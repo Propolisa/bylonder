@@ -230,7 +230,7 @@ createServer(server, (req, res) => {
 const COMPRESSIBLE = /javascript|wasm|json|css|html|svg|text\//;
 function compressor(req, up) {
   const plain = !up.headers["content-encoding"] && COMPRESSIBLE.test(up.headers["content-type"] ?? "") && /\bbr\b/.test(req.headers["accept-encoding"] ?? "");
-  return plain && up.statusCode === 200 ? createBrotliCompress({ params: { [zlib.BROTLI_PARAM_QUALITY]: 4 } }) : null;
+  return plain && up.statusCode === 200 ? createBrotliCompress({ params: { [zlib.constants.BROTLI_PARAM_QUALITY]: 4 } }) : null;
 }
 
 // A dev server behind the key: HTTP and its HMR websocket, to localhost.
@@ -261,3 +261,5 @@ for (const port of DEV_PORTS) {
 }
 console.log(`Dev gallery: https://${lan}:${PORT}/  (key in ${join(dir, "key")}; the phone installs ${join(dir, "ca.crt")} once)`);
 pictures();
+// One bad request must not take the gallery down for the phone.
+process.on("uncaughtException", (error) => console.error(error));
