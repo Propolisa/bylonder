@@ -9,9 +9,12 @@ await record("particle-hair", { example: "particle-hair", node: "Hill" }, async 
   const { app, page } = r;
   await app.hover();
   await r.keys("Numpad 0", "Numpad0");
-  await app.bylonder((b) => { b.views.input.state.overlays = false; b.views.input.setShading("rendered"); });
-  await page.mouse.move(1, 1);
-  await r.pause(15000);
+  // Rendered straight after opening draws washed out until the shading changes once: Material Preview first.
+  for (const shading of ["material", "rendered"]) {
+    await app.bylonder((b, shading) => { b.views.input.state.overlays = false; b.views.input.setShading(shading); }, shading);
+    await page.mouse.move(1, 1);
+    await r.pause(8000);
+  }
   await r.shot("thumbnail", VIEW, { part: [0.1, 0.05, 0.9, 0.95] });
   await app.bylonder((b) => { b.views.input.state.overlays = true; b.views.input.setShading("solid"); });
   await r.tab("Particles");
