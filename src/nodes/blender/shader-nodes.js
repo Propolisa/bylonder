@@ -28,6 +28,7 @@ import { skyTexture } from '../../blenkernel/sky.js';
 import { blendData } from '../../python/bpy_rna.js';
 import { VIEW_FORWARD, viewEye, viewForward } from '../../draw/draw-view.js';
 import { eeveeParity, eeveeParityChanged } from '../../draw/eevee-parity.js';
+import { ditherSeed } from '../../render/dither.js';
 import '../graph-roots.js';
 
 // A NodeMaterial of Blender's nodes. Babylon's walks a block's inputs again for each path that reaches the block as it
@@ -44,6 +45,11 @@ export class BlenderNodeMaterial extends NodeMaterial {
   }
   _initializeBlock(node, state, ...rest) { if (BlenderNodeMaterial.#first(this.#initialized, state, node)) super._initializeBlock(node, state, ...rest); }
   _resetDualBlocks(node, id) { if (BlenderNodeMaterial.#first(this.#reset, this._fragmentCompilationState, node)) super._resetDualBlocks(node, id); }
+  // EEVEE's Dithered render method (the default): a surface that lets light through is hashed in the opaque pass,
+  // depth-tested and depth-writing, not sorted and blended (ShaderNodeOutputMaterial sets blenderDithered).
+  get #hashed() { return !!this.blenderDithered && this.transparencyMode == null; }
+  needAlphaBlending() { return !this.#hashed && super.needAlphaBlending(); }
+  needAlphaTesting() { return this.#hashed || super.needAlphaTesting(); }
 }
 
 const DIMENSIONS = ['1D', '2D', '3D', '4D'];
@@ -1301,7 +1307,13 @@ export class BlenderDisplayBlock extends ImageProcessingBlock {
 }
 RegisterClass('BABYLON.BlenderDisplayBlock', BlenderDisplayBlock);
 
-const REVERSED_FACES = 'bl_reversed_faces', DITHERED = 'BL_DITHERED', frontPass = new WeakSet();
+const REVERSED_FACES = 'bl_reversed_faces', DITHERED = 'BL_DITHERED', DITHER_SEED = 'bl_dither_seed', frontPass = new WeakSet();
+// blender-port: eevee_sampling_lib / common_math_lib interleaved_gradient_noise, offset by the sample's seed.
+const DITHER_NOISE = `float bl_dither(vec2 p, float seed) {
+  p += seed * vec2(47.0, 17.0);
+  return fract(52.9829189 * fract(0.06711056 * p.x + 0.00583715 * p.y));
+}
+`;
 // Material Output (node_shader_output_material.cc) as Babylon's fragment output: the Surface closure's radiance through
 // Babylon's image processing, as the material's color. A material it is added to gets the vertex output Babylon needs.
 export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock) {
@@ -1314,6 +1326,7 @@ export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock)
     super.bind(effect, nodeMaterial, mesh);
     const separate = nodeMaterial.separateCullingPass && !nodeMaterial.backFaceCulling;
     effect.setFloat(REVERSED_FACES, separate ? 1 : 0);
+    effect.setFloat(DITHER_SEED, ditherSeed(nodeMaterial.getScene()));
     if (!separate || !mesh || frontPass.has(mesh)) return;
     frontPass.add(mesh);
     mesh.onBetweenPassObservable.add((subMesh) => subMesh.effect?.setFloat(REVERSED_FACES, 0));
@@ -1356,7 +1369,8 @@ export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock)
     } else wire(helper(material, '__black', (name) => Object.assign(new InputBlock(name, undefined, T.Color4), { value: new Color4(0, 0, 0, 1) })).output, processing.color);
     // Its coverage where the closure lets light through (blended), else its color alone (opaque, unless its Blend Mode
     // blends it).
-    const [from, to, other] = closureHas(closure?.ownerBlock, transparent) ? [processing.getOutputByName('displayRgba'), this.rgba, this.rgb]
+    material.blenderDithered = closureHas(closure?.ownerBlock, transparent);
+    const [from, to, other] = material.blenderDithered ? [processing.getOutputByName('displayRgba'), this.rgba, this.rgb]
       : [processing.getOutputByName('displayRgb'), this.rgb, this.rgba];
     other.connectedPoint?.disconnectFrom(other);
     wire(from, to);
@@ -1372,10 +1386,17 @@ export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock)
   _buildBlock(state) {
     if (!state.sharedData.bindableBlocks.includes(this) && !state.sharedData.forcedBindableBlocks.includes(this)) state.sharedData.forcedBindableBlocks.push(this);
     FragmentOutputBlock.prototype._buildBlock.call(this, state);
-    if (this.rgba.isConnected) state.compilationString += `#ifdef ${DITHERED}
-if (${this.rgba.associatedVariableName}.a <= 0.0) discard;
+    if (this.rgba.isConnected) {
+      // Hashed: kept where its coverage passes the sample's noise, its color then the surface's alone.
+      state._emitUniformFromString(DITHER_SEED, T.Float);
+      state._emitFunction('bl_dither', DITHER_NOISE, '');
+      const rgba = this.rgba.associatedVariableName;
+      state.compilationString += `#ifdef ${DITHERED}
+if (${rgba}.a <= bl_dither(gl_FragCoord.xy, ${DITHER_SEED})) discard;
+gl_FragColor = vec4(gl_FragColor.rgb / ${rgba}.a, 1.0);
 #endif
 `;
+    }
     return this;
   }
 }

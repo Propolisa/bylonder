@@ -5,6 +5,7 @@
 // divides; the display transform comes after, as EEVEE's does.
 import { Camera, Constants, Matrix, PostProcess, ShaderStore } from '@babylonjs/core';
 import { halton, jitterProjection } from './sampling.js';
+import { setDitherSeed } from './dither.js';
 
 // blender-port: DNA_scene_defaults.h filter_size: Blender's default filter width, in pixels.
 export const FILTER_RADIUS = 1.5;
@@ -82,7 +83,7 @@ export function createFilm(scene, camera) {
   // A view's samples while it stays the same (EEVEE's viewport): up to `samples()` of them, each jittered; any change of
   // its view, size or compiled shaders, or a reset() (Main evaluated), starts again. `manual` leaves the
   // samples to a render (frames.js), which jitters and adds them itself.
-  let count = 0, signature = '', jittered = false;
+  let count = 0, signature = '', jittered = false, seed = 0;
   const viewOf = () => {
     const projection = camera.getProjectionMatrix(true).m, effects = engine._compiledEffects ? Object.keys(engine._compiledEffects).length : 0;
     return [...camera.getViewMatrix().m, ...projection, engine.getRenderWidth(), engine.getRenderHeight(), effects].join();
@@ -100,7 +101,9 @@ export function createFilm(scene, camera) {
     controls.sample(jitter);
   });
   const after = scene.onAfterCameraRenderObservable.add((rendering) => {
-    if (rendering !== camera || !jittered) return;
+    if (rendering !== camera) return;
+    setDitherSeed(scene, 0);
+    if (!jittered) return;
     camera.unfreezeProjectionMatrix();
     jittered = false;
     count++;
@@ -113,7 +116,11 @@ export function createFilm(scene, camera) {
     // Starts again: the next sample is the first.
     reset() { state.clear = true; count = 0; },
     // The sample about to render: its jitter, or none to add (the film is complete and keeps what it holds).
-    sample(jitter) { state.adding = !!jitter; if (jitter) state.jitter = jitter; },
+    sample(jitter) {
+      state.adding = !!jitter;
+      if (jitter) state.jitter = jitter;
+      setDitherSeed(scene, jitter ? (seed = (seed % 4096) + 1) : 0);
+    },
     dispose() {
       scene.onBeforeCameraRenderObservable.remove(before);
       scene.onAfterCameraRenderObservable.remove(after);

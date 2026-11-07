@@ -53,8 +53,8 @@ assert.match(fragment, /#ifdef SHADOW\{?X?\}?|SHADOW0|computeShadow/, "the fragm
   scene.render();
   assert.deepEqual(set, [1, 0], 'the pass of back faces reverses FrontFacing, the pass of front faces does not');
 }
-// EEVEE's render methods: a Dithered surface (the default) keeps no depth where it is fully transparent, as its hashed
-// transparency discards it there; a Blended one keeps none at all.
+// EEVEE's render methods: a Dithered surface (the default) is hashed in the opaque pass, kept where its coverage passes
+// the sample's noise; a Blended one is sorted, blended and keeps no depth.
 {
   const tree = { nodes: [{ idname: 'ShaderNodeBsdfTransparent', name: 'Clear' }, { idname: 'ShaderNodeOutputMaterial', name: 'Material Output' }],
     links: [['Clear', 'BSDF', 'Material Output', 'Surface']] };
@@ -69,9 +69,11 @@ assert.match(fragment, /#ifdef SHADOW\{?X?\}?|SHADOW0|computeShadow/, "the fragm
   };
   const dithered = await effect();
   assert.match(dithered.defines, /#define BL_DITHERED/, 'Dithered discards what is fully transparent');
-  assert.match(dithered._fragmentSourceCode, /if \(\w+\.a <= 0\.0\) discard;/);
+  assert.match(dithered._fragmentSourceCode, /if \(\w+\.a <= bl_dither\(gl_FragCoord\.xy, bl_dither_seed\)\) discard;/, 'hashed by its coverage');
+  assert.ok(!material.needAlphaBlending() && material.needAlphaTesting(), 'in the opaque pass, depth-tested, as EEVEE draws Dithered surfaces');
   material.transparencyMode = 2;
   scene.render();
   assert.doesNotMatch((await effect()).defines, /#define BL_DITHERED/, 'Blended blends it');
+  assert.ok(material.needAlphaBlending(), 'sorted and blended');
 }
 console.log("Node material base: Babylon's morph targets, bones, instances, clip planes, lights with shadows, fog and image processing passed");
