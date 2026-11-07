@@ -5,13 +5,19 @@
 // own port (its port + 3000, e.g. 5311 at 8311), websockets included, behind the same key.
 // usage: node tools/dev-gallery.mjs [--port 8443]
 import { createServer } from "node:https";
-import { request } from "node:http";
+import { Agent, request } from "node:http";
+const keepAlive = new Agent({ keepAlive: true, maxSockets: 64 });
 import { connect } from "node:net";
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { execFile } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { networkInterfaces } from "node:os";
-import { dirname, join } from "node:path";
+import zlib, { createBrotliCompress } from "node:zlib";
+import { dirname, extname, join, normalize } from "node:path";
+import { build } from "vite";
+import vue from "@vitejs/plugin-vue";
+import tailwindcss from "@tailwindcss/vite";
+import { blenderIcons } from "../scripts/blender-icons.mjs";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 import { TOOLS } from "../tests/e2e/tools.mjs";
@@ -108,6 +114,7 @@ function pictures() {
   };
   for (const [kind, source] of Object.entries(SOURCES)) for (const d of source()) walk(d, 0, kind, d === TEMP);
   found = all.sort((a, b) => b.mtime - a.mtime);
+  prepare(found.filter((p) => p.mtime < Date.now() - 2000));
   walked = Date.now();
   return found;
 }
@@ -115,16 +122,13 @@ function pictures() {
 function picturesPage(req, res) {
   const q = new URL(req.url, "https://x").searchParams, kinds = (q.get("kinds") ?? "").split(",");
   const before = Number(q.get("before") ?? Infinity), after = Number(q.get("after") ?? -Infinity);
-  const page = pictures().filter((p) => kinds.includes(p.kind) && p.mtime < before && p.mtime > after).slice(0, 30);
+  const text = (q.get("q") ?? "").toLowerCase(), settled = Date.now() - 2000;
+  const page = pictures().filter((p) => kinds.includes(p.kind) && p.mtime < before && p.mtime > after && p.mtime < settled && p.path.toLowerCase().includes(text)).slice(0, 30);
   res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
   res.end(JSON.stringify(page.map((p) => ({ ...p, name: p.path.split(/[\\/]/).slice(-3).join("/") }))));
 }
 
-const STYLE = `body{margin:0;font:15px system-ui;background:#1d1d1d;color:#ddd}h2{padding:12px 16px 0;font-size:16px}a{color:#8cf}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;padding:12px 16px}
-.card{background:#2a2a2a;border-radius:8px;overflow:hidden}.card img{width:100%;aspect-ratio:16/9;object-fit:contain;display:block;background:#333}
-.card p{margin:6px 8px;font-size:12px;word-break:break-all}.kinds{padding:0 16px}.kinds label{margin-right:14px;white-space:nowrap}
-#more{padding:16px;text-align:center;color:#888}form{padding:24px 16px}input,button{font:16px system-ui;padding:10px;border-radius:6px;border:0}input[name=key]{width:16em}`;
+const STYLE = `body{margin:0;font:15px system-ui;background:#1d1d1d;color:#ddd}h2{font-size:16px}a{color:#8cf}form{padding:24px 16px}input,button{font:16px system-ui;padding:10px;border-radius:6px;border:0}input{width:16em}`;
 const page = (body) => `<!doctype html><meta name=viewport content="width=device-width,initial-scale=1"><meta name=theme-color content="#1d1d1d">
 <link rel=manifest href="/manifest.json"><link rel=icon href="/icon.svg"><title>Bylonder dev</title><style>${STYLE}</style>
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js")</script>${body}`;
@@ -134,54 +138,21 @@ const MANIFEST = JSON.stringify({ name: "Bylonder dev", short_name: "Bylonder", 
 // Network first: the gallery is always fresh when the machine is reachable.
 const WORKER = `self.addEventListener("fetch", (e) => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));`;
 
-// The page loads pictures a page at a time as it scrolls, as small thumbnails (the full picture on a tap), and follows
-// new ones: they come in at the top, and with Follow on the page scrolls up to them.
-const CLIENT = `
-const shown = JSON.parse(localStorage.getItem("kinds") || "{}"), grid = document.getElementById("pictures"), more = document.getElementById("more");
-const follow = document.getElementById("follow");
-follow.checked = localStorage.getItem("follow") !== "off";
-follow.onchange = () => { localStorage.setItem("follow", follow.checked ? "on" : "off"); if (follow.checked) scrollTo({ top: 0, behavior: "smooth" }); };
-let newest = -Infinity, oldest = Infinity, done = false, loading = false;
-const kinds = () => [...document.querySelectorAll("input[data-kind]")].filter((b) => b.checked).map((b) => b.dataset.kind).join(",");
-const card = (p) => { const d = document.createElement("div"), url = "/file?path=" + encodeURIComponent(p.path);
-  d.className = "card"; d.innerHTML = '<a href="' + url + '"><img loading=lazy decoding=async src="/thumb?path=' + encodeURIComponent(p.path) + '&t=' + p.mtime + '"></a><p></p>';
-  d.querySelector("p").textContent = p.name + " · " + new Date(p.mtime).toLocaleString(); return d; };
-const get = async (q) => (await fetch("/pictures?kinds=" + kinds() + "&" + q, { cache: "no-store" })).json();
-async function older() {
-  if (loading || done) return;
-  loading = true;
-  const page = await get(oldest < Infinity ? "before=" + oldest : "");
-  page.forEach((p) => { grid.append(card(p)); newest = Math.max(newest, p.mtime); oldest = Math.min(oldest, p.mtime); });
-  done = page.length === 0; more.textContent = done ? "No more pictures" : "Loading...";
-  loading = false;
-  if (!done && more.getBoundingClientRect().top < innerHeight * 2) older();
-}
-async function newer() {
-  if (newest === -Infinity) return older();
-  const page = await get("after=" + newest);
-  page.reverse().forEach((p) => { grid.prepend(card(p)); newest = Math.max(newest, p.mtime); });
-  if (page.length && follow.checked) scrollTo({ top: 0, behavior: "smooth" });
-}
-function restart() { grid.replaceChildren(); newest = -Infinity; oldest = Infinity; done = false; older(); }
-document.querySelectorAll("input[data-kind]").forEach((box) => {
-  box.checked = shown[box.dataset.kind] !== false;
-  box.onchange = () => { shown[box.dataset.kind] = box.checked; localStorage.setItem("kinds", JSON.stringify(shown)); restart(); };
-});
-new IntersectionObserver((e) => { if (e[0].isIntersecting) older(); }, { rootMargin: "1000px" }).observe(more);
-setInterval(async () => {
-  newer();
-  const servers = document.getElementById("servers"), fresh = await (await fetch("/servers", { cache: "no-store" })).text();
-  if (servers.innerHTML !== fresh) servers.innerHTML = fresh;
-}, 5000);
-older();`;
-
-const serverCards = async () => (await servers()).map((s) => `<div class=card><p><a href="${s.url}">${s.name || "localhost"}:${s.port}</a></p></div>`).join("") || "<p>none running</p>";
-async function gallery(res) {
-  res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
-  res.end(page(`<h2>Dev servers</h2><div class=grid id=servers>${await serverCards()}</div>
-<h2>Latest pictures</h2><p class=kinds>${Object.entries(KINDS).map(([kind, label]) => `<label><input type=checkbox data-kind=${kind} checked> ${label}</label>`).join(" ")}
-<label><input type=checkbox id=follow checked> Follow new pictures</label></p>
-<div class=grid id=pictures></div><p id=more>Loading...</p><script>${CLIENT}</script>`));
+// The gallery app (tools/dev-gallery/, Vue and the app's shadcn-vue components), built once at start into
+// .tools/dev-gallery/app and served from there.
+const app = join(dir, "app");
+// Only the icons the gallery draws (the dialog's close and the checkboxes), not all of Blender's.
+const pick = (icons, names) => Object.fromEntries(names.map((n) => [n, icons[n]]));
+await build({ root: join(root, "tools", "dev-gallery"), configFile: false, logLevel: "warn", base: "/",
+  plugins: [vue(), tailwindcss(), { name: "blender-icons", resolveId: (id) => (id === "virtual:blender-icons" ? "\0blender-icons" : null),
+    load: async (id) => (id === "\0blender-icons" ? "export default " + JSON.stringify(pick(await blenderIcons(join(root, "public/icons/blender")), ["x", "checkmark"])) : null) }],
+  resolve: { alias: { "@": join(root, "src") } }, build: { outDir: app, emptyOutDir: true, chunkSizeWarningLimit: 2000 } });
+const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".woff2": "font/woff2" };
+function serveApp(path, res) {
+  const target = join(app, path === "/" ? "index.html" : normalize(path).replace(/^[\/]+/, ""));
+  if (!target.startsWith(app) || !existsSync(target)) { res.writeHead(404); return res.end(); }
+  res.writeHead(200, { "Content-Type": TYPES[extname(target)] ?? "application/octet-stream", "Cache-Control": path === "/" ? "no-store" : "max-age=31536000, immutable" });
+  res.end(readFileSync(target));
 }
 
 // A picture under one of the sources' folders, by its full path.
@@ -198,15 +169,30 @@ const thumbs = join(dir, "thumbs");
 function serveThumb(req, res) {
   const path = pathOf(req);
   if (!allowed(path)) { res.writeHead(404); return res.end(); }
-  const thumb = join(thumbs, createHash("sha1").update(path + statSync(path).mtimeMs).digest("hex") + ".jpg");
+  const thumb = thumbOf(path, statSync(path).mtimeMs);
   const send = () => { res.writeHead(200, { "Content-Type": "image/jpeg", "Cache-Control": "max-age=31536000, immutable" }); res.end(readFileSync(thumb)); };
   if (existsSync(thumb)) return send();
-  mkdirSync(thumbs, { recursive: true });
-  execFile(ffmpeg, ["-v", "error", "-i", path, "-frames:v", "1", "-vf", "scale=480:-2", "-q:v", "5", "-y", thumb], (error) => {
-    if (error || !existsSync(thumb)) { res.writeHead(500); return res.end(); }
-    send();
-  });
+  thumbnail(path, thumb).then(send, () => { res.writeHead(503, { "Cache-Control": "no-store" }); res.end(); });
 }
+const thumbOf = (path, mtime) => join(thumbs, createHash("sha1").update(path + mtime).digest("hex") + ".jpg");
+// The newest pictures' thumbnails are made ahead, so a phone finds them ready.
+const prepare = (list) => list.slice(0, 200).forEach((p) => { const t = thumbOf(p.path, p.mtime); if (!existsSync(t)) thumbnail(p.path, t).catch(() => {}); });
+// Thumbnails are made a few at a time: a phone asks for a page of them at once.
+const making = new Map(), waiting = [];
+let running = 0;
+function thumbnail(path, thumb) {
+  if (making.has(thumb)) return making.get(thumb);
+  const job = new Promise((resolve, reject) => waiting.push(() => {
+    running++;
+    mkdirSync(thumbs, { recursive: true });
+    const done = (error) => { running--; making.delete(thumb); (error || !existsSync(thumb) ? reject : resolve)(); next(); };
+    try { execFile(ffmpeg, ["-v", "error", "-i", path, "-frames:v", "1", "-vf", "scale=480:-2", "-q:v", "5", "-y", thumb], done); } catch (error) { done(error); }
+  }));
+  making.set(thumb, job);
+  next();
+  return job;
+}
+function next() { while (running < 4 && waiting.length) waiting.shift()(); }
 
 const send = (res, type, body) => { res.writeHead(200, { "Content-Type": type }); res.end(body); };
 const PUBLIC = { "/manifest.json": ["application/manifest+json", MANIFEST], "/icon.svg": ["image/svg+xml", ICON], "/sw.js": ["text/javascript", WORKER],
@@ -236,17 +222,27 @@ createServer(server, (req, res) => {
   if (path === "/file") return serveFile(req, res);
   if (path === "/thumb") return serveThumb(req, res);
   if (path === "/pictures") return picturesPage(req, res);
-  if (path === "/servers") return serverCards().then((html) => send(res, "text/html; charset=utf-8", html));
-  gallery(res);
+  if (path === "/servers") return servers().then((list) => send(res, "application/json", JSON.stringify(list)));
+  serveApp(path, res);
 }).listen(PORT, "0.0.0.0");
+
+// Over Wi-Fi the dev servers' responses are compressed: Vite sends them as they are, and the module alone is 80 MB.
+const COMPRESSIBLE = /javascript|wasm|json|css|html|svg|text\//;
+function compressor(req, up) {
+  const plain = !up.headers["content-encoding"] && COMPRESSIBLE.test(up.headers["content-type"] ?? "") && /\bbr\b/.test(req.headers["accept-encoding"] ?? "");
+  return plain && up.statusCode === 200 ? createBrotliCompress({ params: { [zlib.BROTLI_PARAM_QUALITY]: 4 } }) : null;
+}
 
 // A dev server behind the key: HTTP and its HMR websocket, to localhost.
 for (const port of DEV_PORTS) {
   const proxy = createServer(server, (req, res) => {
     if (!signedIn(req)) { res.writeHead(302, { Location: `https://${lan}:${PORT}/` }); return res.end(); }
-    const upstream = request({ host: "localhost", port, path: req.url, method: req.method, headers: { ...req.headers, host: `localhost:${port}` }, autoSelectFamily: true }, (up) => {
-      res.writeHead(up.statusCode, up.headers);
-      up.pipe(res);
+    const upstream = request({ host: "localhost", port, path: req.url, method: req.method, headers: { ...req.headers, host: `localhost:${port}` }, autoSelectFamily: true, agent: keepAlive }, (up) => {
+      const zip = compressor(req, up);
+      if (!zip) { res.writeHead(up.statusCode, up.headers); return up.pipe(res); }
+      const { "content-length": _, ...headers } = up.headers;
+      res.writeHead(up.statusCode, { ...headers, "content-encoding": "br", vary: "accept-encoding" });
+      up.pipe(zip).pipe(res);
     });
     upstream.on("error", () => { res.writeHead(502); res.end("Dev server not running"); });
     req.pipe(upstream);
@@ -264,3 +260,4 @@ for (const port of DEV_PORTS) {
   proxy.listen(port + OFFSET, "0.0.0.0");
 }
 console.log(`Dev gallery: https://${lan}:${PORT}/  (key in ${join(dir, "key")}; the phone installs ${join(dir, "ca.crt")} once)`);
+pictures();

@@ -1,0 +1,6 @@
+@import "../../src/editors/interface/components/tailwind.css";
+@source "./";
+
+/* A phone-sized interface: Blender's tokens at a larger scale. */
+:root { --bl-ui-scale: 1.5; }
+body { margin: 0; background: var(--bl-region); color: var(--bl-text); font-family: var(--bl-font-family); }
