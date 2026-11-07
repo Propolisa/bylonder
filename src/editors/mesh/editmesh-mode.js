@@ -15,7 +15,7 @@ const SELECT_MODES = ['VERT', 'EDGE', 'FACE'];
 export function createMeshEditMode({ world, selection, host }) {
   const sync = () => world.mainSync, blender = () => world.mainSync.blender;
   const isMesh = (node) => !!node?.getTotalVertices && !node.metadata?.wbCreation?.curve && !node.metadata?.wbCreation?.armature && !node.metadata?.group;
-  const activeNode = () => selection.nodes.at(-1);
+  const activeNode = () => selection.active;
   // The object Main holds in Edit Mode, as the view keeps its mode.
   const object = () => { const node = activeNode(); return isMesh(node) && node.metadata?.wbMode === 'EDIT' ? node : null; };
   const edit = () => { const node = object(); return node && blender().editMesh(sync().objectOf(node)); };

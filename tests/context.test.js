@@ -104,7 +104,7 @@ ob.rotation_quaternion = [w, ...xyz];
 [...ob.rotation_euler].forEach((value, i) => assert.ok(Math.abs(value - [x, y, z][i]) < 1e-9, 'quaternion round trip'));
 ob.select_set(false);
 assert.equal(selection.has(cube), false);
-assert.equal(context().object, null);
+assert.equal(context().object?.name, cube.name, 'an unselected active object stays the context object, as in Blender');
 ob.select_set(true);
 
 // Scene, tool settings, render and units write into Bylonder's slices; unbound properties read as Blender's defaults.

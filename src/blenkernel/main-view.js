@@ -367,7 +367,8 @@ export function createMainView(state) {
     let modeChanged = false;
     state.applying = true;
     try {
-      const alive = new Set(blender.ids(ID_OB)), chosen = [], active = [];
+      const alive = new Set(blender.ids(ID_OB)), chosen = [];
+      let active = null;
       blender.cleanMasterCollection();
       const kept = [...objects].filter(([node, entry]) => alive.has(entry.ob) || state.forget(node, entry));
       for (const [node, entry] of kept) {
@@ -385,7 +386,8 @@ export function createMainView(state) {
           modeChanged = true;
         }
         const base = blender.base(ob), data = rna.pointer('Object', node);
-        if (base?.selected) (base.active ? active : chosen).push(node);
+        if (base?.selected) chosen.push(node);
+        if (base?.active) active = node;
         if (base && data.hide_get() !== base.hidden) node.setEnabled(!base.hidden);
         if (entry.type === 'MESH') displayBounds(node, idStruct(ob).display_type === 'BOUNDS');
         // A stand-in Blender's code changed becomes Main's; one an undo step read again stays Babylon's.
@@ -400,9 +402,12 @@ export function createMainView(state) {
       for (const [, entry] of kept) pullRelations(entry);
       for (const node of [...added, ...revived]) {
         const base = blender.base(objects.get(node).ob);
-        if (base?.selected) (base.active ? active : chosen).push(node);
+        if (base?.selected) chosen.push(node);
+        if (base?.active) active = node;
       }
-      selection.replace([...chosen, ...active]);
+      // The active object is Main's, selected or not (view_layer.objects.active).
+      selection.replace(chosen);
+      selection.setActive(active);
       pullShading();
       for (const record of state.sceneRecords()) pull(record, world);
       state.evaluate();
@@ -576,7 +581,7 @@ export function createMainView(state) {
       if (record.viewport && !rendering) {
         overlay = curvesMesh(scene, '__curves overlay ' + key, data, 0, overlay);
         Object.assign(overlay.metadata, { overlay: true, explicit: record.overlay });
-        if (!overlay.material) { const shown = overlay; hairOverlay(scene, shown, { workbench: world.workbench, explicit: () => shown.metadata.explicit, selected: () => selection.has(emitter), active: () => selection.nodes.at(-1) === emitter }); }
+        if (!overlay.material) { const shown = overlay; hairOverlay(scene, shown, { workbench: world.workbench, explicit: () => shown.metadata.explicit, selected: () => selection.has(emitter), active: () => selection.active === emitter }); }
       } else if (overlay) { overlay.dispose(); overlay = null; }
       curved.set(key, { data, mesh, overlay });
     }

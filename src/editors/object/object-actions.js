@@ -12,7 +12,7 @@ export function createObjectActions({ world, editor, commands, creator }) {
   // collection.objects_remove's enum: the collections the selected objects are in.
   const memberships = () => [...new Set(ids().flatMap((id) => cols.memberships(id)))]
     .map((id) => [id, id === cols.MASTER ? "Scene Collection" : cols.byId(id).name, "", "OUTLINER_COLLECTION"]);
-  const active = () => editor.selection.nodes.at(-1),
+  const active = () => editor.selection.active,
     has = () => editor.selection.size > 0,
     several = () => editor.selection.size > 1;
   const rename = async () => {

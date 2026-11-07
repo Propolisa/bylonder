@@ -35,9 +35,9 @@ const newButton = (run) => {
 };
 
 export function createNodeContexts({ world, editor, commit = () => {} }) {
-  const activeMesh = () => { const node = editor.selection.nodes.at(-1); return node?.getTotalVertices ? node : null; };
+  const activeMesh = () => { const node = editor.selection.active; return node?.getTotalVertices ? node : null; };
   // The active object where its type has materials (a mesh, or Main's Curves, Text and the like).
-  const activeWithMaterials = () => { const node = editor.selection.nodes.at(-1); return node && (node.getTotalVertices || world.mainSync?.slots(node)) ? node : null; };
+  const activeWithMaterials = () => { const node = editor.selection.active; return node && (node.getTotalVertices || world.mainSync?.slots(node)) ? node : null; };
   // The node group of the active object's active Geometry Nodes modifier, as Blender's Geometry Node Editor shows it.
   const mainNodeGroup = (node) => {
     const ob = node && world.mainSync.objectOf(node), modifier = ob && idStruct(ob).modifiers.active;
@@ -57,7 +57,7 @@ export function createNodeContexts({ world, editor, commit = () => {} }) {
       };
     },
     geometry() {
-      const node = editor.selection.nodes.at(-1), main = mainNodeGroup(node);
+      const node = editor.selection.active, main = mainNodeGroup(node);
       if (main?.group) {
         const sync = world.mainSync;
         return {

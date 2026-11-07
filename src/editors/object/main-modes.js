@@ -31,7 +31,7 @@ const presets = { 'poselib.create_pose_asset': { asset_library_reference: 'LOCAL
 //   sync: the scene's (createMainSync); selection; options: runBlenderOperator's host (transaction, notify, keying,
 //   commit, wm, pointer, view).
 export function createMainModes({ sync, selection, options }) {
-  const active = () => selection.nodes.at(-1);
+  const active = () => selection.active;
   // The active object's mode while it is one of these, else null.
   const greasePencil = () => active()?.metadata?.wbType === 'GREASEPENCIL';
   const mode = () => { const node = active(), m = node?.metadata?.wbMode; return MODES[m] && (m !== 'EDIT' || node.metadata.wbCreation?.armature || greasePencil()) ? m : null; };

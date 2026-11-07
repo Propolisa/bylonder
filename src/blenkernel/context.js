@@ -24,10 +24,10 @@ export function createContext(r, { area: type = 'VIEW_3D', uiType = type, region
   const screen = rna('Screen', { areas: collection([area]) });
   const window = rna('Window', { scene, view_layer, screen });
   // An armature's modes are Blender's, kept on the object (main-sync.js).
-  const armatureIn = (mode) => { const ob = host.selection?.nodes.at(-1); return ob?.metadata?.wbCreation?.armature && ob.metadata.wbMode === mode ? ob : null; };
+  const armatureIn = (mode) => { const ob = host.selection?.active; return ob?.metadata?.wbCreation?.armature && ob.metadata.wbMode === mode ? ob : null; };
   const editObject = () => world.editMode?.object ?? armatureIn('EDIT');
   // Bylonder's active object is the last selected, or the one in Edit Mode.
-  const activeObject = () => editObject() ?? host.selection?.nodes.at(-1) ?? null;
+  const activeObject = () => editObject() ?? host.selection?.active ?? null;
   const selected = () => r.objects().filter((ob) => host.selection?.has(ob));
   const visible = () => r.objects().filter((ob) => ob.isEnabled() && ob.isVisible !== false);
   const editable = (list) => list.filter((ob) => !ob.metadata?.wbLocked);

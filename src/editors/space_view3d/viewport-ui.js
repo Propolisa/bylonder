@@ -45,7 +45,7 @@ export function createViewportOverlays(scene, { extras, origins, outlines, armat
 export function createViewportStatus({ world, editor, views, send }) {
   let last = '', lastStatus = 0;
   const status = () => {
-    const active = editor.selection.nodes.at(-1);
+    const active = editor.selection.active;
     // The 3D View and the status bar name the active collection (view3d_draw.cc draw_selected_name: CTX_data_collection).
     const cols = world.collections, name = (id) => (!cols || !id || id === cols.MASTER ? 'Scene Collection' : cols.byId(id).name);
     const collection = name(cols?.active);

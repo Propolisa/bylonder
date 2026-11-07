@@ -278,11 +278,11 @@ function principledInputs(material) {
 }
 const worldValue = (r, entry, path) => ({ get: () => path.split('.').reduce((o, k) => o[k], entry), set: (value) => r.world.worlds.set(entry, path, value, false) });
 
-// A view layer's objects (LayerObjects): its collection, with the active object, which selecting makes.
+// A view layer's objects (LayerObjects): its collection, with the active object (selected or not).
 function layerObjects(r) {
   const objects = collection(r.objects().map((ob) => r.pointer('Object', ob)));
-  Object.defineProperty(objects, 'active', { enumerable: true, get: () => r.pointer('Object', r.host.selection?.nodes.at(-1)),
-    set: (ob) => { r.host.selection?.replace(ob ? [ob[INFO].owner] : []); r.host.update?.('LayerObjects', 'active', objects); } });
+  Object.defineProperty(objects, 'active', { enumerable: true, get: () => r.pointer('Object', r.host.selection?.active),
+    set: (ob) => { r.host.selection?.setActive(ob ? ob[INFO].owner : null); r.host.update?.('LayerObjects', 'active', objects); } });
   return rna('LayerObjects', objects);
 }
 

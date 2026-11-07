@@ -218,7 +218,7 @@ try {
 const { world, sdk, animation, scene, objects, documentState } = built;
 const authored = () => built.authoredCamera;
 // Theme wire color of an object (Resources::object_wire_theme_id): the active or selected color, else its type's.
-const wireColor = (node, type = "wire") => !editor?.selection.has(node) ? theme[type] : editor.selection.nodes.at(-1) === node ? theme.object_active : theme.object_selected;
+const wireColor = (node, type = "wire") => !editor?.selection.has(node) ? theme[type] : editor.selection.active === node ? theme.object_active : theme.object_selected;
 // The meshes the view draws instances on (main-view.js drawInstances) of instancers that pass `instancer(node)`.
 const instancesOf = (instancer) => scene.meshes.filter((mesh) => mesh.isVisible && mesh.metadata?.instancers?.some(instancer));
 const overlays = createViewportOverlays(scene, {
@@ -231,11 +231,11 @@ const overlays = createViewportOverlays(scene, {
   },
   origins: { objects: () => world.objects, color: (node) => (editor?.selection.has(node) && !deleted(node) ? wireColor(node) : null) },
   outlines: { outlined: () => [...(editor?.selection.outlined() ?? []), ...instancesOf((node) => editor.selection.has(node))],
-    isActive: (node) => [node, ...(node.metadata?.instancers ?? [])].includes(editor.selection.nodes.at(-1)), isTransform: () => !!world.wm?.modal },
+    isActive: (node) => [node, ...(node.metadata?.instancers ?? [])].includes(editor.selection.active), isTransform: () => !!world.wm?.modal },
   armatures: {
     sync: () => world.mainSync, objects: () => world.objects,
     visible: (node) => visible(node) && (world.collections?.status(node).visible ?? true),
-    selected: (node) => !!editor?.selection.has(node), active: (node) => editor?.selection.nodes.at(-1) === node,
+    selected: (node) => !!editor?.selection.has(node), active: (node) => editor?.selection.active === node,
     wake: () => views?.wake(),
   },
   view3dCursor: () => world.sceneSettings.state.cursor,
@@ -638,7 +638,7 @@ scriptingEditors.push(mountSpreadsheetArea(document.querySelector("#spreadsheet-
 viewportDock.setFactory("spreadsheet", mountSpreadsheetArea);
 // The Image Editor and UV Editor: Blender's SpaceImage, its image and UVs drawn by Babylon on the app's engine.
 const editObject = () => {
-  const node = editor.selection.nodes.at(-1), ob = node?.metadata?.wbMode === "EDIT" ? world.mainSync.objectOf(node) : null;
+  const node = editor.selection.active, ob = node?.metadata?.wbMode === "EDIT" ? world.mainSync.objectOf(node) : null;
   const edit = ob && world.mainSync.blender.editMesh(ob);
   return edit ? { ob, mesh: edit.mesh } : null;
 };

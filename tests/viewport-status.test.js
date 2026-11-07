@@ -11,7 +11,7 @@ const world = {
 };
 let detail = null;
 const views = { idle: true, all: [{ setDetail: (text) => { detail = text; } }] };
-const editor = { selection: { nodes: [stack], size: 1 } };
+const editor = { selection: { nodes: [stack], active: stack, size: 1 } };
 createViewportStatus({ world, editor, views, send: () => {} }).tick();
 assert.equal(detail, '(0) pavement.01 | Pizza Stack', 'the active collection, then the active object');
 console.log('Viewport status: the 3D Viewport names the active collection before the active object, as Blender does');

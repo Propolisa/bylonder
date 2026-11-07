@@ -100,7 +100,7 @@ export function createEditor(world, views, history, changed, capture) {
     }
     if (select_passthrough && selection.has(target)) return "PASS_THROUGH";
     const others = selection.nodes.filter((n) => n !== target);
-    const active = selection.nodes.at(-1) === target;
+    const active = selection.active === target;
     if (toggle) selectList(active ? others : [...others, target]);
     else if (extend) selectList([...others, target]);
     else if (deselect) selectList(others);

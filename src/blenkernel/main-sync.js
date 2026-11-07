@@ -391,7 +391,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     return result;
   }
   // An object's base in the view layer; its collections' visibility and selectability are Blender's view layer sync's.
-  function pushBase({ node, ob }, active = selection.nodes.at(-1)) {
+  function pushBase({ node, ob }, active = selection.active) {
     const data = rna.pointer('Object', node), status = world.collections?.status(node) ?? { visible: true };
     blender.setBase(ob, { visible: status.visible, hidden: data.hide_get(), hide_select: data.hide_select, select: data.select_get(), active: node === active });
   }
@@ -592,7 +592,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       pushMaterials();
       pushWorlds();
     }
-    const active = selection.nodes.at(-1);
+    const active = selection.active;
     for (const entry of all ? objects.values() : dirty) {
       pushObject(entry);
       pushBase(entry, active);
@@ -677,7 +677,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     };
     const nodes = live();
     if (nodes.length !== objects.size || nodes.some((node) => !objects.has(node))) diffs.push('objects: Babylon and Main hold different objects');
-    const active = selection.nodes.at(-1);
+    const active = selection.active;
     for (const [node, entry] of objects) {
       const label = `Object "${node.name}"`;
       if (!sameName(node.name, blender.name(entry.ob))) diffs.push(`${label}.name: Main "${blender.name(entry.ob)}"`);
@@ -871,6 +871,8 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     // The selected objects, whose geometry operators on the selection are given.
     selected: () => selection.nodes.filter((node) => objects.has(node)),
     objectOf: (node) => objects.get(node)?.ob ?? null,
+    // The name of an object's data (its Mesh's, Curve's...), or null.
+    dataName: (node) => { const data = objects.has(node) && blender.data(objects.get(node).ob); return data ? blender.name(data) : null; },
     // A Blender camera's field of view as Blender frames an image of the size with it (its sensor fit, lens and sensor in
     // Main); a Babylon camera's is its own.
     // A Blender camera's depth of field (bmesh-wasm.js cameraDof), or null.
@@ -925,8 +927,11 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   // Main's selection; then a read file's scene settings and collections.
   const { nodes, revived } = mainView.adopt();
   world.objects.push(...nodes);
-  const selected = [...nodes, ...revived].filter((node) => blender.base(objects.get(node).ob)?.selected);
-  if (selected.length) selection?.replace(selected.sort((a, b) => blender.base(objects.get(a).ob).active - blender.base(objects.get(b).ob).active));
+  const adopted = [...nodes, ...revived], baseOf = (node) => blender.base(objects.get(node).ob);
+  const selected = adopted.filter((node) => baseOf(node)?.selected), active = adopted.find((node) => baseOf(node)?.active);
+  if (selected.length) selection?.replace(selected);
+  // The active object, selected or not (view_layer.objects.active).
+  if (active) selection?.setActive(active);
   if (ids.read && world.collections) {
     mainView.adoptScene();
     ids.read = false;

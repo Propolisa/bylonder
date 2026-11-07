@@ -2,6 +2,8 @@ import { nodeId, deleted } from "./identity.js";
 import { Matrix, Quaternion, TransformNode, Vector3 } from "@babylonjs/core";
 export function createSelection(scene, objects, world) {
   const ids = new Set();
+  // The active object (view_layer.objects.active), which may be unselected: deselecting keeps it, as Blender's does.
+  let activeId = null;
   const pivot = new TransformNode("__selectionPivot", scene);
   let baseline = null;
   // In selection order: the last is the active object.
@@ -84,6 +86,13 @@ export function createSelection(scene, objects, world) {
     get nodes() {
       return nodes();
     },
+    // The active object: the one made active last, selected or not, while it exists.
+    get active() {
+      return objects.find((n) => nodeId(n) === activeId && !n.isDisposed() && !deleted(n)) ?? null;
+    },
+    setActive(n) {
+      activeId = n ? nodeId(n) : null;
+    },
     get roots() {
       return roots();
     },
@@ -95,17 +104,20 @@ export function createSelection(scene, objects, world) {
       if (!n) {
         if (!add) ids.clear();
       } else if (add) {
-        ids.has(nodeId(n)) ? ids.delete(nodeId(n)) : ids.add(nodeId(n));
+        if (ids.has(nodeId(n))) ids.delete(nodeId(n));
+        else { ids.add(nodeId(n)); activeId = nodeId(n); }
       } else if (ids.has(nodeId(n))) ids.delete(nodeId(n));
       else {
         ids.clear();
         ids.add(nodeId(n));
+        activeId = nodeId(n);
       }
       sync();
     },
-    replace(list) {
+    replace(list, active = list.at(-1)) {
       ids.clear();
       list.forEach((n) => ids.add(nodeId(n)));
+      if (active) activeId = nodeId(active);
       sync();
     },
     outlined,

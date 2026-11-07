@@ -35,7 +35,7 @@ export function mountProperties(host, { world, editor, history, systems, propert
   const area = markRaw(new AnimArea(blenderMain(), SPACE_PROPERTIES));
   // The space's RNA (SpaceProperties): its tab (context), pinned data and search.
   const space = () => pointerStruct(structFind('SpaceProperties'), 0, x.anim_area_space(area.pointer) >>> 0);
-  const ob = () => editor.selection.nodes.at(-1);
+  const ob = () => editor.selection.active;
   const sync = world.mainSync;
 
   // Region sizes from the editor's own boxes, as the screen gives Blender's regions theirs.

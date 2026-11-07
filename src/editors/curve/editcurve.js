@@ -32,7 +32,7 @@ function winmat(camera, aspect) {
 export function createEditCurve({ world, editor, views, history, notify, changed, curves }) {
   let ed = null;
   const region = new View3DRegion();
-  const activeObject = () => editor.selection.nodes.at(-1);
+  const activeObject = () => editor.selection.active;
   const editable = (node) => !!curveData(node) && !node.metadata?.wbLocked;
 
   // The 3D View's region in the module, from a view: size and matrices.

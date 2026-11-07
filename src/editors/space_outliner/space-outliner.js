@@ -306,7 +306,7 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
   // Redraws when Bylonder's data the Outliner shows changed.
   function refresh() {
     const next = JSON.stringify([world.objects.map((n) => [n.uniqueId, n.name, n.parent?.uniqueId, n.isEnabled(false), n.metadata?.wbDeleted, n.metadata?.wbLocked,
-      n.metadata?.wbHideRender, editor.selection.has(n)]), editor.selection.nodes.at(-1)?.uniqueId, world.collections.state]);
+      n.metadata?.wbHideRender, editor.selection.has(n)]), editor.selection.active?.uniqueId, world.collections.state]);
     if (next !== signature) {
       signature = next;
       draw();

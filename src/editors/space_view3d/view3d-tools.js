@@ -39,7 +39,7 @@ export function createView3DTools({ world, editor, views, area, mode, toolSettin
     .map((node) => ({ node, mesh: node === world.editMode.object ? world.editMode.mesh : meshOf(node) })).filter(({ mesh }) => mesh);
   // The scene's orientation as the ruler's constraints use it: Global, then Local (the active object's axes).
   const orientation = (constrainMode) => {
-    const active = editor.selection.nodes.at(-1);
+    const active = editor.selection.active;
     return constrainMode === 2 && active ? worldAxes(active.computeWorldMatrix(true)) : unit_m3();
   };
   // The active tool's gizmo group, then the redo gizmos the last operator asked for (MESH_GGT_spin_redo).
