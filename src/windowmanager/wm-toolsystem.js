@@ -29,10 +29,10 @@ const plain = (value) => (pointerOf(value) && typeof value.keys === 'function' ?
 //   mode(): the mode Bylonder edits in (context.mode, which Main has once Edit Mode is Main's); changed(ref): a tool was
 //   set.
 export function createToolSystem({ inContext, mode: editMode, changed = () => {} }) {
-  // The context the scripts read the tools in: the window's, in the mode Bylonder edits in.
-  const python = (fn, view) => inContext((C) => inPythonContext(C, () => {
+  // The context the scripts read the tools in: the window's, in the mode Bylonder edits in (or `mode`).
+  const python = (fn, view, mode = editMode()) => inContext((C) => inPythonContext(C, () => {
     const context = contextStruct();
-    return fn(new Proxy(context, { get: (target, key) => (key === 'mode' ? editMode() : Reflect.get(target, key)) }));
+    return fn(new Proxy(context, { get: (target, key) => (key === 'mode' ? mode : Reflect.get(target, key)) }));
   }), view);
   // A mode's tool as its setup left it (bToolRef_Runtime), or null.
   const ref = (mode) => python((context) => {
@@ -47,7 +47,8 @@ export function createToolSystem({ inContext, mode: editMode, changed = () => {}
       if (!ref(mode)?.idname) {
         // Blender's startup file has the mode's default tool as the tool and as the fallback tool (the tool header's Drag).
         const [idname, fallbacks] = defaultTool(mode);
-        python((context) => fallbacks.forEach((as_fallback) => activate_by_id(context, 'VIEW_3D', idname, kw({ as_fallback }))));
+        // In that mode: activate_by_id sets context.mode's tool, and a file opened in another mode would leave this one unset.
+        python((context) => fallbacks.forEach((as_fallback) => activate_by_id(context, 'VIEW_3D', idname, kw({ as_fallback }))), undefined, mode);
         changed();
       }
       return ref(mode);

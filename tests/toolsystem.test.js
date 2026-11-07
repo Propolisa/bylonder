@@ -70,6 +70,12 @@ set({ name: 'builtin.extrude_region' });
 assert.equal(world.toolsystem.active('EDIT_MESH').keymap, '3D View Tool: Edit Mesh, Extrude Region');
 assert.equal(world.toolsystem.active('OBJECT').idname, 'builtin.move');
 editMode = 'OBJECT';
+// A mode's default tool is set in that mode, whatever mode the file opened in (a file saved in Pose Mode asks for
+// Object Mode's tool first).
+editMode = 'POSE';
+assert.equal(world.toolsystem.active('SCULPT')?.idname, 'builtin.brush');
+assert.equal(world.toolsystem.active('POSE').idname, 'builtin.select_box');
+editMode = 'OBJECT';
 
 // The active tool's keymap runs first, with the settings the tool stores (the Select Box mode in the tool header).
 const ran = [];
