@@ -1394,6 +1394,68 @@
   }
  },
  {
+  "id": "sculpting",
+  "title": "Sculpting",
+  "summary": "Sculpt a mesh in Sculpt Mode with Blender's brushes, Grab, Draw, Crease, Inflate and Smooth, each stroke one undo step, here on a ceramic owl.",
+  "expect": "Sculpt Mode, its brushes, their keys and strokes are Blender's code and move the mesh as Blender's do; dynamic topology and multiresolution sculpting are not set up in the steps.",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/sculpt_paint/sculpting/introduction/index.html",
+   "https://docs.blender.org/manual/en/5.2/sculpt_paint/sculpting/brushes/index.html",
+   "https://docs.blender.org/manual/en/5.2/sculpt_paint/brush/index.html",
+   "https://docs.blender.org/manual/en/5.2/editors/3dview/modes.html"
+  ],
+  "example": "sculpting",
+  "thumbnail": "sculpting/thumbnail.png",
+  "media": [
+   "sculpting/sculpt-mode.gif",
+   "sculpting/grab.gif",
+   "sculpting/draw.gif",
+   "sculpting/crease.gif",
+   "sculpting/inflate.gif",
+   "sculpting/smooth-undo.gif"
+  ],
+  "ui": [
+   "VIEW_3D",
+   "SCULPT",
+   "VIEW3D_MT_sculpt",
+   "VIEW3D_PT_tools_brush_settings",
+   "VIEW3D_PT_tools_brush_falloff",
+   "VIEW3D_PT_tools_brush_stroke"
+  ],
+  "operators": [
+   "object.mode_set",
+   "sculpt.brush_stroke",
+   "brush.asset_activate",
+   "ed.undo"
+  ],
+  "code": [
+   "src/editors/object/main-modes.js",
+   "src/editors/space_view3d/view3d-window.js"
+  ],
+  "tests": [
+   "tests/sculpt-wasm.test.js"
+  ],
+  "limits": [
+   "The owl's starting form is made by its script with brush-like falloffs (grab, draw, inflate and crease around points and along lines), not by recorded strokes."
+  ],
+  "page": "docs/features/sculpting.md",
+  "open": "https://propolisa.github.io/bylonder/#example=sculpting",
+  "example_title": "Ceramic Owl",
+  "coverage": {
+   "operators": {
+    "supported": 52,
+    "partial": 1,
+    "total": 54
+   },
+   "ui": {
+    "supported": 19,
+    "partial": 0,
+    "total": 19
+   }
+  }
+ },
+ {
   "id": "shader-nodes",
   "title": "Shader Nodes",
   "summary": "Build a material from Blender's shader nodes in the Shader Editor, here a glowing lava on a sphere displaced by a Clouds texture.",
