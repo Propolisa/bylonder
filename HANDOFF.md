@@ -32,6 +32,12 @@ cherry-pick one commit per page onto main.
 
 Skipped: video-sequencer (scene strips render blank).
 
+## Older unshipped branches still worth finishing
+
+- `binary-storage`: project files kept as bytes so large .blend files (Wasp Bot, Mr. Elephant, the 5.1 splash) open;
+  float images as half float. Not checked in a browser or gated.
+- `eevee-parity-3-next`: EEVEE view transforms and shadow cascades, with its own HANDOFF.
+
 ## Bugs found, not fixed
 
 - Rendered camera view frames tighter than Render Image.
