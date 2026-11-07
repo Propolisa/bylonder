@@ -1,4 +1,4 @@
-import { Color3, Color4, Constants, CubeMapToSphericalPolynomialTools, CubeTexture, EXRCubeTexture, HDRCubeTexture, MeshBuilder, ReflectionProbe, RenderTargetTexture, Scene } from '@babylonjs/core';
+import { Color3, Color4, Constants, CubeMapToSphericalPolynomialTools, CubeTexture, EXRCubeTexture, HDRCubeTexture, HDRFiltering, MeshBuilder, BaseTexture, Texture, ReflectionProbe, RenderTargetTexture, Scene } from '@babylonjs/core';
 import { RAY_TYPE, setRayType } from '../../nodes/blender/shader-nodes.js';
 
 // Babylon adapter for a World datablock. Babylon has no World object, so a world is pushed into
@@ -29,7 +29,8 @@ export function createWorldRenderer(scene, { asset = path => path, studioLight }
   const textures = new Map(authoredTexture ? [['scene', authoredTexture]] : []);
   let skybox = null, skyboxKey = '', rendered = false, sceneLinear = false, useAuthored = false, backgroundColor = new Color3();
   const probe = worldProbe(scene);
-  const nodes = worldNodesView(scene);
+  // A baked probe of the world's nodes lights the scene in place of the one before it.
+  const nodes = worldNodesView(scene, (baked) => { if (scene.environmentTexture === probe.texture) scene.environmentTexture = baked; });
   const texture = key => {
     if (!key) return null;
     if (!textures.has(key)) {
@@ -104,8 +105,9 @@ export function createWorldRenderer(scene, { asset = path => path, studioLight }
       const lights = world?.home === 'BLENDER' && !env;
       const material = lights && world.id === 'world' ? worldNodes.get(scene) ?? null : null;
       nodes.set(material);
-      if (lights && !material) probe.set(color);
-      scene.environmentTexture = env ?? (material ? nodes.texture : lights ? probe.texture : null);
+      // Until the world's nodes are baked, its color lights the scene.
+      if (lights && !(material && nodes.baked)) probe.set(color);
+      scene.environmentTexture = env ?? (material && nodes.baked ? nodes.texture : lights ? probe.texture : null);
       scene.environmentIntensity = env ? background.strength : 1;
       backgroundColor = color;
       showBackground();
@@ -161,37 +163,49 @@ function worldProbe(scene) {
 // two kinds of rays apart; others draw both alike, as glossy rays. The probe is drawn while a view draws scene linear
 // colors (the material's display encoding left to the view), once the material is ready for it.
 const SHOWN = 0x0fffffff;
-function worldNodesView(scene) {
+function worldNodesView(scene, onTexture) {
   let box = null, baking = null, bakes = 0;
-  const probe = new ReflectionProbe('__worldNodesProbe', 256, scene, true, true, true);
-  const texture = probe.cubeTexture;
-  Object.assign(texture, { gammaSpace: false, refreshRate: RenderTargetTexture.REFRESHRATE_RENDER_ONCE });
-  const render = (type) => { setRayType(scene, type); try { texture.render(); } finally { setRayType(scene, RAY_TYPE.CAMERA); } };
+  // What the scene's materials read: one texture for every bake, so a rebake rebuilds none of them.
+  const texture = Object.assign(new BaseTexture(scene), { name: '__worldNodesProbe', isCube: true, gammaSpace: false, coordinatesMode: Texture.CUBIC_MODE });
+  // Babylon's GGX filtering of the mips (HDRFiltering, as for .env files), as EEVEE's sphere probe filters its own. It
+  // filters into the probe's texture, which it keeps: each bake draws with a probe of its own, whose texture the
+  // scene's then takes.
   const bake = async () => {
     baking = null;
     const { material } = box, id = ++bakes;
     if (!scene.imageProcessingConfiguration.applyByPostProcess || !box.subMeshes.every((subMesh) => material.isReadyForSubMesh(box, subMesh))) return;
+    const probe = newProbe(scene), drawn = probe.cubeTexture;
+    probe.renderList.push(box);
     probe.position.copyFrom(scene.activeCamera?.globalPosition ?? probe.position);
+    const render = (type) => { setRayType(scene, type); try { drawn.render(); } finally { setRayType(scene, RAY_TYPE.CAMERA); } };
     const lightPath = material.attachedBlocks.some((block) => block.idname === 'ShaderNodeLightPath');
     render(lightPath ? RAY_TYPE.DIFFUSE : RAY_TYPE.GLOSSY);
-    const sh = CubeMapToSphericalPolynomialTools.ConvertCubeMapTextureToSphericalPolynomial(texture);
+    const sh = CubeMapToSphericalPolynomialTools.ConvertCubeMapTextureToSphericalPolynomial(drawn);
     if (lightPath) render(RAY_TYPE.GLOSSY);
     box.metadata.baked = true;
     const polynomial = await sh;
-    if (id === bakes && polynomial) texture.sphericalPolynomial = polynomial;
+    await new HDRFiltering(scene.getEngine()).prefilter(drawn);
+    if (id === bakes) {
+      const filtered = drawn.getInternalTexture();
+      filtered.incrementReferences();
+      texture._texture?.dispose();
+      Object.assign(texture, { _texture: filtered, lodGenerationScale: drawn.lodGenerationScale, lodGenerationOffset: drawn.lodGenerationOffset, _prefiltered: true });
+      texture.sphericalPolynomial = polynomial;
+      onTexture(texture);
+    }
+    probe.dispose();
   };
   return {
     texture,
+    get baked() { return !!texture.getInternalTexture(); },
     set(material) {
       if (box?.material === material) return;
       box?.dispose(false, false);
       box = null;
-      probe.renderList.length = 0;
       if (!material) return;
       box = MeshBuilder.CreateBox('__worldNodes', { size: 2 }, scene);
       Object.assign(box, { material, infiniteDistance: true, isPickable: false, applyFog: false, doNotSerialize: true, alwaysSelectAsActiveMesh: true, layerMask: 0,
         metadata: { editable: false, baked: false } });
-      probe.renderList.push(box);
     },
     // Per view: shown where it is rendered; the probe drawn before the next frame of one in scene linear colors.
     show(rendered, linear) {
@@ -199,6 +213,11 @@ function worldNodesView(scene) {
       box.layerMask = rendered ? SHOWN : 0;
       if (rendered && linear && !box.metadata.baked && !baking) baking = scene.onBeforeRenderObservable.addOnce(() => { if (box) bake(); else baking = null; });
     },
-    dispose() { box?.dispose(false, false); probe.dispose(); if (baking) scene.onBeforeRenderObservable.remove(baking); },
+    dispose() { box?.dispose(false, false); texture.dispose(); if (baking) scene.onBeforeRenderObservable.remove(baking); },
   };
 }
+const newProbe = (scene) => {
+  const probe = new ReflectionProbe('__worldNodesProbe', 256, scene, true, true, true);
+  Object.assign(probe.cubeTexture, { gammaSpace: false, refreshRate: RenderTargetTexture.REFRESHRATE_RENDER_ONCE });
+  return probe;
+};
