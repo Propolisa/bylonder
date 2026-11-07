@@ -33,4 +33,7 @@ floor.material = new PBRMaterial('Stone', scene);
 for (let i = 0; i < 4; i++) createLight(`Bulb ${i}`, 'POINT', {}, scene);
 shadows.setActive(true);
 assert.equal(floor.material.maxSimultaneousLights, scene.lights.length, 'a material takes all the lights');
+for (let i = 4; i < 12; i++) createLight(`Bulb ${i}`, 'POINT', {}, scene);
+shadows.setActive(true);
+assert.equal(floor.material.maxSimultaneousLights, 8, "as many as a vertex shader's uniform blocks hold");
 console.log('Light shadows: a generator for each light that casts, casters by their shadow visibility passed');

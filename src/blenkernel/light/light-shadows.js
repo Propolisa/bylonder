@@ -26,9 +26,11 @@ function createGenerator(light, type, drawn) {
 export function createLightShadows(scene) {
   const generators = new Map(); // light -> { generator, type }
   let drawn = false, counted = '';
-  // Every light lights every material, as in Blender (Babylon's materials take 4 unless told more).
+  // Every light lights every material, as in Blender (Babylon's materials take 4 unless told more), up to what a vertex
+  // shader holds: a uniform block per light besides the scene's, mesh's and material's (and one spare).
+  const gl = scene.getEngine()._gl, blocks = gl?.getParameter?.(gl.MAX_VERTEX_UNIFORM_BLOCKS) ?? 12;
   const lightAll = () => {
-    const count = scene.lights.length, key = `${count}:${scene.materials.length}`;
+    const count = Math.min(scene.lights.length, blocks - 4), key = `${count}:${scene.materials.length}`;
     if (key === counted) return;
     counted = key;
     for (const material of scene.materials) if (material.maxSimultaneousLights < count) material.maxSimultaneousLights = count;
