@@ -7,15 +7,15 @@ import { blenderMain, operatorNames } from '../../bmesh/bmesh-wasm.js';
 import { RGN_TYPE_WINDOW, RGN_TYPE_HEADER, RGN_TYPE_FOOTER, allowOperators } from '../../windowmanager/wm-window.js';
 
 const RGN_TYPE_UI = 4, RGN_TYPE_TOOLS = 5, RGN_TYPE_TOOL_HEADER = 12;
-// The regions over the main region (region overlap) and the space's flags that show them.
-const OVERLAPS = { [RGN_TYPE_TOOLS]: 'show_region_toolbar', [RGN_TYPE_UI]: 'show_region_ui', [RGN_TYPE_TOOL_HEADER]: 'show_region_tool_header' };
+// The regions over the main region (region overlap), which Blender shows by the space's flags.
+const OVERLAPS = [RGN_TYPE_TOOLS, RGN_TYPE_UI, RGN_TYPE_TOOL_HEADER];
 import { blenderWindow, registerArea, tick } from '../../windowmanager/wm-areas.js';
 import { hasOperator, inArea, invokeOperator } from '../../windowmanager/wm-operators.js';
 import { keymapHandler, blenderKeys } from '../../windowmanager/keyconfig.js';
 import { regionHeader, regionPanels, panelClosedSet } from '../interface/ui-tree.js';
 import { BlockView, PanelsView, sidebarView } from '../interface/block-view.js';
 import { createToolbar } from '../space_view3d/view3d-toolbar.js';
-import { contextStruct, inPythonContext, pointerStruct, structFind } from '../../python/bpy_rna.js';
+import { contextStruct, inPythonContext } from '../../python/bpy_rna.js';
 import '../space_view3d/view3d-regions.css';
 import { drawRecording } from '../interface/region-draw.js';
 import { SvgContext } from '../interface/svg-context.js';
@@ -88,7 +88,9 @@ export function mountBlenderArea(section, { spacetype, name, operators, keymaps,
     report,
   });
   const barUI = Object.fromEntries([RGN_TYPE_HEADER, RGN_TYPE_FOOTER, RGN_TYPE_TOOL_HEADER, RGN_TYPE_UI, ...sides.map((side) => side.type)].map((type) => [type, ui(type)]));
-  const shown = (type) => !!tools && !!pointerStruct(structFind('Area'), 0, area.pointer).spaces.active[OVERLAPS[type]];
+  // The regions over the main region as Blender shows them, by its flags and their animation (N, View > Sidebar).
+  let overlaps = {};
+  const shown = (type) => type in overlaps;
   // Blender's scripts in a region's context: fn(context).
   const python = (fn, type = RGN_TYPE_WINDOW) => area.inContext(type, (C) => inPythonContext(C, () => fn(contextStruct())));
   const toolbar = tools && createToolbar({
@@ -129,6 +131,7 @@ export function mountBlenderArea(section, { spacetype, name, operators, keymaps,
   const app = createApp({
     render() {
       void state.revision;
+      if (tools) overlaps = area.regionsShown(OVERLAPS);
       if (toolbar) toolbar.el.hidden = !shown(RGN_TYPE_TOOLS);
       if (sides.length) shownSides = area.regionsShown(sides.map((side) => side.type));
       layout();

@@ -248,6 +248,15 @@ void GPU_matrix_scale_2f(float x, float y)
   rec.axes[1] *= y;
 }
 void GPU_matrix_scale_2fv(const float vec[2]) { GPU_matrix_scale_2f(vec[0], vec[1]); }
+/* port-override: gpu_matrix.cc keeps a GPU context's 4x4 stacks; regions here record in their plane (the model-view
+ * above), so a matrix multiplies it there: a 2D gizmo's (button2d_gizmo.cc). */
+void(GPU_matrix_mul)(const float m[4][4])
+{
+  const float2 x = rec.axes[0], y = rec.axes[1];
+  rec.offset += x * m[3][0] + y * m[3][1];
+  rec.axes[0] = x * m[0][0] + y * m[0][1];
+  rec.axes[1] = x * m[1][0] + y * m[1][1];
+}
 void GPU_matrix_scale_1f(float factor) { GPU_matrix_scale_2f(factor, factor); }
 void GPU_matrix_scale_3f(float x, float y, float /*z*/) { GPU_matrix_scale_2f(x, y); }
 void GPU_matrix_rotate_2d(float deg)
@@ -380,7 +389,8 @@ void immUniform1f(const char *name, float x)
 void immUniform2f(const char * /*name*/, float /*x*/, float /*y*/) {}
 void immUniform4f(const char *name, float x, float y, float z, float w)
 {
-  if (STREQ(name, "color")) {
+  /* A checkerboard (GPU_SHADER_2D_CHECKER, behind transparent colors) records as its first color. */
+  if (STREQ(name, "color") || (STREQ(name, "color1") && imm.shader == GPU_SHADER_2D_CHECKER)) {
     immUniformColor4f(x, y, z, w);
   }
 }
@@ -578,64 +588,11 @@ void immEnd()
   imm.points.clear();
 }
 
-/* As gpu_immediate_util.cc defines it. */
-void immRectf(uint pos, float x1, float y1, float x2, float y2)
-{
-  immBegin(GPU_PRIM_TRI_FAN, 4);
-  immVertex2f(pos, x1, y1);
-  immVertex2f(pos, x2, y1);
-  immVertex2f(pos, x2, y2);
-  immVertex2f(pos, x1, y2);
-  immEnd();
-}
-
-void immRectf_fast(uint pos, float x1, float y1, float x2, float y2) { immRectf(pos, x1, y1, x2, y2); }
-void imm_draw_box_wire_2d(uint pos, float x1, float y1, float x2, float y2)
-{
-  immBegin(GPU_PRIM_LINE_LOOP, 4);
-  immVertex2f(pos, x1, y1);
-  immVertex2f(pos, x1, y2);
-  immVertex2f(pos, x2, y2);
-  immVertex2f(pos, x2, y1);
-  immEnd();
-}
-static void circle(GPUPrimType prim, uint pos, float x, float y, float radius_x, float radius_y, int nsegments)
-{
-  immBegin(prim, nsegments);
-  for (int i = 0; i < nsegments; i++) {
-    const float angle = float(2 * M_PI) * i / nsegments;
-    immVertex2f(pos, x + radius_x * cosf(angle), y + radius_y * sinf(angle));
-  }
-  immEnd();
-}
-void imm_draw_circle_wire_2d(uint pos, float x, float y, float radius, int nsegments) { circle(GPU_PRIM_LINE_LOOP, pos, x, y, radius, radius, nsegments); }
-void imm_draw_circle_fill_2d(uint pos, float x, float y, float radius, int nsegments) { circle(GPU_PRIM_TRI_FAN, pos, x, y, radius, radius, nsegments); }
-void imm_draw_circle_wire_aspect_2d(uint pos, float x, float y, float radius_x, float radius_y, int nsegments) { circle(GPU_PRIM_LINE_LOOP, pos, x, y, radius_x, radius_y, nsegments); }
-void imm_draw_circle_fill_aspect_2d(uint pos, float x, float y, float radius_x, float radius_y, int nsegments) { circle(GPU_PRIM_TRI_FAN, pos, x, y, radius_x, radius_y, nsegments); }
+/* gpu_immediate_util.cc's shapes (Blender's, in the module) draw through these: an attribute the recording ignores, a
+ * color attribute as the vertex color, integer vertices as float ones. */
 void immAttr2f(uint /*attr_id*/, float /*x*/, float /*y*/) {}
 void immAttr3f(uint attr_id, float r, float g, float b) { immAttr4f(attr_id, r, g, b, 1.0f); }
-void imm_cpack(uint x) { immUniformColor3ub(x & 0xff, (x >> 8) & 0xff, (x >> 16) & 0xff); }
-void imm_draw_disk_partial_fill_2d(uint pos, float x, float y, float rad_inner, float rad_outer, int nsegments, float start, float sweep)
-{
-  immBegin(GPU_PRIM_TRI_STRIP, nsegments * 2);
-  for (int i = 0; i < nsegments; i++) {
-    const float angle = DEG2RADF(start + sweep * i / (nsegments - 1));
-    immVertex2f(pos, x + rad_inner * cosf(angle), y + rad_inner * sinf(angle));
-    immVertex2f(pos, x + rad_outer * cosf(angle), y + rad_outer * sinf(angle));
-  }
-  immEnd();
-}
-/* A checkerboard (behind transparent colors) as its lighter grey. */
-void imm_draw_box_checker_2d_ex(float x1, float y1, float x2, float y2, const float color_primary[4], const float /*color_secondary*/[4], int /*checker_size*/)
-{
-  immUniformColor4fv(color_primary);
-  immRectf(0, x1, y1, x2, y2);
-}
-void imm_draw_box_checker_2d(float x1, float y1, float x2, float y2, bool /*clear_alpha*/)
-{
-  const float light[4] = {0.4f, 0.4f, 0.4f, 1.0f};
-  imm_draw_box_checker_2d_ex(x1, y1, x2, y2, light, light, 8);
-}
+void immVertex2i(uint attr_id, int x, int y) { immVertex2f(attr_id, float(x), float(y)); }
 
 namespace ui {
 

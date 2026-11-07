@@ -36,11 +36,12 @@ export function mountImageEditor(section, { header, engine, views, sync, editObj
   // The editor type menu's Image Editor and UV Editor, and each screen's mode (runtime.js IMAGE_MODES).
   // The UV Editing and Texture Paint workspaces' editors show their toolbar and tool settings, as in Blender's startup file.
   editor.setMode = (mode) => {
-    const space = editor.space();
-    space.mode = mode;
-    if (mode !== 'VIEW') space.show_region_toolbar = space.show_region_tool_header = true;
-    // A mode's tool starts as its default, as WM_toolsystem_refresh_screen_area sets it.
+    // The space in its screen's context: its region flags are found through the screen (rna_area_from_space).
     area.python((context) => {
+      const space = context.space_data;
+      space.mode = mode;
+      if (mode !== 'VIEW') space.show_region_toolbar = space.show_region_tool_header = true;
+      // A mode's tool starts as its default, as WM_toolsystem_refresh_screen_area sets it.
       if (!context.workspace.tools.from_space_image_mode(mode, kw({ create: false }))) module('bl_ui.space_toolsystem_common').activate_by_id(context, 'IMAGE_EDITOR', DEFAULT_TOOLS[mode]);
     });
     area.refresh();

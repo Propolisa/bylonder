@@ -86,7 +86,9 @@ export function setKeyconfigPreferences(C, values) {
 // (Blender's Python, the keyconfig, is loaded by then).
 let configured = null;
 const owned = new Set();
-const allowed = () => [...blenderOperatorIds(), ...owned];
+// Blender's own operator a region's visibility change runs (ED_region_visibility_change_update_animated's timer).
+const WINDOW_OPERATORS = ['screen.region_blend'];
+const allowed = () => [...blenderOperatorIds(), ...owned, ...WINDOW_OPERATORS];
 export function configureWindow(window) {
   if (configured) return;
   configured = window;
