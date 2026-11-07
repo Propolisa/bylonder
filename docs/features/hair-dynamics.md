@@ -12,8 +12,8 @@ example: hair-dynamics
 thumbnail: hair-dynamics/thumbnail.png
 media:
   - hair-dynamics/play.gif
-  - hair-dynamics/frame.gif
-  - hair-dynamics/settings.gif
+  - hair-dynamics/generate.gif
+  - hair-dynamics/gravity.gif
 ui:
   - VIEW_3D
   - TIMELINE
@@ -49,35 +49,39 @@ strands match Blender 5.2's frame by frame (`tests/hair-dynamics.test.js`).
 
 [Open in Bylonder](https://propolisa.github.io/bylonder/#example=hair-dynamics)
 
-The demo is built by a Blender script (`hair-dynamics.py`): Suzanne turns her head and the hair swings. In Blender
-the same setup is Add > Curve > Empty Hair on the head, then Add Modifier > Hair > Generate Hair Curves and Add
-Modifier > Hair > Hair Dynamics. The steps below explore and change the example.
+The demo is a sea anemone on a reef (`hair-dynamics.py`): its tentacles are hair curves that sway as the anemone rocks
+in the current. In Blender the setup is: select the anemone, Add > Curve > Empty Hair (which adds the Curves object
+with Hair Dynamics), then Add Modifier > Hair > Generate Hair Curves above it, with the anemone as its Surface and its
+Disc vertex group as the Density Mask. The script also adds Hair Curves Noise for waviness and Set Hair Curve Profile
+for a radius from root to tip, sets Hair Dynamics to Physics, and turns its Gravity down to what water leaves of it.
+The steps below play and change the simulation.
 
 ## Steps
 
-1. **Play the simulation.** Press Space over the 3D Viewport (or the Timeline's play button). The simulation runs
-   from the start frame; Space again stops it.
+1. **Play the simulation.** Press Space over the 3D Viewport (or the Timeline's play button). The simulation runs from
+   the start frame, one solver step per frame, and the tentacles trail behind the anemone's motion; Space again stops
+   it.
 
    ![Space plays the simulation from frame 1](../media/features/hair-dynamics/play.gif)
 
-2. **Jump to a frame.** Type a frame in the Timeline's current frame field. Bylonder simulates every frame up to it,
-   as playing does, so the result is the same as when played.
+2. **Grow the strands.** Select Tentacles and open Properties > Modifiers. Generate Hair Curves has the Hair Length,
+   Density and Control Points; a change grows the strands again and the simulation restarts from them.
 
-   ![Frame 1, then frame 60](../media/features/hair-dynamics/frame.gif)
+   ![Hair Length 0.6 m, then 0.42 m](../media/features/hair-dynamics/generate.gif)
 
-3. **Change the hair.** Select Hair and open Properties > Modifiers. Generate Hair Curves has the strand length,
-   density and control points; Hair Dynamics has the solver, stiffness, damping, collision and gravity. A change
-   evaluates both node groups again.
+3. **Change the forces.** Hair Dynamics has the solver's substeps, stiffness, damping, collision and Gravity. A
+   stronger downward gravity makes the tentacles droop over the rim; typing a frame in the Timeline simulates every
+   frame up to it, so the result is the same as when played.
 
-   ![Hair Length 0.5 m and Density 400](../media/features/hair-dynamics/settings.gif)
+   ![Gravity Z -4, then -0.5, simulated to frame 60](../media/features/hair-dynamics/gravity.gif)
 
 > **Tip** The Geometry Node Editor shows the node group of the active modifier: see
 > [Geometry Node Editor](geometry-node-editor.md).
 
 ## Project files
 
-- [hair-dynamics.py](../../examples/hair-dynamics/hair-dynamics.py): builds the scene in Blender 5.2: the head and its
-  scalp group, the Hair object with both modifiers, the turning animation, camera and lights.
+- [hair-dynamics.py](../../examples/hair-dynamics/hair-dynamics.py): builds the reef in Blender 5.2: the anemone and
+  its Disc group, the Tentacles object with its four modifiers and material, the rocking animation, lights, fog and
+  camera.
 - [hair-dynamics.blend](../../examples/hair-dynamics/hair-dynamics.blend): the file the script saves.
-- [index.js](../../examples/hair-dynamics/index.js): opens the .blend with Blender's reader.
 - Recorded by [record-hair-dynamics.mjs](../../tools/docs/record-hair-dynamics.mjs).

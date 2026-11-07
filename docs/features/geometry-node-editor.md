@@ -1,20 +1,22 @@
 ---
 id: geometry-node-editor
 title: Geometry Node Editor
-summary: Show and edit the node group of the active Geometry Nodes modifier, here the Hair Dynamics example's Generate Hair Curves.
+summary: Show and edit the node group of the active Geometry Nodes modifier: add nodes from Shift A's search, link sockets and set values, here to lay out a sunflower's seeds by the golden angle.
 expect: Node groups open, edit and evaluate as in Blender; the sidebar's Group tab is missing, and Bylonder's own Geometry Nodes modifier opens in Babylon's editor instead.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/editors/geometry_node.html
   - https://docs.blender.org/manual/en/5.2/modeling/geometry_nodes/index.html
   - https://docs.blender.org/manual/en/5.2/interface/controls/nodes/editing.html
-example: hair-dynamics
+example: geometry-node-editor
 thumbnail: geometry-node-editor/thumbnail.png
 media:
-  - geometry-node-editor/open.gif
-  - geometry-node-editor/zoom.gif
-  - geometry-node-editor/mute.gif
-  - geometry-node-editor/add-node.gif
+  - geometry-node-editor/start.gif
+  - geometry-node-editor/points.gif
+  - geometry-node-editor/golden-angle.gif
+  - geometry-node-editor/angle.gif
+  - geometry-node-editor/seeds.gif
+  - geometry-node-editor/sunflower-tree.png
 ui:
   - GeometryNodeTree
   - NODE_EDITOR
@@ -53,38 +55,52 @@ The tree is Blender's, held in Main, and evaluated by Blender's geometry nodes; 
 edits it with Blender's own operators, so each edit is an undo step and the 3D Viewport updates
 (`docs/node-editors.md`, decision 10).
 
-[Open in Bylonder](https://propolisa.github.io/bylonder/#example=hair-dynamics)
+[Open in Bylonder](https://propolisa.github.io/bylonder/#example=geometry-node-editor)
 
-The demo is the [Hair Dynamics](hair-dynamics.md) example, built by a Blender script. Its Hair object has two
-Essentials node groups as modifiers; the steps below open the first, Generate Hair Curves, and change it.
+The demo is a group of sunflowers (`geometry-node-editor.py`). Each head is a plain disc whose node group places its
+seeds by Vogel's model of phyllotaxis: the n-th seed turns by n times the golden angle and sits at the square root of
+n times a spacing from the middle. The steps below build that spiral from the Default Cube's scene.
 
 ## Steps
 
-1. **Open the editor.** With Hair selected, click the Shading tab, then pick Geometry Node Editor in the bottom area's
-   editor type menu. Hover the editor and press Home to see the whole group.
+1. **Start a group.** Delete the cube, Add > Mesh > Plane, then in Properties > Modifiers Add Modifier > Geometry
+   Nodes and New. Click the Geometry Nodes workspace tab; the editor shows the new group. Numpad 7 looks down on the
+   plane.
 
-   ![The editor type menu, then Home](../media/features/geometry-node-editor/open.gif)
+   ![A plane, its modifier and the Geometry Nodes workspace](../media/features/geometry-node-editor/start.gif)
 
-2. **Navigate.** Scroll to zoom at the mouse and drag with the middle mouse button to pan. Frames group the nodes as
-   their author laid them out.
+2. **Points on a line.** Over the editor, press Shift A and type to search Blender's Add menu; Enter picks the best
+   match and a click places it. Add Points (Count 500, Radius 0.015) and Set Position, and link them to Group Output.
+   Index, Square Root, Math (Multiply, 0.04) and Combine XYZ give each point an X of the square root of its index
+   times 0.04: the points line up, closer together as they go out.
 
-   ![Zoom in on Distribute Points on Faces](../media/features/geometry-node-editor/zoom.gif)
+   ![Points, Set Position, and a position from the index](../media/features/geometry-node-editor/points.gif)
 
-3. **Mute a node.** Click a node's header to select it and press M. A muted node passes its first input through, and
-   the hair is evaluated again; M again unmutes it.
+3. **Turn by the golden angle.** Add a second Math (Multiply) taking the Index, set to 2.39996 (137.5 degrees in
+   radians), and Vector Rotate, which turns the position about Z by it. Linking Vector Rotate to Set Position's
+   Position replaces the old link, and the line winds into the sunflower's spirals.
 
-   ![M mutes and unmutes Distribute Points on Faces](../media/features/geometry-node-editor/mute.gif)
+   ![Index times the golden angle into Vector Rotate](../media/features/geometry-node-editor/golden-angle.gif)
 
-4. **Add a node.** Press Shift A over the editor and type to search Blender's Add menu; Enter picks the best match
-   and a click places it. Drag from an output socket to an input to link it.
+4. **Change a value.** Click the angle's field and type. 2.3 and 2.4 radians break the pattern into curved arms; only
+   the golden angle packs the points evenly.
 
-   ![Shift A, type Math, Enter, click](../media/features/geometry-node-editor/add-node.gif)
+   ![2.3, 2.4, then 2.39996](../media/features/geometry-node-editor/angle.gif)
 
-> **Note** Properties > Modifiers makes a modifier active when its panel is clicked; the editor follows it, so the
-> Hair Dynamics group opens the same way.
+5. **Seeds.** Add Instance on Points and UV Sphere (Radius 0.02) and link them: a seed sits on every point.
+
+   ![Instance on Points with a UV Sphere](../media/features/geometry-node-editor/seeds.gif)
+
+6. **The sunflower.** The example's group does the same in its Seeds frame, with the angle and spacing as modifier
+   inputs, a domed head, and seeds that grow and ripen toward the rim (two seed objects picked by the radius); its
+   Petals frame runs the same spiral at the rim and instances a petal. Home over the editor shows the whole group.
+
+   ![The Sunflower group, in its Seeds and Petals frames](../media/features/geometry-node-editor/sunflower-tree.png)
 
 ## Project files
 
-- [hair-dynamics.py](../../examples/hair-dynamics/hair-dynamics.py) and
-  [hair-dynamics.blend](../../examples/hair-dynamics/hair-dynamics.blend): the scene and its node groups.
+- [geometry-node-editor.py](../../examples/geometry-node-editor/geometry-node-editor.py): builds the sunflowers, their
+  node group, seed and petal objects, sun and camera in Blender 5.2.
+- [geometry-node-editor.blend](../../examples/geometry-node-editor/geometry-node-editor.blend): the file the script
+  saves.
 - Recorded by [record-geometry-node-editor.mjs](../../tools/docs/record-geometry-node-editor.mjs).

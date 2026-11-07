@@ -21,8 +21,9 @@ const sync = sceneMain({ scene, objects });
 const { nodes } = sync.readBlend(fs.readFileSync(new URL('../examples/hair-dynamics/hair-dynamics.blend', import.meta.url)), scene);
 setContextPointer(sync.blender.C);
 const python = (fn) => inPythonContext(sync.blender.C, fn);
-const node = nodes.find((n) => n.name === 'Hair'), hair = idStruct(sync.objectOf(node));
-hair.modifiers.get('Hair Dynamics').show_viewport = false;
+const node = nodes.find((n) => n.name === 'Tentacles'), hair = idStruct(sync.objectOf(node));
+// Only the active modifier, Generate Hair Curves, evaluates: the others would move what the checks below measure.
+for (const modifier of hair.modifiers) modifier.show_viewport = modifier.name === hair.modifiers.active.name;
 
 // The editor shows the active modifier's node group (contexts.js geometry).
 let commits = 0;

@@ -28,6 +28,7 @@ const overlay = () => {
   const style = "position:fixed;z-index:2147483647;pointer-events:none;";
   const install = () => {
     const pointer = Object.assign(document.createElement("div"), { style: style + "width:14px;height:14px;margin:-7px;border-radius:50%;background:#fffc;box-shadow:0 0 0 2px #000a;display:none" });
+    pointer.dataset.pointer = "";
     document.body.append(pointer);
     addEventListener("mousemove", (e) => Object.assign(pointer.style, { display: "block", left: e.clientX + "px", top: e.clientY + "px" }), true);
     addEventListener("mouseleave", () => { pointer.style.display = "none"; });
@@ -156,6 +157,7 @@ export async function recorder(feature, { example, node, size = SIZE, scale = 1,
       const file = `${out}${name}.png`;
       await app.settled();
       await app.page.evaluate(() => document.querySelectorAll("[data-key-overlay]").forEach((key) => key.remove()));
+      for (const frame of app.page.frames()) await frame.evaluate(() => document.querySelectorAll("[data-pointer]").forEach((p) => { p.style.display = "none"; })).catch(() => {});
       await app.page.screenshot({ path: file, clip: await box(region, part) });
       if (width) {
         ffmpeg("-i", file, "-vf", `scale='min(${width},iw)':-2:flags=lanczos`, `${file}.tmp.png`);

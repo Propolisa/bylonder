@@ -1,12 +1,16 @@
-# Geometry Nodes
+# Geometry Nodes Planet
 
-A meadow scattered with trees by a Geometry Nodes modifier, made by `geometry-nodes.mjs` with Blender's own code in
-Bylonder's module (`node examples/geometry-nodes/geometry-nodes.mjs`) and opened here with Blender's reader.
+A tiny planet made in Blender 5.2 by `geometry-nodes.py` (`blender -b --factory-startup -P geometry-nodes.py`) and
+opened here with Blender's own reader. Everything on it comes from one Geometry Nodes modifier on an ico sphere.
 
-- **Scatter.** The Meadow's modifier distributes points on the grid, stores a random `height` on each as a named
-  attribute, and instances the Tree node group on every point, scaled by `height` times Scale. The points stay in the
-  result as a point cloud.
-- **Inputs.** Properties > Modifiers shows the group's Density, Scale and Seed.
-- **Inspecting.** The Geometry Nodes workspace's Spreadsheet lists the evaluated mesh, point cloud and instances, with
-  the `height` column on the points.
-- **Groups.** Select the Tree node and press Tab to edit the group, Ctrl Tab to leave it.
+- **Terrain.** 4D noise (its W is the Seed input) lifts the sphere along its normals; below Sea Level the ground sinks
+  under a second, smooth sphere. The height is stored as the `height` attribute, which the Terrain material reads
+  through a color ramp: sand, meadow, forest, rock and snow.
+- **Forests.** Points are distributed where the land is between the shore and the tree line and a second noise says
+  woods. Each point instances one of the Trees collection's objects (Pick Instance), stands on the ground (the points'
+  Rotation) and is turned and scaled at random. The scale is stored on the instances as `tree_scale`.
+- **Clouds.** Points on a larger sphere, kept where a noise is above Cloud Cover, their radius growing with it. A point
+  cloud draws each point as a sphere.
+- **Inputs.** Properties > Modifiers shows Seed, Mountains, Sea Level, Forest Density and Cloud Cover.
+- **Inspecting.** The Geometry Nodes workspace's Spreadsheet lists the mesh with its `height`, the cloud points with
+  their radius, and the tree instances.
