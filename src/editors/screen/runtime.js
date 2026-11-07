@@ -17,13 +17,17 @@ const SHADING_AREAS=['files','image','viewport','nodes','objects','properties'];
 // the Outliner over the Properties editor. Each screen's Image Editor shows its own mode (SpaceImage.mode).
 const IMAGE_SPLITS={root:LAYOUT_SPLITS.root,main:share(789,787),inspector:LAYOUT_SPLITS.inspector};
 const IMAGE_AREAS=['image','viewport','objects','properties'];
-export const IMAGE_MODES={shading:'VIEW','uv-editing':'UV','texture-paint':'PAINT'};
+export const IMAGE_MODES={shading:'VIEW',compositing:'VIEW','uv-editing':'UV','texture-paint':'PAINT'};
 // The Modeling and Sculpting screens: the 3D Viewport, and the Outliner over the Properties editor as in Layout.
 const MODELING_AREAS=['viewport','objects','properties'];
 // The Geometry Nodes screen: the Spreadsheet beside the 3D Viewport, over the Geometry Node Editor over the Timeline,
 // and the Outliner over the Properties editor.
 const GEOMETRY_NODES_SPLITS={root:LAYOUT_SPLITS.root,main:share(476,557),top:share(657,920),lower:share(480,77),inspector:LAYOUT_SPLITS.inspector};
 const GEOMETRY_NODES_AREAS=['spreadsheet','viewport','nodes','timeline','objects','properties'];
+// The Compositing screen: the Image Editor beside the Properties editor, over the Compositor, over the Timeline (its
+// header and a row, as in Geometry Nodes': an area's minimum here).
+const COMPOSITING_SPLITS={root:share(477,553),top:LAYOUT_SPLITS.root,rest:GEOMETRY_NODES_SPLITS.lower};
+const COMPOSITING_AREAS=['image','properties','nodes','timeline'];
 // The 2D Animation template's screens (bl_app_templates_system/2D_Animation/startup.blend): 2D Animation's 3D Viewport
 // over the Dope Sheet beside the Outliner over the Properties editor, and 2D Full Canvas's 3D Viewport over the Dope Sheet.
 const ANIMATION_2D_SPLITS={root:share(1583,330),main:share(856,172),inspector:share(179,849)};
@@ -76,6 +80,10 @@ export function mountRuntimeLayout(){
     tree:{id:'root',children:[{id:'main',children:[{id:'top',children:[0,1]},{id:'lower',children:[2,3]}]},{id:'inspector',children:[4,5]}]},
     defaults:()=>({order:areaOrder(items,GEOMETRY_NODES_AREAS),hidden:hiddenBut(items,GEOMETRY_NODES_AREAS),sizes:structuredClone(GEOMETRY_NODES_SPLITS),horizontal:{root:false,main:true,top:false,lower:true,inspector:true}}),
   };
+  const compositing={
+    tree:{id:'root',children:[{id:'top',children:[0,1]},{id:'rest',children:[2,3]}]},
+    defaults:()=>({order:areaOrder(items,COMPOSITING_AREAS),hidden:hiddenBut(items,COMPOSITING_AREAS),sizes:structuredClone(COMPOSITING_SPLITS),horizontal:{root:true,top:false,rest:true}}),
+  };
   const animation2d={
     tree:{id:'root',children:[{id:'main',children:[0,1]},{id:'inspector',children:[2,3]}]},
     defaults:()=>({order:areaOrder(items,ANIMATION_2D_AREAS),hidden:hiddenBut(items,ANIMATION_2D_AREAS),sizes:structuredClone(ANIMATION_2D_SPLITS),horizontal:{root:false,main:true,inspector:true}}),
@@ -84,6 +92,6 @@ export function mountRuntimeLayout(){
     tree:{id:'main',children:[0,1]},
     defaults:()=>({order:areaOrder(items,FULL_CANVAS_AREAS),hidden:hiddenBut(items,FULL_CANVAS_AREAS),sizes:structuredClone(FULL_CANVAS_SPLITS),horizontal:{main:true}}),
   };
-  const dock = mountDock({host,items,storageKey:RUNTIME_LAYOUT_KEY,tree:{id:'root',children:[{id:'animation',children:[0,3]},{id:'inspector',children:[1,2]}]},defaults:()=>({order:items.map(x=>x.id),hidden:['dopesheet','graph','drivers','nla','nodes','spreadsheet','sequencer','files','text','image','console','info','preferences'],sizes:structuredClone(LAYOUT_SPLITS),horizontal:{animation:true,root:false,inspector:true}}),screens:{scripting,shading,modeling,'geometry-nodes':geometryNodes,'uv-editing':imageScreen,'texture-paint':imageScreen,'2d-animation':animation2d,'2d-full-canvas':fullCanvas}});
+  const dock = mountDock({host,items,storageKey:RUNTIME_LAYOUT_KEY,tree:{id:'root',children:[{id:'animation',children:[0,3]},{id:'inspector',children:[1,2]}]},defaults:()=>({order:items.map(x=>x.id),hidden:['dopesheet','graph','drivers','nla','nodes','spreadsheet','sequencer','files','text','image','console','info','preferences'],sizes:structuredClone(LAYOUT_SPLITS),horizontal:{animation:true,root:false,inspector:true}}),screens:{scripting,shading,modeling,'geometry-nodes':geometryNodes,compositing,'uv-editing':imageScreen,'texture-paint':imageScreen,'2d-animation':animation2d,'2d-full-canvas':fullCanvas}});
   return dock;
 }

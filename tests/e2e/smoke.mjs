@@ -1144,6 +1144,16 @@ const checks = {
     await app.until(() => /has no Geometry Nodes modifier/.test(document.querySelector("#nodes-section .node-editor-empty").textContent));
   },
 
+  // The Compositing workspace's screen, as Blender's: the Image Editor beside the Properties editor, over the Compositor
+  // and the Timeline.
+  async "the Compositing workspace shows the Compositor"() {
+    await app.page.click('[data-workspace="compositing"]');
+    for (const id of ["image", "properties", "nodes", "timeline"]) await app.locator(`.dock-content[data-section="${id}"]`).waitFor();
+    assert.equal(await app.locator('.dock-content[data-section="viewport"]').isVisible(), false);
+    await app.until(() => /Add a compositor node group/.test(document.querySelector("#nodes-section").textContent));
+    await app.page.click('[data-workspace="layout"]');
+  },
+
   // Opening the Video Sequencer on an empty edit offers to set it up; Remember keeps the choice in Bylonder's Preferences.
   "opening the Video Sequencer offers to set it up for video": { open: { example: "Volcanic Island", node: "Island" }, async run() {
     await app.bylonder((b) => b.world.animation.time.configure({ frameEnd: 48 }));

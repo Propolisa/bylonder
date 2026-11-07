@@ -15,10 +15,10 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
   const autoRun = $('auto-run');
   // Blender's default workspaces with their object modes (startup.blend's WorkSpace.object_mode), each opening the screen
   // the scene's window has for it (docs/blender-boundary.md, Workspaces): Scripting's, Shading's, Modeling's (Modeling
-  // and Sculpting), UV Editing's, Texture Paint's, Geometry Nodes', else Layout's.
+  // and Sculpting), UV Editing's, Texture Paint's, Geometry Nodes', Compositing's, else Layout's.
   // A project made from an application template has the template's workspaces (the 2D Animation template's).
   const SCREENS = { Scripting: 'scripting', Shading: 'shading', Modeling: 'modeling', Sculpting: 'modeling', 'UV Editing': 'uv-editing', 'Texture Paint': 'texture-paint',
-    'Geometry Nodes': 'geometry-nodes', '2D Animation': '2d-animation', '2D Full Canvas': '2d-full-canvas' };
+    'Geometry Nodes': 'geometry-nodes', Compositing: 'compositing', '2D Animation': '2d-animation', '2D Full Canvas': '2d-full-canvas' };
   const GENERAL = [['Layout', 'OBJECT'], ['Modeling', 'EDIT'], ['Sculpting', 'SCULPT'], ['UV Editing', 'EDIT'], ['Texture Paint', 'TEXTURE_PAINT'], ['Shading', 'OBJECT'],
     ['Animation', 'POSE'], ['Rendering', 'OBJECT'], ['Compositing', 'OBJECT'], ['Geometry Nodes', 'OBJECT'], ['Scripting', 'OBJECT']];
   const workspacesOf = (list) => list.map(([name, mode]) => ({ id: name.toLowerCase().replaceAll(' ', '-'), name, mode, screen: SCREENS[name] ?? 'layout' }));

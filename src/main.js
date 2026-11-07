@@ -692,9 +692,10 @@ const mountView = (options) => {
 shadingReady = true;
 const primary = mountView({ section: document.querySelector("#viewport-section"), canvas, headerId: "viewport", cameraName: "__editorCamera" });
 // Each screen's 3D Viewport keeps its own shading and its Node Editor its own tree type, as each of Blender's screens
-// has its own: Shading's starts in Material Preview over the Shader Editor, Geometry Nodes' in the Geometry Node Editor.
+// has its own: Shading's starts in Material Preview over the Shader Editor, Geometry Nodes' in the Geometry Node Editor,
+// Compositing's in the Compositor.
 const screenShading = { shading: "material" };
-const screenNodeTree = { shading: "shader", "geometry-nodes": "geometry" };
+const screenNodeTree = { shading: "shader", "geometry-nodes": "geometry", compositing: "compositor" };
 function setScreen(name) {
   const previous = viewportDock.screen ?? "layout";
   viewportDock.setScreen(name);
