@@ -944,7 +944,7 @@ const checks = {
 
   // Grease Pencil: the Bouncing Ball's drawings draw as GreasedLine and fill meshes; a drag in Draw Mode draws a stroke
   // (one undo step), and the Fill tool's Pixel solver, rendered on Babylon, fills a closed shape.
-  "Grease Pencil draws, fills and undoes a stroke": { open: { link: "grease-pencil", node: "Dusk Lake" }, async run() {
+  "Grease Pencil draws, fills and undoes a stroke": { open: { link: "bouncing-ball", node: "Bouncing Ball" }, async run() {
     const curves = () => app.bylonder((b) => b.world.mainSync.blender.greasePencil({ repack: true }).filter((d) => !d.onion).reduce((n, d) => n + d.curves.length / 5, 0));
     assert.ok(await app.bylonder((b) => b.world.scene.meshes.some((m) => m.getClassName() === "GreasedLineMesh" && m.getTotalVertices())), "strokes draw as GreasedLine");
     await app.bylonder((b) => b.runOperator("object.mode_set", { mode: "PAINT_GREASE_PENCIL" }));
@@ -977,7 +977,7 @@ const checks = {
   } },
 
   // Looking through a .blend's camera, a drag in Draw Mode draws a stroke and leaves the camera where it is.
-  "Grease Pencil draws through a .blend's camera without turning it": { open: { link: "grease-pencil", node: "Bouncing Ball" }, async run() {
+  "Grease Pencil draws through a .blend's camera without turning it": { open: { link: "bouncing-ball", node: "Bouncing Ball" }, async run() {
     const curves = () => app.bylonder((b) => b.world.mainSync.blender.greasePencil({ repack: true }).filter((d) => !d.onion).reduce((n, d) => n + d.curves.length / 5, 0));
     const view = () => app.bylonder((b) => Array.from(b.views.input.camera.getViewMatrix().m).map((v) => +v.toFixed(5)));
     await app.hover();
@@ -995,7 +995,7 @@ const checks = {
   } },
 
   // Properties > Data of a Grease Pencil object: its layers panel, whose buttons include unbounded ranges.
-  "Grease Pencil's Data properties open": { open: { link: "grease-pencil", node: "Bouncing Ball" }, async run() {
+  "Grease Pencil's Data properties open": { open: { link: "bouncing-ball", node: "Bouncing Ball" }, async run() {
     await app.bylonder((b) => b.editor.selection.replace([b.world.objects.find((o) => o.name === "Bouncing Ball")]));
     await app.locator('#properties-section [role="tab"][aria-label="Data"]').click();
     await app.locator('#properties-section').getByText("Layers").first().waitFor();
