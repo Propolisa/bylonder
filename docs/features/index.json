@@ -379,11 +379,14 @@
    "Fills draw under their layer's strokes rather than interleaved stroke by stroke.",
    "Shader effects (Blur, Shadow, Rim, ...) and Line Art's evaluation in a render are not drawn.",
    "Line Art objects are added and evaluated in the module but are not checked against Blender's.",
-   "The paint cursor (the brush circle) and Bezier handles in Edit Mode are not drawn."
+   "The paint cursor (the brush circle) and Bezier handles in Edit Mode are not drawn.",
+   "Drawing a stroke through the camera (Numpad 0), as in Dusk Lake, hides the whole object until it is reopened; draw in a perspective view instead.",
+   "Fill does not yet fill a shape drawn in a new 2D Animation file in the viewport.",
+   "Properties > Data does not open on Dusk Lake (a page error); the Outliner and the Dope Sheet list its layers."
   ],
   "page": "docs/features/grease-pencil.md",
   "open": "https://propolisa.github.io/bylonder/#example=grease-pencil",
-  "example_title": "Bouncing Ball",
+  "example_title": "Dusk Lake",
   "coverage": {
    "operators": {
     "supported": 79,

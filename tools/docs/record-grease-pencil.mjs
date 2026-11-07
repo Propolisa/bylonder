@@ -1,20 +1,38 @@
-// Records docs/features/grease-pencil.md's media: the Bouncing Ball example through its camera, Draw Mode and a
-// stroke, a fill, Edit Mode, playback with the Dope Sheet, and the 2D Animation template.
+// Records docs/features/grease-pencil.md's media: the Dusk Lake example through its camera in Rendered shading, played,
+// then in File > New > 2D Animation: a stroke in Draw Mode, a fill, Edit Mode, and the layers.
 //   usage: node tools/docs/record-grease-pencil.mjs
 import { record } from "./record.mjs";
 
 const VIEW = '[data-section="viewport"]', PROPERTIES = '[data-section="properties"]';
 
-await record("grease-pencil", { example: "grease-pencil", node: "Bouncing Ball" }, async (r) => {
+await record("grease-pencil", { example: "grease-pencil", node: "Dusk Lake" }, async (r) => {
   const { app } = r;
-  await app.hover();
-  await r.keys("Numpad 0", "Numpad0");
-  await r.frame(7);
-  await r.shot("thumbnail", VIEW, { part: [0.15, 0.1, 0.85, 0.9] });
-  await r.gif("play", VIEW, async () => { await r.keys("Space", "Space"); await r.pause(2000); await r.keys("Space", "Space"); }, { part: [0.15, 0.1, 0.85, 0.9] });
-  await r.frame(1);
+  await r.frame(60);
+  await r.render("thumbnail", { wait: 4000 });
+  await app.bylonder((b) => { b.views.input.state.overlays = false; b.views.input.setShading("rendered"); });
+  await r.gif("play", VIEW, async () => { await r.keys("Space", "Space"); await r.pause(5000); await r.keys("Space", "Space"); }, { part: [0.15, 0.1, 0.85, 0.9] });
+  // The layers in the Outliner, maximized (Ctrl Space), three levels shown (Numpad +).
+  const outliner = '.dock-content[data-section="objects"]';
+  await app.locator(outliner).hover();
+  await r.keys("Ctrl Space", "Control+Space");
+  await app.locator(outliner).hover();
+  for (let i = 0; i < 3; i++) await r.keys("Numpad +", "NumpadAdd");
+  await app.page.mouse.move(1, 1);
+  await r.shot("layers", outliner, { part: [0, 0, 0.5, 0.75] });
+  await app.locator(outliner).hover();
+  await r.keys("Ctrl Space", "Control+Space");
+  // Drawing starts from Blender's 2D Animation template: File > New > 2D Animation, its Stroke object in Draw Mode.
+  await app.page.click('[data-blender="TOPBAR_MT_file"]');
+  await app.page.getByRole("menuitem", { name: /^New/ }).first().hover();
+  await app.page.getByRole("menuitem", { name: "2D Animation" }).first().click();
+  // The viewport's frame loads again for the new file.
+  for (let tries = 0; tries < 60; tries++) {
+    if (await app.bylonder((b) => b.world.objects.some((node) => node.name === "Stroke")).catch(() => false)) break;
+    await r.pause(1000);
+  }
+  await app.settled();
+  await r.pause(1500);
   await r.gif("draw", VIEW, async () => {
-    await r.menu(app.frame().locator("button", { hasText: "Object Mode" }), "Draw Mode");
     await r.drag(await app.point(0.3, 0.35), await app.point(0.7, 0.3), { steps: 30 });
     await r.pause(300);
   });
@@ -34,6 +52,4 @@ await record("grease-pencil", { example: "grease-pencil", node: "Bouncing Ball" 
     await app.page.mouse.click(...(await app.point(0.55, 0.45)));
     await app.settled();
   });
-  await r.tab("Data");
-  await r.shot("layers", PROPERTIES, { part: [0, 0, 1, 0.7] });
 });

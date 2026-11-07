@@ -944,7 +944,7 @@ const checks = {
 
   // Grease Pencil: the Bouncing Ball's drawings draw as GreasedLine and fill meshes; a drag in Draw Mode draws a stroke
   // (one undo step), and the Fill tool's Pixel solver, rendered on Babylon, fills a closed shape.
-  "Grease Pencil draws, fills and undoes a stroke": { open: { link: "grease-pencil", node: "Bouncing Ball" }, async run() {
+  "Grease Pencil draws, fills and undoes a stroke": { open: { link: "grease-pencil", node: "Dusk Lake" }, async run() {
     const curves = () => app.bylonder((b) => b.world.mainSync.blender.greasePencil({ repack: true }).filter((d) => !d.onion).reduce((n, d) => n + d.curves.length / 5, 0));
     assert.ok(await app.bylonder((b) => b.world.scene.meshes.some((m) => m.getClassName() === "GreasedLineMesh" && m.getTotalVertices())), "strokes draw as GreasedLine");
     await app.bylonder((b) => b.runOperator("object.mode_set", { mode: "PAINT_GREASE_PENCIL" }));
@@ -1003,7 +1003,7 @@ const checks = {
 
   // A pen in Draw Mode: one move event carrying coalesced moves draws them all, and the pen's eraser end erases. The
   // events are the page's own PointerEvents, as a tablet gives them (pressure, tilt, coalesced moves, button 5).
-  "Grease Pencil takes a pen's coalesced moves and its eraser end": { open: { link: "grease-pencil", node: "Bouncing Ball" }, async run() {
+  "Grease Pencil takes a pen's coalesced moves and its eraser end": { open: { link: "grease-pencil", node: "Dusk Lake" }, async run() {
     const points = () => app.bylonder((b) => b.world.mainSync.blender.greasePencil({ repack: true }).filter((d) => !d.onion).reduce((n, d) => n + d.points.length / 14, 0));
     await app.bylonder((b) => b.runOperator("object.mode_set", { mode: "PAINT_GREASE_PENCIL" }));
     await app.settled();
