@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { NullEngine, Scene, Matrix, Vector3, FreeCamera } from '@babylonjs/core';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
 import { createRenderSettings, outputSize } from '../src/blenkernel/scene/render.js';
+import { displayExponent } from '../src/render/display-gamma.js';
 import { outputSpec, encodeSize, containers } from '../src/render/formats.js';
 import { installVirtualClock, seededRandom } from '../src/render/clock.js';
 import { halton, jitter, sampleTimes, jitterProjection, createAccumulator } from '../src/render/sampling.js';
@@ -134,6 +135,21 @@ acc.reset(); assert.equal(acc.count, 0);
   assert.ok(pipelineOf(camera).depthOfFieldEnabled, 'the camera with depth of field blurs');
   assert.deepEqual([depthOfField.fStop, depthOfField.focalLength, Math.round(depthOfField.focusDistance)], [2.8, 50, 6900]);
   assert.ok(!pipelineOf(other).depthOfFieldEnabled, 'a camera without it does not');
+  settings.dispose(); scene.dispose(); engine.dispose();
+}
+
+// Blender's view gamma raises the displayed color to 1 / gamma (colormanagement.cc colormanage_exponent), last of a
+// rendered view's post processes; a gamma of 1 adds none.
+{
+  const engine = new NullEngine(), scene = new Scene(engine), camera = new FreeCamera('c', Vector3.Zero(), scene);
+  const settings = createRenderSettings({ scene, animation: createAnimationModel() });
+  settings.setRenderedCameras([camera]);
+  const names = () => camera._postProcesses.filter(Boolean).map((p) => p.name);
+  assert.ok(!names().some((name) => name.includes('displayGamma')), 'none at gamma 1');
+  settings.set('viewSettings.gamma', 0.41);
+  assert.match(names().at(-1), /displayGamma/, 'the last post process at another gamma');
+  assert.equal(displayExponent(0.41), 1 / 0.41);
+  assert.equal(displayExponent(0), 100, "at most OCIO's exponent");
   settings.dispose(); scene.dispose(); engine.dispose();
 }
 

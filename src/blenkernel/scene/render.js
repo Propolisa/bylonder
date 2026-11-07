@@ -12,11 +12,11 @@ export const renderDefaults = {
     useSequencer: true,
   },
   eevee: { taaSamples: 16, taaRenderSamples: 16, useRaytracing: false, rayTracingMethod: 'SCREEN', screenTraceQuality: 0.25, screenTraceThickness: 0.5, fastGiMethod: 'AMBIENT_OCCLUSION', fastGiDistance: 2 },
-  viewSettings: { viewTransform: 'STANDARD', look: 'NONE', exposure: 0 },
+  viewSettings: { viewTransform: 'STANDARD', look: 'NONE', exposure: 0, gamma: 1 },
   displaySettings: { displayDevice: 'sRGB' },
 };
 // Animatable render properties, as paths relative to the scene (Blender: scene.view_settings.exposure etc.).
-export const renderChannels = [['viewSettings.exposure', 'Exposure'], ['render.motionBlurShutter', 'Shutter'], ['eevee.screenTraceThickness', 'Thickness'], ['eevee.fastGiDistance', 'Fast GI Distance']];
+export const renderChannels = [['viewSettings.exposure', 'Exposure'], ['viewSettings.gamma', 'Gamma'], ['render.motionBlurShutter', 'Shutter'], ['eevee.screenTraceThickness', 'Thickness'], ['eevee.fastGiDistance', 'Fast GI Distance']];
 const clone = value => JSON.parse(JSON.stringify(value));
 const resolve = (state, path) => { const keys = path.split('.'), key = keys.pop(); return { owner: keys.reduce((o, k) => o?.[k], state), key }; };
 export const getRenderPath = (state, path) => { const { owner, key } = resolve(state, path); return owner?.[key]; };

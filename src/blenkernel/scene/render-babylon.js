@@ -1,6 +1,7 @@
 import { Camera, DefaultRenderingPipeline, DepthOfFieldEffectBlurLevel, ImageProcessingConfiguration, MotionBlurPostProcess, SSAO2RenderingPipeline, SSRRenderingPipeline } from '@babylonjs/core';
 import { seededRandom } from '../../render/clock.js';
 import { createFilm } from '../../render/film.js';
+import { createDisplayGamma } from '../../render/display-gamma.js';
 
 // Babylon adapter for render settings. The only code that writes scene.imageProcessingConfiguration
 // tone mapping/exposure/contrast or creates render-engine effects. Effects are attached per camera, only to the
@@ -68,11 +69,11 @@ export function createRenderEngine(scene, { dof = () => null } = {}) {
   });
   const drop = camera => {
     const entry = attached.get(camera); if (!entry) return;
-    const e = entry.effects; e.pipeline?.dispose(); e.ssr?.dispose(); e.ssao?.dispose(); e.motion?.dispose(); e.film.dispose();
+    const e = entry.effects; e.pipeline?.dispose(); e.ssr?.dispose(); e.ssao?.dispose(); e.motion?.dispose(); e.gamma?.dispose(); e.film.dispose();
     attached.delete(camera);
     if (ownGeometryBuffer && ![...attached.values()].some(a => usesGeometry(a.effects))) scene.disableGeometryBufferRenderer();
   };
-  let viewportSamples = 1;
+  let viewportSamples = 1, displayGamma = 1;
   const build = (camera, settings) => {
     const e = settings.eevee, r = settings.render, effects = {};
     // EEVEE's film first: the samples a view accumulates (its viewport samples) in scene linear.
@@ -88,6 +89,8 @@ export function createRenderEngine(scene, { dof = () => null } = {}) {
     if (e.useRaytracing && e.rayTracingMethod === 'SCREEN') effects.ssr = new SSRRenderingPipeline(name('screenTrace'), scene, [camera], true);
     if (r.useMotionBlur) effects.motion = new MotionBlurPostProcess(name('motionBlur'), scene, 1, camera, undefined, undefined, undefined, undefined, undefined, true);
     if (usesGeometry(effects) && scene.geometryBufferRenderer) scene.geometryBufferRenderer.getGBuffer().ignoreCameraViewport = true;
+    // Last, on the displayed color.
+    if (settings.viewSettings.gamma !== 1) effects.gamma = createDisplayGamma(name('displayGamma'), camera, () => displayGamma);
     return effects;
   };
   return {
@@ -97,11 +100,12 @@ export function createRenderEngine(scene, { dof = () => null } = {}) {
       viewTransformOf(view.viewTransform).apply(ip);
       ip.exposure = 2 ** view.exposure;
       ip.contrast = contrastOf(view.look);
+      displayGamma = view.gamma ?? 1;
       const e = settings.eevee, r = settings.render;
       viewportSamples = Math.max(1, Math.round(e.taaSamples));
       const wanted = new Set([...cameras].filter(c => c && !c.isDisposed?.()));
       for (const camera of [...attached.keys()]) if (!wanted.has(camera)) drop(camera);
-      const key = [e.useRaytracing && e.rayTracingMethod === 'SCREEN', e.useRaytracing, r.useMotionBlur].join();
+      const key = [e.useRaytracing && e.rayTracingMethod === 'SCREEN', e.useRaytracing, r.useMotionBlur, displayGamma !== 1].join();
       for (const camera of wanted) {
         if (attached.get(camera)?.key !== key) { drop(camera); attached.set(camera, { key, effects: build(camera, settings) }); }
         const effects = attached.get(camera).effects;
