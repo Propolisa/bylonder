@@ -58,6 +58,8 @@ async function runBylonder() {
       await app.page.getByRole("menuitem", { name: "Open..." }).click();
       await (await chooser).setFiles(file);
       await app.page.waitForTimeout(3000);
+      // A large file's open replaces the 3D Viewport's frame: wait for the new one.
+      await app.page.waitForFunction(() => !!document.querySelector('iframe[src*="viewport.html"]')?.contentWindow?.__bylonder?.views, null, { timeout: 180000 });
       await app.until((b) => b.views.idle, null, 180000).catch(() => {});
     }
     for (const step of steps) {
