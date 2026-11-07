@@ -10,8 +10,9 @@ const keepAlive = new Agent({ keepAlive: true, maxSockets: 64 });
 import { connect } from "node:net";
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { execFile } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, watch as fsWatch, writeFileSync } from "node:fs";
 import { networkInterfaces } from "node:os";
+import { readdir, stat } from "node:fs/promises";
 import zlib, { createBrotliCompress } from "node:zlib";
 import { dirname, extname, join, normalize } from "node:path";
 import { build } from "vite";
@@ -73,17 +74,22 @@ const alive = (port) => new Promise((done) => {
   const socket = connect({ port, host: "localhost", autoSelectFamily: true }, () => { socket.destroy(); done(true); });
   socket.on("error", () => done(false));
 });
-// The worktree a dev server serves: the folder of the process listening on its port (Windows).
+// The worktree a dev server serves: the folder of the process listening on its port (Windows). Looking it up takes
+// PowerShell a second, so it runs in the background once per port and the list answers from what is known.
+const names = new Map();
 function worktreeOf(port) {
   if (process.platform !== "win32") return "";
-  try {
-    const command = createRequire(import.meta.url)("node:child_process").execFileSync("powershell", ["-NoProfile", "-Command",
-      `(Get-CimInstance Win32_Process -Filter "ProcessId=$((Get-NetTCPConnection -LocalPort ${port} -State Listen)[0].OwningProcess)").CommandLine`], { encoding: "utf8" });
-    return command.match(/(bylonder[\w-]*)[\\/]node_modules/)?.[1] ?? "";
-  } catch { return ""; }
+  if (!names.has(port)) {
+    names.set(port, "");
+    execFile("powershell", ["-NoProfile", "-Command",
+      `(Get-CimInstance Win32_Process -Filter "ProcessId=$((Get-NetTCPConnection -LocalPort ${port} -State Listen)[0].OwningProcess)").CommandLine`],
+      { encoding: "utf8" }, (error, out) => names.set(port, out?.match(/(bylonder[\w-]*)[\\/]node_modules/)?.[1] ?? ""));
+  }
+  return names.get(port);
 }
 async function servers() {
   const ports = (await Promise.all(DEV_PORTS.map(async (p) => ((await alive(p)) ? p : null)))).filter(Boolean);
+  for (const port of names.keys()) if (!ports.includes(port)) names.delete(port);
   return ports.map((port) => ({ port, name: worktreeOf(port), url: `https://${lan}:${port + OFFSET}/` }));
 }
 // Where pictures come from, by kind: the worktrees' docs media, their .shots (side-by-side and parity comparisons, and
@@ -98,25 +104,47 @@ const SOURCES = {
 };
 const KINDS = { docs: "Docs media", comparisons: "Side by side", testing: "Testing and bug fixes" };
 const roots = () => Object.values(SOURCES).flatMap((s) => s());
-// The pictures of each kind, newest first; the temporary folder's own files only as test screenshots (e2e-*,
-// prod-check). The folders are walked at most every few seconds, however often the pages ask.
-let found = [], walked = 0;
+// The pictures of each kind, newest first, kept in an index that file watchers update, so no request waits for a
+// walk of the folders. The temporary folder's own files count only as test screenshots (e2e-*, prod-check); its
+// claude/ folder (the sessions' scratchpads) is watched whole. A full rescan every minute finds new worktrees and
+// anything a watcher missed.
+const index = new Map(), watched = new Map();
+let sorted = null;
+const isPicture = (name, top) => /\.(png|gif|jpg)$/i.test(name) && (!top || /^(e2e-|prod-check)/.test(name));
+async function note(path, kind) {
+  try {
+    const { mtimeMs } = await stat(path);
+    index.set(path, { path, kind, mtime: mtimeMs });
+    if (mtimeMs < Date.now() - 2000) prepare([index.get(path)]);
+    else setTimeout(() => note(path, kind), 2500);
+  } catch { index.delete(path); }
+  sorted = null;
+}
+async function scan(root, kind, top) {
+  const names = await readdir(root, { recursive: !top }).catch(() => []);
+  await Promise.all(names.filter((n) => isPicture(n, top) && !n.includes("node_modules")).map((n) => note(join(root, n), kind)));
+}
+function watch(root, kind, top) {
+  if (watched.has(root) || !existsSync(root)) return;
+  try {
+    const watcher = fsWatch(root, { recursive: !top }, (_, name) => name && isPicture(name, top) && note(join(root, name), kind));
+    watcher.on("error", () => { watcher.close(); watched.delete(root); });
+    watched.set(root, watcher);
+  } catch {}
+}
+async function rescan() {
+  for (const [kind, source] of Object.entries(SOURCES)) for (const root of source()) {
+    const top = root === TEMP;
+    watch(root, kind, top);
+    await scan(root, kind, top);
+  }
+  for (const p of index.values()) if (!existsSync(p.path)) index.delete(p.path);
+  sorted = null;
+}
+rescan();
+setInterval(rescan, 60000);
 function pictures() {
-  if (Date.now() - walked < 3000) return found;
-  const all = [];
-  const walk = (d, depth, kind, top) => {
-    if (depth > 8 || !existsSync(d)) return;
-    for (const entry of readdirSync(d, { withFileTypes: true })) {
-      const path = join(d, entry.name);
-      if (entry.isDirectory()) { if (!top && entry.name !== "node_modules") walk(path, depth + 1, kind, false); }
-      else if (/\.(png|gif|jpg)$/i.test(entry.name) && (!top || /^(e2e-|prod-check)/.test(entry.name))) all.push({ path, kind, mtime: statSync(path).mtimeMs });
-    }
-  };
-  for (const [kind, source] of Object.entries(SOURCES)) for (const d of source()) walk(d, 0, kind, d === TEMP);
-  found = all.sort((a, b) => b.mtime - a.mtime);
-  prepare(found.filter((p) => p.mtime < Date.now() - 2000));
-  walked = Date.now();
-  return found;
+  return (sorted ??= [...index.values()].sort((a, b) => b.mtime - a.mtime));
 }
 // A page of pictures as JSON: the kinds asked for, older than `before` (the next page) or newer than `after` (new ones).
 function picturesPage(req, res) {
@@ -172,17 +200,17 @@ function serveThumb(req, res) {
   const thumb = thumbOf(path, statSync(path).mtimeMs);
   const send = () => { res.writeHead(200, { "Content-Type": "image/jpeg", "Cache-Control": "max-age=31536000, immutable" }); res.end(readFileSync(thumb)); };
   if (existsSync(thumb)) return send();
-  thumbnail(path, thumb).then(send, () => { res.writeHead(503, { "Cache-Control": "no-store" }); res.end(); });
+  thumbnail(path, thumb, true).then(send, () => { res.writeHead(503, { "Cache-Control": "no-store" }); res.end(); });
 }
 const thumbOf = (path, mtime) => join(thumbs, createHash("sha1").update(path + mtime).digest("hex") + ".jpg");
-// The newest pictures' thumbnails are made ahead, so a phone finds them ready.
-const prepare = (list) => list.slice(0, 200).forEach((p) => { const t = thumbOf(p.path, p.mtime); if (!existsSync(t)) thumbnail(p.path, t).catch(() => {}); });
+// The last day's pictures get their thumbnails ahead, so a phone finds them ready; one a phone asks for goes first.
+const prepare = (list) => list.filter((p) => p.mtime > Date.now() - 86400000).forEach((p) => { const t = thumbOf(p.path, p.mtime); if (!existsSync(t)) thumbnail(p.path, t).catch(() => {}); });
 // Thumbnails are made a few at a time: a phone asks for a page of them at once.
 const making = new Map(), waiting = [];
 let running = 0;
-function thumbnail(path, thumb) {
+function thumbnail(path, thumb, asked) {
   if (making.has(thumb)) return making.get(thumb);
-  const job = new Promise((resolve, reject) => waiting.push(() => {
+  const job = new Promise((resolve, reject) => waiting[asked ? "unshift" : "push"](() => {
     running++;
     mkdirSync(thumbs, { recursive: true });
     const done = (error) => { running--; making.delete(thumb); (error || !existsSync(thumb) ? reject : resolve)(); next(); };
@@ -260,6 +288,5 @@ for (const port of DEV_PORTS) {
   proxy.listen(port + OFFSET, "0.0.0.0");
 }
 console.log(`Dev gallery: https://${lan}:${PORT}/  (key in ${join(dir, "key")}; the phone installs ${join(dir, "ca.crt")} once)`);
-pictures();
 // One bad request must not take the gallery down for the phone.
 process.on("uncaughtException", (error) => console.error(error));
