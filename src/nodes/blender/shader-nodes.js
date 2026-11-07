@@ -1549,8 +1549,8 @@ export function blenderDefaultTree(material) {
 const plainValue = (value) => (value && typeof value === 'object' && Symbol.iterator in value ? [...value] : value);
 // A node's properties as its block keeps them, from Blender's node (RNA): those its declaration has, its color ramp and its
 // curve mapping.
-export function nodeProperties(node) {
-  const decl = declaration('shader', node.bl_idname), ramp = node.color_ramp, mapping = CURVE_MAPPINGS[node.bl_idname] && node.mapping;
+export function nodeProperties(node, tree = 'shader') {
+  const decl = declaration(tree, node.bl_idname), ramp = node.color_ramp, mapping = CURVE_MAPPINGS[node.bl_idname] && node.mapping;
   return {
     // An ID pointer (an Image Texture's image) by its name.
     ...Object.fromEntries(Object.entries(decl?.properties ?? {}).map(([key, { type }]) => [key, type === 'POINTER' ? node[key]?.name ?? null : plainValue(node[key])])),
@@ -1608,7 +1608,7 @@ export function nodeMaterialFromTree(name, scene, tree) {
 }
 
 // A tree's links with its reroutes passed through (node_tree_reroute_link: a reroute links what links into it).
-function rerouted({ nodes, links }) {
+export function rerouted({ nodes, links }) {
   const reroutes = new Set(nodes.filter((n) => n.idname === 'NodeReroute').map((n) => n.name));
   const source = (node, output, seen = new Set()) => {
     if (!reroutes.has(node) || seen.has(node)) return [node, output];

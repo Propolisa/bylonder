@@ -321,13 +321,23 @@ export function createMainView(state) {
   const PRINCIPLED_TREE = ['ShaderNodeBsdfPrincipled', 'ShaderNodeOutputMaterial'];
   const INLINED = ['ShaderNodeGroup', 'GeometryNodeRepeatInput', 'NodeClosureOutput', 'NodeEvaluateClosure', 'NodeCombineBundle', 'NodeSeparateBundle'];
   // The integer and boolean inputs Main's description leaves out (a repeat zone's iterations), as RNA reads them.
-  const wholeValues = (inputs, rnaNode) => Object.fromEntries(Object.entries(inputs).filter(([, value]) => value === null)
+  // A compositor's menus too, by item name.
+  const wholeValues = (inputs, rnaNode, menus = false) => Object.fromEntries(Object.entries(inputs).filter(([, value]) => value === null)
     .map(([id]) => [id, [...rnaNode.inputs].find((s) => s.identifier === id)?.default_value])
-    .filter(([, value]) => typeof value === 'number' || typeof value === 'boolean').map(([id, value]) => [id, Number(value)]));
+    .filter(([, value]) => typeof value === 'number' || typeof value === 'boolean' || (menus && typeof value === 'string'))
+    .map(([id, value]) => [id, typeof value === 'string' ? value : Number(value)]));
   const plainTree = ({ nodes, links }, rnaNodes) => ({ links, nodes: nodes.map((node) => {
     const rnaNode = rnaNodes.get(node.name);
     return { ...node, values: { ...node.inputs, ...wholeValues(node.inputs, rnaNode), ...outputValues(rnaNode) }, properties: nodeProperties(rnaNode) };
   }) });
+  // The scene's compositing node group (Blender 5's own NodeTree ID) as plain data, with its nodes' locations.
+  function compositingTree(group) {
+    const { nodes, links } = blender.nodeGroup(group.as_pointer());
+    return { name: group.name, links, nodes: nodes.map((node) => {
+      const rnaNode = group.nodes.get(node.name);
+      return { ...node, values: { ...node.inputs, ...wholeValues(node.inputs, rnaNode, true) }, properties: nodeProperties(rnaNode, 'compositor'), location: [...rnaNode.location] };
+    }) };
+  }
   function nodeTreeOf(ma, warnings = [], label = 'Material') {
     const tree = blender.nodeTree(ma), rnaNodes = idStruct(ma).node_tree?.nodes;
     if (!rnaNodes || !tree.nodes.length) return null;
@@ -381,7 +391,8 @@ export function createMainView(state) {
     const unmapped = [...new Set(held.map((h) => h.idname).filter((idname) => !mapped.has(idname)))];
     if (unmapped.length) warnings.push(`Material "${label}": its ${unmapped.join(', ')} nodes are not opened`);
   }
-  // A read file's scene, once the slices it sets exist: its settings, world and collections.
+  // A read file's scene, once the slices it sets exist: its settings, world, collections and compositing node group
+  // (returns the compositor's adopting it).
   function adoptScene() {
     state.applying = true;
     try {
@@ -394,6 +405,8 @@ export function createMainView(state) {
     } finally {
       state.applying = false;
     }
+    const sce = idStruct(blender.scene), group = sce.compositing_node_group;
+    return group && world.compositor?.adopt(compositingTree(group), { use_compositing: sce.render.use_compositing });
   }
 
   // Babylon drawn from Main, after Blender's code ran: what it deleted is deleted, every object's values, relations,

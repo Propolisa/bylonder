@@ -1,5 +1,6 @@
 import { NodeRenderGraph } from '@babylonjs/core';
 import { bindGraph } from '../nodes/bindings.js';
+import { compositorGraph } from './compositor-tree.js';
 
 export function createCompositor(world, { commit = () => {}, notify = console.warn } = {}) {
   const { scene, animation } = world;
@@ -8,12 +9,16 @@ export function createCompositor(world, { commit = () => {}, notify = console.wa
   const listeners = new Set();
   const emit = () => listeners.forEach(fn => fn());
   const cameraBlocks = () => (graph?.attachedBlocks || []).filter(b => b.getClassName() === 'NodeRenderGraphInputBlock' && b.isCamera?.());
-  const ensure = json => {
-    if (graph) return graph;
-    graph = new NodeRenderGraph('Compositing', scene, { rebuildGraphOnEngineResize: true });
-    if (json) graph.parseSerializedObject(json); else graph.setToDefault();
+  const own = next => {
+    graph = next;
     graph.onBuildObservable.add(() => { if (!building) { edited = true; bind(); commit(); emit(); } });
     return graph;
+  };
+  const ensure = json => {
+    if (graph) return graph;
+    const next = new NodeRenderGraph('Compositing', scene, { rebuildGraphOnEngineResize: true });
+    if (json) next.parseSerializedObject(json); else next.setToDefault();
+    return own(next);
   };
   const bind = () => graph && bindGraph(animation, { id: 'compositor', title: 'Compositing', graph: () => graph, kind: 'render' });
   const build = async () => {
@@ -55,6 +60,20 @@ export function createCompositor(world, { commit = () => {}, notify = console.wa
       commit();
     },
     syncCamera() { api.bindCamera(scene.activeCamera); },
+    // A read file's compositing node group (compositor-tree.js), composited when the file's render uses compositing.
+    // Returns the node types it does not run. A compositor the project already has (a saved one's) is kept.
+    async adopt(tree, { use_compositing = true } = {}) {
+      if (graph) return [];
+      let read;
+      try { read = compositorGraph(tree, scene, tree.name); } catch (error) { notify(`Compositor: "${tree.name}" is not opened: ${error.message}`); return []; }
+      const { graph: next, missing } = read;
+      own(next);
+      edited = true;
+      if (missing.length) notify(`Compositor: its ${missing.join(', ')} nodes are not composited`);
+      await api.setEnabled(use_compositing, { record: false });
+      emit();
+      return missing;
+    },
     capture: () => ({ enabled, graph: graph && (edited || enabled) ? graph.serialize() : null }),
     async apply(state = {}) {
       if (state.graph) {

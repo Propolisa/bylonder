@@ -509,6 +509,8 @@ export class BlenderMain {
     this.relationsChanged();
   }
   nodeTree(owner) { return JSON.parse(cString(x.node_tree_describe(owner))); }
+  // A node tree that is its own ID (a node group, the scene's compositing node group), as nodeTree gives an ID's.
+  nodeGroup(tree) { return JSON.parse(cString(x.node_tree_inlined_describe(tree))); }
   // fn(tree) with an ID's shader node tree as EEVEE compiles it (main-api.cc node_tree_inlined): its node groups and
   // closures inlined, its repeat zones kept, as nodeTree gives a tree, with `id` (the inlined tree, an ID outside
   // Main, for its nodes' RNA) and `errors` (what inlining reported), freed after.
