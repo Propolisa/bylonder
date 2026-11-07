@@ -624,34 +624,45 @@
  {
   "id": "keyframe-animation",
   "title": "Keyframe Animation",
-  "summary": "Key an object's transform with I at two frames on the Timeline and play the animation with Space.",
-  "expect": "Keying with I, the Timeline and playback work as in Blender; the demo itself is keyed from code, so the steps animate the Default Cube instead.",
+  "summary": "Key an object's rotation with I at two frames, shape the motion between them with an F-curve's interpolation and easing in the Graph Editor, and play it.",
+  "expect": "Keying with I, the Timeline, the Graph Editor's interpolation and easing modes and playback work as in Blender, evaluated by Blender's animation code; the Graph Editor's Frame All does not frame the curves yet.",
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/animation/keyframes/introduction.html",
    "https://docs.blender.org/manual/en/5.2/animation/keyframes/editing.html",
+   "https://docs.blender.org/manual/en/5.2/editors/graph_editor/fcurves/properties.html",
    "https://docs.blender.org/manual/en/5.2/editors/timeline.html"
   ],
-  "example": "animation",
+  "example": "newtons-cradle",
   "thumbnail": "keyframe-animation/thumbnail.png",
   "media": [
-   "keyframe-animation/insert.gif",
-   "keyframe-animation/second-key.gif",
+   "keyframe-animation/pendulum.gif",
+   "keyframe-animation/key-swing.gif",
+   "keyframe-animation/ease.gif",
    "keyframe-animation/play.gif",
-   "keyframe-animation/timeline.png"
+   "keyframe-animation/cradle.gif"
   ],
   "ui": [
    "VIEW_3D",
    "TIMELINE",
+   "FCURVES",
    "TIME_*",
    "DOPESHEET_MT_marker",
    "ANIM_MT_keyframe*",
-   "VIEW3D_MT_object_animation"
+   "VIEW3D_MT_object_animation",
+   "GRAPH_MT_key"
   ],
   "operators": [
    "anim.keyframe_insert",
-   "transform.translate",
    "transform.rotate",
+   "object.rotation_clear",
+   "object.editmode_toggle",
+   "transform.translate",
+   "graph.interpolation_type",
+   "graph.easing_type",
+   "graph.view_all",
+   "view2d.pan",
+   "view2d.zoom",
    "screen.animation_play",
    "screen.frame_jump",
    "screen.keyframe_jump"
@@ -668,21 +679,21 @@
    "tests/animatable.test.js"
   ],
   "limits": [
-   "The Keyframe Animation example keys a Babylon scene from code with the project SDK; the steps here key Blender's objects with I."
+   "The Graph Editor's View > Frame All (Home) and Frame Selected (Numpad .) do nothing: pan with a middle drag and zoom with Ctrl middle drag instead."
   ],
   "page": "docs/features/keyframe-animation.md",
-  "open": "https://propolisa.github.io/bylonder/#example=animation",
-  "example_title": "Keyframe Animation",
+  "open": "https://propolisa.github.io/bylonder/#example=newtons-cradle",
+  "example_title": "Newton's Cradle",
   "coverage": {
    "operators": {
-    "supported": 32,
+    "supported": 73,
     "partial": 1,
-    "total": 39
+    "total": 112
    },
    "ui": {
-    "supported": 13,
+    "supported": 19,
     "partial": 0,
-    "total": 14
+    "total": 25
    }
   }
  },

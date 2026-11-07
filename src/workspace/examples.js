@@ -38,6 +38,7 @@ export const examples = [
   { id: "grease-pencil", title: "Bouncing Ball" },
   { id: "shape-keys", title: "Shape Keys" },
   { id: "nla", title: "Nonlinear Animation" },
+  { id: "newtons-cradle", title: "Newton's Cradle" },
   { id: "carousel", title: "Carousel" },
   { id: "lotus", title: "Lotus" },
   { id: "import-export", title: "Import and Export" },
