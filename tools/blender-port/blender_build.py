@@ -242,9 +242,11 @@ STAND_INS = {'operator-properties.cc', 'rna-fcurve.cc', 'rna-space.cc'}
 
 
 # Blender headers a source of the API compiles without, by source: each is an empty header in its place (a clang file
-# overlay), the source defining what it needs of it. armature-draw.cc compiles Blender's overlay_armature.cc with
+# overlay), the source defining what it needs of it. armature-draw.cc compiles Blender's overlay_armature.cc (and
+# relations-draw.cc its overlay_relation.hh) with
 # stand-ins for the draw manager that header brings.
-OVERLAY_STAND_INS = {'armature-draw.cc': ['source/blender/draw/engines/overlay/overlay_armature.hh']}
+OVERLAY_STAND_INS = {'armature-draw.cc': ['source/blender/draw/engines/overlay/overlay_armature.hh'],
+                     'relations-draw.cc': ['source/blender/draw/engines/overlay/overlay_base.hh']}
 
 
 def stand_ins(tree, out, source):

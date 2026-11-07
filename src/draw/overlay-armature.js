@@ -313,6 +313,14 @@ function drawMeshes(scene, drawn) {
   return meshes;
 }
 
+// Lines given as vertex pairs of position (xyz, w) and color, drawn as the overlay draws its relationship lines (its
+// extra_wire shader and state): the Relations overlay's too (overlay-relations.js).
+export function relationLinesMesh(scene, data) {
+  const pass = PASSES.find((p) => p.buffer === 'relations');
+  const shape = { mode: LINES, inputs: { position: [...data].filter((_, i) => i % 8 < 3), vcolor: [...data].filter((_, i) => i % 8 >= 4) } };
+  return passMesh(scene, 'relations', shape, pass, false, { data, count: data.length / 16 });
+}
+
 // Bone names as the overlay's text cache draws them (draw_manager_text.cc DRW_text_cache_draw): at their point, 10
 // pixels right, in their color over a shadow, in the interface's font at its 11 points.
 const FONT = '11px "DejaVu Sans", sans-serif';

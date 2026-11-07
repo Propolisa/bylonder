@@ -240,6 +240,7 @@ const overlays = createViewportOverlays(scene, {
     selected: (node) => !!editor?.selection.has(node), active: (node) => editor?.selection.active === node,
     wake: () => views?.wake(),
   },
+  relations: { sync: () => world.mainSync, wake: () => views?.wake() },
   view3dCursor: () => world.sceneSettings.state.cursor,
 });
 world.pickExtra = (x, y, camera, accept) => overlays.extras.pick(x, y, camera, accept);

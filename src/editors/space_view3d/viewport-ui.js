@@ -5,17 +5,21 @@ import { createOriginOverlay } from '../../draw/overlay-origin.js';
 import { createOutlineOverlay } from '../../draw/overlay-outline.js';
 import { createOverlayPass } from '../../draw/overlay-pass.js';
 import { createArmatureOverlay } from '../../draw/overlay-armature.js';
+import { createRelationsOverlay } from '../../draw/overlay-relations.js';
 import { paintWeightView } from '../../draw/overlay-paint-weight.js';
 
 // Overlays shared by every 3D Viewport (shown per view by view3d.js): the floor grid and axes, the 3D cursor, selected objects' origins
-// and outlines, the extras of cameras, lights and empties, and armatures' bones. Each view's header, gizmo and shading live in view3d.js.
+// and outlines, the extras of cameras, lights and empties, armatures' bones and relationship lines. Each view's header, gizmo and
+// shading live in view3d.js.
 //   extras: options of createExtrasOverlay (draw/overlay-extra.js); origins: of createOriginOverlay (overlay-origin.js);
 //   outlines: of createOutlineOverlay (overlay-outline.js); armatures: of createArmatureOverlay (overlay-armature.js);
+//   relations: of createRelationsOverlay (overlay-relations.js);
 //   view3dCursor(): the scene's 3D cursor
-export function createViewportOverlays(scene, { extras, origins, outlines, armatures, view3dCursor }) {
+export function createViewportOverlays(scene, { extras, origins, outlines, armatures, relations: relationsOptions, view3dCursor }) {
   const grid = createGridOverlay(scene), cursor = createCursorOverlay(scene, view3dCursor), origin = createOriginOverlay(scene, origins);
   const pass = createOverlayPass(scene), outline = createOutlineOverlay(scene, outlines, pass);
   const extra = createExtrasOverlay(scene, extras), armature = createArmatureOverlay(scene, armatures), meshes = [...grid.meshes, ...cursor.meshes];
+  const relations = createRelationsOverlay(scene, relationsOptions);
   let shown = true;
   return {
     extras: extra,
@@ -30,6 +34,7 @@ export function createViewportOverlays(scene, { extras, origins, outlines, armat
       }
       extra.setEnabled(value);
       armature.setEnabled(value, { shading, xray });
+      relations.setEnabled(value);
       origin.update(value);
       // Wireframe draws selected objects' edges in the selection colors instead (workbench.js).
       outline.update(value && shading !== 'wire', { xray: !!xray });
@@ -37,7 +42,7 @@ export function createViewportOverlays(scene, { extras, origins, outlines, armat
     },
     // Per view, after setEnabled: where its overlays draw (draw/overlay-pass.js); returns what to call once it rendered.
     use: (camera, film) => pass.use(camera, film),
-    dispose() { pass.dispose(); grid.dispose(); cursor.dispose(); origin.dispose(); outline.dispose(); extra.dispose(); armature.dispose(); },
+    dispose() { pass.dispose(); relations.dispose(); grid.dispose(); cursor.dispose(); origin.dispose(); outline.dispose(); extra.dispose(); armature.dispose(); },
   };
 }
 
