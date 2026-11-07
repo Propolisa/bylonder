@@ -28,6 +28,7 @@ import { CurveObject, CURVE_TARGETS } from './curve/curve.js';
 import { viewTransforms, looks } from './scene/render-babylon.js';
 import { BlenderAnimation } from './animation/anim-blender.js';
 import { Camera, MultiMaterial, VertexData } from '@babylonjs/core';
+import { setOrthoView } from '../editors/space_view3d/navigation.js';
 import { setOutputFrame } from '../runtime/object-transform.js';
 import { armatureData, setArmatureData } from './armature/armature.js';
 import { armatureChanged } from '../draw/overlay-armature.js';
@@ -883,6 +884,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       const frame = blender.cameraViewFov(ob, width, height);
       setOutputFrame(camera, frame);
       setLens(camera, frame, frame.shift);
+      setOrthoView(camera, null);
     },
     // Camera view as Blender draws it at the default camera zoom (BKE_screen_view3d_zoom_to_fac(0), half size): the
     // camera's view plane fitted to the region at twice its extent and shifted as the camera's, and the output's frame
@@ -898,6 +900,9 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       const frame = plane(output, 1), view = plane(region, 2), data = blender.data(ob);
       setOutputFrame(camera, frame);
       setLens(camera, view, [frame.shift[0] * frame.x / view.x, frame.shift[1] * frame.y / view.y]);
+      // An orthographic camera's Orthographic Scale spans the frame along its fit, so the region spans as much more.
+      const units = dnaGet('Camera', data, 'ortho_scale') / 2 / (frame.vertical ? frame.y : frame.x);
+      setOrthoView(camera, camera.mode === Camera.ORTHOGRAPHIC_CAMERA ? [view.x * units, view.y * units] : null);
       return { width: frame.x / view.x, height: frame.y / view.y,
         passepartout: dnaGet('Camera', data, 'show_passepartout') ? dnaGet('Camera', data, 'passepartout_alpha') : 0 };
     },

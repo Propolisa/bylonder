@@ -204,7 +204,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   // The camera whose workbench shading this view set: the editor camera's, or the scene camera's in camera view.
   let shadedCamera = editorCamera;
   const sync = () => {
-    name.textContent = state.cameraView ? 'Camera Perspective' : nav.viewName + (editorCamera.mode === 0 ? ' Perspective' : ' Orthographic');
+    name.textContent = state.cameraView ? (view.camera.mode === 1 ? 'Camera Orthographic' : 'Camera Perspective') : nav.viewName + (editorCamera.mode === 0 ? ' Perspective' : ' Orthographic');
     section.classList.toggle('overlays-off', !state.overlays);
     section.classList.toggle('gizmos-off', !state.show_gizmo);
     section.classList.toggle('camera-view', state.cameraView);
