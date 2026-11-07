@@ -167,12 +167,8 @@ export async function recorder(feature, { example, node, size = SIZE, scale = 1,
       }
       await app.settled();
     },
-    // A click on an Outliner row's name.
-    async outliner(name) {
-      // The row's text takes no pointer events: the click goes to the region under it, as a user's does.
-      const row = await app.frame().locator("svg.bl-outliner-region text", { hasText: new RegExp(`^${name}$`) }).first().boundingBox();
-      await app.page.mouse.click(row.x + row.width / 2, row.y + row.height / 2);
-    // A click on an Outliner row's name, with `modifiers` held (Control extends the selection).
+    // A click on an Outliner row's name, with `modifiers` held (Control extends the selection). The row's text takes no
+    // pointer events: the click goes to the region under it, as a user's does.
     async outliner(name, modifiers = []) {
       const row = await app.frame().locator("svg.bl-outliner-region text", { hasText: new RegExp(`^${name}$`) }).first().boundingBox();
       await app.page.mouse.move(row.x + row.width / 2, row.y + row.height / 2, { steps: 5 });
