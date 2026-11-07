@@ -19,7 +19,8 @@ export function createSelection(scene, objects, world) {
     );
   // The meshes the selection outline draws (Instance::object_sync): selected objects with geometry, outside Edit Mode.
   // A selected parent (an empty or a group) outlines nothing of its children, as in Blender.
-  const outlined = () => nodes().filter((n) => n.getTotalVertices?.() > 0 && !n.metadata?.editing);
+  const inEditMode = (n) => n.metadata?.editing || n.metadata?.wbMode === 'EDIT';
+  const outlined = () => nodes().filter((n) => n.getTotalVertices?.() > 0 && !inEditMode(n));
   function sync() {
     for (const id of ids)
       if (!objects.some((n) => nodeId(n) === id)) ids.delete(id);

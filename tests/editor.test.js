@@ -22,6 +22,10 @@ const history = createHistory(objects, () => {}, { main: sceneMain(world, select
 selection.toggle(a);
 assert.equal(selection.size, 1);
 assert.deepEqual(selection.outlined(), [a]);
+// An object in Edit Mode draws its edit overlay, not the outline (overlay_outline.hh object_sync skips it).
+a.metadata = { ...a.metadata, wbMode: 'EDIT' };
+assert.deepEqual(selection.outlined().map((n) => n.name), [], 'no outline in Edit Mode');
+a.metadata = { ...a.metadata, wbMode: 'OBJECT' };
 selection.toggle(a);
 assert.equal(selection.size, 0);
 assert.deepEqual(selection.outlined(), []);
