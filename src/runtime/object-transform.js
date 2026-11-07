@@ -93,3 +93,5 @@ export function setEvaluatedMatrix(node, matrix) {
   }
   evaluatedMatrices.set(node, matrix);
 }
+// A light's or camera's world matrix in Babylon's axes: the one Blender evaluated, else its own transform's.
+export const objectMatrix = (node) => evaluatedMatrices.get(node) ?? node.computeWorldMatrix();

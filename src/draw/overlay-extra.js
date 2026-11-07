@@ -16,6 +16,7 @@ import { Viewport } from '@babylonjs/core/Maths/math.viewport.js';
 import { view_3d as theme } from '../editors/interface/userdef-default-theme.js';
 import { SHAPES, VCLASS } from './overlay-shape.js';
 import { drawView, DRAW_VIEW_GLSL } from './draw-view.js';
+import { objectMatrix } from '../runtime/object-transform.js';
 
 const VIEW_UNIFORMS = `uniform mat4 viewProjection;
 uniform vec3 viewRight;
@@ -288,7 +289,14 @@ export function createExtrasOverlay(scene, { objects, color: themeColor = (node,
       const light = node, type = entry.lightType;
       position.copyFrom(light.getAbsolutePosition?.() ?? light.position ?? Vector3.ZeroReadOnly);
       if (type === 'POINT') { right.copyFromFloats(1, 0, 0); up.copyFromFloats(0, 0, 1); forward.copyFromFloats(0, 1, 0); }
-      else if (type === 'AREA') { right.copyFromFloats(1, 0, 0); up.copyFromFloats(0, 1, 0); forward.copyFromFloats(0, 0, 1); }
+      else if (type === 'AREA') {
+        // Its rectangle lies in its object's XY plane (Babylon's local XZ), facing its Z (Babylon's local Y).
+        const w = objectMatrix(light);
+        w.getTranslationToRef(position);
+        Vector3.TransformNormalToRef(Vector3.RightReadOnly, w, right);
+        Vector3.TransformNormalToRef(FORWARD, w, up);
+        Vector3.TransformNormalToRef(Vector3.UpReadOnly, w, forward);
+      }
       else {
         // Blender's lights shine down their -Z; a hemispheric light's direction points at its sky.
         forward.copyFrom(light.direction).normalize();
