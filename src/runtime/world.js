@@ -151,7 +151,7 @@ export async function createWorld({ input, engine, canvas, hooks = {}, audioCont
     // A rendered view draws in scene linear and displays through its camera's final post-process; the compositor's
     // graph displays what its own nodes draw.
     const sceneLinear = rendered && !scene.frameGraph;
-    world.renderSettings.setSceneLinear(sceneLinear);
+    world.renderSettings.setView({ rendered, sceneLinear });
     world.worlds.setViewportActive(rendered, sceneLinear);
   };
   world.compositor = documentState.register("compositor", createCompositor(world, { commit, notify }));

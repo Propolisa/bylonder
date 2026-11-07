@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { NullEngine, Scene, Matrix, Vector3, FreeCamera } from '@babylonjs/core';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
 import { createRenderSettings, outputSize } from '../src/blenkernel/scene/render.js';
-import { displayExponent } from '../src/render/display-gamma.js';
+import { displayExponent, displayedViewSettings } from '../src/render/view-settings.js';
 import { outputSpec, encodeSize, containers } from '../src/render/formats.js';
 import { installVirtualClock, seededRandom } from '../src/render/clock.js';
 import { halton, jitter, sampleTimes, jitterProjection, createAccumulator } from '../src/render/sampling.js';
@@ -150,6 +150,14 @@ acc.reset(); assert.equal(acc.count, 0);
   assert.match(names().at(-1), /displayGamma/, 'the last post process at another gamma');
   assert.equal(displayExponent(0.41), 1 / 0.41);
   assert.equal(displayExponent(0), 100, "at most OCIO's exponent");
+  // Material Preview and Solid display with the view transform and look only (draw_color_management.cc).
+  settings.set('viewSettings.exposure', 1);
+  settings.setView({ rendered: true, sceneLinear: true });
+  assert.equal(scene.imageProcessingConfiguration.exposure, 2, 'a rendered view with the scene exposure');
+  settings.setView({ rendered: false, sceneLinear: false });
+  assert.equal(scene.imageProcessingConfiguration.exposure, 1, 'Material Preview and Solid without it');
+  assert.deepEqual(displayedViewSettings({ viewTransform: 'STANDARD', look: 'HIGH_CONTRAST', exposure: 1, gamma: 0.5 }, false),
+    { viewTransform: 'STANDARD', look: 'HIGH_CONTRAST', exposure: 0, gamma: 1 });
   settings.dispose(); scene.dispose(); engine.dispose();
 }
 
