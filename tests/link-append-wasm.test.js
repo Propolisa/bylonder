@@ -152,6 +152,22 @@ sync.view();
 assert.deepEqual(drawn(), ['Props'], 'the linked objects are drawn by the instancing empty, not as scene objects');
 const instances = () => scene.meshes.filter((mesh) => mesh.name.startsWith('__instances')).reduce((n, mesh) => n + mesh.thinInstanceCount, 0);
 assert.equal(instances(), 2, 'the empty draws the crate and the ball as instances');
+{
+  // A second empty instancing the collection: each object draws at both, within bounds that hold them.
+  const data = blendData(main.C), second = data.objects.new('Props Again', null);
+  Object.assign(second, { instance_type: 'COLLECTION', instance_collection: data.collections.get('Props'), location: [5, 0, 0] });
+  contextStruct(main.C).scene.collection.objects.link(second);
+  sync.view();
+  const carriers = scene.meshes.filter((mesh) => mesh.name.startsWith('__instances'));
+  for (const carrier of carriers) {
+    const xs = carrier.thinInstanceGetWorldMatrices().map((m) => m.m[12]), { minimum, maximum } = carrier.getBoundingInfo();
+    assert.equal(Math.abs(Math.abs(xs[1] - xs[0]) - 5), 0, `${carrier.name} draws at both empties: ${xs}`);
+    assert.ok([...minimum.asArray(), ...maximum.asArray()].every(Number.isFinite) && maximum.x - minimum.x > 5, `${carrier.name}'s bounds hold both`);
+  }
+  assert.equal(instances(), 4);
+  data.objects.remove(second);
+  sync.view();
+}
 const result = sync.run(() => main.run('object.make_override_library', {}));
 assert.ok(result.status & 4, `object.make_override_library: ${result.report}`);
 sync.view();

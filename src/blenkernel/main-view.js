@@ -434,12 +434,20 @@ export function createMainView(state) {
     const byOb = new Map([...objects.values()].map((e) => [e.ob, e.node])), drawn = new Set(), rendering = !!world.collections?.rendering, { scene } = world;
     // A mesh group's Mesh, and a point cloud, are new at each evaluation: each is kept as its instancer's nth.
     const nth = new Map(), nthOf = (place) => nth.set(place, (nth.get(place) ?? -1) + 1).get(place);
+    // An object instanced by several instancers is one carrier: carriers sharing its geometry would share their
+    // instance buffers too (Babylon keeps them on the geometry), so all would draw the last one's instances.
+    const carriers = new Map();
     for (const group of blender.instances()) {
-      const { instancer, ob, shape, overlay, drawSize, color, geometry, material } = group;
+      const { instancer, ob, shape, overlay, drawSize, color } = group;
       const geometric = shape === 'MESH';
-      const key = geometric ? `${instancer}:MESH:${nthOf(instancer + ':MESH')}` : `${instancer}:${ob || shape}:${color}:${drawSize}`;
+      const key = geometric ? `${instancer}:MESH:${nthOf(instancer + ':MESH')}` : shape === 'OBJECT' ? `OBJECT:${ob}` : `${instancer}:${shape}:${color}:${drawSize}`;
       const source = shape === 'OBJECT' ? byOb.get(ob) : geometric ? null : particleShapeMesh(scene, shape);
       if ((!source?.geometry && !geometric) || (overlay && rendering)) continue;
+      if (carriers.has(key)) carriers.get(key).groups.push(group);
+      else carriers.set(key, { source, groups: [group] });
+    }
+    for (const [key, { source, groups: [first, ...more] }] of carriers) {
+      const { shape, drawSize, color, geometry, material } = first, geometric = shape === 'MESH';
       drawn.add(key);
       let carrier = instanced.get(key);
       if (!carrier) {
@@ -452,15 +460,18 @@ export function createMainView(state) {
       if (shape === 'OBJECT') carrier.material = source.material;
       if (geometric) carrier.material = materialFor(material);
       // Read after instanceMesh and materialFor, which can grow the module's memory.
-      const { data } = group;
+      const groups = [first, ...more], length = groups.reduce((sum, group) => sum + group.data.length, 0);
       let buffer = carrier.metadata.instances;
-      if (!(buffer?.length >= data.length)) {
-        buffer = carrier.metadata.instances = new Float32Array(Math.max(16, 2 ** Math.ceil(Math.log2(data.length))));
+      if (!(buffer?.length >= length)) {
+        buffer = carrier.metadata.instances = new Float32Array(Math.max(16, 2 ** Math.ceil(Math.log2(length))));
         carrier.thinInstanceSetBuffer('matrix', buffer, 16, false);
       }
-      buffer.set(data);
+      groups.reduce((offset, group) => { buffer.set(group.data, offset); return offset + group.data.length; }, 0);
       carrier.thinInstanceBufferUpdated('matrix');
-      carrier.thinInstanceCount = data.length / 16;
+      carrier.thinInstanceCount = length / 16;
+      // Its bounds over the instances drawn, not the buffer's unused zero matrices (NaN bounds cull a carrier of several
+      // materials, whose submeshes are tested against them).
+      carrier.thinInstanceRefreshBoundingInfo(true);
     }
     for (const [key, carrier] of instanced) if (!drawn.has(key)) { carrier.dispose(); instanced.delete(key); }
     const clouds = blender.pointClouds().map((record) => Object.assign(record, { key: `${record.instancer}:${nthOf(record.instancer + ':POINTCLOUD')}` }));
