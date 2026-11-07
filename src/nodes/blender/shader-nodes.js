@@ -988,6 +988,7 @@ const REFRACTION = {
   'subsurface.tintColor': (c) => `bl_closure_transmission_tint(${c})`,
   'refraction.intensity': (c) => `bl_closure_transmission(${c})`, 'refraction.volumeIndexOfRefraction': (c) => `bl_closure_parameter(${c}, ${c}.ior, 1.5)`,
 };
+const AREA_LIGHT_SAMPLERS = ['areaLightsLTC1Sampler', 'areaLightsLTC2Sampler'];
 export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
   // lobe: 0 for the base, else the reflection lobe it lights over the radiance of the surface before it (`under`).
   constructor(name, lobe = 0) {
@@ -1003,6 +1004,19 @@ export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
   }
 
   getClassName() { return 'BlenderSurfaceBlock'; }
+  // Babylon's PBR block lists each light's samplers but not the area lights' LTC tables (its LightBlock does): unlisted,
+  // they stay on texture unit 0, which a point light's cube shadow map also takes, and every draw fails.
+  updateUniformsAndSamples(state, nodeMaterial, defines, uniformBuffers) {
+    super.updateUniformsAndSamples(state, nodeMaterial, defines, uniformBuffers);
+    for (const name of AREA_LIGHT_SAMPLERS) if (!state.samplers.includes(name)) state.samplers.push(name);
+  }
+  // A reset of the material's defines clears the area light support NodeMaterialDefines starts with, while the lights'
+  // own defines come back: their code then calls area light functions its includes left out.
+  prepareDefines(defines, nodeMaterial, mesh) {
+    super.prepareDefines(defines, nodeMaterial, mesh);
+    defines.setValue('AREALIGHTSUPPORTED', true, true);
+    defines.setValue('AREALIGHTNOROUGHTNESS', true, true);
+  }
   serialize() { return { ...super.serialize(), lobe: this.lobe }; }
   _deserialize(serializationObject, scene, rootUrl) { super._deserialize(serializationObject, scene, rootUrl); this.lobe = serializationObject.lobe ?? 0; }
   get closure() { return this.getInputByName('closure'); }
