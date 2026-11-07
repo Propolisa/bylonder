@@ -101,6 +101,8 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   const toggleCameraView = () => {
     creator.finish(); ctx.capture.release();
     const camera = ctx.sceneCamera();
+    // Without a scene camera there is nothing to look through (view3d.view_camera cancels).
+    if (!camera && !state.cameraView) return;
     state.cameraView = !state.cameraView;
     if (state.cameraView && takesInput(camera)) camera.attachControl(canvas, true); else camera?.detachControl();
     views.setInput(view);

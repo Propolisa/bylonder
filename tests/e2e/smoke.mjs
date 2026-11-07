@@ -1156,6 +1156,15 @@ const checks = {
     await app.page.waitForFunction(() => !!document.querySelector('iframe[src*="viewport.html"]')?.contentWindow?.__bylonder?.world?.scene.getNodeByName("Cube"), null, { timeout: 120000 });
     await app.settled();
     assert.equal(await app.bylonder((b) => b.world.scene.getNodeByName("Camera")), null);
+    // The file dialog closed over the 3D Viewport: the pointer already over it gives it the keys, as Blender's area under
+    // the mouse takes them.
+    await app.hover(0.5, 0.5);
+    await app.page.keyboard.press("n");
+    await app.until((b) => b.views.input.state.show_region_ui);
+    // Without a camera, Numpad 0 keeps the user's view.
+    await app.page.keyboard.press("Numpad0");
+    await app.settled();
+    assert.equal(await app.bylonder((b) => b.views.input.state.cameraView), false, "no camera view without a camera");
   } },
 
   async "The Video Sequencer's edit survives a reload, a project ZIP and a .blend"() {

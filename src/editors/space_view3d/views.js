@@ -81,10 +81,17 @@ export function createViews({ engine, scene, live = () => false }) {
       layoutDirty = true;
       if (view.input === false) { api.wake(); return view; }
       const enter = () => { api.setInput(view); takeKeys(view.canvas); };
+      // A pointer already over the view when the window gets focus back (a file dialog closed over it) enters no more.
+      const move = () => { if (!document.hasFocus()) enter(); };
       const down = () => { api.setInput(view); if (focused !== view) { focused = view; api.onFocus?.(view); } };
       view.canvas.addEventListener('pointerenter', enter);
+      view.canvas.addEventListener('pointermove', move);
       view.canvas.addEventListener('pointerdown', down, true);
-      view.detach = () => { view.canvas.removeEventListener('pointerenter', enter); view.canvas.removeEventListener('pointerdown', down, true); };
+      view.detach = () => {
+        view.canvas.removeEventListener('pointerenter', enter);
+        view.canvas.removeEventListener('pointermove', move);
+        view.canvas.removeEventListener('pointerdown', down, true);
+      };
       if (!inputView) api.setInput(view);
       api.wake();
       return view;
