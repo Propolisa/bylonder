@@ -56,6 +56,39 @@ const overlay = () => {
   };
 };
 
+// 3x3 matrices as arrays of columns, and 4x4 transforms as { rot, pos }.
+const mul3 = (a, v) => [0, 1, 2].map((i) => a[0][i] * v[0] + a[1][i] * v[1] + a[2][i] * v[2]);
+const matmul3 = (a, b) => b.map((column) => mul3(a, column));
+const transposed = (a) => [0, 1, 2].map((i) => a.map((column) => column[i]));
+const compose = (a, b) => ({ rot: matmul3(a.rot, b.rot), pos: mul3(a.rot, b.pos).map((v, i) => v + a.pos[i]) });
+const inverse = ({ rot, pos }) => { const t = transposed(rot); return { rot: t, pos: mul3(t, pos).map((v) => -v) }; };
+const axisAngle = ([x, y, z], a) => {
+  const c = Math.cos(a), s = Math.sin(a), t = 1 - c;
+  return [[t * x * x + c, t * x * y + s * z, t * x * z - s * y], [t * x * y - s * z, t * y * y + c, t * y * z + s * x], [t * x * z + s * y, t * y * z - s * x, t * z * z + c]];
+};
+// blender-port: armature.cc vec_roll_to_mat3_normalized, then the roll about the bone.
+function boneRest({ head, tail, roll = 0 }) {
+  const d = tail.map((t, i) => t - head[i]), length = Math.hypot(...d), [x, y, z] = d.map((v) => v / length);
+  const theta = 1 + y;
+  const rot = theta > 1e-5 ? [[1 - (x * x) / theta, -x, (-x * z) / theta], [x, y, z], [(-x * z) / theta, -z, 1 - (z * z) / theta]] : [[-1, 0, 0], [0, -1, 0], [0, 0, 1]];
+  return { rot: matmul3(axisAngle([x, y, z], roll), rot), pos: head, length };
+}
+const eulerXYZ = ([x, y, z]) => matmul3(axisAngle([0, 0, 1], z), matmul3(axisAngle([0, 1, 0], y), axisAngle([1, 0, 0], x)));
+const quaternion = ([w, x, y, z]) => [[1 - 2 * (y * y + z * z), 2 * (x * y + w * z), 2 * (x * z - w * y)], [2 * (x * y - w * z), 1 - 2 * (x * x + z * z), 2 * (y * z + w * x)], [2 * (x * z + w * y), 2 * (y * z - w * x), 1 - 2 * (x * x + y * y)]];
+// A bone's posed head and tail in armature space: its parent's pose, the rest offset from it, then its own location and
+// rotation (rotation inherited, no scale).
+function posedBone(bones, name) {
+  const pose = (bone) => {
+    const rest = boneRest(bone), p = bone.pose ?? {};
+    const local = { rot: p.rotation_mode === "QUATERNION" ? quaternion(p.rotation_quaternion) : eulerXYZ(p.rotation_euler ?? [0, 0, 0]), pos: p.location ?? [0, 0, 0] };
+    const parent = bones.find((b) => b.name === bone.parent);
+    const base = parent ? compose(pose(parent), compose(inverse(boneRest(parent)), rest)) : rest;
+    return { ...compose(base, local), length: rest.length };
+  };
+  const m = pose(bones.find((b) => b.name === name));
+  return { head: m.pos, tail: mul3(m.rot, [0, m.length, 0]).map((v, i) => v + m.pos[i]) };
+}
+
 const encode = (...args) => execFileSync(ffmpeg, ["-y", "-loglevel", "error", ...args]);
 
 // Opens the app on `example` (its #example= link; none: the Default Cube from the splash) and returns the recorder.
@@ -138,6 +171,13 @@ export async function recorder(feature, { example, node, size = SIZE, scale = 1,
       // The row's text takes no pointer events: the click goes to the region under it, as a user's does.
       const row = await app.frame().locator("svg.bl-outliner-region text", { hasText: new RegExp(`^${name}$`) }).first().boundingBox();
       await app.page.mouse.click(row.x + row.width / 2, row.y + row.height / 2);
+    // A click on an Outliner row's name, with `modifiers` held (Control extends the selection).
+    async outliner(name, modifiers = []) {
+      const row = await app.frame().locator("svg.bl-outliner-region text", { hasText: new RegExp(`^${name}$`) }).first().boundingBox();
+      await app.page.mouse.move(row.x + row.width / 2, row.y + row.height / 2, { steps: 5 });
+      for (const key of modifiers) await app.page.keyboard.down(key);
+      await app.page.mouse.click(row.x + row.width / 2, row.y + row.height / 2);
+      for (const key of modifiers) await app.page.keyboard.up(key);
       await app.settled();
     },
     tab: async (name) => { await app.locator(`[role="tab"][aria-label="${name}"]`).click(); await app.settled(); },
@@ -152,8 +192,8 @@ export async function recorder(feature, { example, node, size = SIZE, scale = 1,
     },
     // The middle of an armature's bone, in page coordinates.
     async boneAt(armature, bone, along = 0.5) {
-      const { head, tail } = await app.bylonder((b, [armature, bone]) =>
-        b.world.objects.find((n) => n.name === armature).metadata.wbCreation.armature.bones.find((x) => x.name === bone), [armature, bone]);
+      const bones = await app.bylonder((b, armature) => b.world.objects.find((n) => n.name === armature).metadata.wbCreation.armature.bones, armature);
+      const { head, tail } = posedBone(bones, bone);
       return r.screenOf(head.map((h, i) => h + (tail[i] - h) * along));
     },
     box,

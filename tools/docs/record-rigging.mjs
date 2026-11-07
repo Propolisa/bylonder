@@ -1,13 +1,62 @@
-// Records docs/features/rigging.md's media: Pose Mode, selecting and rotating bones, keying the pose, bone collections,
-// a bone constraint, the pose library and Weight Paint on the Rigged Character example.
+// Records docs/features/rigging.md's media: a rig built and skinned from the Default Cube scene, then on the Desk Lamp
+// example Pose Mode, selecting and rotating bones, keying the pose, bone collections, a bone constraint, the pose
+// library, Weight Paint, and the lamp's light following its Head bone in Rendered shading.
 // usage: node tools/docs/record-rigging.mjs
 import { record } from "./record.mjs";
+import { rendered } from "./scene-view.mjs";
 
+const SCENE = { part: [0.1, 0.06, 0.92, 0.94] };
 const VIEW = '[data-section="viewport"]', PROPERTIES = '[data-section="properties"]';
-// The middle of the 3D Viewport, where the figure stands once View Selected framed it.
+// The middle of the 3D Viewport, where the lamp stands once View Selected framed it.
 const FIGURE = { part: [0.2, 0.05, 0.8, 0.95] };
 
-await record("rigging", { example: "rigged-character", node: "Rig" }, async (r) => {
+await record("rigging", { example: "cube", node: "Cube" }, async (r) => {
+  const { app } = r;
+  const pick = async (...labels) => {
+    for (const label of labels) await app.frame().getByRole("menuitem", { name: new RegExp(`^${label}`) }).last().click();
+    await app.settled();
+  };
+  const type = async (...keys) => { for (const key of keys) await r.keys(key, key.toLowerCase()); };
+  await r.gif("build", undefined, async () => {
+    await app.hover();
+    await r.keys("Delete");
+    await r.keys("Shift A", "Shift+a");
+    await pick("Armature");
+    await r.keys("Tab");
+    await type("E", "Z", "1");
+    await r.keys("Enter");
+    await type("E", "Z", "1");
+    await r.keys("Enter");
+    await r.keys("Tab");
+  });
+  await r.gif("skin", undefined, async () => {
+    await app.hover();
+    await r.keys("Shift A", "Shift+a");
+    await pick("Mesh", "Cylinder");
+    await type("S", ".", "3");
+    await r.keys("Enter");
+    await type("S", "Z", "5");
+    await r.keys("Enter");
+    await type("G", "Z", "1", ".", "5");
+    await r.keys("Enter");
+    await r.outliner("Armature", ["Control"]);
+    await app.hover();
+    await r.keys("Ctrl P", "Control+p");
+    await pick("With Automatic Weights");
+    await app.hover();
+    await r.keys("Ctrl Tab", "Control+Tab");
+    await r.keys("Alt Z", "Alt+z");
+    const top = await r.boneAt("Armature", "Bone.002");
+    await app.page.mouse.move(...top, { steps: 8 });
+    await app.page.mouse.click(...top);
+    await app.settled();
+    await type("R", "X", "4", "5");
+    await r.keys("Alt Z", "Alt+z");
+    await r.keys("Enter");
+  });
+});
+
+await record("rigging", { example: "desk-lamp", node: "Rig" }, async (r) => {
   const { app, page } = r;
   const clickBone = async (bone, modifiers = []) => {
     const at = await r.boneAt("Rig", bone);
@@ -18,57 +67,31 @@ await record("rigging", { example: "rigged-character", node: "Rig" }, async (r) 
     await app.settled();
   };
   await app.hover();
-  await r.keys("Numpad 1", "Numpad1");
+  await r.keys("Numpad 3", "Numpad3");
   await r.keys("Numpad .", "NumpadDecimal");
   await r.pause(1000);
 
   await r.gif("pose-mode", VIEW, () => r.keys("Ctrl Tab", "Control+Tab"), FIGURE);
-  const [x, y] = await r.boneAt("Rig", "spine");
-  await r.shot("thumbnail", { x: x - 240, y: y - 220, width: 480, height: 400 });
   await r.gif("select", VIEW, async () => {
-    await clickBone("forearm.L");
+    await clickBone("Upper Arm");
     await r.pause(400);
-    await clickBone("upper_arm.L", ["Shift"]);
+    await clickBone("Lower Arm", ["Shift"]);
   }, FIGURE);
   await r.gif("select-box", VIEW, async () => {
-    const [shin, thigh] = [await r.boneAt("Rig", "shin.L"), await r.boneAt("Rig", "thigh.L", 0)];
-    await r.drag([Math.min(shin[0], thigh[0]) - 25, thigh[1] - 15], [Math.max(shin[0], thigh[0]) + 25, shin[1] + 30]);
+    const [upper, head] = [await r.boneAt("Rig", "Upper Arm"), await r.boneAt("Rig", "Head")];
+    await r.drag([Math.min(upper[0], head[0]) - 30, Math.min(upper[1], head[1]) - 30], [Math.max(upper[0], head[0]) + 30, Math.max(upper[1], head[1]) + 30]);
     await app.settled();
     await r.pause(400);
-    await page.mouse.move(...(await r.boneAt("Rig", "forearm.R")), { steps: 8 });
+    await page.mouse.move(...(await r.boneAt("Rig", "Base")), { steps: 8 });
     await r.keys("L", "l");
   }, FIGURE);
-  await clickBone("upper_arm.L");
+  await clickBone("Upper Arm");
   await r.gif("rotate", VIEW, async () => {
     await r.keys("R");
     for (const key of ["4", "5"]) await r.keys(key);
     await r.keys("Enter");
   }, FIGURE);
-  await r.gif("pose-library", VIEW, async () => {
-    await app.hover();
-    await r.keys("A", "a");
-    await r.menu("VIEW3D_MT_pose", "Create Pose Asset...");
-    const name = app.locator(`xpath=//*[normalize-space(text())="Pose Name"]/following::input[1]`).first();
-    await name.fill("Wave");
-    await name.press("Tab");
-    await app.frame().getByRole("button", { name: "Create" }).last().click();
-    await app.settled();
-    await r.menu("VIEW3D_MT_view", "Asset Shelf");
-    await r.pause(600);
-    await app.hover();
-    await r.keys("Alt R", "Alt+r");
-    const tile = app.locator(".bl-grid-tile").first();
-    await tile.click();
-    await app.settled();
-    await r.pause(600);
-    await r.keys("Alt R", "Alt+r");
-    const box = await tile.boundingBox(), from = [box.x + box.width / 2, box.y + box.height / 2];
-    await r.drag(from, [from[0] + 60, from[1]]);
-  });
-  await r.menu("VIEW3D_MT_view", "Asset Shelf");
-  await app.hover();
-  await r.keys("Alt R", "Alt+r");
-  await clickBone("upper_arm.L");
+  await clickBone("Upper Arm");
   await r.gif("keyframe", undefined, async () => {
     await r.keys("Alt R", "Alt+r");
     await app.hover();
@@ -99,17 +122,68 @@ await record("rigging", { example: "rigged-character", node: "Rig" }, async (r) 
   await r.gif("weight-paint", VIEW, async () => {
     await app.hover();
     await r.keys("Ctrl Tab", "Control+Tab");
-    await app.bylonder((b) => { const find = (name) => b.world.objects.find((n) => n.name === name); b.editor.selection.replace([find("Rig"), find("Body")]); });
+    await app.bylonder((b) => { const find = (name) => b.world.objects.find((n) => n.name === name); b.editor.selection.replace([find("Rig"), find("Lamp")]); });
     await app.settled();
     await app.bylonder((b) => b.runOperator("object.mode_set", { mode: "WEIGHT_PAINT" }));
     await app.settled();
     await r.pause(400);
-    const chest = await r.boneAt("Rig", "chest");
+    const arm = await r.boneAt("Rig", "Lower Arm");
     await page.keyboard.down("Alt");
-    await clickBone("chest");
+    await clickBone("Lower Arm");
     await page.keyboard.up("Alt");
     await r.pause(400);
-    await r.drag([chest[0] - 40, chest[1] + 10], [chest[0] + 40, chest[1] + 10]);
+    await r.drag([arm[0] - 40, arm[1] + 10], [arm[0] + 40, arm[1] + 10]);
     await app.settled();
   }, FIGURE);
+});
+
+// The pose library, on the Rigged Character: on the Desk Lamp a click on the new pose's tile reports Asset not found
+// while the screencast runs (see the page's limits).
+await record("rigging", { example: "rigged-character", node: "Rig" }, async (r) => {
+  const { app } = r;
+  await app.hover();
+  await r.keys("Ctrl Tab", "Control+Tab");
+  await r.pause(1000);
+  await r.gif("pose-library", VIEW, async () => {
+    await app.hover();
+    await r.keys("A", "a");
+    await r.menu("VIEW3D_MT_pose", "Create Pose Asset...");
+    const name = app.locator(`xpath=//*[normalize-space(text())="Pose Name"]/following::input[1]`).first();
+    await name.fill("Wave");
+    await name.press("Tab");
+    await app.frame().getByRole("button", { name: "Create" }).last().click();
+    await app.settled();
+    await r.menu("VIEW3D_MT_view", "Asset Shelf");
+    // The shelf lists the new asset once the window's asset library job has read it.
+    await r.pause(2000);
+    await app.hover();
+    await r.keys("Alt R", "Alt+r");
+    const tile = app.locator(".bl-grid-tile").first();
+    await tile.click();
+    await app.settled();
+    await r.pause(600);
+    await r.keys("Alt R", "Alt+r");
+    const box = await tile.boundingBox(), from = [box.x + box.width / 2, box.y + box.height / 2];
+    await r.drag(from, [from[0] + 60, from[1]]);
+  }, VIEW);
+});
+
+await record("rigging", { example: "desk-lamp", node: "Rig" }, async (r) => {
+  const { app, page } = r;
+  await rendered(r);
+  const pointer = (display) => app.frame().evaluate((display) => document.querySelectorAll("div[style*='border-radius: 50%']").forEach((d) => (d.style.display = display)), display);
+  await pointer("none");
+  await r.shot("thumbnail", VIEW, SCENE);
+  await pointer("");
+  await r.gif("aim", VIEW, async () => {
+    await app.hover();
+    await r.keys("Ctrl Tab", "Control+Tab");
+    const head = await r.boneAt("Rig", "Head");
+    await page.mouse.click(...head);
+    await app.settled();
+    await app.hover();
+    for (const key of ["R", "X", "-", "4", "0"]) await r.keys(key, key.toLowerCase());
+    await r.keys("Enter");
+    await r.pause(1500);
+  }, SCENE);
 });

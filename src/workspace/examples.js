@@ -43,6 +43,7 @@ export const examples = [
   { id: "newtons-cradle", title: "Newton's Cradle" },
   { id: "carousel", title: "Carousel" },
   { id: "lotus", title: "Lotus" },
+  { id: "desk-lamp", title: "Desk Lamp" },
   { id: "import-export", title: "Import and Export" },
   { id: "link-append", title: "Link and Append" },
   { id: "rendering", title: "Window Light" },

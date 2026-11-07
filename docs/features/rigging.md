@@ -6,15 +6,18 @@ expect: Posing, selecting, keying, bone collections, constraints, weight paint a
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/animation/armatures/posing/index.html
+  - https://docs.blender.org/manual/en/5.2/animation/armatures/skinning/parenting.html
   - https://docs.blender.org/manual/en/5.2/animation/armatures/posing/selecting.html
   - https://docs.blender.org/manual/en/5.2/animation/armatures/properties/bone_collections.html
   - https://docs.blender.org/manual/en/5.2/animation/armatures/posing/bone_constraints/index.html
   - https://docs.blender.org/manual/en/5.2/sculpt_paint/weight_paint/index.html
   - https://docs.blender.org/manual/en/5.2/animation/armatures/posing/editing/pose_library.html
   - https://docs.blender.org/manual/en/5.2/editors/3dview/display/overlays.html
-example: rigged-character
+example: desk-lamp
 thumbnail: rigging/thumbnail.png
 media:
+  - rigging/build.gif
+  - rigging/skin.gif
   - rigging/pose-mode.gif
   - rigging/select.gif
   - rigging/select-box.gif
@@ -24,6 +27,7 @@ media:
   - rigging/constraint.gif
   - rigging/pose-library.gif
   - rigging/weight-paint.gif
+  - rigging/aim.gif
 ui:
   - VIEW_3D
   - POSE
@@ -46,6 +50,9 @@ ui:
   - VIEW3D_PT_overlay_weight_paint
   - VIEW3D_PT_slots_vertex_groups
 operators:
+  - armature.extrude_move
+  - object.parent_set
+  - object.editmode_toggle
   - object.posemode_toggle
   - view3d.select
   - view3d.select_box
@@ -90,6 +97,8 @@ limits:
   - Weight Paint's Show Wire is not drawn.
   - Bylonder's own meshes get vertex groups only from Blender's operators (With Automatic Weights); meshes read from a .blend keep theirs.
   - Selecting the armature in Object Mode outlines its child mesh too.
+  - View > Asset Shelf shows the shelf but does not hide it again.
+  - A new pose asset's tile can report Asset not found on the first click; click it again.
 ---
 # Rigging and Posing
 
@@ -97,67 +106,86 @@ An armature is a skeleton of bones that deforms a mesh. In Pose Mode each bone i
 object, and the pose is keyed on the Timeline. Bone collections group bones, and bone constraints limit or drive
 them. The armature, its pose evaluation and the Armature modifier run Blender's own code (`docs/armatures.md`).
 
-[Open in Bylonder](https://propolisa.github.io/bylonder/#example=rigged-character)
+[Open in Bylonder](https://propolisa.github.io/bylonder/#example=desk-lamp)
 
-The demo, Rigged Character, is a figure skinned to an 11 bone rig by automatic weights. It is built by a Blender
-script (`rigged-character.py`), so the steps below start from the example and pose it.
+The demo is a desk lamp at night. The lamp is one mesh in four vertex groups (Base, Lower Arm, Upper Arm, Head), each
+weighted fully to the bone of its name, so every part turns rigidly about its joint. Its spot light is parented to the
+Head bone: posing the head aims the light, and the shadows of the arm, the mug and the pencil follow. The pose is
+keyed to light the notebook, look up and return. A faint blue sun stands for moonlight.
 
 ## Steps
 
-1. **Enter Pose Mode.** The Rig is selected when the example opens. Hover the 3D Viewport and press Ctrl Tab, or pick
-   Pose Mode in the header's mode menu. The bones turn gray and the header shows the Pose menu.
+1. **Build a rig.** In a new file, hover the 3D Viewport and press Delete. Shift A > Armature adds one bone. Press Tab
+   for Edit Mode, then E Z 1 Enter twice extrudes two more bones, each from the tip of the last; Tab returns.
+
+   ![An armature extruded to three bones](../media/features/rigging/build.gif)
+
+2. **Skin a mesh to it.** Shift A > Mesh > Cylinder, then S .3 Enter, S Z 5 Enter and G Z 1.5 Enter fit it around the
+   bones. Ctrl click Armature in the Outliner so it is active, then Ctrl P > With Automatic Weights. Ctrl Tab enters
+   Pose Mode and Alt Z (X-ray) shows the bones inside the cylinder. Click the top bone and press R X 45 Enter: the
+   cylinder's top bends with it.
+
+   ![Parent With Automatic Weights, then a pose](../media/features/rigging/skin.gif)
+
+3. **Enter Pose Mode.** Open the Desk Lamp example; its Rig is selected. Hover the 3D Viewport and press Ctrl Tab, or
+   pick Pose Mode in the header's mode menu. The bones turn gray and the header shows the Pose menu.
 
    ![Ctrl Tab switches the Rig to Pose Mode](../media/features/rigging/pose-mode.gif)
 
-2. **Select bones.** Click a bone to select it; Shift click adds a bone to the selection. The last one clicked is the
+4. **Select bones.** Click a bone to select it; Shift click adds a bone to the selection. The last one clicked is the
    active bone, which the Bone tab of the Properties editor shows. Drag a box with the Select Box tool (or press B),
    press C for circle select or Ctrl right drag a lasso; Shift adds and Ctrl subtracts. L over a bone selects the
    bones connected to it.
 
-   ![Click the left forearm, then Shift click the upper arm](../media/features/rigging/select.gif)
+   ![Click the Upper Arm, then Shift click the Lower Arm](../media/features/rigging/select.gif)
 
-   ![A box around the left leg, then L over the right arm](../media/features/rigging/select-box.gif)
+   ![A box around the Upper Arm and Head, then L over the Base](../media/features/rigging/select-box.gif)
 
-3. **Rotate.** Press R, type an angle and press Enter, or move the mouse and click. G moves and S scales the same way.
+5. **Rotate.** Press R, type an angle and press Enter, or move the mouse and click. G moves and S scales the same way.
    Alt R and Alt G clear the rotation and location.
 
    ![R, 45, Enter rotates the selected bones](../media/features/rigging/rotate.gif)
 
-4. **Key the pose.** Press I to insert a keyframe for the selected bones. Set the current frame on the Timeline,
+6. **Key the pose.** Press I to insert a keyframe for the selected bones. Set the current frame on the Timeline,
    change the pose and press I again. Space plays the animation between the two keys.
 
    ![Keys at frames 1 and 40, then playback](../media/features/rigging/keyframe.gif)
 
-5. **Bone collections.** Open Properties > Armature (the Data tab). In Bone Collections, + adds a collection and
+7. **Bone collections.** Open Properties > Armature (the Data tab). In Bone Collections, + adds a collection and
    Assign puts the selected bones in it. The eye hides a collection's bones.
 
    ![A new collection with the selected arm bones assigned](../media/features/rigging/bone-collections.gif)
 
-6. **Bone constraints.** Open the Bone Constraints tab, then Add Bone Constraint > Limit Rotation. Enable Limit X, Y
+8. **Bone constraints.** Open the Bone Constraints tab, then Add Bone Constraint > Limit Rotation. Enable Limit X, Y
    or Z and set the range; the bone cannot be rotated past it.
 
    ![Add Bone Constraint > Limit Rotation on the active bone](../media/features/rigging/constraint.gif)
 
-7. **Weight Paint.** Back in Object Mode, select the Rig, then Shift click the Body so it is active, and pick Weight
+9. **Weight Paint.** Back in Object Mode, select the Rig, then Shift click the Lamp so it is active, and pick Weight
    Paint in the header's mode menu: the Rig goes to Pose Mode with it. Alt click a bone to paint its vertex group,
-   then drag over the body. Blue is no weight, red full weight; Ctrl paints the inverse. The Overlays popover's Weight
+   then drag over the lamp. Blue is no weight, red full weight; Ctrl paints the inverse. The Overlays popover's Weight
    Paint panel sets the weights' Opacity, Zero Weights and Show Weight Contours.
 
-   ![Alt click the chest, then a stroke across it](../media/features/rigging/weight-paint.gif)
+   ![Alt click the Lower Arm, then a stroke across it](../media/features/rigging/weight-paint.gif)
 
-8. **Pose library.** In Pose Mode, select the bones (A) and pick Pose > Create Pose Asset: name the pose and press
+10. **Pose library.** In Pose Mode, select the bones (A) and pick Pose > Create Pose Asset: name the pose and press
    Create; it is saved in the Current File. View > Asset Shelf shows the pose library along the bottom of the 3D
    Viewport. Click a pose to apply it; drag from a pose to the right to blend it in by how far you drag, then release.
    Right click a pose for Apply Pose Flipped, Blend Pose and Select Pose Bones.
 
    ![Create Pose Asset, the asset shelf, a click on the pose and a drag that blends it](../media/features/rigging/pose-library.gif)
 
+11. **Aim the light.** In Rendered shading through the camera, click the Head bone in Pose Mode and press R X -40
+   Enter: the light parented to the bone turns with it, off the notebook and toward the camera.
+
+   ![Rotating the Head bone aims the lamp's light](../media/features/rigging/aim.gif)
+
 > **Note** Every step is an undo step: Ctrl Z undoes it as in Blender.
 
 ## Project files
 
-- [rigged-character.py](../../examples/rigged-character/rigged-character.py): builds the figure in Blender 5.2: the
-  body from a Skin modifier, the rig, and the automatic weights.
-- [rigged-character.blend](../../examples/rigged-character/rigged-character.blend): the file the script saves.
-- [index.js](../../examples/rigged-character/index.js): opens the .blend with Blender's reader.
+- [desk-lamp.py](../../examples/desk-lamp/desk-lamp.py): builds the lamp mesh and its vertex groups, the rig, the
+  light parented to the Head bone, the keyed poses, the desk and the lights, in Blender 5.2.
+- [desk-lamp.blend](../../examples/desk-lamp/desk-lamp.blend): the file the script saves.
+- [index.js](../../examples/desk-lamp/index.js): opens the .blend with Blender's reader.
 - Recorded by [record-rigging.mjs](../../tools/docs/record-rigging.mjs).
