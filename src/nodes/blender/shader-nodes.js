@@ -320,7 +320,9 @@ const enumValue = (decl, p, key) => decl.properties[key].values?.[p[key]] ?? dec
 export const STAND_INS = {
   // blender-port: eevee_surf_common.bsl.hh init_globals, init_globals_curves: every ray is a camera ray (EEVEE's main
   // view); a strand's normal is its cylinder's, which curves.js gives. The derivatives node_bump reads (the film's scale is 1).
-  bl_g_data: `#define FrontFacing gl_FrontFacing
+  // A material drawing its back faces in a pass of their own (separateCullingPass) reverses which winding faces front
+  // there; bl_reversed_faces (ShaderNodeOutputMaterial.bind) tells, so FrontFacing stays Blender's.
+  bl_g_data: `#define FrontFacing (gl_FrontFacing != (bl_reversed_faces > 0.5))
 #define RAY_TYPE_CAMERA 0
 #define RAY_TYPE_SHADOW 1
 #define RAY_TYPE_DIFFUSE 2
@@ -330,7 +332,7 @@ struct GlobalData { vec3 P; vec3 N; vec3 Ni; vec3 Ng; vec3 curve_T; vec3 curve_B
 GlobalData g_data;
 float derivative_scale_get() { return 1.0; }
 void bl_g_data(vec3 P, vec3 N, vec3 camera, float is_strand, float hair_radius, vec3 curve_N, float hair_strand_id) {
-  bool flip = !gl_FrontFacing && is_strand < 0.5;
+  bool flip = !FrontFacing && is_strand < 0.5;
   g_data.P = P;
   g_data.Ni = flip ? -N : N;
   g_data.N = normalize(g_data.Ni);
@@ -845,7 +847,10 @@ const blenderShader = (Base) => class extends Base {
       if ([...this.declaration.inputs, ...this.declaration.outputs].some((s) => s.type === 'SHADER')) state._emitFunction('bl_closure', STAND_INS.bl_closure, '');
       // Compiled before it is added: the values of the shaded point are declared as the steps first use them.
       const code = compileSteps(this.declaration, steps, links, {
-        emit: (key, code) => state._emitFunction(key, code, ''),
+        emit: (key, code) => {
+          if (key === 'bl_g_data') state._emitUniformFromString(REVERSED_FACES, T.Float);
+          state._emitFunction(key, code, '');
+        },
         free: (prefix) => state._getFreeVariableName(prefix),
         sampler: ({ texture: table, image, sky, ...sampling }) => {
           if (sky) {
@@ -1215,11 +1220,22 @@ export class BlenderDisplayBlock extends ImageProcessingBlock {
 }
 RegisterClass('BABYLON.BlenderDisplayBlock', BlenderDisplayBlock);
 
+const REVERSED_FACES = 'bl_reversed_faces', frontPass = new WeakSet();
 // Material Output (node_shader_output_material.cc) as Babylon's fragment output: the Surface closure's radiance through
 // Babylon's image processing, as the material's color. A material it is added to gets the vertex output Babylon needs.
 export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock) {
   constructor(name, idname = 'ShaderNodeOutputMaterial') {
     super(name || 'Material Output', idname);
+  }
+
+  // Babylon draws a separate culling pass's back faces first, their winding reversed, then its front faces.
+  bind(effect, nodeMaterial, mesh) {
+    super.bind(effect, nodeMaterial, mesh);
+    const separate = nodeMaterial.separateCullingPass && !nodeMaterial.backFaceCulling;
+    effect.setFloat(REVERSED_FACES, separate ? 1 : 0);
+    if (!separate || !mesh || frontPass.has(mesh)) return;
+    frontPass.add(mesh);
+    mesh.onBetweenPassObservable.add((subMesh) => subMesh.effect?.setFloat(REVERSED_FACES, 0));
   }
 
   attach(material) {
@@ -1266,6 +1282,7 @@ export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock)
   }
 
   _buildBlock(state) {
+    if (!state.sharedData.bindableBlocks.includes(this) && !state.sharedData.forcedBindableBlocks.includes(this)) state.sharedData.forcedBindableBlocks.push(this);
     return FragmentOutputBlock.prototype._buildBlock.call(this, state);
   }
 }

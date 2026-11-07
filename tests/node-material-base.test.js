@@ -30,4 +30,26 @@ const { _vertexSourceCode: vertex, _fragmentSourceCode: fragment } = mesh.subMes
 for (const define of ['MORPHTARGETS', 'NUM_BONE_INFLUENCERS', 'INSTANCES', 'CLIPPLANE']) assert.match(vertex, new RegExp(`#if(def|) ?\\(?(defined\\()?${define}`), `the vertex shader keeps Babylon's ${define} path`);
 assert.match(fragment, /#ifdef FOG/, "the fragment shader keeps Babylon's fog");
 assert.match(fragment, /#ifdef SHADOW\{?X?\}?|SHADOW0|computeShadow/, "the fragment shader keeps Babylon's shadows");
+// Blender's FrontFacing holds in Babylon's separate culling pass, which draws the back faces first with the front
+// winding reversed: the material tells its shader which pass draws (a glass's inner walls take the back face's IOR).
+{
+  const tree = { nodes: [{ idname: 'ShaderNodeLayerWeight', name: 'Layer Weight' }, { idname: 'ShaderNodeBsdfGlass', name: 'Glass' }, { idname: 'ShaderNodeBsdfTransparent', name: 'Clear' },
+    { idname: 'ShaderNodeMixShader', name: 'Mix' }, { idname: 'ShaderNodeOutputMaterial', name: 'Material Output' }],
+  links: [['Layer Weight', 'Fresnel', 'Mix', 'Fac'], ['Clear', 'BSDF', 'Mix', 'Shader'], ['Glass', 'BSDF', 'Mix', 'Shader_001'], ['Mix', 'Shader', 'Material Output', 'Surface']] };
+  const { material } = nodeMaterialFromTree('Glass', scene, tree);
+  // Backface Culling off, as Blender's materials have it.
+  material.backFaceCulling = false;
+  const glass = Object.assign(MeshBuilder.CreateSphere('Glass', {}, scene), { material });
+  for (let i = 0; i < 50 && !glass.subMeshes[0].effect?.isReady(); i++) {
+    scene.render();
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  assert.ok(material.separateCullingPass, 'a blended surface draws its back faces in a pass of their own');
+  const effect = glass.subMeshes[0].effect, set = [];
+  assert.match(effect._fragmentSourceCode, /#define FrontFacing \(gl_FrontFacing != \(bl_reversed_faces > 0\.5\)\)/);
+  const setFloat = effect.setFloat.bind(effect);
+  effect.setFloat = (name, value) => { if (name === 'bl_reversed_faces') set.push(value); return setFloat(name, value); };
+  scene.render();
+  assert.deepEqual(set, [1, 0], 'the pass of back faces reverses FrontFacing, the pass of front faces does not');
+}
 console.log("Node material base: Babylon's morph targets, bones, instances, clip planes, lights with shadows, fog and image processing passed");
