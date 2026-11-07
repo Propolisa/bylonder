@@ -2,7 +2,8 @@
 // all of Blender's Light settings in RNA's terms (`metadata.wbLight`), and its Babylon light is derived from them; a
 // light project code made is Babylon's, and Blender's Light is derived from it. Derivation follows Blender's glTF
 // exporter (io_scene_gltf2 blender/exp/lights.py and light_spots.py), the conversion Blender itself ships to Babylon.
-import { DirectionalLight, Light, PointLight, RectAreaLight, SpotLight, Vector3 } from '@babylonjs/core';
+import { DirectionalLight, Light, PointLight, SpotLight, Vector3 } from '@babylonjs/core';
+import { AreaLight } from './area-light.js';
 import { asObject } from '../../runtime/object-transform.js';
 import { rnaProperty } from '../../makesrna/rna.js';
 import { lightFields, lightStruct } from './light-fields.js';
@@ -26,10 +27,10 @@ export const wattsOf = (type, intensity, mode) => intensity / intensityOf(type, 
 
 // A Blender light of a type in a scene (bpy.data.lights.new with its object): the Babylon light nearest it, made
 // Blender's with the settings given. An Area light is Babylon's rectangular one (a disk or ellipse its bounding
-// rectangle).
+// rectangle) with a shadow (area-light.js).
 export function createLight(name, type, settings = {}, scene) {
   const light = asObject(type === 'SPOT' ? new SpotLight(name, Vector3.Zero(), new Vector3(0, 0, 1), Math.PI / 4, 1, scene)
-    : type === 'SUN' ? new DirectionalLight(name, new Vector3(0, 0, 1), scene) : type === 'AREA' ? new RectAreaLight(name, Vector3.Zero(), 1, 1, scene)
+    : type === 'SUN' ? new DirectionalLight(name, new Vector3(0, 0, 1), scene) : type === 'AREA' ? new AreaLight(name, Vector3.Zero(), 1, 1, scene)
       : new PointLight(name, Vector3.Zero(), scene));
   makeBlenderLight(light, type, settings);
   return light;

@@ -4,9 +4,9 @@
 // scene's lights (Rendered shading, Render Image); other views draw them empty, which changes no material.
 import { CascadedShadowGenerator, ShadowGenerator } from '@babylonjs/core';
 import { isBlenderLight, lightRecord } from './light-home.js';
+import { areaLightShadows } from './area-light.js';
 
 const MAP_SIZE = 2048;
-// Babylon has no shadows of rectangular area lights.
 const CASTS = ['SUN', 'SPOT', 'POINT'];
 // A mesh of the scene's objects (not an overlay or a helper), and whether it casts.
 export const shadedObject = (mesh) => !mesh.name.startsWith('__') && !mesh.metadata?.overlay && mesh.getTotalVertices() > 0;
@@ -15,8 +15,9 @@ const casts = (mesh) => shadedObject(mesh) && mesh.metadata?.wbVisibleShadow !==
 function createGenerator(light, type, drawn) {
   const generator = new ShadowGenerator(MAP_SIZE, light);
   if (type === 'SUN') light.autoCalcShadowZBounds = true;
-  // EEVEE filters its shadows by a pixel or two (shadow_filter_radius); a point light's cube map takes Poisson sampling.
-  if (type === 'POINT') generator.usePoissonSampling = true;
+  // EEVEE filters its shadows by a pixel or two (shadow_filter_radius); a cube map (a point or area light's) takes
+  // Poisson sampling.
+  if (light.needCube()) generator.usePoissonSampling = true;
   else Object.assign(generator, { usePercentageCloserFiltering: true, filteringQuality: ShadowGenerator.QUALITY_HIGH });
   Object.assign(generator, { bias: 0.002, normalBias: 0.02 });
   generator.getShadowMap().renderListPredicate = (mesh) => drawn() && casts(mesh);
@@ -35,15 +36,16 @@ export function createLightShadows(scene) {
     counted = key;
     for (const material of scene.materials) if (material.maxSimultaneousLights < count) material.maxSimultaneousLights = count;
   };
+  const casting = (record) => record?.use_shadow && (CASTS.includes(record.type) || (record.type === 'AREA' && areaLightShadows.enabled(scene)));
   const sync = () => {
     lightAll();
     for (const [light, entry] of generators) {
       const record = lightRecord(light);
-      if (light.isDisposed() || !record?.use_shadow || record.type !== entry.type) { entry.generator.dispose(); generators.delete(light); }
+      if (light.isDisposed() || !casting(record) || record.type !== entry.type) { entry.generator.dispose(); generators.delete(light); }
     }
     for (const light of scene.lights) {
       const record = isBlenderLight(light) && lightRecord(light);
-      if (record?.use_shadow && CASTS.includes(record.type) && !generators.has(light)) generators.set(light, { generator: createGenerator(light, record.type, () => drawn), type: record.type });
+      if (casting(record) && !generators.has(light)) generators.set(light, { generator: createGenerator(light, record.type, () => drawn), type: record.type });
     }
     for (const mesh of scene.meshes) if (shadedObject(mesh)) mesh.receiveShadows = true;
   };

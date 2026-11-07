@@ -62,6 +62,7 @@ import { registerOperators, runOperator, invokeOperator, pollOperator, appendMen
 import { registered, registerPythonOperators } from "./python/bpy_interface.js";
 import { registerRuntimeTypes } from "./runtimes/runtimes.js";
 import { registerEeveeParityTypes } from "./draw/eevee-parity.js";
+import { registerRenderExtensions } from "./draw/render-extension.js";
 import { restorePreferences, readPreferences, onPreferencesChanged, preferencesChanged, preferences, inputPreferences, savedPreferences, savePreferences } from "./windowmanager/wm-userdef.js";
 import { touchKeyconfig } from "./windowmanager/input/wm-touch.js";
 import { mountTouch, showScale } from "./editors/interface/touch.js";
@@ -549,6 +550,7 @@ registerPythonOperators((idname, props, event) => runBlenderOperator(world.mainS
 // The runtimes' properties and panels (docs/runtimes.md), as an add-on registers its classes.
 registerRuntimeTypes(bylonderIcon());
 registerEeveeParityTypes(bylonderIcon());
+registerRenderExtensions(bylonderIcon());
 // The theme and Resolution Scale on the design tokens of this window and the app's.
 const themed = () => {
   applyTheme(preferences().themes[0], [document, parent.document]);

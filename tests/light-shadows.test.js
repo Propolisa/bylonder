@@ -1,22 +1,28 @@
 // Blender's lights cast shadows as Babylon's shadow generators: one for each light whose Cast Shadow is on (an area
-// light none), objects casting as their Visibility > Shadow says, drawn only for views that show the scene's lights.
+// light's a cube from its center while Area Light Shadows is on), objects casting as their Visibility > Shadow says,
+// drawn only for views that show the scene's lights.
 import assert from 'node:assert/strict';
 import { MeshBuilder, NullEngine, PBRMaterial, Scene, Vector3, FreeCamera } from '@babylonjs/core';
 import { createLight } from '../src/blenkernel/light/light-home.js';
 import { createLightShadows } from '../src/blenkernel/light/light-shadows.js';
+import { areaLightShadows } from '../src/blenkernel/light/area-light.js';
 
 const scene = new Scene(new NullEngine());
 new FreeCamera('Camera', new Vector3(0, 5, -5), scene);
 const sun = createLight('Sun', 'SUN', { use_shadow: true }, scene);
 createLight('Lamp', 'POINT', { use_shadow: false }, scene);
-createLight('Panel', 'AREA', { use_shadow: true }, scene);
+const panel = createLight('Panel', 'AREA', { use_shadow: true }, scene);
 const floor = MeshBuilder.CreateGround('Floor', { width: 4, height: 4 }, scene);
 const ball = MeshBuilder.CreateSphere('Ball', {}, scene);
 const hidden = Object.assign(MeshBuilder.CreateBox('Hidden', {}, scene), { metadata: { wbVisibleShadow: false } });
 MeshBuilder.CreateBox('__helper', {}, scene);
 const shadows = createLightShadows(scene);
 shadows.setActive(true);
-assert.equal(shadows.generators.length, 1, 'a shadow generator for the sun only');
+assert.deepEqual(shadows.generators.map((g) => g.getLight().name), ['Sun', 'Panel'], 'a shadow generator for the sun and the area light');
+assert.ok(panel.needCube(), "an area light's shadow is a cube from its center");
+areaLightShadows.set(scene, false);
+shadows.setActive(true);
+assert.deepEqual(shadows.generators.map((g) => g.getLight().name), ['Sun'], 'none for the area light with Area Light Shadows off');
 const [generator] = shadows.generators;
 assert.equal(generator.getLight(), sun);
 const map = generator.getShadowMap();

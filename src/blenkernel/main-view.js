@@ -25,6 +25,7 @@ import { armatureChanged } from '../draw/overlay-armature.js';
 import { principledPBR, applyPBR } from './material/principled-gltf.js';
 import { attributesWanted, nodeMaterialFromTree, nodeProperties, outputValues } from '../nodes/blender/shader-nodes.js';
 import { pullEeveeParity } from '../draw/eevee-parity.js';
+import { pullRenderExtensions } from '../draw/render-extension.js';
 import { idStruct, pointerStruct, structFind } from '../python/bpy_rna.js';
 import { createEditMeshOverlay } from '../draw/overlay-edit-mesh.js';
 import { createGreasePencilDraw, BLENDER_LOOK } from '../draw/grease-pencil.js';
@@ -479,6 +480,7 @@ export function createMainView(state) {
       if (scene ?? updates.has(blender.scene)) {
         for (const record of state.sceneRecords()) pull(record, world);
         pullEeveeParity(world.scene, blender.scene);
+        pullRenderExtensions(world.scene, blender.scene);
       }
       if (updates.size) { drawInstances(); drawCurves(); drawGreasePencil(); particleEdit = particleEditOverlay(world.scene, blender.particleEdit(), particleEdit); }
     } finally {
