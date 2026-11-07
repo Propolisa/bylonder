@@ -6,7 +6,9 @@ The workflow runs on Windows, Linux and macOS. `npm run tools` installs the dev 
 and nowhere else (delete the folder to remove them): Playwright's Chromium, which browser checks and docs recorders run
 on the machine's GPU (`CHROMIUM_CDP` drives a running one instead), and the reference Blender the tests compare
 against (Linux and Windows; elsewhere point `BLENDER_REFERENCE` at one). ffmpeg comes with the dev dependencies. Dev
-tooling never installs onto the host outside the checkout.
+tooling never installs onto the host outside the checkout. `node scripts/build-module.mjs` builds the WASM module from
+this checkout as CI does and installs it: on Linux directly, on Windows in a WSL distro of its own whose disk is
+`.tools/wsl/` (`wsl --unregister bylonder-build` removes it).
 
 Commit subjects are the app's changelog (Splash Screen > Changelog): one commit per user-visible change, its subject
 saying what a user gets. No WIP commits reach `main`; branches merge with `git merge --squash`. Before pushing to
