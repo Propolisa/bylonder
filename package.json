@@ -13,6 +13,7 @@
     "test:workflows": "node tests/e2e/workflows.mjs",
     "test": "node scripts/run-tests.mjs",
     "module": "node scripts/module.mjs",
+    "tools": "node scripts/dev-tools.mjs",
     "gates": "node scripts/gates.mjs"
   },
   "dependencies": {
@@ -48,6 +49,9 @@
     "@tailwindcss/vite": "4.3.3",
     "@vitejs/plugin-vue": "6.0.10",
     "eslint": "9.13.0",
+    "ffmpeg-static": "5.2.0",
+    "ffprobe-static": "3.1.0",
+    "playwright": "1.56.1",
     "prettier": "3.3.3",
     "tailwindcss": "4.3.3",
     "typescript": "5.7.3",

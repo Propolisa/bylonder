@@ -4,13 +4,14 @@
 // usage: node scripts/feature-docs.mjs [--check] [--links] [--runtime]   (--check fails when a page is invalid or the
 // index is out of date; --links fetches every Blender manual link; --runtime first saves what the built app runs of
 // Blender's own code, which the source scan cannot see, to src/coverage/runtime.json, which npm run test:prod checks)
+import { fileURLToPath } from "node:url";
 import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { coverageText, frontMatter, LIMITS, MEDIA, openLink, REFERENCE, SECTIONS } from "../src/feature-docs.js";
 import { computeCoverage, runtimeAvailable, STATUS } from "../src/coverage/coverage.js";
 import { scanImplemented } from "./blender-coverage.mjs";
 
-const root = new URL("..", import.meta.url).pathname;
+const root = fileURLToPath(new URL("..", import.meta.url));
 const DIR = "docs/features/";
 const read = (path) => readFileSync(root + path, "utf8");
 const exists = (path) => existsSync(root + path);

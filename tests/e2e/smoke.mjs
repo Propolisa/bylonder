@@ -2,6 +2,8 @@
 // Assertions read state through window.__bylonder in the 3D Viewport frame and the status bar's statistics, and
 // every check fails on a page error.
 // usage: npm run test:e2e [-- name filter]
+import { ffmpeg, ffprobe } from "../../tools/media.mjs";
+import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
 import { tmpdir } from "node:os";
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
@@ -172,7 +174,7 @@ const checks = {
     const confirm = (title) => app.frame().getByRole("dialog", { name: title }).getByRole("button", { name: title }).click();
     const chooser = app.page.waitForEvent("filechooser");
     await fileMenu("Import", "Wavefront (.obj)");
-    await (await chooser).setFiles(["suzanne.obj", "suzanne.mtl"].map((name) => new URL(`../fixtures/io/${name}`, import.meta.url).pathname));
+    await (await chooser).setFiles(["suzanne.obj", "suzanne.mtl"].map((name) => fileURLToPath(new URL(`../fixtures/io/${name}`, import.meta.url))));
     await confirm("Import Wavefront OBJ");
     await app.until((b) => b.world.objects.some((node) => node.name === "Suzanne" && node.getTotalVertices() === 1968));
     // Without the save picker the export downloads, as in browsers that lack it.
@@ -1082,10 +1084,10 @@ const checks = {
     assert.match(statuses.find((s) => !s.startsWith("Preparing")), /^Frame \d+ \|/);
     const file = `${tmpdir()}/smoke-render.webm`;
     await (await download).saveAs(file);
-    const streams = JSON.parse(execFileSync("ffprobe", ["-v", "error", "-show_streams", "-of", "json", file])).streams;
+    const streams = JSON.parse(execFileSync(ffprobe, ["-v", "error", "-show_streams", "-of", "json", file])).streams;
     const audio = streams.find((stream) => stream.codec_type === "audio");
     assert.ok(audio, "the video has a sound track");
-    const { stderr } = spawnSync("ffmpeg", ["-hide_banner", "-i", file, "-map", "0:a", "-af", "volumedetect", "-f", "null", "-"], { encoding: "utf8" });
+    const { stderr } = spawnSync(ffmpeg, ["-hide_banner", "-i", file, "-map", "0:a", "-af", "volumedetect", "-f", "null", "-"], { encoding: "utf8" });
     const mean = Number(stderr.match(/mean_volume: (-?[\d.]+) dB/)?.[1]);
     assert.ok(mean > -60, `the sound track carries the scene's sound (mean ${mean} dB)`);
     await app.bylonder((b) => b.world.animation.time.configure({ frameEnd: 400 }));
@@ -1117,7 +1119,7 @@ const checks = {
   "File > Open of a .blend without a camera shows its scene": { open: { example: null, node: "sphere" }, async run() {
     const chooser = app.page.waitForEvent("filechooser");
     await menu("TOPBAR_MT_file", "Open...");
-    await (await chooser).setFiles(new URL("../fixtures/io/no-camera.blend", import.meta.url).pathname);
+    await (await chooser).setFiles(fileURLToPath(new URL("../fixtures/io/no-camera.blend", import.meta.url)));
     await app.page.waitForFunction(() => !!document.querySelector('iframe[src*="viewport.html"]')?.contentWindow?.__bylonder?.world?.scene.getNodeByName("Cube"), null, { timeout: 120000 });
     await app.settled();
     assert.equal(await app.bylonder((b) => b.world.scene.getNodeByName("Camera")), null);
@@ -1224,7 +1226,7 @@ const checks = {
     assert.match(video.at(-1), /^Finished 12 frames/);
     const file = `${tmpdir()}/smoke-sequencer.webm`;
     await (await download).saveAs(file);
-    const streams = JSON.parse(execFileSync("ffprobe", ["-v", "error", "-show_streams", "-of", "json", file])).streams;
+    const streams = JSON.parse(execFileSync(ffprobe, ["-v", "error", "-show_streams", "-of", "json", file])).streams;
     assert.deepEqual(streams.map((s) => s.codec_type).sort(), ["audio", "video"]);
     // Known and harmless here: the headless <video> fallback KubeezCut preloads does not load the clip (Mediabunny
     // decodes it), and KubeezCut's embed bundles a Mediabunny of its own next to Bylonder's.
@@ -1265,7 +1267,7 @@ const checks = {
     const chooser = app.page.waitForEvent("filechooser");
     await prefs.locator('[data-blender="USERPREF_MT_addons_settings"]').first().click();
     await app.frame().getByRole("menuitem", { name: "Install from Disk..." }).first().click();
-    await (await chooser).setFiles(new URL("../../examples/python/scatter_cubes.py", import.meta.url).pathname);
+    await (await chooser).setFiles(fileURLToPath(new URL("../../examples/python/scatter_cubes.py", import.meta.url)));
     // The operator's options (Enable on Install), confirmed as the File Browser's sidebar confirms them.
     await app.frame().getByRole("button", { name: "Install from Disk" }).last().click();
     await region.getByText("Scatter Cubes").first().waitFor({ timeout: 30000 });
@@ -1354,7 +1356,7 @@ const checks = {
 // placed at frame 1.
 async function addClipStrip() {
   const file = `${tmpdir()}/smoke-clip.webm`;
-  execFileSync("ffmpeg", ["-v", "error", "-y", "-f", "lavfi", "-i", "testsrc=size=64x36:rate=24:duration=1", "-f", "lavfi", "-i", "sine=frequency=440:duration=1", "-c:v", "libvpx", "-c:a", "libopus", "-shortest", file]);
+  execFileSync(ffmpeg, ["-v", "error", "-y", "-f", "lavfi", "-i", "testsrc=size=64x36:rate=24:duration=1", "-f", "lavfi", "-i", "sine=frequency=440:duration=1", "-c:v", "libvpx", "-c:a", "libopus", "-shortest", file]);
   await app.bylonder(async (b, bytes) => {
     const handle = await (await navigator.storage.getDirectory()).getFileHandle("clip.webm", { create: true });
     const writable = await handle.createWritable();

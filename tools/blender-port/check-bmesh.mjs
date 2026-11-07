@@ -5,12 +5,13 @@
 // input in Blender's window manager. Prints each test's result; the build runs it on the module and on copies with
 // their data moved, which must print the same.
 // usage: node tools/blender-port/check-bmesh.mjs MODULE.wasm
+import { fileURLToPath } from 'node:url';
 import { execFile } from 'node:child_process';
 import { resolve } from 'node:path';
 import { promisify } from 'node:util';
 
 const TESTS = ['editmesh-wasm', 'editmesh-menus', 'tools-wasm', 'objects-wasm', 'modifiers-wasm', 'outliner', 'anim-wasm', 'curves-wasm', 'armature-wasm', 'wm-wasm'];
-const repo = new URL('../..', import.meta.url).pathname;
+const repo = fileURLToPath(new URL('../..', import.meta.url));
 const env = { ...process.env, BYLONDER_BMESH_WASM: resolve(process.argv[2]) };
 // What a test prints, without Babylon's banner and timings, which vary from run to run.
 const stable = (text) => text.split('\n').filter((line) => !line.startsWith('BJS')).map((line) => line.replace(/\d+(\.\d+)? ?ms\b/g, 'ms')).join('\n');

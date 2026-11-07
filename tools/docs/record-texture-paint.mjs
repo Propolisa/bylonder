@@ -2,6 +2,7 @@
 // the UV Editing and Texture Paint workspaces, Smart UV Project, moving a UV island, strokes in the 3D Viewport and the
 // Image Editor, Vertex Paint, Image > New, the Image Texture node and the image's Runtime panel.
 // usage: node tools/docs/record-texture-paint.mjs
+import { tmpdir } from "node:os";
 import { recorder } from "./record.mjs";
 
 const IMAGE = '#image-section', VIEW = '[data-section="viewport"]';
@@ -13,7 +14,7 @@ async function session(feature, steps) {
   try {
     await steps(r);
   } catch (error) {
-    await r.page.screenshot({ path: `/tmp/record-${feature}.png` }).catch(() => {});
+    await r.page.screenshot({ path: `${tmpdir()}/record-${feature}.png` }).catch(() => {});
     throw error;
   } finally {
     await r.close();

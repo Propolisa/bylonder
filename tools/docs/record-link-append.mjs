@@ -2,11 +2,12 @@
 // browsed in Blender's File Browser (Collection, then Props), Object > Library Override > Make, File > Append of the
 // Lamp Post, and the Outliner's Blender File view.
 //   usage: node tools/docs/record-link-append.mjs
+import { fileURLToPath } from "node:url";
 import { record } from "./record.mjs";
 
 const VIEW = '[data-section="viewport"]';
 const BROWSER = '[data-blender="FILE_BROWSER"]';
-const LIBRARY = new URL("../../examples/link-append/libraries/library.blend", import.meta.url).pathname;
+const LIBRARY = fileURLToPath(new URL("../../examples/link-append/libraries/library.blend", import.meta.url));
 
 await record("link-append", { node: "Cube" }, async (r) => {
   const { app } = r;

@@ -3,6 +3,7 @@
 // module once Python has started, in the order the add-ons register there (bylonder_cpython.py enables them sorted, one
 // order), each checked against Blender 5.2's menus (src/coverage/blender-surface.json).
 //   usage: node scripts/io-addon-menus.mjs [--check]
+import { fileURLToPath } from 'node:url';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { blenderMain } from '../src/bmesh/bmesh-wasm.js';
 import '../src/python/bpy_interface.js';
@@ -11,7 +12,7 @@ import { createTopbarArea } from '../src/editors/space_topbar/topbar-area.js';
 import { loadKeyconfig } from '../src/windowmanager/wm-window.js';
 import { startPython } from '../src/python/python.js';
 
-const root = new URL('..', import.meta.url).pathname;
+const root = fileURLToPath(new URL('..', import.meta.url));
 const OUT = 'src/editors/io/addon-menus.json';
 const MENUS = ['TOPBAR_MT_file_import', 'TOPBAR_MT_file_export'];
 // Blender's own importers and exporters are wm.*; the add-ons' are their own (import_scene.gltf, export_anim.bvh, ...).

@@ -2,6 +2,7 @@
 // Bevel and Bisect shaping a camera body; on the Rangefinder Camera example, the finished model's edges, its
 // lens spun from a profile, and its render (also the thumbnail).
 // usage: node tools/docs/record-mesh-modeling.mjs
+import { ffmpeg } from "../media.mjs";
 import { execFileSync } from "node:child_process";
 import { copyFileSync, rmSync, writeFileSync } from "node:fs";
 import { recorder } from "./record.mjs";
@@ -117,7 +118,7 @@ await session({ example: "mesh-modeling", node: "Camera Body" }, async (r) => {
   await app.until(() => /^(Finished|Render failed)/.test(document.querySelector(".render-result [data-status]")?.textContent ?? ""), null, 600000);
   const png = await app.frame().evaluate(() => document.querySelector(".render-result canvas").toDataURL("image/png"));
   writeFileSync(`${r.out}full.png`, Buffer.from(png.split(",")[1], "base64"));
-  execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-i", `${r.out}full.png`, "-vf", "scale=800:-2:flags=lanczos", `${r.out}render.png`]);
+  execFileSync(ffmpeg, ["-y", "-loglevel", "error", "-i", `${r.out}full.png`, "-vf", "scale=800:-2:flags=lanczos", `${r.out}render.png`]);
   copyFileSync(`${r.out}render.png`, `${r.out}thumbnail.png`);
   rmSync(`${r.out}full.png`);
 });

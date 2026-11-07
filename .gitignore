@@ -31,6 +31,8 @@ Thumbs.db
 !.vscode/extensions.json
 *.swp
 .blender-reference/
+# Dev tools (npm run tools): delete to remove them.
+.tools/
 .shots/
 __pycache__/
 

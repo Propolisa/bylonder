@@ -11,6 +11,7 @@ import { compositorNodeClasses } from '../src/nodes/blender/compositor-nodes.js'
 import { declaration, defaults } from '../src/nodes/blender/declarations.js';
 import { compileSteps, kindOfSocket, menuValue, socketOf } from '../src/nodes/blender/node-code.js';
 import { convert, glslValue, socketType } from '../src/nodes/blender/sockets.js';
+import { GL_ARGS } from './e2e/tools.mjs';
 
 let chromium;
 try { ({ chromium } = createRequire(import.meta.url)('playwright')); } catch {
@@ -116,7 +117,7 @@ function run(programs) {
 
 // Mesa's llvmpipe through ANGLE, the software OpenGL the fixtures were rendered with: Chromium's default SwiftShader
 // takes minutes over a loop of 4D noise and gives nothing.
-const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=gl-egl', '--ignore-gpu-blocklist'] });
+const browser = await chromium.launch({ args: GL_ARGS });
 try {
   // In batches, each in a page of its own: a software GPU gives up on very many large programs in one context.
   const results = [];
@@ -130,7 +131,8 @@ try {
     if (results[i].error) return [`${c.node} ${JSON.stringify(c.properties)}: ${results[i].error}`];
     const got = results[i], channels = c.tree === 'shader' && socketType(declaration('shader', c.node).outputs.find((s) => s.identifier === c.output).type).kind === 'float' ? 1 : 4;
     // EEVEE's AOVs hold half floats.
-    const tolerance = c.engine === 'EEVEE' ? 2e-3 : 1e-4;
+    // A hardware GPU's sin and pow differ from Mesa's by up to 2e-4 in noise textures (Magic, Gabor).
+    const tolerance = c.engine === 'EEVEE' ? 2e-3 : 5e-4;
     const off = c.result.slice(0, channels).some((v, k) => v !== null && Math.abs(v - got[k]) > tolerance * Math.max(1, Math.abs(v)));
     return off ? [`${c.node} ${JSON.stringify(c.properties)}: Blender ${c.result.slice(0, channels)}, Bylonder ${got.slice(0, channels).map((v) => +v.toFixed(6))}`] : [];
   });

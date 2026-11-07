@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { writeFileSync, mkdtempSync, mkdirSync, copyFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { pathToFileURL, fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { NullEngine, Scene, FreeCamera, Vector3, VertexBuffer } from '@babylonjs/core';
 import { createPrimitive, shadeSmooth } from '../src/editors/object/mesh-catalog.js';
@@ -23,7 +23,7 @@ assert.equal(await bundleWorker(), (await import('node:fs')).readFileSync(new UR
 
 // Every modifier Bylonder offers evaluates in the committed module without trapping (the build's check, which it also
 // runs with the module's data moved: tools/blender-port/check-modifiers.mjs).
-const checked = execFileSync('node', [new URL('../tools/blender-port/check-modifiers.mjs', import.meta.url).pathname, new URL('../src/modifiers/modifiers.wasm', import.meta.url).pathname], { encoding: 'utf8' });
+const checked = execFileSync(process.execPath, [fileURLToPath(new URL('../tools/blender-port/check-modifiers.mjs', import.meta.url)), fileURLToPath(new URL('../src/modifiers/modifiers.wasm', import.meta.url))], { encoding: 'utf8' });
 assert.deepEqual(checked.split('\n').filter((line) => line.includes('error:')), [], 'no modifier reports an error');
 
 const engine = new NullEngine(), scene = new Scene(engine);
