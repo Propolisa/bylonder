@@ -1,16 +1,19 @@
-// Records docs/features/import-export.md's media: the Default Cube deleted, File > Import (its add-ons' entries live)
-// > Wavefront (.obj) with the example's suzanne.obj and suzanne.mtl, the importer's options, the result, and File >
-// Export's menu and options.
+// Records docs/features/import-export.md's media on the gallery example: the bust through the camera in Rendered
+// shading, the bust deleted, File > Import (its add-ons' entries live) > glTF 2.0 with the example's bust.glb, the
+// importer's options, the bust moved onto the plinth, and File > Export's menu and options.
 //   usage: node tools/docs/record-import-export.mjs
 import { fileURLToPath } from "node:url";
 import { record } from "./record.mjs";
 
 const VIEW = '[data-section="viewport"]';
-const FILES = ["suzanne.obj", "suzanne.mtl"].map((name) => fileURLToPath(new URL(`../../examples/import-export/${name}`, import.meta.url)));
+const GLB = fileURLToPath(new URL("../../examples/import-export/bust.glb", import.meta.url));
 const DIALOG = (title) => `[role="dialog"][aria-label="${title}"]`;
 
-await record("import-export", { node: "Cube" }, async (r) => {
+await record("import-export", { example: "import-export", node: null }, async (r) => {
   const { app } = r;
+  const rendered = (name) => r.render(name, { part: [0.2, 0, 0.8, 1] });
+  await r.pause(3000);
+  await rendered("thumbnail");
   const fileMenu = async (submenu) => {
     await app.page.click('[data-blender="TOPBAR_MT_file"]');
     await app.page.getByRole("menuitem", { name: new RegExp(`^${submenu}`) }).first().hover();
@@ -18,21 +21,29 @@ await record("import-export", { node: "Cube" }, async (r) => {
     await app.page.locator('.bl-menu-item[aria-disabled="false"]', { hasText: "glTF 2.0" }).waitFor({ timeout: 180000 });
     await r.pause(300);
   };
-  await app.click();
+  await r.outliner("Bust");
+  await app.hover();
   await r.keys("Delete");
   await fileMenu("Import");
   await r.shot("import-menu", null, { part: [0, 0, 0.45, 0.72] });
   const chooser = app.page.waitForEvent("filechooser");
-  await app.page.getByRole("menuitem", { name: "Wavefront (.obj)" }).click();
-  await (await chooser).setFiles(FILES);
-  const options = app.frame().locator(DIALOG("Import Wavefront OBJ"));
+  await app.page.getByRole("menuitem", { name: /^glTF 2.0/ }).click();
+  await (await chooser).setFiles(GLB);
+  const options = app.frame().locator('[role="dialog"]').last();
   await options.waitFor();
+  await r.pause(500);
   await r.shot("import-options", options);
-  await options.getByRole("button", { name: "Import Wavefront OBJ" }).click();
-  await app.until((b) => b.world.objects.some((node) => node.name === "Suzanne"));
+  await options.getByRole("button", { name: /^Import/ }).last().click();
+  await app.until((b) => b.world.objects.some((node) => node.name === "Bust"), null, 120000);
   await app.settled();
-  await r.shot("imported", VIEW);
-  await r.shot("thumbnail", VIEW, { part: [0.2, 0.1, 0.8, 0.9] });
+  await r.gif("place", VIEW, async () => {
+    await app.hover();
+    await r.keys("G", "g");
+    await r.keys("Z", "z");
+    await app.page.keyboard.type("1.1", { delay: 250 });
+    await r.keys("Enter");
+  });
+  await rendered("imported");
   await app.page.keyboard.press("Escape");
   await fileMenu("Export");
   await r.shot("export-menu", null, { part: [0, 0, 0.45, 0.72] });

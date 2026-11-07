@@ -18,6 +18,7 @@ thumbnail: import-export/thumbnail.png
 media:
   - import-export/import-menu.png
   - import-export/import-options.png
+  - import-export/place.gif
   - import-export/imported.png
   - import-export/export-menu.png
   - import-export/export-options.png
@@ -77,28 +78,31 @@ included.
 
 [Open in Bylonder](https://propolisa.github.io/bylonder/#example=import-export)
 
-The demo, Import and Export, is the Default Cube's scene with Suzanne imported from the example's
-[suzanne.obj](../../examples/import-export/suzanne.obj) and [suzanne.mtl](../../examples/import-export/suzanne.mtl).
-The steps below make it from the Default Cube.
+The demo, Import and Export, is a gallery: a plinth between two spot lights, and on it a bronze bust brought in
+from the example's [bust.glb](../../examples/import-export/bust.glb), a glTF 2.0 file with the bust's mesh and its
+Bronze and Marble materials. The steps below take the bust out and import it again.
 
 ## Steps
 
-1. **An empty scene.** In the Default Cube example, click the cube and press Delete. Open File > Import: OBJ, PLY, STL,
-   FBX, SVG, Motion Capture and glTF 2.0 run; Alembic and USD are greyed out, their tooltip says why.
+1. **Make room.** Click Bust in the Outliner, hover the 3D Viewport and press Delete. Open File > Import: OBJ, PLY,
+   STL, FBX, SVG, Motion Capture and glTF 2.0 run; Alembic and USD are greyed out, their tooltip says why.
 
    ![File > Import](../media/features/import-export/import-menu.png)
 
-2. **Import.** Choose Wavefront (.obj) and pick both suzanne.obj and suzanne.mtl in the file dialog. The importer's
-   options follow (General, Options, Materials); click Import Wavefront OBJ.
+2. **Import.** Choose glTF 2.0 (.glb/.gltf) and pick bust.glb in the file dialog. The importer's options follow;
+   click Import glTF 2.0. The bust arrives at the world origin with its materials, selected and active.
 
-   ![The OBJ importer's options](../media/features/import-export/import-options.png)
+   ![The glTF importer's options](../media/features/import-export/import-options.png)
 
-3. **The result.** Suzanne is in the scene with her Skin material, UV map and smooth normals, selected and active, as
-   Blender's importer leaves her.
+3. **Place it.** Hover the 3D Viewport and press G, Z, type 1.1 and press Enter: the bust stands on the plinth.
 
-   ![Suzanne imported](../media/features/import-export/imported.png)
+   ![G Z 1.1: onto the plinth](../media/features/import-export/place.gif)
 
-4. **Export.** File > Export lists the exporters. Choose STL (.stl): its options come first (General, Geometry),
+4. **Look at it.** Press Numpad 0 and pick Rendered shading: the spot lights pick out the bronze, as before.
+
+   ![The bust in the gallery, Rendered](../media/features/import-export/imported.png)
+
+5. **Export.** File > Export lists the exporters. Choose STL (.stl): its options come first (General, Geometry),
    then the save dialog. Wavefront (.obj), Stanford PLY (.ply), FBX and glTF 2.0 export the same way.
 
    ![File > Export](../media/features/import-export/export-menu.png)
@@ -107,8 +111,9 @@ The steps below make it from the Default Cube.
 
 ## Project files
 
-- [import-export.py](../../examples/import-export/import-export.py): writes suzanne.obj and suzanne.mtl with Blender
-  5.2's OBJ exporter, imports them into the Default Cube's scene and saves import-export.blend.
+- [import-export.py](../../examples/import-export/import-export.py): writes bust.glb with Blender 5.2's glTF exporter,
+  builds the gallery, imports the bust onto the plinth and saves import-export.blend.
+- [bust.glb](../../examples/import-export/bust.glb): the asset.
 - [import-export.blend](../../examples/import-export/import-export.blend): the file the script saves.
 - [index.js](../../examples/import-export/index.js): opens the .blend with Blender's reader.
 - [io-fixtures.py](../../tools/blender-reference/io-fixtures.py) and
