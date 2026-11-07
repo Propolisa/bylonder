@@ -873,6 +873,8 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     objectOf: (node) => objects.get(node)?.ob ?? null,
     // A Blender camera's field of view as Blender frames an image of the size with it (its sensor fit, lens and sensor in
     // Main); a Babylon camera's is its own.
+    // A Blender camera's depth of field (bmesh-wasm.js cameraDof), or null.
+    cameraDof: (camera) => { const ob = blenderCameraOf(camera); return ob ? blender.cameraDof(ob) : null; },
     fitCamera(camera, { width, height }) {
       const ob = blenderCameraOf(camera);
       if (!ob) return;

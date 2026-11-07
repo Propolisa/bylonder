@@ -121,5 +121,21 @@ acc.reset(); assert.equal(acc.count, 0);
   scene.dispose(); engine.dispose();
 }
 
+// A Blender camera's depth of field (Main's, through the module) on the rendered view that looks through it, as
+// Babylon's: its f-stop, focal length and focus distance in millimeters, and none for a camera without it.
+{
+  const engine = new NullEngine(), scene = new Scene(engine), camera = new FreeCamera('Camera', Vector3.Zero(), scene), other = new FreeCamera('view', Vector3.Zero(), scene);
+  const mainSync = { cameraDof: (c) => (c === camera ? { focusDistance: 6.9, fStop: 2.8, lens: 50 } : null) };
+  const settings = createRenderSettings({ scene, animation: createAnimationModel(), mainSync });
+  settings.setRenderedCameras([camera, other]);
+  const pipelineOf = (c) => scene.postProcessRenderPipelineManager.supportedPipelines.find((p) => p.cameras.includes(c) && 'depthOfFieldEnabled' in p);
+  for (const c of [camera, other]) scene.onBeforeCameraRenderObservable.notifyObservers(c);
+  const { depthOfField } = pipelineOf(camera);
+  assert.ok(pipelineOf(camera).depthOfFieldEnabled, 'the camera with depth of field blurs');
+  assert.deepEqual([depthOfField.fStop, depthOfField.focalLength, Math.round(depthOfField.focusDistance)], [2.8, 50, 6900]);
+  assert.ok(!pipelineOf(other).depthOfFieldEnabled, 'a camera without it does not');
+  settings.dispose(); scene.dispose(); engine.dispose();
+}
+
 settings.dispose(); scene.dispose(); engine.dispose();
 console.log('Render: output settings, formats, virtual clock and sampling passed');

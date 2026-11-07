@@ -291,6 +291,13 @@ export class BlenderMain {
     const [fov, vertical, x0, y0] = new Float32Array(x.memory.buffer, x.camera_view_fov(ob, width, height) >>> 0, 4);
     return { fov, vertical: vertical > 0, shift: [x0, y0] };
   }
+  // A camera object's depth of field (main-api.cc camera_dof): its focus distance, f-stop and focal length, or null
+  // when it has none (or the module predates it).
+  cameraDof(ob) {
+    if (!x.camera_dof) return null;
+    const [on, focusDistance, fStop, lens] = new Float32Array(x.memory.buffer, x.camera_dof(ob) >>> 0, 5);
+    return on ? { focusDistance, fStop, lens } : null;
+  }
 
   // Main evaluated by Blender's depsgraph for what was tagged; clears the tags.
   evaluate() { x.main_evaluate(this.#context); }

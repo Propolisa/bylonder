@@ -1,4 +1,4 @@
-import { DefaultRenderingPipeline, ImageProcessingConfiguration, MotionBlurPostProcess, SSAO2RenderingPipeline, SSRRenderingPipeline } from '@babylonjs/core';
+import { Camera, DefaultRenderingPipeline, DepthOfFieldEffectBlurLevel, ImageProcessingConfiguration, MotionBlurPostProcess, SSAO2RenderingPipeline, SSRRenderingPipeline } from '@babylonjs/core';
 import { seededRandom } from '../../render/clock.js';
 import { createFilm } from '../../render/film.js';
 
@@ -40,7 +40,11 @@ const withSeededRandom = create => {
   try { return create(); } finally { Math.random = random; }
 };
 
-export function createRenderEngine(scene) {
+// The widest blur of Babylon's depth of field (its High level's kernel), in pixels.
+const DOF_KERNEL = 51;
+
+// dof(camera): its depth of field as Blender's camera has it ({ focusDistance in meters, fStop, lens in millimeters }), or null.
+export function createRenderEngine(scene, { dof = () => null } = {}) {
   const attached = new Map(); // camera -> { key, effects }
   const usesGeometry = effects => !!(effects.ssao || effects.ssr || effects.motion);
   const ownGeometryBuffer = !scene.geometryBufferRenderer;
@@ -49,6 +53,18 @@ export function createRenderEngine(scene) {
   const gateGeometryBuffer = scene.onBeforeCameraRenderObservable.add((camera) => {
     const buffer = scene.geometryBufferRenderer, effects = attached.get(camera)?.effects;
     if (buffer && ownGeometryBuffer) buffer.renderList = effects && usesGeometry(effects) ? null : [];
+  });
+  // Blender's depth of field on a camera that has it (EEVEE draws it through the camera and in renders) as Babylon's,
+  // its circle of confusion in pixels as Blender's: a millimeter of it on the sensor is the focal length in pixels over
+  // the lens's, which the blur's widest kernel spans.
+  const focus = scene.onBeforeCameraRenderObservable.add((camera) => {
+    const pipeline = attached.get(camera)?.effects.pipeline;
+    if (!pipeline) return;
+    const settings = camera.mode === Camera.PERSPECTIVE_CAMERA ? dof(camera) : null;
+    if (pipeline.depthOfFieldEnabled !== !!settings) pipeline.depthOfFieldEnabled = !!settings;
+    if (!settings) return;
+    const focalPixels = camera.getProjectionMatrix().m[0] * scene.getEngine().getRenderWidth() * camera.viewport.width / 2;
+    Object.assign(pipeline.depthOfField, { focusDistance: settings.focusDistance * 1000, fStop: settings.fStop, focalLength: settings.lens, lensSize: focalPixels / DOF_KERNEL });
   });
   const drop = camera => {
     const entry = attached.get(camera); if (!entry) return;
@@ -65,6 +81,7 @@ export function createRenderEngine(scene) {
     const name = id => `__${id}:${camera.uniqueId}`;
     // Drawn in half float, displayed by its image processing: the view transform, after blending, as Blender's.
     effects.pipeline = new DefaultRenderingPipeline(name('display'), true, scene, [camera]);
+    effects.pipeline.depthOfFieldBlurLevel = DepthOfFieldEffectBlurLevel.High;
     // Post processes draw a view drawn into part of the canvas (views.js regions) on whole textures, so the geometry
     // buffer must fill whole textures too and Fast GI must not crop its result to the camera viewport.
     if (e.useRaytracing) effects.ssao = Object.assign(withSeededRandom(() => new SSAO2RenderingPipeline(name('fastGI'), scene, 0.5, [camera], true)), { useViewportInCombineStage: false });
@@ -98,6 +115,6 @@ export function createRenderEngine(scene) {
     film: (camera) => attached.get(camera)?.effects.film ?? null,
     resetFilms() { for (const { effects } of attached.values()) effects.film.reset(); },
     setSceneLinear(value) { scene.imageProcessingConfiguration.applyByPostProcess = value; },
-    dispose() { scene.onBeforeCameraRenderObservable.remove(gateGeometryBuffer); for (const camera of [...attached.keys()]) drop(camera); },
+    dispose() { scene.onBeforeCameraRenderObservable.remove(gateGeometryBuffer); scene.onBeforeCameraRenderObservable.remove(focus); for (const camera of [...attached.keys()]) drop(camera); },
   };
 }

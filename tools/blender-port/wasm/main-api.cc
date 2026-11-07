@@ -248,6 +248,21 @@ EXPORT(camera_view_fov) const float *camera_view_fov(Object *camera, int winx, i
   return result;
 }
 
+/* A camera's depth of field as EEVEE reads it (eevee_depth_of_field.cc DepthOfField::sync): whether it is on, the
+ * focus distance (its focus object's, if any: BKE_camera_object_dof_distance), the f-stop, the focal length and the
+ * sensor size in millimeters. */
+EXPORT(camera_dof) const float *camera_dof(Object *camera)
+{
+  static float result[5];
+  const Camera *cam = reinterpret_cast<const Camera *>(camera->data);
+  result[0] = (cam->dof.flag & CAM_DOF_ENABLED) != 0;
+  result[1] = BKE_camera_object_dof_distance(camera);
+  result[2] = cam->dof.aperture_fstop;
+  result[3] = cam->lens;
+  result[4] = BKE_camera_sensor_size(cam->sensor_fit, cam->sensor_x, cam->sensor_y);
+  return result;
+}
+
 static Base *base_of(BlenderMain *ctx, Object *ob) { return BKE_view_layer_base_find(ctx->view_layer, ob); }
 
 /* The collections' changes synced to the view layer after each change, as BKE_main_collection_sync syncs a scene's. */
