@@ -17,13 +17,20 @@ export const lightRecord = (light) => light.metadata?.wbLight;
 const PBR_WATTS_TO_LUMENS = 683;
 export const lightingMode = (scene) => scene?.metadata?.wbLightingMode ?? 'COMPAT';
 
-// Blender's power (W, or W/m² for a sun) as Babylon's intensity, and back.
-export function intensityOf(type, watts, mode) {
+// Blender's power (W, or W/m² for a sun) as Babylon's intensity, and back. An area light's is its radiance, as EEVEE
+// converts it (blender-port: eevee_light.cc Light::shape_radiance_get: 1 / (pi * area)), `area` its shape's in m²;
+// Babylon's rectangular light takes radiance.
+export function intensityOf(type, watts, mode, area = 1) {
   if (mode === 'RAW') return watts;
-  const luminous = type === 'SUN' ? watts : watts / (4 * Math.PI);
+  const luminous = type === 'SUN' ? watts : type === 'AREA' ? watts / (Math.PI * area) : watts / (4 * Math.PI);
   return mode === 'SPEC' ? luminous * PBR_WATTS_TO_LUMENS : luminous;
 }
-export const wattsOf = (type, intensity, mode) => intensity / intensityOf(type, 1, mode);
+export const wattsOf = (type, intensity, mode, area = 1) => intensity / intensityOf(type, 1, mode, area);
+// An Area light's surface in m²: its rectangle's, a disk's or ellipse's the inscribed one (pi / 4 of it).
+export const areaOf = (record) => {
+  const rectangle = ['RECTANGLE', 'ELLIPSE'].includes(record.shape), area = record.size * (rectangle ? record.size_y : record.size);
+  return ['DISK', 'ELLIPSE'].includes(record.shape) ? area * Math.PI / 4 : area;
+};
 
 // A Blender light of a type in a scene (bpy.data.lights.new with its object): the Babylon light nearest it, made
 // Blender's with the settings given. An Area light is Babylon's rectangular one (a disk or ellipse its bounding
@@ -49,7 +56,7 @@ export function makeBlenderLight(light, type, values = {}) {
 export function deriveBabylonLight(light) {
   const record = lightRecord(light);
   light.diffuse.copyFromFloats(...record.color);
-  light.intensity = intensityOf(record.type, record.energy * 2 ** (record.exposure ?? 0), lightingMode(light.getScene()));
+  light.intensity = intensityOf(record.type, record.energy * 2 ** (record.exposure ?? 0), lightingMode(light.getScene()), record.type === 'AREA' ? areaOf(record) : 1);
   if (record.type !== 'SUN') light.falloffType = Light.FALLOFF_GLTF;
   // An area light's extent is its size; a radius would zero its photometric scale, which Babylon has no case for.
   if (record.type !== 'AREA') light.radius = shapeRadius(record);

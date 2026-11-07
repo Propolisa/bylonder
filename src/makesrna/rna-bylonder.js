@@ -116,6 +116,8 @@ const dimensions = (ob) => {
   return axes([size.x * Math.abs(ob.scaling.x), size.y * Math.abs(ob.scaling.y), size.z * Math.abs(ob.scaling.z)]);
 };
 const SELECT_BITS = [SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE];
+// A Babylon rectangular light's area (1 for others).
+const babylonArea = (light) => (light.getClassName() === 'RectAreaLight' ? light.width * light.height : 1);
 const lightType = (light) => lightRecord(light)?.type ?? (light instanceof SpotLight ? 'SPOT' : light instanceof PointLight ? 'POINT' : light.getClassName() === 'RectAreaLight' ? 'AREA' : 'SUN');
 export const LIGHT_STRUCTS = { POINT: 'PointLight', SPOT: 'SpotLight', SUN: 'SunLight', AREA: 'AreaLight' };
 const OBJECT_DATA = { MESH: () => 'Mesh', LIGHT: (ob) => LIGHT_STRUCTS[lightType(ob)], CAMERA: () => 'Camera', FONT: () => 'TextCurve', CURVE: () => 'Curve', ARMATURE: () => 'Armature' };
@@ -302,8 +304,8 @@ const babylonLight = {
   name: settable('name'),
   type: synced(lightType),
   color: synced(array((light) => light.diffuse.asArray(), (light, value) => light.diffuse.copyFromFloats(...value), 'rgb')),
-  energy: { get: (light) => wattsOf(lightType(light), light.intensity, lightingMode(light.getScene())),
-    set: (light, value) => { light.intensity = intensityOf(lightType(light), value, lightingMode(light.getScene())); }, sync: true },
+  energy: { get: (light) => wattsOf(lightType(light), light.intensity, lightingMode(light.getScene()), babylonArea(light)),
+    set: (light, value) => { light.intensity = intensityOf(lightType(light), value, lightingMode(light.getScene()), babylonArea(light)); }, sync: true },
   shadow_soft_size: synced(settable('radius'), (light) => lightType(light) !== 'SUN'),
   use_shadow: synced(settable('shadowEnabled')),
   spot_size: synced(settable('angle'), (light) => lightType(light) === 'SPOT'),
