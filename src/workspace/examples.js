@@ -28,7 +28,7 @@ export const examples = [
   { id: "shader", title: "Shader Waves" },
   { id: "text", title: "3D Text" },
   { id: "particle-hair", title: "Grass Hill" },
-  { id: "hair-dynamics", title: "Hair Dynamics" },
+  { id: "hair-dynamics", title: "Sea Anemone" },
   { id: "geometry-nodes", title: "Geometry Nodes Planet" },
   { id: "geometry-node-editor", title: "Sunflowers" },
   { id: "rigged-character", title: "Rigged Character" },
