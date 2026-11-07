@@ -77,11 +77,20 @@ console.log("Instances: an instance of instances, Object Info's object and a rea
 
 // Solid shading (Workbench) lights the instances as it lights objects, in their material's Viewport Display color.
 const { createWorkbench } = await import('../src/draw/workbench.js');
-const { FreeCamera } = await import('@babylonjs/core');
-const workbench = createWorkbench(scene), camera = new FreeCamera('camera', undefined, scene);
+const { FreeCamera, Vector3 } = await import('@babylonjs/core');
+const workbench = createWorkbench(scene), camera = new FreeCamera('camera', new Vector3(0, 0, -10), scene);
 workbench.setShading(camera, 'solid');
 const carriers = scene.meshes.filter((mesh) => mesh.name.startsWith('__instances'));
 assert.ok(carriers.length, 'the view draws instances');
 for (const carrier of carriers) assert.equal(carrier.getMaterialForRenderPass(camera.renderPassId)?.name, '__workbenchSolid', `${carrier.name} is shaded by Workbench in Solid`);
+// Wireframe draws each instance's edges, and a selected instancer outlines its instances (overlay_outline.cc).
+workbench.setShading(camera, 'wire');
+scene.activeCamera = camera;
+scene.render();
+for (const carrier of carriers) {
+  const lines = scene.meshes.find((mesh) => mesh.name === '__wire ' + carrier.name);
+  assert.equal(lines?.thinInstanceCount, carrier.thinInstanceCount, `${carrier.name}'s wires at each instance`);
+  assert.deepEqual(carrier.metadata.instancers, [box], 'the cube instances them');
+}
 workbench.dispose();
-console.log('Instances: Solid shading lights them as it lights objects');
+console.log('Instances: Solid shading lights them as it lights objects, Wireframe draws their edges');

@@ -219,6 +219,8 @@ const { world, sdk, animation, scene, objects, documentState } = built;
 const authored = () => built.authoredCamera;
 // Theme wire color of an object (Resources::object_wire_theme_id): the active or selected color, else its type's.
 const wireColor = (node, type = "wire") => !editor?.selection.has(node) ? theme[type] : editor.selection.nodes.at(-1) === node ? theme.object_active : theme.object_selected;
+// The meshes the view draws instances on (main-view.js drawInstances) of instancers that pass `instancer(node)`.
+const instancesOf = (instancer) => scene.meshes.filter((mesh) => mesh.isVisible && mesh.metadata?.instancers?.some(instancer));
 const overlays = createViewportOverlays(scene, {
   extras: {
     objects: () => world.objects,
@@ -228,7 +230,8 @@ const overlays = createViewportOverlays(scene, {
     aspect: () => { const { width, height } = outputSize(world.renderSettings.state.render); return width / height; },
   },
   origins: { objects: () => world.objects, color: (node) => (editor?.selection.has(node) && !deleted(node) ? wireColor(node) : null) },
-  outlines: { outlined: () => editor?.selection.outlined() ?? [], isActive: (node) => editor.selection.nodes.at(-1) === node, isTransform: () => !!world.wm?.modal },
+  outlines: { outlined: () => [...(editor?.selection.outlined() ?? []), ...instancesOf((node) => editor.selection.has(node))],
+    isActive: (node) => [node, ...(node.metadata?.instancers ?? [])].includes(editor.selection.nodes.at(-1)), isTransform: () => !!world.wm?.modal },
   armatures: {
     sync: () => world.mainSync, objects: () => world.objects,
     visible: (node) => visible(node) && (world.collections?.status(node).visible ?? true),
@@ -255,7 +258,8 @@ const paintTexture = (mesh) => {
     : material?.texture_paint_images[material.paint_active_slot] ?? (active?.bl_idname === "ShaderNodeTexImage" ? active.image : null);
   return image ? imageTexture(image, scene) : null;
 };
-world.workbench = createWorkbench(scene, { wireColor: (mesh) => wireColor(mesh.metadata?.drawOwner ?? mesh), paintTexture });
+// Instances take their selected instancer's wire color, as duplis take their instancer's base flags.
+world.workbench = createWorkbench(scene, { wireColor: (mesh) => wireColor(mesh.metadata?.drawOwner ?? mesh.metadata?.instancers?.find((node) => editor?.selection.has(node)) ?? mesh), paintTexture });
 // Views keep rendering while anything moves: playback, modal edits, user render loops and observers, animations,
 // particles, video; otherwise they stop until the next input or change.
 const observerCount = () => scene.onBeforeRenderObservable.observers.length + scene.onAfterRenderObservable.observers.length;

@@ -254,8 +254,12 @@ void main() {
 // Wireframe: each object's edges as lines sharing its positions, in its wire color; the object itself draws nothing.
 const WIRE_VERTEX = `precision highp float;
 attribute vec3 position;
-uniform mat4 worldViewProjection;
-void main() { gl_Position = worldViewProjection * vec4(position, 1.0); }`;
+#include<instancesDeclaration>
+uniform mat4 viewProjection;
+void main() {
+#include<instancesVertex>
+  gl_Position = viewProjection * finalWorld * vec4(position, 1.0);
+}`;
 const WIRE_FRAGMENT = `precision highp float;
 uniform vec4 wireColor;
 void main() { gl_FragColor = wireColor; }`;
@@ -348,7 +352,7 @@ export function createWorkbench(scene, { wireColor = () => theme.wire, paintText
   Object.assign(accum, { alphaMode: Constants.ALPHA_ONEONE_ONEONE, disableDepthWrite: true, depthFunction: Constants.ALWAYS, transparencyMode: Material.MATERIAL_ALPHABLEND });
   accum.setFloat('xray_alpha', XRAY_ALPHA);
   const wire = new ShaderMaterial('__workbenchWire', scene, { vertexSource: WIRE_VERTEX, fragmentSource: WIRE_FRAGMENT }, {
-    attributes: ['position'], uniforms: ['worldViewProjection', 'wireColor'],
+    attributes: ['position'], uniforms: ['world', 'viewProjection', 'wireColor'],
   });
   // X-ray: every edge shows.
   Object.assign(wire, { backFaceCulling: false, disableDepthWrite: true, depthFunction: Constants.ALWAYS });
@@ -389,7 +393,7 @@ export function createWorkbench(scene, { wireColor = () => theme.wire, paintText
   const edges = (mesh) => {
     let lines = wires.get(mesh);
     const positions = mesh.getVertexBuffer('position');
-    if (lines && !lines.isDisposed() && lines.metadata.positions === positions) return lines;
+    if (lines && !lines.isDisposed() && lines.metadata.positions === positions) return instancedAs(mesh, lines);
     lines?.dispose();
     lines = new Mesh('__wire ' + mesh.name, scene);
     // A view of the object's position buffer, which it keeps owning.
@@ -399,13 +403,22 @@ export function createWorkbench(scene, { wireColor = () => theme.wire, paintText
     lines.setIndices(mesh_batch_cache_wire_indices(mesh), mesh.getTotalVertices());
     Object.assign(lines, { parent: mesh, material: wire, isPickable: false, alwaysSelectAsActiveMesh: true, doNotSerialize: true });
     lines._getRenderingFillMode = () => Material.LineListDrawMode;
-    lines.metadata = { overlay: true, wireOwner: mesh, positions };
+    lines.metadata = { overlay: true, wireOwner: mesh, positions, instances: null };
     wires.set(mesh, lines);
+    return instancedAs(mesh, lines);
+  };
+  // An instance carrier's edges at each of its instances, thin instances on its matrices (overlay-outline.js does so too).
+  const instancedAs = (mesh, lines) => {
+    const instances = mesh.thinInstanceCount ? mesh._thinInstanceDataStorage.matrixData : null;
+    if (instances !== lines.metadata.instances) lines.thinInstanceSetBuffer('matrix', instances, 16, false);
+    else if (instances) lines.thinInstanceBufferUpdated('matrix');
+    if (instances) lines.thinInstanceCount = mesh.thinInstanceCount;
+    lines.metadata.instances = instances;
     return lines;
   };
   const showWires = scene.onBeforeCameraRenderObservable.add((camera) => {
     const show = shaded.get(camera) === 'wire';
-    if (show) for (const mesh of scene.meshes) if (shadedMesh(mesh) && !mesh.metadata?.curves && !mesh.hasThinInstances && !wires.has(mesh)) edges(mesh);
+    if (show) for (const mesh of scene.meshes) if (shadedMesh(mesh) && !mesh.metadata?.curves && !wires.has(mesh)) edges(mesh);
     for (const [mesh, lines] of wires) {
       if (mesh.isDisposed()) { lines.dispose(); wires.delete(mesh); continue; }
       edges(mesh).isVisible = show && mesh.isVisible;

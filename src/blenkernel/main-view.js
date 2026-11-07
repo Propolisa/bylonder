@@ -513,6 +513,8 @@ export function createMainView(state) {
       carrier.thinInstanceBufferUpdated('matrix');
       carrier.thinInstanceCount = length / 16;
       carrier.metadata.instancesVersion = (carrier.metadata.instancesVersion ?? 0) + 1;
+      // Its instancers, whose selection outlines it (overlay_outline.cc draws a selected object's instances).
+      carrier.metadata.instancers = [...new Set(groups.map((group) => byOb.get(group.instancer)).filter(Boolean))];
       if (shape === 'OBJECT') displayBounds(carrier, bounded.has(source));
       // Its bounds over the instances drawn, not the buffer's unused zero matrices (NaN bounds cull a carrier of several
       // materials, whose submeshes are tested against them).
