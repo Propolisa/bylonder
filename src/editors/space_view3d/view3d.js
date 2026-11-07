@@ -93,11 +93,14 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   const nav = createNavigation({ camera: editorCamera, engine: world.engine, onSync: () => sync() });
   view.nav = nav;
 
+  // Looking through a camera hands it the view's input, as a project's Babylon camera takes it; a Blender camera (a
+  // .blend's) moves only as Blender moves it, so a drag in the view paints or selects instead of turning it.
+  const takesInput = (camera) => camera && camera.metadata?.wbHome !== 'BLENDER';
   const toggleCameraView = () => {
     creator.finish(); ctx.capture.release();
     const camera = ctx.sceneCamera();
     state.cameraView = !state.cameraView;
-    if (state.cameraView) camera?.attachControl(canvas, true); else camera?.detachControl();
+    if (state.cameraView && takesInput(camera)) camera.attachControl(canvas, true); else camera?.detachControl();
     views.setInput(view);
     sync(); ctx.shadingChanged();
   };
@@ -106,7 +109,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   view.enterCameraView = () => { if (!state.cameraView) toggleCameraView(); };
   view.setShading = id => { state.shading = id; sync(); ctx.shadingChanged(); };
   // The scene camera changed while this view looks through it.
-  view.sceneCameraChanged = (next, previous) => { if (!state.cameraView) return; previous?.detachControl(); next?.attachControl(canvas, true); sync(); ctx.shadingChanged(); };
+  view.sceneCameraChanged = (next, previous) => { if (!state.cameraView) return; previous?.detachControl(); if (takesInput(next)) next.attachControl(canvas, true); sync(); ctx.shadingChanged(); };
 
   const header = dock.header(headerId);
   const editMode = () => world.editMode?.active;

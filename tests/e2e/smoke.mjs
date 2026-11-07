@@ -976,6 +976,24 @@ const checks = {
     assert.equal(await curves(), before + 1, "Ctrl Z undoes the fill");
   } },
 
+  // Looking through a .blend's camera, a drag in Draw Mode draws a stroke and leaves the camera where it is.
+  "Grease Pencil draws through a .blend's camera without turning it": { open: { link: "grease-pencil", node: "Bouncing Ball" }, async run() {
+    const curves = () => app.bylonder((b) => b.world.mainSync.blender.greasePencil({ repack: true }).filter((d) => !d.onion).reduce((n, d) => n + d.curves.length / 5, 0));
+    const view = () => app.bylonder((b) => Array.from(b.views.input.camera.getViewMatrix().m).map((v) => +v.toFixed(5)));
+    await app.hover();
+    await app.page.keyboard.press("Numpad0");
+    await app.bylonder((b) => b.runOperator("object.mode_set", { mode: "PAINT_GREASE_PENCIL" }));
+    await app.settled();
+    const [before, looking] = [await curves(), await view()];
+    await app.page.mouse.move(...(await app.point(0.3, 0.3)));
+    await app.page.mouse.down();
+    for (let k = 1; k <= 12; k++) await app.page.mouse.move(...(await app.point(0.3 + 0.4 * k / 12, 0.3 + 0.1 * k / 12)));
+    await app.page.mouse.up();
+    await app.settled();
+    assert.equal(await curves(), before + 1, "the drag drew a stroke");
+    assert.deepEqual(await view(), looking, "the camera did not turn");
+  } },
+
   // A pen in Draw Mode: one move event carrying coalesced moves draws them all, and the pen's eraser end erases. The
   // events are the page's own PointerEvents, as a tablet gives them (pressure, tilt, coalesced moves, button 5).
   "Grease Pencil takes a pen's coalesced moves and its eraser end": { open: { link: "grease-pencil", node: "Bouncing Ball" }, async run() {
