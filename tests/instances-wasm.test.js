@@ -74,3 +74,14 @@ const [first] = blender.instances(), { memory } = (await import('../src/bmesh/bm
 memory.grow(1);
 assert.deepEqual(Array.from(first.data), before, "a group's data is read anew after the module's memory grew");
 console.log("Instances: an instance of instances, Object Info's object and a realized branch drawn where Blender's dupli list places them");
+
+// Solid shading (Workbench) lights the instances as it lights objects, in their material's Viewport Display color.
+const { createWorkbench } = await import('../src/draw/workbench.js');
+const { FreeCamera } = await import('@babylonjs/core');
+const workbench = createWorkbench(scene), camera = new FreeCamera('camera', undefined, scene);
+workbench.setShading(camera, 'solid');
+const carriers = scene.meshes.filter((mesh) => mesh.name.startsWith('__instances'));
+assert.ok(carriers.length, 'the view draws instances');
+for (const carrier of carriers) assert.equal(carrier.getMaterialForRenderPass(camera.renderPassId)?.name, '__workbenchSolid', `${carrier.name} is shaded by Workbench in Solid`);
+workbench.dispose();
+console.log('Instances: Solid shading lights them as it lights objects');

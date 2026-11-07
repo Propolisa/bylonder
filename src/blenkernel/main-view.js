@@ -494,7 +494,7 @@ export function createMainView(state) {
       drawn.add(key);
       let carrier = instanced.get(key);
       if (!carrier) {
-        instanced.set(key, carrier = Object.assign(new Mesh('__instances ' + key, scene), { isPickable: false, alwaysSelectAsActiveMesh: true, metadata: {} }));
+        instanced.set(key, carrier = Object.assign(new Mesh('__instances ' + key, scene), { isPickable: false, alwaysSelectAsActiveMesh: true, metadata: { workbench: geometric || shape === 'OBJECT' } }));
         if (!geometric && shape !== 'OBJECT') carrier.material = particleShapeMaterial(scene, shape, color, drawSize);
         if (carrier.material) carrier.onDisposeObservable.add(() => carrier.material.dispose());
       }

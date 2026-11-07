@@ -376,8 +376,9 @@ export function createWorkbench(scene, { wireColor = () => theme.wire, paintText
   };
   const materialOf = (mesh, type, colorType) => (mesh.metadata?.curves ? curvesMaterial(mesh, type === 'xray' ? 'accum' : type)
     : (type === 'solid' && paintMaterial(mesh, colorType)) || materials[type]);
-  // Overlays (grid, extras, Edit Mode) and line meshes draw themselves; curves draw as Workbench's hair.
-  const shadedMesh = (mesh) => (mesh.metadata?.curves ? !mesh.metadata.overlay : !mesh.name.startsWith('__') && !mesh.metadata?.overlay && !(mesh instanceof LinesMesh) && mesh.getTotalVertices() > 0);
+  // Overlays (grid, extras, Edit Mode) and line meshes draw themselves; curves draw as Workbench's hair; the view's own
+  // meshes (named __) draw only when Workbench shades them (instances of objects and meshes, main-view.js drawInstances).
+  const shadedMesh = (mesh) => (mesh.metadata?.curves ? !mesh.metadata.overlay : (!mesh.name.startsWith('__') || mesh.metadata?.workbench) && !mesh.metadata?.overlay && !(mesh instanceof LinesMesh) && mesh.getTotalVertices() > 0);
   const assign = (mesh, camera) => mesh.setMaterialForRenderPass(camera.renderPassId, materialOf(mesh, shaded.get(camera), colorTypes.get(camera)));
   const added = scene.onNewMeshAddedObservable.add((mesh) => {
     // Builders add vertices after construction; decide once the mesh is set up.
@@ -404,7 +405,7 @@ export function createWorkbench(scene, { wireColor = () => theme.wire, paintText
   };
   const showWires = scene.onBeforeCameraRenderObservable.add((camera) => {
     const show = shaded.get(camera) === 'wire';
-    if (show) for (const mesh of scene.meshes) if (shadedMesh(mesh) && !mesh.metadata?.curves && !wires.has(mesh)) edges(mesh);
+    if (show) for (const mesh of scene.meshes) if (shadedMesh(mesh) && !mesh.metadata?.curves && !mesh.hasThinInstances && !wires.has(mesh)) edges(mesh);
     for (const [mesh, lines] of wires) {
       if (mesh.isDisposed()) { lines.dispose(); wires.delete(mesh); continue; }
       edges(mesh).isVisible = show && mesh.isVisible;
