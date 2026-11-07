@@ -3,13 +3,17 @@
 // and a diff image, and report.json with the mismatch score (share of differing pixels) overall and per Blender editor,
 // and per editor how well Bylonder's area overlaps Blender's (layout, intersection over union).
 // usage: node tools/blender-reference/parity.mjs [--out DIR] [--blender] [STATE ...]
-//   --blender recaptures Blender (otherwise only missing shots); needs Xvfb and ImageMagick. PARITY_DISPLAY picks the
-//   X display (default :81), BLENDER_REFERENCE the folder holding Blender (default .blender-reference/).
+//   --blender recaptures Blender (otherwise only missing shots). On Linux Blender runs in Xvfb (PARITY_DISPLAY picks the
+//   X display, default :81); elsewhere in a window on the desktop. The reference Blender is npm run tools'.
 import { fileURLToPath } from "node:url";
 import { spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { chromium, openApp, startServer } from "../../tests/e2e/app.mjs";
+import { TOOLS } from "../../tests/e2e/tools.mjs";
+import { referenceBlender } from "../../tests/blender-reference.js";
 import { displacedSphere, lavaMaterial } from "../../tests/e2e/lava.mjs";
+import { compare } from "./compare.mjs";
 
 const here = fileURLToPath(new URL(".", import.meta.url)), root = fileURLToPath(new URL("../..", import.meta.url));
 const args = process.argv.slice(2);
@@ -22,24 +26,26 @@ const size = { width: 1600, height: 950 };
 // Where the mouse rests, as a fraction of the 3D View; ui-shots.py uses the same point.
 const REST = [0.25, 0.75];
 
-const cache = process.env.BLENDER_REFERENCE || root + ".blender-reference";
-const blender = cache + "/blender-5.2.3-linux-x64/blender";
-const startFile = cache + "/start.blend";
+const blender = referenceBlender();
+const startFile = join(TOOLS.blender, "start.blend");
 const blenderShots = out + "/blender";
 
+// Blender in a window of Bylonder's size: on Linux in Xvfb with Mesa (PARITY_DISPLAY, default :81), elsewhere on the
+// desktop and its GPU. ui-shots.py takes the screenshots with Blender's own Save Screenshot.
 async function captureBlender(ids) {
-  if (!existsSync(blender)) throw Error("Blender not found: run tools/blender-reference/capture.sh once to download it");
-  if (!existsSync(startFile)) spawnSync(blender, ["-b", "--factory-startup", "--python-expr", `import bpy; bpy.ops.wm.save_as_mainfile(filepath='${startFile}')`]);
+  if (!blender) throw Error("Blender not found: run npm run tools once to install it");
+  if (!existsSync(startFile)) spawnSync(blender, ["-b", "--factory-startup", "--python-expr", `import bpy; bpy.ops.wm.save_as_mainfile(filepath=r'${startFile}')`]);
   const display = process.env.PARITY_DISPLAY || ":81";
-  const xvfb = spawn("Xvfb", [display, "-screen", "0", `${size.width}x${size.height}x24`, "-dpi", "96"], { stdio: "ignore" });
+  const xvfb = process.platform === "linux" && spawn("Xvfb", [display, "-screen", "0", `${size.width}x${size.height}x24`, "-dpi", "96"], { stdio: "ignore" });
   try {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    const env = { ...process.env, DISPLAY: display, LIBGL_ALWAYS_SOFTWARE: "1" };
-    const run = spawnSync(blender, ["--factory-startup", "--enable-event-simulate", startFile, "--python", here + "ui-shots.py", "--", blenderShots, ...ids], { env, encoding: "utf8", timeout: 300000 });
+    if (xvfb) await new Promise((resolve) => setTimeout(resolve, 1000));
+    const env = { ...process.env, ...(xvfb && { DISPLAY: display, LIBGL_ALWAYS_SOFTWARE: "1" }) };
+    const window = ["--window-geometry", "0", "0", String(size.width), String(size.height), "--no-window-focus"];
+    const run = spawnSync(blender, ["--factory-startup", "--enable-event-simulate", ...window, startFile, "--python", here + "ui-shots.py", "--", blenderShots, ...ids], { env, encoding: "utf8", timeout: 300000 });
     const shot = (run.stdout.match(/^shot .+$/gm) || []).length;
     if (shot !== ids.length) throw Error(`Blender captured ${shot} of ${ids.length} states:\n${run.stdout}\n${run.stderr}`);
   } finally {
-    xvfb.kill();
+    if (xvfb) xvfb.kill();
   }
 }
 
@@ -232,49 +238,6 @@ async function captureBylonder(browser, url, state) {
   } finally {
     await app.close();
   }
-}
-
-// Side-by-side and diff images and mismatch scores, computed in the browser. A pixel differs when its channels differ
-// by more than 48 in sum, enough to ignore anti-aliasing and small color shifts.
-async function compare(page, blenderPng, bylonderPng, areas) {
-  const result = await page.evaluate(async ([a, b, areas]) => {
-    const load = async (base64) => createImageBitmap(await (await fetch("data:image/png;base64," + base64)).blob());
-    const [left, right] = await Promise.all([load(a), load(b)]);
-    const { width, height } = left;
-    const pixels = (bitmap) => {
-      const canvas = new OffscreenCanvas(width, height), ctx = canvas.getContext("2d");
-      ctx.drawImage(bitmap, 0, 0);
-      return ctx.getImageData(0, 0, width, height);
-    };
-    const pa = pixels(left).data, pb = pixels(right).data;
-    const diff = new ImageData(width, height), mask = new Uint8Array(width * height);
-    for (let i = 0; i < mask.length; i++) {
-      const o = i * 4, d = Math.abs(pa[o] - pb[o]) + Math.abs(pa[o + 1] - pb[o + 1]) + Math.abs(pa[o + 2] - pb[o + 2]);
-      const gray = (pa[o] + pa[o + 1] + pa[o + 2]) / 12;
-      mask[i] = d > 48;
-      diff.data.set(mask[i] ? [255, 40, 90, 255] : [gray, gray, gray, 255], o);
-    }
-    const score = (x0, y0, w, h) => {
-      let n = 0;
-      for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) n += mask[y * width + x];
-      return n / (w * h);
-    };
-    const png = async (draw, w) => {
-      const canvas = new OffscreenCanvas(w, height);
-      draw(canvas.getContext("2d"));
-      const bytes = new Uint8Array(await (await canvas.convertToBlob()).arrayBuffer());
-      let text = "";
-      for (let i = 0; i < bytes.length; i += 0x8000) text += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
-      return btoa(text);
-    };
-    return {
-      mismatch: score(0, 0, width, height),
-      editors: Object.fromEntries((areas || []).map((r) => [r.type, score(r.x, r.y, r.width, r.height)])),
-      sideBySide: await png((ctx) => { ctx.drawImage(left, 0, 0); ctx.drawImage(right, width, 0); }, width * 2),
-      diff: await png((ctx) => ctx.putImageData(diff, 0, 0), width),
-    };
-  }, [blenderPng.toString("base64"), bylonderPng.toString("base64"), areas]);
-  return { ...result, sideBySide: Buffer.from(result.sideBySide, "base64"), diff: Buffer.from(result.diff, "base64") };
 }
 
 // Intersection over union of two rectangles: how well an editor's area in Bylonder matches Blender's.

@@ -1,11 +1,10 @@
-# Screenshots of Blender's UI in the states of ui-states.json, for the visual parity harness (parity.mjs).
-# Run inside an X server with ImageMagick's `import`, with event simulation so the states come from real input:
+# Screenshots of Blender's UI in the states of ui-states.json, for the visual parity harness (parity.mjs), taken by
+# Blender's own Save Screenshot, with event simulation so the states come from real input:
 #   blender --factory-startup --enable-event-simulate START.blend --python ui-shots.py -- OUT_DIR [STATE ...]
 # START.blend is the factory startup saved as a file, which skips the splash screen. Coordinates assume a
-# 1600 x 950 window at UI scale 1 (an X server at 96 DPI).
+# 1600 x 950 window at UI scale 1.
 import json
 import os
-import subprocess
 import sys
 
 import bpy
@@ -14,6 +13,9 @@ from bpy_extras.view3d_utils import location_3d_to_region_2d
 args = sys.argv[sys.argv.index("--") + 1:]
 out, only = args[0], args[1:]
 bpy.context.preferences.view.show_tooltips = False
+# UI scale 1 whatever the display's scaling (Windows at 150 % scales Blender's UI by 1.5): Blender's dpi is 72 at scale 1.
+view = bpy.context.preferences.view
+view.ui_scale *= 72 / bpy.context.preferences.system.dpi
 STATES = json.load(open(os.path.join(os.path.dirname(__file__), "ui-states.json")))
 
 # Header buttons, in window pixels from the bottom left.
@@ -328,7 +330,8 @@ def steps():
         for a in window().screen.areas:
             a.tag_redraw()
         yield 0.5
-        subprocess.run(["import", "-window", "root", os.path.join(out, state["id"] + ".png")], check=True)
+        with bpy.context.temp_override(window=window()):
+            bpy.ops.screen.screenshot(filepath=os.path.join(out, state["id"] + ".png"))
         areas[state["id"]] = [
             {"type": a.type, "x": a.x, "y": window().height - a.y - a.height, "width": a.width, "height": a.height}
             for a in window().screen.areas
