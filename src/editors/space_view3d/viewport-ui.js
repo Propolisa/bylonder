@@ -1,4 +1,3 @@
-import { nodeId } from '../object/identity.js';
 import { createGridOverlay } from '../../draw/overlay-grid.js';
 import { createExtrasOverlay } from '../../draw/overlay-extra.js';
 import { createCursorOverlay } from '../../draw/overlay-cursor.js';
@@ -44,14 +43,13 @@ export function createViewportStatus({ world, editor, views, send }) {
   let last = '', lastStatus = 0;
   const status = () => {
     const active = editor.selection.nodes.at(-1);
-    // Blender shows the active object's collection (or the active collection) before the object name.
-    // The 3D View names the active object's collection, the status bar the active collection.
+    // The 3D View and the status bar name the active collection (view3d_draw.cc draw_selected_name: CTX_data_collection).
     const cols = world.collections, name = (id) => (!cols || !id || id === cols.MASTER ? 'Scene Collection' : cols.byId(id).name);
-    const collection = name(cols?.active), home = name(active && world.objects.includes(active) ? cols?.memberships(nodeId(active))[0] : cols?.active);
+    const collection = name(cols?.active);
     const visible = world.objects.filter(n => n.isEnabled() && n.isVisible !== false && !n.isDisposed() && n.getTotalVertices);
     const verts = visible.reduce((s, n) => s + n.getTotalVertices(), 0);
     const tris = visible.reduce((s, n) => s + (n.getTotalIndices() || n.getTotalVertices()) / 3, 0);
-    const detail = `(${Math.round(world.animation.time.frame)}) ${home}${active ? ' | ' + active.name : ''}`;
+    const detail = `(${Math.round(world.animation.time.frame)}) ${collection}${active ? ' | ' + active.name : ''}`;
     for (const view of views.all) view.setDetail?.(detail);
     const hints = world.wm?.modal
       ? [[['mouse_lmb'], 'Confirm'], [['mouse_rmb'], 'Cancel'], [['X', 'Y', 'Z'], 'Axis'], [['Shift'], 'Precision'], [['Ctrl'], 'Snap']]
