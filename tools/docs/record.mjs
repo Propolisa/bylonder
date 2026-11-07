@@ -108,6 +108,8 @@ export async function recorder(feature, { example, node, size = SIZE, scale = 1,
         await scope.locator("input:not([type])").first().fill(String(value));
       } else {
         await scope.locator(`xpath=.//*[normalize-space(text())="${label}"]/following::*[@role="spinbutton"][1]`).nth(nth).click();
+        // Keys before the text field has focus reach the panel: Ctrl A over a modifier applies it.
+        await app.frame().locator("input:focus").waitFor();
         await app.page.keyboard.press("Control+A");
         await app.page.keyboard.type(String(value));
       }

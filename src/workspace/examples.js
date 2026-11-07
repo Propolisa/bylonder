@@ -22,7 +22,7 @@ export const examples = [
   { id: "lumen", title: "Lumen" },
   { id: "materials", title: "Materials & Nodes" },
   { id: "solar", title: "Solar System" },
-  { id: "arrays", title: "Array Modifiers" },
+  { id: "arrays", title: "Spiral Stair" },
   { id: "animation", title: "Keyframe Animation" },
   { id: "city", title: "Procedural City" },
   { id: "shader", title: "Shader Waves" },

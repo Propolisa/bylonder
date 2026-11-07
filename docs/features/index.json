@@ -854,7 +854,7 @@
  {
   "id": "modifiers",
   "title": "Modifiers",
-  "summary": "Add, edit and stack modifiers in Properties > Modifiers, here two Array modifiers that turn a cube into a floor of tiles.",
+  "summary": "Add, edit and stack modifiers in Properties > Modifiers, here a Bevel and an Array with an Object Offset that turn one box into a spiral stair.",
   "expect": "Blender's modifiers run Blender's code and give its result; modifier panels cut long labels short.",
   "blender_version": "5.2.3",
   "blender_manual": [
@@ -864,9 +864,9 @@
   "example": "arrays",
   "thumbnail": "modifiers/thumbnail.png",
   "media": [
-   "modifiers/add-array.gif",
-   "modifiers/count.gif",
-   "modifiers/second-array.gif"
+   "modifiers/stack.png",
+   "modifiers/turn.gif",
+   "modifiers/count.gif"
   ],
   "ui": [
    "PROPERTIES",
@@ -891,12 +891,11 @@
    "tests/modifiers-wasm.test.js"
   ],
   "limits": [
-   "The Array Modifiers example builds its arrays from code with Bylonder's Array (Nodes) modifier; the steps here use the Add Modifier menu.",
    "Modifier panels lay out Blender's properties in a narrow column, so long labels are cut short."
   ],
   "page": "docs/features/modifiers.md",
   "open": "https://propolisa.github.io/bylonder/#example=arrays",
-  "example_title": "Array Modifiers",
+  "example_title": "Spiral Stair",
   "coverage": {
    "operators": {
     "supported": 29,
