@@ -76,6 +76,8 @@ export function createWorlds(world, { commit = () => {}, asset } = {}) {
     setViewportActive(value, sceneLinear = false) { renderer.setRendered(value, sceneLinear); },
     // Material Preview's studio lighting while a view shows it.
     setPreview(value) { renderer.setPreview(value); },
+    // The studio light's orientation for the view about to render. Cheap; per view.
+    setStudio(value) { renderer.setStudio(value); },
     link(entry) { state.active = entry?.id ?? null; changed(); },
     unlink() { state.active = null; changed(); },
     // Blender's world.new copies the current world when there is one, as Blender's.

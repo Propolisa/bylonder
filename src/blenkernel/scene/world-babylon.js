@@ -1,4 +1,4 @@
-import { Color3, Color4, Constants, CubeMapToSphericalPolynomialTools, CubeTexture, EXRCubeTexture, HDRCubeTexture, HDRFiltering, MeshBuilder, BaseTexture, Texture, ReflectionProbe, RenderTargetTexture, Scene } from '@babylonjs/core';
+import { Color3, Color4, Constants, CubeMapToSphericalPolynomialTools, CubeTexture, EXRCubeTexture, HDRCubeTexture, HDRFiltering, Matrix, MeshBuilder, BaseTexture, Texture, ReflectionProbe, RenderTargetTexture, Scene } from '@babylonjs/core';
 import { RAY_TYPE, setRayType } from '../../nodes/blender/shader-nodes.js';
 
 // Babylon adapter for a World datablock. Babylon has no World object, so a world is pushed into
@@ -75,8 +75,21 @@ export function createWorldRenderer(scene, { asset = path => path, studioLight }
   // no mesh is on, which leaves their settings as they are.
   const NO_MESH_LAYER = 0x10000000;
   let preview = null;
+  // blender-port: eevee_lookdev.cc LookdevModule::rotate_world: the studio light turned by the view's Rotation, and with
+  // the view unless World Space Lighting is on (View3DShading studiolight_rotate_z, use_world_space_lighting), per view.
+  // STUDIO_YAW: Blender's equirectangular image as Babylon lays it out on the cube, turned about the vertical.
+  const STUDIO_YAW = -Math.PI / 2, studioRotation = new Matrix(), studioYaw = new Matrix();
+  let studio = { worldSpace: false, rotateZ: 0 };
+  const orientStudio = (camera) => {
+    Matrix.RotationYToRef(STUDIO_YAW - studio.rotateZ, studioYaw);
+    if (studio.worldSpace) studioRotation.copyFrom(studioYaw);
+    else camera.getViewMatrix().getRotationMatrixToRef(studioRotation).multiplyToRef(studioYaw, studioRotation);
+    texture(studioLight).setReflectionTextureMatrix(studioRotation);
+  };
+  let orienting = null;
   const applyPreview = () => {
     scene.environmentTexture = texture(studioLight);
+    orienting ??= scene.onBeforeCameraRenderObservable.add(orientStudio);
     scene.environmentIntensity = 1;
     for (const light of scene.lights) if (!preview.lights.has(light)) { preview.lights.set(light, light.includeOnlyWithLayerMask); light.includeOnlyWithLayerMask = NO_MESH_LAYER; }
   };
@@ -89,6 +102,8 @@ export function createWorldRenderer(scene, { asset = path => path, studioLight }
     }
     scene.environmentTexture = preview.env;
     scene.environmentIntensity = preview.intensity;
+    scene.onBeforeCameraRenderObservable.remove(orienting);
+    orienting = null;
     for (const [light, mask] of preview.lights) light.includeOnlyWithLayerMask = mask;
     preview = null;
   };
@@ -96,6 +111,8 @@ export function createWorldRenderer(scene, { asset = path => path, studioLight }
     hasAuthoredTexture: !!authoredTexture,
     // Material Preview's lighting for the scene, while a view shows it.
     setPreview,
+    // The studio light's orientation for the view about to render ({ worldSpace, rotateZ }). Cheap; per view.
+    setStudio(value) { studio = value; },
     // Rebuilds the world's Babylon state. Solid and Wireframe views show no world background or volume, as in Blender.
     render(world) {
       const background = world?.background, volume = world?.volume;

@@ -67,7 +67,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   if (from) { editorCamera.upVector = from.upVector.clone(); editorCamera.setTarget(from.target.clone()); editorCamera.setPosition(from.position.clone()); editorCamera.mode = from.mode; }
   // The view's own state, and its regions' as SpaceView3D's show_region_* (Blender's startup: no sidebar), and the
   // overlay's Weight Paint settings (View3DOverlay's defaults).
-  const state = { shading: 'solid', color_type: 'MATERIAL', overlays: true, show_gizmo: true, cameraView: false, show_region_header: true, show_region_tool_header: true, show_region_toolbar: true,
+  const state = { shading: 'solid', color_type: 'MATERIAL', use_world_space_lighting: false, studiolight_rotate_z: 0, overlays: true, show_gizmo: true, cameraView: false, show_region_header: true, show_region_tool_header: true, show_region_toolbar: true,
     show_region_ui: false, weight_paint_mode_opacity: 1, show_wpaint_contours: false };
   const view = {
     id: headerId, section, canvas, editorCamera, state, active: true, wantsCompositor: false,
@@ -233,7 +233,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
       ? world.mainSync?.viewCamera(view.camera, outputSize(world.renderSettings.state.render), { width: canvas.width, height: canvas.height }) : null;
     cameraBorder.hidden = !frame || !state.overlays;
     if (frame) cameraBorder.style.cssText = `--width:${frame.width};--height:${frame.height};--passepartout:${frame.passepartout}`;
-    world.beforeViewRender({ rendered, compositor: view.wantsCompositor });
+    world.beforeViewRender({ rendered, compositor: view.wantsCompositor, studio: { worldSpace: state.use_world_space_lighting, rotateZ: state.studiolight_rotate_z } });
     // Rendered draws the overlays after its film, as Blender does; the compositor's graph has no pass for them.
     const film = rendered && !scene.frameGraph ? world.renderSettings.film(view.camera) : null;
     ctx.overlays.setEnabled(state.overlays && (!rendered || !!film), state);

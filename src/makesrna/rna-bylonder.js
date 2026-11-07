@@ -663,6 +663,9 @@ const STRUCTS = {
   View3DShading: {
     type: { get: (view) => SHADING[view.state.shading], set: (view, type) => setViewState(view, 'shading', Object.keys(SHADING).find((id) => SHADING[id] === type)) },
     show_xray: { get: (view) => !!view.state.xray, set: (view, value) => setViewState(view, 'xray', !!value) },
+    // Material Preview's studio light: with the view or fixed in the world, and its rotation.
+    use_world_space_lighting: { get: (view) => !!view.state.use_world_space_lighting, set: (view, value) => setViewState(view, 'use_world_space_lighting', !!value) },
+    studiolight_rotate_z: { get: (view) => view.state.studiolight_rotate_z ?? 0, set: (view, value) => setViewState(view, 'studiolight_rotate_z', Number(value)) },
   },
   View3DOverlay: { show_overlays: { get: (view) => view.state.overlays, set: (view, value) => setViewState(view, 'overlays', !!value) } },
   RegionView3D: {
