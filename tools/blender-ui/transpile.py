@@ -19,6 +19,8 @@ TAG = json.load(open(os.path.join(REPO, 'tools', 'blender-port', 'manifest.json'
 # Where Transcrypt's Python differs from what Blender's scripts use: (generated file, text, replacement, reason).
 FORMAT = "str.format with a format spec ('{:s}', '{:.2f}', '{:03d}'), which Transcrypt leaves unformatted"
 PATCHES = [
+    ('time.js', 'var __language = window.navigator.language;', 'var __language = Intl.getCanonicalLocales (window.navigator.language) [0];',
+     "the browser's locale only when Intl accepts it (Chromium under LANG=C.UTF-8 reports en-US@posix), else the catch's en-US"),
     ('org.transcrypt.__runtime__.js', "export function getattr (obj, name) {\n    return name in obj ? obj [name] : obj ['py_' + name];",
      "export function getattr (obj, name, py_default) {\n"
      "    if (arguments.length > 2 && (obj === null || obj === undefined || !(name in Object (obj) || 'py_' + name in Object (obj)))) {\n"
