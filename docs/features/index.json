@@ -624,34 +624,43 @@
  {
   "id": "keyframe-animation",
   "title": "Keyframe Animation",
-  "summary": "Key an object's transform with I at two frames on the Timeline and play the animation with Space.",
-  "expect": "Keying with I, the Timeline and playback work as in Blender; the demo itself is keyed from code, so the steps animate the Default Cube instead.",
+  "summary": "Key an object's rotation with I at two frames, shape the motion between them with an F-curve's interpolation and easing in the Graph Editor, and play it.",
+  "expect": "Keying with I, the Timeline, the Graph Editor's interpolation and easing modes and playback work as in Blender, evaluated by Blender's animation code.",
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/animation/keyframes/introduction.html",
    "https://docs.blender.org/manual/en/5.2/animation/keyframes/editing.html",
+   "https://docs.blender.org/manual/en/5.2/editors/graph_editor/fcurves/properties.html",
    "https://docs.blender.org/manual/en/5.2/editors/timeline.html"
   ],
-  "example": "animation",
+  "example": "newtons-cradle",
   "thumbnail": "keyframe-animation/thumbnail.png",
   "media": [
-   "keyframe-animation/insert.gif",
-   "keyframe-animation/second-key.gif",
+   "keyframe-animation/pendulum.gif",
+   "keyframe-animation/key-swing.gif",
+   "keyframe-animation/ease.gif",
    "keyframe-animation/play.gif",
-   "keyframe-animation/timeline.png"
+   "keyframe-animation/cradle.gif"
   ],
   "ui": [
    "VIEW_3D",
    "TIMELINE",
+   "FCURVES",
    "TIME_*",
    "DOPESHEET_MT_marker",
    "ANIM_MT_keyframe*",
-   "VIEW3D_MT_object_animation"
+   "VIEW3D_MT_object_animation",
+   "GRAPH_MT_key"
   ],
   "operators": [
    "anim.keyframe_insert",
-   "transform.translate",
    "transform.rotate",
+   "object.rotation_clear",
+   "object.editmode_toggle",
+   "transform.translate",
+   "graph.interpolation_type",
+   "graph.easing_type",
+   "graph.view_all",
    "screen.animation_play",
    "screen.frame_jump",
    "screen.keyframe_jump"
@@ -668,21 +677,21 @@
    "tests/animatable.test.js"
   ],
   "limits": [
-   "The Keyframe Animation example keys a Babylon scene from code with the project SDK; the steps here key Blender's objects with I."
+   "The Keyframe Animation example (a Babylon scene keyed from code with the project SDK) is kept for the SDK; the Newton's Cradle example is the one this page recreates."
   ],
   "page": "docs/features/keyframe-animation.md",
-  "open": "https://propolisa.github.io/bylonder/#example=animation",
-  "example_title": "Keyframe Animation",
+  "open": "https://propolisa.github.io/bylonder/#example=newtons-cradle",
+  "example_title": "Newton's Cradle",
   "coverage": {
    "operators": {
-    "supported": 32,
+    "supported": 71,
     "partial": 1,
-    "total": 39
+    "total": 110
    },
    "ui": {
-    "supported": 13,
+    "supported": 19,
     "partial": 0,
-    "total": 14
+    "total": 25
    }
   }
  },
@@ -1290,6 +1299,7 @@
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/animation/armatures/posing/index.html",
+   "https://docs.blender.org/manual/en/5.2/animation/armatures/skinning/parenting.html",
    "https://docs.blender.org/manual/en/5.2/animation/armatures/posing/selecting.html",
    "https://docs.blender.org/manual/en/5.2/animation/armatures/properties/bone_collections.html",
    "https://docs.blender.org/manual/en/5.2/animation/armatures/posing/bone_constraints/index.html",
@@ -1297,9 +1307,11 @@
    "https://docs.blender.org/manual/en/5.2/animation/armatures/posing/editing/pose_library.html",
    "https://docs.blender.org/manual/en/5.2/editors/3dview/display/overlays.html"
   ],
-  "example": "rigged-character",
+  "example": "desk-lamp",
   "thumbnail": "rigging/thumbnail.png",
   "media": [
+   "rigging/build.gif",
+   "rigging/skin.gif",
    "rigging/pose-mode.gif",
    "rigging/select.gif",
    "rigging/select-box.gif",
@@ -1308,7 +1320,8 @@
    "rigging/bone-collections.gif",
    "rigging/constraint.gif",
    "rigging/pose-library.gif",
-   "rigging/weight-paint.gif"
+   "rigging/weight-paint.gif",
+   "rigging/aim.gif"
   ],
   "ui": [
    "VIEW_3D",
@@ -1333,6 +1346,9 @@
    "VIEW3D_PT_slots_vertex_groups"
   ],
   "operators": [
+   "armature.extrude_move",
+   "object.parent_set",
+   "object.editmode_toggle",
    "object.posemode_toggle",
    "view3d.select",
    "view3d.select_box",
@@ -1382,18 +1398,80 @@
    "Selecting the armature in Object Mode outlines its child mesh too."
   ],
   "page": "docs/features/rigging.md",
-  "open": "https://propolisa.github.io/bylonder/#example=rigged-character",
-  "example_title": "Rigged Character",
+  "open": "https://propolisa.github.io/bylonder/#example=desk-lamp",
+  "example_title": "Desk Lamp",
   "coverage": {
    "operators": {
-    "supported": 136,
+    "supported": 139,
     "partial": 1,
-    "total": 164
+    "total": 167
    },
    "ui": {
     "supported": 92,
     "partial": 1,
     "total": 99
+   }
+  }
+ },
+ {
+  "id": "sculpting",
+  "title": "Sculpting",
+  "summary": "Sculpt a mesh in Sculpt Mode with Blender's brushes, Grab, Draw, Crease, Inflate and Smooth, each stroke one undo step, here on a ceramic owl.",
+  "expect": "Sculpt Mode, its brushes, their keys and strokes are Blender's code and move the mesh as Blender's do; dynamic topology and multiresolution sculpting are not set up in the steps.",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/sculpt_paint/sculpting/introduction/index.html",
+   "https://docs.blender.org/manual/en/5.2/sculpt_paint/sculpting/brushes/index.html",
+   "https://docs.blender.org/manual/en/5.2/sculpt_paint/brush/index.html",
+   "https://docs.blender.org/manual/en/5.2/editors/3dview/modes.html"
+  ],
+  "example": "sculpting",
+  "thumbnail": "sculpting/thumbnail.png",
+  "media": [
+   "sculpting/sculpt-mode.gif",
+   "sculpting/grab.gif",
+   "sculpting/draw.gif",
+   "sculpting/crease.gif",
+   "sculpting/inflate.gif",
+   "sculpting/smooth-undo.gif"
+  ],
+  "ui": [
+   "VIEW_3D",
+   "SCULPT",
+   "VIEW3D_MT_sculpt",
+   "VIEW3D_PT_tools_brush_settings",
+   "VIEW3D_PT_tools_brush_falloff",
+   "VIEW3D_PT_tools_brush_stroke"
+  ],
+  "operators": [
+   "object.mode_set",
+   "sculpt.brush_stroke",
+   "brush.asset_activate",
+   "ed.undo"
+  ],
+  "code": [
+   "src/editors/object/main-modes.js",
+   "src/editors/space_view3d/view3d-window.js"
+  ],
+  "tests": [
+   "tests/sculpt-wasm.test.js"
+  ],
+  "limits": [
+   "The owl's starting form is made by its script with brush-like falloffs (grab, draw, inflate and crease around points and along lines), not by recorded strokes."
+  ],
+  "page": "docs/features/sculpting.md",
+  "open": "https://propolisa.github.io/bylonder/#example=sculpting",
+  "example_title": "Ceramic Owl",
+  "coverage": {
+   "operators": {
+    "supported": 52,
+    "partial": 1,
+    "total": 54
+   },
+   "ui": {
+    "supported": 19,
+    "partial": 0,
+    "total": 19
    }
   }
  },

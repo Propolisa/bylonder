@@ -14,7 +14,11 @@ const proxy = process.env.HTTPS_PROXY && { proxy: { server: process.env.HTTPS_PR
 // Mesa's llvmpipe through ANGLE, as nodes-gpu.test.js runs: Chromium's default SwiftShader takes seconds a frame over
 // Blender's 4D noise.
 const gl = ["--use-gl=angle", "--use-angle=gl-egl", "--ignore-gpu-blocklist"];
-export const chromium = { launch: (options) => playwright.chromium.launch({ ...proxy, args: gl, ...options }) };
+// CHROMIUM_CDP: a running Chromium to drive instead (e.g. one on the Windows side of WSL, on its GPU), started with
+// --remote-debugging-port; closing the browser only disconnects from it.
+export const chromium = {
+  launch: (options) => (process.env.CHROMIUM_CDP ? playwright.chromium.connectOverCDP(process.env.CHROMIUM_CDP) : playwright.chromium.launch({ ...proxy, args: gl, ...options })),
+};
 // Chromium's incognito contexts crash on file handles read back from IndexedDB (the Sequencer's media library): checks
 // that reload with media open the app in a profile of its own.
 async function persistentContext(options) {
