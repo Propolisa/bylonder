@@ -5,9 +5,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { BlenderMain, newOperator, blenderModule } from '../src/bmesh/bmesh-wasm.js';
 import { BlenderAnimation, animatedProperty } from '../src/blenkernel/animation/anim-blender.js';
-import { AnimArea, SPACE_GRAPH, SPACE_ACTION, RGN_TYPE_WINDOW, RGN_TYPE_UI, ACTION_MODES, GRAPH_MODES, OPERATOR_FINISHED, OPERATOR_RUNNING_MODAL } from '../src/editors/animation/anim-area.js';
+import { AnimArea, SPACE_GRAPH, SPACE_ACTION, RGN_TYPE_WINDOW, RGN_TYPE_HEADER, RGN_TYPE_UI, ACTION_MODES, GRAPH_MODES, OPERATOR_FINISHED, OPERATOR_RUNNING_MODAL } from '../src/editors/animation/anim-area.js';
 import { FCURVE } from '../src/blenkernel/animation/anim-blender.js';
-import { pointerStruct, setContextPointer } from '../src/python/bpy_rna.js';
+import { contextStruct, pointerStruct, setContextPointer } from '../src/python/bpy_rna.js';
 import { regionPanels, categorySet, buttonApplied, buttonPress } from '../src/editors/interface/ui-tree.js';
 
 const dir = new URL('./fixtures/anim/', import.meta.url);
@@ -208,6 +208,27 @@ for (const [name, idname, key, axes, typed] of MODAL) {
   for (const c of typed) area.handle({ type: c === '.' ? 'PERIOD' : DIGITS[c], text: c, ...at });
   assert.ok(area.handle({ modal: area.modalItem('CONFIRM'), ...at }) & OPERATOR_FINISHED, `${name}: confirmed`);
   compare(state(anim, ob), fixture.after, `${name} (modal)`);
+  area.dispose();
+}
+// View > Frame All from the header's menu (INVOKE_REGION_WIN: it polls in the main region) and Home with Smooth View
+// on in the Preferences: the view frames the keys at once.
+{
+  const main = new BlenderMain(), anim = new BlenderAnimation(main), ob = main.add('EMPTY', 'Empty');
+  main.setBase(ob, { select: true, active: true });
+  const { type, subtype } = animatedProperty('Object', 'location'), fc = anim.fcurve(ob, 'location', 0, { group: 'Object Transforms', type, subtype });
+  anim.insert(fc, 1, 0);
+  anim.insert(fc, 20, 2);
+  const area = new AnimArea(main, SPACE_GRAPH);
+  area.layout(RGN_TYPE_WINDOW, 0, 0, 800, 400);
+  setContextPointer(main.C);
+  area.v2d().cur = { xmin: 0, xmax: 250, ymin: -9, ymax: 10 };
+  contextStruct(area.main.C).preferences.view.smooth_view = 200;
+  // bpy_operator_poll's call context 1: INVOKE_REGION_WIN, as a menu's operator buttons poll (uiItemFullO_ptr_ex).
+  const menuPolls = (idname) => area.inContext(RGN_TYPE_HEADER, (C) => blenderModule.withString(idname, (p) => blenderModule.exports.bpy_operator_poll(C, p, 1)));
+  assert.ok(menuPolls('graph.view_all') && !area.poll('graph.view_all', RGN_TYPE_HEADER), 'Frame All polls from the header menu, in the main region');
+  area.run(newOperator('graph.view_all', {}), RGN_TYPE_WINDOW, { type: 'HOME', value: 'PRESS', x: 400, y: 200 });
+  const { xmin, xmax } = area.v2d().cur;
+  assert.ok(xmin > -20 && xmax < 40, `Home frames the keys: ${xmin}..${xmax}`);
   area.dispose();
 }
 console.log(`Animation editors: ${cases.length} Graph Editor and Dope Sheet operator results, ${panels.length} sidebar panel edits, ${fmods.length} F-Modifier stacks, ${drivers.length} drivers, ${markers.length} marker operators and ${MODAL.length} modal transforms match Blender 5.2`);

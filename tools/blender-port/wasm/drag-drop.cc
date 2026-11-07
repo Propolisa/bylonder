@@ -21,7 +21,53 @@ namespace blender {
 
 /* As wm_event_system.cc defines them, for operators run in the context's area and region. */
 bool WM_operator_poll(bContext *C, wmOperatorType *ot) { return !ot->poll || ot->poll(C); }
-bool WM_operator_poll_context(bContext *C, wmOperatorType *ot, wm::OpCallContext /*context*/) { return WM_operator_poll(C, ot); }
+/* As wm_operator_call_internal polls in a call context: a region context in that region of the context's area (a
+ * header menu's INVOKE_REGION_WIN items in its main region), an area context without a region, a screen context
+ * without either. */
+bool WM_operator_poll_context(bContext *C, wmOperatorType *ot, wm::OpCallContext context)
+{
+  ScrArea *area = CTX_wm_area(C);
+  ARegion *region = CTX_wm_region(C);
+  ScrArea *poll_area = area;
+  ARegion *poll_region = region;
+  auto region_of_type = [&](int type) {
+    ARegion *found = !area ? nullptr :
+                     type == RGN_TYPE_WINDOW ? BKE_area_find_region_active_win(area) :
+                                               BKE_area_find_region_type(area, type);
+    poll_region = found ? found : (area ? region : nullptr);
+  };
+  switch (context) {
+    case wm::OpCallContext::InvokeRegionWin:
+    case wm::OpCallContext::ExecRegionWin:
+      region_of_type(RGN_TYPE_WINDOW);
+      break;
+    case wm::OpCallContext::InvokeRegionChannels:
+    case wm::OpCallContext::ExecRegionChannels:
+      region_of_type(RGN_TYPE_CHANNELS);
+      break;
+    case wm::OpCallContext::InvokeRegionPreview:
+    case wm::OpCallContext::ExecRegionPreview:
+      region_of_type(RGN_TYPE_PREVIEW);
+      break;
+    case wm::OpCallContext::InvokeArea:
+    case wm::OpCallContext::ExecArea:
+      poll_region = nullptr;
+      break;
+    case wm::OpCallContext::InvokeScreen:
+    case wm::OpCallContext::ExecScreen:
+      poll_area = nullptr;
+      poll_region = nullptr;
+      break;
+    default:
+      break;
+  }
+  CTX_wm_area_set(C, poll_area);
+  CTX_wm_region_set(C, poll_region);
+  const bool polls = WM_operator_poll(C, ot);
+  CTX_wm_area_set(C, area);
+  CTX_wm_region_set(C, region);
+  return polls;
+}
 wmEventHandler_Dropbox *WM_event_add_dropbox_handler(ListBaseT<wmEventHandler> *handlers, ListBaseT<wmDropBox> *dropboxes)
 {
   for (wmEventHandler &handler_base : *handlers) {

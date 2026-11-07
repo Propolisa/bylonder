@@ -1236,10 +1236,13 @@ bool ED_operator_region_animview_active(bContext *C)
   return true;
 }
 
-/* As wm_operators.cc defines it. */
+bContext *wm_handling_context();
+/* port-override: a view changes at once where no timer steps its smooth view: an animation editor's area runs its
+ * operators outside the window's handlers (wm_handling_context() is null there), so Home did nothing once the
+ * Preferences set Smooth View; the window's 3D Views animate as Blender's do. */
 int WM_operator_smooth_viewtx_get(const wmOperator *op)
 {
-  return (op->flag & OP_IS_INVOKE && !(U.uiflag & USER_REDUCE_MOTION)) ? U.smooth_viewtx : 0;
+  return (wm_handling_context() && op->flag & OP_IS_INVOKE && !(U.uiflag & USER_REDUCE_MOTION)) ? U.smooth_viewtx : 0;
 }
 
 /* port-override: no message bus (its subscribers are the UI's). */
