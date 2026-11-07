@@ -1304,6 +1304,35 @@ if (${this.rgba.associatedVariableName}.a <= 0.0) discard;
   }
 }
 
+// blender-port: eevee_lightprobe_sphere_bake.bsl.hh, eevee_colorspace_lib.bsl.hh brightness_clamp_max: the world probe
+// keeps the world's light up to its Sun Threshold (EEVEE lights the rest as a sun) and the scene's indirect light clamp;
+// the view sees the world unclamped. The material's limits (blenderProbeClamp: sun, indirect) are its world's; 0 is none.
+export class BlenderWorldProbeClampBlock extends NodeMaterialBlock {
+  constructor(name) {
+    super(name, Targets.Fragment);
+    this.registerInput('radiance', T.Color4);
+    this.registerOutput('output', T.Color4);
+  }
+  getClassName() { return 'BlenderWorldProbeClampBlock'; }
+  get radiance() { return this._inputs[0]; }
+  get output() { return this._outputs[0]; }
+  bind(effect, nodeMaterial, mesh) {
+    const limit = (value) => (value > 0 ? value : 1e20), [sun = 0, indirect = 0] = nodeMaterial.blenderProbeClamp ?? [];
+    effect.setFloat3(this._limits, mesh ? meshValue('$ray_type')[1](mesh) : RAY_TYPE.CAMERA, limit(sun), limit(indirect));
+  }
+  _buildBlock(state) {
+    super._buildBlock(state);
+    this._limits = state._getFreeVariableName('bl_probe_limits');
+    state._emitUniformFromString(this._limits, T.Vector3);
+    state._emitFunction('bl_brightness_clamp_max', 'vec3 bl_brightness_clamp_max(vec3 color, float limit) { return color * clamp(limit / max(1e-8, max(max(abs(color.r), abs(color.g)), abs(color.b))), 0.0, 1.0); }\n', '');
+    const radiance = this.radiance.associatedVariableName, limits = this._limits;
+    state.compilationString += `${state._declareOutput(this.output)} = ${limits}.x == ${RAY_TYPE.CAMERA}.0 ? ${radiance} : vec4(bl_brightness_clamp_max(bl_brightness_clamp_max(${radiance}.rgb, ${limits}.y), ${limits}.z), ${radiance}.a);\n`;
+    state.sharedData.bindableBlocks.push(this);
+    return this;
+  }
+}
+RegisterClass('BABYLON.BlenderWorldProbeClampBlock', BlenderWorldProbeClampBlock);
+
 // A world's box at the far plane: behind all the view draws, whatever its clip end.
 export class BlenderFarPlaneBlock extends NodeMaterialBlock {
   constructor(name) {
@@ -1351,7 +1380,9 @@ export class ShaderNodeOutputWorld extends ShaderNodeOutputMaterial {
     const processing = helper(material, `__display ${this.uniqueId}`, (name) => new BlenderDisplayBlock(name));
     const radiance = closure ? helper(material, `__unlit ${this.uniqueId}`, (name) => new BlenderUnlitSurfaceBlock(name)) : null;
     if (radiance) wire(closure, radiance.closure);
-    wire(radiance?.radiance ?? helper(material, '__black', (name) => Object.assign(new InputBlock(name, undefined, T.Color4), { value: new Color4(0, 0, 0, 1) })).output, processing.color);
+    const probe = helper(material, `__probeClamp ${this.uniqueId}`, (name) => new BlenderWorldProbeClampBlock(name));
+    wire(radiance?.radiance ?? helper(material, '__black', (name) => Object.assign(new InputBlock(name, undefined, T.Color4), { value: new Color4(0, 0, 0, 1) })).output, probe.radiance);
+    wire(probe.output, processing.color);
     this.rgba.connectedPoint?.disconnectFrom(this.rgba);
     wire(processing.getOutputByName('displayRgb'), this.rgb);
   }

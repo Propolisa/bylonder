@@ -52,7 +52,7 @@ tests:
 limits:
   - Shadows are filtered by a fixed amount, as EEVEE's filter radius; a light's Angle or Radius widens its highlights but does not soften its shadows' edges.
   - Reflections and refraction show the world's color only; EEVEE's light probes (sphere, plane, volume) and screen space reflections are not drawn, so glass and metal do not reflect the room.
-  - A world's node tree draws as the background and lights the scene through one world probe baked when the world changes; a Sky Texture's Preetham and Hosek / Wilkie models, the world's Volume and its Background's blur are not drawn yet, and the tree's values are not followed while it is edited.
+  - A world's node tree draws as the background and lights the scene through one world probe baked when the world changes, clamped at the world's Sun Threshold as EEVEE's, without the sun light EEVEE makes of what it clamps; a Sky Texture's Preetham and Hosek / Wilkie models, the world's Volume and its Background's blur are not drawn yet, and the tree's values are not followed while it is edited.
   - Glass refracts the world behind it, not the objects; a Transparent BSDF mixed in lets the objects through.
   - AgX and Filmic map to Babylon's filmic tone mapping, not Blender's curves, so colors differ from Blender under those view transforms; Standard matches.
   - The 3D Viewport's camera view frames tighter than the camera when the viewport's aspect differs from the render's; Render Image frames as Blender does.

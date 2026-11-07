@@ -313,6 +313,7 @@ export function createMainView(state) {
     const nodes = tree && !(tree.nodes.every((node) => BACKGROUND_TREE.includes(node.idname)) && tree.links.length <= 1)
       ? nodeMaterialFromTree(`__world ${name}`, scene, tree) : null;
     if (nodes?.missing.length) warnings.push(`World "${name}": its ${nodes.missing.join(', ')} nodes are not opened`);
+    if (nodes) nodes.material.blenderProbeClamp = [idStruct(wo).sun_threshold, idStruct(blender.scene).eevee.clamp_surface_indirect];
     createWorld(scene, color && { color: [...color].slice(0, 3), strength: background?.values.Strength, nodes: nodes?.material });
     ids.adopted.set('world', wo);
   }

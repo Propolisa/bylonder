@@ -158,6 +158,7 @@ assert.match(skyCode, /vec3 bl_P = normalize\(\w+\.xzy\);/, "a world's point is 
 assert.match(skyCode, /bl_tex_coord\(bl_P, /, 'its Generated coordinates are that direction');
 assert.match(skyCode, /bl_set_ray_type\(\w+\);[\s\S]*bl_node_light_path\(/, 'its Light Path reads the ray type it is drawn for');
 assert.match(skyCode, /bl_node_emission\(/, 'a Background is an emission');
+assert.match(skyCode, /bl_brightness_clamp_max\(bl_brightness_clamp_max\(/, "the world probe clamps the world's light as EEVEE's sphere probe bake");
 assert.match(sky._vertexCompilationState._builtCompilationString, /\.w \* 0\.99999, /, 'at the far plane');
 
 // A Sky Texture's Multiple Scattering sky is the one Blender precomputes (the module's SKY_multiple_scattering_precompute_texture),

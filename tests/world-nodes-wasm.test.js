@@ -36,5 +36,6 @@ assert.ok(material?.blenderWorld, "the world's tree is a node material");
 const background = material.attachedBlocks.find((block) => block.idname === 'ShaderNodeBackground');
 assert.equal(background.getInputByName('Color').connectedPoint?.ownerBlock.idname, 'ShaderNodeTexGradient', 'linked as in the tree, through its reroute');
 assert.ok(material.attachedBlocks.some((block) => block.idname === 'ShaderNodeOutputWorld'), 'into its World Output');
+assert.deepEqual(material.blenderProbeClamp, [world.sun_threshold, idStruct(plain.sync.blender.scene).eevee.clamp_surface_indirect], "its probe clamped at the world's Sun Threshold and the scene's indirect clamp");
 assert.deepEqual(material.attachedBlocks.find((block) => block.idname === 'ShaderNodeTexSky').properties.sun_direction.length, 3, "a Sky Texture's sun direction read as an array");
 console.log("World node trees: a tree of more than a Background opens as the world's node material");
