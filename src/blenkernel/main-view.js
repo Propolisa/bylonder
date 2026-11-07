@@ -128,7 +128,7 @@ export function createMainView(state) {
     if (type === 'MESH') {
       if (blender.property(entry.ob, PROPERTIES.standin) === '1') entry.owned = false;
       else keepMesh(entry, blender);
-      displayBounds(node, idStruct(entry.ob).display_type === 'BOUNDS');
+      displayAs(node, idStruct(entry.ob).display_type);
     }
     else if (CURVE_TYPES.includes(type)) {
       // Its recipe; the depsgraph's evaluation draws it.
@@ -150,8 +150,18 @@ export function createMainView(state) {
     bounded.delete(mesh);
     mesh.isVisible = true;
   }
+  // Meshes shown as their edges in the viewport (Display As > Wire): Workbench's wire in every shading, in place of
+  // their surfaces, which renders draw.
+  const wired = new Set();
+  function displayAs(mesh, type) {
+    displayBounds(mesh, type === 'BOUNDS');
+    if (type === 'WIRE') wired.add(mesh);
+    else if (wired.delete(mesh)) { mesh.isVisible = true; world.workbench?.displayAsWire(mesh, false); }
+  }
   world.scene.onBeforeRenderObservable.add(() => {
     const rendering = !!world.collections?.rendering;
+    // The workbench may come after Main's objects (main.js makes it once the world is built).
+    for (const mesh of wired) if (mesh.isDisposed()) wired.delete(mesh); else { mesh.isVisible = rendering; world.workbench?.displayAsWire(mesh, true); }
     for (const [mesh, entry] of bounded) {
       if (mesh.isDisposed()) { displayBounds(mesh, false); continue; }
       const instanced = mesh.hasThinInstances, box = (instanced ? mesh.rawBoundingInfo : mesh.getBoundingInfo())?.boundingBox;
@@ -405,7 +415,7 @@ export function createMainView(state) {
         if (base?.selected) chosen.push(node);
         if (base?.active) active = node;
         if (base && data.hide_get() !== base.hidden) node.setEnabled(!base.hidden);
-        if (entry.type === 'MESH') displayBounds(node, idStruct(ob).display_type === 'BOUNDS');
+        if (entry.type === 'MESH') displayAs(node, idStruct(ob).display_type);
         if (entry.type === 'EMPTY') emptyDisplay(entry);
         // A stand-in Blender's code changed becomes Main's; one an undo step read again stays Babylon's.
         const changed = ((tags.object | tags.data) & ID_RECALC_GEOMETRY) || (entry.owned && tags.data & ID_RECALC_SYNC_TO_EVAL) || sculpted(entry, tags.object);

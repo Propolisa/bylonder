@@ -360,6 +360,12 @@ export function createWorkbench(scene, { wireColor = () => theme.wire, paintText
     const c = wireColor(mesh.metadata.wireOwner);
     wire.getEffect().setFloat4('wireColor', c[0], c[1], c[2], c[3] ?? 1);
   });
+  // An object displayed as wire in a view with surfaces: its edges hidden behind them, as Blender's wire overlay.
+  const wireBehind = Object.assign(wire.clone('__workbenchWireBehind'), { depthFunction: Constants.LEQUAL });
+  wireBehind.onBindObservable.add((mesh) => {
+    const c = wireColor(mesh.metadata.wireOwner);
+    wireBehind.getEffect().setFloat4('wireColor', c[0], c[1], c[2], c[3] ?? 1);
+  });
   const hidden = new ShaderMaterial('__workbenchHidden', scene, { vertexSource: HIDDEN_VERTEX, fragmentSource: HIDDEN_FRAGMENT }, { attributes: ['position'] });
   const materials = { solid, xray: hidden, wire: hidden };
   // Curves' Solid and X-ray materials, by their Hair shape; curves Workbench does not draw (their viewport display is
@@ -388,8 +394,10 @@ export function createWorkbench(scene, { wireColor = () => theme.wire, paintText
     // Builders add vertices after construction; decide once the mesh is set up.
     scene.onBeforeRenderObservable.addOnce(() => { if (shadedMesh(mesh)) for (const camera of shaded.keys()) assign(mesh, camera); });
   });
-  // Each shaded object's edges, shown only while a Wireframe view renders; rebuilt when its geometry is replaced.
+  // Each shaded object's edges, shown only while a Wireframe view renders, and those of an object displayed as wire
+  // (Display As > Wire) while its surface is hidden; rebuilt when its geometry is replaced.
   const wires = new Map(); // mesh -> lines mesh
+  const displayedAsWire = new Set();
   const edges = (mesh) => {
     let lines = wires.get(mesh);
     const positions = mesh.getVertexBuffer('position');
@@ -419,9 +427,12 @@ export function createWorkbench(scene, { wireColor = () => theme.wire, paintText
   const showWires = scene.onBeforeCameraRenderObservable.add((camera) => {
     const show = shaded.get(camera) === 'wire';
     if (show) for (const mesh of scene.meshes) if (shadedMesh(mesh) && !mesh.metadata?.curves && !wires.has(mesh)) edges(mesh);
+    for (const mesh of displayedAsWire) if (mesh.isDisposed()) displayedAsWire.delete(mesh); else if (!wires.has(mesh)) edges(mesh);
     for (const [mesh, lines] of wires) {
       if (mesh.isDisposed()) { lines.dispose(); wires.delete(mesh); continue; }
-      edges(mesh).isVisible = show && mesh.isVisible;
+      const asWire = displayedAsWire.has(mesh) && mesh.isEnabled() && !mesh.isVisible;
+      edges(mesh).isVisible = (show && mesh.isVisible) || asWire;
+      lines.material = asWire && !show ? wireBehind : wire;
     }
   });
   // X-ray: a view's surfaces accumulate into the transparent targets before it renders (TransparentPass), and the
@@ -453,6 +464,8 @@ export function createWorkbench(scene, { wireColor = () => theme.wire, paintText
   return {
     // A mesh's Workbench materials again, after its mode or color data changed.
     refresh(mesh) { if (mesh.getTotalVertices && shadedMesh(mesh)) for (const camera of shaded.keys()) assign(mesh, camera); },
+    // Display As > Wire for `mesh`: its edges drawn in every shading while its surface is hidden (main-view.js).
+    displayAsWire(mesh, on) { if (on) displayedAsWire.add(mesh); else displayedAsWire.delete(mesh); },
     // What `camera` renders: 'solid', 'xray', 'wire', or undefined for the scene's materials.
     shading: (camera) => shaded.get(camera),
     // Solid ('solid'), Solid with X-ray ('xray'), Wireframe ('wire') or the scene's materials (null) for what `camera`

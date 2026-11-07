@@ -824,6 +824,17 @@ const checks = {
     assert.ok(axis > 20, `X axis pixels over the plane: ${axis}`);
   },
 
+  // Display As > Wire draws an object as its edges in Solid, its surface left to renders, as in Blender.
+  async "an object displayed as wire shows its edges in Solid"() {
+    await app.bylonder((b) => b.runOperator("wm.context_set_enum", { data_path: "object.display_type", value: "WIRE" }));
+    await app.settled();
+    await app.until((b) => b.views.idle);
+    const drawn = await app.bylonder((b) => { const cube = b.world.scene.getMeshByName("Cube"); return { surface: cube.isVisible, edges: !!b.world.scene.getMeshByName("__wire Cube")?.isVisible }; });
+    await app.bylonder((b) => b.runOperator("wm.context_set_enum", { data_path: "object.display_type", value: "TEXTURED" }));
+    await app.settled();
+    assert.deepEqual(drawn, { surface: false, edges: true });
+  },
+
   async "split a 3D Viewport and switch its shading"() {
     // Drag the corner of the area under the 3D Viewport (the viewport is laid over its area) inward.
     const leaf = await app.frame().evaluate(() => {
