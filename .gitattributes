@@ -1,0 +1,22 @@
+# Text files keep LF on every platform (shell scripts and generated sources run as checked in); binaries are never
+# converted.
+* text=auto eol=lf
+*.wasm binary
+*.blend binary
+*.blend1 binary
+*.png binary
+*.jpg binary
+*.gif binary
+*.webp binary
+*.exr binary
+*.hdr binary
+*.glb binary
+*.bin binary
+*.fbx binary
+*.zip binary
+*.ttf binary
+*.woff2 binary
+*.mp4 binary
+*.webm binary
+*.wav binary
+*.ogg binary

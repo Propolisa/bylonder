@@ -1,6 +1,7 @@
 // Touch only checks (docs/mobile.md Test plan): Chromium as a touch device at a large phone's and a tablet's sizes,
 // driven by touch alone (taps, holds, drags and multi finger gestures through CDP), against the production build.
 // usage: npm run test:touch [-- name filter]
+import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
 import { tmpdir } from "node:os";
 import { chromium, openApp, startServer } from "./app.mjs";
@@ -336,7 +337,7 @@ const checks = {
 };
 
 const filter = process.argv[2];
-if (process.argv[1] === new URL(import.meta.url).pathname) {
+if (process.argv[1] === fileURLToPath(new URL(import.meta.url))) {
   const server = await startServer();
   const browser = await chromium.launch();
   let failed = 0;

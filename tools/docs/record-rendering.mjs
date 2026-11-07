@@ -2,6 +2,7 @@
 // sun's angle and Cast Shadow, the fill light's radius, the world's color, the glass material, the render's samples and
 // Render Image.
 // usage: node tools/docs/record-rendering.mjs
+import { ffmpeg } from "../media.mjs";
 import { execFileSync } from "node:child_process";
 import { rmSync, writeFileSync } from "node:fs";
 import { record } from "./record.mjs";
@@ -82,6 +83,6 @@ await record("rendering", { example: "rendering", node: "Carafe" }, async (r) =>
   // The thumbnail: the render at its own size, scaled to 800 pixels wide.
   const png = await app.frame().evaluate(() => document.querySelector(".render-result canvas").toDataURL("image/png"));
   writeFileSync(`${r.out}render.png`, Buffer.from(png.split(",")[1], "base64"));
-  execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-i", `${r.out}render.png`, "-vf", "scale=800:-2:flags=lanczos", `${r.out}thumbnail.png`]);
+  execFileSync(ffmpeg, ["-y", "-loglevel", "error", "-i", `${r.out}render.png`, "-vf", "scale=800:-2:flags=lanczos", `${r.out}thumbnail.png`]);
   rmSync(`${r.out}render.png`);
 });

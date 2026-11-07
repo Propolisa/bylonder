@@ -2,6 +2,7 @@
 // flywheel's F-curve and its Cycles modifier in the Graph Editor, a key moved to change its speed, the crosshead's
 // driver in the Drivers editor, the gauge needle's Noise modifier, and a render.
 // usage: node tools/docs/record-drivers-and-graph-editor.mjs
+import { ffmpeg } from "../media.mjs";
 import { execFileSync } from "node:child_process";
 import { rmSync, writeFileSync } from "node:fs";
 import { record } from "./record.mjs";
@@ -89,6 +90,6 @@ await record("drivers-and-graph-editor", { example: "drivers-and-graph-editor", 
   await app.until(() => /^(Finished|Render failed)/.test(document.querySelector(".render-result [data-status]")?.textContent ?? ""), null, 600000);
   const png = await app.frame().evaluate(() => document.querySelector(".render-result canvas").toDataURL("image/png"));
   writeFileSync(`${r.out}full.png`, Buffer.from(png.split(",")[1], "base64"));
-  execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-i", `${r.out}full.png`, "-vf", "scale=800:-2:flags=lanczos", `${r.out}thumbnail.png`]);
+  execFileSync(ffmpeg, ["-y", "-loglevel", "error", "-i", `${r.out}full.png`, "-vf", "scale=800:-2:flags=lanczos", `${r.out}thumbnail.png`]);
   rmSync(`${r.out}full.png`);
 });

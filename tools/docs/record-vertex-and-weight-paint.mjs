@@ -2,6 +2,7 @@
 // Paint, a sampled color painted on, the Tail group in Weight Paint and a stroke that widens it, the Simple Deform
 // modifier it limits, the swim played, and a render.
 // usage: node tools/docs/record-vertex-and-weight-paint.mjs
+import { ffmpeg } from "../media.mjs";
 import { execFileSync } from "node:child_process";
 import { rmSync, writeFileSync } from "node:fs";
 import { record } from "./record.mjs";
@@ -75,6 +76,6 @@ await record("vertex-and-weight-paint", { example: "vertex-and-weight-paint", no
   await app.until(() => /^(Finished|Render failed)/.test(document.querySelector(".render-result [data-status]")?.textContent ?? ""), null, 600000);
   const png = await app.frame().evaluate(() => document.querySelector(".render-result canvas").toDataURL("image/png"));
   writeFileSync(`${r.out}full.png`, Buffer.from(png.split(",")[1], "base64"));
-  execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-i", `${r.out}full.png`, "-vf", "scale=720:-2:flags=lanczos", `${r.out}thumbnail.png`]);
+  execFileSync(ffmpeg, ["-y", "-loglevel", "error", "-i", `${r.out}full.png`, "-vf", "scale=720:-2:flags=lanczos", `${r.out}thumbnail.png`]);
   rmSync(`${r.out}full.png`);
 });

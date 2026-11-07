@@ -5,12 +5,13 @@
 // usage: node tools/blender-reference/parity.mjs [--out DIR] [--blender] [STATE ...]
 //   --blender recaptures Blender (otherwise only missing shots); needs Xvfb and ImageMagick. PARITY_DISPLAY picks the
 //   X display (default :81), BLENDER_REFERENCE the folder holding Blender (default .blender-reference/).
+import { fileURLToPath } from "node:url";
 import { spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { chromium, openApp, startServer } from "../../tests/e2e/app.mjs";
 import { displacedSphere, lavaMaterial } from "../../tests/e2e/lava.mjs";
 
-const here = new URL(".", import.meta.url).pathname, root = new URL("../..", import.meta.url).pathname;
+const here = fileURLToPath(new URL(".", import.meta.url)), root = fileURLToPath(new URL("../..", import.meta.url));
 const args = process.argv.slice(2);
 const flag = (name) => args.includes(name) && args.splice(args.indexOf(name), 1);
 const option = (name, fallback) => (args.includes(name) ? args.splice(args.indexOf(name), 2)[1] : fallback);

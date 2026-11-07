@@ -2,10 +2,11 @@
 // > Wavefront (.obj) with the example's suzanne.obj and suzanne.mtl, the importer's options, the result, and File >
 // Export's menu and options.
 //   usage: node tools/docs/record-import-export.mjs
+import { fileURLToPath } from "node:url";
 import { record } from "./record.mjs";
 
 const VIEW = '[data-section="viewport"]';
-const FILES = ["suzanne.obj", "suzanne.mtl"].map((name) => new URL(`../../examples/import-export/${name}`, import.meta.url).pathname);
+const FILES = ["suzanne.obj", "suzanne.mtl"].map((name) => fileURLToPath(new URL(`../../examples/import-export/${name}`, import.meta.url)));
 const DIALOG = (title) => `[role="dialog"][aria-label="${title}"]`;
 
 await record("import-export", { node: "Cube" }, async (r) => {

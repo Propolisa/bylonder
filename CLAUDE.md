@@ -2,6 +2,11 @@
 
 Setup: `npm ci`, `npm run module` (fetches Blender's WASM module built by CI for this checkout; a local module build installs
 itself instead), `npm test`, `npm run dev`. Commit and push to `main` when done. The module is not kept in git.
+The workflow runs on Windows, Linux and macOS. `npm run tools` installs the dev tools into `.tools/` of the checkout
+and nowhere else (delete the folder to remove them): Playwright's Chromium, which browser checks and docs recorders run
+on the machine's GPU (`CHROMIUM_CDP` drives a running one instead), and the reference Blender the tests compare
+against (Linux and Windows; elsewhere point `BLENDER_REFERENCE` at one). ffmpeg comes with the dev dependencies. Dev
+tooling never installs onto the host outside the checkout.
 
 Commit subjects are the app's changelog (Splash Screen > Changelog): one commit per user-visible change, its subject
 saying what a user gets. No WIP commits reach `main`; branches merge with `git merge --squash`. Before pushing to

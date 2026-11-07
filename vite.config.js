@@ -53,7 +53,7 @@ export default defineConfig({
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
   // Agents' worktrees live under .claude/: their edits must not reload this checkout's pages (a worktree's own server
   // watches its own files).
-  server: { watch: { ignored: [`${fileURLToPath(new URL("./.claude", import.meta.url))}/**`] } },
+  server: { watch: { ignored: [`${fileURLToPath(new URL("./.claude", import.meta.url)).replaceAll("\\", "/")}/**`] } },
   build: {
     target: "esnext",
     rollupOptions: {

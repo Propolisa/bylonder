@@ -1,19 +1,18 @@
 // Drives Bylonder's production build in Chromium, for the smoke tests and the visual parity harness.
+import { fileURLToPath } from "node:url";
 import { execFileSync, spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync, statSync } from "node:fs";
 import { variantItems } from "../../src/coverage/coverage.js";
 import { tmpdir } from "node:os";
 import { createRequire } from "node:module";
 import { preview } from "vite";
+import { GL_ARGS as gl } from "./tools.mjs";
 
-const root = new URL("../..", import.meta.url).pathname;
-// Playwright comes from the environment (preinstalled with its Chromium), not from package.json. Pyodide loads from
-// its CDN, through the environment's proxy where one is set (Chromium bypasses it for the local server).
+const root = fileURLToPath(new URL("../..", import.meta.url));
+// Playwright's Chromium is in .tools/ (npm run tools). Pyodide loads from its CDN, through the environment's proxy
+// where one is set (Chromium bypasses it for the local server).
 const playwright = createRequire(import.meta.url)("playwright");
 const proxy = process.env.HTTPS_PROXY && { proxy: { server: process.env.HTTPS_PROXY, bypass: "localhost,127.0.0.1" } };
-// Mesa's llvmpipe through ANGLE, as nodes-gpu.test.js runs: Chromium's default SwiftShader takes seconds a frame over
-// Blender's 4D noise.
-const gl = ["--use-gl=angle", "--use-angle=gl-egl", "--ignore-gpu-blocklist"];
 // CHROMIUM_CDP: a running Chromium to drive instead (e.g. one on the Windows side of WSL, on its GPU), started with
 // --remote-debugging-port; closing the browser only disconnects from it.
 export const chromium = {
@@ -31,7 +30,7 @@ async function persistentContext(options) {
 const mtime = (file) => statSync(root + file, { throwIfNoEntry: false })?.mtimeMs ?? 0;
 const stale = () => {
   const built = mtime("dist/index.html");
-  const files = execFileSync("git", ["ls-files", "--cached", "--others", "--exclude-standard"], { cwd: root, encoding: "utf8" }).split("\n");
+  const files = execFileSync("git", ["ls-files", "--cached", "--others", "--exclude-standard"], { cwd: root, encoding: "utf8" }).split(/\r?\n/);
   return files.some((file) => file && !/^(tests|tools)\/|\.md$/.test(file) && mtime(file) > built);
 };
 
@@ -42,7 +41,7 @@ export async function startServer({ build = true } = {}) {
   if (!build && !mtime("dist/index.html")) throw Error("No dist/: run npm run build first");
   if (build && stale()) {
     console.log("Building dist/ ...");
-    if (spawnSync("npm", ["run", "build"], { cwd: root, stdio: ["ignore", "ignore", "inherit"] }).status) throw Error("Build failed");
+    if (spawnSync("npm", ["run", "build"], { cwd: root, stdio: ["ignore", "ignore", "inherit"], shell: process.platform === "win32" }).status) throw Error("Build failed");
   }
   const server = await preview({ root, logLevel: "warn", preview: { port: 4320, strictPort: false } });
   return { url: server.resolvedUrls.local[0], close: () => server.close() };

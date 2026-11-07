@@ -3,13 +3,15 @@
 // Chromium. A GIF is a CDP screencast of the page while the step runs, cropped to the step's region and encoded by
 // ffmpeg (palettegen and paletteuse, 12 fps, 640 wide), smaller until it is under 1 MB. Frames are scaled to the page's
 // device pixels first: a screencast under load can send smaller ones.
+import { ffmpeg } from "../media.mjs";
+import { fileURLToPath } from "node:url";
 import { spawn, execFileSync } from "node:child_process";
 import { cpSync, mkdirSync, mkdtempSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { chromium, openApp } from "../../tests/e2e/app.mjs";
 import { fingers } from "../../tests/e2e/touch.mjs";
 
-const root = new URL("../..", import.meta.url).pathname;
+const root = fileURLToPath(new URL("../..", import.meta.url));
 const PORT = process.env.DOCS_PORT ?? "5205", URL_ = `http://localhost:${PORT}/`;
 const SIZE = { width: 1280, height: 800 };
 const MAX_GIF = 1024 * 1024;
@@ -17,9 +19,9 @@ const MAX_GIF = 1024 * 1024;
 const reachable = () => fetch(URL_).then((r) => r.ok, () => false);
 async function devServer() {
   if (await reachable()) return () => {};
-  const server = spawn("npx", ["vite", "--port", PORT, "--strictPort"], { cwd: root, stdio: "ignore", detached: true });
+  const server = spawn(process.execPath, ["node_modules/vite/bin/vite.js", "--port", PORT, "--strictPort"], { cwd: root, stdio: "ignore" });
   while (!(await reachable())) await new Promise((done) => setTimeout(done, 300));
-  return () => process.kill(-server.pid);
+  return () => server.kill();
 }
 
 // A pointer and the last key pressed, drawn into every frame of the page, since a screencast shows neither.
@@ -54,7 +56,7 @@ const overlay = () => {
   };
 };
 
-const ffmpeg = (...args) => execFileSync("ffmpeg", ["-y", "-loglevel", "error", ...args]);
+const encode = (...args) => execFileSync(ffmpeg, ["-y", "-loglevel", "error", ...args]);
 
 // Opens the app on `example` (its #example= link; none: the Default Cube from the splash) and returns the recorder.
 // `media` is the folder under docs/media/ the files go to (default: the feature's); `touch`, a touch device, driven by
@@ -176,7 +178,7 @@ export async function recorder(feature, { example, node, size = SIZE, scale = 1,
       await app.page.evaluate(() => document.querySelectorAll("[data-key-overlay]").forEach((key) => key.remove()));
       await app.page.screenshot({ path: file, clip: await box(region, part) });
       if (width) {
-        ffmpeg("-i", file, "-vf", `scale='min(${width},iw)':-2:flags=lanczos`, `${file}.tmp.png`);
+        encode("-i", file, "-vf", `scale='min(${width},iw)':-2:flags=lanczos`, `${file}.tmp.png`);
         renameSync(`${file}.tmp.png`, file);
       }
       return file;
@@ -207,7 +209,7 @@ export async function recorder(feature, { example, node, size = SIZE, scale = 1,
       writeFileSync(`${dir}/list.txt`, list.join("\n") + `\nfile '${dir}/${frames.length - 1}.jpg'\n`);
       const file = `${out}${name}.gif`;
       for (const [width, colors, fps] of [[640, 128, 12], [560, 96, 10], [480, 64, 10], [400, 48, 8]]) {
-        ffmpeg("-f", "concat", "-safe", "0", "-i", `${dir}/list.txt`, "-vf",
+        encode("-f", "concat", "-safe", "0", "-i", `${dir}/list.txt`, "-vf",
           `scale=${size.width * scale}:${size.height * scale},crop=${crop.width * scale}:${crop.height * scale}:${crop.x * scale}:${crop.y * scale},fps=${fps},scale='min(${width},iw)':-2:flags=lanczos,split[a][b];[a]palettegen=max_colors=${colors}:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4:diff_mode=rectangle`,
           "-loop", "0", file);
         if (statSync(file).size < MAX_GIF) break;
