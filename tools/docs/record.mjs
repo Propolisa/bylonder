@@ -252,7 +252,7 @@ export async function recorder(feature, { example, node, size = SIZE, scale = 1,
       });
       writeFileSync(`${dir}/list.txt`, list.join("\n") + `\nfile '${dir}/${frames.length - 1}.jpg'\n`);
       const file = `${out}${name}.gif`;
-      for (const [width, colors, fps] of [[640, 128, 12], [560, 96, 10], [480, 64, 10], [400, 48, 8]]) {
+      for (const [width, colors, fps] of [[640, 128, 12], [560, 96, 10], [480, 64, 10], [400, 48, 8], [320, 32, 6]]) {
         encode("-f", "concat", "-safe", "0", "-i", `${dir}/list.txt`, "-vf",
           `scale=${size.width * scale}:${size.height * scale},crop=${crop.width * scale}:${crop.height * scale}:${crop.x * scale}:${crop.y * scale},fps=${fps},scale='min(${width},iw)':-2:flags=lanczos,split[a][b];[a]palettegen=max_colors=${colors}:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4:diff_mode=rectangle`,
           "-loop", "0", file);

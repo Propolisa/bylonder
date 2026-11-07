@@ -1,5 +1,5 @@
 // Records docs/features/mobile.md's media under touch emulation: the Layout workspace on a large phone, a folded area's
-// drawer, navigation by gestures, the header scrolled to Rendered shading, press and hold, a value dragged with its
+// drawer, navigation by gestures, on the Robot Arm in Pose Mode, the header scrolled to Rendered shading, press and hold, a value dragged with its
 // readout and soft Shift, the area edge menu, an area carried by its header, and the touch bar's pie and bubbles.
 // usage: node tools/docs/record-mobile.mjs
 import { record } from "./record.mjs";
@@ -10,10 +10,21 @@ const center = async (locator) => {
   return [box.x + box.width / 2, box.y + box.height / 2];
 };
 
-await record("mobile", { example: "cube", node: "Cube", size: PHONE, touch: true }, async (r) => {
+await record("mobile", { example: "robot-arm", node: null, size: PHONE, touch: true }, async (r) => {
   const { app, fingers } = r;
+  await r.pause(3000);
+  await app.settled();
+  // The arm framed: View Selected on the active bone, then zoomed out.
+  await app.hover(0.5, 0.5);
+  await r.page.keyboard.press("NumpadDecimal");
+  await app.settled();
+  for (let i = 0; i < 4; i++) await r.page.mouse.wheel(0, 120);
+  await app.settled();
+  await app.bylonder((b) => b.views.input.setShading("rendered"));
+  await r.pause(8000);
   await r.shot("layout");
   await r.shot("thumbnail", undefined, { width: 412 });
+  await app.bylonder((b) => b.views.input.setShading("solid"));
 
   await r.gif("drawer", undefined, async () => {
     await fingers.tap(await center(app.locator(".dock-fold").first()));
@@ -40,43 +51,50 @@ await record("mobile", { example: "cube", node: "Cube", size: PHONE, touch: true
     await fingers.send("touchEnd", []);
     await r.pause(600);
   });
+  // The drag moved the rig: put it back.
+  await r.page.keyboard.press("Control+z");
+  await app.settled();
   const drawer = await app.locator(".dock-drawer").boundingBox();
   await fingers.tap([drawer.x / 2, drawer.y + drawer.height / 2]);
   await r.pause(600);
 
   const bar = app.locator(".bl-touch-bar");
   const tap = async (locator, wait = 500) => { await locator.scrollIntoViewIfNeeded(); await fingers.tap(await center(locator)); await r.pause(wait); };
-  await r.gif("bubbles", { x: 0, y: PHONE.height - 520, width: PHONE.width, height: 520 }, async () => {
+  await r.gif("bubbles", undefined, async () => {
     await tap(bar.locator('button[aria-label="Keys"]'), 900);
-    await tap(app.locator('[role="menuitem"][aria-label="Move"]'));
+    await tap(app.locator('[role="menuitem"][aria-label="Rotate"]'));
     await tap(bar.locator('.bl-bubble[data-item="AXIS_X"]'));
     await tap(bar.locator('button[aria-label="Numbers"]'));
     await tap(bar.locator('button[aria-label="2"]'));
+    await tap(bar.locator('button[aria-label="0"]'));
     await tap(bar.locator('button[aria-label="Numbers"]'));
     await tap(bar.locator('.bl-bubble[data-item="CONFIRM"]'), 1000);
   });
   await fingers.tap(await app.point(0.5, 0.92), 2);
   await r.pause(600);
 
-  await r.gif("navigate", undefined, async () => {
+  await r.gif("navigate", { x: 0, y: 40, width: PHONE.width, height: 720 }, async () => {
     const at = await app.point(0.5, 0.55);
-    await fingers.pan(at, [60, 60]);
+    await fingers.pan(at, [40, 30]);
     await r.pause(300);
-    await fingers.pinch(at, 80, 220);
+    await fingers.pinch(at, 100, 140);
     await r.pause(300);
-    await fingers.pan(at, [120, 0], 3);
+    await fingers.pan(at, [90, 0], 3);
   });
 
   const header = app.locator(".dock-header-content:has(.bl-view3d-header)").first();
   const rendered = app.locator('.bl-view3d-header [data-value="RENDERED"]').first();
   await r.gif("header", { x: 0, y: 0, width: PHONE.width, height: 320 }, async () => {
     const box = await header.boundingBox(), y = box.y + box.height / 2;
-    await fingers.drag([box.x + box.width - 10, y], [box.x + 10, y]);
+    await fingers.drag([box.x + box.width - 60, y], [box.x + 10, y]);
     await r.pause(500);
     await fingers.tap(await center(rendered));
     await r.pause(1500);
   });
   await fingers.tap(await center(app.locator('.bl-view3d-header [data-value="SOLID"]').first()));
+  // A drawer a tap near the folded strip opened.
+  if (await app.locator(".dock-drawer").isVisible()) await fingers.tap([8, PHONE.height / 2]);
+  await r.pause(400);
 
   await r.gif("hold", { x: 0, y: 0, width: PHONE.width, height: 500 }, async () => {
     await fingers.hold(await center(app.locator('.bl-view3d-header [data-value="SOLID"]').first()), 600);

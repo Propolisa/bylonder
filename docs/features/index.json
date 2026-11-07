@@ -1828,7 +1828,7 @@
    "https://docs.blender.org/manual/en/5.2/editors/preferences/keymap.html",
    "https://docs.blender.org/manual/en/5.2/interface/window_system/areas.html"
   ],
-  "example": "cube",
+  "example": "robot-arm",
   "thumbnail": "mobile/thumbnail.png",
   "media": [
    "mobile/layout.png",
@@ -1896,8 +1896,8 @@
    "Twisting two fingers does nothing; three fingers orbit."
   ],
   "page": "docs/features/mobile.md",
-  "open": "https://propolisa.github.io/bylonder/#example=cube",
-  "example_title": "Default Cube",
+  "open": "https://propolisa.github.io/bylonder/#example=robot-arm",
+  "example_title": "Robot Arm",
   "coverage": {
    "operators": {
     "supported": 9,
