@@ -8,7 +8,7 @@
 //   the 3D Viewport as fractions of its size.
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium, openApp, startServer } from "../../tests/e2e/app.mjs";
 import { TOOLS } from "../../tests/e2e/tools.mjs";
@@ -18,6 +18,8 @@ import { compare } from "./compare.mjs";
 const here = fileURLToPath(new URL(".", import.meta.url)), root = fileURLToPath(new URL("../..", import.meta.url));
 const args = process.argv.slice(2);
 const out = args.includes("--out") ? args.splice(args.indexOf("--out"), 2)[1] : join(root, ".shots", "side-by-side");
+// --file: a .blend both open first (Blender from its command line, Bylonder by File > Open), instead of the startup file.
+const file = args.includes("--file") ? resolve(args.splice(args.indexOf("--file"), 2)[1]) : null;
 const steps = JSON.parse(readFileSync(args[0], "utf8"));
 const size = { width: 1600, height: 950 };
 
@@ -49,6 +51,14 @@ async function runBylonder() {
   const app = await openApp(browser, server.url, { size });
   const shots = [], events = [];
   try {
+    if (file) {
+      const chooser = app.page.waitForEvent("filechooser");
+      await app.page.click('[data-blender="TOPBAR_MT_file"]');
+      await app.page.getByRole("menuitem", { name: "Open..." }).click();
+      await (await chooser).setFiles(file);
+      await app.page.waitForTimeout(3000);
+      await app.until((b) => b.views.idle, null, 180000).catch(() => {});
+    }
     for (const step of steps) {
       const sent = [];
       if (step.click || step.move) {
@@ -82,7 +92,8 @@ function runBlender(events) {
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, "events.json"), JSON.stringify(events));
   const window = ["--window-geometry", "0", "0", String(size.width), String(size.height), "--no-window-focus"];
-  const run = spawnSync(blender, ["--factory-startup", "--enable-event-simulate", ...window, startFile, "--python", here + "steps.py", "--", join(dir, "events.json"), dir], { encoding: "utf8", timeout: 600000 });
+  const env = { ...process.env, ...(file && { SIDE_BY_SIDE_FILE: file }) };
+  const run = spawnSync(blender, ["--factory-startup", "--enable-event-simulate", ...window, startFile, "--python", here + "steps.py", "--", join(dir, "events.json"), dir], { encoding: "utf8", timeout: 600000, env });
   if ((run.stdout.match(/^shot \d+$/gm) || []).length !== events.length) throw Error(`Blender took ${run.stdout.match(/^shot/gm)?.length ?? 0} of ${events.length} shots:\n${run.stdout}\n${run.stderr}`);
   return events.map((_, i) => readFileSync(join(dir, `${String(i).padStart(2, "0")}.png`)));
 }

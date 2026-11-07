@@ -34,6 +34,10 @@ def send(event):
 
 
 def run():
+    # A .blend to compare opens without its saved UI (Load UI off), as Bylonder opens one, and no splash.
+    if os.environ.get("SIDE_BY_SIDE_FILE"):
+        bpy.ops.wm.open_mainfile(filepath=os.environ["SIDE_BY_SIDE_FILE"], load_ui=False)
+        yield 3.0
     for i, step in enumerate(steps):
         for event in step["events"]:
             send(event)
@@ -42,6 +46,9 @@ def run():
         for a in window().screen.areas:
             a.tag_redraw()
         yield 0.4
+        # Save Screenshot writes in the scene's output format: a file's own (a video, say) would write no PNG.
+        image = window().scene.render.image_settings
+        image.media_type, image.file_format = "IMAGE", "PNG"
         with bpy.context.temp_override(window=window()):
             bpy.ops.screen.screenshot(filepath=os.path.join(out, f"{i:02d}.png"))
         print("shot", i, flush=True)
