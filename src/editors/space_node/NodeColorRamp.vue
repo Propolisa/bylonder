@@ -2,7 +2,7 @@
 // A color ramp as uiTemplateColorRamp draws it in a node (colorband_buttons_layout): add, remove, color mode and
 // interpolation; the band, where a press picks the nearest stop within reach and a drag moves it; the active stop's
 // index and position; its color. `field` gets the ramp and tells what changed (rebuild or not).
-import { computed } from "vue";
+import { computed, shallowRef, triggerRef, watch } from "vue";
 import BlIcon from "@/editors/interface/components/BlIcon.vue";
 import NodeValue from "./NodeValue.vue";
 import { rnaProperty } from "@/makesrna/rna.js";
@@ -10,10 +10,11 @@ import { activeElement, addElement, colorRampTable, removeElement, setElementPos
 
 const props = defineProps({ field: { type: Object, required: true } });
 const emit = defineEmits(["changed"]);
-const ramp = computed(() => props.field.get());
-const edit = (fn, rebuild = true) => { fn(ramp.value); props.field.changed(rebuild); emit("changed"); };
+// The ramp is Blender's data, not reactive: each edit tells the widget it changed.
+const ramp = shallowRef(props.field.get());
+watch(() => props.field, (field) => { ramp.value = field.get(); });
+const edit = (fn, rebuild = true) => { fn(ramp.value); triggerRef(ramp); props.field.changed(rebuild); emit("changed"); };
 const cur = computed(() => activeElement(ramp.value));
-const element = computed(() => ramp.value.elements[cur.value]);
 
 const items = (name) => rnaProperty("ColorRamp", name)?.items?.filter(Boolean).map(([id, label]) => [id, label]) ?? [];
 const enumField = (name) => ({ get: () => ramp.value[name], set: (v) => edit((r) => { r[name] = v; }) });
@@ -47,9 +48,10 @@ function bandDown(e) {
   target.onpointermove = (m) => edit((r) => setElementPosition(r, activeElement(r), at(m.clientX) + offset));
   target.onpointerup = () => { target.onpointermove = target.onpointerup = null; };
 }
-const positionField = { get: () => element.value.position, set: (v) => edit((r) => setElementPosition(r, activeElement(r), v)) };
-const indexField = { get: () => cur.value, set: (v) => edit((r) => { r.cur = Math.max(0, Math.min(r.elements.length - 1, Math.round(v))); }, false) };
-const colorField = { get: () => element.value.color, set: (v) => edit((r) => { r.elements[activeElement(r)].color = [...v]; }) };
+// New fields on every edit, so the buttons show the active stop's values (they read their field once).
+const positionField = computed(() => { const { position } = ramp.value.elements[activeElement(ramp.value)]; return { get: () => position, set: (v) => edit((r) => setElementPosition(r, activeElement(r), v)) }; });
+const indexField = computed(() => { const index = activeElement(ramp.value); return { get: () => index, set: (v) => edit((r) => { r.cur = Math.max(0, Math.min(r.elements.length - 1, Math.round(v))); }, false) }; });
+const colorField = computed(() => { const color = [...ramp.value.elements[activeElement(ramp.value)].color]; return { get: () => color, set: (v) => edit((r) => { r.elements[activeElement(r)].color = [...v]; }) }; });
 </script>
 
 <template>

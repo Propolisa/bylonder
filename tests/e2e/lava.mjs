@@ -87,6 +87,8 @@ export async function lavaMaterial(app) {
   // The ramp's white stop, picked on the band, made orange.
   const band = await ramp.getByLabel("Color ramp").boundingBox();
   await app.page.mouse.click(band.x + band.width - 3, band.y + band.height / 2);
+  // The widget shows the stop picked: its position.
+  await ramp.getByRole("button", { name: /^Pos/ }).filter({ hasText: "1.000" }).waitFor({ timeout: 5000 });
   await ramp.locator('input[type="color"]').fill("#ff6000");
   // Cracks: the black stop moved to the middle, and a dark surface around them.
   await app.page.mouse.click(band.x + 3, band.y + band.height / 2);
