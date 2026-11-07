@@ -133,6 +133,13 @@ document.querySelectorAll("input[data-kind]").forEach((box) => {
   box.onchange = () => { shown[box.dataset.kind] = box.checked; localStorage.setItem("kinds", JSON.stringify(shown)); apply(); };
 });
 apply();
+// Live: the servers and pictures again every 10 seconds, keeping the toggles and the scroll position.
+setInterval(async () => {
+  const fresh = new DOMParser().parseFromString(await (await fetch("/", { cache: "no-store" })).text(), "text/html");
+  const grids = document.querySelectorAll(".grid"), next = fresh.querySelectorAll(".grid");
+  grids.forEach((grid, i) => { if (next[i] && grid.innerHTML !== next[i].innerHTML) grid.innerHTML = next[i].innerHTML; });
+  apply();
+}, 10000);
 </script>`));
 }
 
