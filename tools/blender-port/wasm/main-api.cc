@@ -955,6 +955,12 @@ template<typename Key> static void matrix_groups(Object &ob, const Map<Key, Vect
     instance_group_add(group);
   }
 }
+/* A dupli of a mesh geometry nodes made, not of its object's own data: an instanced object's instances
+ * (make_duplis_geometry_set_impl's duplis carry the object and the instance's mesh). */
+static bool geometry_dupli(const DupliObject &dupli)
+{
+  return dupli.ob_data && dupli.ob_data != dupli.ob->data && GS(dupli.ob_data->name) == ID_ME;
+}
 /* An evaluated geometry with instances or components besides the object's own by geometry_instances, as
  * object_dupli.cc's generator choice prefers it; else classic instancing (vertices, faces, a collection) by
  * object_duplilist. */
@@ -973,14 +979,21 @@ static void object_instances(Depsgraph *depsgraph, Object &ob, Object *evaluated
   }
   DupliList duplis;
   object_duplilist(depsgraph, evaluated, nullptr, duplis);
-  Map<Object *, Vector<float4x4>> objects;
+  GeometryInstances found;
   for (const DupliObject &dupli : duplis) {
     Object *instanced = DEG_get_original(dupli.ob);
-    if (!dupli.no_draw && instanced && instanced != dupli.ob && instanced != &ob) {
-      objects.lookup_or_add_default(instanced).append(float4x4(dupli.mat));
+    if (dupli.no_draw) {
+      continue;
+    }
+    if (geometry_dupli(dupli)) {
+      found.meshes.lookup_or_add_default(dupli.ob_data).append(float4x4(dupli.mat));
+    }
+    else if (instanced && instanced != dupli.ob && instanced != &ob) {
+      found.objects.lookup_or_add_default(instanced).append(float4x4(dupli.mat));
     }
   }
-  matrix_groups(ob, objects, SHAPE_OBJECT);
+  matrix_groups(ob, found.objects, SHAPE_OBJECT);
+  matrix_groups(ob, found.meshes, SHAPE_MESH);
 }
 static void particle_shapes(Depsgraph *depsgraph, Object &ob, Object *evaluated)
 {
@@ -1063,11 +1076,11 @@ EXPORT(main_duplis) int main_duplis(BlenderMain *ctx, Object *ob)
   for (const DupliObject &dupli : duplis) {
     Object *instanced = DEG_get_original(dupli.ob);
     DupliRecord record = {};
-    if (instanced && instanced != dupli.ob && instanced != ob) {
-      record.ob = instanced;
-    }
-    else if (dupli.ob_data && dupli.ob_data != own_mesh && GS(dupli.ob_data->name) == ID_ME) {
+    if (geometry_dupli(dupli) && dupli.ob_data != own_mesh) {
       record.data = dupli.ob_data;
+    }
+    else if (instanced && instanced != dupli.ob && instanced != ob) {
+      record.ob = instanced;
     }
     else {
       continue;
