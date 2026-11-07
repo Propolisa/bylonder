@@ -12,6 +12,7 @@ import { RawTexture } from '@babylonjs/core/Materials/Textures/rawTexture.js';
 import { ShaderMaterial } from '@babylonjs/core/Materials/shaderMaterial.js';
 import { Constants } from '@babylonjs/core/Engines/constants.js';
 import { Material } from '@babylonjs/core/Materials/material.js';
+import { MaterialPluginBase } from '@babylonjs/core/Materials/materialPluginBase.js';
 import defaultTheme from '../editors/interface/theme-default.json' with { type: 'json' };
 import { overlayMaterial } from './overlay-edit-mesh.js';
 import { Vector2 } from '@babylonjs/core/Maths/math.vector.js';
@@ -34,9 +35,21 @@ attribute vec4 color;
 uniform mat4 worldViewProjection;
 varying vec4 vColor;
 void main() { vColor = color; gl_Position = worldViewProjection * vec4(position, 1.0); }`;
+// Colors come as Blender's draw gives them, in display sRGB (grease-pencil-api.cc color_output): a view that draws in
+// scene linear (Rendered, its post-process displaying it) takes them back to linear, as Blender's render draws them.
 const FILL_FRAGMENT = `precision highp float;
 varying vec4 vColor;
-void main() { if (vColor.a <= 0.0) discard; gl_FragColor = vColor; }`;
+uniform float sceneLinear;
+vec3 linear(vec3 c) { return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c)); }
+void main() { if (vColor.a <= 0.0) discard; gl_FragColor = vec4(sceneLinear > 0.5 ? linear(vColor.rgb) : vColor.rgb, vColor.a); }`;
+// GreasedLine sets a stroke's color after Babylon's material takes its color to scene linear: this does it after.
+class SceneLinearStrokePlugin extends MaterialPluginBase {
+  constructor(material) { super(material, 'BlenderSceneLinearStroke', 300, {}, true, true); }
+  getClassName() { return 'BlenderSceneLinearStrokePlugin'; }
+  getCustomCode(shaderType) {
+    return shaderType === 'fragment' ? { CUSTOM_FRAGMENT_BEFORE_FRAGCOLOR: '#ifdef IMAGEPROCESSINGPOSTPROCESS\ncolor.rgb = toLinearSpace(color.rgb);\n#endif\n' } : null;
+  }
+}
 
 // The mean scale of a matrix's axes, by which Blender scales a stroke's radius.
 const meanScale = (m) => [0, 4, 8].reduce((sum, i) => sum + Math.hypot(m[i], m[i + 1], m[i + 2]), 0) / 3;
@@ -101,6 +114,7 @@ export function greasedLineMaterial(scene, name, sizeAttenuation) {
   const material = CreateGreasedLineMaterial(name, { useColors: true, width: 1, sizeAttenuation, colorMode: COLOR_MODE_SET,
     colorDistributionType: COLOR_DISTRIBUTION_SEGMENT, cameraFacing: true }, scene);
   Object.assign(material, { transparencyMode: Constants.MATERIAL_ALPHABLEND, disableDepthWrite: true, backFaceCulling: false, disableLighting: true });
+  new SceneLinearStrokePlugin(material);
   return material;
 }
 
@@ -143,6 +157,13 @@ function strokeBatch(scene, name, owner) {
   return batch;
 }
 
+export function fillMaterial(scene, name) {
+  const material = Object.assign(new ShaderMaterial(name, scene, { vertexSource: FILL_VERTEX, fragmentSource: FILL_FRAGMENT },
+    { attributes: ['position', 'color'], uniforms: ['worldViewProjection', 'sceneLinear'], needAlphaBlending: true }), { backFaceCulling: false, disableDepthWrite: true });
+  material.onBindObservable.add(() => material.getEffect().setFloat('sceneLinear', +scene.imageProcessingConfiguration.applyByPostProcess));
+  return material;
+}
+
 // A drawing's fills: its points' positions and fill colors, Blender's triangles.
 function fillMesh(scene, name, owner, draw, matrix, kept) {
   if (!draw.triangles.length) { kept?.dispose(); return null; }
@@ -153,8 +174,7 @@ function fillMesh(scene, name, owner, draw, matrix, kept) {
     colors.set(draw.points.subarray(p * POINT_FLOATS + 8, p * POINT_FLOATS + 12), p * 4);
   }
   Object.assign(new VertexData(), { positions, colors, indices: Uint32Array.from(draw.triangles) }).applyToMesh(mesh, false);
-  mesh.material ??= Object.assign(new ShaderMaterial(name, scene, { vertexSource: FILL_VERTEX, fragmentSource: FILL_FRAGMENT },
-    { attributes: ['position', 'color'], uniforms: ['worldViewProjection'], needAlphaBlending: true }), { backFaceCulling: false, disableDepthWrite: true });
+  mesh.material ??= fillMaterial(scene, name);
   mesh.material.alphaMode = BLEND_MODES[draw.blend] ?? Constants.ALPHA_COMBINE;
   Object.assign(mesh, { alphaIndex: alphaIndex(draw, 0), isPickable: true, metadata: { drawOwner: owner, greasePencil: true } });
   mesh.freezeWorldMatrix(matrix);
