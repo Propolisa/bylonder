@@ -171,7 +171,7 @@ lathe('Jug', COPPER, [(0, 0), (0.13, 0), (0.15, 0.04), (0.16, 0.14), (0.12, 0.26
                       (0.11, 0.36), (0.09, 0.32), (0.11, 0.26), (0.15, 0.14), (0.14, 0.04), (0, 0.02)], (-1.0, 2.05, TOP))
 lathe('Bowl', GLAZE, [(0, 0), (0.1, 0), (0.12, 0.02), (0.22, 0.08), (0.27, 0.14), (0.26, 0.145), (0.21, 0.09),
                       (0.11, 0.035), (0, 0.035)], (0.6, 1.8, TOP))
-for i, (x, y, z, turn) in enumerate([(0.52, 1.78, 0.1, 0.3), (0.7, 1.74, 0.1, 1.9), (0.62, 1.9, 0.17, 1.1)]):
+for i, (x, y, z, turn) in enumerate([(0.52, 1.78, 0.1, 0.3), (0.7, 1.74, 0.1, 1.9), (0.6, 1.92, 0.1, 1.1)]):
     bpy.ops.mesh.primitive_uv_sphere_add(segments=32, ring_count=16, radius=0.056, location=(x, y, TOP + z))
     lemon = place(bpy.context.object, f'Lemon.{i + 1:03d}' if i else 'Lemon', LEMON)
     lemon.scale = (1.3, 1, 1)
