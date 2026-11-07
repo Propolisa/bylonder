@@ -152,7 +152,7 @@
  {
   "id": "geometry-node-editor",
   "title": "Geometry Node Editor",
-  "summary": "Show and edit the node group of the active Geometry Nodes modifier, here the Hair Dynamics example's Generate Hair Curves.",
+  "summary": "Show and edit the node group of the active Geometry Nodes modifier: add nodes from Shift A's search, link sockets and set values, here to lay out a sunflower's seeds by the golden angle.",
   "expect": "Node groups open, edit and evaluate as in Blender; the sidebar's Group tab is missing, and Bylonder's own Geometry Nodes modifier opens in Babylon's editor instead.",
   "blender_version": "5.2.3",
   "blender_manual": [
@@ -160,13 +160,15 @@
    "https://docs.blender.org/manual/en/5.2/modeling/geometry_nodes/index.html",
    "https://docs.blender.org/manual/en/5.2/interface/controls/nodes/editing.html"
   ],
-  "example": "hair-dynamics",
+  "example": "geometry-node-editor",
   "thumbnail": "geometry-node-editor/thumbnail.png",
   "media": [
-   "geometry-node-editor/open.gif",
-   "geometry-node-editor/zoom.gif",
-   "geometry-node-editor/mute.gif",
-   "geometry-node-editor/add-node.gif"
+   "geometry-node-editor/start.gif",
+   "geometry-node-editor/points.gif",
+   "geometry-node-editor/golden-angle.gif",
+   "geometry-node-editor/angle.gif",
+   "geometry-node-editor/seeds.gif",
+   "geometry-node-editor/sunflower-tree.png"
   ],
   "ui": [
    "GeometryNodeTree",
@@ -204,8 +206,8 @@
    "The sidebar's Group tab (interface panels) is not shown yet; inputs are added from Group Input's empty socket."
   ],
   "page": "docs/features/geometry-node-editor.md",
-  "open": "https://propolisa.github.io/bylonder/#example=hair-dynamics",
-  "example_title": "Hair Dynamics",
+  "open": "https://propolisa.github.io/bylonder/#example=geometry-node-editor",
+  "example_title": "Sunflowers",
   "coverage": {
    "operators": {
     "supported": 371,
@@ -222,7 +224,7 @@
  {
   "id": "geometry-nodes",
   "title": "Geometry Nodes",
-  "summary": "Build a Geometry Nodes modifier from an empty node group, expose its inputs, make node groups, and see the evaluated mesh, points and instances drawn.",
+  "summary": "Build a Geometry Nodes modifier from an empty node group, shape a mesh, instance objects on points, expose inputs, and see the evaluated mesh, points and instances drawn.",
   "expect": "Meshes, points and mesh instances evaluate and draw as in Blender; volumes and instanced curves are not drawn, and instances take their mesh's first material.",
   "blender_version": "5.2.3",
   "blender_manual": [
@@ -234,13 +236,13 @@
   "example": "geometry-nodes",
   "thumbnail": "geometry-nodes/thumbnail.png",
   "media": [
-   "geometry-nodes/grid.gif",
+   "geometry-nodes/sphere.gif",
    "geometry-nodes/modifier.gif",
    "geometry-nodes/workspace.gif",
-   "geometry-nodes/points.gif",
-   "geometry-nodes/instances.gif",
+   "geometry-nodes/terrain.gif",
+   "geometry-nodes/forest.gif",
    "geometry-nodes/input.gif",
-   "geometry-nodes/group.gif"
+   "geometry-nodes/planet-tree.png"
   ],
   "ui": [
    "GeometryNodeTree",
@@ -285,7 +287,7 @@
   ],
   "page": "docs/features/geometry-nodes.md",
   "open": "https://propolisa.github.io/bylonder/#example=geometry-nodes",
-  "example_title": "Geometry Nodes Meadow",
+  "example_title": "Geometry Nodes Planet",
   "coverage": {
    "operators": {
     "supported": 375,
@@ -405,8 +407,8 @@
   "thumbnail": "hair-dynamics/thumbnail.png",
   "media": [
    "hair-dynamics/play.gif",
-   "hair-dynamics/frame.gif",
-   "hair-dynamics/settings.gif"
+   "hair-dynamics/generate.gif",
+   "hair-dynamics/gravity.gif"
   ],
   "ui": [
    "VIEW_3D",
@@ -440,7 +442,7 @@
   ],
   "page": "docs/features/hair-dynamics.md",
   "open": "https://propolisa.github.io/bylonder/#example=hair-dynamics",
-  "example_title": "Hair Dynamics",
+  "example_title": "Sea Anemone",
   "coverage": {
    "operators": {
     "supported": 35,
@@ -1630,7 +1632,7 @@
   ],
   "page": "docs/features/spreadsheet.md",
   "open": "https://propolisa.github.io/bylonder/#example=geometry-nodes",
-  "example_title": "Geometry Nodes Meadow",
+  "example_title": "Geometry Nodes Planet",
   "coverage": {
    "operators": {
     "supported": 1,

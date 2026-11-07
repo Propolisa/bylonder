@@ -38,8 +38,9 @@ instances.
 
 [Open in Bylonder](https://propolisa.github.io/bylonder/#example=geometry-nodes)
 
-The demo is the Geometry Nodes Meadow example ([Geometry Nodes](geometry-nodes.md) builds it). The Meadow's modifier
-makes a mesh, a point cloud with a `height` attribute and instances of a Tree group.
+The demo is the Geometry Nodes Planet example ([Geometry Nodes](geometry-nodes.md) builds its core). Its modifier
+makes the terrain and sea as a mesh with a `height` attribute, the clouds as a point cloud with a radius per point, and
+the trees as instances of four tree objects with a `tree_scale` attribute.
 
 ## Steps
 
@@ -48,19 +49,19 @@ makes a mesh, a point cloud with a `height` attribute and instances of a Tree gr
 
    ![The Geometry Nodes workspace with the Spreadsheet](../media/features/spreadsheet/open.gif)
 
-2. **Pick a component and a domain.** Click Point Cloud in the data set tree at the left. The table lists the points,
-   with the `position`, `radius` and `height` columns; the footer counts the rows and columns. Instances lists each
-   instance with its transform and the geometry it instances.
+2. **Pick a component and a domain.** Click Point Cloud in the data set tree at the left. The table lists the cloud
+   points, with their `position` and `radius` columns; the footer counts the rows and columns. Instances lists each
+   tree with its transform, the object it instances and its `tree_scale`.
 
    ![Point Cloud, then Instances](../media/features/spreadsheet/domains.gif)
 
-3. **Original data.** Set the menu under the object's name to Original. The table shows the Meadow's own grid, before
-   its modifiers; Evaluated shows the result again.
+3. **Original data.** Set the menu under the object's name to Original. The table shows the planet's own ico sphere,
+   before its modifier; Evaluated shows the result again, with the `height` column on the mesh's points.
 
    ![Evaluated, then Original](../media/features/spreadsheet/original.gif)
 
 ## Project files
 
-- [geometry-nodes.mjs](../../examples/geometry-nodes/geometry-nodes.mjs) and
-  [geometry-nodes.blend](../../examples/geometry-nodes/geometry-nodes.blend): the scene and its node groups.
+- [geometry-nodes.py](../../examples/geometry-nodes/geometry-nodes.py) and
+  [geometry-nodes.blend](../../examples/geometry-nodes/geometry-nodes.blend): the planet and its node group.
 - Recorded by [record-spreadsheet.mjs](../../tools/docs/record-spreadsheet.mjs).

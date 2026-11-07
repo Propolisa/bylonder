@@ -1,4 +1,4 @@
-// Records docs/features/spreadsheet.md's media: the Spreadsheet on the Geometry Nodes Meadow example, its components
+// Records docs/features/spreadsheet.md's media: the Spreadsheet on the Geometry Nodes Planet example, its components
 // and domains, and the original data.
 // usage: node tools/docs/record-spreadsheet.mjs
 import { record } from "./record.mjs";
@@ -13,7 +13,7 @@ const pick = async (app, text) => {
   await app.settled();
 };
 
-await record("spreadsheet", { example: "geometry-nodes", node: "Meadow" }, async (r) => {
+await record("spreadsheet", { example: "geometry-nodes", node: "Planet" }, async (r) => {
   const { app, page } = r;
   await r.gif("open", undefined, async () => {
     await page.click('[data-workspace="geometry-nodes"]');
