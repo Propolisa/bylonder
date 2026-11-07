@@ -7,5 +7,10 @@ const root = fileURLToPath(new URL('../../.tools/', import.meta.url));
 export const TOOLS = { root, playwright: join(root, 'playwright'), blender: join(root, 'blender') };
 process.env.PLAYWRIGHT_BROWSERS_PATH ??= TOOLS.playwright;
 // Chromium's GL: on Linux Mesa's llvmpipe through ANGLE (Chromium's default SwiftShader takes seconds a frame over
-// Blender's 4D noise); elsewhere its own GPU backend.
-export const GL_ARGS = process.platform === 'linux' ? ['--use-gl=angle', '--use-angle=gl-egl', '--ignore-gpu-blocklist'] : ['--ignore-gpu-blocklist'];
+// Blender's 4D noise); on Windows D3D11 on the discrete GPU (headless Chromium otherwise takes SwiftShader, or the
+// integrated GPU of a laptop); elsewhere its own GPU backend.
+const GL_BY_PLATFORM = {
+  linux: ['--use-gl=angle', '--use-angle=gl-egl'],
+  win32: ['--enable-gpu', '--use-angle=d3d11', '--force_high_performance_gpu'],
+};
+export const GL_ARGS = [...(GL_BY_PLATFORM[process.platform] ?? []), '--ignore-gpu-blocklist'];

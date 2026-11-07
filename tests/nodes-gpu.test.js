@@ -115,7 +115,7 @@ function run(programs) {
   } });
 }
 
-// Mesa's llvmpipe through ANGLE, the software OpenGL the fixtures were rendered with: Chromium's default SwiftShader
+// The machine's GPU (Mesa's llvmpipe on Linux, which the fixtures were rendered with): Chromium's default SwiftShader
 // takes minutes over a loop of 4D noise and gives nothing.
 const browser = await chromium.launch({ args: GL_ARGS });
 try {
@@ -131,7 +131,8 @@ try {
     if (results[i].error) return [`${c.node} ${JSON.stringify(c.properties)}: ${results[i].error}`];
     const got = results[i], channels = c.tree === 'shader' && socketType(declaration('shader', c.node).outputs.find((s) => s.identifier === c.output).type).kind === 'float' ? 1 : 4;
     // EEVEE's AOVs hold half floats.
-    // A hardware GPU's sin and pow differ from Mesa's by up to 2e-4 in noise textures (Magic, Gabor).
+    // A hardware GPU filters textures with coarser weights than Mesa: color ramps and curves (their tables) differ by up
+    // to 3e-4 on an RTX 5070 Ti.
     const tolerance = c.engine === 'EEVEE' ? 2e-3 : 5e-4;
     const off = c.result.slice(0, channels).some((v, k) => v !== null && Math.abs(v - got[k]) > tolerance * Math.max(1, Math.abs(v)));
     return off ? [`${c.node} ${JSON.stringify(c.properties)}: Blender ${c.result.slice(0, channels)}, Bylonder ${got.slice(0, channels).map((v) => +v.toFixed(6))}`] : [];
