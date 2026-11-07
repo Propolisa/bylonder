@@ -908,9 +908,9 @@ const checks = {
 
   // Texture Paint: a stroke on Suzanne in the 3D Viewport and one in the Image Editor paint her image, Ctrl Z takes a
   // stroke back, and the UV Editing workspace shows her UVs over it.
-  "Texture Paint paints in the 3D Viewport and the Image Editor": { open: { link: "texture-paint", node: "Suzanne" }, async run() {
+  "Texture Paint paints in the 3D Viewport and the Image Editor": { open: { link: "texture-paint", node: "Vase" }, async run() {
     const painted = () => app.bylonder((b) => {
-      const pixels = b.modules.bpyRna.blendData().images.get("Suzanne Paint").pixels;
+      const pixels = b.modules.bpyRna.blendData().images.get("Vase Paint").pixels;
       let sum = 0;
       for (let i = 0; i < pixels.length; i += 401) sum += pixels[i];
       return sum;
@@ -1016,8 +1016,8 @@ const checks = {
   } },
 
   // The Shader Editor edits the active object's active material for any object type with materials: a Curves object's.
-  "the Shader Editor edits a Curves object's material": { open: { example: "Hair Dynamics", node: "Hair" }, async run() {
-    await app.bylonder((b) => { b.editor.selection.replace([b.world.scene.getNodeByName("Hair")]); b.world.openNodeEditor("shader"); });
+  "the Shader Editor edits a Curves object's material": { open: { example: "Sea Anemone", node: "Tentacles" }, async run() {
+    await app.bylonder((b) => { b.editor.selection.replace([b.world.scene.getNodeByName("Tentacles")]); b.world.openNodeEditor("shader"); });
     await app.until(() => document.querySelector("#nodes-section .node-editor-empty").hidden);
   } },
 

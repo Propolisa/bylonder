@@ -205,9 +205,9 @@ try {
 
   // Examples made in Blender open with every object of Main in the scene sync, once (an armature left out of it was
   // invisible to every tool), and without a page error.
-  for (const example of ["Rigged Character", "Hair Dynamics"]) {
+  for (const example of ["Rigged Character", "Sea Anemone"]) {
     await step(`example ${example}`, async () => {
-      const opened = await openApp(browser, server.url, { example, node: example === "Rigged Character" ? "Rig" : "Hair" });
+      const opened = await openApp(browser, server.url, { example, node: example === "Rigged Character" ? "Rig" : "Tentacles" });
       try {
         await opened.settled();
         const problems = await opened.bylonder((b) => {
