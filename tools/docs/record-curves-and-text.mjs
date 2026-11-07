@@ -1,18 +1,23 @@
-// Records docs/features/curves-and-text.md's media: a text object added, edited, extruded and beveled, and a Bézier
-// curve extruded in Edit Mode, from the Default Cube.   usage: node tools/docs/record-curves-and-text.mjs
+// Records docs/features/curves-and-text.md's media: a text typed, given depth and a round bevel, and a Bezier circle
+// beveled into a tube, from the Default Cube; then the Neon Sign example's render.
+// usage: node tools/docs/record-curves-and-text.mjs [steps] [example]
 import { record } from "./record.mjs";
 
 const VIEW = '[data-section="viewport"]', PROPERTIES = '[data-section="properties"]';
+const only = process.argv.slice(2), wanted = (part) => !only.length || only.includes(part);
 
-await record("curves-and-text", {}, async (r) => {
+if (wanted("steps")) await record("curves-and-text", {}, async (r) => {
   const { app, page } = r;
   const add = async (...path) => {
     await app.hover(0.5, 0.6);
     await r.keys("Shift A", "Shift+A");
-    for (const [i, label] of path.entries()) {
-      const item = app.frame().getByRole("menuitem", { name: label, exact: true }).last();
-      await (i < path.length - 1 ? item.hover() : item.click());
+    for (const label of path) {
+      await app.frame().getByRole("menuitem", { name: label, exact: true }).last().click();
     }
+    await app.settled();
+  };
+  const panel = async (name) => {
+    await app.locator(PROPERTIES).getByText(name, { exact: true }).first().click();
     await app.settled();
   };
   await r.gif("add-text", VIEW, async () => {
@@ -28,34 +33,33 @@ await record("curves-and-text", {}, async (r) => {
     await app.hover();
     await r.keys("Tab");
     for (let i = 0; i < 4; i++) await r.keys("Backspace");
-    await page.keyboard.type("Bylonder", { delay: 120 });
+    await page.keyboard.type("Open Late", { delay: 120 });
     await app.settled();
     await r.keys("Tab");
     await r.keys("Numpad .", "NumpadDecimal");
   });
   await r.tab("Data");
-  const panel = async (name) => {
-    await app.locator(PROPERTIES).getByText(name, { exact: true }).first().click();
-    await app.settled();
-  };
   await r.gif("extrude", undefined, async () => {
     await panel("Geometry");
-    await r.field(app.locator(PROPERTIES), "Extrude", 0.15);
+    await r.field(app.locator(PROPERTIES), "Extrude", 0.02);
     if (!(await app.locator(PROPERTIES).getByText("Depth", { exact: true }).count())) await panel("Bevel");
     await r.field(app.locator(PROPERTIES), "Depth", 0.03);
     await app.hover();
     for (let i = 0; i < 3; i++) await r.keys("Numpad 8", "Numpad8");
   });
-  await r.shot("thumbnail", ".viewport-canvas", { part: [0.45, 0.22, 0.98, 0.7] });
-  await r.gif("curve", VIEW, async () => {
-    await add("Curve", "Bézier");
+  await r.gif("tube", VIEW, async () => {
+    await add("Curve", "Circle");
+    await app.hover(0.5, 0.5);
+    await r.keys("S X 3 Enter", "s", "x", "3", "Enter");
+    await r.keys("Numpad .", "NumpadDecimal");
+    await r.tab("Data");
+    if (!(await app.locator(PROPERTIES).getByText("Depth", { exact: true }).count())) await panel("Bevel");
+    await r.field(app.locator(PROPERTIES), "Depth", 0.05);
     await app.hover();
-    await r.keys("Tab");
-    await app.hover(0.55, 0.5);
-    await r.keys("E", "e");
-    await page.mouse.move(...(await app.point(0.7, 0.3)), { steps: 15 });
-    await page.mouse.click(...(await app.point(0.7, 0.3)));
-    await app.settled();
-    await r.keys("Tab");
   });
+});
+
+if (wanted("example")) await record("curves-and-text", { example: "neon-sign", node: "Frame", size: { width: 1600, height: 950 } }, async (r) => {
+  await r.render("render", { wait: 30000 });
+  await r.render("thumbnail", { width: 960, wait: 15000 });
 });

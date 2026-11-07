@@ -2,8 +2,8 @@
  {
   "id": "curves-and-text",
   "title": "Curves and Text",
-  "summary": "Add a text object, type into it in Edit Mode, give it depth with Extrude and Bevel, and extrude a Bézier curve's points.",
-  "expect": "Text and Bezier curves are typed, edited, extruded and beveled as in Blender; the 3D Text demo's Google Fonts title needs network access.",
+  "summary": "Add a text object, type into it in Edit Mode, give it depth with Extrude and Bevel, and bevel a Bézier curve into a tube, here the letters and tubes of a neon sign.",
+  "expect": "Text and Bezier curves are typed, edited, extruded and beveled as in Blender; in a curve's Edit Mode, View Selected does not frame the selected points.",
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/modeling/texts/index.html",
@@ -11,13 +11,14 @@
    "https://docs.blender.org/manual/en/5.2/modeling/curves/index.html",
    "https://docs.blender.org/manual/en/5.2/modeling/curves/editing/index.html"
   ],
-  "example": "text",
+  "example": "neon-sign",
   "thumbnail": "curves-and-text/thumbnail.png",
   "media": [
    "curves-and-text/add-text.gif",
    "curves-and-text/edit-text.gif",
    "curves-and-text/extrude.gif",
-   "curves-and-text/curve.gif"
+   "curves-and-text/tube.gif",
+   "curves-and-text/render.png"
   ],
   "ui": [
    "VIEW_3D",
@@ -39,6 +40,8 @@
    "font.text_insert",
    "font.delete",
    "curve.primitive_bezier_curve_add",
+   "curve.primitive_bezier_circle_add",
+   "transform.resize",
    "curve.extrude_move",
    "object.editmode_toggle"
   ],
@@ -55,11 +58,13 @@
    "tests/text.test.js"
   ],
   "limits": [
+   "In a curve's Edit Mode, View Selected (Numpad .) does not frame the selected points.",
+   "In Solid shading, a beveled Bézier curve in Edit Mode can draw a black fill between its points and handles.",
    "The 3D Text example builds its text from code with a Google Fonts family and needs network access; a text object added with Shift A uses Blender's built-in font."
   ],
   "page": "docs/features/curves-and-text.md",
-  "open": "https://propolisa.github.io/bylonder/#example=text",
-  "example_title": "3D Text",
+  "open": "https://propolisa.github.io/bylonder/#example=neon-sign",
+  "example_title": "Neon Sign",
   "coverage": {
    "operators": {
     "supported": 103,
