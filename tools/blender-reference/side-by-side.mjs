@@ -90,7 +90,7 @@ async function runBylonder() {
 }
 
 function runBlender(events) {
-  const blender = referenceBlender(), startFile = join(TOOLS.blender, "start.blend"), dir = join(out, "blender");
+  const blender = referenceBlender(), startFile = join(out, "start.blend"), dir = join(out, "blender");
   if (!blender) throw Error("Blender not found: run npm run tools once to install it");
   if (!existsSync(startFile)) spawnSync(blender, ["-b", "--factory-startup", "--python-expr", `import bpy; bpy.ops.wm.save_as_mainfile(filepath=r'${startFile}')`]);
   mkdirSync(dir, { recursive: true });

@@ -49,11 +49,17 @@ def run():
         for a in window().screen.areas:
             a.tag_redraw()
         yield 0.4
-        # Save Screenshot writes in the scene's output format: a file's own (a video, say) would write no PNG.
-        image = window().scene.render.image_settings
-        image.media_type, image.file_format = "IMAGE", "PNG"
-        with bpy.context.temp_override(window=window()):
-            bpy.ops.screen.screenshot(filepath=os.path.join(out, f"{i:02d}.png"))
+        # Save Screenshot writes in the scene's output format: a file's own (a video, say) would write no PNG. Right after
+        # a file opens it can be cancelled, so it is tried again until the file exists.
+        path = os.path.join(out, f"{i:02d}.png")
+        for _ in range(10):
+            image = window().scene.render.image_settings
+            image.media_type, image.file_format = "IMAGE", "PNG"
+            with bpy.context.temp_override(window=window()):
+                bpy.ops.screen.screenshot(filepath=path)
+            if os.path.exists(path):
+                break
+            yield 0.5
         print("shot", i, flush=True)
     bpy.ops.wm.quit_blender()
 
