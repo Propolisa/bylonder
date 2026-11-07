@@ -56,9 +56,9 @@ export function createImageView(main, engine, views) {
   const view = views.add({ canvas, camera, active: true, input: false });
   // The UV overlay: faces, edges and vertices, each a mesh of its own with the overlay's material (overlay-edit-mesh.js).
   const part = (name, options) => Object.assign(new Mesh(name, scene), { isPickable: false, alwaysSelectAsActiveMesh: true, material: overlayMaterial(scene, name, options) });
-  const faces = part('UV Faces', { fillMode: Constants.MATERIAL_TriangleFillMode, depthUnits: 0, alpha: true });
-  const edges = part('UV Edges', { fillMode: Constants.MATERIAL_LineListDrawMode, depthUnits: 0 });
-  const verts = part('UV Vertices', { fillMode: Constants.MATERIAL_PointFillMode, depthUnits: 0, round: 1 });
+  const faces = part('UV Faces', { fillMode: Constants.MATERIAL_TriangleFillMode, alpha: true });
+  const edges = part('UV Edges', { fillMode: Constants.MATERIAL_LineListDrawMode });
+  const verts = part('UV Vertices', { fillMode: Constants.MATERIAL_PointFillMode, round: 1 });
   let shown = null;
 
   function setGeometry(mesh, positions, colors, indices) {

@@ -24,9 +24,9 @@ export function createEditCurveOverlay(owner) {
     mesh.metadata = { overlay: true };
     return mesh;
   };
-  const lines = part('edit curve lines', { fillMode: Material.LineListDrawMode, depthUnits: 4e-5, slopeScale: 4 });
-  const points = part('edit curve points', { fillMode: Material.PointListDrawMode, pointSize: theme.vertex_size * 2, depthUnits: 6e-5, slopeScale: 0 });
-  const handlePoints = part('edit curve handle points', { fillMode: Material.PointListDrawMode, pointSize: curves.handle_vertex_size, depthUnits: 6e-5, slopeScale: 0, round: 1 });
+  const lines = part('edit curve lines', { fillMode: Material.LineListDrawMode, ndcOffset: 1 });
+  const points = part('edit curve points', { fillMode: Material.PointListDrawMode, pointSize: theme.vertex_size * 2, ndcOffset: 1.5 });
+  const handlePoints = part('edit curve handle points', { fillMode: Material.PointListDrawMode, pointSize: curves.handle_vertex_size, ndcOffset: 1.5, round: 1 });
 
   const fill = (mesh, vertices) => {
     mesh.geometry?.dispose();

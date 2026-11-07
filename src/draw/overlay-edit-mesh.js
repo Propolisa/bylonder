@@ -9,34 +9,46 @@ import { Constants } from '@babylonjs/core/Engines/constants.js';
 import { view_3d as theme } from '../editors/interface/userdef-default-theme.js';
 import { SCE_SELECT_VERTEX } from '../bmesh/intern/bmesh-marking.js';
 
-// Depth is pulled toward the eye like glPolygonOffset(slopeScale, units): enough to win against the surface it
-// sits on at any angle, too little to show through anything in front.
+// blender-port: gpu_matrix.cc GPU_polygon_offset_calc at distance 1, Blender's unit of overlay depth offset
+// (View::OffsetData::polygon_offset_factor) for a view's projection (Babylon's, row-major): a share of the perspective's
+// depth term, so it shrinks with distance as the depth it offsets does; for an orthographic view, a share of its extent.
+export function polygonOffsetFactor(projection) {
+  const m = projection.m;
+  if (m[15] > 0.5) return 0.00001 * 0.5 / Math.max(Math.abs(m[0]), Math.abs(m[5]));
+  return Math.abs(m[14]) * 0.0025 * 0.5;
+}
+
+// Each part is pulled toward the eye by its ndc_offset in that unit, as overlay_edit_mesh_vert.glsl does
+// (overlay_mesh.hh: faces 0, edges 1, vertices 1.5), and drawn where it is not behind what the view drew.
 const SHADER = {
   vertex: `precision highp float;
 attribute vec3 position; attribute vec4 color;
-uniform mat4 worldViewProjection; uniform float pointSize;
+uniform mat4 worldViewProjection; uniform float pointSize; uniform float ndcOffsetFactor; uniform float ndcOffset;
 varying vec4 vColor;
-void main() { gl_Position = worldViewProjection * vec4(position, 1.0); gl_PointSize = pointSize; vColor = color; }`,
+void main() {
+  gl_Position = worldViewProjection * vec4(position, 1.0);
+  gl_Position.z -= ndcOffsetFactor * ndcOffset;
+  gl_PointSize = pointSize;
+  vColor = color;
+}`,
   fragment: `precision highp float;
-varying vec4 vColor; uniform float roundPoint; uniform float depthUnits; uniform float slopeScale;
+varying vec4 vColor; uniform float roundPoint;
 void main() {
   if (roundPoint > 0.5) { vec2 c = gl_PointCoord * 2.0 - 1.0; if (dot(c, c) > 1.0) discard; }
-  float slope = max(abs(dFdx(gl_FragCoord.z)), abs(dFdy(gl_FragCoord.z)));
-  gl_FragDepth = gl_FragCoord.z - depthUnits - slopeScale * slope;
   gl_FragColor = vColor;
 }`,
 };
 
-export function overlayMaterial(scene, name, { fillMode, pointSize = 1, depthUnits, slopeScale = 1, round = 0, alpha = false }) {
+export function overlayMaterial(scene, name, { fillMode, pointSize = 1, ndcOffset = 0, round = 0, alpha = false }) {
   const material = new ShaderMaterial(name, scene, { vertexSource: SHADER.vertex, fragmentSource: SHADER.fragment }, {
-    attributes: ['position', 'color'], uniforms: ['worldViewProjection', 'pointSize', 'depthUnits', 'slopeScale', 'roundPoint'], needAlphaBlending: alpha,
+    attributes: ['position', 'color'], uniforms: ['worldViewProjection', 'pointSize', 'ndcOffsetFactor', 'ndcOffset', 'roundPoint'], needAlphaBlending: alpha,
   });
   material.fillMode = fillMode;
   material.backFaceCulling = false;
   material.setFloat('pointSize', pointSize);
-  material.setFloat('depthUnits', depthUnits);
-  material.setFloat('slopeScale', slopeScale);
+  material.setFloat('ndcOffset', ndcOffset);
   material.setFloat('roundPoint', round);
+  material.onBindObservable.add(() => material.getEffect().setFloat('ndcOffsetFactor', polygonOffsetFactor(scene.getProjectionMatrix())));
   if (alpha) material.alphaMode = Constants.ALPHA_COMBINE;
   return material;
 }
@@ -58,9 +70,9 @@ export function createEditMeshOverlay(owner) {
     mesh.material = overlayMaterial(scene, owner.name + ' ' + name, options);
     return mesh;
   };
-  const faces = part('edit faces', { fillMode: Material.TriangleFillMode, depthUnits: 2e-5, slopeScale: 4, alpha: true });
-  const edges = part('edit edges', { fillMode: Material.LineListDrawMode, depthUnits: 4e-5, slopeScale: 4 });
-  const verts = part('edit verts', { fillMode: Material.PointListDrawMode, pointSize: theme.vertex_size * 2, depthUnits: 6e-5, slopeScale: 0, round: 1 });
+  const faces = part('edit faces', { fillMode: Material.TriangleFillMode, alpha: true });
+  const edges = part('edit edges', { fillMode: Material.LineListDrawMode, ndcOffset: 1 });
+  const verts = part('edit verts', { fillMode: Material.PointListDrawMode, pointSize: theme.vertex_size * 2, ndcOffset: 1.5, round: 1 });
   // Positions, colors and drawn indices per part, kept while the topology stays, as Blender keeps its edit mode
   // buffers and refills the ones out of date.
   let buffers = null;
