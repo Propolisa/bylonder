@@ -1,7 +1,7 @@
 ---
 id: shader-nodes
 title: Shader Nodes
-summary: Build a material from Blender's shader nodes in the Shader Editor, here a glowing lava on a sphere displaced by a Clouds texture.
+summary: Build a material from Blender's shader nodes in the Shader Editor, here a planet's seas, coasts, land and ice caps, a cratered moon and a starry sky, with no image at all.
 expect: 76 of Blender's shader nodes run; textures, converters and inputs run Blender's GLSL and match EEVEE pixel for pixel, while shaders are Babylon's PBR lighting, close to EEVEE but not equal; lights cast hard-edged shadows (area lights none); Material Preview uses Babylon's studio light.
 blender_version: 5.2.3
 blender_manual:
@@ -13,13 +13,16 @@ blender_manual:
   - https://docs.blender.org/manual/en/5.2/render/shader_nodes/utilities/index.html
   - https://docs.blender.org/manual/en/5.2/render/shader_nodes/textures/noise.html
   - https://docs.blender.org/manual/en/5.2/render/shader_nodes/color/color_ramp.html
-  - https://docs.blender.org/manual/en/5.2/modeling/modifiers/deform/displace.html
-example: lava
+  - https://docs.blender.org/manual/en/5.2/render/shader_nodes/textures/voronoi.html
+  - https://docs.blender.org/manual/en/5.2/render/shader_nodes/input/layer_weight.html
+example: blue-planet
 thumbnail: shader-nodes/thumbnail.png
 media:
   - shader-nodes/sphere.gif
-  - shader-nodes/nodes.gif
-  - shader-nodes/node-tree.png
+  - shader-nodes/land-and-sea.gif
+  - shader-nodes/planet-tree.png
+  - shader-nodes/moon-tree.png
+  - shader-nodes/render.png
 ui:
   - ShaderNodeTree
   - NODE_EDITOR
@@ -36,8 +39,7 @@ operators:
   - node.add_node
   - node.link
   - mesh.primitive_uv_sphere_add
-  - object.modifier_add
-  - texture.new
+  - object.shade_smooth
   - material.new
 code:
   - src/nodes/blender/shader-nodes.js
@@ -99,32 +101,50 @@ limits:
 A material's surface is a tree of Blender's shader nodes in the Shader Editor. Each Blender node runs Blender's own
 GLSL in Babylon's material, so a node computes what it computes in Blender; an input value changes without a rebuild,
 a property such as a Noise Texture's dimensions rebuilds the material as Blender recompiles its shader
-(`docs/node-editors.md`). The full workflow is written out in [A displaced lava sphere](../lava-material.md).
+(`docs/node-editors.md`).
 
-[Open in Bylonder](https://propolisa.github.io/bylonder/#example=lava)
+[Open in Bylonder](https://propolisa.github.io/bylonder/#example=blue-planet)
 
-The demo, Lava Sphere, is the result made in Blender by `lava.py`. The steps below make it from the Default Cube.
+The demo, Blue Planet, is a planet, its moon and a starry sky, every surface made of shader nodes, built in Blender by
+`blue-planet.py`. The steps below start the planet's material from the Default Cube, then open the example for the
+rest of its tree.
 
 ## Steps
 
-1. **The sphere.** In the Default Cube example, click the cube, press X > Delete, then Shift A > Mesh > UV Sphere. In
-   Properties > Modifiers add Generate > Subdivision Surface and Deform > Displace. In the Displace panel, the
-   Texture field's New makes a texture; in Properties > Texture set its Type to Clouds.
+1. **The sphere.** In the Default Cube example, click the cube, press X > Delete, then Shift A > Mesh > UV Sphere.
+   Right click it and pick Shade Smooth.
 
-   ![Sphere, Subdivision Surface, Displace with a Clouds texture](../media/features/shader-nodes/sphere.gif)
+   ![X > Delete, Shift A > Mesh > UV Sphere, Shade Smooth](../media/features/shader-nodes/sphere.gif)
 
-2. **The lava material.** Click the Shading tab and New in the Shader Editor (Principled BSDF into Material Output).
-   Shift A adds each node (type to search, Enter, click to place); drag from socket to socket to link:
-   - Texture Coordinate's Object into two Noise Textures, both set to 4D.
-   - The first Noise's Factor into a Color Ramp (black stop at 0.5, the other orange), its Color into Principled
-     BSDF's Emission Color, and the Factor into Emission Strength.
-   - The second Noise (Detail 8) into Bump's Height, Bump's Normal into Principled BSDF's Normal; a dark Base Color.
+2. **Land and sea.** Click the Shading tab and New in the Shader Editor (Principled BSDF into Material Output). Shift
+   A adds each node (type to search, Enter, click to place): Texture Coordinate, Noise Texture and Color Ramp. Home
+   frames them. Drag from socket to socket to link Texture Coordinate's Object into the Noise's Vector, its Factor
+   into the Color Ramp, and the ramp's Color into Principled BSDF's Base Color. Click the ramp's left stop, pick a deep
+   blue and set Pos to 0.5; click the right stop, pick a green and set Pos to 0.53. The noise's height is now sea below
+   0.5 and land above.
 
-   ![Adding, setting and linking the nodes](../media/features/shader-nodes/nodes.gif)
+   ![Adding, linking and setting the nodes](../media/features/shader-nodes/land-and-sea.gif)
 
-3. **The result.** Material Preview shows the sphere glowing through its cracks. Every edit rebuilds the material.
+3. **The planet's tree.** Open the example. More stops on the ramp add a sand shore and rock on the heights. Separate
+   XYZ's Z, made absolute and pushed by the noise, goes through a second ramp into a Mix for the ice caps. A third ramp
+   makes the sea glossy and the land rough, Bump takes the same noise as height, and Layer Weight's Facing, raised to
+   a power, lights a blue rim as Emission Strength.
 
-   ![The finished tree](../media/features/shader-nodes/node-tree.png)
+   ![The Planet material in the Shader Editor](../media/features/shader-nodes/planet-tree.png)
+
+4. **The moon and the sky.** Click Moon in the Outliner: Voronoi's Distance through a ramp into Bump makes the
+   craters, a Noise through a ramp the grey surface. The sky is a large sphere around the scene whose Voronoi
+   Distance, through a ramp with a narrow white stop, drives an Emission shader: a star at every Voronoi point.
+
+   ![The Moon material](../media/features/shader-nodes/moon-tree.png)
+
+5. **The result.** In the Layout workspace, Numpad 0 looks through the camera and the Viewport Shading popover's
+   Rendered shows the scene lit by the sun.
+
+   ![Rendered through the camera](../media/features/shader-nodes/render.png)
+
+The full workflow of an earlier example, a displaced lava sphere, is written out in
+[A displaced lava sphere](../lava-material.md).
 
 The [Shader Node Gallery](https://propolisa.github.io/bylonder/#example=shader-gallery) example shows twenty materials of
 Blender's common nodes, and a floor four objects cast the sun's shadows on; the smoke test renders it and compares each sphere and floor tile with EEVEE's render of the same file
@@ -162,11 +182,10 @@ clearcoat; off, it lights with Babylon's own blocks. Either way the scene loads 
 
 ## Project files
 
-- [lava.py](../../examples/lava/lava.py): builds the sphere, its modifiers, the texture and the material in Blender
-  5.2.
-- [lava.blend](../../examples/lava/lava.blend): the file the script saves.
-- [index.js](../../examples/lava/index.js): opens the .blend with Blender's reader.
+- [blue-planet.py](../../examples/blue-planet/blue-planet.py): builds the planet, the moon, the sky and their
+  materials in Blender 5.2.
+- [blue-planet.blend](../../examples/blue-planet/blue-planet.blend): the file the script saves.
+- [index.js](../../examples/blue-planet/index.js): opens the .blend with Blender's reader.
 - [shader_gallery.py](../../examples/shader-gallery/shader_gallery.py): builds the Shader Node Gallery and renders it
   in EEVEE, the reference the smoke test compares with.
-- [lava.mjs](../../tests/e2e/lava.mjs): the steps as real input, used by the smoke test and by
-  [record-shader-nodes.mjs](../../tools/docs/record-shader-nodes.mjs).
+- Recorded by [record-shader-nodes.mjs](../../tools/docs/record-shader-nodes.mjs).

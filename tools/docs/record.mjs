@@ -133,7 +133,9 @@ export async function recorder(feature, { example, node, size = SIZE, scale = 1,
     },
     // A click on an Outliner row's name.
     async outliner(name) {
-      await app.locator("svg.bl-outliner-region text", { hasText: new RegExp(`^${name}$`) }).first().click();
+      // The row's text takes no pointer events: the click goes to the region under it, as a user's does.
+      const row = await app.frame().locator("svg.bl-outliner-region text", { hasText: new RegExp(`^${name}$`) }).first().boundingBox();
+      await app.page.mouse.click(row.x + row.width / 2, row.y + row.height / 2);
       await app.settled();
     },
     tab: async (name) => { await app.locator(`[role="tab"][aria-label="${name}"]`).click(); await app.settled(); },
@@ -156,7 +158,7 @@ export async function recorder(feature, { example, node, size = SIZE, scale = 1,
     // A PNG of the 3D Viewport through the scene camera in Rendered shading, without overlays, header, toolbar or the
     // pointer's dot: the canvas below the header and right of the toolbar, `part` of it (see box). The view is left as
     // it was.
-    async render(name, { part = [0, 0, 1, 1], wait = 10000 } = {}) {
+    async render(name, { part = [0, 0, 1, 1], wait = 10000, width } = {}) {
       const canvas = await app.frame().locator(".viewport-canvas").first().boundingBox();
       const header = await app.locator(".bl-view3d-header").first().boundingBox();
       await app.bylonder((b) => b.views.input.enterCameraView());
@@ -167,7 +169,7 @@ export async function recorder(feature, { example, node, size = SIZE, scale = 1,
       await app.page.waitForTimeout(wait);
       const left = canvas.x + 56, top = Math.max(canvas.y, header.y + header.height + 30);
       const right = canvas.x + canvas.width, bottom = canvas.y + canvas.height;
-      await r.shot(name, { x: left, y: top, width: right - left, height: bottom - top }, { part });
+      await r.shot(name, { x: left, y: top, width: right - left, height: bottom - top }, { part, width });
       await app.bylonder((b, before) => { b.views.input.state.overlays = before.overlays ?? true; b.views.input.setShading(before.shading); }, before);
       for (const where of [app.page, app.frame()]) await where.evaluate(() => document.querySelectorAll("div[style*='border-radius: 50%']").forEach((d) => (d.style.display = "")));
     },

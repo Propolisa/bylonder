@@ -1411,7 +1411,7 @@
  {
   "id": "shader-nodes",
   "title": "Shader Nodes",
-  "summary": "Build a material from Blender's shader nodes in the Shader Editor, here a glowing lava on a sphere displaced by a Clouds texture.",
+  "summary": "Build a material from Blender's shader nodes in the Shader Editor, here a planet's seas, coasts, land and ice caps, a cratered moon and a starry sky, with no image at all.",
   "expect": "76 of Blender's shader nodes run; textures, converters and inputs run Blender's GLSL and match EEVEE pixel for pixel, while shaders are Babylon's PBR lighting, close to EEVEE but not equal; lights cast hard-edged shadows (area lights none); Material Preview uses Babylon's studio light.",
   "blender_version": "5.2.3",
   "blender_manual": [
@@ -1423,14 +1423,17 @@
    "https://docs.blender.org/manual/en/5.2/render/shader_nodes/utilities/index.html",
    "https://docs.blender.org/manual/en/5.2/render/shader_nodes/textures/noise.html",
    "https://docs.blender.org/manual/en/5.2/render/shader_nodes/color/color_ramp.html",
-   "https://docs.blender.org/manual/en/5.2/modeling/modifiers/deform/displace.html"
+   "https://docs.blender.org/manual/en/5.2/render/shader_nodes/textures/voronoi.html",
+   "https://docs.blender.org/manual/en/5.2/render/shader_nodes/input/layer_weight.html"
   ],
-  "example": "lava",
+  "example": "blue-planet",
   "thumbnail": "shader-nodes/thumbnail.png",
   "media": [
    "shader-nodes/sphere.gif",
-   "shader-nodes/nodes.gif",
-   "shader-nodes/node-tree.png"
+   "shader-nodes/land-and-sea.gif",
+   "shader-nodes/planet-tree.png",
+   "shader-nodes/moon-tree.png",
+   "shader-nodes/render.png"
   ],
   "ui": [
    "ShaderNodeTree",
@@ -1449,8 +1452,7 @@
    "node.add_node",
    "node.link",
    "mesh.primitive_uv_sphere_add",
-   "object.modifier_add",
-   "texture.new",
+   "object.shade_smooth",
    "material.new"
   ],
   "code": [
@@ -1511,13 +1513,13 @@
    "Not run yet: Wireframe, Point Info, Particle Info, the volume nodes, Script, Sky, Environment and IES textures, Toon BSDF, Specular BSDF, Ray Portal, Raycast, AOV Output and node groups."
   ],
   "page": "docs/features/shader-nodes.md",
-  "open": "https://propolisa.github.io/bylonder/#example=lava",
-  "example_title": "Lava Sphere",
+  "open": "https://propolisa.github.io/bylonder/#example=blue-planet",
+  "example_title": "Blue Planet",
   "coverage": {
    "operators": {
-    "supported": 142,
-    "partial": 1,
-    "total": 174
+    "supported": 141,
+    "partial": 2,
+    "total": 173
    },
    "ui": {
     "supported": 37,
