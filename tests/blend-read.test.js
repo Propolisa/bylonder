@@ -147,6 +147,8 @@ else {
     }
     const red = user.world.objects.find((n) => n.name === 'Cube').material;
     assert(close(red.albedoColor.asArray(), [0.8, 0.05, 0.05]) && Math.abs(red.roughness - 0.3) < 1e-5, 'the Principled BSDF inputs');
+    const { color, strength } = user.world.worlds.active().background;
+    assert(close(color, [0.2, 0.3, 0.6]) && Math.abs(strength - 0.35) < 1e-6, `the world's Background color and strength: ${color}, ${strength}`);
     assert.deepEqual(user.world.collections.state.collections.map((c) => c.name).sort(), Object.keys(expected.collections).sort());
     assert.equal(user.scene.activeCamera?.name, expected.scene.camera);
     const keys = user.world.animation.serialize().action.tracks.find((t) => t.id === 'object:Cube' && t.path === 'position.y');

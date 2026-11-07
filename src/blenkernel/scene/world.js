@@ -26,9 +26,9 @@ export const worldChannels = [
 const resolve = (entry, path) => { const keys = path.split('.'), key = keys.pop(); return { owner: keys.reduce((o, k) => o?.[k], entry), key }; };
 export const getPath = (entry, path) => { const { owner, key } = resolve(entry, path); return owner?.[key]; };
 
-// A scene's world as Blender's (bpy.data.worlds.new as scene.world): its color, linear, lights the scene.
-export function createWorld(scene, { color = worldDefaults.background.color } = {}) {
-  scene.metadata = { ...scene.metadata, wbWorld: { color } };
+// A scene's world as Blender's (bpy.data.worlds.new as scene.world): its color, linear, times its strength lights the scene.
+export function createWorld(scene, { color = worldDefaults.background.color, strength = worldDefaults.background.strength } = {}) {
+  scene.metadata = { ...scene.metadata, wbWorld: { color, strength } };
 }
 
 export function createWorlds(world, { commit = () => {}, asset } = {}) {

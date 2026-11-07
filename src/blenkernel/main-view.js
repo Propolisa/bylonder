@@ -267,8 +267,7 @@ export function createMainView(state) {
   function adoptWorld(wo, scene, warnings) {
     const background = blender.nodeTree(wo).nodes.find((node) => node.idname === 'ShaderNodeBackground');
     const color = background?.inputs.Color ?? dnaGet('World', wo, 'color');
-    createWorld(scene, color && { color: [...color].slice(0, 3) });
-    if (background && background.inputs.Strength !== 1) warnings.push(`World "${blender.name(wo)}": its strength opens as 1`);
+    createWorld(scene, color && { color: [...color].slice(0, 3), strength: background?.inputs.Strength });
     ids.adopted.set('world', wo);
   }
   // A material's or world's values and node tree from Main. A PBR material is its Principled BSDF as Blender's glTF
