@@ -804,6 +804,26 @@ const checks = {
     assert.ok(solid.color.every((c, i) => Math.abs(c - rendered.color[i]) <= 24), `outline ${rendered.color} in Rendered, ${solid.color} in Solid`);
   },
 
+  // The floor grid fades through geometry on its plane, as Blender's four offset iterations draw it: a plane at z 0 keeps
+  // the X axis showing over it.
+  async "the floor grid's axes show over a plane on the floor"() {
+    await app.bylonder((b) => b.runOperator("mesh.primitive_plane_add", { size: 40 }));
+    await app.settled();
+    await app.until((b) => b.views.idle);
+    const axis = await app.bylonder(async (b) => {
+      const { canvas } = b.views.input, { width, height } = canvas;
+      const context = new OffscreenCanvas(width, height).getContext("2d");
+      context.drawImage(await createImageBitmap(canvas), 0, 0);
+      const { data } = context.getImageData(0, Math.round(height * 0.6), width, Math.round(height * 0.35));
+      let red = 0;
+      for (let i = 0; i < data.length; i += 4) if (data[i] > data[i + 1] + 40 && data[i] > data[i + 2] + 40) red++;
+      return red;
+    });
+    await app.page.keyboard.press("Control+z");
+    await app.settled();
+    assert.ok(axis > 20, `X axis pixels over the plane: ${axis}`);
+  },
+
   async "split a 3D Viewport and switch its shading"() {
     // Drag the corner of the area under the 3D Viewport (the viewport is laid over its area) inward.
     const leaf = await app.frame().evaluate(() => {

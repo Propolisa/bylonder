@@ -1,8 +1,8 @@
 // The 3D Viewport's floor grid and axis lines (overlay_grid.hh, overlay_grid_vert/frag.glsl): lines generated from
 // the vertex index on three grid levels around the point of interest, the levels chosen and faded by the distance
 // to the floor, faded with distance, at grazing angles and at the edge of each level, in the theme's grid colors.
-// Blender draws four passes with growing depth bias and fading alpha to blend the floor into geometry on it; one
-// alpha-blended pass is drawn here.
+// In perspective, as Blender, the lines draw in four iterations with a depth offset going from behind to in front and
+// halving alpha, so the grid fades through geometry on its plane (a floor at z 0) instead of z-fighting it.
 import { Mesh } from '@babylonjs/core/Meshes/mesh.js';
 import { VertexBuffer } from '@babylonjs/core/Buffers/buffer.js';
 import { ShaderMaterial } from '@babylonjs/core/Materials/shaderMaterial.js';
@@ -11,7 +11,7 @@ import { Color4 } from '@babylonjs/core/Maths/math.color.js';
 import { view_3d as theme, user_interface, colorShade, colorBlendShade } from '../editors/interface/userdef-default-theme.js';
 import { drawView, DRAW_VIEW_GLSL } from './draw-view.js';
 
-const STEPS_LEN = 8, STEPS_DRAW = 3;
+const STEPS_LEN = 8, STEPS_DRAW = 3, ITER_LEN = 4;
 const SHOW_GRID = 1, SHOW_AXES = 2, AXIS_X = 4, AXIS_Y = 8, PLANE_XY = 32, PLANE_XZ = 64, PLANE_YZ = 128, GRID_ALIGNED = 256, GRID_BEHIND_GEOMETRY = 4096;
 
 const VERTEX = `precision highp float;
@@ -25,6 +25,7 @@ uniform float numLines;
 uniform float gridFlag;
 uniform vec3 viewPosition;
 uniform float persp;
+uniform float gridIter;
 uniform float pixelFac;
 uniform vec2 sizeViewport;
 varying vec3 vPos;
@@ -63,7 +64,8 @@ bool line_end(vec2 P, out vec2 coord, out vec3 pos) {
 }
 vec4 clip_position(vec3 pos) {
   vec4 p = drw_point_world_to_homogenous(pos);
-  if (persp != 0.0) p.z += mix(0.00025, -0.0002, float(line_level) / ${4 * STEPS_DRAW}.0);
+  // blender-port: overlay_grid_vert.glsl: z-offset by iteration and level, from z_max_offset to z_min_offset.
+  if (persp != 0.0) p.z += mix(0.00025, -0.0002, (gridIter * ${STEPS_DRAW}.0 + float(line_level)) / ${ITER_LEN * STEPS_DRAW}.0);
   else if (flag_test(grid_flag, ${GRID_BEHIND_GEOMETRY})) p.z = p.w;
   return p;
 }
@@ -85,6 +87,8 @@ void main() {
   grid_flag = int(gridFlag);
   int num_lines = int(numLines);
   gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
+  // An orthographic view draws one iteration.
+  if (persp == 0.0 && gridIter > 0.0) return;
   int vertex_id = int(position.x);
   int side = vertex_id & 1;
   vec2 P;
@@ -141,6 +145,7 @@ uniform float gridFlag;
 uniform vec3 viewPosition;
 uniform vec3 viewForward;
 uniform float persp;
+uniform float gridIter;
 uniform float farClip;
 uniform vec4 colorGrid;
 uniform vec4 colorEmphasis;
@@ -179,6 +184,8 @@ void main() {
   // Low alpha lines become dashes.
   const float dash_width = 4.0, fade_start = 0.1;
   if (color.a < fade_start && color.a / fade_start < fract(distance(vEdgeStart, vEdgePos) / dash_width)) discard;
+  // Lower iterations are given stronger alpha (additive_alpha: 1, 0.5, 0.25, 0.125).
+  if (persp != 0.0) color.a *= exp2(-gridIter);
   gl_FragColor = color;
 }`;
 
@@ -199,7 +206,7 @@ export function createGridOverlay(scene) {
   };
   const material = new ShaderMaterial('__gridOverlay', scene, { vertexSource: VERTEX, fragmentSource: FRAGMENT }, {
     attributes: ['position'], needAlphaBlending: true,
-    uniforms: ['viewProjection', 'steps', 'offset', 'clipRect', 'level', 'numLines', 'gridFlag', 'viewPosition', 'viewForward', 'persp', 'pixelFac', 'sizeViewport', 'farClip', ...Object.keys(colors)],
+    uniforms: ['viewProjection', 'steps', 'offset', 'clipRect', 'level', 'numLines', 'gridFlag', 'viewPosition', 'viewForward', 'persp', 'gridIter', 'pixelFac', 'sizeViewport', 'farClip', ...Object.keys(colors)],
   });
   material.backFaceCulling = false;
   material.disableDepthWrite = true;
@@ -210,11 +217,21 @@ export function createGridOverlay(scene) {
     // Each vertex holds its index: Blender's shader reads gl_VertexID, which crashed Chromium's software GL here.
     mesh.setVerticesData(VertexBuffer.PositionKind, Float32Array.from({ length: count * 3 }, (_, i) => (i % 3 ? 0 : i / 3)), false);
     Object.assign(mesh, { isUnIndexed: true, isPickable: false, alwaysSelectAsActiveMesh: true, doNotSerialize: true, material });
-    mesh.metadata = { editable: false, overlay: true, gridFlags: flags };
+    mesh.metadata = { editable: false, overlay: true, gridFlags: flags, gridIter: 0 };
     mesh._getRenderingFillMode = () => Material.LineListDrawMode;
     return mesh;
   };
   const grid = part('__grid', 4 * STEPS_DRAW * LINES.ortho, 'grid'), axes = part('__gridAxes', 6, 'axes');
+  // Each iteration's lines, its geometry shared, drawn in order (alphaIndex) after the first.
+  const iterations = [grid, axes];
+  for (let iter = 1; iter < ITER_LEN; iter++) {
+    for (const first of [grid, axes]) {
+      const mesh = Object.assign(first.clone(`${first.name} ${iter}`), { isUnIndexed: true, isPickable: false, alwaysSelectAsActiveMesh: true, doNotSerialize: true, alphaIndex: iter, material });
+      mesh.metadata = { ...first.metadata, gridIter: iter };
+      mesh._getRenderingFillMode = first._getRenderingFillMode;
+      iterations.push(mesh);
+    }
+  }
   const offset = [0, 0];
   material.onBindObservable.add((mesh) => {
     const v = drawView(scene), effect = material.getEffect(), f = v.forward, eye = v.position;
@@ -248,7 +265,8 @@ export function createGridOverlay(scene) {
       if (next >= dist || i === STEPS_LEN - 1) { level = i + (dist - curr) / (next - curr); break; }
     }
     const far = camera.maxZ;
-    effect.setFloat('gridFlag', mesh === grid ? gridFlag : axisFlag);
+    effect.setFloat('gridFlag', mesh.metadata.gridFlags === 'grid' ? gridFlag : axisFlag);
+    effect.setFloat('gridIter', mesh.metadata.gridIter);
     effect.setFloat('numLines', v.persp ? LINES.persp : LINES.ortho);
     effect.setFloat('level', level);
     effect.setFloat2('offset', offset[0], offset[1]);
@@ -261,7 +279,7 @@ export function createGridOverlay(scene) {
     effect.setFloat('farClip', far);
   });
   return {
-    meshes: [grid, axes],
-    dispose() { grid.dispose(); axes.dispose(); material.dispose(); },
+    meshes: iterations,
+    dispose() { iterations.forEach((mesh) => mesh.dispose()); material.dispose(); },
   };
 }
