@@ -1087,6 +1087,17 @@ const checks = {
     });
     assert.deepEqual(idle, { evaluated: 0, frames: 0 });
   },
+  // A menu redraws its own region, as Blender's do: hovering its items draws no frame of the 3D View under it.
+  async "hovering a menu's items draws no view frame"() {
+    await app.locator('.bl-pulldown[data-blender="VIEW3D_MT_object"]').first().click();
+    await app.locator(".bl-menu .bl-menu-item").first().waitFor();
+    await app.until((b) => b.views.idle);
+    await app.bylonder((b) => { const { engine } = b.world; b.viewFrames = 0; b.counting = engine.onEndFrameObservable.add(() => { if (engine.views.some((v) => v.enabled)) b.viewFrames++; }); });
+    for (const item of (await app.locator(".bl-menu").first().locator(".bl-menu-item").all()).slice(0, 10)) await item.hover({ timeout: 3000 }).catch(() => {});
+    const drawn = await app.bylonder((b) => { b.world.engine.onEndFrameObservable.remove(b.counting); return b.viewFrames; });
+    await app.page.keyboard.press("Escape");
+    assert.equal(drawn, 0, `view frames while hovering a menu: ${drawn}`);
+  },
   // Navigating changes where the view looks and its name, not its header: Blender redraws the window region only, so
   // orbiting draws no header or tool settings again.
   async "navigating the view redraws its name, not its header"() {

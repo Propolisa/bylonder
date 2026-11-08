@@ -773,7 +773,11 @@ const sequencerEditor = mountSequencerEditor(document.querySelector("#sequencer-
   }).catch((error) => notify("Video Sequencer setup: " + (error.message || error.__args__?.[0] || error))),
 });
 const fileBrowser = mountFileBrowser(document.querySelector("#files-section"), { adapter: sequencerAdapter, notify });
-for (const event of ["pointermove", "pointerdown", "wheel", "keydown"]) window.addEventListener(event, () => views.wake(), { passive: true, capture: true });
+// Input redraws the views as Blender's window redraws a region: a press or key anywhere, a move or wheel over a view (or
+// leaving it); a pointer moving over a menu or another editor redraws that, not the views.
+const overView = (event) => views.all.some((view) => view.canvas === event.target);
+for (const event of ["pointerdown", "keydown"]) window.addEventListener(event, () => views.wake(), { passive: true, capture: true });
+for (const event of ["pointermove", "wheel", "pointerout"]) window.addEventListener(event, (e) => { if (overView(e)) views.wake(); }, { passive: true, capture: true });
 for (const source of [documentState, world.particles, world.modifiers, animation]) source.subscribe?.(() => views.wake());
 world.modifiers.onDrawn(() => views.wake());
 function undoRedo(redo) {
