@@ -276,6 +276,23 @@ const checks = {
     await expectStats((s) => s.Verts > 8);
   },
 
+  // The Properties editor's tabs as Blender 5.2.3 draws them at UI scale 1 (measured from its screenshot): a 29 pixel
+  // bar, tabs 27 by 28 flush with the main region, the first 8 pixels down, groups 8 pixels apart, the active tab in
+  // the main region's color.
+  async "the Properties editor's tabs have Blender's navigation bar metrics"() {
+    const properties = app.locator("#properties-section");
+    await properties.locator('[role="tab"][aria-label="Object"]').click();
+    const { bar, tabs, active } = await properties.locator(".bl-navigation-bar").evaluate((bar) => {
+      const box = (el) => { const r = el.getBoundingClientRect(); return { x: r.x, y: r.y, width: r.width, height: r.height, right: r.right }; };
+      const selected = bar.querySelector('[role="tab"][aria-selected="true"]');
+      return { bar: box(bar), tabs: [...bar.querySelectorAll('[role="tab"]')].map(box), active: getComputedStyle(selected).backgroundColor };
+    });
+    assert.equal(bar.width, 29);
+    for (const tab of tabs) assert.deepEqual([tab.width, tab.height, tab.right], [27, 28, bar.right]);
+    assert.deepEqual(tabs.slice(0, 3).map((tab) => tab.y - bar.y), [8, 44, 72], "Tool, then Render after a group gap");
+    assert.equal(active, "rgb(48, 48, 48)");
+  },
+
   // The region's focus on pointer enter must not take the keyboard back from the text field a click opens.
   async "a click on a Properties number field edits its text"() {
     await app.click();

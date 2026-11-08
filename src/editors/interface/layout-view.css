@@ -99,13 +99,34 @@
 .bl-list-item{border-radius:calc(var(--bl-row)*.2);color:var(--bl-text)}
 .bl-list-item.is-active{background:var(--bl-wcol-list-sel);color:var(--bl-text-sel)}
 .bl-list-item:hover:not(.is-active){background:var(--bl-wcol-hover)}
-/* The Properties editor's navigation bar (prop_tabs_enum at 1.4 scale): tabs that join the main region when active. */
-.bl-navigation-bar{width:calc(var(--bl-row)*1.6);background:var(--bl-navigation-bar)}
+/* The Properties editor's navigation bar (RGN_TYPE_NAV_BAR, prop_tabs_enum at 1.4 scale, widget_tab): each tab its own
+   box rounded on the left, flush with the main region, so the active one (wcol_tab inner_sel) joins it; the outline is
+   wcol_tab's, which shows only around the active tab; the emboss only under a group's last tab. A tab's theme-colored
+   icon is drawn at 0.8 alpha unless the tab is active or hovered (widget_draw_icon). */
+.bl-navigation-bar{width:calc(var(--bl-row)*1.45);overflow-y:auto;scrollbar-width:none;background:var(--bl-navigation-bar)}
+/* Tabs beyond an edge (RGN_FLAG_INDICATE_OVERFLOW, ED_region_draw_overflow_indication): a gradient to the bar's back
+   at 0.85 over that edge, opaque once 20 pixels or more are hidden there. */
+.bl-navigation-bar::before,.bl-navigation-bar::after{content:'';position:sticky;z-index:1;flex:none;height:var(--bl-overflow-fade);opacity:0;pointer-events:none;animation:linear both;animation-timeline:scroll(self)}
+.bl-navigation-bar::before{top:0;margin-bottom:calc(-1*var(--bl-overflow-fade));background:linear-gradient(var(--bl-navigation-bar-overflow),transparent);animation-name:bl-fade-in;animation-range:0 var(--bl-overflow-ramp)}
+.bl-navigation-bar::after{bottom:0;margin-top:calc(-1*var(--bl-overflow-fade));background:linear-gradient(transparent,var(--bl-navigation-bar-overflow));animation-name:bl-fade-out;animation-range:calc(100% - var(--bl-overflow-ramp)) 100%}
+@keyframes bl-fade-in{from{opacity:0}to{opacity:1}}
+@keyframes bl-fade-out{from{opacity:1}to{opacity:0}}
+.bl-navigation-bar .bl-region-panels{padding:0}
+.bl-navigation-bar .bl-align-col>*+*{margin-top:0}
+/* The bar's layout is scaled 1.4 high, its separators too, in whole pixels (Layout::separator). */
+.bl-navigation-bar .bl-separator{height:round(down,calc(var(--bl-row)*.3*1.4),1px)}
+/* The tab visibility popover below the tabs: its arrow alone, centered in its button. */
+.bl-navigation-bar .bl-menu-button::after{right:auto;left:calc(50% - var(--bl-row)*.2)}
 .bl-tabs{align-items:flex-end;padding:calc(var(--bl-row)*.4) 0}
-.bl-tab{display:flex;align-items:center;justify-content:center;width:calc(var(--bl-row)*1.35);height:calc(var(--bl-row)*1.4);border:0;border-radius:calc(var(--bl-row)*.2) 0 0 calc(var(--bl-row)*.2);background:var(--bl-wcol-tab);color:var(--bl-text);cursor:pointer}
+.bl-tab{display:flex;flex:none;align-items:center;justify-content:center;width:calc(var(--bl-row)*1.35);height:calc(var(--bl-row)*1.4);margin-left:auto!important;padding:0;border:0;
+  border-radius:var(--bl-tab-radius) 0 0 var(--bl-tab-radius);background:var(--bl-wcol-tab);color:var(--bl-wcol-tab-text);cursor:pointer;
+  box-shadow:inset 1px 0 var(--bl-wcol-tab-outline),inset 0 1px var(--bl-wcol-tab-outline),inset 0 -1px var(--bl-wcol-tab-outline)}
+.bl-tab:is(:last-child,:has(+.bl-separator,+.bl-tab-gap)){box-shadow:inset 1px 0 var(--bl-wcol-tab-outline),inset 0 1px var(--bl-wcol-tab-outline),inset 0 -1px var(--bl-wcol-tab-outline),0 1px var(--bl-wcol-emboss)}
 .bl-tab .bl-icon{width:calc(var(--bl-row)*.8);height:calc(var(--bl-row)*.8)}
-.bl-tab:hover{background:var(--bl-wcol-hover)}
-.bl-tab[aria-selected=true]{background:var(--bl-region)}
+.bl-tab .bl-icon[class*=bl-icon-]{opacity:var(--bl-icon-theme-alpha)}
+.bl-tab:hover{background:var(--bl-wcol-tab-hover)}
+.bl-tab:is(:hover,[aria-selected=true]) .bl-icon[class*=bl-icon-]{opacity:1}
+.bl-tab[aria-selected=true]{background:var(--bl-wcol-tab-sel);color:var(--bl-wcol-tab-text-sel)}
 .bl-tab-gap{height:calc(var(--bl-row)*.4)}
 /* Icons in their theme color (UI_icons.hh, src/editors/interface/icon-themes.json). */
 .bl-icon-scene{color:var(--bl-icon-scene)}.bl-icon-collection{color:var(--bl-icon-collection)}.bl-icon-object{color:var(--bl-icon-object)}

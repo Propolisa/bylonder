@@ -120,7 +120,7 @@ export function mountProperties(host, { world, editor, history, systems, propert
         onPointerenter: focusUnlessInside }, [
         headerHost ? h(Teleport, { to: headerHost }, [headerView]) : headerView,
         h('div', { class: 'flex min-h-0 flex-1' }, [
-          h('div', { class: 'bl-navigation-bar flex shrink-0 flex-col items-center', 'data-blender': 'PROPERTIES_PT_navigation_bar' },
+          h('div', { class: 'bl-navigation-bar flex shrink-0 flex-col', 'data-blender': 'PROPERTIES_PT_navigation_bar' },
             h(PanelsView, { panels: nav.panels, ui: ui[RGN_TYPE_NAV_BAR] })),
           h('div', { class: 'bl-properties-region min-w-0 flex-1 overflow-y-auto' }, h(PanelsView, { panels: main.panels, ui: ui[RGN_TYPE_WINDOW] },
             () => addonPanels({ world, editor, history, systems, properties, storage, files, tab, node: ob(), state, registered: propertyPanels, ui: addonUI }))),
