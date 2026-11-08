@@ -3,20 +3,18 @@ import { BlenderNodeMaterial, blenderDefaultTree, buildMaterial } from '../../no
 import { nodeId, deleted } from '../../editors/object/identity.js';
 import { fields, materialType, materialTypes, resolve, textureSlots } from './schema.js';
 import { bindGraph } from '../../nodes/bindings.js';
-import { blenderAreaSpecular } from '../light/area-specular.js';
+import { applyPBR, principledPBR } from './principled-gltf.js';
+import { declaration, defaults } from '../../nodes/blender/declarations.js';
 
 export const materialId = material => material.metadata?.wbId || material.name;
 const imageFile = /\.(png|jpe?g|webp|gif|bmp|ktx2?|dds|env|hdr)$/i;
 
 // What an object without a material shows: Blender's default surface (material_default_surface_init), a Principled
-// BSDF of base color 0.8 at the Principled's defaults, so it takes lights as Blender's materials do.
+// BSDF at its defaults on a Material at its defaults (drawn from both sides).
 function defaultSurface(scene) {
   const material = new PBRMaterial('__defaultSurface', scene);
-  material.albedoColor = new Color3(0.8, 0.8, 0.8);
-  material.metallic = 0;
-  material.roughness = 0.5;
-  material.indexOfRefraction = 1.5;
-  return blenderAreaSpecular(material);
+  applyPBR(material, principledPBR(defaults(declaration('shader', 'ShaderNodeBsdfPrincipled')).values, { use_backface_culling: false }));
+  return material;
 }
 
 export function createMaterialLibrary(world, { commit = () => {}, asset = path => path, files = [] } = {}) {
