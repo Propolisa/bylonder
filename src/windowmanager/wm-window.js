@@ -135,6 +135,13 @@ export class Area {
     const out = withArrays([new Float32Array(10)], ([p]) => { x.wm_view3d_get(this.pointer, p); return Array.from(new Float32Array(x.memory.buffer, p >>> 0, 10)); });
     return { ofs: out.slice(0, 3), viewquat: out.slice(3, 7), dist: out[7], persp: out[8], view: out[9] };
   }
+  // Camera view as Blender draws it in the 3D View's window region (wm_view3d_camera): its view plane ({ fov, vertical,
+  // shift, half: half width and height }) at the view's camera zoom and offset, and the camera's frame in the region
+  // (border: xmin, ymin, xmax, ymax in pixels from its bottom left).
+  camera() {
+    const v = new Float32Array(x.memory.buffer, x.wm_view3d_camera(this.window.C, this.pointer) >>> 0, 10).slice();
+    return { fov: v[0], vertical: !!v[1], shift: [v[2], v[3]], half: [v[4], v[5]], border: [v[6], v[7], v[8], v[9]] };
+  }
   // A region drawn by its type (or its overlay), as region-draw.cc records it.
   draw(regiontype, overlay = false) { return JSON.parse(cString(x.wm_region_draw(this.window.C, this.pointer, regiontype, overlay))); }
   // Runs fn(C) with this area's region as the context's.

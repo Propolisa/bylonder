@@ -5,6 +5,7 @@
  * window, areas and regions, modal operators, macros and gestures run as in Blender. Each event returns what Blender
  * tagged for redrawing. */
 #include "BKE_addon.h"
+#include "BKE_camera.h"
 #include "BKE_context.hh"
 #include "BKE_keyconfig.h"
 #include "BKE_global.hh"
@@ -22,12 +23,14 @@
 #include "BLI_function_ref.hh"
 #include "BLI_time.h"
 #include "BLI_vector.hh"
+#include "DNA_camera_types.h"
 #include "DNA_screen_types.h"
 #include "DNA_space_types.h"
 #include "DNA_userdef_types.h"
 #include "DNA_view3d_types.h"
 #include "DNA_windowmanager_types.h"
 #include "ED_screen.hh"
+#include "ED_view3d.hh"
 #include "ED_space_api.hh"
 #include "ED_util.hh"
 #include "GPU_context.hh"
@@ -334,6 +337,40 @@ EXPORT(wm_view3d_get) void wm_view3d_get(ScrArea *area, float *out)
   out[7] = rv3d.dist;
   out[8] = rv3d.persp;
   out[9] = rv3d.view;
+}
+
+/* Camera view in a 3D View's window region as Blender draws it, at the view's camera zoom and offset (view3d.zoom,
+ * view3d.view_center_camera): the region's view plane (BKE_camera_params_from_view3d) as camera_view_fov gives a
+ * camera's (field of view along the fitted side, whether that is the height, the plane's center as a part of its half
+ * width and height), the plane's half width and height (scene units for an orthographic camera), and the camera's
+ * frame in the region (ED_view3d_calc_camera_border) as xmin, ymin, xmax, ymax in pixels from its bottom left. */
+EXPORT(wm_view3d_camera) const float *wm_view3d_camera(bContext *C, ScrArea *area)
+{
+  static float result[10];
+  const ARegion *region = BKE_area_find_region_type(area, RGN_TYPE_WINDOW);
+  const View3D *v3d = static_cast<const View3D *>(area->spacedata.first);
+  const RegionView3D *rv3d = static_cast<const RegionView3D *>(region->regiondata);
+  const Scene *scene = WM_window_get_active_scene(CTX_wm_window(C));
+  const Depsgraph *depsgraph = CTX_data_depsgraph_pointer(C);
+  CameraParams params;
+  BKE_camera_params_init(&params);
+  BKE_camera_params_from_view3d(&params, depsgraph, v3d, rv3d);
+  BKE_camera_params_compute_viewplane(&params, region->winx, region->winy, 1.0f, 1.0f);
+  const rctf &plane = params.viewplane;
+  const bool vertical = BKE_camera_sensor_fit(params.sensor_fit, region->winx, region->winy) == CAMERA_SENSOR_FIT_VERT;
+  result[0] = 2.0f * atanf((vertical ? BLI_rctf_size_y(&plane) : BLI_rctf_size_x(&plane)) / 2.0f / params.clip_start);
+  result[1] = vertical;
+  result[2] = (plane.xmin + plane.xmax) / BLI_rctf_size_x(&plane);
+  result[3] = (plane.ymin + plane.ymax) / BLI_rctf_size_y(&plane);
+  result[4] = BLI_rctf_size_x(&plane) / 2.0f;
+  result[5] = BLI_rctf_size_y(&plane) / 2.0f;
+  rctf border;
+  ED_view3d_calc_camera_border(scene, depsgraph, region, v3d, rv3d, false, &border);
+  result[6] = border.xmin;
+  result[7] = border.ymin;
+  result[8] = border.xmax;
+  result[9] = border.ymax;
+  return result;
 }
 
 /* The browser's input as GHOST's events: the pointer's place (page pixels), a button pressed or released (the DOM's

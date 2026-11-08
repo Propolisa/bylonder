@@ -888,24 +888,18 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       setLens(camera, frame, frame.shift);
       setOrthoView(camera, null);
     },
-    // Camera view as Blender draws it at the default camera zoom (BKE_screen_view3d_zoom_to_fac(0), half size): the
-    // camera's view plane fitted to the region at twice its extent and shifted as the camera's, and the output's frame
-    // centered in it, its size as fractions of the region's (ED_view3d_calc_camera_border), with the camera's
-    // passepartout; null for a Babylon camera.
-    viewCamera(camera, output, region) {
+    // Camera view as Blender draws it in a 3D View's window region (`view`: its Area.camera(), at the view's camera zoom
+    // and offset; `region`: its size in pixels): the region's view plane, the camera's frame in it as parts of the
+    // region from its top left (ED_view3d_calc_camera_border), and the camera's passepartout; null for a Babylon camera.
+    viewCamera(camera, output, view, region) {
       const ob = blenderCameraOf(camera);
       if (!ob) return null;
-      const plane = ({ width, height }, zoom) => {
-        const { fov, vertical, shift } = blender.cameraViewFov(ob, width, height), half = Math.tan(fov / 2) * zoom;
-        return { fov: 2 * Math.atan(half), vertical, shift, x: vertical ? half * width / height : half, y: vertical ? half : half * height / width };
-      };
-      const frame = plane(output, 1), view = plane(region, 2), data = blender.data(ob);
-      setOutputFrame(camera, frame);
-      setLens(camera, view, [frame.shift[0] * frame.x / view.x, frame.shift[1] * frame.y / view.y]);
-      // An orthographic camera's Orthographic Scale spans the frame along its fit, so the region spans as much more.
-      const units = dnaGet('Camera', data, 'ortho_scale') / 2 / (frame.vertical ? frame.y : frame.x);
-      setOrthoView(camera, camera.mode === Camera.ORTHOGRAPHIC_CAMERA ? [view.x * units, view.y * units] : null);
-      return { width: frame.x / view.x, height: frame.y / view.y,
+      const data = blender.data(ob);
+      setOutputFrame(camera, blender.cameraViewFov(ob, output.width, output.height));
+      setLens(camera, view, view.shift);
+      setOrthoView(camera, camera.mode === Camera.ORTHOGRAPHIC_CAMERA ? view.half : null);
+      const [xmin, ymin, xmax, ymax] = view.border;
+      return { x: xmin / region.width, y: 1 - ymax / region.height, width: (xmax - xmin) / region.width, height: (ymax - ymin) / region.height,
         passepartout: dnaGet('Camera', data, 'show_passepartout') ? dnaGet('Camera', data, 'passepartout_alpha') : 0 };
     },
     nodeOf,

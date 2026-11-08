@@ -234,12 +234,12 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     authored = null;
     if (!rendered) { authored = scene.clearColor; scene.clearColor = background; }
     // Camera view shows the scene's output framed in the region, the passepartout darkening around it.
-    const frame = state.cameraView && world.renderSettings
-      ? world.mainSync?.viewCamera(view.camera, outputSize(world.renderSettings.state.render), { width: canvas.width, height: canvas.height }) : null;
+    const area = state.cameraView && world.renderSettings && world.view3dArea?.(view);
+    const frame = area ? world.mainSync?.viewCamera(view.camera, outputSize(world.renderSettings.state.render), area.camera(), { width: canvas.clientWidth, height: canvas.clientHeight }) : null;
     // view3d_draw.cc drawviewborder: the passepartout and its outline always, the dashed guide with the overlays.
     cameraBorder.hidden = !frame;
     if (frame) {
-      cameraBorder.style.cssText = `--width:${frame.width};--height:${frame.height};--passepartout:${frame.passepartout}`;
+      cameraBorder.style.cssText = `--x:${frame.x};--y:${frame.y};--width:${frame.width};--height:${frame.height};--passepartout:${frame.passepartout}`;
       cameraBorder.classList.toggle('passepartout', frame.passepartout > 0);
       cameraBorder.classList.toggle('guides', !!state.overlays);
     }

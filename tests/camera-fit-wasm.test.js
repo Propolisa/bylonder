@@ -18,6 +18,9 @@ import { createSelection } from '../src/editors/object/selection.js';
 import { createRNA } from '../src/makesrna/rna-bylonder.js';
 import { createMainSync } from '../src/blenkernel/main-sync.js';
 import { createCurveObjects } from '../src/editors/curve/curve-objects.js';
+import { Window, SPACE_VIEW3D, RGN_TYPE_WINDOW } from '../src/windowmanager/wm-window.js';
+import { regionView3D } from '../src/editors/space_view3d/view3d-project.js';
+import { contextStruct, inPythonContext } from '../src/python/bpy_rna.js';
 
 // The gallery's .blend opened as a project's code opens it, then the world's slices and its scene sync.
 const scene = new Scene(new NullEngine());
@@ -66,15 +69,33 @@ Object.assign(data, { shift_x: 0, shift_y: 0 });
 sync.fitCamera(camera, LANDSCAPE);
 assert.deepEqual([...camera.getProjectionMatrix(true).m], centered, 'and back');
 
-// Camera view in a 1600 by 900 region at the default camera zoom: the view plane twice the camera's, fitted to the
-// region, and the output's frame inside it as Blender's ED_view3d_calc_camera_border places it.
+// Camera view in a 1600 by 900 3D View at the default camera zoom: the view plane twice the camera's, fitted to the
+// region, and the output's frame inside it as Blender's ED_view3d_calc_camera_border places it; Frame Camera Bounds
+// (view3d.view_center_camera, Home) zooms the view until the frame nearly fills it.
 const REGION = { width: 1600, height: 900 };
+sync.blender.camera = sync.objectOf(camera);
+const window = new Window(sync.blender);
+window.size = REGION;
+window.allow(['view3d.view_center_camera']);
+const area = window.area(SPACE_VIEW3D), rect = { x: 0, y: 0, ...REGION };
+area.layout(rect, { [RGN_TYPE_WINDOW]: rect });
+// The scene's output at `size`, looked at through the camera: Blender's camera view of it.
+const look = ({ width, height }) => {
+  inPythonContext(sync.blender.C, () => Object.assign(contextStruct().scene.render, { resolution_x: width, resolution_y: height, resolution_percentage: 100 }));
+  area.view3d = regionView3D({ camera, canvas: { clientWidth: REGION.width, clientHeight: REGION.height }, state: { cameraView: true } });
+  return area.camera();
+};
 for (const [size, width, height] of [[LANDSCAPE, 0.5, 0.5], [PORTRAIT, 1 / 3, 8 / 9]]) {
   data.sensor_fit = 'AUTO';
-  const frame = sync.viewCamera(camera, size, REGION), label = `Auto at ${size.width}x${size.height}`;
-  assert.ok(Math.abs(frame.width - width) < 1e-5 && Math.abs(frame.height - height) < 1e-5, `${label}: the frame ${frame.width} by ${frame.height}`);
+  const frame = sync.viewCamera(camera, size, look(size), REGION), label = `Auto at ${size.width}x${size.height}`;
+  assert.ok(Math.abs(frame.width - width) < 1e-3 && Math.abs(frame.height - height) < 1e-3, `${label}: the frame ${frame.width} by ${frame.height}`);
+  assert.ok(Math.abs(frame.x - (1 - width) / 2) < 1e-3 && Math.abs(frame.y - (1 - height) / 2) < 1e-3, `${label}: centered, at ${frame.x}, ${frame.y}`);
   assert.equal(camera.fovMode, Camera.FOVMODE_HORIZONTAL_FIXED, `${label}: the region fits horizontally`);
-  assert.ok(Math.abs(Math.tan(camera.fov / 2) - 2 * Math.tan(fov(36) / 2)) < 1e-5, `${label}: the view twice the camera's`);
+  assert.ok(Math.abs(Math.tan(camera.fov / 2) - 2 * Math.tan(fov(36) / 2)) < 1e-4, `${label}: the view twice the camera's`);
   assert.equal(frame.passepartout, data.show_passepartout ? data.passepartout_alpha : 0, "the camera's passepartout");
 }
-console.log('Camera fit: Auto, Horizontal and Vertical frame landscape and portrait output as Blender computes them, Shift moves the view, and camera view frames it in the region passed');
+window.invoke(area, 'view3d.view_center_camera', {});
+const fitted = sync.viewCamera(camera, PORTRAIT, area.camera(), REGION), fill = Math.max(fitted.width, fitted.height);
+assert.ok(fill > 0.9 && fill < 1 && Math.abs(fitted.x - (1 - fitted.width) / 2) < 1e-3 && Math.abs(fitted.y - (1 - fitted.height) / 2) < 1e-3,
+  `Home: the frame fills the view, ${fitted.width} by ${fitted.height} at ${fitted.x}, ${fitted.y}`);
+console.log("Camera fit: Auto, Horizontal and Vertical frame landscape and portrait output as Blender computes them, Shift moves the view, and camera view frames it in the region at the view's camera zoom, Home filling it");

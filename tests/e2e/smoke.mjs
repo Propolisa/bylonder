@@ -278,6 +278,20 @@ const checks = {
     await expectStats((s) => s.Verts > 8);
   },
 
+  // Camera view at the view's camera zoom (Blender's camera border): Home (view3d.view_center_camera) fills the view
+  // with the camera's frame.
+  "camera view zooms with Home": { open: { link: "tin-cans", node: "Tomato" }, async run() {
+    const border = () => app.frame().evaluate(() => { const b = document.querySelector(".camera-border"), r = b.getBoundingClientRect(), c = document.querySelector(".viewport-canvas").getBoundingClientRect(); return b.hidden ? null : r.width / c.width; });
+    await app.hover();
+    await app.page.keyboard.press("Numpad0");
+    await app.until((b) => b.views.input.state.cameraView);
+    const before = await border();
+    assert.ok(before > 0.45 && before < 0.55, `the frame at half the view: ${before}`);
+    await app.bylonder((b) => b.world.view3dInvoke(b.views.input, "view3d.view_center_camera", {}));
+    await app.settled();
+    assert.ok((await border()) > 0.95, `Home: the frame fills the view: ${await border()}`);
+  } },
+
   // The Properties editor's tabs as Blender 5.2.3 draws them at UI scale 1 (measured from its screenshot): a 29 pixel
   // bar, tabs 27 by 28 flush with the main region, the first 8 pixels down, groups 8 pixels apart, the active tab in
   // the main region's color.

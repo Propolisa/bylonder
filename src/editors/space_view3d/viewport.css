@@ -20,10 +20,9 @@
 .nav-buttons .bl-icon-button:hover{background:#ffffff26}
 .overlays-off .nav-gizmo,.overlays-off .nav-buttons,.overlays-off .view-label{display:none}
 .gizmos-off .nav-gizmo,.gizmos-off .nav-buttons{display:none}
-/* The camera view's border, centered on the canvas (which spans under the header), the passepartout around it. */
-/* The camera view's border, centered on the canvas (which spans under the header): a black line dashed in the
-   viewport's color, the passepartout (TH_CAMERA_PASSEPARTOUT at the camera's alpha) around it. */
-.camera-border{position:absolute;left:50%;top:calc(50% - var(--bl-header-h)/2);width:calc(100% * var(--width) + 4px);height:calc((100% + var(--bl-header-h)) * var(--height) + 4px);transform:translate(-50%,-50%);border:1px solid transparent;box-shadow:0 0 0 100vmax rgb(var(--bl-camera-passepartout) / var(--passepartout));pointer-events:none}
+/* The camera view's border where Blender places the camera's frame on the canvas (which spans under the header), its
+   lines 2 pixels outside it, the passepartout (TH_CAMERA_PASSEPARTOUT at the camera's alpha) around it. */
+.camera-border{position:absolute;left:calc(100% * var(--x) - 2px);top:calc((100% + var(--bl-header-h)) * var(--y) - var(--bl-header-h) - 2px);width:calc(100% * var(--width) + 4px);height:calc((100% + var(--bl-header-h)) * var(--height) + 4px);border:1px solid transparent;box-shadow:0 0 0 100vmax rgb(var(--bl-camera-passepartout) / var(--passepartout));pointer-events:none}
 .camera-border.passepartout{border-color:var(--bl-viewport)}
 /* Its lines a pixel outside the camera frame (drawviewborder x1i = x1 - 1). drawviewborder's dashes: dash_width 6 at udash_factor 0.5, 3 pixels on and 3 off. */
 .camera-border.guides::after{content:"";position:absolute;inset:-1px;--dash:var(--bl-camera-border) 0 3px,transparent 3px 6px;background:repeating-linear-gradient(90deg,var(--dash)) top/100% 1px no-repeat,repeating-linear-gradient(90deg,var(--dash)) bottom/100% 1px no-repeat,repeating-linear-gradient(180deg,var(--dash)) left/1px 100% no-repeat,repeating-linear-gradient(180deg,var(--dash)) right/1px 100% no-repeat}
