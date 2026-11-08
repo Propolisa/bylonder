@@ -572,9 +572,10 @@ viewportDock.setFactory("preferences", preferencesEditor);
 registerUserprefOperators({ showArea: () => viewportDock.show("preferences", true) });
 view3dWindow = createView3DWindow({ sync: world.mainSync, views: viewports, takes: () => !editCurve.active, host: objectOperatorHost, wake: () => views.wake(),
   menu: (name, at) => world.callMenu(name, at), before: () => creator.finish() });
-// Curve Edit Mode keeps its input from Blender's window; Frame Selected (Numpad .) still runs Blender's, on the edit curve.
+// Frame Selected (Numpad .) is the page's so Curve Edit Mode, which keeps its input from Blender's window, has it too; in
+// every mode it runs Blender's in the view (Blender's window leaves operators the page registers to the page).
 registerOperators({
-  "view3d.view_selected": { supports: () => editCurve.active, run: (props, event) => (event?.view ? (view3dWindow.invoke(event.view, "view3d.view_selected", props), "FINISHED") : "CANCELLED") },
+  "view3d.view_selected": { run: (props, event) => (event?.view ? (view3dWindow.invoke(event.view, "view3d.view_selected", props), "FINISHED") : "CANCELLED") },
 });
 // File > Import, Export, Link and Append: Main made current (an export's meshes filled) for the operator the file dialog
 // or File Browser runs, then what it changed drawn, Blender's undo step, if it pushed one, taken, and the libraries Main

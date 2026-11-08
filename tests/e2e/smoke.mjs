@@ -279,7 +279,7 @@ const checks = {
   },
 
   // Camera view at the view's camera zoom (Blender's camera border): Home (view3d.view_center_camera) fills the view
-  // with the camera's frame, and Frame Selected leaves camera view as Blender's navigation does.
+  // with the camera's frame, and Frame Selected (Numpad .) leaves camera view as Blender's navigation does.
   "camera view zooms with Home and Frame Selected leaves it": { open: { link: "tin-cans", node: "Tomato" }, async run() {
     const border = () => app.frame().evaluate(() => { const b = document.querySelector(".camera-border"), r = b.getBoundingClientRect(), c = document.querySelector(".viewport-canvas").getBoundingClientRect(); return b.hidden ? null : r.width / c.width; });
     await app.hover();
@@ -290,7 +290,8 @@ const checks = {
     await app.bylonder((b) => b.world.view3dInvoke(b.views.input, "view3d.view_center_camera", {}));
     await app.settled();
     assert.ok((await border()) > 0.95, `Home: the frame fills the view: ${await border()}`);
-    await app.bylonder((b) => b.world.view3dInvoke(b.views.input, "view3d.view_selected", {}));
+    await app.hover();
+    await app.page.keyboard.press("NumpadDecimal");
     await app.until((b) => !b.views.input.state.cameraView);
     assert.match(await app.frame().locator(".view-label").textContent(), /^User Perspective/);
   } },
