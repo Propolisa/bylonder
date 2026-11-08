@@ -1627,6 +1627,28 @@ const checks = {
     assert.equal(await app.bylonder((b) => b.views.input.state.cameraView), false, "no camera view without a camera");
   } },
 
+  // Add > Camera into the active collection while an object instances it (Pizza Delivery's pavement): the camera is
+  // added and the outliner and Properties go on drawing.
+  async "Add > Camera into an instanced collection adds the camera"() {
+    await app.bylonder((b) => {
+      const C = b.modules.bpyRna.contextStruct(), set = C.blend_data.collections.new("Set");
+      C.scene.collection.children.link(set);
+      const instancer = C.blend_data.objects.new("Instancer", null);
+      Object.assign(instancer, { instance_type: "COLLECTION", instance_collection: set });
+      C.scene.collection.objects.link(instancer);
+      C.view_layer.active_layer_collection = C.view_layer.layer_collection.children.get("Set");
+    });
+    const cameras = await app.bylonder((b) => b.world.scene.cameras.length);
+    await app.hover();
+    await app.page.keyboard.press("Shift+A");
+    await app.frame().getByRole("menuitem", { name: "Camera", exact: true }).click();
+    await app.until((b, count) => b.world.scene.cameras.length > count, cameras);
+    const name = await app.bylonder((b) => b.editor.selection.active.name);
+    await app.until((b, name) => b.world.outliner.area.draw().draw.some((c) => c.op === "text" && c.text === name), name);
+    await app.locator('#properties-section [role="tab"][aria-label="Object"]').click();
+    await app.until(() => /Transform/.test(document.querySelector("#properties-section").textContent));
+  },
+
   async "The Video Sequencer's edit survives a reload, a project ZIP and a .blend"() {
     const strips = () => app.bylonder((b) => b.world.sequenceEditor.state?.edit?.timeline?.items?.length ?? 0);
     const ready = () => app.page.waitForFunction(() => !!document.querySelector('iframe[src*="viewport.html"]')?.contentWindow?.__bylonder?.editor, null, { timeout: 120000 });

@@ -45,4 +45,15 @@ const instancer = blender.ids(0x424f).find((ob) => blender.name(ob) === 'Instanc
 const meshes = blender.instances().filter((group) => group.instancer === instancer && group.shape === 'MESH');
 assert.ok(empty && instancer, 'the instancer is in Main');
 assert.equal(meshes.reduce((sum, group) => sum + group.data.length / 16, 0), 8, "the instanced cube's 8 spheres are drawn");
-console.log("Collection instances: an instanced object's Geometry Nodes instances draw, as Blender's dupli list nests them");
+// Add > Camera into an instanced collection that is also in the view layer and active, as Pizza Delivery's pavement:
+// the camera is instanced too, and draws as no light.
+inPythonContext(blender.C, () => {
+  const C = contextStruct(), set = C.blend_data.collections.get('Set');
+  C.scene.collection.children.link(set);
+  C.view_layer.active_layer_collection = C.view_layer.layer_collection.children.get('Set');
+});
+run('object.camera_add');
+sync.redraw();
+const camera = blender.ids(0x424f).find((ob) => blender.name(ob) === 'Camera');
+assert.ok(blender.instances().some((group) => group.ob === camera), 'the camera is instanced');
+console.log("Collection instances: an instanced object's Geometry Nodes instances draw, as Blender's dupli list nests them; an instanced camera draws");

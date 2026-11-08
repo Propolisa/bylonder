@@ -9,7 +9,8 @@ import { rnaProperty } from '../../makesrna/rna.js';
 import { lightFields, lightStruct } from './light-fields.js';
 
 export const BLENDER = 'BLENDER';
-export const isBlenderLight = (light) => light.metadata?.wbHome === BLENDER;
+// A camera Blender's code made has its home there too (main-view.js MAKERS).
+export const isBlenderLight = (light) => light instanceof Light && light.metadata?.wbHome === BLENDER;
 export const lightRecord = (light) => light.metadata?.wbLight;
 
 // The glTF exporter's lighting modes: Unitless (COMPAT, its candela without the 683 lm/W), Standard (SPEC, physical)
