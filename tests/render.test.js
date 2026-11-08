@@ -113,6 +113,20 @@ assert.ok(Array.from({ length: 64 }, (_, i) => filmJitter(i)).every(([x, y]) => 
     filmScene.onAfterCameraRenderObservable.notifyObservers(camera);
   }
   assert.deepEqual(drawn, [false, true], 'the first sample unjittered, the second jittered');
+  // It starts again when a mesh it draws draws with another shader (one compiled and swapped in), not for the shaders
+  // of other passes (shadows, overlays).
+  const mesh = MeshBuilder.CreateBox('Drawn', {}, filmScene), wrapper = { effect: { uniqueId: 1 }, dispose() {} };
+  mesh.subMeshes[0]._drawWrappers[camera.renderPassId] = wrapper;
+  filmScene.getActiveMeshes().push(mesh);
+  const frame = () => { filmScene.onBeforeCameraRenderObservable.notifyObservers(camera); filmScene.onAfterCameraRenderObservable.notifyObservers(camera); };
+  for (let i = 0; i < 6; i++) frame();
+  assert.ok(view.converged, 'converged');
+  engine._compiledEffects = { ...engine._compiledEffects, shadowDepth: {} };
+  frame();
+  assert.ok(view.converged, "another pass's new shader keeps the film");
+  wrapper.effect = { uniqueId: 2 };
+  frame(); frame();
+  assert.ok(!view.converged, 'a drawn mesh swapping its shader starts it again');
   view.dispose();
   filmScene.dispose();
 }

@@ -108,12 +108,22 @@ export function createFilm(scene, camera) {
     effect.setFloat('single', state.single ? 1 : 0);
   };
   // A view's samples while it stays the same (EEVEE's viewport): up to `samples()` of them, each jittered; any change of
-  // its view, size or compiled shaders, or a reset() (Main evaluated), starts again. `manual` leaves the
-  // samples to a render (frames.js), which jitters and adds them itself.
-  let count = 0, signature = '', sampled = false, jittered = false, drawn = 0;
+  // its view, its size or the shaders its meshes drew with (one compiled, swapped in), or a reset() (Main evaluated),
+  // starts again. Shaders of other passes (shadows, overlays, probes) do not. `manual` leaves the samples to a render
+  // (frames.js), which jitters and adds them itself.
+  let count = 0, signature = '', sampled = false, jittered = false, drawn = 0, shaders = 0;
   const viewOf = () => {
-    const projection = camera.getProjectionMatrix(true).m, effects = engine._compiledEffects ? Object.keys(engine._compiledEffects).length : 0;
-    return [...camera.getViewMatrix().m, ...projection, engine.getRenderWidth(), engine.getRenderHeight(), effects].join();
+    const projection = camera.getProjectionMatrix(true).m;
+    return [...camera.getViewMatrix().m, ...projection, engine.getRenderWidth(), engine.getRenderHeight(), shaders].join();
+  };
+  // The effects the camera's meshes drew with in its own pass, as one number.
+  const drawnShaders = () => {
+    const meshes = scene.getActiveMeshes();
+    let hash = 0;
+    for (let i = 0; i < meshes.length; i++) {
+      for (const subMesh of meshes.data[i].subMeshes ?? []) hash = (Math.imul(hash, 31) + (subMesh._drawWrappers?.[camera.renderPassId]?.effect?.uniqueId ?? 0)) | 0;
+    }
+    return hash;
   };
   const before = scene.onBeforeCameraRenderObservable.add((rendering) => {
     if (rendering !== camera || controls.manual) return;
@@ -131,6 +141,7 @@ export function createFilm(scene, camera) {
   });
   const after = scene.onAfterCameraRenderObservable.add((rendering) => {
     if (rendering !== camera) return;
+    shaders = drawnShaders();
     setDitherOffset(scene, 0);
     sampling.delete(scene);
     if (jittered) camera.unfreezeProjectionMatrix();
