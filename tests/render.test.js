@@ -139,6 +139,27 @@ acc.reset(); assert.equal(acc.count, 0);
   scene.dispose(); engine.dispose();
 }
 
+// Material Preview draws through a film as Rendered does (EEVEE's viewport film, its samples accumulating while the view
+// is still): its camera gets the film and the display transform, but is not a rendered camera.
+{
+  const engine = new NullEngine(), scene = new Scene(engine), rendered = new FreeCamera('r', Vector3.Zero(), scene), preview = new FreeCamera('p', Vector3.Zero(), scene);
+  const settings = createRenderSettings({ scene, animation: createAnimationModel() });
+  settings.setRenderedCameras([rendered], [preview]);
+  assert.ok(settings.film(preview) && settings.film(rendered), 'a Material Preview view has a film');
+  assert.deepEqual(settings.renderedCameras, [rendered], 'and is not a rendered view');
+  settings.setRenderedCameras([rendered], []);
+  assert.ok(!settings.film(preview), 'leaving Material Preview drops it');
+  settings.dispose(); scene.dispose(); engine.dispose();
+}
+// The film keeps coverage in its alpha (a Material Preview's background is the view's own, as EEVEE's film with the
+// world's opacity 0), dividing by the filter's weights, which are the same for every pixel of a sample.
+{
+  const { filmWeights } = await import('../src/render/film.js');
+  const weights = filmWeights([0, 0]);
+  assert.ok(weights > 1 && weights < 4, `a centered sample's weights: ${weights}`);
+  assert.ok(Math.abs(filmWeights([0.3, -0.2]) - filmWeights([-0.3, 0.2])) < 1e-9, 'mirrored jitters weigh the same');
+}
+
 // A Blender camera's depth of field (Main's, through the module) on the rendered view that looks through it, as
 // Babylon's: its f-stop, focal length and focus distance in millimeters, and none for a camera without it.
 {

@@ -1099,6 +1099,27 @@ const checks = {
     const after = await app.bylonder((b) => ({ draws: b.headerDraws, name: b.views.input.section.querySelector(".view-name").textContent }));
     assert.deepEqual(after, { draws: 0, name: "Front Orthographic" });
   },
+
+  // Material Preview accumulates its samples through a film as EEVEE's viewport does, then goes idle; where nothing is
+  // drawn it shows the view's own background (the theme's), not the color-managed world.
+  async "Material Preview converges through its film over the view's background"() {
+    await app.bylonder((b) => b.views.input.setShading("material"));
+    await app.until((b) => b.views.idle, null, 30000).catch(() => {});
+    const view = await app.bylonder(async (b) => {
+      const { canvas, camera } = b.views.input, context = new OffscreenCanvas(canvas.width, canvas.height).getContext("2d");
+      context.drawImage(await createImageBitmap(canvas), 0, 0);
+      return { film: !!b.world.renderSettings.film(camera), converged: b.world.renderSettings.converged(), idle: b.views.idle, corner: Array.from(context.getImageData(4, canvas.height - 4, 1, 1).data.slice(0, 3)) };
+    });
+    await app.bylonder((b) => b.views.input.setShading("solid"));
+    const theme = await app.bylonder(async (b) => {
+      await new Promise((done) => b.world.scene.onAfterRenderObservable.addOnce(done));
+      const { canvas } = b.views.input, context = new OffscreenCanvas(canvas.width, canvas.height).getContext("2d");
+      context.drawImage(await createImageBitmap(canvas), 0, 0);
+      return Array.from(context.getImageData(4, canvas.height - 4, 1, 1).data.slice(0, 3));
+    });
+    assert.deepEqual({ ...view, corner: undefined }, { film: true, converged: true, idle: true, corner: undefined });
+    assert.ok(view.corner.every((c, i) => Math.abs(c - theme[i]) <= 2), `the background ${view.corner}, the theme's ${theme}`);
+  },
   // A Dithered surface's shadow is drawn by its own shader (ShadowDepthWrapper), whose world position a point light's
   // shadow reads as worldPos: the wrapper names the variable the material's vertex shader holds it in. Unnamed, the
   // shadow's shader failed to compile and was compiled again every frame (bike_ride: 3.5 frames/s in Rendered).

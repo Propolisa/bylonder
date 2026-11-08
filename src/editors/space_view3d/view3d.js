@@ -37,7 +37,7 @@ function selectModeLayout(selectmode) {
 // The keymaps an Object Mode 3D View's handlers run, in order.
 const KEYMAPS = ['Object Mode', 'Object Non-modal', '3D View', '3D View Generic', 'Frames', 'Screen', 'Window'];
 
-const background = new Color4(...view_3d.background);
+const background = new Color4(...view_3d.background), CLEAR = new Color4(0, 0, 0, 0);
 // Blender's startup 3D View (startup.blend: region_3d view_rotation, view_distance and view_location) as an orbit
 // around its location, and its lens (LENS_HALF_TAN).
 const STARTUP_VIEW = { alpha: -0.415918, beta: 1.108752, radius: 18.388048, target: new Vector3(-0.020693, 0.000669, -0.046025) };
@@ -237,8 +237,11 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     editorCamera.fov = 2 * Math.atan(LENS_HALF_TAN / Math.max(1, aspect));
     if (editorCamera.mode) nav.updateBounds();
     const rendered = view.rendered;
+    // Rendered and Material Preview draw through the camera's film; Material Preview's background is the view's own,
+    // which the display transform puts under what the film covers.
+    const film = (rendered || view.preview) && !scene.frameGraph ? world.renderSettings.film(view.camera) : null;
     authored = null;
-    if (!rendered) { authored = scene.clearColor; scene.clearColor = background; }
+    if (!rendered) { authored = scene.clearColor; scene.clearColor = film ? CLEAR : background; }
     // Camera view shows the scene's output framed in the region, the passepartout darkening around it.
     const area = state.cameraView && world.renderSettings && world.view3dArea?.(view);
     const frame = area ? world.mainSync?.viewCamera(view.camera, outputSize(world.renderSettings.state.render), area.camera(), { width, height }) : null;
@@ -256,10 +259,9 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
       cameraBorder.classList.toggle('passepartout', frame.passepartout > 0);
       cameraBorder.classList.toggle('guides', !!state.overlays);
     }
-    world.beforeViewRender({ rendered, compositor: view.wantsCompositor, frame, studio: { worldSpace: state.use_world_space_lighting, rotateZ: state.studiolight_rotate_z } });
-    // Rendered draws the overlays after its film and compositor, as Blender does; a compositor graph of Babylon's own
+    world.beforeViewRender({ rendered, preview: !!film && view.preview, background, compositor: view.wantsCompositor, frame, studio: { worldSpace: state.use_world_space_lighting, rotateZ: state.studiolight_rotate_z } });
+    // Rendered and Material Preview draw the overlays after the film (and the compositor), as Blender does; a compositor graph of Babylon's own
     // that draws the scene has no pass for them.
-    const film = rendered && !scene.frameGraph ? world.renderSettings.film(view.camera) : null;
     ctx.overlays.setEnabled(state.overlays && (!rendered || !!film), state);
     overlaysDrawn = ctx.overlays.use(view.camera, film);
     if (rendered || view.preview) materialsDrawn = ctx.shaderCompile.use(view.camera);

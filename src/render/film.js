@@ -32,8 +32,7 @@ void main(void) {
       vec2 offset = vec2(float(x), float(y)) - jitter;
       float d2 = dot(offset, offset);
       if (d2 > radius * radius) continue;
-      float w = film_filter_weight(radius, d2);
-      sum += vec4(texture2D(textureSampler, vUV + vec2(float(x), float(y)) * texelSize).rgb * w, w);
+      sum += texture2D(textureSampler, vUV + vec2(float(x), float(y)) * texelSize) * film_filter_weight(radius, d2);
     }
   }
   gl_FragColor = sum * weightScale;
@@ -42,10 +41,25 @@ void main(void) {
 ShaderStore.ShadersStore.blenderFilmResolveFragmentShader = `precision highp float;
 varying vec2 vUV;
 uniform sampler2D textureSampler;
+uniform float weights;
 void main(void) {
-  vec4 film = texture2D(textureSampler, vUV);
-  gl_FragColor = vec4(film.rgb / max(film.a, 1e-8), 1.0);
+  gl_FragColor = texture2D(textureSampler, vUV) / max(weights, 1e-8);
 }`;
+
+// blender-port: eevee_film_lib.glsl film_filter_weight, as the film's shader weighs a sample's neighbors.
+const filterWeight = (radius, d2) => Math.exp((-0.5 / (0.284 * 0.284)) * (d2 / (radius * radius)));
+// The weights a sample with this jitter adds to every pixel, the same for each: the film keeps its colors and
+// coverage (alpha, which a view without a background leaves for its own, as EEVEE's film does) and divides by these.
+export function filmWeights(jitter, radius = FILTER_RADIUS) {
+  let sum = 0;
+  for (let y = -2; y <= 2; y++) {
+    for (let x = -2; x <= 2; x++) {
+      const d2 = (x - jitter[0]) ** 2 + (y - jitter[1]) ** 2;
+      if (d2 <= radius * radius) sum += filterWeight(radius, d2);
+    }
+  }
+  return sum;
+}
 
 // The jitter of a view's sample, in pixels, within its pixel (Halton bases 2 and 3, as EEVEE's sampling draws it).
 export const filmJitter = (sample) => [halton(sample + 1, 2) - 0.5, halton(sample + 1, 3) - 0.5];
@@ -58,7 +72,7 @@ export const filmSample = (scene) => sampling.get(scene) ?? null;
 export function createFilm(scene, camera) {
   const engine = scene.getEngine(), type = Constants.TEXTURETYPE_HALF_FLOAT;
   const film = new PostProcess('__film', 'blenderFilm', ['texelSize', 'jitter', 'radius', 'weightScale'], null, 1, null, Constants.TEXTURE_NEAREST_SAMPLINGMODE, engine, false, null, type);
-  const resolve = new PostProcess('__filmResolve', 'blenderFilmResolve', null, null, 1, null, Constants.TEXTURE_NEAREST_SAMPLINGMODE, engine, false, null, type);
+  const resolve = new PostProcess('__filmResolve', 'blenderFilmResolve', ['weights'], null, 1, null, Constants.TEXTURE_NEAREST_SAMPLINGMODE, engine, false, null, type);
   camera.attachPostProcess(film, 0);
   camera.attachPostProcess(resolve, 1);
   film.alphaMode = Constants.ALPHA_ONEONE_ONEONE;
@@ -70,15 +84,19 @@ export function createFilm(scene, camera) {
     const target = film.inputTexture;
     if (!target.depthStencilTexture) target.createDepthStencilTexture(0, false, stencil, 1, stencil ? Constants.TEXTUREFORMAT_DEPTH24_STENCIL8 : Constants.TEXTUREFORMAT_DEPTH24);
   });
-  const state = { jitter: [0, 0], adding: true, clear: true, size: '' };
-  // The resolve's input is the film's sum: cleared once per reset (and when its size changes), then each sample adds to it.
+  const state = { jitter: [0, 0], adding: true, clear: true, size: '', weights: 0 };
+  // The resolve's input is the film's sum: cleared once per reset (and when its size changes), then each sample adds to
+  // it, and its weights to the film's.
   resolve.autoClear = false;
   resolve.onActivateObservable.add(() => {
     const size = `${resolve.width}x${resolve.height}`;
-    if (!state.clear && size === state.size) return;
-    Object.assign(state, { clear: false, size });
-    engine.clear({ r: 0, g: 0, b: 0, a: 0 }, true, false, false);
+    if (state.clear || size !== state.size) {
+      Object.assign(state, { clear: false, size, weights: 0 });
+      engine.clear({ r: 0, g: 0, b: 0, a: 0 }, true, false, false);
+    }
+    if (state.adding) state.weights += filmWeights(state.jitter);
   });
+  resolve.onApply = (effect) => effect.setFloat('weights', state.weights);
   film.onApply = (effect) => {
     effect.setFloat2('texelSize', 1 / film.width, 1 / film.height);
     effect.setFloat2('jitter', state.jitter[0], state.jitter[1]);

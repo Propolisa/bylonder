@@ -7,33 +7,38 @@ import { Constants, Effect, EffectWrapper, PostProcess, RawTexture3D } from '@ba
 import { displayExponent } from './view-settings.js';
 import { LOG_SIZE, STOPS } from './display-lut.js';
 
-const SHADER = 'bylonderDisplayTransform', UNIFORMS = ['exposure', 'range', 'exponent', 'latticed'], SAMPLERS = ['lattice'];
+const SHADER = 'bylonderDisplayTransform', UNIFORMS = ['exposure', 'range', 'exponent', 'latticed', 'background'], SAMPLERS = ['lattice'];
 Effect.ShadersStore[`${SHADER}FragmentShader`] = `precision highp float;
 precision highp sampler3D;
 varying vec2 vUV;
 uniform sampler2D textureSampler;
 uniform sampler3D lattice;
 uniform float exposure, range, exponent, latticed;
+// A view's own background (a display color, alpha 1) where its film's coverage leaves it, or none (alpha 0).
+uniform vec4 background;
 vec3 srgb(vec3 c) { return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(0.0031308, c)); }
 void main(void) {
   vec4 color = texture2D(textureSampler, vUV);
-  vec3 linear = max(color.rgb * exposure, 0.0), display;
+  float coverage = background.a > 0.5 ? clamp(color.a, 0.0, 1.0) : 1.0;
+  vec3 linear = max(color.rgb / max(coverage, 1e-4) * exposure, 0.0), display;
   if (latticed > 0.5) {
     vec3 u = clamp(log2(max(linear / range, 1e-30)) / ${STOPS.toFixed(1)} + 1.0, 0.0, 1.0);
     display = texture(lattice, u * ${((LOG_SIZE - 1) / LOG_SIZE).toFixed(8)} + ${(0.5 / LOG_SIZE).toFixed(8)}).rgb;
   } else display = srgb(clamp(linear, 0.0, 1.0));
-  gl_FragColor = vec4(pow(max(display, 0.0), vec3(exponent)), color.a);
+  display = pow(max(display, 0.0), vec3(exponent));
+  gl_FragColor = background.a > 0.5 ? vec4(mix(background.rgb, display, coverage), 1.0) : vec4(display, 1.0);
 }`;
 
 // The scene's display settings: () => { exposure (stops), gamma, lut (display-lut.js's log lattice, or null) }.
 const settingsOf = new WeakMap();
 export const setDisplaySettings = (scene, settings) => settingsOf.set(scene, settings);
-const NEUTRAL = { exposure: 0, gamma: 1, lut: null };
+const NEUTRAL = { exposure: 0, gamma: 1, lut: null, background: null };
 
 // The lattice sampler's texture while there is no lattice: a 3D sampler takes a 3D texture.
 let none = null;
 function bind(effect, scene) {
-  const { exposure, gamma, lut } = settingsOf.get(scene)?.() ?? NEUTRAL;
+  const { exposure, gamma, lut, background } = settingsOf.get(scene)?.() ?? NEUTRAL;
+  if (background) effect.setFloat4('background', background.r, background.g, background.b, 1); else effect.setFloat4('background', 0, 0, 0, 0);
   effect.setFloat('exposure', 2 ** exposure);
   effect.setFloat('exponent', displayExponent(gamma));
   effect.setFloat('latticed', lut ? 1 : 0);

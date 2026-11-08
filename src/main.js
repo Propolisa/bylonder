@@ -682,7 +682,8 @@ const viewportCtx = {
     const preferred = backdrop.shown ? backdrop.view : views.focused;
     const compositorView = world.compositor.enabled ? (compositing.includes(preferred) ? preferred : compositing[0]) || null : null;
     for (const v of all) v.wantsCompositor = v === compositorView;
-    world.setViewShading({ renderedCameras: rendered.map((v) => v.camera), compositorCamera: compositorView?.camera, preview: all.some((v) => v.preview && v.active !== false) });
+    const previews = all.filter((v) => v.preview && v.active !== false);
+    world.setViewShading({ renderedCameras: rendered.map((v) => v.camera), previewCameras: previews.map((v) => v.camera), compositorCamera: compositorView?.camera, preview: previews.length > 0 });
     const cameraView = !!views.input?.state.cameraView;
     document.body.classList.toggle("scene-mode", cameraView);
     views.relayout();

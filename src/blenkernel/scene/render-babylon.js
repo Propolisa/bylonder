@@ -104,8 +104,11 @@ export function createRenderEngine(scene, { dof = () => null, displayTransform =
     attached.delete(camera);
     if (ownGeometryBuffer && ![...attached.values()].some(a => usesGeometry(a.effects))) scene.disableGeometryBufferRenderer();
   };
-  let viewportSamples = 1, view = {};
-  setDisplaySettings(scene, () => ({ exposure: view.exposure ?? 0, gamma: view.gamma ?? 1, lut: displayTransform()?.log ?? null }));
+  let viewportSamples = 1, view = {}, shown = { rendered: true, background: null };
+  setDisplaySettings(scene, () => {
+    const { exposure = 0, gamma = 1 } = displayedViewSettings(view, shown.rendered);
+    return { exposure, gamma, lut: displayTransform()?.log ?? null, background: shown.background };
+  });
   const build = (camera, settings) => {
     const e = settings.eevee, effects = {};
     // EEVEE's film first: the samples a view accumulates (its viewport samples) in scene linear.
@@ -157,7 +160,8 @@ export function createRenderEngine(scene, { dof = () => null, displayTransform =
     converged: () => [...attached.values()].every(({ effects }) => effects.film.converged),
     // The view about to render: whether it is rendered (its view settings as displayedViewSettings gives them) and whether
     // it draws in scene linear, its display transform a post-process. Cheap; per view.
-    setView({ rendered, sceneLinear }) {
+    setView({ rendered, sceneLinear, background = null }) {
+      shown = { rendered, background };
       const ip = scene.imageProcessingConfiguration;
       if (ip.applyByPostProcess !== sceneLinear) {
         ip.applyByPostProcess = sceneLinear;

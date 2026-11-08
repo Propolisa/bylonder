@@ -28,27 +28,33 @@ export function createRenderSettings(world, { commit = () => {}, authored = {} }
   const listeners = new Set();
   const emit = () => listeners.forEach(fn => fn());
   const engine = createRenderEngine(scene, { dof: (camera) => world.mainSync?.cameraDof(camera) ?? null, displayTransform: () => world.mainSync?.displayLut() ?? null });
-  let cameras = new Set();
+  // The cameras of views in Rendered shading, and of those in Material Preview, which draw through a film as EEVEE's.
+  let cameras = new Set(), previews = new Set();
   // Code sets render settings through the SDK's renderSettings, and view settings also through Babylon's image processing.
   const fromCode = { ...authored, viewSettings: { ...readAuthoredRender(scene), ...authored.viewSettings } };
   const baseline = clone(Object.fromEntries(Object.entries(renderDefaults).map(([group, values]) => [group, { ...values, ...fromCode[group] }])));
   let state = clone(baseline);
-  const render = () => engine.render(state, { cameras });
+  const render = () => engine.render(state, { cameras: new Set([...cameras, ...previews]) });
   for (const [path, label] of renderChannels) animation.register({ id: 'scene', path, label, group: 'Scene', get: () => getRenderPath(state, path), set: v => { const { owner, key } = resolve(state, path); owner[key] = v; render(); } });
   render();
   return {
     get state() { return state; },
     subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
-    // Cameras of the views in Rendered shading; render effects attach to these only.
+    // Cameras of the views in Rendered shading.
     get renderedCameras() { return [...cameras]; },
-    // The view about to render ({ rendered, sceneLinear }). Cheap; per view.
+    // The view about to render ({ rendered, sceneLinear, background }). Cheap; per view.
     setView: (view) => engine.setView(view),
     film: (camera) => engine.film(camera),
     display: (camera) => engine.display(camera),
     resetFilms: () => engine.resetFilms(),
     // Whether every rendered view's film holds all its samples.
     converged: () => engine.converged(),
-    setRenderedCameras(list) { const next = new Set(list); if (next.size === cameras.size && [...next].every(c => cameras.has(c))) return; cameras = next; render(); },
+    // The cameras of the views in Rendered shading and in Material Preview.
+    setRenderedCameras(list, previewList = []) {
+      const same = (a, b) => a.size === b.size && [...a].every(c => b.has(c)), next = new Set(list), nextPreviews = new Set(previewList);
+      if (same(next, cameras) && same(nextPreviews, previews)) return;
+      cameras = next; previews = nextPreviews; render();
+    },
     set(path, value, finish = true) {
       const { owner, key } = resolve(state, path);
       owner[key] = value; render();

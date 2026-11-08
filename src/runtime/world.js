@@ -139,19 +139,21 @@ export async function createWorld({ input, engine, canvas, hooks = {}, audioCont
   // (in one view at a time) the compositor. setViewShading runs when view shading or cameras change: it attaches
   // effects to the rendered cameras and binds the compositor camera. beforeViewRender runs per view, per frame,
   // and only flips switches.
-  world.setViewShading = ({ renderedCameras = [], compositorCamera = null, preview = false }) => {
+  world.setViewShading = ({ renderedCameras = [], previewCameras = [], compositorCamera = null, preview = false }) => {
     world.worlds.setPreview(preview && !renderedCameras.length);
-    world.renderSettings.setRenderedCameras(renderedCameras);
+    world.renderSettings.setRenderedCameras(renderedCameras, previewCameras);
     world.compositor?.bindCamera(compositorCamera);
   };
   world.shadows = createLightShadows(scene);
-  world.beforeViewRender = ({ rendered, compositor, frame = null, studio = { worldSpace: false, rotateZ: 0 } }) => {
+  // A Material Preview view (preview) draws in scene linear through its film too, over its own background (a display
+  // color) where nothing is drawn, as EEVEE's film with the world's opacity 0.
+  world.beforeViewRender = ({ rendered, preview = false, background = null, compositor, frame = null, studio = { worldSpace: false, rotateZ: 0 } }) => {
     world.shadows.setActive(rendered);
     world.compositor?.setViewportActive(compositor, frame);
     // A rendered view draws in scene linear and displays through its camera's final post-process (the compositor works
     // before it); a compositor graph of Babylon's own displays what its blocks draw.
-    const sceneLinear = rendered && !world.compositor?.drawsScene;
-    world.renderSettings.setView({ rendered, sceneLinear });
+    const sceneLinear = rendered ? !world.compositor?.drawsScene : preview;
+    world.renderSettings.setView({ rendered, sceneLinear, background: !rendered && preview ? background : null });
     world.worlds.setViewportActive(rendered, sceneLinear);
     world.worlds.setStudio(studio);
   };
