@@ -69,7 +69,7 @@ export function createFrameRenderer({ world: built, engine, canvas, resize, cloc
       try {
         for (let s = 0; s < q.samples; s++) {
           const offset = filmJitter(s);
-          film.sample(offset);
+          film.sample(offset, s);
           await renderSample(times[s], offset, job);
         }
       } finally {

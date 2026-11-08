@@ -2,12 +2,39 @@
 // sun's cascaded as EEVEE's sun shadow is (directional clipmaps), and every object whose Visibility > Shadow is on casts
 // into it. Materials receive them through Babylon's own light code. Shadow maps are drawn for the views that show the
 // scene's lights (Rendered shading, Render Image); other views draw them empty, which changes no material.
-import { CascadedShadowGenerator, ShadowGenerator } from '@babylonjs/core';
+import { CascadedShadowGenerator, Matrix, ShadowGenerator, Vector3 } from '@babylonjs/core';
 import { isBlenderLight, lightRecord } from './light-home.js';
 import { areaLightShadows } from './area-light.js';
+import { filmSample } from '../../render/film.js';
+import { halton } from '../../render/sampling.js';
+import { evaluatedMatrix, setEvaluatedMatrix } from '../../runtime/object-transform.js';
 
 const MAP_SIZE = 2048;
 const CASTS = ['SUN', 'SPOT', 'POINT'];
+// blender-port: DNA_scene_defaults.h light_threshold: the scene's default Light Threshold.
+const LIGHT_THRESHOLD = 0.01;
+// How far, in meters, a caster's depth is pushed back from the light: below a brick's bump, past a cube map texel.
+const DEPTH_BIAS = 0.005;
+
+// blender-port: eevee_light.cc Light::shape_parameters_set and attenuation_radius_get: a point or spot light's shadow
+// spans its influence radius (its Custom Distance, else where its power falls to the light threshold), its near clip
+// 1/4000 of that.
+export function shadowRange(record) {
+  const power = Math.max(...record.color) * Math.abs(record.energy * 2 ** (record.exposure ?? 0) / 100);
+  const far = record.use_custom_distance ? record.cutoff_distance : Math.sqrt(power / LIGHT_THRESHOLD);
+  return { near: far / 4000, far };
+}
+
+// A light's offset within its radius for a film's sample: none for the first (what a moving view shows, one stable
+// shadow), then points alternately on its sphere and within it, whose views from any side together spread evenly over
+// the disk the sphere shows, so the samples average the soft shadow of EEVEE's sphere light.
+export function shadowJitter(index, radius) {
+  if (!index || !(radius > 0)) return null;
+  const z = 2 * halton(index, 5) - 1, phi = 2 * Math.PI * halton(index, 7), s = Math.sqrt(1 - z * z);
+  const r = radius * (index % 2 ? 1 : Math.cbrt(halton(index, 11)));
+  return new Vector3(r * s * Math.cos(phi), r * s * Math.sin(phi), r * z);
+}
+
 // A mesh of the scene's objects (not an overlay or a helper), and whether it casts.
 export const shadedObject = (mesh) => !mesh.name.startsWith('__') && !mesh.metadata?.overlay && mesh.getTotalVertices() > 0;
 const casts = (mesh) => shadedObject(mesh) && mesh.metadata?.wbVisibleShadow !== false && mesh.isEnabled() && mesh.isVisible;
@@ -26,8 +53,44 @@ function createGenerator(light, type, drawn) {
   return generator;
 }
 
+// Babylon's depth of a local light's shadow spans the camera's clip range unless the light has its own, and its bias is
+// a share of that range.
+function fitRange(light, generator) {
+  const { near, far } = shadowRange(lightRecord(light));
+  Object.assign(light, { shadowMinZ: near, shadowMaxZ: far });
+  generator.bias = DEPTH_BIAS / (near + far);
+}
+
+// Moves a point or spot light within its radius for the film's sample while its shadow map and the view draw, and back
+// after: a Blender light's evaluated world matrix, another light's position.
+function jitterPerSample(scene) {
+  const moved = new Map(); // light -> what it was
+  const before = (light) => {
+    const offset = shadowJitter(filmSample(scene), lightRecord(light).shadow_soft_size);
+    if (!offset || moved.has(light)) return;
+    const matrix = evaluatedMatrix(light);
+    if (matrix) {
+      moved.set(light, () => setEvaluatedMatrix(light, matrix));
+      setEvaluatedMatrix(light, matrix.clone().addTranslationFromFloats(offset.x, offset.y, offset.z));
+    } else {
+      const position = light.position.clone();
+      moved.set(light, () => light.position.copyFrom(position));
+      light.position.addInPlace(light.parent ? Vector3.TransformNormal(offset, Matrix.Invert(light.parent.getWorldMatrix())) : offset);
+    }
+  };
+  const after = scene.onAfterCameraRenderObservable.add(() => {
+    for (const restore of moved.values()) restore();
+    moved.clear();
+  });
+  return {
+    add: (light, generator) => generator.getShadowMap().onBeforeBindObservable.add(() => before(light), undefined, true),
+    dispose: () => scene.onAfterCameraRenderObservable.remove(after),
+  };
+}
+
 export function createLightShadows(scene) {
   const generators = new Map(); // light -> { generator, type }
+  const jitter = jitterPerSample(scene);
   let drawn = false, counted = '';
   // Every light lights every material, as in Blender (Babylon's materials take 4 unless told more), up to what a vertex
   // shader holds: a uniform block per light besides the scene's, mesh's and material's (and one spare).
@@ -47,14 +110,18 @@ export function createLightShadows(scene) {
     }
     for (const light of scene.lights) {
       const record = isBlenderLight(light) && lightRecord(light);
-      if (casting(record) && !generators.has(light)) generators.set(light, { generator: createGenerator(light, record.type, () => drawn), type: record.type });
+      if (!casting(record) || generators.has(light)) continue;
+      const generator = createGenerator(light, record.type, () => drawn);
+      generators.set(light, { generator, type: record.type });
+      if (record.type === 'POINT' || record.type === 'SPOT') jitter.add(light, generator);
     }
+    for (const [light, { generator, type }] of generators) if (type !== 'SUN') fitRange(light, generator);
     for (const mesh of scene.meshes) if (shadedObject(mesh)) mesh.receiveShadows = true;
   };
   return {
     // Per view, before it renders: whether it shows the scene's lights.
     setActive(value) { drawn = value; sync(); },
     get generators() { return [...generators.values()].map((entry) => entry.generator); },
-    dispose() { for (const { generator } of generators.values()) generator.dispose(); generators.clear(); },
+    dispose() { for (const { generator } of generators.values()) generator.dispose(); generators.clear(); jitter.dispose(); },
   };
 }

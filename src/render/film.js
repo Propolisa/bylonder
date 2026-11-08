@@ -50,6 +50,11 @@ void main(void) {
 // The jitter of a view's sample, in pixels, within its pixel (Halton bases 2 and 3, as EEVEE's sampling draws it).
 export const filmJitter = (sample) => [halton(sample + 1, 2) - 0.5, halton(sample + 1, 3) - 0.5];
 
+// The index of the sample a scene's film is adding, or null when it adds none; effects that vary per sample (light
+// shadows, light-shadows.js) draw it as EEVEE draws that sample.
+const sampling = new WeakMap();
+export const filmSample = (scene) => sampling.get(scene) ?? null;
+
 export function createFilm(scene, camera) {
   const engine = scene.getEngine(), type = Constants.TEXTURETYPE_HALF_FLOAT;
   const film = new PostProcess('__film', 'blenderFilm', ['texelSize', 'jitter', 'radius', 'weightScale'], null, 1, null, Constants.TEXTURE_NEAREST_SAMPLINGMODE, engine, false, null, type);
@@ -98,11 +103,12 @@ export function createFilm(scene, camera) {
     // The scene took the camera's matrices before this observer: it takes them again, jittered.
     scene.updateTransformMatrix(true);
     jittered = true;
-    controls.sample(jitter);
+    controls.sample(jitter, count);
   });
   const after = scene.onAfterCameraRenderObservable.add((rendering) => {
     if (rendering !== camera) return;
     setDitherOffset(scene, 0);
+    sampling.delete(scene);
     if (!jittered) return;
     camera.unfreezeProjectionMatrix();
     jittered = false;
@@ -115,9 +121,10 @@ export function createFilm(scene, camera) {
     samples: () => 1,
     // Starts again: the next sample is the first.
     reset() { state.clear = true; count = 0; },
-    // The sample about to render: its jitter, or none to add (the film is complete and keeps what it holds).
-    sample(jitter) {
+    // The sample about to render: its jitter and index, or none to add (the film is complete and keeps what it holds).
+    sample(jitter, index = 0) {
       state.adding = !!jitter;
+      sampling.set(scene, jitter ? index : null);
       if (jitter) state.jitter = jitter;
       setDitherOffset(scene, jitter ? halton((drawn = (drawn % 4096) + 1), 2) : 0);
     },

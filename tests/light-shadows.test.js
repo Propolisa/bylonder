@@ -4,7 +4,10 @@
 import assert from 'node:assert/strict';
 import { MeshBuilder, NullEngine, PBRMaterial, Scene, Vector3, FreeCamera } from '@babylonjs/core';
 import { createLight } from '../src/blenkernel/light/light-home.js';
-import { createLightShadows } from '../src/blenkernel/light/light-shadows.js';
+import { createLightShadows, shadowJitter, shadowRange } from '../src/blenkernel/light/light-shadows.js';
+import { createFilm, filmJitter } from '../src/render/film.js';
+import { evaluatedMatrix, setEvaluatedMatrix } from '../src/runtime/object-transform.js';
+import { Matrix } from '@babylonjs/core';
 import { areaLightShadows } from '../src/blenkernel/light/area-light.js';
 
 const engine = new NullEngine();
@@ -47,4 +50,43 @@ assert.equal(floor.material.maxSimultaneousLights, scene.lights.length, 'a mater
 for (let i = 4; i < 12; i++) createLight(`Bulb ${i}`, 'POINT', {}, scene);
 shadows.setActive(true);
 assert.equal(floor.material.maxSimultaneousLights, 8, "as many as a vertex shader's uniform blocks hold");
+// A point light's shadow spans its influence as EEVEE's does (eevee_light.cc), not the camera's clip range: Neon Night's
+// 120 W orange Door Light reaches 120^0.5 m, its near clip 1/4000 of that, its bias a few millimeters there, so a sign's
+// tube 0.2 m off the wall shadows it.
+const door = createLight('Door Light', 'POINT', { use_shadow: true, energy: 120, color: [1, 0.5, 0.2], shadow_soft_size: 0.1 }, scene);
+assert.deepEqual(shadowRange(door.metadata.wbLight), { near: Math.sqrt(120) / 4000, far: Math.sqrt(120) });
+assert.equal(shadowRange({ ...door.metadata.wbLight, use_custom_distance: true, cutoff_distance: 5 }).far, 5, 'a Custom Distance bounds it');
+shadows.setActive(true);
+const doorShadow = shadows.generators.find((g) => g.getLight() === door);
+assert.equal(door.shadowMaxZ, Math.sqrt(120));
+const biasMeters = doorShadow.bias * (door.shadowMinZ + door.shadowMaxZ);
+assert.ok(biasMeters > 0.001 && biasMeters < 0.02, `the depth bias is ${biasMeters} m`);
+// Soft shadows: a film's samples after the first see the light from points within its radius (EEVEE's sphere light),
+// the first (all a moving view shows) from its center.
+assert.equal(shadowJitter(0, 0.1), null, 'the first sample keeps the light still');
+assert.equal(shadowJitter(3, 0), null, 'a light of no radius stays still');
+const offsets = Array.from({ length: 63 }, (_, i) => shadowJitter(i + 1, 0.1));
+assert.ok(offsets.every((o) => o.length() <= 0.1 + 1e-9), 'within the radius');
+const mean = offsets.reduce((sum, o) => sum.addInPlace(o), Vector3.Zero()).scale(1 / offsets.length);
+assert.ok(mean.length() < 0.02, 'around the center');
+{
+  const home = new Vector3(3.6, 0.4, -0.8), at = (v) => v.equalsWithEpsilon(home, 1e-6);
+  setEvaluatedMatrix(door, Matrix.Translation(home.x, home.y, home.z));
+  const camera = scene.activeCamera, film = createFilm(scene, camera), map = doorShadow.getShadowMap();
+  const drawnAt = (index) => {
+    film.sample(filmJitter(index), index);
+    map.onBeforeBindObservable.notifyObservers(map);
+    const at = evaluatedMatrix(door).getTranslation();
+    scene.onAfterCameraRenderObservable.notifyObservers(camera);
+    return at;
+  };
+  assert.ok(at(drawnAt(0)), 'the first sample draws the light where it is');
+  const moved = drawnAt(5);
+  assert.ok(!at(moved) && Vector3.Distance(moved, home) <= 0.1 + 1e-6, 'a later one within its radius');
+  assert.ok(at(evaluatedMatrix(door).getTranslation()), 'and back after the view draws');
+  film.sample(null);
+  map.onBeforeBindObservable.notifyObservers(map);
+  assert.ok(at(evaluatedMatrix(door).getTranslation()), 'a complete film keeps it still');
+  film.dispose();
+}
 console.log('Light shadows: a generator for each light that casts, casters by their shadow visibility passed');

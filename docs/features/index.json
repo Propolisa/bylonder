@@ -1282,7 +1282,7 @@
    "tests/world-nodes-wasm.test.js"
   ],
   "limits": [
-   "Shadows are filtered by a fixed amount, as EEVEE's filter radius; a light's Angle or Radius widens its highlights but does not soften its shadows' edges.",
+   "Shadows are filtered by a fixed amount, as EEVEE's filter radius; a point or spot light's Radius softens its shadows as the samples of a render or a still Rendered view add up (a moving view shows them hard), a sun's Angle does not soften them yet.",
    "Reflections and refraction show the world's color only; EEVEE's light probes (sphere, plane, volume) and screen space reflections are not drawn, so glass and metal do not reflect the room.",
    "A world's node tree draws as the background and lights the scene through one world probe baked when the world changes, clamped at the world's Sun Threshold as EEVEE's, without the sun light EEVEE makes of what it clamps; a Sky Texture's Preetham and Hosek / Wilkie models, the world's Volume and its Background's blur are not drawn yet, and the tree's values are not followed while it is edited.",
    "Glass refracts the world behind it, not the objects; a Transparent BSDF mixed in lets the objects through.",
@@ -1581,7 +1581,7 @@
    "Glass and Refraction BSDF refract the world only, not the objects behind them (Glass, sphere 18, mean dE 2.1, max 3).",
    "Render Image takes 16 samples by default where EEVEE's render takes 64, filtered as EEVEE's film filters them (Blackman-Harris, 1.5 pixels); the film costs about 19 ms a frame on a software renderer (gallery viewport, 101 to 120 ms). The film keeps no transparency: a render's background is opaque.",
    "Blender's view transforms other than Standard are approximated by Babylon's tone mapping.",
-   "Shadows have hard edges: a sun's angle and a light's soft size do not soften them yet (Shader Node Gallery floor tiles 21 to 24, mean dE 2.4 to 5.9, 99th percentile 18 to 48 at the edges). A light's shadow map (2048 texels a side, percentage closer filtered) covers every object that casts into it at once, so over a large scene shadows are coarser than EEVEE's virtual shadow maps. Area lights cast no shadows: Babylon's rectangular area light takes no shadow generator. A shadow map costs about 9 ms a frame at 2048 on a software renderer.",
+   "A sun's shadows have hard edges: its angle does not soften them yet (a point or spot light's soft size does, over a render's samples) (Shader Node Gallery floor tiles 21 to 24, mean dE 2.4 to 5.9, 99th percentile 18 to 48 at the edges). A light's shadow map (2048 texels a side, percentage closer filtered) covers every object that casts into it at once, so over a large scene shadows are coarser than EEVEE's virtual shadow maps. Area lights cast no shadows: Babylon's rectangular area light takes no shadow generator. A shadow map costs about 9 ms a frame at 2048 on a software renderer.",
    "Material Preview lays blended surfaces over what is behind them in display space; Rendered shading and Render Image blend in scene linear, as EEVEE does.",
    "A Transparent BSDF's color lets through its average, not each channel; Holdout draws black, not a hole in the film.",
    "Light Path takes every ray as a camera ray; Ambient Occlusion finds no occlusion; Shader to RGB does not run.",

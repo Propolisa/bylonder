@@ -60,6 +60,7 @@ const BLENDER_FORWARD = new Vector3(0, -1, 0), BLENDER_UP = new Vector3(0, 0, 1)
 const evaluatedMatrices = new WeakMap();
 // A light or camera drawn at the world matrix Blender evaluated (its constraints, drivers and parents; Babylon's axes),
 // as Babylon reads it: a light's position and direction in the world, a camera's view.
+export const evaluatedMatrix = (node) => evaluatedMatrices.get(node) ?? null;
 export function setEvaluatedMatrix(node, matrix) {
   if (!evaluatedMatrices.has(node)) {
     if (node._computeTransformedInformation) {
