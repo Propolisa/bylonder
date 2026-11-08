@@ -117,6 +117,12 @@ export function createRenderEngine(scene, { dof = () => null } = {}) {
     },
     // A rendered camera's film (film.js), and every film started again (Main evaluated something new).
     film: (camera) => attached.get(camera)?.effects.film ?? null,
+    // A rendered camera's display: the view transform's input (scene linear, after the render's effects) and the post
+    // processes that display it, between which Blender's compositor works (compositor-cpu.js).
+    display(camera) {
+      const effects = attached.get(camera)?.effects, transform = effects?.pipeline.imageProcessing;
+      return transform?.inputTexture ? { input: transform.inputTexture, passes: [transform, effects.gamma].filter(Boolean) } : null;
+    },
     resetFilms() { for (const { effects } of attached.values()) effects.film.reset(); },
     // The view about to render: whether it is rendered (its view settings as displayedViewSettings gives them) and whether
     // it draws in scene linear, its display transform a post-process. Cheap; per view.

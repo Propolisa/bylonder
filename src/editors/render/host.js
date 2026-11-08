@@ -80,7 +80,11 @@ export function createRenderHost({ world, live, sceneAudio, sequencer, name = ()
       const out = new OffscreenCanvas(size.width, size.height), ctx = out.getContext('2d');
       for (let index = 0; index < frames.length; index++) {
         if (signal.aborted) throw cancelled();
-        const catchingUp = (done, total) => { setStatus(`Frame ${frames[index]} | catching up ${done} / ${total} | ${clock(started)}`); if (frames.length === 1) setProgress(done / total); };
+        // Pre-rolling a simulation (done of total frames), or a stage of the frame (Blender's Compositing).
+        const catchingUp = (done, total, stage) => {
+          setStatus(`Frame ${frames[index]} | ${stage ?? `catching up ${done} / ${total}`} | ${clock(started)}`);
+          if (frames.length === 1 && !stage) setProgress(done / total);
+        };
         const image = await untilCancelled(source.renderFrame(frames[index], catchingUp), signal);
         ctx.drawImage(image, 0, 0, size.width, size.height);
         image.close?.();

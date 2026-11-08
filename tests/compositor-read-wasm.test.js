@@ -14,6 +14,7 @@ import { createMainSync } from '../src/blenkernel/main-sync.js';
 import { createCompositor } from '../src/compositor/compositor.js';
 import { blendData, idStruct } from '../src/python/bpy_rna.js';
 import '../src/python/bpy_interface.js';
+import { kw } from '../src/windowmanager/wm-operators.js';
 
 const notices = [];
 const open = (bytes) => {
@@ -33,7 +34,7 @@ const open = (bytes) => {
 // A file with a compositing node group, made in Main as Blender's Python would.
 const { sync } = open();
 const tree = blendData().node_groups.new('Compositor Nodes', 'CompositorNodeTree');
-tree.interface.new_socket('Image', { in_out: 'OUTPUT', socket_type: 'NodeSocketColor' });
+tree.interface.new_socket(kw({ name: 'Image', in_out: 'OUTPUT', socket_type: 'NodeSocketColor' }));
 idStruct(sync.blender.scene).compositing_node_group = tree;
 const { nodes, links } = tree;
 const layers = nodes.new('CompositorNodeRLayers'), output = nodes.new('NodeGroupOutput'), reroute = nodes.new('NodeReroute');

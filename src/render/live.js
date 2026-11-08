@@ -33,7 +33,8 @@ export function createLiveRender({ world: built, engine, views: viewsOf, overlay
       resize(size.width, size.height);
       const camera = await frames.useCamera();
       world.workbench.setShading(camera, null);
-      world.beforeViewRender({ rendered: true, compositor: true });
+      // A file's compositor composites final frames on the CPU (frames.js), its views on the GPU.
+      world.beforeViewRender({ rendered: true, compositor: !world.compositor.onCPU });
       return { label: 'Camera ' + camera.name, warnings: [], dispose: restore,
         renderFrame: (frame, progress) => frames.renderFrame({ frame, ...size, quality: 'final', progress }) };
     } catch (error) {

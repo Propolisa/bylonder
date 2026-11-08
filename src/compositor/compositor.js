@@ -1,6 +1,7 @@
 import { NodeRenderGraph } from '@babylonjs/core';
 import { bindGraph } from '../nodes/bindings.js';
 import { compositorGraph } from './compositor-tree.js';
+import { compositeFinalFrame } from './compositor-cpu.js';
 import { BlenderGroupOutputBlock } from '../nodes/blender/compositor-io.js';
 
 // Blender's new compositing node group (node.new_compositing_node_group): Render Layers into the Group Output.
@@ -9,7 +10,7 @@ const NEW_TREE = { name: 'Compositor Nodes', nodes: [{ idname: 'CompositorNodeRL
 
 export function createCompositor(world, { commit = () => {}, notify = console.warn } = {}) {
   const { scene, animation } = world;
-  let graph = null, enabled = false, edited = false, building = false, camera = null, viewport = false;
+  let graph = null, enabled = false, edited = false, fromFile = false, building = false, camera = null, viewport = false;
   // camera: the camera the composite is rendered from; applied to the graph's camera inputs on every build.
   const listeners = new Set();
   const emit = () => listeners.forEach(fn => fn());
@@ -38,6 +39,10 @@ export function createCompositor(world, { commit = () => {}, notify = console.wa
   const api = {
     get graph() { return graph; },
     get enabled() { return enabled; },
+    // Whether final renders composite on Blender's CPU path (compositor-cpu.js): the graph is the file's compositing node
+    // group, which Main holds as read; the views composite on the GPU.
+    get onCPU() { return enabled && fromFile; },
+    finalFrame: (camera) => api.onCPU && compositeFinalFrame(world, camera),
     // Whether the graph ends in Blender's Group Output, which displays through the view transform (a graph made in
     // Babylon's editor shows what its blocks draw).
     get viewTransformed() { return !!graph?.attachedBlocks.some((block) => block instanceof BlenderGroupOutputBlock); },
@@ -64,6 +69,7 @@ export function createCompositor(world, { commit = () => {}, notify = console.wa
     // An edit in the node editor, recorded; rebuilt when it changed the graph's blocks, links or code.
     async edit(rebuild) {
       edited = true;
+      fromFile = false;
       if (rebuild && enabled) await build().catch(error => notify('Compositor: ' + error.message));
       bind();
       commit();
@@ -77,7 +83,7 @@ export function createCompositor(world, { commit = () => {}, notify = console.wa
       try { read = compositorGraph(tree, scene, tree.name); } catch (error) { notify(`Compositor: "${tree.name}" is not opened: ${error.message}`); return []; }
       const { graph: next, missing } = read;
       own(next);
-      edited = true;
+      edited = fromFile = true;
       if (missing.length) notify(`Compositor: its ${missing.join(', ')} nodes are not composited`);
       await api.setEnabled(use_compositing, { record: false });
       emit();

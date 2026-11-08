@@ -75,6 +75,9 @@ export function createFrameRenderer({ world: built, engine, canvas, resize, cloc
       } finally {
         film.manual = false;
       }
+      const { compositor } = built().world;
+      if (compositor?.onCPU) progress?.(0, 0, 'Compositing');
+      await compositor?.finalFrame(built().scene.activeCamera);
       ctx.drawImage(canvas, 0, 0);
       simulated = frame;
       return out;
@@ -91,7 +94,7 @@ export function createFrameRenderer({ world: built, engine, canvas, resize, cloc
   }
 
   // One frame for a scene strip: a single sample for previews, full quality for final renders.
-  // progress(done, total) hears of a final frame's pre-roll.
+  // progress(done, total, stage) hears of a final frame's pre-roll, and of its compositing (stage 'Compositing').
   async function renderFrame({ frame, width, height, camera, quality: kind = 'preview', progress }) {
     resize(width, height);
     built().world.mainSync?.fitCamera(await useCamera(camera), { width, height });

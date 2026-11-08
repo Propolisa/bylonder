@@ -33,7 +33,8 @@ async function open(input, { width, height }, { camera: cameraName, audio } = {}
   world.collections.useRenderVisibility();
   engine.setSize(width, height);
   const camera = await useCamera(cameraName);
-  world.beforeViewRender({ rendered: true, compositor: true });
+  // A file's compositor composites final frames on the CPU (frames.js), its views on the GPU.
+  world.beforeViewRender({ rendered: true, compositor: !world.compositor.onCPU });
   if (input.overrides?.compositor) await world.compositor.apply(input.overrides.compositor);
   await scene.whenReadyAsync();
   return { camera: camera.name, warnings };

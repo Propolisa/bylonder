@@ -44,6 +44,7 @@ export function createRenderSettings(world, { commit = () => {}, authored = {} }
     // The view about to render ({ rendered, sceneLinear }). Cheap; per view.
     setView: (view) => engine.setView(view),
     film: (camera) => engine.film(camera),
+    display: (camera) => engine.display(camera),
     resetFilms: () => engine.resetFilms(),
     setRenderedCameras(list) { const next = new Set(list); if (next.size === cameras.size && [...next].every(c => cameras.has(c))) return; cameras = next; render(); },
     set(path, value, finish = true) {
