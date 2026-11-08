@@ -62,6 +62,7 @@ limits:
   - Theme colors that no design token stands for are greyed out. Reset to Default Theme gives Blender Dark; the theme presets menu (Blender Light) does not load its XML yet.
   - Add-ons lists every add-on Blender 5.2 ships; only Bylonder's own and the Pose Library run in the app, the others are greyed out as not included. Installing add-ons from disk or online is greyed out.
   - The Keymap lists operators Bylonder runs its own way as unavailable, as Blender lists an operator it lacks; their keys still work.
+  - GPU Backend's WebGPU is a preview (docs/webgpu.md lists what differs); it takes effect at the next start, and a browser without WebGPU draws with WebGL 2.
   - The Mouse panel's labels are cut short at the window's default width.
   - File Paths are greyed out: projects and their files live in the browser.
 ---
@@ -126,8 +127,9 @@ looks (Themes) shape the work. The steps below change Preferences over it.
 
    ![Themes, its User Interface colors](../media/features/preferences/themes.png)
 
-6. **Bylonder's settings.** System > Bylonder holds Keep Scenes Loaded and the Video Sequencer's setup: whether it asks
-   when the Video Sequencer opens on an empty edit, and the choice it remembers.
+6. **Bylonder's settings.** System > Bylonder holds GPU Backend (WebGL 2, or WebGPU as a preview, used from the next
+   start), Keep Scenes Loaded and the Video Sequencer's setup: whether it asks when the Video Sequencer opens on an
+   empty edit, and the choice it remembers.
 
    ![System > Bylonder](../media/features/preferences/bylonder.png)
 

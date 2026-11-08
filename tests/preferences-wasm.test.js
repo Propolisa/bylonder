@@ -23,6 +23,7 @@ const prefs = preferences();
 assert.equal(prefs.inputs.drag_threshold_mouse, 3);
 assert.equal(prefs.inputs.use_mouse_emulate_3_button, false);
 assert.equal(bylonderPreferences().keep_scenes_loaded, true);
+assert.equal(bylonderPreferences().gpu_backend, 'WEBGL2');
 assert.equal(prefs.addons.get('bylonder').module, 'bylonder');
 
 // Blender's keymaps reach the page: the 3D View's numpad views, the menus' shortcuts, Select With's default.
@@ -46,6 +47,7 @@ assert.equal(blenderKeys(['Object Mode'], 'object.delete', { use_global: false }
 
 // Bylonder's own settings are part of the Preferences.
 bylonderPreferences().keep_scenes_loaded = false;
+bylonderPreferences().gpu_backend = 'WEBGPU';
 
 // Save Preferences writes Blender's userpref.blend into the user directory, which the page keeps.
 assert.equal(blender.run('wm.save_userpref').report, 'Preferences saved');
@@ -59,6 +61,7 @@ assert.equal(prefs.inputs.use_mouse_emulate_3_button, false);
 readPreferences();
 assert.equal(prefs.inputs.use_mouse_emulate_3_button, true);
 assert.equal(bylonderPreferences().keep_scenes_loaded, false);
+assert.equal(bylonderPreferences().gpu_backend, 'WEBGPU');
 loadKeyconfig(blender.C);
 assert.equal(blenderKeys(['Object Mode'], 'object.delete', { use_global: false }), 'Y');
 // Add-ons: Blender's addon_utils lists every add-on Blender ships and Bylonder's own, from their bl_info; the category

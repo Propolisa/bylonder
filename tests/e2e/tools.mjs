@@ -13,4 +13,11 @@ const GL_BY_PLATFORM = {
   linux: ['--use-gl=angle', '--use-angle=gl-egl'],
   win32: ['--enable-gpu', '--use-angle=d3d11', '--force_high_performance_gpu'],
 };
-export const GL_ARGS = [...(GL_BY_PLATFORM[process.platform] ?? []), '--ignore-gpu-blocklist'];
+// E2E_ENGINE=webgpu: the app draws with WebGPU (src/render/gpu-engine.js), which headless Chromium offers behind a flag.
+// Playwright's Chromium for Windows ships no DXC, so its WebGPU compiles with FXC, which fails shaders DXC compiles;
+// E2E_CHROME, the path of an installed Chrome, runs local WebGPU checks on it instead (a fresh temporary profile).
+export const E2E_ENGINE = process.env.E2E_ENGINE === 'webgpu' ? 'webgpu' : null;
+export const E2E_CHROME = process.env.E2E_CHROME || undefined;
+const FXC = process.platform === 'win32' && !E2E_CHROME ? ['--disable-dawn-features=use_dxc'] : [];
+const WEBGPU_ARGS = E2E_ENGINE ? ['--enable-unsafe-webgpu', ...FXC, ...(process.platform === 'linux' ? ['--enable-features=Vulkan'] : [])] : [];
+export const GL_ARGS = [...(GL_BY_PLATFORM[process.platform] ?? []), '--ignore-gpu-blocklist', ...WEBGPU_ARGS];

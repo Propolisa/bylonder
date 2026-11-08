@@ -6,7 +6,7 @@ import { variantItems } from "../../src/coverage/coverage.js";
 import { tmpdir } from "node:os";
 import { createRequire } from "node:module";
 import { preview } from "vite";
-import { GL_ARGS as gl } from "./tools.mjs";
+import { GL_ARGS as gl, E2E_CHROME, E2E_ENGINE } from "./tools.mjs";
 
 const root = fileURLToPath(new URL("../..", import.meta.url));
 // Playwright's Chromium is in .tools/ (npm run tools). Pyodide loads from its CDN, through the environment's proxy
@@ -16,13 +16,13 @@ const proxy = process.env.HTTPS_PROXY && { proxy: { server: process.env.HTTPS_PR
 // CHROMIUM_CDP: a running Chromium to drive instead (e.g. one on the Windows side of WSL, on its GPU), started with
 // --remote-debugging-port; closing the browser only disconnects from it.
 export const chromium = {
-  launch: (options) => (process.env.CHROMIUM_CDP ? playwright.chromium.connectOverCDP(process.env.CHROMIUM_CDP) : playwright.chromium.launch({ ...proxy, args: gl, ...options })),
+  launch: (options) => (process.env.CHROMIUM_CDP ? playwright.chromium.connectOverCDP(process.env.CHROMIUM_CDP) : playwright.chromium.launch({ ...proxy, args: gl, executablePath: E2E_CHROME, ...options })),
 };
 // Chromium's incognito contexts crash on file handles read back from IndexedDB (the Sequencer's media library): checks
 // that reload with media open the app in a profile of its own.
 async function persistentContext(options) {
   const profile = mkdtempSync(`${tmpdir()}/bylonder-profile-`);
-  const context = await playwright.chromium.launchPersistentContext(profile, { ...proxy, args: gl, ...options });
+  const context = await playwright.chromium.launchPersistentContext(profile, { ...proxy, args: gl, executablePath: E2E_CHROME, ...options });
   // Windows keeps the profile's files busy for a moment after the browser exits.
   context.on("close", () => { try { rmSync(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 }); } catch {} });
   return context;
@@ -60,7 +60,8 @@ export async function openApp(browser, url, { example = "Default Cube", node = "
   const errors = [];
   page.on("pageerror", (error) => errors.push(process.env.E2E_STACKS ? error.stack : error.message));
   page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
-  await page.goto(link ? `${url}#example=${link}` : url);
+  const start = E2E_ENGINE ? `${url}${url.includes("?") ? "&" : "?"}gpu=${E2E_ENGINE}` : url;
+  await page.goto(link ? `${start}#example=${link}` : start);
   const frame = () => page.frames().findLast((f) => f.url().includes("viewport.html") && !f.isDetached());
   const splash = page.locator("dialog.bl-splash");
   if (link) await page.waitForURL((url) => !url.hash);

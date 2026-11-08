@@ -2,7 +2,7 @@
 // on a virtual clock. The Video Sequencer's scene strips render other scenes in one (sequencer/scene-frames.js), and a
 // scene's sound mixes in one (sequencer/scene-audio.js), on an offline audio context its audio engines play into.
 // Render Image and Render Animation render the live scene instead (live.js).
-import { Engine } from '@babylonjs/core';
+import { createEngine } from './gpu-engine.js';
 import { installVirtualClock } from './clock.js';
 import { createWorld } from '../runtime/world.js';
 import { createFrameRenderer, frameMs } from './frames.js';
@@ -25,7 +25,7 @@ const { useCamera, renderFrame } = createFrameRenderer({ world: () => built, eng
 let sound = null;
 async function open(input, { width, height }, { camera: cameraName, audio } = {}) {
   resize(width, height);
-  engine = new Engine(canvas, true, { stencil: true, preserveDrawingBuffer: false });
+  engine = await createEngine(canvas, { stencil: true, preserveDrawingBuffer: false });
   engine.setHardwareScalingLevel(1);
   if (audio) sound = { ...audio, context: new OfflineAudioContext(2, Math.ceil(((audio.frameEnd - audio.frameStart + 1) / audio.fps) * audio.sampleRate), audio.sampleRate) };
   built = await createWorld({ input, engine, canvas, audioContext: sound?.context, hooks: { notify: text => warnings.push(String(text)) } });

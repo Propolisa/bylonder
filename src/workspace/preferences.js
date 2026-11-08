@@ -24,7 +24,11 @@ const SETTINGS = [
 export function registerBylonderPreferences(icon) {
   registerClass(__class__('BYLONDER_AP_preferences', [types().AddonPreferences], {
     bl_idname: ADDON,
-    __annotations__: Object.fromEntries(SETTINGS.map(([name, label, description, value]) => [name, props().BoolProperty(kw({ name: label, description, default: value }))])),
+    __annotations__: {
+      ...Object.fromEntries(SETTINGS.map(([name, label, description, value]) => [name, props().BoolProperty(kw({ name: label, description, default: value }))])),
+      gpu_backend: props().EnumProperty(kw({ name: 'GPU Backend', description: 'The graphics API the views draw with, used from the next start',
+        items: [['WEBGL2', 'WebGL 2', "Babylon's WebGL 2 engine"], ['WEBGPU', 'WebGPU (Preview)', "Babylon's WebGPU engine, where the browser has it; WebGL 2 otherwise"]], default: 'WEBGL2' })),
+    },
     draw(context) { drawSettings(this.layout, this); },
   }));
   registerClass(__class__('USERPREF_PT_bylonder', [types().Panel], {
@@ -38,6 +42,7 @@ export function registerBylonderPreferences(icon) {
 function drawSettings(layout, settings) {
   layout.use_property_split = true;
   layout.use_property_decorate = false;
+  layout.prop(settings, 'gpu_backend');
   layout.prop(settings, 'keep_scenes_loaded');
   layout.prop(settings, 'ask_sequencer_setup');
   const remembered = layout.column(kw({ heading: 'Video Editing Setup', align: true }));

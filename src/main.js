@@ -10,6 +10,7 @@ import { registerObjects } from './blenkernel/animation/bindings.js';
 import { mountAnimEditor, registerAnimOperators } from './editors/animation/anim-editor.js';
 import { mountRuntimeLayout, IMAGE_MODES } from "./editors/screen/runtime.js";
 import { applyRenderSettings } from "./workspace/render-settings.js";
+import { createEngine, rememberBackend } from "./render/gpu-engine.js";
 import { createObjectActions } from "./editors/object/object-actions";
 import { createObjectCommands } from "./editors/object/commands";
 import { createAddMesh } from "./editors/object/add-mesh";
@@ -185,7 +186,7 @@ viewportDock.setScreen(input.screen);
 const workCanvas = Object.assign(document.createElement("canvas"), { className: "engine-working-canvas" });
 workCanvas.setAttribute("aria-hidden", "true");
 document.body.append(workCanvas);
-const engine = new BABYLON.Engine(workCanvas, true, { stencil: true });
+const engine = await createEngine(workCanvas, { stencil: true });
 applyRenderSettings(engine);
 let saveOverrides = () => {};
 let history;
@@ -563,7 +564,7 @@ const themed = () => {
 themed();
 followPixelRatio(window, [document, parent.document]);
 const setUiScale = (value) => { preferences().view.ui_scale = value; preferencesChanged(); };
-onPreferencesChanged(() => { themed(); send("preferences", { keep_scenes_loaded: bylonderPreferences().keep_scenes_loaded }); });
+onPreferencesChanged(() => { themed(); rememberBackend(bylonderPreferences().gpu_backend); send("preferences", { keep_scenes_loaded: bylonderPreferences().keep_scenes_loaded }); });
 // The Preferences editor: an area's editor (Editor Type), mounted once it is first shown, and Edit > Preferences.
 const mountWhenShown = (host, mount) => {
   const observer = new ResizeObserver(() => { if (host.clientWidth) { observer.disconnect(); mount(); } });
