@@ -81,6 +81,9 @@ def patched_tree(root):
         shutil.rmtree(tree, ignore_errors=True)
         subprocess.run(['cp', '-al', os.path.abspath(root), tree], check=True)
         for p in patches:
+            # A patch configure_host.sh already applied to root is in the copy too: each applies once, as there.
+            if not subprocess.run(['patch', '-p1', '-R', '-s', '-f', '--dry-run', '-d', tree, '-i', p], capture_output=True).returncode:
+                continue
             # Patched files are written anew, so the originals they were linked to stay as they are.
             for line in open(p):
                 if line.startswith('+++ b/'):
