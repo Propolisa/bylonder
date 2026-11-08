@@ -91,10 +91,10 @@ function jitterPerSample(scene) {
     moved.clear();
   };
   // After the camera's draw, or after the frame where a frame graph draws it (no camera observables fire then).
-  const afterCamera = scene.onAfterCameraRenderObservable.add(restore), afterFrame = scene.onAfterRenderObservable.add(restore);
+  const afterCamera = scene.onAfterCameraRenderObservable.add(restore), afterFrame = scene.getEngine().onEndFrameObservable.add(restore);
   return {
     add: (light, generator) => generator.getShadowMap().onBeforeBindObservable.add(() => before(light), undefined, true),
-    dispose: () => { scene.onAfterCameraRenderObservable.remove(afterCamera); scene.onAfterRenderObservable.remove(afterFrame); },
+    dispose: () => { scene.onAfterCameraRenderObservable.remove(afterCamera); scene.getEngine().onEndFrameObservable.remove(afterFrame); },
   };
 }
 

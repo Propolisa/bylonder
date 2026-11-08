@@ -90,7 +90,7 @@ assert.ok(mean.length() < 0.02, 'around the center');
   // A frame graph draws without the camera's observables: the light is back after the frame.
   film.sample(filmJitter(3), 3);
   map.onBeforeBindObservable.notifyObservers(map);
-  scene.onAfterRenderObservable.notifyObservers(scene);
+  scene.getEngine().onEndFrameObservable.notifyObservers(scene.getEngine());
   assert.ok(at(evaluatedMatrix(door).getTranslation()), 'and back after a frame a frame graph draws');
   film.sample(null);
   map.onBeforeBindObservable.notifyObservers(map);
