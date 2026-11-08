@@ -17,6 +17,8 @@ uniform vec2 texelSize;
 uniform vec2 jitter;
 uniform float radius;
 uniform float weightScale;
+// A view's first sample (all a moving view shows) takes its own pixel alone, unjittered: no filtering to pay for.
+uniform float single;
 // blender-port: eevee_film_lib.glsl film_filter_weight: a Gaussian fitted to Blackman-Harris.
 float film_filter_weight(float filter_radius, float sample_distance_sqr) {
   float r = sample_distance_sqr / (filter_radius * filter_radius);
@@ -25,6 +27,7 @@ float film_filter_weight(float filter_radius, float sample_distance_sqr) {
   return exp(fac * r);
 }
 void main(void) {
+  if (single > 0.5) { gl_FragColor = texture2D(textureSampler, vUV) * weightScale; return; }
   vec4 sum = vec4(0.0);
   for (int y = -2; y <= 2; y++) {
     for (int x = -2; x <= 2; x++) {
@@ -71,7 +74,7 @@ export const filmSample = (scene) => sampling.get(scene) ?? null;
 
 export function createFilm(scene, camera) {
   const engine = scene.getEngine(), type = Constants.TEXTURETYPE_HALF_FLOAT;
-  const film = new PostProcess('__film', 'blenderFilm', ['texelSize', 'jitter', 'radius', 'weightScale'], null, 1, null, Constants.TEXTURE_NEAREST_SAMPLINGMODE, engine, false, null, type);
+  const film = new PostProcess('__film', 'blenderFilm', ['texelSize', 'jitter', 'radius', 'weightScale', 'single'], null, 1, null, Constants.TEXTURE_NEAREST_SAMPLINGMODE, engine, false, null, type);
   const resolve = new PostProcess('__filmResolve', 'blenderFilmResolve', ['weights'], null, 1, null, Constants.TEXTURE_NEAREST_SAMPLINGMODE, engine, false, null, type);
   camera.attachPostProcess(film, 0);
   camera.attachPostProcess(resolve, 1);
@@ -84,7 +87,7 @@ export function createFilm(scene, camera) {
     const target = film.inputTexture;
     if (!target.depthStencilTexture) target.createDepthStencilTexture(0, false, stencil, 1, stencil ? Constants.TEXTUREFORMAT_DEPTH24_STENCIL8 : Constants.TEXTUREFORMAT_DEPTH24);
   });
-  const state = { jitter: [0, 0], adding: true, clear: true, size: '', weights: 0 };
+  const state = { jitter: [0, 0], adding: true, clear: true, size: '', weights: 0, single: false };
   // The resolve's input is the film's sum: cleared once per reset (and when its size changes), then each sample adds to
   // it, and its weights to the film's.
   resolve.autoClear = false;
@@ -94,7 +97,7 @@ export function createFilm(scene, camera) {
       Object.assign(state, { clear: false, size, weights: 0 });
       engine.clear({ r: 0, g: 0, b: 0, a: 0 }, true, false, false);
     }
-    if (state.adding) state.weights += filmWeights(state.jitter);
+    if (state.adding) state.weights += state.single ? 1 : filmWeights(state.jitter);
   });
   resolve.onApply = (effect) => effect.setFloat('weights', state.weights);
   film.onApply = (effect) => {
@@ -102,11 +105,12 @@ export function createFilm(scene, camera) {
     effect.setFloat2('jitter', state.jitter[0], state.jitter[1]);
     effect.setFloat('radius', FILTER_RADIUS);
     effect.setFloat('weightScale', state.adding ? 1 : 0);
+    effect.setFloat('single', state.single ? 1 : 0);
   };
   // A view's samples while it stays the same (EEVEE's viewport): up to `samples()` of them, each jittered; any change of
   // its view, size or compiled shaders, or a reset() (Main evaluated), starts again. `manual` leaves the
   // samples to a render (frames.js), which jitters and adds them itself.
-  let count = 0, signature = '', jittered = false, drawn = 0;
+  let count = 0, signature = '', sampled = false, jittered = false, drawn = 0;
   const viewOf = () => {
     const projection = camera.getProjectionMatrix(true).m, effects = engine._compiledEffects ? Object.keys(engine._compiledEffects).length : 0;
     return [...camera.getViewMatrix().m, ...projection, engine.getRenderWidth(), engine.getRenderHeight(), effects].join();
@@ -116,6 +120,8 @@ export function createFilm(scene, camera) {
     const now = viewOf();
     if (now !== signature) { signature = now; count = 0; state.clear = true; }
     if (count >= controls.samples()) { controls.sample(null); return; }
+    sampled = true;
+    if (!count) { controls.sample([0, 0], 0, true); return; }
     const jitter = filmJitter(count), width = engine.getRenderWidth() * camera.viewport.width, height = engine.getRenderHeight() * camera.viewport.height;
     camera.freezeProjectionMatrix(Matrix.FromArray(jitterProjection(Array.from(camera.getProjectionMatrix(true).m), jitter, width, height, camera.mode === Camera.ORTHOGRAPHIC_CAMERA)));
     // The scene took the camera's matrices before this observer: it takes them again, jittered.
@@ -127,10 +133,9 @@ export function createFilm(scene, camera) {
     if (rendering !== camera) return;
     setDitherOffset(scene, 0);
     sampling.delete(scene);
-    if (!jittered) return;
-    camera.unfreezeProjectionMatrix();
-    jittered = false;
-    count++;
+    if (jittered) camera.unfreezeProjectionMatrix();
+    if (sampled) count++;
+    sampled = jittered = false;
   });
   // A frame a frame graph draws fires no camera observables: its sample ends with the frame.
   const afterFrame = scene.onAfterRenderObservable.add(() => sampling.delete(scene));
@@ -143,9 +148,10 @@ export function createFilm(scene, camera) {
     reset() { state.clear = true; count = 0; },
     // Whether the view holds all its samples (EEVEE's viewport stops drawing then).
     get converged() { return controls.manual || count >= controls.samples(); },
-    // The sample about to render: its jitter and index, or none to add (the film is complete and keeps what it holds).
-    sample(jitter, index = 0) {
-      state.adding = !!jitter;
+    // The sample about to render: its jitter and index, or none to add (the film is complete and keeps what it holds);
+    // single: its own pixel alone, unfiltered.
+    sample(jitter, index = 0, single = false) {
+      Object.assign(state, { adding: !!jitter, single });
       sampling.set(scene, jitter ? index : null);
       if (jitter) state.jitter = jitter;
       setDitherOffset(scene, jitter ? halton((drawn = (drawn % 4096) + 1), 2) : 0);

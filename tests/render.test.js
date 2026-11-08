@@ -103,6 +103,17 @@ assert.ok(Array.from({ length: 64 }, (_, i) => filmJitter(i)).every(([x, y]) => 
   const coverage = 0.3, kept = (noise) => offsets.slice(0, 16).filter((offset) => coverage > (offset + noise) % 1).length / 16;
   for (const noise of [0, 0.13, 0.5, 0.77, 0.99]) assert.ok(Math.abs(kept(noise) - coverage) <= 1 / 16, `a pixel of noise ${noise} keeps ${kept(noise)}`);
   film.dispose();
+  // A view's first sample (each frame of a moving view) is drawn as the camera sees it, unjittered; the next ones are
+  // jittered within the pixel.
+  const view = Object.assign(createFilm(filmScene, camera), { samples: () => 4 }), jittered = () => !!camera._doNotComputeProjectionMatrix;
+  const drawn = [];
+  for (let i = 0; i < 2; i++) {
+    filmScene.onBeforeCameraRenderObservable.notifyObservers(camera);
+    drawn.push(jittered());
+    filmScene.onAfterCameraRenderObservable.notifyObservers(camera);
+  }
+  assert.deepEqual(drawn, [false, true], 'the first sample unjittered, the second jittered');
+  view.dispose();
   filmScene.dispose();
 }
 // Accumulator averages in floating point.
