@@ -162,6 +162,17 @@ assert.deepEqual((await lobes(['ShaderNodeBsdfDiffuse', 'ShaderNodeBsdfDiffuse']
   assert.match(outline._fragmentCompilationState._builtCompilationString, /#ifdef SM_FLOAT\s+g_data\.ray_type = RAY_TYPE_SHADOW;/);
 }
 
+// A Volume without a Surface draws no surface and casts no surface shadow, as in EEVEE (Bylonder draws no volumes yet).
+{
+  const fog = nodeMaterialFromTree('Fog', scene, { nodes: [{ idname: 'ShaderNodeVolumePrincipled', name: 'Principled Volume' }, { idname: 'ShaderNodeOutputMaterial', name: 'Material Output' }],
+    links: [['Principled Volume', 'Volume', 'Material Output', 'Volume']] }).material;
+  if (fog._buildIsInProgress) await new Promise((resolve) => fog.onBuildObservable.addOnce(resolve));
+  assert.match(fog._fragmentCompilationState._builtCompilationString, /\ndiscard;\r?\n/, 'its fragments are discarded');
+  assert.ok(fog.blenderNoSurface, 'and casts no surface shadow (light-shadows.js)');
+  const empty = nodeMaterialFromTree('Empty', scene, { nodes: [{ idname: 'ShaderNodeOutputMaterial', name: 'Material Output' }], links: [] }).material;
+  if (empty._buildIsInProgress) await new Promise((resolve) => empty.onBuildObservable.addOnce(resolve));
+  assert.doesNotMatch(empty._fragmentCompilationState._builtCompilationString, /\ndiscard;\r?\n/, 'an empty Material Output draws black');
+}
 // A lit node material's area light specular is EEVEE's (blenkernel/light/area-specular.js), not Babylon's squared one.
 {
   const lit = nodeMaterialFromTree('Lit', scene, { nodes: [{ idname: 'ShaderNodeBsdfDiffuse', name: 'Diffuse' }, { idname: 'ShaderNodeOutputMaterial', name: 'Material Output' }],

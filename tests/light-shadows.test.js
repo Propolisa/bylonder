@@ -36,6 +36,9 @@ assert.equal(generator.getClassName(), 'CascadedShadowGenerator', "a sun's shado
 const map = generator.getShadowMap();
 const casters = () => scene.meshes.filter((mesh) => map.renderListPredicate(mesh)).map((mesh) => mesh.name);
 assert.deepEqual(casters(), ['Floor', 'Ball'], "objects cast but those whose Visibility > Shadow is off and Bylonder's helpers");
+const fog = Object.assign(MeshBuilder.CreateBox('Fog', {}, scene), { material: Object.assign(new PBRMaterial('Volume', scene), { blenderNoSurface: true }) });
+assert.ok(!casters().includes('Fog'), 'a material without a surface (a Volume alone) casts no surface shadow');
+fog.dispose();
 assert.ok(floor.receiveShadows && ball.receiveShadows && hidden.receiveShadows, 'objects receive');
 shadows.setActive(false);
 assert.deepEqual(casters(), [], 'a view without the scene lights draws no shadow map');

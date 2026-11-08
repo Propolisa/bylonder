@@ -54,6 +54,7 @@ limits:
   - A Render Image of a single sample (Render Samples 1) draws no light shadows; two or more do.
   - Reflections and refraction show the world's color only; EEVEE's light probes (sphere, plane, volume) and screen space reflections are not drawn, so glass and metal do not reflect the room.
   - A world's node tree draws as the background and lights the scene through one world probe baked when the world changes, clamped at the world's Sun Threshold as EEVEE's, without the sun light EEVEE makes of what it clamps; a Sky Texture's Preetham and Hosek / Wilkie models, the world's Volume and its Background's blur are not drawn yet, and the tree's values are not followed while it is edited.
+  - Volumes are not drawn: a material with only a Volume (a Principled Volume, say) shows nothing, as EEVEE shows no surface for it, and fog or smoke inside it is missing.
   - Glass refracts the world behind it, not the objects; a Transparent BSDF mixed in lets the objects through.
   - Khronos PBR Neutral's darkest tones (its toe) can differ from Blender's by up to three 8-bit steps; other view transforms and looks are within one in Rendered shading and Render Image, and within two or three in Solid and Material Preview.
   - The 3D Viewport's camera view frames tighter than the camera when the viewport's aspect differs from the render's; Render Image frames as Blender does.

@@ -35,7 +35,8 @@ export function shadowJitter(index, radius) {
 
 // A mesh of the scene's objects (not an overlay or a helper), and whether it casts.
 export const shadedObject = (mesh) => !mesh.name.startsWith('__') && !mesh.metadata?.overlay && mesh.getTotalVertices() > 0;
-const casts = (mesh) => shadedObject(mesh) && mesh.metadata?.wbVisibleShadow !== false && mesh.isEnabled() && mesh.isVisible;
+// A material without a surface (a Volume alone) casts no surface shadow.
+const casts = (mesh) => shadedObject(mesh) && mesh.metadata?.wbVisibleShadow !== false && mesh.isEnabled() && mesh.isVisible && !mesh.material?.blenderNoSurface;
 
 // Babylon's normal bias moves every caster along -N, so a face turned away from the light moves toward it and shadows
 // itself, though EEVEE lights it from behind (its offset is the receiver's, along the normal facing the viewer). Babylon's

@@ -1520,6 +1520,8 @@ export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock)
     // Its coverage where the closure lets light through (blended), else its color alone (opaque, unless its Blend Mode
     // blends it).
     material.blenderDithered = closureHas(closure?.ownerBlock, transparent);
+    // EEVEE draws no surface for a Volume without a Surface (and Bylonder draws no volumes yet).
+    material.blenderNoSurface = this._noSurface = !closure && !!this.blenderVolume;
     // EEVEE's transparent shadows: a Dithered surface's shadow is hashed per sample as the surface is, so its samples
     // average a shadow as dense as its coverage. Babylon's shadow maps draw it with the material's own shader.
     if (material.blenderDithered) material.shadowDepthWrapper ??= new ShadowDepthWrapper(material, material.getScene(), { remappedVariables: LIT_SIDE_NORMAL_BIAS });
@@ -1550,6 +1552,7 @@ gl_FragColor = vec4(gl_FragColor.rgb / ${rgba}.a, 1.0);
 #endif
 `;
     }
+    if (this._noSurface) state.compilationString += 'discard;\n';
     return this;
   }
 }
@@ -1748,7 +1751,10 @@ export function nodeMaterialFromTree(name, scene, tree) {
     if (node === output) block.attach(material);
     else material.attachedBlocks.push(block);
   }
-  for (const [from, output, to, input] of rerouted(tree)) {
+  const links = rerouted(tree);
+  // Volumes are not drawn yet: whether the output has one is kept apart from the links to blocks.
+  if (blocks.get(output?.name)) blocks.get(output.name).blenderVolume = links.some(([, , to, input]) => to === output.name && input === 'Volume');
+  for (const [from, output, to, input] of links) {
     const fromBlock = blocks.get(from), source = fromBlock instanceof BlenderRepeatWriteBlock ? fromBlock.zone.result(output) : fromBlock?.getOutputByName(output);
     const target = blocks.get(to)?.getInputByName(input);
     if (!source || !target) continue;
