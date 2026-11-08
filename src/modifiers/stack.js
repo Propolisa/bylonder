@@ -43,9 +43,15 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn}={
   const inMain=(node,modifier)=>!!mainDefinition(modifier.type)&&!modifierStack(node).includes(modifier);
   const stack=node=>[...(main()?.modifiers.of(node)??[]),...modifierStack(node)];
   const find=(node,id)=>stack(node).find(m=>m.id===id);
+  // Each modifier's channels registered once per name (the refresh runs every frame; registering again drops the
+  // animation's cached F-Curves).
+  const registered=new WeakMap();
   function registerChannels(node,modifier){
-    const definition=modifierDefinitions.get(modifier.type);if(!definition)return;
-    for(const [path,def] of Object.entries(definition.schema))if(def.animatable!==false)world.animation?.register({id:'modifier:'+nodeId(node)+':'+modifier.id,path,label:def.label,group:node.name+' › '+modifier.name,options:def.options,
+    const definition=modifierDefinitions.get(modifier.type);if(!definition||!world.animation)return;
+    const group=node.name+' › '+modifier.name,names=registered.get(node)??registered.set(node,new Map()).get(node);
+    if(names.get(modifier.id)===group)return;
+    names.set(modifier.id,group);
+    for(const [path,def] of Object.entries(definition.schema))if(def.animatable!==false)world.animation.register({id:'modifier:'+nodeId(node)+':'+modifier.id,path,label:def.label,group,options:def.options,
       available:()=>!deleted(node)&&!!find(node,modifier.id),
       get:()=>find(node,modifier.id)?.values[path]??def.default,
       set:value=>api.set(node,modifier.id,path,value,{finish:false})

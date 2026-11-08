@@ -11,6 +11,9 @@ const engine=new NullEngine(),scene=new Scene(engine),box=MeshBuilder.CreateBox(
 const objects=[box];objects.scene=scene;const world={scene,objects,animation:createAnimationModel()};
 let history;const mods=createModifierSystem(world,{commit:()=>history?.commit(),notify:message=>{throw Error(message);}});history=createHistory(objects,()=>mods.refresh(),{main:sceneMain(world)});
 const initial=VertexData.ExtractFromMesh(box).serialize(),modifier=mods.add(box);assert.equal(box.thinInstanceCount,2);assert.equal(box.getTotalVertices(),24);
+// The refresh, which runs every frame, registers a modifier's animation channels once, not again each time (that drops
+// the animation's cached F-Curves).
+{const register=world.animation.register;let registered=0;world.animation.register=(...args)=>{registered++;return register(...args);};mods.refresh();mods.refresh();world.animation.register=register;assert.equal(registered,0,'channels registered again by a refresh');}
 mods.set(box,modifier.id,'count',3);assert.equal(box.thinInstanceCount,3);assert.equal(box.getBoundingInfo().boundingBox.maximum.x,5);
 history.undo();assert.equal(mods.stack(box)[0].values.count,2);history.redo();assert.equal(mods.stack(box)[0].values.count,3);
 mods.set(box,modifier.id,'realizeInstances',true);assert.equal(box.thinInstanceCount,0);assert.equal(box.getTotalVertices(),72);
