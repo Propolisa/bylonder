@@ -28,7 +28,7 @@ import { skyTexture } from '../../blenkernel/sky.js';
 import { blendData } from '../../python/bpy_rna.js';
 import { VIEW_FORWARD, viewEye, viewForward } from '../../draw/draw-view.js';
 import { eeveeParity, eeveeParityChanged } from '../../draw/eevee-parity.js';
-import { ditherOffset } from '../../render/dither.js';
+import { DITHER_NOISE, ditherOffset } from '../../render/dither.js';
 import { readsSceneDepth, sceneDepth } from '../../render/scene-depth.js';
 import { AREA_SPECULAR, LIGHT_SPECULAR } from '../../blenkernel/light/area-specular.js';
 import '../graph-roots.js';
@@ -1466,12 +1466,6 @@ RegisterClass('BABYLON.BlenderDisplayBlock', BlenderDisplayBlock);
 
 const LIGHT_FRAGMENT = 'blenderLightFragment';
 const REVERSED_FACES = 'bl_reversed_faces', DITHERED = 'BL_DITHERED', DITHER_OFFSET = 'bl_dither_offset', frontPass = new WeakSet();
-// blender-port: gpu_shader_math_base_lib interleaved_gradient_noise and eevee_nodetree_lib hashed_alpha_threshold:
-// the pixel's noise shifted by the sample's offset, so the samples a film averages cover every threshold.
-const DITHER_NOISE = `float bl_dither(vec2 pixel, float offset) {
-  return fract(offset + 52.9829189 * fract(0.06711056 * pixel.x + 0.00583715 * pixel.y));
-}
-`;
 // Material Output (node_shader_output_material.cc) as Babylon's fragment output: the Surface closure's radiance through
 // Babylon's image processing, as the material's color. A material it is added to gets the vertex output Babylon needs.
 export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock) {

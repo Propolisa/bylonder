@@ -736,5 +736,5 @@ const viewportDisplay = (ma) => ({ color: dnaGet('Material', ma, 'diffuse_color'
 // A Material's Principled BSDF in Main as PBRMaterial properties, null without one.
 export function mainPBR(blender, ma) {
   const principled = blender.nodeTree(ma).nodes.find((node) => node.idname === 'ShaderNodeBsdfPrincipled');
-  return principled && principledPBR(principled.inputs, { use_backface_culling: dnaGet('Material', ma, 'use_backface_culling') });
+  return principled && principledPBR(principled.inputs, { use_backface_culling: dnaGet('Material', ma, 'use_backface_culling'), surface_render_method: dnaGet('Material', ma, 'surface_render_method') });
 }

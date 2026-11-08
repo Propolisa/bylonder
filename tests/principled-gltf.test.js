@@ -44,4 +44,16 @@ applyPBR(material, principledPBR(cases.layers.inputs, cases.layers));
 applyPBR(material, principledPBR(cases.red.inputs, cases.red));
 assert.deepEqual(differencesPBR(material, principledPBR(cases.red.inputs, cases.red)), []);
 assert(!material.clearCoat.isEnabled && !material.sheen.isEnabled && !material.subSurface.isRefractionEnabled, 'the layers are gone with the extensions');
+// EEVEE's Render Method: a surface its Alpha lets through is hashed in the opaque pass when Dithered (Blender's default,
+// dithered-pbr.js), its shadow drawn with its own shader; Blended blends it, as glTF does.
+{
+  const half = { ...cases.red.inputs, Alpha: 0.5 }, value = (values, path) => values.find(([p]) => p === path)?.[1];
+  const dithered = principledPBR(half, { surface_render_method: 'DITHERED' }), blended = principledPBR(half, { surface_render_method: 'BLENDED' });
+  assert.deepEqual([value(dithered, 'transparencyMode'), value(dithered, 'blenderDithered')], [PBRMaterial.MATERIAL_ALPHATEST, true]);
+  assert.deepEqual([value(blended, 'transparencyMode'), value(blended, 'blenderDithered')], [PBRMaterial.MATERIAL_ALPHABLEND, false]);
+  assert.equal(value(principledPBR(cases.red.inputs, {}), 'blenderDithered'), false, 'an opaque surface is not hashed');
+  const glass = new PBRMaterial('Glass', material.getScene());
+  applyPBR(glass, dithered);
+  assert.ok(glass.pluginManager.getPlugin('BlenderDitheredPBR') && glass.shadowDepthWrapper, 'hashed by its plugin, its shadow by its own shader');
+}
 console.log(`Principled BSDF as PBRMaterial: ${Object.keys(cases).length} materials as Blender's glTF exporter writes them and Babylon's loader reads them`);

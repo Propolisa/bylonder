@@ -2,7 +2,7 @@
 // sun's cascaded as EEVEE's sun shadow is (directional clipmaps), and every object whose Visibility > Shadow is on casts
 // into it. Materials receive them through Babylon's own light code. Shadow maps are drawn for the views that show the
 // scene's lights (Rendered shading, Render Image); other views draw them empty, which changes no material.
-import { CascadedShadowGenerator, Matrix, RenderTargetTexture, ShaderStore, ShadowGenerator, Vector3 } from '@babylonjs/core';
+import { CascadedShadowGenerator, Matrix, RenderTargetTexture, ShaderStore, ShadowGenerator, Texture, Vector3 } from '@babylonjs/core';
 import { shadowMapVertexShader } from '@babylonjs/core/Shaders/shadowMap.vertex.js';
 import { shadowMapPixelShader } from '@babylonjs/core/Shaders/shadowMap.fragment.js';
 import { influenceRadius, isBlenderLight, lightRecord } from './light-home.js';
@@ -55,7 +55,12 @@ function createGenerator(light, type) {
     : new ShadowGenerator(MAP_SIZE, light);
   // EEVEE filters its shadows by a pixel or two (shadow_filter_radius); a cube map (a point or area light's) takes
   // Poisson sampling.
-  if (light.needCube()) generator.usePoissonSampling = true;
+  // A cube map's depths are compared point by point, as EEVEE's shadow maps are: Babylon samples it bilinearly, which
+  // blends a hashed (Dithered) caster's depths with what lies behind and shadows as if it were nearly opaque.
+  if (light.needCube()) {
+    generator.usePoissonSampling = true;
+    generator.getShadowMap().updateSamplingMode(Texture.NEAREST_SAMPLINGMODE);
+  }
   else Object.assign(generator, { usePercentageCloserFiltering: true, filteringQuality: ShadowGenerator.QUALITY_HIGH });
   Object.assign(generator, { bias: 0.002, normalBias: 0.02, customShaderOptions: { shaderName: SHADOW_MAP } });
   return generator;

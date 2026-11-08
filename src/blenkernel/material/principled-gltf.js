@@ -9,6 +9,7 @@
 // whole each time: what an absent extension would leave is a new PBRMaterial's value.
 import { Color3, Constants, PBRMaterial } from '@babylonjs/core';
 import { blenderAreaSpecular } from '../light/area-specular.js';
+import { blenderDitheredPBR } from './dithered-pbr.js';
 
 // io/com/constants.py
 const GLTF_IOR = 1.5, BLENDER_COAT_ROUGHNESS = 0.03;
@@ -107,7 +108,13 @@ const STORED = { 'subSurface.volumeIndexOfRefraction': 'subSurface._volumeIndexO
 export const gltfPBR = (gltf) => LOADER.map(([path, load]) => [path, load(gltf)]);
 // Both composed: a Principled BSDF's inputs and its Material's settings as PBRMaterial properties, with EEVEE's diffuse,
 // Lambert's (Babylon defaults to Oren-Nayar).
-export const principledPBR = (inputs, settings) => [...gltfPBR(principledGltf(inputs, settings)), ['brdf.baseDiffuseModel', Constants.MATERIAL_DIFFUSE_MODEL_LAMBERT]];
+// A surface its Alpha lets through, with the Material's Render Method Dithered (Blender's default), is hashed in the opaque
+// pass (dithered-pbr.js) where glTF would blend it.
+export function principledPBR(inputs, settings) {
+  const dithered = settings.surface_render_method !== 'BLENDED' && inputs.Alpha < 1;
+  const values = [...gltfPBR(principledGltf(inputs, settings)), ['brdf.baseDiffuseModel', Constants.MATERIAL_DIFFUSE_MODEL_LAMBERT], ['blenderDithered', dithered]];
+  return dithered ? values.map(([path, value]) => [path, path === 'transparencyMode' ? PBRMaterial.MATERIAL_ALPHATEST : value]) : values;
+}
 
 const owner = (material, path) => { const keys = path.split('.'), key = keys.pop(); return [keys.reduce((o, k) => o[k], material), key]; };
 const read = (material, path) => { const [o, key] = owner(material, STORED[path] ?? path); const value = o[key]; return value?.asArray ? value.asArray() : value; };
@@ -121,6 +128,7 @@ export function applyPBR(material, values) {
     const [o, key] = owner(material, path);
     o[key] = Array.isArray(value) ? Color3.FromArray(value) : value;
   }
+  blenderDitheredPBR(material);
 }
 // The properties that differ, as messages.
 export const differencesPBR = (material, values) => values.filter(([path, value]) => !same(value, read(material, path)))
