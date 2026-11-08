@@ -104,6 +104,9 @@ await session("uv-editing", { example: "tin-cans", node: "Tomato" }, async (r) =
   await r.render("render");
   await r.render("thumbnail", { width: 960 });
   await workspace(r, "uv-editing");
+  // The camera's frame filling the 3D Viewport (Home in camera view).
+  await r.app.page.mouse.move(...(await at(r, VIEW, 0.5, 0.5)));
+  await r.keys("Home");
   // The image framed (Home): the Tomato can's UVs over the label atlas.
   await r.app.page.mouse.move(...(await at(r, IMAGE, 0.3, 0.5)));
   await r.keys("Home");
