@@ -840,6 +840,26 @@ const checks = {
     await view("DISABLED");
   } },
 
+  // Render Image composites on Blender's CPU compositor and shows the composite at the render's size: Render Layers
+  // straight into the Group Output gives the render as it is (a composite written at another size shows as stripes).
+  "Render Image shows the composite at the render's size": { open: { example: null, node: "sphere" }, async run() {
+    await app.bylonder((b) => { b.world.renderSettings.set("render.resolutionX", 1280); b.world.renderSettings.set("render.resolutionY", 720); });
+    const render = async () => {
+      await app.page.click('[data-blender="TOPBAR_MT_render"]');
+      await app.page.getByRole("menuitem", { name: "Render Image" }).click();
+      await rendered();
+      return app.bylonder(() => {
+        const canvas = document.querySelector(".render-result canvas"), context = new OffscreenCanvas(canvas.width, canvas.height).getContext("2d");
+        context.drawImage(canvas, 0, 0);
+        return Array.from(context.getImageData(0, 0, canvas.width, canvas.height).data);
+      });
+    };
+    const plain = await render();
+    await app.bylonder((b) => b.world.compositor.setEnabled(true));
+    const composited = await render();
+    const mean = composited.reduce((sum, v, i) => sum + Math.abs(v - plain[i]), 0) / composited.length;
+    assert.ok(mean < 3, `the composite differs from the render by ${mean.toFixed(1)} on average`);
+  } },
   // The floor grid fades through geometry on its plane, as Blender's four offset iterations draw it: a plane at z 0 keeps
   // the X axis showing over it.
   async "the floor grid's axes show over a plane on the floor"() {

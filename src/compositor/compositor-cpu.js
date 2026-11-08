@@ -45,7 +45,8 @@ export async function compositeFinalFrame(world, camera) {
   const render = engine._readTexturePixelsSync(texture, width, height);
   const composite = await compositeInWorker(world.mainSync.writeBlend('/compositor.blend'), render, width, height);
   if (!composite) return false;
-  engine._uploadArrayBufferViewToTexture(texture, halfFloats(composite));
+  // In place, at the target's own size (an upload of a whole texture would make it a power of two).
+  engine.updateTextureData(texture, halfFloats(composite), 0, 0, width, height);
   world.scene.postProcessManager.directRender(display.passes, null, true);
   return true;
 }
