@@ -115,7 +115,6 @@ export function createFrameRenderer({ world: built, engine, canvas, resize, cloc
     await world.modifiers.settled();
     // Geometry modifiers just drew may need shaders compiled before it can be drawn.
     await scene.whenReadyAsync();
-    camera.unfreezeProjectionMatrix();
     if (offset[0] || offset[1]) {
       const m = Array.from(camera.getProjectionMatrix(true).m);
       camera.freezeProjectionMatrix(Matrix.FromArray(jitterProjection(m, offset, width, height, camera.mode === Camera.ORTHOGRAPHIC_CAMERA)));
@@ -123,6 +122,8 @@ export function createFrameRenderer({ world: built, engine, canvas, resize, cloc
     engine().beginFrame();
     scene.render();
     engine().endFrame();
+    // The camera is also the views' camera (camera view): only this sample is jittered.
+    camera.unfreezeProjectionMatrix();
   }
 
   return { useCamera, renderFrame, forget: () => { shadedCamera = null; simulated = null; } };

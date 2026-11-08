@@ -53,6 +53,8 @@ const checks = {
     });
     assert.ok(opaque > 0.99, `opaque fraction ${opaque}`);
     assert.ok(colors > 8, `${colors} distinct colors`);
+    // The scene camera is also camera view's: no sample's jittered projection stays on it.
+    assert.deepEqual(await app.bylonder((b) => b.world.scene.cameras.filter((c) => c._doNotComputeProjectionMatrix).map((c) => c.name)), []);
   },
 
   // examples/shader-gallery: Render Image of Blender's common shader nodes against EEVEE's render of the same file
