@@ -9,6 +9,7 @@ import { RenderTargetTexture } from '@babylonjs/core/Materials/Textures/renderTa
 import { Constants } from '@babylonjs/core/Engines/constants.js';
 import { Color4 } from '@babylonjs/core/Maths/math.color.js';
 import { createFullscreenPass } from './fullscreen-pass.js';
+import { setRenderList } from './render-list.js';
 
 const SCENE_LAYERS = 0x0fffffff;
 export const OVERLAY_LAYER = 0x20000000;
@@ -28,7 +29,7 @@ export function createOverlayPass(scene) {
     generateMipMaps: false, type: Constants.TEXTURETYPE_UNSIGNED_BYTE, samplingMode: Constants.TEXTURE_NEAREST_SAMPLINGMODE,
     generateDepthBuffer: false, doNotChangeAspectRatio: true,
   });
-  Object.assign(target, { renderParticles: false, renderSprites: false, renderListPredicate: (mesh) => mesh.layerMask === OVERLAY_LAYER });
+  Object.assign(target, { renderParticles: false, renderSprites: false });
   // The scene's depth stays: the overlays test against it.
   target.onClearObservable.add(() => engine.clear(new Color4(0, 0, 0, 0), true, false, false));
   const merge = pass.effect('overlayMerge', MERGE_FRAGMENT, [], ['overlay_tx']);
@@ -40,10 +41,14 @@ export function createOverlayPass(scene) {
     const sceneTarget = film.target(), depth = sceneTarget?.depthStencilTexture;
     if (!depth || sceneTarget.width !== pass.size.width || sceneTarget.height !== pass.size.height) return;
     if (target.renderTarget.depthStencilTexture !== depth) sceneTarget.shareDepth(target.renderTarget);
+    // The switch set as Babylon's ObjectRenderer sets it for a target of its own (disableImageProcessing), without its
+    // setter: the setter marks every material's image processing dirty, twice a frame. The target's render pass keeps
+    // defines of its own, which always see it off.
     const ip = scene.imageProcessingConfiguration, sceneLinear = ip.applyByPostProcess;
-    ip.applyByPostProcess = false;
+    ip._applyByPostProcess = false;
+    setRenderList(target, scene.meshes.filter((mesh) => mesh.layerMask === OVERLAY_LAYER));
     target.render();
-    ip.applyByPostProcess = sceneLinear;
+    ip._applyByPostProcess = sceneLinear;
   });
   const mergeOverlays = scene.onAfterCameraRenderObservable.add((rendered) => {
     if (!film || rendered !== camera || !merge.effect.isReady()) return;

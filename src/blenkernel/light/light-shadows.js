@@ -2,7 +2,7 @@
 // sun's cascaded as EEVEE's sun shadow is (directional clipmaps), and every object whose Visibility > Shadow is on casts
 // into it. Materials receive them through Babylon's own light code. Shadow maps are drawn for the views that show the
 // scene's lights (Rendered shading, Render Image); other views draw them empty, which changes no material.
-import { CascadedShadowGenerator, Matrix, ShaderStore, ShadowGenerator, Vector3 } from '@babylonjs/core';
+import { CascadedShadowGenerator, Matrix, RenderTargetTexture, ShaderStore, ShadowGenerator, Vector3 } from '@babylonjs/core';
 import { shadowMapVertexShader } from '@babylonjs/core/Shaders/shadowMap.vertex.js';
 import { shadowMapPixelShader } from '@babylonjs/core/Shaders/shadowMap.fragment.js';
 import { influenceRadius, isBlenderLight, lightRecord } from './light-home.js';
@@ -10,6 +10,7 @@ import { areaLightShadows } from './area-light.js';
 import { filmSample } from '../../render/film.js';
 import { halton } from '../../render/sampling.js';
 import { evaluatedMatrix, setEvaluatedMatrix } from '../../runtime/object-transform.js';
+import { setRenderList } from '../../draw/render-list.js';
 
 const MAP_SIZE = 2048;
 const CASTS = ['SUN', 'SPOT', 'POINT'];
@@ -47,7 +48,7 @@ const SHADOW_MAP = 'blenderShadowMap';
 ShaderStore.ShadersStore[`${SHADOW_MAP}VertexShader`] ??= shadowMapVertexShader.shader.replace('#include<shadowMapVertexNormalBias>', `#include<shadowMapVertexNormalBias>(${LIT_SIDE_NORMAL_BIAS})`);
 ShaderStore.ShadersStore[`${SHADOW_MAP}PixelShader`] ??= shadowMapPixelShader.shader;
 
-function createGenerator(light, type, drawn) {
+function createGenerator(light, type) {
   // A sun's map spans the view's frustum in cascades, fine near the eye, as EEVEE's clipmaps are: one map over the
   // whole scene's bounds is too coarse for what a large scene (a sky dome, a ground plane) holds.
   const generator = type === 'SUN' && CascadedShadowGenerator.IsSupported ? Object.assign(new CascadedShadowGenerator(MAP_SIZE, light), { numCascades: 4, lambda: 0.9, cascadeBlendPercentage: 0.05 })
@@ -57,7 +58,6 @@ function createGenerator(light, type, drawn) {
   if (light.needCube()) generator.usePoissonSampling = true;
   else Object.assign(generator, { usePercentageCloserFiltering: true, filteringQuality: ShadowGenerator.QUALITY_HIGH });
   Object.assign(generator, { bias: 0.002, normalBias: 0.02, customShaderOptions: { shaderName: SHADOW_MAP } });
-  generator.getShadowMap().renderListPredicate = (mesh) => drawn() && casts(mesh);
   return generator;
 }
 
@@ -101,7 +101,7 @@ function jitterPerSample(scene) {
 export function createLightShadows(scene) {
   const generators = new Map(); // light -> { generator, type }
   const jitter = jitterPerSample(scene);
-  let drawn = false, counted = '';
+  let counted = '';
   // Every light lights every material, as in Blender (Babylon's materials take 4 unless told more), up to what a vertex
   // shader holds: a uniform block per light besides the scene's, mesh's and material's (and one spare).
   const gl = scene.getEngine()._gl, blocks = gl?.getParameter?.(gl.MAX_VERTEX_UNIFORM_BLOCKS) ?? 12;
@@ -121,7 +121,7 @@ export function createLightShadows(scene) {
     for (const light of scene.lights) {
       const record = isBlenderLight(light) && lightRecord(light);
       if (!casting(record) || generators.has(light)) continue;
-      const generator = createGenerator(light, record.type, () => drawn);
+      const generator = createGenerator(light, record.type);
       generators.set(light, { generator, type: record.type });
       if (record.type === 'POINT' || record.type === 'SPOT') jitter.add(light, generator);
     }
@@ -130,7 +130,16 @@ export function createLightShadows(scene) {
   };
   return {
     // Per view, before it renders: whether it shows the scene's lights.
-    setActive(value) { drawn = value; sync(); },
+    // Views that show no lights draw the maps empty, once (Babylon's render-once refresh rate): nothing reads them there.
+    setActive(value) {
+      sync();
+      const casters = value ? scene.meshes.filter(casts) : [];
+      for (const { generator } of generators.values()) {
+        const map = generator.getShadowMap(), rate = value ? 1 : RenderTargetTexture.REFRESHRATE_RENDER_ONCE;
+        setRenderList(map, casters);
+        if (map.refreshRate !== rate) map.refreshRate = rate;
+      }
+    },
     get generators() { return [...generators.values()].map((entry) => entry.generator); },
     dispose() { for (const { generator } of generators.values()) generator.dispose(); generators.clear(); jitter.dispose(); },
   };

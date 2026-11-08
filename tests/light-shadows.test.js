@@ -2,7 +2,7 @@
 // light's a cube from its center while Area Light Shadows is on), objects casting as their Visibility > Shadow says,
 // drawn only for views that show the scene's lights.
 import assert from 'node:assert/strict';
-import { MeshBuilder, NullEngine, PBRMaterial, Scene, Vector3, FreeCamera } from '@babylonjs/core';
+import { MeshBuilder, NullEngine, PBRMaterial, RenderTargetTexture, Scene, Vector3, FreeCamera } from '@babylonjs/core';
 import { createLight } from '../src/blenkernel/light/light-home.js';
 import { createLightShadows, shadowJitter, shadowRange } from '../src/blenkernel/light/light-shadows.js';
 import { createFilm, filmJitter } from '../src/render/film.js';
@@ -34,14 +34,22 @@ const [generator] = shadows.generators;
 assert.equal(generator.getLight(), sun);
 assert.equal(generator.getClassName(), 'CascadedShadowGenerator', "a sun's shadow spans the view in cascades, fine near the eye, as EEVEE's clipmaps");
 const map = generator.getShadowMap();
-const casters = () => scene.meshes.filter((mesh) => map.renderListPredicate(mesh)).map((mesh) => mesh.name);
+const casters = () => map.renderList.map((mesh) => mesh.name);
 assert.deepEqual(casters(), ['Floor', 'Ball'], "objects cast but those whose Visibility > Shadow is off and Bylonder's helpers");
 const fog = Object.assign(MeshBuilder.CreateBox('Fog', {}, scene), { material: Object.assign(new PBRMaterial('Volume', scene), { blenderNoSurface: true }) });
 assert.ok(!casters().includes('Fog'), 'a material without a surface (a Volume alone) casts no surface shadow');
 fog.dispose();
 assert.ok(floor.receiveShadows && ball.receiveShadows && hidden.receiveShadows, 'objects receive');
+// Drawing the map again with the same casters leaves the materials alone: a render list filled again from empty marks
+// every mesh's lights dirty (Babylon's ObjectRenderer), and every material then resolved its effect each frame.
+let marked = 0;
+floor._markSubMeshesAsLightDirty = () => marked++;
+for (let i = 0; i < 3; i++) { shadows.setActive(true); map.render(); }
+delete floor._markSubMeshesAsLightDirty;
+assert.equal(marked, 0, 'no light marks from drawing the same casters again');
 shadows.setActive(false);
 assert.deepEqual(casters(), [], 'a view without the scene lights draws no shadow map');
+assert.equal(map.refreshRate, RenderTargetTexture.REFRESHRATE_RENDER_ONCE, 'which it draws empty once');
 sun.metadata.wbLight.use_shadow = false;
 shadows.setActive(true);
 assert.equal(shadows.generators.length, 0, 'turning Cast Shadow off removes the generator');
