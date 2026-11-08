@@ -233,8 +233,13 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     // Camera view shows the scene's output framed in the region, the passepartout darkening around it.
     const frame = state.cameraView && world.renderSettings
       ? world.mainSync?.viewCamera(view.camera, outputSize(world.renderSettings.state.render), { width: canvas.width, height: canvas.height }) : null;
-    cameraBorder.hidden = !frame || !state.overlays;
-    if (frame) cameraBorder.style.cssText = `--width:${frame.width};--height:${frame.height};--passepartout:${frame.passepartout}`;
+    // view3d_draw.cc drawviewborder: the passepartout and its outline always, the dashed guide with the overlays.
+    cameraBorder.hidden = !frame;
+    if (frame) {
+      cameraBorder.style.cssText = `--width:${frame.width};--height:${frame.height};--passepartout:${frame.passepartout}`;
+      cameraBorder.classList.toggle('passepartout', frame.passepartout > 0);
+      cameraBorder.classList.toggle('guides', !!state.overlays);
+    }
     world.beforeViewRender({ rendered, compositor: view.wantsCompositor, studio: { worldSpace: state.use_world_space_lighting, rotateZ: state.studiolight_rotate_z } });
     // Rendered draws the overlays after its film, as Blender does; the compositor's graph has no pass for them.
     const film = rendered && !scene.frameGraph ? world.renderSettings.film(view.camera) : null;

@@ -23,8 +23,10 @@
 /* The camera view's border, centered on the canvas (which spans under the header), the passepartout around it. */
 /* The camera view's border, centered on the canvas (which spans under the header): a black line dashed in the
    viewport's color, the passepartout (TH_CAMERA_PASSEPARTOUT at the camera's alpha) around it. */
-.camera-border{position:absolute;left:50%;top:calc(50% - var(--bl-header-h)/2);width:calc(100% * var(--width));height:calc((100% + var(--bl-header-h)) * var(--height));transform:translate(-50%,-50%);border:1px solid var(--bl-camera-border);box-shadow:0 0 0 100vmax rgb(var(--bl-camera-passepartout) / var(--passepartout));pointer-events:none}
-.camera-border::after{content:"";position:absolute;inset:-1px;border:1px dashed var(--bl-viewport)}
+.camera-border{position:absolute;left:50%;top:calc(50% - var(--bl-header-h)/2);width:calc(100% * var(--width) + 4px);height:calc((100% + var(--bl-header-h)) * var(--height) + 4px);transform:translate(-50%,-50%);border:1px solid transparent;box-shadow:0 0 0 100vmax rgb(var(--bl-camera-passepartout) / var(--passepartout));pointer-events:none}
+.camera-border.passepartout{border-color:var(--bl-viewport)}
+/* Its lines a pixel outside the camera frame (drawviewborder x1i = x1 - 1). drawviewborder's dashes: dash_width 6 at udash_factor 0.5, 3 pixels on and 3 off. */
+.camera-border.guides::after{content:"";position:absolute;inset:-1px;--dash:var(--bl-camera-border) 0 3px,transparent 3px 6px;background:repeating-linear-gradient(90deg,var(--dash)) top/100% 1px no-repeat,repeating-linear-gradient(90deg,var(--dash)) bottom/100% 1px no-repeat,repeating-linear-gradient(180deg,var(--dash)) left/1px 100% no-repeat,repeating-linear-gradient(180deg,var(--dash)) right/1px 100% no-repeat}
 .camera-border[hidden]{display:none}
 #toast{left:50%;transform:translateX(-50%);bottom:10px;background:var(--bl-popup);border:1px solid var(--bl-popup-line);border-radius:5px;color:var(--bl-text);font:var(--bl-font)}
 dialog{background:var(--bl-header);color:var(--bl-text);border:1px solid var(--bl-gap);border-radius:5px;font:var(--bl-font);box-shadow:0 6px 20px #0008}
