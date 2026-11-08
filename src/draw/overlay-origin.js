@@ -1,5 +1,5 @@
 // Object origins (overlay_origin.hh, overlay_extra_point_vert.glsl, overlay_point_varying_color_varying_outline_aa_frag.glsl):
-// a round point at each selected object's origin, in the active or selected color with a thin wire outline, drawn over
+// a round point at the active and each selected object's origin, in the active or selected color with a thin wire outline, drawn over
 // everything.
 import { Mesh } from '@babylonjs/core/Meshes/mesh.js';
 import { ShaderMaterial } from '@babylonjs/core/Materials/shaderMaterial.js';
@@ -35,6 +35,10 @@ void main() {
   if (dist > midStroke) gl_FragColor = vec4(outlineColor.rgb, mix(outlineColor.a, 0.0, smoothstep(radii[1], radii[0], dist)));
   else gl_FragColor = mix(fillColor, outlineColor, smoothstep(radii[3], radii[2], dist));
 }`;
+
+// blender-port: overlay_origin.hh object_sync: the active object's origin in the active color, selected or not, and a
+// selected object's in the selected color; null for the rest.
+export const originColor = (node, { selected, active }) => (node === active ? theme.object_active : selected.has(node) ? theme.object_selected : null);
 
 //   objects() -> the scene's objects, color(node) -> its origin's color, or null when it shows none
 export function createOriginOverlay(scene, { objects, color }) {

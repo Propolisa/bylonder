@@ -17,6 +17,7 @@ import { createHud } from "./editors/interface/hud.js";
 import { createOutliner } from "./editors/space_outliner/space-outliner.js";
 import { visible, deleted } from "./editors/object/identity";
 import { view_3d as theme } from "./editors/interface/userdef-default-theme.js";
+import { originColor } from "./draw/overlay-origin.js";
 import { createWorkbench } from "./draw/workbench.js";
 import { windowCapture } from "./windowmanager/mouse-capture";
 import { createEventSystem } from "./windowmanager/wm-event-system.js";
@@ -231,7 +232,7 @@ const overlays = createViewportOverlays(scene, {
     visible: (node) => (world.objects.includes(node) ? visible(node) && (world.collections?.status(node).visible ?? true) : node.isEnabled()),
     aspect: () => { const { width, height } = outputSize(world.renderSettings.state.render); return width / height; },
   },
-  origins: { objects: () => world.objects, color: (node) => (editor?.selection.has(node) && !deleted(node) ? wireColor(node) : null) },
+  origins: { objects: () => world.objects, color: (node) => (editor && !deleted(node) ? originColor(node, { selected: editor.selection, active: editor.selection.active }) : null) },
   outlines: { outlined: () => [...(editor?.selection.outlined() ?? []), ...instancesOf((node) => editor.selection.has(node))],
     isActive: (node) => [node, ...(node.metadata?.instancers ?? [])].includes(editor.selection.active), isTransform: () => !!world.wm?.modal },
   armatures: {
