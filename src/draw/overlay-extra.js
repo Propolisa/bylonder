@@ -323,7 +323,9 @@ export function createExtrasOverlay(scene, { objects, color: themeColor = (node,
         const tria_size = 0.7 * drawsize / Math.abs(depth), tria_margin = 0.1 * drawsize / Math.abs(depth);
         m[3] = m[7] = -tria_size; m[11] = 0; m[15] = cy + tria_margin + tria_size;
       }
-      color[3] = lookedThrough ? -depth : depth;
+      // Looked through, its frame lies on the near plane (BKE_camera_view_frame_ex's do_clip), where the clipping hides
+      // nearly all of it under the camera border, as in Blender.
+      color[3] = lookedThrough ? (ortho ? -depth : node.minZ) : depth;
     } else if (entry.kind === 'light') {
       const light = node, type = entry.lightType;
       position.copyFrom(light.getAbsolutePosition?.() ?? light.position ?? Vector3.ZeroReadOnly);

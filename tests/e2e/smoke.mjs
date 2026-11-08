@@ -336,6 +336,25 @@ const checks = {
     await app.page.keyboard.press("Escape");
   },
 
+  // Looking through the camera, its own frame wire lies on the near plane, hidden under the camera border as Blender's
+  // is (BKE_camera_view_frame_ex do_clip): the pixels just inside the border are the scene's, no dark line.
+  "camera view draws no camera wire inside its border": { open: { link: "tin-cans", node: "Tomato" }, async run() {
+    await app.hover();
+    await app.page.keyboard.press("Numpad0");
+    await app.until((b) => b.views.input.state.cameraView);
+    await app.page.mouse.move(5, 500);
+    await app.settled();
+    const border = await app.frame().locator(".camera-border").boundingBox();
+    const shot = await app.page.screenshot({ clip: { x: border.x + 1, y: border.y + border.height / 2, width: 6, height: 1 } });
+    const column = await app.page.evaluate(async (png) => {
+      const image = await createImageBitmap(await (await fetch(`data:image/png;base64,${png}`)).blob());
+      const ctx = new OffscreenCanvas(image.width, image.height).getContext("2d");
+      ctx.drawImage(image, 0, 0);
+      return [...ctx.getImageData(0, 0, image.width, 1).data].filter((_, i) => i % 4 === 0);
+    }, shot.toString("base64"));
+    assert.ok(Math.max(...column) - Math.min(...column) < 24, `the pixels inside the border: ${column}`);
+  } },
+
   // The Properties editor's tabs as Blender 5.2.3 draws them at UI scale 1 (measured from its screenshot): a 29 pixel
   // bar, tabs 27 by 28 flush with the main region, the first 8 pixels down, groups 8 pixels apart, the active tab in
   // the main region's color.
