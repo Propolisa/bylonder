@@ -1,8 +1,8 @@
 /* A mesh's draw buffers as Blender's draw cache extracts them (draw_cache_extract_mesh.cc
  * mesh_buffer_cache_create_requested and its mesh_extractors, compiled as they are): one vertex per face corner with
  * its position, normal and UV, the triangles sorted by material, the face edges and the edges with their adjacent
- * corners. They fill Blender's own dummy GPU backend, whose buffers keep their data in module memory, where JS uploads
- * each from (src/draw/mesh-batch-cache.js) before freeing them. */
+ * corners. They fill the module's GPU backend (gpu-record.cc), whose buffers keep their data in module memory, where JS
+ * uploads each from (src/draw/mesh-batch-cache.js) before freeing them. */
 #include "BKE_attribute.hh"
 #include "BKE_mesh_wrapper.hh"
 #include "BKE_object.hh"
@@ -12,8 +12,7 @@
 #include "DNA_scene_types.h"
 #include "draw_attributes.hh"
 #include "draw_cache_extract.hh"
-#include "dummy/dummy_vertex_buffer.hh"
-#include "gpu_backend.hh"
+#include "GPU_index_buffer.hh"
 #include "gpu_capabilities_private.hh"
 #include "extraction.hh"
 
@@ -33,38 +32,7 @@ class ModuleIndexBuf : public IndexBuf {
   void strip_restart_indices() override {}
 };
 
-/* port-override: the GPU module's backend: vertex buffers are Blender's dummy backend's (GPU_BACKEND_NONE, as in
- * background mode), which keep their data in module memory; it makes nothing else, as the module draws nothing. */
-class ModuleBackend : public GPUBackend {
- public:
-  VertBuf *vertbuf_alloc() override { return new DummyVertexBuffer; }
-  IndexBuf *indexbuf_alloc() override { return new ModuleIndexBuf; }
-  void init_resources() override {}
-  void delete_resources() override {}
-  void compute_dispatch(int /*x*/, int /*y*/, int /*z*/) override {}
-  void compute_dispatch_indirect(StorageBuf * /*indirect_buf*/) override {}
-  Context *context_alloc(GHOST_IWindow * /*window*/, GHOST_IContext * /*context*/) override { return nullptr; }
-  Batch *batch_alloc() override { return nullptr; }
-  Fence *fence_alloc() override { return nullptr; }
-  FrameBuffer *framebuffer_alloc(const char * /*name*/) override { return nullptr; }
-  PixelBuffer *pixelbuf_alloc(size_t /*size*/) override { return nullptr; }
-  QueryPool *querypool_alloc() override { return nullptr; }
-  Shader *shader_alloc(const char * /*name*/) override { return nullptr; }
-  Texture *texture_alloc(const char * /*name*/) override { return nullptr; }
-  TexturePool *texturepool_alloc() override { return nullptr; }
-  UniformBuf *uniformbuf_alloc(size_t /*size*/, const char * /*name*/) override { return nullptr; }
-  StorageBuf *storagebuf_alloc(size_t /*size*/, GPUUsageType /*usage*/, const char * /*name*/) override { return nullptr; }
-  void shader_cache_dir_clear_old() override {}
-  void render_begin() override {}
-  void render_end() override {}
-  void render_step(bool /*force_resource_release*/) override {}
-};
-
-GPUBackend *GPUBackend::get()
-{
-  static ModuleBackend backend;
-  return &backend;
-}
+IndexBuf *module_index_buf_alloc() { return new ModuleIndexBuf; }
 
 }  // namespace blender::gpu
 

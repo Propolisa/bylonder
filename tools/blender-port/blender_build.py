@@ -234,6 +234,20 @@ def generate(host, out, missing, by_any, extra):
         result = subprocess.run(command, shell=True, cwd=host, capture_output=True, text=True)
         if result.returncode:
             print(f'{os.path.relpath(path, host)}: generator failed\n{result.stdout[-1500:]}{result.stderr[-1500:]}', file=sys.stderr)
+    shader_create_infos(host)
+
+
+def shader_create_infos(host):
+    """The GPU shaders' create infos (each `*_infos.hh.info` the `glsl_*_infos_list.hh` lists include), which
+    gpu_shader_create_info.cc registers: Blender's shader tool, built for the host, writes them."""
+    infos = []
+    for directory, _, names in os.walk(host):
+        for name in (n for n in names if re.fullmatch(r'glsl_\w+_infos_list\.hh', n)):
+            for include in re.findall(r'#include "([^"]+)"', open(os.path.join(directory, name)).read()):
+                infos.append(os.path.relpath(os.path.join(directory, include), host))
+    missing = [path for path in infos if not os.path.exists(os.path.join(host, path))]
+    if missing:
+        subprocess.run(['ninja', '-C', host, *missing], check=True, capture_output=True)
 
 
 # The module build's own sources that stand in for what this build compiles from Blender: RNA's runtime (its generated
@@ -312,7 +326,8 @@ def main():
     source_of = lambda e: e['file'] if os.path.isabs(e['file']) else os.path.join(e['directory'], e['file'])
     generate(host, out, [source_of(e) for e in entries if not os.path.exists(source_of(e))], by_any, extra)
     # Sources of the seams' libraries the module compiles as Blender does (the manifest's `seam_sources`, paths under
-    # source/blender, a directory's with it): Blender's mesh draw extraction on its dummy GPU backend (draw-mesh.cc).
+    # source/blender, a directory's with it): Blender's mesh draw extraction (draw-mesh.cc) and the GPU module's front end, on
+    # the module's recording GPU backend (gpu-record.cc).
     kept = [f'/source/blender/{path}' for path in spec.get('seam_sources', [])]
     compiled = lambda target, e: not SEAMS.match(target) or any(path in source_of(e) for path in kept)
     by_target = {t: [e for e in group if compiled(t, e)] for t, group in by_any.items()}

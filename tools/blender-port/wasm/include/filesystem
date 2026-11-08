@@ -1,5 +1,6 @@
 /* The wasm32-wasi libc++ this build uses is configured without <filesystem> (_LIBCPP_HAS_NO_FILESYSTEM). This is the
- * part of std::filesystem OpenImageIO's Filesystem utilities (libutil/filesystem.cpp) and Blender's asset indexer use,
+ * part of std::filesystem OpenImageIO's Filesystem utilities (libutil/filesystem.cpp), Blender's asset indexer and its
+ * shader source dump (gpu_shader.cc) use,
  * over WASI's POSIX calls: paths with '/' separators, status, file times, directory listing, and creating, copying,
  * renaming and removing files. */
 #pragma once
@@ -77,6 +78,7 @@ class path {
   }
   friend path operator/(path a, const path &b) { return a /= b; }
   friend bool operator==(const path &a, const path &b) { return a.s_ == b.s_; }
+  template<class C, class T> friend basic_ostream<C, T> &operator<<(basic_ostream<C, T> &os, const path &p) { return os << p.s_; }
 };
 
 enum class perms : unsigned {
@@ -242,6 +244,16 @@ inline path current_path(error_code &ec)
 {
   char buffer[1024];
   return result(getcwd(buffer, sizeof(buffer)) != nullptr, ec) ? path(buffer) : path();
+}
+inline path current_path()
+{
+  error_code ec;
+  return current_path(ec);
+}
+inline bool create_directories(const path &p)
+{
+  error_code ec;
+  return create_directories(p, ec);
 }
 inline path absolute(const path &p) { error_code ec; return p.is_absolute() ? p : current_path(ec) / p; }
 inline path temp_directory_path(error_code &ec)

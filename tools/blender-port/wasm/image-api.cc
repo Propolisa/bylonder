@@ -32,43 +32,6 @@ namespace blender {
  * under what the region's own drawing records (region-draw.cc). */
 void DRW_draw_view(const bContext * /*C*/) {}
 
-/* port-override: the GPU module is not in the module; the Image panel names the format Blender's GPU texture of an image
- * has (IMB_gpu_get_texture_format), with gpu_texture.cc's names of those formats. */
-const char *GPU_texture_format_name(gpu::TextureFormat format)
-{
-  using gpu::TextureFormat;
-  switch (format) {
-    case TextureFormat::UNORM_8_8_8_8:
-      return "RGBA8";
-    case TextureFormat::SRGBA_8_8_8_8:
-      return "SRGB8_A8";
-    case TextureFormat::SFLOAT_16_16_16_16:
-      return "RGBA16F";
-    case TextureFormat::SFLOAT_32_32_32_32:
-      return "RGBA32F";
-    case TextureFormat::UNORM_8:
-      return "R8";
-    case TextureFormat::SFLOAT_16:
-      return "R16F";
-    case TextureFormat::SFLOAT_32:
-      return "R32F";
-    case TextureFormat::SRGB_DXT1:
-      return "SRGB8_A8_DXT1";
-    case TextureFormat::SRGB_DXT3:
-      return "SRGB8_A8_DXT3";
-    case TextureFormat::SRGB_DXT5:
-      return "SRGB8_A8_DXT5";
-    case TextureFormat::SNORM_DXT1:
-      return "RGBA8_DXT1";
-    case TextureFormat::SNORM_DXT3:
-      return "RGBA8_DXT3";
-    case TextureFormat::SNORM_DXT5:
-      return "RGBA8_DXT5";
-    default:
-      return "";
-  }
-}
-
 }  // namespace blender
 
 /* An image's buffer as Blender draws it (the image user's frame and tile, or the first), read by JS as 32-bit words:

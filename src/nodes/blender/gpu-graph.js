@@ -40,15 +40,10 @@ provided.gpu_function_signature = (namePointer, types, quals, max) => {
   return Math.min(params.length, max);
 };
 
-// The graph of a node type (in a tree of `treeType`) with its properties and input values, those in `linked` linked
-// from images: { nodes: [{ name, inputs: [{ type, source, ... }], outputs: [{ type, id }] }], outputs: { socket: id },
-// bands: [pixels] }, or null when the node has no GPU code.
-const graphs = new Map();
-export function nodeGraph(treeType, idname, { properties = {}, values = {}, linked = [] }) {
-  const key = JSON.stringify([treeType, idname, properties, values, linked]);
-  if (graphs.has(key)) return graphs.get(key);
-  // A node group of Main's holding the node, made and removed through RNA as Blender's Python would, so its tree updates
-  // (socket availability, menu items) are Blender's.
+// A node of a type (in a tree of `treeType`) with its properties and input values, in a node group of Main's made and
+// removed through RNA as Blender's Python would, so its tree updates (socket availability, menu items) are Blender's:
+// `fn(group, node)`'s result.
+export function withScratchNode(treeType, idname, { properties = {}, values = {} }, fn) {
   const data = blendData(blenderMain().C), group = data.node_groups.new('GPU Scratch', treeType);
   try {
     const node = group.nodes.new(idname);
@@ -57,10 +52,22 @@ export function nodeGraph(treeType, idname, { properties = {}, values = {}, link
       const input = [...node.inputs].find((s) => s.identifier === id);
       if (input && value !== null && 'default_value' in input) try { input.default_value = value; } catch { /* not settable */ }
     }
-    const graph = JSON.parse(withString(linked.join('\n'), (l) => cString(x.node_gpu_graph(group.as_pointer(), node.as_pointer(), l))));
-    graphs.set(key, graph.nodes.length ? graph : null);
+    return fn(group, node);
   } finally {
     data.node_groups.remove(group);
+  }
+}
+
+// The graph of a node type (in a tree of `treeType`) with its properties and input values, those in `linked` linked
+// from images: { nodes: [{ name, inputs: [{ type, source, ... }], outputs: [{ type, id }] }], outputs: { socket: id },
+// bands: [pixels] }, or null when the node has no GPU code.
+const graphs = new Map();
+export function nodeGraph(treeType, idname, { properties = {}, values = {}, linked = [] }) {
+  const key = JSON.stringify([treeType, idname, properties, values, linked]);
+  if (!graphs.has(key)) {
+    const graph = withScratchNode(treeType, idname, { properties, values }, (group, node) =>
+      JSON.parse(withString(linked.join('\n'), (l) => cString(x.node_gpu_graph(group.as_pointer(), node.as_pointer(), l)))));
+    graphs.set(key, graph.nodes.length ? graph : null);
   }
   return graphs.get(key);
 }
