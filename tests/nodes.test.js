@@ -142,6 +142,10 @@ assert.deepEqual((await lobes(['ShaderNodeBsdfDiffuse', 'ShaderNodeBsdfDiffuse']
   const code = occluded._fragmentCompilationState._builtCompilationString;
   assert.match(code, /bl_ambient_occlusion\(bl_depth\w*, /, 'the occlusion reads the view depth');
   assert.match(code, /uniform highp sampler2D bl_depth/);
+  // EEVEE's horizon scan (eevee_fast_gi.bsl.hh): occluded sectors in a bitmask, cosine weighted, the noise shifted per
+  // film sample.
+  assert.match(code, /bl_bitmask_to_occlusion_cosine[(]slice_bitmask[)]/, 'occlusion is cosine weighted over the occluded sectors');
+  assert.match(code, /uniform float bl_sample_offset/, "the noise follows the film's sample");
 }
 
 // Light Path's Is Shadow Ray is 1 where a shadow map draws the surface, as EEVEE's shadow pass sets the ray type: a

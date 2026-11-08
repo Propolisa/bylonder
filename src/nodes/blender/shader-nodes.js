@@ -247,7 +247,7 @@ export const SHADER_NODES = {
   // port-override: EEVEE searches its hi-Z buffer (ambient_occlusion_eval); the view's depth (render/scene-depth.js)
   // stands in for it.
   ShaderNodeAmbientOcclusion: (p, decl, { connected }) => [G_DATA,
-    ['bl_ambient_occlusion', [{ depth: true }, '$viewmat', '$winmat', 'Color', 'Distance', connected('Normal') ? 'Normal' : WORLD_NORMAL, p.inside ? 1 : 0, Math.ceil(p.samples / 4)], outputs(decl)]],
+    ['bl_ambient_occlusion', [{ depth: true }, '$viewmat', '$winmat', '$sample_offset', 'Color', 'Distance', connected('Normal') ? 'Normal' : WORLD_NORMAL, p.inside ? 1 : 0, p.samples], outputs(decl)]],
   ShaderNodeDisplacement: (p, decl, { connected }) => [...ENGINE_STEPS,
     [p.space === 'OBJECT' ? 'node_displacement_object' : 'node_displacement_world', ['Height', 'Midlevel', 'Scale', connected('Normal') ? 'Normal' : WORLD_NORMAL], ['@Displacement']]],
   ShaderNodeVectorDisplacement: (p, decl) => [...ENGINE_STEPS, p.space === 'TANGENT' ? stack('node_vector_displacement_tangent', decl, [tangent('')])
@@ -529,36 +529,99 @@ vec4 bl_closure_radiance(BlClosure c, vec3 lit) {
 }`,
   // node_holdout: nothing of the surface or what is behind it.
   bl_node_holdout: 'void bl_node_holdout(inout BlClosure result) { result = bl_closure_empty(); }',
-  // port-override: EEVEE's horizon scan; Babylon has no occlusion of the view to read, so nothing is occluded.
-  // blender-port: gpu_shader_material_ambient_occlusion.glsl node_ambient_occlusion, its occlusion a horizon search
-  // in screen space as EEVEE's (eevee_horizon_scan_eval_lib): per direction, the highest point of the view's depth
-  // within the distance above the surface's tangent plane (below it when Inside).
-  bl_ambient_occlusion: `void bl_ambient_occlusion(sampler2D depth, mat4 viewmat, mat4 winmat, vec4 color, float dist, vec3 normal, float inverted,
+  // blender-port: eevee_nodetree_lib.bsl.hh ambient_occlusion_eval and eevee_fast_gi.bsl.hh fast_gi::eval (AO only),
+  // angles_to_bitmask and bitmask_to_occlusion_cosine: two slices around the view vector, each side's samples spread
+  // quadratically over the distance, each occluding the sectors between its front and its back (its depth plus the
+  // scene's Fast GI near thickness) within the sphere of the distance, the occluded sectors cosine weighted; the noise
+  // shifts with the film's sample. port-override: the view's depth (render/scene-depth.js) stands in for the hi-Z buffer.
+  bl_ambient_occlusion: `uint bl_angles_to_bitmask(vec2 theta) {
+  vec2 ratio = clamp(theta * 0.31830989 + 0.5, 0.0, 1.0);
+  uint a = uint(floor(32.0 * ratio.x)), b = uint(ceil(32.0 * (ratio.y - ratio.x)));
+  return (((b < 32u) ? 1u << b : 0u) - 1u) << a;
+}
+// bitCount, which GLSL ES 3.0 lacks.
+float bl_bit_count(uint x) {
+  x = x - ((x >> 1) & 0x55555555u);
+  x = (x & 0x33333333u) + ((x >> 2) & 0x33333333u);
+  return float((((x + (x >> 4)) & 0x0F0F0F0Fu) * 0x01010101u) >> 24);
+}
+float bl_bitmask_to_occlusion_cosine(uint bitmask) {
+  const vec4 weights = vec4(0.0095061, 0.0270951, 0.0405571, 0.0478421);
+  vec4 counts = vec4(bl_bit_count(bitmask & 0xF000000Fu), bl_bit_count(bitmask & 0x0F0000F0u), bl_bit_count(bitmask & 0x00F00F00u),
+    bl_bit_count(bitmask & 0x000FF000u));
+  return clamp(1.0 - dot(counts, weights), 0.0, 1.0);
+}
+void bl_ambient_occlusion(sampler2D depth, mat4 viewmat, mat4 winmat, float offset, vec4 color, float dist, vec3 normal, float inverted,
     float sample_count, out vec4 result_color, out float result_ao) {
-  vec3 vP = (viewmat * vec4(g_data.P, 1.0)).xyz, vN = normalize(mat3(viewmat) * normal) * (inverted > 0.5 ? -1.0 : 1.0);
-  bool ortho = winmat[3][3] > 0.5;
+  const float PI = 3.14159265, THICKNESS = 0.1, ANGLE_BIAS = 1.0 / 0.95;
+  bool reversed = inverted > 0.5, ortho = winmat[3][3] > 0.5;
+  vec3 vP = (viewmat * vec4(g_data.P, 1.0)).xyz, vN = normalize(mat3(viewmat) * normal) * (reversed ? -1.0 : 1.0);
+  vec3 vV = ortho ? vec3(0.0, 0.0, 1.0) : normalize(-vP);
   vec2 scale = vec2(winmat[0][0], winmat[1][1]), shift = ortho ? -winmat[3].xy : vec2(winmat[2][0], winmat[2][1]);
   vec4 clip = winmat * vec4(vP, 1.0);
   vec2 uv = clip.xy / clip.w * 0.5 + 0.5, radius = 0.5 * dist * scale / (ortho ? 1.0 : -vP.z);
-  float noise = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
-  int directions = int(clamp(sample_count, 1.0, 8.0)) * 2;
-  float occlusion = 0.0;
-  for (int i = 0; i < 16; i++) {
-    if (i >= directions) break;
-    float angle = (float(i) + noise) * 6.2831853 / float(directions), horizon = 0.0;
-    vec2 direction = vec2(cos(angle), sin(angle)) * radius;
-    for (int s = 0; s < 8; s++) {
-      vec2 at = uv + direction * (float(s) + 1.0 - noise) / 8.0;
-      if (any(lessThan(at, vec2(0.0))) || any(greaterThan(at, vec2(1.0)))) break;
-      float z = texture(depth, at).r;
-      vec2 ndc = at * 2.0 - 1.0;
-      vec3 S = vec3((ndc + shift) * (ortho ? 1.0 : z) / scale, -z), v = S - vP;
-      float len = length(v);
-      if (len > 1e-4 && len < dist) horizon = max(horizon, dot(vN, v) / len);
+  vec4 ign = vec4(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715)), dot(gl_FragCoord.xy + vec2(5.588, 4.312), vec2(0.06711056, 0.00583715)),
+    dot(gl_FragCoord.xy + vec2(13.21, 9.17), vec2(0.06711056, 0.00583715)), dot(gl_FragCoord.xy + vec2(21.73, 2.51), vec2(0.06711056, 0.00583715)));
+  vec4 noise = fract(fract(52.9829189 * fract(ign)) + offset * vec4(1.0, 1.618034, 2.236068, 3.141593));
+  vec2 size = vec2(textureSize(depth, 0));
+  // ScreenThicknessParameters: the scene's near thickness and some pixels' footprint at the sample's depth.
+  float pixel_thickness = 4.0 * sqrt(64.0 / 8.0) * 0.5 * (1.0 / (scale.x * size.x) + 1.0 / (scale.y * size.y));
+  int samples = int(max(sample_count * 0.5, 1.0));
+  float angle = 2.0 * PI * noise.x / 4.0, occlusion = 0.0, weight = 0.0;
+  vec2 v_dir = vec2(cos(angle), sin(angle));
+  for (int slice = 0; slice < 2; slice++) {
+    vec3 vB = normalize(cross(vV, vec3(v_dir, 0.0))), vT = cross(vB, vV);
+    vec3 n_proj = vN - vB * dot(vN, vB);
+    float n_len = length(n_proj);
+    n_proj /= max(n_len, 1e-8);
+    float n_angle = sign(dot(n_proj, vT)) * acos(clamp(dot(n_proj, vV), -1.0, 1.0)) + (noise.z - 0.5) * (PI / 32.0) * ANGLE_BIAS;
+    uint slice_bitmask = 0u;
+    for (int side = 0; side < 2; side++) {
+      vec2 direction = (side == 0 ? v_dir : -v_dir) * radius * size, step = normalize(direction) / size;
+      float max_time = length(direction), prev_z = -vP.z, prev_time = 0.0;
+      vec2 prev_slope = vec2(0.0);
+      for (int j = 0; j < 32; j++) {
+        if (j >= samples) break;
+        // Always cross at least one pixel.
+        float time = 1.0 + pow((float(j) + noise.y) / float(samples), 2.0) * max_time + (reversed ? 1.0 : 0.0);
+        vec2 at = uv + step * time;
+        if (any(lessThan(at, vec2(0.0))) || any(greaterThan(at, vec2(1.0)))) break;
+        float z = texture(depth, at).r;
+        // ScreenThicknessEstimator: a sample is a segment from the one before, unless the slope breaks.
+        float slope = (z - prev_z) / (time - prev_time), thickness = abs(z - prev_z);
+        if (any(greaterThan(abs(prev_slope - slope), abs(prev_slope)))) thickness = 0.0;
+        thickness = max(thickness, THICKNESS + (ortho ? 1.0 : z) * pixel_thickness);
+        prev_slope = vec2(slope, prev_slope.x);
+        prev_z = z;
+        prev_time = time;
+        if (z > 1e7 && !reversed) continue;
+        vec2 ndc = at * 2.0 - 1.0;
+        vec3 front = vec3((ndc + shift) * (ortho ? 1.0 : z) / scale, -z) - vP;
+        vec3 back = vec3((ndc + shift) * (ortho ? 1.0 : z + thickness) / scale, -z - thickness) - vP;
+        vec3 ls_front = front / dist, ls_back = back / dist;
+        float max_dist = sqrt(clamp(1.0 - dot(ls_front.xy, ls_front.xy), 0.0, 1.0));
+        if (!reversed) {
+          ls_front.z = clamp(ls_front.z, -max_dist, max_dist);
+          ls_back.z = clamp(ls_back.z, -max_dist, max_dist);
+          if (ls_front.z == ls_back.z) continue;
+        }
+        float lv_front = dot(normalize(ls_front), vV), lv_back = dot(normalize(ls_back), vV);
+        if (reversed) {
+          lv_front = 1.0;
+          if (z > 1e7) lv_back = -1.0;
+        }
+        vec2 theta = acos(clamp(vec2(lv_front, lv_back), -1.0, 1.0));
+        theta.y = max(theta.x, theta.y);
+        if (reversed) theta -= PI;
+        theta = side == 0 ? theta.xy : -theta.yx;
+        slice_bitmask |= bl_angles_to_bitmask((theta - n_angle) * ANGLE_BIAS);
+      }
     }
-    occlusion += horizon;
+    occlusion += bl_bitmask_to_occlusion_cosine(slice_bitmask) * n_len;
+    weight += n_len;
+    v_dir = vec2(-v_dir.y, v_dir.x);
   }
-  result_ao = clamp(1.0 - occlusion / float(directions), 0.0, 1.0);
+  result_ao = clamp(occlusion / max(weight, 1e-8), 0.0, 1.0);
   result_color = result_ao * color;
 }
 `,
@@ -639,6 +702,8 @@ const MESH_VALUES = {
   $texspace_location: [T.Vector3, (mesh) => texspace(mesh)[0]],
   $texspace_size: [T.Vector3, (mesh) => texspace(mesh)[1]],
   $ray_type: [T.Float, (mesh) => rayTypes.get(mesh.getScene()) ?? RAY_TYPE.CAMERA],
+  // The film's sample: its noise offset (render/dither.js), as EEVEE's sampling shifts its noise per sample.
+  $sample_offset: [T.Float, (mesh) => ditherOffset(mesh.getScene())],
 };
 export const meshValue = (id) => MESH_VALUES[id] ?? (id.startsWith('$uniform_attribute:') && [T.Vector4, (mesh) => {
   const [, type, ...name] = id.split(':');
