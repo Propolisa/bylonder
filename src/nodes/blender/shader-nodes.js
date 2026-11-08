@@ -29,7 +29,7 @@ import { blendData } from '../../python/bpy_rna.js';
 import { VIEW_FORWARD, viewEye, viewForward } from '../../draw/draw-view.js';
 import { eeveeParity, eeveeParityChanged } from '../../draw/eevee-parity.js';
 import { ditherOffset } from '../../render/dither.js';
-import { sceneDepth } from '../../render/scene-depth.js';
+import { readsSceneDepth, sceneDepth } from '../../render/scene-depth.js';
 import '../graph-roots.js';
 
 // A NodeMaterial of Blender's nodes. Babylon's walks a block's inputs again for each path that reaches the block as it
@@ -999,6 +999,7 @@ const blenderShader = (Base) => class extends Base {
           if (depth) {
             const name = state._getFreeVariableName('bl_depth'), scene = state.sharedData.scene;
             state._emit2DSampler(name, '', false, undefined, false, 'highp');
+            readsSceneDepth(scene);
             this._textures.push([name, () => sceneDepth(scene)]);
             return name;
           }

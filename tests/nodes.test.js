@@ -1,7 +1,8 @@
 // Blender's nodes inline with Babylon's blocks: one NodeMaterial and one NodeRenderGraph holding both, linked by
 // Blender's socket conversions, built, saved and loaded.
 import assert from 'node:assert/strict';
-import { Constants, NullEngine, Scene, NodeMaterial, ArcRotateCamera, Vector3, InputBlock, NodeMaterialBlockConnectionPointTypes as T, NodeRenderGraph } from '@babylonjs/core';
+import { readySceneDepth } from '../src/render/scene-depth.js';
+import { Constants, NullEngine, Scene, NodeMaterial, ArcRotateCamera, FreeCamera, Vector3, InputBlock, NodeMaterialBlockConnectionPointTypes as T, NodeRenderGraph } from '@babylonjs/core';
 import { nodeMaterialFromTree, shaderNodeClasses, SHADER_NODES } from '../src/nodes/blender/shader-nodes.js';
 import { skyTexture } from '../src/blenkernel/sky.js';
 import { compositorNodeClasses } from '../src/nodes/blender/compositor-nodes.js';
@@ -142,6 +143,10 @@ assert.deepEqual((await lobes(['ShaderNodeBsdfDiffuse', 'ShaderNodeBsdfDiffuse']
   const code = occluded._fragmentCompilationState._builtCompilationString;
   assert.match(code, /bl_ambient_occlusion\(bl_depth\w*, /, 'the occlusion reads the view depth');
   assert.match(code, /uniform highp sampler2D bl_depth/);
+  // A render's camera gets the depth before its first sample, though no view of it has drawn the material yet.
+  const renderCamera = new FreeCamera('Render Camera', new Vector3(0, 0, -5), scene);
+  await Promise.race([readySceneDepth(scene, renderCamera), new Promise((resolve) => setTimeout(resolve, 2000))]);
+  assert.ok(scene._depthRenderer?.[renderCamera.id], "the render's camera draws the view depth from its first sample");
   // EEVEE's horizon scan (eevee_fast_gi.bsl.hh): occluded sectors in a bitmask, cosine weighted, the noise shifted per
   // film sample.
   assert.match(code, /bl_bitmask_to_occlusion_cosine[(]slice_bitmask[)]/, 'occlusion is cosine weighted over the occluded sectors');
