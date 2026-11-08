@@ -32,8 +32,9 @@ export function createView3DWindow({ sync, views, takes, host, menu, before = ()
   // view's steps come with the window's timers).
   const follow = (view, a) => {
     const rv3d = a.view3d;
-    if (rv3d.persp === RV3D_CAMOB) view.enterCameraView();
-    else view.nav.follow(rv3d);
+    if (rv3d.persp === RV3D_CAMOB) return view.enterCameraView();
+    view.leaveCameraView();
+    view.nav.follow(rv3d);
   };
   const redrawn = (redraw) => {
     for (const [view, a] of areas) {
