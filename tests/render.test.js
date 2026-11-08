@@ -133,6 +133,7 @@ acc.reset(); assert.equal(acc.count, 0);
   scene.onBeforeCameraRenderObservable.notifyObservers(b);
   assert.match(effectsOf(b).at(-1).name, /displayTransform/, 'Fast GI, Screen Trace and motion blur in scene linear, before the display transform');
   assert.ok(settings.film(b) && !settings.film(a), 'a rendered view has a film');
+  assert.ok(!effectsOf(b).some((p) => /motion/i.test(p.name)), "no motion blur in a view, as in EEVEE's viewport");
   settings.dispose();
   assert.deepEqual(effectsOf(b), []);
   scene.dispose(); engine.dispose();

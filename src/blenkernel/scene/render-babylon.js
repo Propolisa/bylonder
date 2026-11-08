@@ -1,4 +1,4 @@
-import { Camera, DefaultRenderingPipeline, DepthOfFieldEffectBlurLevel, ImageProcessingConfiguration, MotionBlurPostProcess, SSAO2RenderingPipeline, SSRRenderingPipeline } from '@babylonjs/core';
+import { Camera, DefaultRenderingPipeline, DepthOfFieldEffectBlurLevel, ImageProcessingConfiguration, SSAO2RenderingPipeline, SSRRenderingPipeline } from '@babylonjs/core';
 import { seededRandom } from '../../render/clock.js';
 import { createFilm } from '../../render/film.js';
 import { createDisplayTransform, setDisplaySettings } from '../../render/display-transform.js';
@@ -8,7 +8,7 @@ import { displayedViewSettings } from '../../render/view-settings.js';
 // tone mapping/exposure/contrast or creates render-engine effects. Effects are attached per camera, only to the
 // cameras of views in Rendered shading (like EEVEE in Blender's viewport), so views with
 // different shading render side by side without rebuilding anything.
-// Effects that need scene geometry (Raytracing, Motion Blur) read Babylon's geometry buffer renderer, which renders
+// Effects that need scene geometry (Raytracing) read Babylon's geometry buffer renderer, which renders
 // for whichever camera the scene renders through, never its prepass renderer: the prepass is one scene-wide switch
 // that routes every camera's draw into its targets, so views without these effects would never reach their canvas.
 // `ocioView`: Blender's view transform (its OCIO config's view) nearest to each: Babylon's ACES is the fit of ACES 1's
@@ -50,7 +50,7 @@ const DOF_KERNEL = 51;
 // while there is none: the view transform and look are then Babylon's nearest tone map and contrast.
 export function createRenderEngine(scene, { dof = () => null, displayTransform = () => null } = {}) {
   const attached = new Map(); // camera -> { key, effects }
-  const usesGeometry = effects => !!(effects.ssao || effects.ssr || effects.motion);
+  const usesGeometry = effects => !!(effects.ssao || effects.ssr);
   const ownGeometryBuffer = !scene.geometryBufferRenderer;
   // The geometry buffer renders per camera; only cameras with effects that read it need it filled. A camera observer
   // leaves the scene's render observers to user code, which keeps the views rendering (main.js).
@@ -71,7 +71,7 @@ export function createRenderEngine(scene, { dof = () => null, displayTransform =
     const focalPixels = camera.getProjectionMatrix().m[0] * scene.getEngine().getRenderWidth() * camera.viewport.width / 2;
     Object.assign(pipeline.depthOfField, { focusDistance: settings.focusDistance * 1000, fStop: settings.fStop, focalLength: settings.lens, lensSize: focalPixels / DOF_KERNEL });
   });
-  // The scene linear effects (the film, Fast GI, Screen Trace, depth of field, motion blur) before the display transform,
+  // The scene linear effects (the film, Fast GI, Screen Trace, depth of field) before the display transform,
   // as EEVEE's: a pipeline that builds its post processes again appends them after it.
   const keepDisplayLast = (camera, display) => {
     const passes = camera._postProcesses.filter(Boolean);
@@ -81,14 +81,14 @@ export function createRenderEngine(scene, { dof = () => null, displayTransform =
   };
   const drop = camera => {
     const entry = attached.get(camera); if (!entry) return;
-    const e = entry.effects; e.pipeline?.dispose(); e.ssr?.dispose(); e.ssao?.dispose(); e.motion?.dispose(); e.display.dispose(camera); e.film.dispose();
+    const e = entry.effects; e.pipeline?.dispose(); e.ssr?.dispose(); e.ssao?.dispose(); e.display.dispose(camera); e.film.dispose();
     attached.delete(camera);
     if (ownGeometryBuffer && ![...attached.values()].some(a => usesGeometry(a.effects))) scene.disableGeometryBufferRenderer();
   };
   let viewportSamples = 1, view = {};
   setDisplaySettings(scene, () => ({ exposure: view.exposure ?? 0, gamma: view.gamma ?? 1, lut: displayTransform()?.log ?? null }));
   const build = (camera, settings) => {
-    const e = settings.eevee, r = settings.render, effects = {};
+    const e = settings.eevee, effects = {};
     // EEVEE's film first: the samples a view accumulates (its viewport samples) in scene linear.
     effects.film = Object.assign(createFilm(scene, camera), { samples: () => viewportSamples });
     // Babylon's pipeline manager keys pipelines by name, so each camera's pipelines need their own.
@@ -101,7 +101,7 @@ export function createRenderEngine(scene, { dof = () => null, displayTransform =
     // buffer must fill whole textures too and Fast GI must not crop its result to the camera viewport.
     if (e.useRaytracing) effects.ssao = Object.assign(withSeededRandom(() => new SSAO2RenderingPipeline(name('fastGI'), scene, 0.5, [camera], true)), { useViewportInCombineStage: false });
     if (e.useRaytracing && e.rayTracingMethod === 'SCREEN') effects.ssr = new SSRRenderingPipeline(name('screenTrace'), scene, [camera], true);
-    if (r.useMotionBlur) effects.motion = new MotionBlurPostProcess(name('motionBlur'), scene, 1, camera, undefined, undefined, undefined, undefined, undefined, true);
+    // No motion blur: EEVEE blurs motion in a render (frames.js spreads its samples over the shutter), never in a view.
     if (usesGeometry(effects) && scene.geometryBufferRenderer) scene.geometryBufferRenderer.getGBuffer().ignoreCameraViewport = true;
     // Last: the view settings, whole as a rendered view displays them.
     effects.display = createDisplayTransform(name('displayTransform'), camera);
@@ -114,18 +114,17 @@ export function createRenderEngine(scene, { dof = () => null, displayTransform =
       view = settings.viewSettings;
       viewTransformOf(view.viewTransform).apply(ip);
       ip.contrast = contrastOf(view.look);
-      const e = settings.eevee, r = settings.render;
+      const e = settings.eevee;
       viewportSamples = Math.max(1, Math.round(e.taaSamples));
       const wanted = new Set([...cameras].filter(c => c && !c.isDisposed?.()));
       for (const camera of [...attached.keys()]) if (!wanted.has(camera)) drop(camera);
-      const key = [e.useRaytracing && e.rayTracingMethod === 'SCREEN', e.useRaytracing, r.useMotionBlur].join();
+      const key = [e.useRaytracing && e.rayTracingMethod === 'SCREEN', e.useRaytracing].join();
       for (const camera of wanted) {
         if (attached.get(camera)?.key !== key) { drop(camera); attached.set(camera, { key, effects: build(camera, settings) }); }
         const effects = attached.get(camera).effects;
         effects.film.reset();
         if (effects.ssao) effects.ssao.radius = e.fastGiDistance;
         if (effects.ssr) Object.assign(effects.ssr, { thickness: e.screenTraceThickness, step: Math.max(1, Math.round(1 + (1 - e.screenTraceQuality) * 7)) });
-        if (effects.motion) effects.motion.motionStrength = r.motionBlurShutter * 2;
       }
     },
     // A rendered camera's film (film.js), and every film started again (Main evaluated something new).
