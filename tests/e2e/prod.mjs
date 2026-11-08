@@ -38,7 +38,8 @@ async function hoverItems(where) {
 }
 
 const server = await startServer({ build: false });
-const browser = await chromium.launch();
+// CHROMIUM_ARGS reproduces CI here, e.g. --use-angle=swiftshader for its software rendering.
+const browser = await chromium.launch({ args: process.env.CHROMIUM_ARGS?.split(" ") });
 let app;
 try {
   // The new project's scene, as a first visit opens it.

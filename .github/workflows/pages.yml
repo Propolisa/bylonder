@@ -75,7 +75,7 @@ jobs:
       # Some failures only happen in the production build: boot it in headless Chromium, open the menus and every
       # workspace, and fail before deploying on any page or console error (tests/e2e/prod.mjs).
       - name: Check the production build
-        timeout-minutes: 10
+        timeout-minutes: 30
         run: npm run test:prod
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
