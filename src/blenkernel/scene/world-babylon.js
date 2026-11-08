@@ -1,5 +1,7 @@
-import { Color3, Color4, Constants, CubeMapToSphericalPolynomialTools, CubeTexture, EXRCubeTexture, HDRCubeTexture, HDRFiltering, Matrix, MeshBuilder, BaseTexture, Texture, ReflectionProbe, RenderTargetTexture, Scene } from '@babylonjs/core';
+import { Color3, Color4, Constants, Vector3, CubeMapToSphericalPolynomialTools, CubeTexture, EXRCubeTexture, HDRCubeTexture, HDRFiltering, Matrix, MeshBuilder, BaseTexture, Texture, ReflectionProbe, RenderTargetTexture, Scene } from '@babylonjs/core';
 import { RAY_TYPE, setRayType } from '../../nodes/blender/shader-nodes.js';
+import { createLight } from '../light/light-home.js';
+import { StudioLightTexture, firstBand } from './world-sun.js';
 
 // Babylon adapter for a World datablock. Babylon has no World object, so a world is pushed into
 // scene.clearColor, environmentTexture/environmentIntensity, a skybox and fog. Nothing else touches these.
@@ -23,6 +25,11 @@ export function readAuthoredWorld(scene, defaults) {
   };
 }
 
+// blender-port: eevee_lookdev.cc LookdevWorld: Material Preview's world is a World of Blender's defaults (DNA_world_defaults.h:
+// Sun Threshold 10, Sun Angle 0.526 degrees, sun shadows on) around the studio light, so EEVEE lights the studio's
+// light above the threshold as a sun with shadows (world-sun.js), the rest from the probe.
+const LOOKDEV = { threshold: 10, angle: (0.526 * Math.PI) / 180 };
+
 export function createWorldRenderer(scene, { asset = path => path, studioLight } = {}) {
   const authoredTexture = scene.environmentTexture;
   const authoredSkyboxes = scene.meshes.filter(m => m.infiniteDistance && !m.name.startsWith('__'));
@@ -35,9 +42,10 @@ export function createWorldRenderer(scene, { asset = path => path, studioLight }
     if (!key) return null;
     if (!textures.has(key)) {
       const url = /^(https?|file):/.test(key) ? key : asset(key);
-      const tex = /\.hdr$/i.test(key) ? new HDRCubeTexture(url, scene, 256)
+      const tex = key === studioLight && /\.exr$/i.test(key) ? new StudioLightTexture(url, scene, 256, LOOKDEV.threshold)
+        : /\.hdr$/i.test(key) ? new HDRCubeTexture(url, scene, 256)
         : /\.exr$/i.test(key) ? new EXRCubeTexture(url, scene, 256, false, true, false, true)
-          : CubeTexture.CreateFromPrefilteredData(url, scene);
+        : CubeTexture.CreateFromPrefilteredData(url, scene);
       tex.name = key;
       textures.set(key, tex);
     }
@@ -75,23 +83,39 @@ export function createWorldRenderer(scene, { asset = path => path, studioLight }
   // no mesh is on, which leaves their settings as they are.
   const NO_MESH_LAYER = 0x10000000;
   let preview = null;
-  // blender-port: eevee_lookdev.cc LookdevModule::rotate_world: the studio light turned by the view's Rotation, and with
-  // the view unless World Space Lighting is on (View3DShading studiolight_rotate_z, use_world_space_lighting), per view.
+  // blender-port: eevee_lookdev.cc LookdevModule::rotate_world: the studio light (its probe and sun) turned by the
+  // view's Rotation (studiolight_rotate_z), fixed in the world unless it turns with the view
+  // (use_studiolight_view_rotation: viewinv * basis * rotation), per view.
   // STUDIO_YAW: Blender's equirectangular image as Babylon lays it out on the cube, turned about the vertical.
   const STUDIO_YAW = -Math.PI / 2, studioRotation = new Matrix(), studioYaw = new Matrix();
-  let studio = { worldSpace: false, rotateZ: 0 };
+  let studio = { viewRotation: false, rotateZ: 0 };
   const orientStudio = (camera) => {
     Matrix.RotationYToRef(STUDIO_YAW - studio.rotateZ, studioYaw);
-    if (studio.worldSpace) studioRotation.copyFrom(studioYaw);
-    else camera.getViewMatrix().getRotationMatrixToRef(studioRotation).multiplyToRef(studioYaw, studioRotation);
+    if (studio.viewRotation) camera.getViewMatrix().getRotationMatrixToRef(studioRotation).multiplyToRef(studioYaw, studioRotation);
+    else studioRotation.copyFrom(studioYaw);
     texture(studioLight).setReflectionTextureMatrix(studioRotation);
+    // Its sun from the cube's direction, through the inverse of the turn.
+    if (lookdevSun) Vector3.TransformNormalToRef(lookdevSun.cubeDirection, studioRotation.clone().invert(), lookdevSun.light.direction).scaleInPlace(-1);
+  };
+  let lookdevSun = null, firstBandOnly = false;
+  const studioSun = async (studio) => {
+    if (!studio.isReady()) await new Promise((resolve) => studio.onLoadObservable.addOnce(resolve));
+    if (!firstBandOnly && studio.sphericalPolynomial) { studio.sphericalPolynomial = firstBand(studio.sphericalPolynomial); firstBandOnly = true; }
+    const { sun } = studio;
+    if (!sun || !preview || lookdevSun) return;
+    const strength = Math.max(sun.color.r, sun.color.g, sun.color.b);
+    const light = createLight('__lookdevSun', 'SUN', { energy: strength, color: sun.color.asArray().map((c) => c / strength), angle: LOOKDEV.angle, use_shadow: true }, scene);
+    // Fixed in the world, its shadow spans what casts rather than the view: orbiting draws no shadow map.
+    light.metadata = { ...light.metadata, shadowFitsCasters: true };
+    lookdevSun = { light, cubeDirection: sun.direction };
   };
   let orienting = null;
   const applyPreview = () => {
     scene.environmentTexture = texture(studioLight);
     orienting ??= scene.onBeforeCameraRenderObservable.add(orientStudio);
     scene.environmentIntensity = 1;
-    for (const light of scene.lights) if (!preview.lights.has(light)) { preview.lights.set(light, light.includeOnlyWithLayerMask); light.includeOnlyWithLayerMask = NO_MESH_LAYER; }
+    for (const light of scene.lights) if (!preview.lights.has(light) && light !== lookdevSun?.light) { preview.lights.set(light, light.includeOnlyWithLayerMask); light.includeOnlyWithLayerMask = NO_MESH_LAYER; }
+    studioSun(texture(studioLight));
   };
   const setPreview = (value) => {
     if (!!preview === value) return;
@@ -102,17 +126,19 @@ export function createWorldRenderer(scene, { asset = path => path, studioLight }
     }
     scene.environmentTexture = preview.env;
     scene.environmentIntensity = preview.intensity;
-    scene.onBeforeCameraRenderObservable.remove(orienting);
-    orienting = null;
     for (const [light, mask] of preview.lights) light.includeOnlyWithLayerMask = mask;
     preview = null;
+    lookdevSun?.light.dispose();
+    lookdevSun = null;
+    scene.onBeforeCameraRenderObservable.remove(orienting);
+    orienting = null;
   };
   return {
     hasAuthoredTexture: !!authoredTexture,
+    // The studio light's orientation for the view about to render ({ viewRotation, rotateZ }). Cheap; per view.
+    setStudio(value) { studio = value; },
     // Material Preview's lighting for the scene, while a view shows it.
     setPreview,
-    // The studio light's orientation for the view about to render ({ worldSpace, rotateZ }). Cheap; per view.
-    setStudio(value) { studio = value; },
     // Rebuilds the world's Babylon state. Solid and Wireframe views show no world background or volume, as in Blender.
     render(world) {
       const background = world?.background, volume = world?.volume;

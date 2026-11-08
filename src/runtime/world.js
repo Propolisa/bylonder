@@ -148,8 +148,8 @@ export async function createWorld({ input, engine, canvas, hooks = {}, audioCont
   world.shadows = createLightShadows(scene, { warn: (message) => report('WARNING', message) });
   // A Material Preview view (preview) draws in scene linear through its film too, over its own background (a display
   // color) where nothing is drawn, as EEVEE's film with the world's opacity 0.
-  world.beforeViewRender = ({ rendered, preview = false, background = null, compositor, frame = null, studio = { worldSpace: false, rotateZ: 0 } }) => {
-    world.shadows.setActive(rendered);
+  world.beforeViewRender = ({ rendered, preview = false, background = null, compositor, frame = null, studio = { viewRotation: false, rotateZ: 0 } }) => {
+    world.shadows.setActive(rendered || preview, world.renderSettings.state.eevee.shadowRayCount);
     world.compositor?.setViewportActive(compositor, frame);
     // A rendered view draws in scene linear and displays through its camera's final post-process (the compositor works
     // before it); a compositor graph of Babylon's own displays what its blocks draw.

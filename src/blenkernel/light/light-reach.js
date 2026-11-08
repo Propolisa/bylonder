@@ -38,6 +38,10 @@ function lightReach(light) {
     power: Math.abs(record.energy) * Math.max(...record.color) };
 }
 
+// A light that lights some mesh: not one kept off every mesh by its layer mask (the scene's lights in Material Preview,
+// world-babylon.js), which takes no place in a material.
+export const lightsMeshes = (light) => !light.includeOnlyWithLayerMask || (light.includeOnlyWithLayerMask & 0x0fffffff) !== 0;
+
 const meshSphere = (mesh) => {
   const sphere = mesh.getBoundingInfo().boundingSphere;
   return { id: mesh.uniqueId, center: [sphere.centerWorld.x, sphere.centerWorld.y, sphere.centerWorld.z], radius: sphere.radiusWorld };
@@ -50,7 +54,7 @@ export function createLightReach(scene, warn = () => {}) {
   const warned = new Set();
   return {
     update(budget) {
-      const lights = scene.lights, meshes = scene.meshes.filter((mesh) => mesh.material && mesh.getTotalVertices() > 0);
+      const lights = scene.lights.filter(lightsMeshes), meshes = scene.meshes.filter((mesh) => mesh.material && mesh.getTotalVertices() > 0);
       const key = [budget, ...lights.map((l) => `${l.uniqueId}:${l.getWorldMatrix?.().updateFlag ?? ''}:${l.intensity}`),
         ...meshes.map((m) => `${m.uniqueId}:${m.getWorldMatrix().updateFlag}`)].join();
       if (key === state) return;

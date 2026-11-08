@@ -11,7 +11,7 @@ export const renderDefaults = {
     // Post Processing > Sequencer: with strips in the edit, renders output the edit instead of the camera.
     useSequencer: true,
   },
-  eevee: { taaSamples: 16, taaRenderSamples: 16, useRaytracing: false, rayTracingMethod: 'SCREEN', screenTraceQuality: 0.25, screenTraceThickness: 0.5, fastGiMethod: 'AMBIENT_OCCLUSION', fastGiDistance: 2 },
+  eevee: { taaSamples: 16, taaRenderSamples: 16, useRaytracing: false, rayTracingMethod: 'SCREEN', screenTraceQuality: 0.25, screenTraceThickness: 0.5, fastGiMethod: 'AMBIENT_OCCLUSION', fastGiDistance: 2, shadowRayCount: 1 },
   viewSettings: { viewTransform: 'STANDARD', look: 'NONE', exposure: 0, gamma: 1 },
   displaySettings: { displayDevice: 'sRGB' },
 };

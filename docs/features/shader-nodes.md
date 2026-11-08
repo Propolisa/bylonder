@@ -2,7 +2,7 @@
 id: shader-nodes
 title: Shader Nodes
 summary: Build a material from Blender's shader nodes in the Shader Editor, here a planet's seas, coasts, land and ice caps, a cratered moon and a starry sky, with no image at all.
-expect: 76 of Blender's shader nodes run; textures, converters and inputs run Blender's GLSL and match EEVEE pixel for pixel, while shaders are Babylon's PBR lighting, close to EEVEE but not equal; lights cast hard-edged shadows (area lights none); Material Preview uses Babylon's studio light.
+expect: 76 of Blender's shader nodes run; textures, converters and inputs run Blender's GLSL and match EEVEE pixel for pixel, while shaders are Babylon's PBR lighting, close to EEVEE but not equal; lights cast shadows, a sun's softened by its Angle (area lights none); Material Preview lights the scene with Blender's studio light and the sun EEVEE takes from it.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/editors/shader_editor.html
@@ -77,7 +77,7 @@ limits:
   - A material's closures are lit as EEVEE's closure bins: the base (diffuse, Principled, refraction) once and up to two Glossy, Metallic or Anisotropic BSDFs each on its own; closures that share a bin are merged into one set of parameters (their colors, roughness, IOR and normals as they weigh), where EEVEE picks one of them per sample.
   - Glossy, Metallic and Anisotropic BSDF draw without their distribution choice, anisotropy, F82 tint or thin film.
   - Sheen draws as a diffuse closure of its color, as EEVEE does; Subsurface Scattering and Translucent draw as diffuse, without scattering or light from behind.
-  - A sun's angle and a light's soft size widen its highlights as Babylon widens them (the surface's roughness plus the radius over the distance), not by EEVEE's integration over the light's disk, and cast no soft shadows.
+  - A sun's angle and a light's soft size widen its highlights as Babylon widens them (the surface's roughness plus the radius over the distance), not by EEVEE's integration over the light's disk; a point or spot light's soft shadows add up over a still view's samples, a sun's are filtered at once.
   - A world color lights as EEVEE's world probe; an environment image lights as Babylon's environment, filtered as Babylon filters it, not as EEVEE's sphere probe.
   - Glass and Refraction BSDF refract the world only, not the objects behind them (Glass, sphere 18, mean dE 2.1, max 3).
   - Render Image takes 16 samples by default where EEVEE's render takes 64, filtered as EEVEE's film filters them (Blackman-Harris, 1.5 pixels); the film costs about 19 ms a frame on a software renderer (gallery viewport, 101 to 120 ms). The film keeps no transparency: a render's background is opaque.

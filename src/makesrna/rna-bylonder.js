@@ -639,6 +639,7 @@ const STRUCTS = {
   SceneEEVEE: {
     taa_samples: synced(sliceValue('renderSettings', 'eevee.taaSamples')),
     taa_render_samples: synced(sliceValue('renderSettings', 'eevee.taaRenderSamples')),
+    shadow_ray_count: synced(sliceValue('renderSettings', 'eevee.shadowRayCount')),
     use_raytracing: synced(sliceValue('renderSettings', 'eevee.useRaytracing')),
     ray_tracing_method: synced(sliceValue('renderSettings', 'eevee.rayTracingMethod')),
     fast_gi_method: synced(sliceValue('renderSettings', 'eevee.fastGiMethod')),
@@ -694,8 +695,10 @@ const STRUCTS = {
   View3DShading: {
     type: { get: (view) => SHADING[view.state.shading], set: (view, type) => setViewState(view, 'shading', Object.keys(SHADING).find((id) => SHADING[id] === type)) },
     show_xray: { get: (view) => !!view.state.xray, set: (view, value) => setViewState(view, 'xray', !!value) },
-    // Material Preview's studio light: with the view or fixed in the world, and its rotation.
+    // Solid shading's studio light fixed in the world; Material Preview's turning with the view (eevee_lookdev.cc,
+    // V3D_SHADING_STUDIOLIGHT_VIEW_ROTATION), and its rotation.
     use_world_space_lighting: { get: (view) => !!view.state.use_world_space_lighting, set: (view, value) => setViewState(view, 'use_world_space_lighting', !!value) },
+    use_studiolight_view_rotation: { get: (view) => !!view.state.use_studiolight_view_rotation, set: (view, value) => setViewState(view, 'use_studiolight_view_rotation', !!value) },
     studiolight_rotate_z: { get: (view) => view.state.studiolight_rotate_z ?? 0, set: (view, value) => setViewState(view, 'studiolight_rotate_z', Number(value)) },
     use_compositor: { get: (view) => view.state.use_compositor ?? 'DISABLED', set: (view, value) => view.setCompositor(value) },
   },

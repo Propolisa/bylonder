@@ -46,6 +46,8 @@ export function createViews({ engine, scene, live = () => false }) {
   });
   // Anything else resizing the engine (hardware scaling, engine.resize() in user code) re-runs the layout.
   const resized = engine.onResizeObservable.add(() => { if (!held) { layoutDirty = true; api.wake(); } });
+  // A light added outside an input (Material Preview's studio sun, once its world is read) shows.
+  const lit = scene.onNewLightAddedObservable.add(() => api.wake());
 
   // Views may share a camera (camera view, compositor backdrop), so each applies its region as it renders.
   const before = engine.onBeforeViewRenderObservable.add(engineView => {
@@ -143,6 +145,7 @@ export function createViews({ engine, scene, live = () => false }) {
       engine.onAfterViewRenderObservable.remove(after);
       engine.onBeginFrameObservable.remove(frame);
       engine.onResizeObservable.remove(resized);
+      scene.onNewLightAddedObservable.remove(lit);
       for (const { view } of [...views.values()]) api.remove(view);
       observer.disconnect();
     },

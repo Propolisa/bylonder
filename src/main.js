@@ -673,7 +673,7 @@ async function inspector() {
 }
 // 3D Viewports: the primary area and any added by splitting it (dock factory 'viewport').
 const viewportCtx = {
-  world, views, editor, rna: blenderRNA, creator, dock: viewportDock, capture, overlays, shaderCompile: createShaderCompile(scene),
+  world, views, editor, rna: blenderRNA, creator, dock: viewportDock, capture, overlays, shaderCompile: createShaderCompile(scene, { compiled: () => world.renderSettings.resetFilms() }),
   sceneCamera: authored,
   // Shading or camera view changed somewhere: effects attach to rendered views' cameras and one rendered view
   // whose Viewport Shading > Compositor is on (the last one clicked, else the first), or the Compositor's backdrop, shows

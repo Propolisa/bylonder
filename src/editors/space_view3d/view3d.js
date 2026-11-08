@@ -67,7 +67,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   if (from) { editorCamera.upVector = from.upVector.clone(); editorCamera.setTarget(from.target.clone()); editorCamera.setPosition(from.position.clone()); editorCamera.mode = from.mode; }
   // The view's own state, and its regions' as SpaceView3D's show_region_* (Blender's startup: no sidebar), and the
   // overlay's Weight Paint settings (View3DOverlay's defaults).
-  const state = { shading: 'solid', color_type: 'MATERIAL', use_compositor: 'DISABLED', use_world_space_lighting: false, studiolight_rotate_z: 0, overlays: true, show_gizmo: true, cameraView: false, show_region_header: true, show_region_tool_header: true, show_region_toolbar: true,
+  const state = { shading: 'solid', color_type: 'MATERIAL', use_compositor: 'DISABLED', use_world_space_lighting: false, use_studiolight_view_rotation: false, studiolight_rotate_z: 0, overlays: true, show_gizmo: true, cameraView: false, show_region_header: true, show_region_tool_header: true, show_region_toolbar: true,
     show_region_ui: false, weight_paint_mode_opacity: 1, show_wpaint_contours: false };
   const view = {
     id: headerId, section, canvas, editorCamera, state, active: true, wantsCompositor: false,
@@ -259,7 +259,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
       cameraBorder.classList.toggle('passepartout', frame.passepartout > 0);
       cameraBorder.classList.toggle('guides', !!state.overlays);
     }
-    world.beforeViewRender({ rendered, preview: !!film && view.preview, background, compositor: view.wantsCompositor, frame, studio: { worldSpace: state.use_world_space_lighting, rotateZ: state.studiolight_rotate_z } });
+    world.beforeViewRender({ rendered, preview: !!film && view.preview, background, compositor: view.wantsCompositor, frame, studio: { viewRotation: state.use_studiolight_view_rotation, rotateZ: state.studiolight_rotate_z } });
     // Rendered and Material Preview draw the overlays after the film (and the compositor), as Blender does; a compositor graph of Babylon's own
     // that draws the scene has no pass for them.
     ctx.overlays.setEnabled(state.overlays && (!rendered || !!film), state);
@@ -277,6 +277,8 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     toolOverlay.tick();
     if (!state.cameraView && state.overlays) drawGizmo();
     const queued = view.rendered || view.preview ? ctx.shaderCompile.queued : 0, text = queued ? `Compiling shaders (${queued} remaining)` : '';
+    // The view draws until what it waits on has compiled.
+    if (queued) views.wake();
     if (info.textContent !== text) Object.assign(info, { textContent: text, hidden: !text });
   };
   view.setDetail = text => { if (detail.textContent !== text) detail.textContent = text; };

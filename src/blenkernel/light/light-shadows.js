@@ -2,18 +2,20 @@
 // sun's cascaded as EEVEE's sun shadow is (directional clipmaps), and every object whose Visibility > Shadow is on casts
 // into it. Materials receive them through Babylon's own light code. Shadow maps are drawn for the views that show the
 // scene's lights (Rendered shading, Render Image); other views draw them empty, which changes no material.
-import { CascadedShadowGenerator, Matrix, RenderTargetTexture, ShaderStore, ShadowGenerator, Texture, Vector3 } from '@babylonjs/core';
+import { CascadedShadowGenerator, Constants, LinesMesh, Matrix, RenderTargetTexture, ShaderStore, ShadowGenerator, Texture, Vector3 } from '@babylonjs/core';
 import { shadowMapVertexShader } from '@babylonjs/core/Shaders/shadowMap.vertex.js';
 import { shadowMapPixelShader } from '@babylonjs/core/Shaders/shadowMap.fragment.js';
 import { influenceRadius, isBlenderLight, lightRecord } from './light-home.js';
 import { areaLightShadows } from './area-light.js';
-import { createLightReach } from './light-reach.js';
+import { createLightReach, lightsMeshes } from './light-reach.js';
 import { filmSample } from '../../render/film.js';
 import { halton } from '../../render/sampling.js';
 import { evaluatedMatrix, setEvaluatedMatrix } from '../../runtime/object-transform.js';
 import { setRenderList } from '../../draw/render-list.js';
 
 const MAP_SIZE = 2048;
+// A soft sun's filter samples by the scene's shadow Rays: 1, 2, 3 or more.
+const SUN_QUALITY = [ShadowGenerator.QUALITY_LOW, ShadowGenerator.QUALITY_MEDIUM, ShadowGenerator.QUALITY_HIGH];
 const CASTS = ['SUN', 'SPOT', 'POINT'];
 // How far, in meters, a caster's depth is pushed back from the light: below a brick's bump, past a cube map texel.
 const DEPTH_BIAS = 0.005;
@@ -37,8 +39,9 @@ export function shadowJitter(index, radius) {
 
 // A mesh of the scene's objects (not an overlay or a helper), and whether it casts.
 export const shadedObject = (mesh) => !mesh.name.startsWith('__') && !mesh.metadata?.overlay && mesh.getTotalVertices() > 0;
-// A material without a surface (a Volume alone) casts no surface shadow.
-const casts = (mesh) => shadedObject(mesh) && mesh.metadata?.wbVisibleShadow !== false && mesh.isEnabled() && mesh.isVisible && !mesh.material?.blenderNoSurface;
+// A material without a surface (a Volume alone) casts no surface shadow; a light that lights no mesh draws no shadow.
+// Lines (loose edges) have no surface to cast with.
+const casts = (mesh) => shadedObject(mesh) && !(mesh instanceof LinesMesh) && mesh.metadata?.wbVisibleShadow !== false && mesh.isEnabled() && mesh.isVisible && !mesh.material?.blenderNoSurface;
 
 // Babylon's normal bias moves every caster along -N, so a face turned away from the light moves toward it and shadows
 // itself, though EEVEE lights it from behind (its offset is the receiver's, along the normal facing the viewer). Babylon's
@@ -49,11 +52,18 @@ const SHADOW_MAP = 'blenderShadowMap';
 ShaderStore.ShadersStore[`${SHADOW_MAP}VertexShader`] ??= shadowMapVertexShader.shader.replace('#include<shadowMapVertexNormalBias>', `#include<shadowMapVertexNormalBias>(${LIT_SIDE_NORMAL_BIAS})`);
 ShaderStore.ShadersStore[`${SHADOW_MAP}PixelShader`] ??= shadowMapPixelShader.shader;
 
+// A sun whose map spans its casters, not the view (light.metadata.shadowFitsCasters: Material Preview's studio sun), so
+// that moving the view draws no map: one map, as large as the cascades together.
+const fitsCasters = (light) => !!light.metadata?.shadowFitsCasters;
+const FITTED_MAP_SIZE = 4096;
+
 function createGenerator(light, type) {
   // A sun's map spans the view's frustum in cascades, fine near the eye, as EEVEE's clipmaps are: one map over the
   // whole scene's bounds is too coarse for what a large scene (a sky dome, a ground plane) holds.
-  const generator = type === 'SUN' && CascadedShadowGenerator.IsSupported ? Object.assign(new CascadedShadowGenerator(MAP_SIZE, light), { numCascades: 4, lambda: 0.9, cascadeBlendPercentage: 0.05 })
-    : new ShadowGenerator(MAP_SIZE, light);
+  const cascaded = type === 'SUN' && !fitsCasters(light) && CascadedShadowGenerator.IsSupported;
+  if (type === 'SUN' && !cascaded) Object.assign(light, { autoUpdateExtends: true, autoCalcShadowZBounds: true });
+  const generator = cascaded ? Object.assign(new CascadedShadowGenerator(MAP_SIZE, light), { numCascades: 4, lambda: 0.9, cascadeBlendPercentage: 0.05 })
+    : new ShadowGenerator(type === 'SUN' ? FITTED_MAP_SIZE : MAP_SIZE, light);
   // EEVEE filters its shadows by a pixel or two (shadow_filter_radius); a cube map (a point or area light's) takes
   // Poisson sampling.
   // A cube map's depths are compared point by point, as EEVEE's shadow maps are: Babylon samples it bilinearly, which
@@ -62,9 +72,30 @@ function createGenerator(light, type) {
     generator.usePoissonSampling = true;
     generator.getShadowMap().updateSamplingMode(Texture.NEAREST_SAMPLINGMODE);
   }
+  else if (type === 'SUN') softSun(light, generator);
   else Object.assign(generator, { usePercentageCloserFiltering: true, filteringQuality: ShadowGenerator.QUALITY_HIGH });
   Object.assign(generator, { bias: 0.002, normalBias: 0.02, customShaderOptions: { shaderName: SHADOW_MAP } });
   return generator;
+}
+
+// EEVEE's sun casts the soft shadow of its disk (Angle): Babylon's contact hardening filter (PCSS), whose penumbra widens
+// by the sun's radius (light.radius, at unit distance) per meter from the caster. Babylon measures it in the first
+// cascade's (or the map's) texels per depth: refitted each time the map is drawn. Its samples follow the scene's shadow
+// Rays (setActive).
+function softSun(light, generator) {
+  Object.assign(generator, { useContactHardeningShadow: true, penumbraDarkness: 0 });
+  const halfZ = light.getScene().getEngine().isNDCHalfZRange ? 1 : 2;
+  const extent = () => {
+    if (generator instanceof CascadedShadowGenerator) {
+      const m = generator.getCascadeProjectionMatrix(0).m;
+      return { width: 2 / Math.abs(m[0]), depth: halfZ / Math.abs(m[10]) };
+    }
+    return { width: (light.orthoRight - light.orthoLeft) * (1 + 2 * light.shadowOrthoScale), depth: light.shadowMaxZ - light.shadowMinZ };
+  };
+  generator.getShadowMap().onAfterRenderObservable.add(() => {
+    const { width, depth } = extent();
+    if (width > 0 && depth > 0) generator.contactHardeningLightSizeUVRatio = (light.radius * depth) / width;
+  });
 }
 
 // Babylon's depth of a local light's shadow spans the camera's clip range unless the light has its own, and its bias is
@@ -104,18 +135,30 @@ function jitterPerSample(scene) {
   };
 }
 
-// What a point, spot or area light's map shows, which no camera changes: the light where it draws (a film sample's
-// jitter included), its casters and where they are. A caster that deforms on its own (bones, shape keys) changes always.
+// What a light's map shows, which no camera changes: the light where it draws (a film sample's jitter included), its
+// casters, where they are and how their bones and shape keys pose them; a baked vertex animation changes always.
 const ids = new WeakMap();
 let nextId = 0;
 const idOf = (object) => (object ? ids.get(object) ?? ids.set(object, ++nextId).get(object) : 0);
+// A skeleton's pose: its bones' world matrices' update flags, which Babylon raises whenever one changes.
+const poseOf = (skeleton) => skeleton?.bones.reduce((sum, bone) => sum + bone.getWorldMatrix().updateFlag, 0);
 function shadowState(light, casters, sample) {
   const parts = [evaluatedMatrix(light)?.m.join() ?? light.position.asArray().join(), light.direction?.asArray().join(), light.shadowMinZ, light.shadowMaxZ, sample];
   for (const mesh of casters) {
-    if (mesh.skeleton || mesh.morphTargetManager || mesh.bakedVertexAnimationManager) return ++nextId;
-    parts.push(mesh.uniqueId, mesh.getWorldMatrix().updateFlag, idOf(mesh.getVertexBuffer('position')), mesh.thinInstanceCount, mesh.metadata?.instancesVersion);
+    if (mesh.bakedVertexAnimationManager) return ++nextId;
+    parts.push(mesh.uniqueId, mesh.getWorldMatrix().updateFlag, idOf(mesh.getVertexBuffer('position')), mesh.thinInstanceCount, mesh.metadata?.instancesVersion,
+      poseOf(mesh.skeleton), mesh.morphTargetManager?.influences.join(' '));
   }
   return parts.join();
+}
+
+// What a sun's cascades are fitted to: the camera's view, its film's jitter left out, and the casters' bounds.
+function cascadeState(scene, generator) {
+  const camera = scene.activeCamera, engine = scene.getEngine();
+  if (!camera || !(generator instanceof CascadedShadowGenerator)) return '';
+  const { fov, minZ, maxZ, mode, orthoLeft, orthoRight, orthoTop, orthoBottom, viewport } = camera, box = generator.shadowCastersBoundingInfo.boundingBox;
+  return [camera.uniqueId, camera.getViewMatrix().m.join(), fov, minZ, maxZ, mode, orthoLeft, orthoRight, orthoTop, orthoBottom, viewport.width, viewport.height,
+    engine.getRenderWidth(), engine.getRenderHeight(), box.minimumWorld.asArray().join(), box.maximumWorld.asArray().join()].join();
 }
 
 // warn(message): a Warning report, for a mesh more lights reach than its material takes (light-reach.js).
@@ -153,28 +196,37 @@ export function createLightShadows(scene, { warn } = {}) {
     for (const [light, { generator, type }] of generators) if (type !== 'SUN') fitRange(light, generator);
     for (const mesh of scene.meshes) if (shadedObject(mesh)) mesh.receiveShadows = true;
   };
-  // After the film chose its sample (onBeforeCameraRender), before the camera draws its render targets.
+  // After the film chose its sample (onBeforeCameraRender), before the camera draws its render targets. A sun takes no
+  // sample's offset; its cascades follow the camera's view, not the film's jitter.
   const refresh = scene.onBeforeActiveMeshesEvaluationObservable.add(() => {
     if (!drawn) return;
     for (const [light, entry] of generators) {
-      if (entry.type === 'SUN') continue;
-      const map = entry.generator.getShadowMap(), state = `${evaluated}:${shadowState(light, map.renderList, filmSample(scene))}`;
+      const map = entry.generator.getShadowMap(), sun = entry.type === 'SUN';
+      // A map without casters is drawn empty once.
+      const state = !map.renderList?.length ? 'empty' : `${evaluated}:${cascadeState(scene, entry.generator)}:${shadowState(light, map.renderList, sun ? 0 : filmSample(scene))}`;
       if (state !== entry.state) { entry.state = state; map.resetRefreshCounter(); }
     }
   });
   return {
     // Per view, before it renders: whether it shows the scene's lights.
     // Views that show no lights draw the maps empty, once (Babylon's render-once refresh rate): nothing reads them there.
-    // A sun's cascades follow the view, drawn every frame; other lights' maps only when what they show changed.
-    setActive(value) {
+    // Maps draw only when what they show changed: a sun's cascades also when the view moved.
+    setActive(value, rays = 1) {
       drawn = value;
       sync();
+      let relit = false;
       const casters = value ? scene.meshes.filter(casts) : [];
-      for (const { generator, type } of generators.values()) {
-        const map = generator.getShadowMap(), rate = value && type === 'SUN' ? 1 : RenderTargetTexture.REFRESHRATE_RENDER_ONCE;
-        if (setRenderList(map, casters)) map.resetRefreshCounter();
+      const quality = SUN_QUALITY[Math.min(rays, SUN_QUALITY.length) - 1] ?? SUN_QUALITY[0];
+      for (const [light, { generator }] of generators) {
+        if (generator.useContactHardeningShadow && generator.filteringQuality !== quality) generator.filteringQuality = quality;
+        const map = generator.getShadowMap(), shows = value && lightsMeshes(light), rate = RenderTargetTexture.REFRESHRATE_RENDER_ONCE;
+        const had = !!map.renderList?.length;
+        if (setRenderList(map, shows ? casters : [])) map.resetRefreshCounter();
+        // Babylon's materials take a light's shadow only while its map holds a caster: they take it again when that changes.
+        if (had !== !!map.renderList?.length) relit = true;
         if (map.refreshRate !== rate) map.refreshRate = rate;
       }
+      if (relit) scene.markAllMaterialsAsDirty(Constants.MATERIAL_LightDirtyFlag);
     },
     // Main evaluated something (main-view.js): what the maps show may have changed in ways no state here sees.
     changed() { evaluated++; },

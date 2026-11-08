@@ -50,7 +50,7 @@ tests:
   - tests/view-transform.test.js
   - tests/world-nodes-wasm.test.js
 limits:
-  - Shadows are filtered by a fixed amount, as EEVEE's filter radius; a point or spot light's Radius softens its shadows as the samples of a render or a still Rendered view add up (a moving view shows them hard), a sun's Angle does not soften them yet.
+  - Shadows are filtered by a fixed amount, as EEVEE's filter radius; a point or spot light's Radius softens its shadows as the samples of a render or a still Rendered view add up (a moving view shows them hard), a sun's Angle softens its shadow with distance from the caster (Babylon's contact hardening filter, its samples set by Shadows > Rays), as a filtered estimate rather than EEVEE's traced rays.
   - Reflections and refraction show the world's color only; EEVEE's light probes (sphere, plane, volume) and screen space reflections are not drawn, so glass and metal do not reflect the room.
   - Screen-traced reflections (Raytracing with the Screen-Trace method) ignore a Principled BSDF's Specular IOR Level: a surface at Specular 0 still reflects as a plain dielectric does.
   - A world's node tree draws as the background and lights the scene through one world probe baked when the world changes, clamped at the world's Sun Threshold as EEVEE's, without the sun light EEVEE makes of what it clamps; a Sky Texture's Preetham and Hosek / Wilkie models, the world's Volume and its Background's blur are not drawn yet, and the tree's values are not followed while it is edited.

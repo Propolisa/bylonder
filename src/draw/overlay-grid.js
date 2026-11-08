@@ -8,6 +8,7 @@ import { VertexBuffer } from '@babylonjs/core/Buffers/buffer.js';
 import { ShaderMaterial } from '@babylonjs/core/Materials/shaderMaterial.js';
 import { Material } from '@babylonjs/core/Materials/material.js';
 import { Color4 } from '@babylonjs/core/Maths/math.color.js';
+import { Constants } from '@babylonjs/core/Engines/constants.js';
 import { view_3d as theme, user_interface, colorShade, colorBlendShade } from '../editors/interface/userdef-default-theme.js';
 import { drawView, DRAW_VIEW_GLSL } from './draw-view.js';
 
@@ -210,6 +211,9 @@ export function createGridOverlay(scene) {
   });
   material.backFaceCulling = false;
   material.disableDepthWrite = true;
+  // Blender's GPU_BLEND_ALPHA: alpha composited as the color is, so the iterations drawn over each other leave the
+  // overlay target (Material Preview, Rendered) the alpha they cover, not their sum, which darkens what lies under them.
+  material.alphaMode = Constants.ALPHA_LAYER_ACCUMULATE;
   material.setArray4('steps', [...STEPS]);
   for (const [name, c] of Object.entries(colors)) material.setColor4(name, new Color4(...c));
   const part = (name, count, flags) => {
