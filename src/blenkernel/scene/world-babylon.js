@@ -1,6 +1,6 @@
 import { Color3, Color4, Constants, Vector3, CubeMapToSphericalPolynomialTools, CubeTexture, EXRCubeTexture, HDRCubeTexture, HDRFiltering, Matrix, MeshBuilder, BaseTexture, Texture, ReflectionProbe, RenderTargetTexture, Scene } from '@babylonjs/core';
 import { RAY_TYPE, setRayType } from '../../nodes/blender/shader-nodes.js';
-import { createLight } from '../light/light-home.js';
+import { createLight, deriveBabylonLight, lightRecord } from '../light/light-home.js';
 import { StudioLightTexture, firstBand } from './world-sun.js';
 
 // Babylon adapter for a World datablock. Babylon has no World object, so a world is pushed into
@@ -98,16 +98,25 @@ export function createWorldRenderer(scene, { asset = path => path, studioLight }
     if (lookdevSun) Vector3.TransformNormalToRef(lookdevSun.cubeDirection, studioRotation.clone().invert(), lookdevSun.light.direction).scaleInPlace(-1);
   };
   let lookdevSun = null, firstBandOnly = false;
+  // The sun is made dark at the switch, before the studio light's image has loaded, so the materials' first compile
+  // already lights them with it (a light's defines); its image then gives it its strength, color and direction, which
+  // are uniforms. An image without a sun takes it away again.
+  const makeLookdevSun = () => {
+    const light = createLight('__lookdevSun', 'SUN', { energy: 0, angle: LOOKDEV.angle, use_shadow: true }, scene);
+    // Fixed in the world, its shadow spans what casts rather than the view: orbiting draws no shadow map.
+    light.metadata = { ...light.metadata, shadowFitsCasters: true };
+    lookdevSun = { light, cubeDirection: new Vector3(0, 1, 0) };
+  };
   const studioSun = async (studio) => {
     if (!studio.isReady()) await new Promise((resolve) => studio.onLoadObservable.addOnce(resolve));
     if (!firstBandOnly && studio.sphericalPolynomial) { studio.sphericalPolynomial = firstBand(studio.sphericalPolynomial); firstBandOnly = true; }
     const { sun } = studio;
-    if (!sun || !preview || lookdevSun) return;
+    if (!preview || !lookdevSun) return;
+    if (!sun) { lookdevSun.light.dispose(); lookdevSun = null; return; }
     const strength = Math.max(sun.color.r, sun.color.g, sun.color.b);
-    const light = createLight('__lookdevSun', 'SUN', { energy: strength, color: sun.color.asArray().map((c) => c / strength), angle: LOOKDEV.angle, use_shadow: true }, scene);
-    // Fixed in the world, its shadow spans what casts rather than the view: orbiting draws no shadow map.
-    light.metadata = { ...light.metadata, shadowFitsCasters: true };
-    lookdevSun = { light, cubeDirection: sun.direction };
+    Object.assign(lightRecord(lookdevSun.light), { energy: strength, color: sun.color.asArray().map((c) => c / strength) });
+    deriveBabylonLight(lookdevSun.light);
+    lookdevSun.cubeDirection = sun.direction;
   };
   let orienting = null;
   const applyPreview = () => {
@@ -115,6 +124,8 @@ export function createWorldRenderer(scene, { asset = path => path, studioLight }
     orienting ??= scene.onBeforeCameraRenderObservable.add(orientStudio);
     scene.environmentIntensity = 1;
     for (const light of scene.lights) if (!preview.lights.has(light) && light !== lookdevSun?.light) { preview.lights.set(light, light.includeOnlyWithLayerMask); light.includeOnlyWithLayerMask = NO_MESH_LAYER; }
+    if (lookdevSun) lookdevSun.light.setEnabled(true);
+    else makeLookdevSun();
     studioSun(texture(studioLight));
   };
   const setPreview = (value) => {
@@ -128,8 +139,8 @@ export function createWorldRenderer(scene, { asset = path => path, studioLight }
     scene.environmentIntensity = preview.intensity;
     for (const [light, mask] of preview.lights) light.includeOnlyWithLayerMask = mask;
     preview = null;
-    lookdevSun?.light.dispose();
-    lookdevSun = null;
+    // Kept, off: its shadow generator's depth programs stay valid for the materials that drew with it.
+    lookdevSun?.light.setEnabled(false);
     scene.onBeforeCameraRenderObservable.remove(orienting);
     orienting = null;
   };
