@@ -70,7 +70,7 @@
                     "patches": ["cpython-pthread-stubs-cxx.patch"],
                     "build": {"script": "deps/cpython.sh", "uses": ["zlib", "expat"], "archives": ["libpython3.13.a",
                               "Modules/_decimal/libmpdec/libmpdec.a", "Modules/_hacl/libHacl_Hash_SHA2.a"]}},
-        "numpy": {"url": "https://github.com/numpy/numpy/releases/download/v2.3.4/numpy-2.3.4.tar.gz", "tag": "2.3.4",
+        "numpy": {"url": "https://files.pythonhosted.org/packages/source/n/numpy/numpy-2.3.4.tar.gz", "tag": "2.3.4",
                   "sha256": "a7d018bfedb375a8d979ac758b120ba846a7fe764911a64465fd87b8729f4a6a", "private": true,
                   "patches": ["numpy-wasm.patch"],
                   "build": {"script": "deps/numpy.sh", "uses": ["cpython"], "inputs": ["wasm_weaken.py", "wasm/include/shared_mutex"],

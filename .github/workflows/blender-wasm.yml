@@ -71,6 +71,11 @@ jobs:
         with:
           path: work/blender
           key: blender-source-${{ hashFiles('tools/blender-port/manifest.json', 'tools/blender-port/wasm/patches/*.patch') }}
+      # The dependencies the link builds (CPython, numpy, FFTW) take minutes; each is rebuilt when its script or inputs change.
+      - uses: actions/cache@v4
+        with:
+          path: work/wasm-build/deps
+          key: blender-wasm-deps-${{ hashFiles('tools/blender-port/manifest.json', 'tools/blender-port/deps/**', 'tools/blender-port/wasm/patches/deps/*') }}
       # A failed LFS pull leaves a clone the script would not pull again, so a retry starts from no clone.
       - name: Configure Blender
         run: for i in 1 2 3; do bash tools/blender-port/configure_host.sh work && exit 0; rm -rf work/blender; sleep 60; done; exit 1
