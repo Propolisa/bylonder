@@ -35,6 +35,24 @@ const { width, height, cases } = JSON.parse(readFileSync(new URL('./fixtures/ble
 const SPOTS = ['12,10', '30,20', '40,6'];
 const image = Array.from({ length: width * height }, (_, i) => [i % width, Math.floor(i / width)]).flatMap(([x, y]) =>
   (SPOTS.includes(`${x},${y}`) ? [8, 6, 4, 1] : [x / width, y / height, 0.5 + 0.25 * ((x + y) % 2), 1]));
+// The means of the quadrants Kuwahara Classic could pick at a pixel: those whose variance is the least to within float32
+// rounding (its variance is E[x^2] - E[x]^2), where a GPU and Blender may pick differently and both are right.
+function kuwaharaChoices(x, y, radius) {
+  const quadrants = [0, 1, 2, 3].map((q) => {
+    const sx = (q % 2) * 2 - 1, sy = Math.floor(q / 2) * 2 - 1, sum = [0, 0, 0, 0], squares = [0, 0, 0, 0];
+    let count = 0;
+    for (let j = 0; j <= radius; j++) for (let i = 0; i <= radius; i++) {
+      const X = x + i * sx, Y = y + j * sy;
+      if (X < 0 || Y < 0 || X >= width || Y >= height) continue;
+      count++;
+      for (let c = 0; c < 4; c++) { const v = image[(Y * width + X) * 4 + c]; sum[c] += v; squares[c] += v * v; }
+    }
+    const mean = sum.map((s) => s / count);
+    return { mean, variance: [0, 1, 2].reduce((v, c) => v + squares[c] / count - mean[c] ** 2, 0) };
+  });
+  const least = Math.min(...quadrants.map((q) => q.variance));
+  return quadrants.filter((q) => q.variance - least < 1e-4).map((q) => q.mean);
+}
 const large = ([w, h]) => Array.from({ length: w * h }, (_, i) => [i % w, Math.floor(i / w)]).flatMap(([x, y]) =>
   (Math.abs(x - 160) < 10 && Math.abs(y - 90) < 10 ? [8, 6, 4, 1] : [0.02, 0.02, 0.02, 1]));
 
@@ -170,7 +188,16 @@ try {
     // A float image (a mask) as the Group Output's color, as Blender converts it.
     const channels = formatChannels(results[i].channels ?? 'RGBA'), w = (size ?? [width])[0];
     const texel = (x, y) => { const at = (y * w + x) * 4, px = results[i].pixels.slice(at, at + 4); return channels === 1 ? [px[0], px[0], px[0], 1] : px; };
-    const got = size ? probes.flatMap(([x, y]) => texel(x, y)) : Array.from({ length: width * height }, (_, k) => texel(k % width, Math.floor(k / width))).flat();
+    const got = size ? probes.flatMap(([x, y]) => texel(x, y)) : Array.from({ length: width * height }, (_, k) => {
+      const x = k % width, y = Math.floor(k / width), px = texel(x, y), blender = result.slice(k * 4, k * 4 + 4);
+      const close = (a) => a.every((v, c) => Math.abs(v - px[c]) < 2e-2);
+      // A tie Kuwahara Classic broke otherwise than Blender, with Blender's pick among the tied: Blender's value.
+      if (label === 'CompositorNodeKuwahara Classic' && !close(blender)) {
+        const choices = kuwaharaChoices(x, y, inputs.Size);
+        if (choices.some(close) && choices.some((m) => m.every((v, c) => Math.abs(v - blender[c]) < 2e-2))) return blender;
+      }
+      return px;
+    }).flat();
     // Blender's GPU filters textures in hardware, with coarse weights; the replay's border sampling (WebGL 2 has no
     // clamp to border) filters exactly, as Blender's CPU path: Lens Distortion differs by up to 1% beside bright spots.
     const worst = result.reduce((m, v, k) => Math.max(m, Math.abs(v - got[k]) / Math.max(1, Math.abs(v))), 0);
