@@ -1042,7 +1042,13 @@ const blenderShader = (Base) => class extends Base {
     if (state.target !== Targets.Fragment) return this;
     recordBuild(state, this, () => this._writeOutputs(state, this._compile(state)));
     if (!state.sharedData.bindableBlocks.includes(this)) state.sharedData.forcedBindableBlocks.push(this);
+    // Babylon's material is ready when its blocks are: this one when its images are loaded (a world's probe bakes them).
+    if (this._textures?.length && !state.sharedData.blockingBlocks.includes(this)) state.sharedData.blockingBlocks.push(this);
     return this;
+  }
+
+  isReady() {
+    return (this._textures ?? []).every(([, texture]) => typeof texture === 'function' || texture.isReady());
   }
 
   bind(effect, nodeMaterial, mesh) {

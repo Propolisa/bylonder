@@ -194,6 +194,8 @@ function worldNodesView(scene, onTexture) {
     const probe = newProbe(scene), drawn = probe.cubeTexture;
     probe.renderList.push(box);
     probe.position.copyFrom(scene.activeCamera?.globalPosition ?? probe.position);
+    while (!readyInPasses(drawn, box)) await new Promise((resolve) => setTimeout(resolve, 16));
+    if (id !== bakes || !box) { probe.dispose(); return; }
     const render = (type) => { setRayType(scene, type); try { drawn.render(); } finally { setRayType(scene, RAY_TYPE.CAMERA); } };
     const lightPath = material.attachedBlocks.some((block) => block.idname === 'ShaderNodeLightPath');
     render(lightPath ? RAY_TYPE.DIFFUSE : RAY_TYPE.GLOSSY);
@@ -232,6 +234,17 @@ function worldNodesView(scene, onTexture) {
     },
     dispose() { box?.dispose(false, false); texture.dispose(); if (baking) scene.onBeforeRenderObservable.remove(baking); },
   };
+}
+// Whether a render target's passes have the shaders to draw `mesh`: a probe draws in render passes of its own, whose
+// shaders compile apart from the views'; drawn before they are ready, it holds only its clear color.
+export function readyInPasses(target, mesh) {
+  const engine = mesh.getEngine(), current = engine.currentRenderPassId;
+  try {
+    return target.renderPassIds.every((pass) => {
+      engine.currentRenderPassId = pass;
+      return mesh.subMeshes.every((subMesh) => mesh.material.isReadyForSubMesh(mesh, subMesh));
+    });
+  } finally { engine.currentRenderPassId = current; }
 }
 const newProbe = (scene) => {
   const probe = new ReflectionProbe('__worldNodesProbe', 256, scene, true, true, true);

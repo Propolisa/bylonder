@@ -170,6 +170,15 @@ assert.deepEqual((await lobes(['ShaderNodeBsdfDiffuse', 'ShaderNodeBsdfDiffuse']
   assert.match(lit._fragmentCompilationState._builtCompilationString, /fresnel=reflectance0[*]info[.]areaLightFresnel[.]x/);
 }
 
+// A node's material is ready once its images are loaded, so a world's probe never bakes an image still loading.
+{
+  const node = new shaderNodeClasses.ShaderNodeTexImage('Image');
+  node._textures = [['bl_image', { isReady: () => false }]];
+  assert.equal(node.isReady(), false, 'not ready while its image loads');
+  node._textures = [['bl_image', { isReady: () => true }], ['bl_depth', () => null]];
+  assert.equal(node.isReady(), true);
+}
+
 // Data linked to a shader input is an Emission of it, and a shader linked to a data input is dropped, as Blender's
 // shader tree makes them (ntree_shader_implicit_closure_cast).
 const implicit = nodeMaterialFromTree('Implicit', scene, { nodes: [{ idname: 'ShaderNodeRGB', name: 'RGB' }, { idname: 'ShaderNodeBsdfDiffuse', name: 'Diffuse' },
