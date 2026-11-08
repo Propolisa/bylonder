@@ -680,6 +680,7 @@ const STRUCTS = {
     // Material Preview's studio light: with the view or fixed in the world, and its rotation.
     use_world_space_lighting: { get: (view) => !!view.state.use_world_space_lighting, set: (view, value) => setViewState(view, 'use_world_space_lighting', !!value) },
     studiolight_rotate_z: { get: (view) => view.state.studiolight_rotate_z ?? 0, set: (view, value) => setViewState(view, 'studiolight_rotate_z', Number(value)) },
+    use_compositor: { get: (view) => view.state.use_compositor ?? 'DISABLED', set: (view, value) => view.setCompositor(value) },
   },
   View3DOverlay: { show_overlays: { get: (view) => view.state.overlays, set: (view, value) => setViewState(view, 'overlays', !!value) } },
   RegionView3D: {

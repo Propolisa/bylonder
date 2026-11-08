@@ -67,7 +67,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   if (from) { editorCamera.upVector = from.upVector.clone(); editorCamera.setTarget(from.target.clone()); editorCamera.setPosition(from.position.clone()); editorCamera.mode = from.mode; }
   // The view's own state, and its regions' as SpaceView3D's show_region_* (Blender's startup: no sidebar), and the
   // overlay's Weight Paint settings (View3DOverlay's defaults).
-  const state = { shading: 'solid', color_type: 'MATERIAL', use_world_space_lighting: false, studiolight_rotate_z: 0, overlays: true, show_gizmo: true, cameraView: false, show_region_header: true, show_region_tool_header: true, show_region_toolbar: true,
+  const state = { shading: 'solid', color_type: 'MATERIAL', use_compositor: 'DISABLED', use_world_space_lighting: false, studiolight_rotate_z: 0, overlays: true, show_gizmo: true, cameraView: false, show_region_header: true, show_region_tool_header: true, show_region_toolbar: true,
     show_region_ui: false, weight_paint_mode_opacity: 1, show_wpaint_contours: false };
   const view = {
     id: headerId, section, canvas, editorCamera, state, active: true, wantsCompositor: false,
@@ -76,6 +76,8 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     get rendered() { return state.shading === 'rendered'; },
     // Material Preview: the scene's materials in studio lighting.
     get preview() { return state.shading === 'material'; },
+    // Viewport Shading > Compositor (View3DShading.use_compositor): whether Rendered shading shows the composite.
+    get composites() { return state.use_compositor === 'ALWAYS' || (state.use_compositor === 'CAMERA' && state.cameraView); },
   };
 
   // Overlays: view name, navigation gizmo and buttons.
@@ -114,6 +116,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   // Blender's operators that leave the view looking through the camera (Align Active Camera to View).
   view.enterCameraView = () => { if (!state.cameraView) toggleCameraView(); };
   view.setShading = id => { state.shading = id; sync(); ctx.shadingChanged(); };
+  view.setCompositor = (value) => { state.use_compositor = value; ctx.shadingChanged(); };
   // The scene camera changed while this view looks through it.
   view.sceneCameraChanged = (next, previous) => { if (!state.cameraView) return; previous?.detachControl(); if (takesInput(next)) next.attachControl(canvas, true); sync(); ctx.shadingChanged(); };
 

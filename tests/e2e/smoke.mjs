@@ -804,6 +804,23 @@ const checks = {
     assert.ok(solid.color.every((c, i) => Math.abs(c - rendered.color[i]) <= 24), `outline ${rendered.color} in Rendered, ${solid.color} in Solid`);
   },
 
+  // The scene's compositor shows in Rendered shading only as Viewport Shading > Compositor says
+  // (View3DShading.use_compositor, Disabled by default as in Blender): off, the view draws its overlays as any Rendered
+  // view does.
+  "Rendered shading composites only when the view's Compositor is on": { open: { example: null, node: "sphere" }, async run() {
+    await app.bylonder((b) => b.world.compositor.setEnabled(true));
+    const view = (use_compositor) => app.bylonder(async (b, use_compositor) => {
+      const v = b.views.input;
+      v.setShading("rendered");
+      v.setCompositor(use_compositor);
+      await new Promise((done) => b.world.scene.onAfterRenderObservable.addOnce(done));
+      return { composites: !!b.world.scene.frameGraph, grid: b.world.scene.meshes.some((m) => m.metadata?.gridIter !== undefined && m.isEnabled()) };
+    }, use_compositor);
+    assert.deepEqual(await view("DISABLED"), { composites: false, grid: true });
+    assert.deepEqual(await view("ALWAYS"), { composites: true, grid: false });
+    await view("DISABLED");
+  } },
+
   // The floor grid fades through geometry on its plane, as Blender's four offset iterations draw it: a plane at z 0 keeps
   // the X axis showing over it.
   async "the floor grid's axes show over a plane on the floor"() {

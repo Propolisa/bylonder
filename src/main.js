@@ -671,11 +671,12 @@ const viewportCtx = {
   world, views, editor, rna: blenderRNA, creator, dock: viewportDock, capture, overlays, shaderCompile: createShaderCompile(scene),
   sceneCamera: authored,
   // Shading or camera view changed somewhere: effects attach to rendered views' cameras and one rendered view
-  // (the last one clicked, else the first) shows the compositor.
+  // whose Viewport Shading > Compositor is on (the last one clicked, else the first), or the Compositor's backdrop, shows
+  // the compositor.
   shadingChanged() {
-    const all = views.all, rendered = all.filter((v) => v.rendered && v.active !== false);
+    const all = views.all, rendered = all.filter((v) => v.rendered && v.active !== false), compositing = rendered.filter((v) => v.composites !== false);
     const preferred = backdrop.shown ? backdrop.view : views.focused;
-    const compositorView = world.compositor.enabled ? (rendered.includes(preferred) ? preferred : rendered[0]) || null : null;
+    const compositorView = world.compositor.enabled ? (compositing.includes(preferred) ? preferred : compositing[0]) || null : null;
     for (const v of all) v.wantsCompositor = v === compositorView;
     world.setViewShading({ renderedCameras: rendered.map((v) => v.camera), compositorCamera: compositorView?.camera, preview: all.some((v) => v.preview && v.active !== false) });
     const cameraView = !!views.input?.state.cameraView;

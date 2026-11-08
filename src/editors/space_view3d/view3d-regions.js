@@ -29,6 +29,7 @@ const SPACE_STATE = [
   ['overlays', ['overlay', 'show_overlays']],
   ['xray', ['shading', 'show_xray'], (value) => !!value],
   ['color_type', ['shading', 'color_type']],
+  ['use_compositor', ['shading', 'use_compositor']],
   ['shading', ['shading', 'type'], (value) => SHADING[value], (type) => Object.keys(SHADING).find((id) => SHADING[id] === type)],
   ['weight_paint_mode_opacity', ['overlay', 'weight_paint_mode_opacity']],
   ['show_wpaint_contours', ['overlay', 'show_wpaint_contours']],
@@ -105,7 +106,7 @@ export function createRegions({ view, area, scene, legacy, context, ui, menu, te
     const data = space(false);
     for (const [key, path, , back = (v) => v] of SPACE_STATE) {
       const value = back(path.reduce((o, name) => o[name], data));
-      if (value !== view.state[key]) (key === 'shading' ? view.setShading(value) : (view.state[key] = value));
+      if (value !== view.state[key]) (key === 'shading' ? view.setShading(value) : key === 'use_compositor' ? view.setCompositor(value) : (view.state[key] = value));
     }
     for (const key of REGION_STATE) if (data[key] !== laidOut[key]) view.state[key] = data[key];
     view.sync?.();
