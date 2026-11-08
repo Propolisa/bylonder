@@ -295,6 +295,15 @@ const checks = {
     assert.match(await app.frame().locator(".view-label").textContent(), /^User Perspective/);
   } },
 
+  // At a display's 2.625 pixel ratio the UI unit is Blender's U.widget_unit there, whole device pixels: round(18 * 2.625)
+  // plus a 2 pixel line width on each side, 51 pixels (Blender's own UI at that scale measures the same).
+  "the UI unit is whole device pixels at a fractional pixel ratio": { open: { scale: 2.625 }, async run() {
+    for (const frame of [app.page.mainFrame(), app.frame()]) {
+      const row = await frame.evaluate(() => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--bl-row")));
+      assert.ok(Math.abs(row * 2.625 - 51) < 1e-3, `${row} CSS pixels`);
+    }
+  } },
+
   // The Properties editor's tabs as Blender 5.2.3 draws them at UI scale 1 (measured from its screenshot): a 29 pixel
   // bar, tabs 27 by 28 flush with the main region, the first 8 pixels down, groups 8 pixels apart, the active tab in
   // the main region's color.

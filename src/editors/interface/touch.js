@@ -119,3 +119,10 @@ export function mountTouch(win, { scale, hint, keys, modal = () => null, mode = 
 
 // Resolution Scale on the documents' size tokens (theme.css).
 export const showScale = (documents, value) => documents.forEach((doc) => doc?.documentElement.style.setProperty('--bl-ui-scale', String(value)));
+// The display's pixel ratio on the documents' size tokens (theme.css rounds the UI unit to its pixels), followed as it
+// changes (a zoom, a move to another display).
+export function followPixelRatio(win, documents) {
+  const ratio = win.devicePixelRatio || 1;
+  documents.forEach((doc) => doc?.documentElement.style.setProperty('--bl-dpr', String(ratio)));
+  win.matchMedia(`(resolution: ${ratio}dppx)`).addEventListener('change', () => followPixelRatio(win, documents), { once: true });
+}

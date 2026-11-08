@@ -9,8 +9,13 @@
 @property --bl-finger{syntax:'<length>';inherits:true;initial-value:44px}
 @property --bl-row-gap{syntax:'<length>';inherits:true;initial-value:4px}
 :root{
-  /* Preferences > Interface > Resolution Scale (PreferencesView.ui_scale), which every size token below scales. */
-  --bl-ui-scale:1;
+  /* Preferences > Interface > Resolution Scale (PreferencesView.ui_scale), which every size token below scales, and the
+     display's pixel ratio (touch.js followPixelRatio). */
+  --bl-ui-scale:1;--bl-dpr:1;
+  /* The UI unit in whole device pixels, as WM_window_dpi_set_userdef makes U.widget_unit: 18 pixels at the scale,
+     rounded, and a line width (U.pixelsize, U.dpi / 64) on each side; U.dpi is 72 at scale 1, truncated. */
+  --bl-dpi:round(down,calc(72*var(--bl-dpr)*var(--bl-ui-scale)),1);
+  --bl-pixelsize:max(1,round(down,calc(var(--bl-dpi)/64),1));
   --bl-font-family:"Inter","DejaVu Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--bl-font-size:calc(11px*var(--bl-ui-scale));
   --bl-font:var(--bl-font-size) var(--bl-font-family);
   --bl-gap:#161616;--bl-topbar:#181818;--bl-header:#303030;--bl-view3d-header:#303030b3;--bl-region:#303030;--bl-back:#282828;--bl-viewport:#3d3d3d;--bl-camera-passepartout:0 0 0;--bl-camera-border:#000;
@@ -48,7 +53,7 @@
   --bl-socket-shader:#63c763;--bl-socket-menu:#666666;--bl-socket-rotation:#a663c7;--bl-socket-matrix:#b83385;--bl-socket-string:#70b2ff;
   --bl-socket-object:#ed9e5c;--bl-socket-collection:#f5f5f5;--bl-socket-geometry:#00d6a3;--bl-socket-custom:#333333;
   --bl-socket-bundle:#4d8080;--bl-socket-closure:#7d7d3b;--bl-socket-material:#eb7582;--bl-socket-image:#633863;--bl-socket-font:#635742;
-  --bl-header-h:calc(26px*var(--bl-ui-scale));--bl-topbar-h:calc(24px*var(--bl-ui-scale));--bl-statusbar-h:calc(21px*var(--bl-ui-scale));--bl-row:calc(20px*var(--bl-ui-scale));--bl-text-margin:calc(var(--bl-row)*.4);--bl-column-space:calc(var(--bl-row)*.4);--bl-radius:calc(4px*var(--bl-ui-scale));
+  --bl-header-h:calc(26px*var(--bl-ui-scale));--bl-topbar-h:calc(24px*var(--bl-ui-scale));--bl-statusbar-h:calc(21px*var(--bl-ui-scale));--bl-row:calc((round(calc(18*var(--bl-dpi)/72),1) + 2*var(--bl-pixelsize))*1px/var(--bl-dpr));--bl-text-margin:calc(var(--bl-row)*.4);--bl-column-space:calc(var(--bl-row)*.4);--bl-radius:calc(4px*var(--bl-ui-scale));
   /* Blender's widget colors (userdef_default_theme.c, read from Blender 5.2): inner, inner when pressed or selected,
      item (a slider's fill, a check mark, a menu's arrow), outline. Hover lightens inner (widget_state). Panels: header,
      back, a sub-panel's back, outline. Property split: the label column is 0.4 of a row, the decorator a unit wide. */

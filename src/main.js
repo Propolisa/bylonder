@@ -65,7 +65,7 @@ import { registerEeveeParityTypes } from "./draw/eevee-parity.js";
 import { registerRenderExtensions } from "./draw/render-extension.js";
 import { restorePreferences, readPreferences, onPreferencesChanged, preferencesChanged, preferences, inputPreferences, savedPreferences, savePreferences } from "./windowmanager/wm-userdef.js";
 import { touchKeyconfig } from "./windowmanager/input/wm-touch.js";
-import { mountTouch, showScale } from "./editors/interface/touch.js";
+import { mountTouch, showScale, followPixelRatio } from "./editors/interface/touch.js";
 import { applyTheme } from "./editors/interface/theme-tokens.js";
 import { registerBylonderPreferences, bylonderPreferences } from "./workspace/preferences.js";
 import { loadKeyconfig, setKeyconfigPreferences } from "./windowmanager/wm-window.js";
@@ -558,6 +558,7 @@ const themed = () => {
   showScale([document, parent.document], preferences().view.ui_scale);
 };
 themed();
+followPixelRatio(window, [document, parent.document]);
 const setUiScale = (value) => { preferences().view.ui_scale = value; preferencesChanged(); };
 onPreferencesChanged(() => { themed(); send("preferences", { keep_scenes_loaded: bylonderPreferences().keep_scenes_loaded }); });
 // The Preferences editor: an area's editor (Editor Type), mounted once it is first shown, and Edit > Preferences.
