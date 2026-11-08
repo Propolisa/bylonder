@@ -71,7 +71,7 @@ export function treeMenu(tree, ui, editorTypeOwner) {
       case 'SEPR_SPACER': break;
       case 'LABEL': if (text) items.push({ heading: text }); break;
       case 'PULLDOWN': case 'MENU': case 'POPOVER': case 'BLOCK':
-        items.push({ label: text, icon: iconName, blender: node.menu, items: () => treeMenu(ui.inContext((C) => buttonMenu(C, node)) ?? { children: [] }, ui) });
+        items.push({ label: text, icon: iconName, keys: shortcut, blender: node.menu, items: () => treeMenu(ui.inContext((C) => buttonMenu(C, node)) ?? { children: [] }, ui) });
         break;
       default:
         if (editorTypeOwner) {

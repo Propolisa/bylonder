@@ -305,6 +305,14 @@ const checks = {
     }
   } },
 
+  // A menu's sub-menu shows the shortcut that opens it, as Blender's (ui_menu_block_set_keymaps): Object > Apply, Ctrl A.
+  async "a sub-menu shows its shortcut"() {
+    await app.locator('[data-blender="VIEW3D_MT_object"]').first().click();
+    const apply = app.frame().locator(".bl-menu .bl-menu-item", { hasText: "Apply" }).first();
+    assert.equal(await apply.locator("kbd").textContent(), "Ctrl A");
+    await app.page.keyboard.press("Escape");
+  },
+
   // The Properties editor's tabs as Blender 5.2.3 draws them at UI scale 1 (measured from its screenshot): a 29 pixel
   // bar, tabs 27 by 28 flush with the main region, the first 8 pixels down, groups 8 pixels apart, the active tab in
   // the main region's color.
