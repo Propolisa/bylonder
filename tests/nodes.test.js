@@ -133,6 +133,17 @@ const two = await lobes(['ShaderNodeBsdfAnisotropic', 'ShaderNodeBsdfAnisotropic
 assert.deepEqual(two.surfaces, [0, 1], 'two Glossy BSDFs take the base and a lobe');
 assert.deepEqual((await lobes(['ShaderNodeBsdfDiffuse', 'ShaderNodeBsdfDiffuse'])).surfaces, [0], 'diffuse closures share the base');
 
+// Ambient Occlusion searches the view's depth for what rises above the surface within its distance, as EEVEE's
+// searches its hi-Z buffer, instead of returning no occlusion.
+{
+  const occluded = nodeMaterialFromTree('Occluded', scene, { nodes: [{ idname: 'ShaderNodeAmbientOcclusion', name: 'AO' }, { idname: 'ShaderNodeOutputMaterial', name: 'Material Output' }],
+    links: [['AO', 'Color', 'Material Output', 'Surface']] }).material;
+  if (occluded._buildIsInProgress) await new Promise((resolve) => occluded.onBuildObservable.addOnce(resolve));
+  const code = occluded._fragmentCompilationState._builtCompilationString;
+  assert.match(code, /bl_ambient_occlusion\(bl_depth\w*, /, 'the occlusion reads the view depth');
+  assert.match(code, /uniform highp sampler2D bl_depth/);
+}
+
 // Data linked to a shader input is an Emission of it, and a shader linked to a data input is dropped, as Blender's
 // shader tree makes them (ntree_shader_implicit_closure_cast).
 const implicit = nodeMaterialFromTree('Implicit', scene, { nodes: [{ idname: 'ShaderNodeRGB', name: 'RGB' }, { idname: 'ShaderNodeBsdfDiffuse', name: 'Diffuse' },

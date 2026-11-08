@@ -29,6 +29,7 @@ import { blendData } from '../../python/bpy_rna.js';
 import { VIEW_FORWARD, viewEye, viewForward } from '../../draw/draw-view.js';
 import { eeveeParity, eeveeParityChanged } from '../../draw/eevee-parity.js';
 import { ditherSeed } from '../../render/dither.js';
+import { sceneDepth } from '../../render/scene-depth.js';
 import '../graph-roots.js';
 
 // A NodeMaterial of Blender's nodes. Babylon's walks a block's inputs again for each path that reaches the block as it
@@ -243,8 +244,10 @@ export const SHADER_NODES = {
   // node_shader_bevel.cc, node_shader_ambient_occlusion.cc, node_shader_displacement.cc,
   // node_shader_vector_displacement.cc: an unlinked normal is the shaded point's.
   ShaderNodeBevel: (p, decl, { connected }) => [G_DATA, ['node_bevel', ['Radius', connected('Normal') ? 'Normal' : WORLD_NORMAL], ['@Normal']]],
+  // port-override: EEVEE searches its hi-Z buffer (ambient_occlusion_eval); the view's depth (render/scene-depth.js)
+  // stands in for it.
   ShaderNodeAmbientOcclusion: (p, decl, { connected }) => [G_DATA,
-    ['node_ambient_occlusion', ['Color', 'Distance', connected('Normal') ? 'Normal' : WORLD_NORMAL, p.inside ? 1 : 0, Math.ceil(p.samples / 4)], outputs(decl)]],
+    ['bl_ambient_occlusion', [{ depth: true }, '$viewmat', '$winmat', 'Color', 'Distance', connected('Normal') ? 'Normal' : WORLD_NORMAL, p.inside ? 1 : 0, Math.ceil(p.samples / 4)], outputs(decl)]],
   ShaderNodeDisplacement: (p, decl, { connected }) => [...ENGINE_STEPS,
     [p.space === 'OBJECT' ? 'node_displacement_object' : 'node_displacement_world', ['Height', 'Midlevel', 'Scale', connected('Normal') ? 'Normal' : WORLD_NORMAL], ['@Displacement']]],
   ShaderNodeVectorDisplacement: (p, decl) => [...ENGINE_STEPS, p.space === 'TANGENT' ? stack('node_vector_displacement_tangent', decl, [tangent('')])
@@ -522,7 +525,38 @@ vec4 bl_closure_radiance(BlClosure c, vec3 lit) {
   // node_holdout: nothing of the surface or what is behind it.
   bl_node_holdout: 'void bl_node_holdout(inout BlClosure result) { result = bl_closure_empty(); }',
   // port-override: EEVEE's horizon scan; Babylon has no occlusion of the view to read, so nothing is occluded.
-  ambient_occlusion_eval: 'float ambient_occlusion_eval(vec3 normal, float max_distance, float inverted, float sample_count) { return 1.0; }',
+  // blender-port: gpu_shader_material_ambient_occlusion.glsl node_ambient_occlusion, its occlusion a horizon search
+  // in screen space as EEVEE's (eevee_horizon_scan_eval_lib): per direction, the highest point of the view's depth
+  // within the distance above the surface's tangent plane (below it when Inside).
+  bl_ambient_occlusion: `void bl_ambient_occlusion(sampler2D depth, mat4 viewmat, mat4 winmat, vec4 color, float dist, vec3 normal, float inverted,
+    float sample_count, out vec4 result_color, out float result_ao) {
+  vec3 vP = (viewmat * vec4(g_data.P, 1.0)).xyz, vN = normalize(mat3(viewmat) * normal) * (inverted > 0.5 ? -1.0 : 1.0);
+  bool ortho = winmat[3][3] > 0.5;
+  vec2 scale = vec2(winmat[0][0], winmat[1][1]), shift = ortho ? -winmat[3].xy : vec2(winmat[2][0], winmat[2][1]);
+  vec4 clip = winmat * vec4(vP, 1.0);
+  vec2 uv = clip.xy / clip.w * 0.5 + 0.5, radius = 0.5 * dist * scale / (ortho ? 1.0 : -vP.z);
+  float noise = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
+  int directions = int(clamp(sample_count, 1.0, 8.0)) * 2;
+  float occlusion = 0.0;
+  for (int i = 0; i < 16; i++) {
+    if (i >= directions) break;
+    float angle = (float(i) + noise) * 6.2831853 / float(directions), horizon = 0.0;
+    vec2 direction = vec2(cos(angle), sin(angle)) * radius;
+    for (int s = 0; s < 8; s++) {
+      vec2 at = uv + direction * (float(s) + 1.0 - noise) / 8.0;
+      if (any(lessThan(at, vec2(0.0))) || any(greaterThan(at, vec2(1.0)))) break;
+      float z = texture(depth, at).r;
+      vec2 ndc = at * 2.0 - 1.0;
+      vec3 S = vec3((ndc + shift) * (ortho ? 1.0 : z) / scale, -z), v = S - vP;
+      float len = length(v);
+      if (len > 1e-4 && len < dist) horizon = max(horizon, dot(vN, v) / len);
+    }
+    occlusion += horizon;
+  }
+  result_ao = clamp(1.0 - occlusion / float(directions), 0.0, 1.0);
+  result_color = result_ao * color;
+}
+`,
 };
 // What a node reads of the world's normal (world_normals_get).
 const WORLD_NORMAL = { glsl: 'g_data.N' };
@@ -891,7 +925,13 @@ const blenderShader = (Base) => class extends Base {
           state._emitFunction(key, code, '');
         },
         free: (prefix) => state._getFreeVariableName(prefix),
-        sampler: ({ texture: table, image, sky, ...sampling }) => {
+        sampler: ({ texture: table, image, sky, depth, ...sampling }) => {
+          if (depth) {
+            const name = state._getFreeVariableName('bl_depth'), scene = state.sharedData.scene;
+            state._emit2DSampler(name, '', false, undefined, false, 'highp');
+            this._textures.push([name, () => sceneDepth(scene)]);
+            return name;
+          }
           if (sky) {
             const name = state._getFreeVariableName('bl_sky');
             state._emit2DArraySampler(name);

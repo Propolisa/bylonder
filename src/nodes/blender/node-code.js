@@ -22,12 +22,12 @@ export const kindOfSocket = (decl, id) => socketType(socketOf(decl, id).type)?.k
 const constant = (arg, sampler) => {
   if (typeof arg === 'number') return glslValue(arg, 'float');
   if (Array.isArray(arg)) return glslValue(arg, arg.length === 4 ? 'vec4' : arg.length === 2 ? 'vec2' : 'vec3');
-  if (arg?.texture || arg?.image || arg?.sky) return sampler(arg);
+  if (arg?.texture || arg?.image || arg?.sky || arg?.depth) return sampler(arg);
   return arg?.glsl;
 };
 
 // The statements running the steps; `links` gives and takes the GLSL of socket links, `emit(name, code)` declares a
-// function once, `free(prefix)` gives a fresh variable name, `sampler(arg)` a sampler of its table or image, and
+// function once, `free(prefix)` gives a fresh variable name, `sampler(arg)` a sampler of its table, image, sky or the view's depth, and
 // `functions` GLSL of the caller's own (Bylonder's stand-ins for Blender's engine code) by name; `pointKind(name)`
 // the kind of a value of the shaded point, where it may differ from its parameter's.
 export function compileSteps(decl, steps, links, { emit, free, sampler, functions = {}, pointKind = () => undefined }) {
