@@ -2,7 +2,7 @@
 // input: the rendered view's image after its film and effects, in scene linear, where the view transform takes it);
 // the Group Output's composite is copied back there, so the view displays it through its view transform and draws its
 // overlays over it, as Blender displays its compositor's result (compositor.js runs the graph per rendered frame).
-import { FrameGraphCopyToTextureTask, NodeRenderGraphBlockConnectionPointTypes, NodeRenderGraphInputBlock, NodeRenderGraphOutputBlock, RegisterClass } from '@babylonjs/core';
+import { Constants, FrameGraphCopyToTextureTask, NodeRenderGraphBlockConnectionPointTypes, NodeRenderGraphInputBlock, NodeRenderGraphOutputBlock, RegisterClass } from '@babylonjs/core';
 import { declaration } from './declarations.js';
 
 const blenderNode = (idname, decl) => ({ idname, declaration: decl, properties: {}, values: {} });
@@ -15,14 +15,22 @@ export class BlenderRenderLayersBlock extends NodeRenderGraphInputBlock {
     super(name, frameGraph, scene, NodeRenderGraphBlockConnectionPointTypes.Texture);
     Object.assign(this, blenderNode('CompositorNodeRLayers', RENDER_LAYERS));
     this.isExternal = true;
+    this.fit(1, 1);
   }
   getClassName() { return 'CompositorNodeRLayers'; }
   declared(name) { return RENDER_LAYERS.outputs.some((s) => s.identifier === name); }
-  // The view's render this frame (an InternalTexture), imported under the handle the graph was built with.
-  setRender(texture) {
-    this.value = texture;
-    if (this.output.value !== undefined) this._frameGraph.textureManager.importTexture(this.name, texture, this.output.value);
+  // The image the graph reads, a texture of its own the view's render is copied into each frame (the graph's handles,
+  // aliases of a muted node's included, resolve to it when it is built), at the render's size: true when it was made
+  // anew, which the graph must be built again for.
+  fit(width, height) {
+    if (this.target?.width === width && this.target?.height === height) return false;
+    this.target?.dispose();
+    this.target = this._scene.getEngine().createRenderTargetTexture({ width, height }, { type: Constants.TEXTURETYPE_HALF_FLOAT,
+      format: Constants.TEXTUREFORMAT_RGBA, generateMipMaps: false, generateDepthBuffer: false, samplingMode: Constants.TEXTURE_NEAREST_SAMPLINGMODE });
+    this.value = this.target.texture;
+    return true;
   }
+  dispose() { this.target?.dispose(); super.dispose(); }
 }
 RegisterClass('BABYLON.CompositorNodeRLayers', BlenderRenderLayersBlock);
 

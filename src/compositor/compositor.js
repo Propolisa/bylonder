@@ -42,10 +42,12 @@ export function createCompositor(world, { commit = () => {}, notify = console.wa
       const layers = renderLayers();
       if (!layers || !ready || !enabled || !viewport || view !== camera || !transform.inputTexture) return;
       const render = transform.inputTexture;
-      layers.setRender(render.texture);
+      if (layers.fit(render.width, render.height)) { rebuild(); return; }
+      copier ??= new CopyTextureToTexture(scene.getEngine());
+      copier.copy(render.texture, layers.target);
       graph.frameGraph.execute();
       const result = graph.frameGraph.textureManager.getTextureFromHandle(graph.outputBlock.result);
-      if (result && result !== render.texture) (copier ??= new CopyTextureToTexture(scene.getEngine())).copy(result, render);
+      if (result && result !== layers.value) copier.copy(result, render);
     });
   };
   const own = next => {

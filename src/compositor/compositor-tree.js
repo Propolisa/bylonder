@@ -2,7 +2,7 @@
 // values, location }], links: [[from node, output, to node, input]] }), as Bylonder's compositor graph: a Babylon
 // render graph from Blender's Render Layers, the view's render, to its Group Output (compositor-io.js), with a block per
 // Blender node in between, linked as in the tree (docs/node-editors.md).
-import { Constants, NodeRenderGraph } from '@babylonjs/core';
+import { NodeRenderGraph } from '@babylonjs/core';
 import { compositorBlockClasses } from '../nodes/blender/compositor-nodes.js';
 import { BlenderGroupOutputBlock, BlenderRenderLayersBlock } from '../nodes/blender/compositor-io.js';
 import { declaration } from '../nodes/blender/declarations.js';
@@ -13,10 +13,9 @@ const RENDER_LAYERS = 'CompositorNodeRLayers', GROUP_OUTPUT = 'NodeGroupOutput';
 const UNCOMPOSITED = ['CompositorNodeViewer', 'NodeFrame', 'NodeReroute'];
 
 // Blender's Render Layers, the view's render, and the Group Output, the graph's output block, whose composite is copied
-// back over it. Render Layers holds a placeholder until the first frame gives it the view's render.
+// back over it.
 function blenderEnds(graph, scene) {
   const rendering = new BlenderRenderLayersBlock(undefined, graph.frameGraph, scene), output = new BlenderGroupOutputBlock(undefined, graph.frameGraph, scene);
-  rendering.value = scene.getEngine().createRawTexture(new Uint8Array(4), 1, 1, Constants.TEXTUREFORMAT_RGBA, false, false, Constants.TEXTURE_NEAREST_SAMPLINGMODE);
   rendering.output.connectTo(output.texture);
   graph.outputBlock = output;
   graph.attachedBlocks.push(rendering, output);

@@ -917,6 +917,55 @@ const checks = {
     await view("DISABLED");
   } },
 
+  // A muted node passes its image through, as Blender's muting does: a Rendered view compositing as the tree is edited
+  // (a muted Glare, Color Balance with its Lift far off and a Mix whose other color is a mask, added while it shows the
+  // composite) shows the render as it is, and a node after the muted ones reads the render through them.
+  "a muted compositor node passes the view's render through": { open: { example: null, node: "sphere" }, async run() {
+    const pixels = (use_compositor) => app.bylonder(async (b, use_compositor) => {
+      const v = b.views.input;
+      v.state.overlays = false;
+      v.setShading("rendered");
+      v.setCompositor(use_compositor);
+      // Twenty frames, the views kept drawing, or two seconds (a view that stops drawing shows what it last drew).
+      for (let i = 0; i < 20; i++) { b.views.wake?.(); await Promise.race([new Promise((done) => b.world.scene.onAfterRenderObservable.addOnce(done)), new Promise((done) => setTimeout(done, 100))]); }
+      const { canvas } = v, context = new OffscreenCanvas(canvas.width, canvas.height).getContext("2d");
+      context.drawImage(await createImageBitmap(canvas), 0, 0);
+      return Array.from(context.getImageData(0, 0, canvas.width, canvas.height).data);
+    }, use_compositor);
+    const edit = (fn) => app.bylonder(async (b, source) => {
+      const c = b.world.compositor, g = c.group, socket = (sockets, id) => [...sockets].find((s) => s.identifier === id);
+      (0, eval)(source)(g, socket);
+      b.world.mainSync.view();
+      await c.edit();
+    }, String(fn));
+    const differs = (a, b) => a.reduce((sum, v, i) => sum + Math.abs(v - b[i]), 0) / a.length;
+    await app.bylonder((b) => b.world.compositor.setEnabled(true));
+    const plain = await pixels("DISABLED");
+    await pixels("ALWAYS");
+    await edit((g, socket) => {
+      const glare = g.nodes.new("CompositorNodeGlare"), balance = g.nodes.new("CompositorNodeColorBalance");
+      const mask = g.nodes.new("CompositorNodeEllipseMask"), mix = g.nodes.new("ShaderNodeMix");
+      mix.data_type = "RGBA";
+      balance.inputs.get("Color Lift").default_value = [0, 0, 4, 1];
+      g.links.new(g.nodes.get("Render Layers").outputs.get("Image"), glare.inputs.get("Image"));
+      g.links.new(glare.outputs.get("Image"), balance.inputs.get("Image"));
+      g.links.new(balance.outputs.get("Image"), socket(mix.inputs, "A_Color"));
+      g.links.new(mask.outputs.get("Mask"), socket(mix.inputs, "B_Color"));
+      g.links.new(socket(mix.outputs, "Result_Color"), g.nodes.get("Group Output").inputs[0]);
+      glare.mute = balance.mute = mix.mute = true;
+    });
+    const muted = await pixels("ALWAYS");
+    // Color Balance at its defaults after the muted Glare leaves the render as it is.
+    await edit((g) => {
+      const balance = g.nodes.get("Color Balance");
+      balance.mute = false;
+      balance.inputs.get("Color Lift").default_value = [1, 1, 1, 1];
+    });
+    const after = await pixels("ALWAYS");
+    await app.bylonder((b) => { b.views.input.setCompositor("DISABLED"); b.views.input.state.overlays = true; });
+    assert.ok(differs(muted, plain) < 3, `the muted nodes' composite differs from the render by ${differs(muted, plain).toFixed(1)} on average`);
+    assert.ok(differs(after, plain) < 3, `a node after a muted one differs from the render by ${differs(after, plain).toFixed(1)} on average`);
+  } },
   // Render Image composites on Blender's CPU compositor and shows the composite at the render's size: Render Layers
   // straight into the Group Output gives the render as it is (a composite written at another size shows as stripes).
   "Render Image shows the composite at the render's size": { open: { example: null, node: "sphere" }, async run() {
