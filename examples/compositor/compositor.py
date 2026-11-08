@@ -10,11 +10,15 @@ import random
 from contextlib import contextmanager
 
 import bpy
+from bpy_extras import anim_utils
 from mathutils import Matrix, Vector
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 # Where the camera stands (x, y, eye height); the city and the people behind paper are placed from it.
 EYE = (2.4, -3.6, 1.6)
+# How the steam is made: 'particles' (noise-textured cards emitted by a particle system) or 'volume' (a Principled
+# Volume domain with noise density).
+STEAM = 'particles'
 bpy.ops.wm.read_factory_settings(use_empty=True)
 scene = bpy.context.scene
 collection = scene.collection
@@ -77,6 +81,12 @@ def merged(name):
     yield group
     parts = [obj for obj in bpy.data.objects if obj not in before]
     group['object'] = join(name, parts) if len(parts) > 1 else parts[0] if parts else None
+
+
+def fcurves(owner):
+    """The F-curves of what `owner` animates (its action's channels for its slot)."""
+    data = owner.animation_data
+    return anim_utils.action_get_channelbag_for_slot(data.action, data.action_slot).fcurves
 
 
 def textured(name, color_a, color_b, scale, roughness=(0.5, 0.5), metallic=0.0, waves=0.0, bands='Z', distortion=6):
@@ -203,7 +213,6 @@ wood = textured('Crate Wood', (0.16, 0.09, 0.045), (0.05, 0.03, 0.02), 3, (0.55,
 rubber = material('Rubber', (0.008, 0.008, 0.008), roughness=0.6)
 rusty_paint = textured('Rusty Paint', (0.3, 0.03, 0.02), (0.1, 0.035, 0.012), 14, (0.3, 0.85), metallic=0.3)
 chrome = material('Chrome', (0.6, 0.6, 0.62), roughness=0.2, metallic=1)
-rain = material('Rain', (0.6, 0.65, 0.7), roughness=0.2)
 mirror = material('Puddle', (0.003, 0.003, 0.004), roughness=0.02)
 
 # The facades: dark timber boards below, weathered plaster or corrugated metal above, tiled eaves between.
@@ -321,17 +330,148 @@ def ellipsoid(name, scale, location, mat):
     return obj
 
 
-steam_puff = material('Steam Puff', (0.85, 0.8, 0.75), roughness=1)
-steam_puff.node_tree.nodes['Principled BSDF'].inputs['Alpha'].default_value = 0.12
-steam_puff.surface_render_method = 'BLENDED'
+def steam(name, x, y, z, width, height, density=6.0, drift=(0.0, 0.0), count=10):
+    """Steam rising from (x, y, z), `width` across and `height` tall, leaning by `drift`: made as STEAM says."""
+    if STEAM == 'volume':
+        return steam_volume(name, x, y, z, width, height, density, drift)
+    return steam_particles(name, x, y, z, width, height, drift, count)
 
 
-def puffs(name, x, y, z, drift, count=5, size=1.0):
-    """Steam rising from (x, y, z): ellipsoids growing and drifting by `drift` (dx, dy) per step."""
-    with merged(name):
-        for i in range(count):
-            r = (0.08 + i * 0.05) * size
-            ellipsoid('Puff', (r * 1.3, r, r), (x + drift[0] * i + wobble.uniform(-0.05, 0.05) * size, y + drift[1] * i, z + i * 0.18 * size), steam_puff)
+def puff_material():
+    """A steam card's look: thin white, unlit by itself, its alpha a vertically stretched, distorted Noise Texture (streaks,
+    not blobs) inside a soft oval, fading in above its foot and out toward its top."""
+    mat = bpy.data.materials.get('Steam Puff')
+    if mat:
+        return mat
+    mat = bpy.data.materials.new('Steam Puff')
+    nodes, links = mat.node_tree.nodes, mat.node_tree.links
+    principled = nodes['Principled BSDF']
+    principled.inputs['Base Color'].default_value = (0.92, 0.92, 0.9, 1)
+    principled.inputs['Roughness'].default_value = 1.0
+    principled.inputs['Emission Color'].default_value = (1.0, 0.92, 0.82, 1)
+    principled.inputs['Emission Strength'].default_value = 0.1
+    coord = nodes.new('ShaderNodeTexCoord')
+
+    def node(kind, *inputs, **settings):
+        n = nodes.new(kind)
+        for key, value in settings.items():
+            setattr(n, key, value)
+        for i, value in enumerate(inputs):
+            if value is None:
+                continue
+            if isinstance(value, (int, float, tuple)):
+                n.inputs[i].default_value = value
+            else:
+                links.new(value, n.inputs[i])
+        return n
+
+    centered = node('ShaderNodeMapping', coord.outputs['Generated'], (-1, 0, -1), None, (2, 0, 2))
+    oval = node('ShaderNodeTexGradient', centered.outputs['Vector'], gradient_type='SPHERICAL')
+    stretched = node('ShaderNodeMapping', coord.outputs['Object'], None, None, (1, 1, 0.3))
+    noise = node('ShaderNodeTexNoise', stretched.outputs['Vector'], None, 1.2, 8, 0.6)
+    noise.inputs['Distortion'].default_value = 2.5
+    streaks = node('ShaderNodeMapRange', noise.outputs['Fac'], 0.45, 0.75, 0.0, 1.0)
+    height = node('ShaderNodeSeparateXYZ', coord.outputs['Generated'])
+    # Transparent at the foot, densest a fifth of the way up, gone at the top.
+    rise = node('ShaderNodeFloatCurve', None, height.outputs['Z'])
+    points = rise.mapping.curves[0].points
+    points[0].location, points[1].location = (0, 0), (1, 0)
+    points.new(0.22, 1.0)
+    rise.mapping.update()
+    alpha = node('ShaderNodeMath', oval.outputs['Fac'], streaks.outputs['Result'], operation='MULTIPLY')
+    alpha = node('ShaderNodeMath', alpha.outputs[0], rise.outputs['Value'], operation='MULTIPLY')
+    alpha = node('ShaderNodeMath', alpha.outputs[0], 0.2, operation='MULTIPLY')
+    links.new(alpha.outputs[0], principled.inputs['Alpha'])
+    # Thin enough to pass the room's light through from behind: half translucent, cut by the same alpha.
+    glow = node('ShaderNodeBsdfTranslucent', (0.95, 0.93, 0.9, 1))
+    see_through = node('ShaderNodeBsdfTransparent')
+    lit_through = node('ShaderNodeMixShader', alpha.outputs[0], see_through.outputs[0], glow.outputs[0])
+    both = node('ShaderNodeMixShader', 0.5, principled.outputs['BSDF'], lit_through.outputs[0])
+    links.new(both.outputs[0], nodes['Material Output'].inputs['Surface'])
+    mat.surface_render_method = 'BLENDED'
+    return mat
+
+
+def steam_particles(name, x, y, z, width, height, drift, count):
+    """A disk over the source emitting noise-textured cards, `count` at a time, that rise, drift, wander (Brownian motion), turn
+    toward the camera and grow over their short life."""
+    # Cards three times taller than wide, a single face each.
+    puff = outline(f'{name} Card', [(x - 0.5, y, -21.5), (x + 0.5, y, -21.5), (x + 0.5, y, -18.5), (x - 0.5, y, -18.5)], puff_material())
+    puff.location = (0, 0, 0)
+    puff.data.transform(Matrix.Translation((-x, -y, 20)))
+    bpy.ops.mesh.primitive_circle_add(vertices=12, radius=width / 3, fill_type='NGON', location=(x, y, z))
+    emitter = finish(bpy.context.object, f'{name} Emitter', None)
+    emitter.show_instancer_for_render = emitter.show_instancer_for_viewport = False
+    # Turned so its Y axis points at the camera: the cards, aligned to it, face the camera.
+    emitter.rotation_euler.z = math.atan2(-(EYE[0] - x), EYE[1] - y)
+    system = emitter.modifiers.new(name, 'PARTICLE_SYSTEM').particle_system
+    settings = system.settings
+    settings.name = name
+    # `count` alive at a time: emitted evenly from well before the first frame to after the last.
+    settings.frame_start, settings.frame_end = -120, 250
+    settings.count = int(count * (settings.frame_end - settings.frame_start) // 36)
+    settings.lifetime, settings.lifetime_random = 36, 0.3
+    # Rising about half a meter over a life of 36 frames (1.5 s at 24 fps), a little sideways.
+    settings.emit_from, settings.normal_factor, settings.factor_random = 'FACE', 0.35, 0.05
+    settings.object_align_factor = (drift[0], drift[1], 0)
+    settings.brownian_factor = 0.15
+    settings.effector_weights.gravity = 0
+    settings.render_type, settings.instance_object = 'OBJECT', puff
+    settings.use_rotations, settings.rotation_mode, settings.phase_factor_random = True, 'OB_Y', 2.0
+    settings.particle_size, settings.size_random = width * 0.7, 0.3
+    # Each card grows over its life: a Blend texture along the particle's age scales its size.
+    grow = bpy.data.textures.new(f'{name} Growth', 'BLEND')
+    slot = settings.texture_slots.add()
+    slot.texture, slot.texture_coords = grow, 'STRAND'
+    slot.use_map_time, slot.use_map_size, slot.size_factor = False, True, 1.0
+    system.seed = len(name)
+    return emitter
+
+
+def steam_volume(name, x, y, z, width, height, density=6.0, drift=(0.0, 0.0)):
+    """Steam rising from (x, y, z): a box domain `width` wide and `height` tall with a Principled Volume whose density
+    is a fine Noise Texture, strongest at the bottom center and gone toward the top and the sides, leaning by `drift`
+    (its top's offset, meters). White, thin and breaking up as it rises."""
+    mat = bpy.data.materials.new(f'{name} Volume')
+    nodes, links = mat.node_tree.nodes, mat.node_tree.links
+    nodes.remove(nodes['Principled BSDF'])
+    volume = nodes.new('ShaderNodeVolumePrincipled')
+    volume.inputs['Color'].default_value = (0.95, 0.93, 0.9, 1)
+    coord, noise, mapping = nodes.new('ShaderNodeTexCoord'), nodes.new('ShaderNodeTexNoise'), nodes.new('ShaderNodeMapping')
+    noise.inputs['Scale'].default_value, noise.inputs['Detail'].default_value, noise.inputs['Roughness'].default_value = 6, 6, 0.65
+    # Generated coordinates run 0..1 over the box: shear them by the drift so the plume leans.
+    mapping.inputs['Location'].default_value = (0, 0, 0)
+    links.new(coord.outputs['Generated'], mapping.inputs['Vector'])
+    links.new(mapping.outputs['Vector'], noise.inputs['Vector'])
+    parts = nodes.new('ShaderNodeSeparateXYZ')
+    links.new(coord.outputs['Generated'], parts.inputs['Vector'])
+
+    def node(kind, *inputs, operation=None):
+        n = nodes.new(kind)
+        if operation:
+            n.operation = operation
+        for i, value in enumerate(inputs):
+            if isinstance(value, (int, float)):
+                n.inputs[i].default_value = value
+            else:
+                links.new(value, n.inputs[i])
+        return n.outputs[0]
+
+    # Fades: up the box (thinning as it rises), and out from the plume's leaning axis.
+    rise = node('ShaderNodeMath', 1.0, parts.outputs['Z'], operation='SUBTRACT')
+    axis_x = node('ShaderNodeMath', parts.outputs['X'], node('ShaderNodeMath', node('ShaderNodeMath', parts.outputs['Z'], drift[0] / width, operation='MULTIPLY'), 0.5, operation='ADD'), operation='SUBTRACT')
+    axis_y = node('ShaderNodeMath', parts.outputs['Y'], node('ShaderNodeMath', node('ShaderNodeMath', parts.outputs['Z'], drift[1] / width, operation='MULTIPLY'), 0.5, operation='ADD'), operation='SUBTRACT')
+    off = node('ShaderNodeMath', node('ShaderNodeMath', axis_x, axis_x, operation='MULTIPLY'), node('ShaderNodeMath', axis_y, axis_y, operation='MULTIPLY'), operation='ADD')
+    spread = node('ShaderNodeMath', 0.04, node('ShaderNodeMath', parts.outputs['Z'], 0.12, operation='MULTIPLY'), operation='ADD')
+    radial = node('ShaderNodeMath', 1.0, node('ShaderNodeMath', off, spread, operation='DIVIDE'), operation='SUBTRACT')
+    shape = node('ShaderNodeMath', node('ShaderNodeMath', rise, radial, operation='MULTIPLY'), 0.0, operation='MAXIMUM')
+    wisps = nodes.new('ShaderNodeMapRange')
+    wisps.inputs['From Min'].default_value, wisps.inputs['From Max'].default_value = 0.5, 0.75
+    links.new(noise.outputs['Fac'], wisps.inputs['Value'])
+    density_value = node('ShaderNodeMath', node('ShaderNodeMath', shape, wisps.outputs['Result'], operation='MULTIPLY'), density, operation='MULTIPLY')
+    links.new(density_value, volume.inputs['Density'])
+    links.new(volume.outputs['Volume'], nodes['Material Output'].inputs['Volume'])
+    return box(name, (width, width, height), (x, y, z + height / 2), mat)
 
 
 # The bar: one shallow room behind the window and the door, plaster walls, a wooden counter, a row of menu tags over
@@ -393,7 +533,7 @@ with merged('Bowls'):
     for x in (-4.1, -2.9, -1.9):
         bowl('Counter Bowl', x, 1.45, 1.42)
 for x in (-4.1, -2.9, -1.9):
-    puffs('Bowl Steam', x, 1.45, 1.55, (0.02, 0.0), 3)
+    steam('Bowl Steam', x, 1.45, 1.47, 0.25, 0.45, density=4)
 cylinder('Stockpot', 0.2, 0.35, (-4.8, 2.2, 1.475), steel, vertices=20)
 with merged('Traces'):
     bowl('Half-Eaten Bowl', -1.55, 1.45, 1.42)
@@ -410,8 +550,7 @@ with merged('Traces'):
     finish(bpy.context.object, 'Coat on a Hook', material('Hung Coat', (0.04, 0.07, 0.04), roughness=0.9))
     box('Radio', (0.24, 0.12, 0.14), (2.75, 2.36, 1.64), material('Radio Case', (0.25, 0.08, 0.04), roughness=0.4))
     box('Radio Dial', (0.12, 0.01, 0.04), (2.75, 2.29, 1.66), material('Radio Dial', (1.0, 0.6, 0.2), emission=4))
-puffs('Pot Steam', -4.8, 2.2, 1.75, (0.04, 0.0), 4)
-puffs('Cook Steam', -5.7, 1.8, 1.5, (0.03, -0.02), 5)
+steam('Pot Steam', -4.8, 2.2, 1.66, 0.6, 1.1, density=6, drift=(0.1, -0.1))
 
 
 def lantern(name, x, y, z, mat=lantern_paper, top=2.9, size=1.0):
@@ -647,6 +786,7 @@ with merged('Shop Front'):
 frosted = material('Frosted Pane', (0.4, 0.26, 0.13), roughness=0.4, emission=0.5)
 frosted_low = material('Frosted Pane Low', (0.4, 0.26, 0.13), roughness=0.4, emission=0.3)
 box('Kitchen Vent', (0.35, 0.25, 0.3), (3.85, -0.12, 2.3), dark_metal, bevel=0.02)
+steam('Vent Steam', 3.85, -0.6, 2.35, 0.8, 1.4, density=5, drift=(-0.15, -0.25))
 with merged('Sliding Door'):
     box('Door Frame', (0.6, 0.05, 2.22), (2.67, 0.12, 1.11), worn_paint)
     for dz in (0.55, 1.15, 1.75):
@@ -733,20 +873,76 @@ for part in bike:
     part.matrix_world = lean @ part.matrix_world
 join('Bicycle', bike)
 
-# Rain: thin streaks, slanted by the wind, that catch the light of whatever they pass.
+# Rain: thin streaks facing the camera, slanted by the wind, faint and soft-ended (alpha a vertical gradient along each
+# streak's UV), glossy so they glint where they pass a light; longer and fainter far off, denser there.
+rain_streak = bpy.data.materials.new('Rain')
+nodes, links = rain_streak.node_tree.nodes, rain_streak.node_tree.links
+principled = nodes['Principled BSDF']
+principled.inputs['Base Color'].default_value = (0.7, 0.75, 0.8, 1)
+principled.inputs['Roughness'].default_value = 0.05
+principled.inputs['Emission Color'].default_value = (0.6, 0.65, 0.75, 1)
+principled.inputs['Emission Strength'].default_value = 0.08
+uv = nodes.new('ShaderNodeUVMap')
+along = nodes.new('ShaderNodeSeparateXYZ')
+links.new(uv.outputs['UV'], along.inputs['Vector'])
+soft = nodes.new('ShaderNodeFloatCurve')
+links.new(along.outputs['Y'], soft.inputs['Value'])
+points = soft.mapping.curves[0].points
+points[0].location, points[1].location = (0, 0), (1, 0)
+points.new(0.6, 1.0)
+soft.mapping.update()
+faint = nodes.new('ShaderNodeAttribute')
+faint.attribute_type, faint.attribute_name = 'GEOMETRY', 'opacity'
+alpha = nodes.new('ShaderNodeMath')
+alpha.operation = 'MULTIPLY'
+links.new(soft.outputs['Value'], alpha.inputs[0])
+links.new(faint.outputs['Fac'], alpha.inputs[1])
+links.new(alpha.outputs[0], principled.inputs['Alpha'])
+rain_streak.surface_render_method = 'BLENDED'
 streaks = bpy.data.meshes.new('Rain')
-verts, faces = [], []
+verts, faces, opacity = [], [], []
 rng = random.Random(7)
-for k in range(900):
-    x, y, z = rng.uniform(-14.0, 6.0), rng.uniform(-4.2, -0.6), rng.uniform(-0.1, 6.0)
-    length = rng.uniform(0.25, 0.45)
-    dx = 0.08 * length
+eye = Vector(EYE)
+for k in range(1600):
+    x, y, z = rng.uniform(-24.0, 6.0), rng.uniform(-4.4, -0.4), rng.uniform(-0.1, 6.5)
+    far = min(1.0, (Vector((x, y, z)) - eye).length / 25)
+    # Short: Render Image's motion blur draws them out as they fall.
+    length, width = rng.uniform(0.12, 0.22) * (1 + far), 0.004 * (1 + 2 * far)
+    # Across the streak, square to the line of sight.
+    side = (Vector((x, y, z)) - eye).cross(Vector((0, 0, 1))).normalized() * width
+    lean = Vector((0.08 * length, 0, length))
+    root = Vector((x, y, z))
     n = len(verts)
-    verts += [(x - 0.003, y, z), (x + 0.003, y, z), (x + 0.003 + dx, y, z + length), (x - 0.003 + dx, y, z + length)]
+    verts += [tuple(root - side), tuple(root + side), tuple(root + side + lean), tuple(root - side + lean)]
     faces.append((n, n + 1, n + 2, n + 3))
+    opacity += [rng.uniform(0.12, 0.22) * (1 - 0.5 * far)] * 4
 streaks.from_pydata(verts, [], faces)
-streaks.materials.append(rain)
-collection.objects.link(bpy.data.objects.new('Rain', streaks))
+corners = streaks.uv_layers.new(name='UVMap')
+corners.data.foreach_set('uv', [v for _ in faces for v in (0, 0, 1, 0, 1, 1, 0, 1)])
+streaks.attributes.new('opacity', 'FLOAT', 'POINT').data.foreach_set('value', opacity)
+streaks.materials.append(rain_streak)
+rain = bpy.data.objects.new('Rain', streaks)
+collection.objects.link(rain)
+# A few big drops close to the camera refract what is behind them (EEVEE's raytraced transmission) and glint.
+drop_glass = material('Rain Drop', (1, 1, 1), roughness=0.05)
+glass = drop_glass.node_tree.nodes['Principled BSDF']
+glass.inputs['Transmission Weight'].default_value, glass.inputs['IOR'].default_value = 1.0, 1.33
+drop_glass.use_raytrace_refraction = True
+with merged('Rain Near') as near:
+    for k in range(40):
+        x, y, z = rng.uniform(-1.5, 3.0), rng.uniform(-3.0, -2.0), rng.uniform(0.2, 3.2)
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=8, ring_count=6, radius=0.006, location=(x, y, z))
+        drop = finish(bpy.context.object, 'Drop', drop_glass)
+        drop.scale.z = 6
+# The rain falls 9 m/s, round and round through its 6.6 m: what motion blur draws as it falls.
+for falling in (rain, near['object']):
+    for frame, z in ((1, 0.0), (19, -6.6)):
+        falling.location.z = z
+        falling.keyframe_insert('location', index=2, frame=frame)
+    for channel in fcurves(falling):
+        channel.modifiers.new('CYCLES')
+        for key in channel.keyframe_points:
+            key.interpolation = 'LINEAR'
 
 
 # Plastic stools under the window, a bucket by the crates and an A-frame menu board.
@@ -1110,7 +1306,8 @@ def eating():
 
 
 ink = material('Silhouette', (0.006, 0.005, 0.005), roughness=0.7)
-silhouette('Eating', *eating(), ink, -2.6, 1.0, 1.05, 47)
+# Facing away from the woman outside, so the two do not mirror each other.
+silhouette('Eating', *eating(), ink, -2.6, 1.0, 1.05, 47, mirror=True)
 
 def behind(pane, depth, seat=0.46):
     """Where to seat someone `depth` behind a pane so that, seen from the camera, the head shows near `pane` (a point
@@ -1126,13 +1323,13 @@ def behind(pane, depth, seat=0.46):
 for name, pane, depth, facing in (('Upstairs Kissa', (-6.0, 0.0, 4.25), 0.4, 90), ('Upstairs Bar', (-1.9, 0.0, 4.7), 0.45, -90)):
     x, y, floor = behind(pane, depth)
     seated(name, 'animated-woman.glb', x, y, facing, 0.46, floor=floor)
-# A woman on a tea break, in muted colours: a dusty rose knit top, dark denim, brown hair, dark shoes.
-TEA_BREAK = {(0.91, 0.4, 0.36): (0.55, 0.4, 0.39), (0.94, 0.28, 0.18): (0.13, 0.11, 0.1), (0.82, 0.76, 0.44): (0.18, 0.11, 0.07),
-             (0.38, 0.53, 0.83): (0.13, 0.17, 0.27), (0.91, 0.74, 0.57): (0.84, 0.64, 0.52)}
+# A woman on a tea break, in muted colours: a dusty rose knit top, washed denim, brown hair, tan shoes.
+TEA_BREAK = {(0.91, 0.4, 0.36): (0.55, 0.4, 0.39), (0.94, 0.28, 0.18): (0.42, 0.36, 0.3), (0.82, 0.76, 0.44): (0.18, 0.11, 0.07),
+             (0.38, 0.53, 0.83): (0.25, 0.34, 0.5), (0.91, 0.74, 0.57): (0.84, 0.64, 0.52)}
 drinker, cup_at, crown, seat_top = seated('Tea Break', 'animated-woman.glb', -0.35, -0.6, 140, 0.5, palette=TEA_BREAK)
 stool('Low Stool', -0.35, -0.6, height=seat_top)
 cylinder('Tea Cup', 0.045, 0.1, tuple(cup_at), material('Tea Cup', (0.55, 0.45, 0.35), roughness=0.4), vertices=14)
-puffs('Tea Steam', cup_at.x, cup_at.y, cup_at.z + 0.1, (0.01, -0.01), 3, size=0.35)
+steam('Tea Steam', cup_at.x, cup_at.y, cup_at.z + 0.05, 0.14, 0.3, density=4)
 simple_bike('Parked Bicycle', -5.4, -0.55, 92, lamp=True)
 # Ripples in the puddles where the rain lands.
 ripple = material('Ripple', (0.15, 0.16, 0.18), roughness=0.2)
@@ -1144,9 +1341,10 @@ with merged('Ripples'):
         finish(bpy.context.object, 'Ripple', ripple)
 
 
-def light(name, kind, color, energy, location, radius=0.1, rotation=(0, 0, 0), specular=1.0):
+def light(name, kind, color, energy, location, radius=0.1, rotation=(0, 0, 0), specular=1.0, shadow=False):
+    """A light; only the few whose shadows show cast them (each shadow costs a realtime view its maps)."""
     data = bpy.data.lights.new(name, kind)
-    data.color, data.energy = color, energy
+    data.color, data.energy, data.use_shadow = color, energy, shadow
     if kind == 'SUN':
         data.angle = radius
     elif kind == 'AREA':
@@ -1166,10 +1364,12 @@ light('Magenta Light', 'AREA', (1, 0.08, 0.45), 140, (0.7, -0.6, 3.7), (2.6, 1.0
 light('Cyan Light', 'AREA', (0.1, 0.65, 1), 50, (-1.0, -0.5, 3.6), (0.8, 0.8), glow, specular=0)
 # The window's and the door's light on the street (no highlights of their own: the puddles mirror the openings), a
 # cold moon from above and a street lamp off to the right.
-light('Window Light', 'POINT', (1, 0.45, 0.15), 260, (-1.6, -0.45, 0.5), 0.6, specular=0)
+light('Window Light', 'POINT', (1, 0.45, 0.15), 260, (-1.6, -0.45, 0.5), 0.6, specular=0, shadow=True)
+# A little of the window's light low on her shins, from the side the camera does not see.
+light('Shin Rim', 'POINT', (1, 0.55, 0.25), 25, (-0.85, -0.35, 0.3), 0.15, specular=0.3)
 light('Door Light', 'POINT', (1, 0.45, 0.15), 160, (2.0, -1.7, 0.4), 0.5, specular=0)
 # The bar's own light: one over the counter, one inside the doorway; and the vending machine's cold glow.
-light('Bar Light', 'POINT', (1, 0.6, 0.3), 200, (-3.5, 1.9, 2.5), 0.4)
+light('Bar Light', 'POINT', (1, 0.6, 0.3), 200, (-3.5, 1.9, 2.5), 0.4, shadow=True)
 light('Doorway Light', 'POINT', (1, 0.5, 0.2), 80, (2.0, 0.8, 1.2), 0.3)
 light('Vending Light', 'POINT', (0.6, 0.8, 1), 25, (-7.0, -1.6, 1.3), 0.4, specular=0)
 light('Yakitori Light', 'POINT', (1, 0.4, 0.12), 110, (-9.4, -0.9, 1.8), 0.5, specular=0)
@@ -1186,11 +1386,6 @@ light('Moon', 'SUN', (0.35, 0.5, 1), 0.08, (0, 0, 10), 0.1, (math.radians(35), m
 
 # The city beyond: megastructure towers far behind the lane's roofs, dark with sparse lit windows, red warning lights
 # and tall video ads, half lost in banks of fog.
-tower_dark = material('Tower', (0.008, 0.009, 0.012), roughness=0.6)
-tower_window = material('Tower Window', (1.0, 0.75, 0.45), emission=1.5)
-warning_light = material('Warning Light', (1.0, 0.05, 0.02), emission=6)
-
-
 def gradient_ad(name, low, high, strength):
     """A video ad's glow: a vertical Gradient Texture between two colors, as emission."""
     mat = bpy.data.materials.new(name)
@@ -1210,7 +1405,7 @@ def gradient_ad(name, low, high, strength):
 
 
 def fog_card(name, density, glow=1.0):
-    """Haze: a pale card whose Alpha is a stretched Noise Texture, so the towers fade in and out behind it."""
+    """Haze: a pale card whose Alpha is a Noise Texture thinning upward, so the towers fade in and out behind it."""
     mat = bpy.data.materials.new(name)
     nodes, links = mat.node_tree.nodes, mat.node_tree.links
     principled = nodes['Principled BSDF']
@@ -1223,7 +1418,19 @@ def fog_card(name, density, glow=1.0):
     ramp.inputs['To Max'].default_value = density
     links.new(coord.outputs['Generated'], noise.inputs['Vector'])
     links.new(noise.outputs['Fac'], ramp.inputs['Value'])
-    links.new(ramp.outputs['Result'], principled.inputs['Alpha'])
+    # Thinning out upward, so a bank has no edge.
+    height, thin = nodes.new('ShaderNodeSeparateXYZ'), nodes.new('ShaderNodeFloatCurve')
+    links.new(coord.outputs['Generated'], height.inputs['Vector'])
+    links.new(height.outputs['Z'], thin.inputs['Value'])
+    points = thin.mapping.curves[0].points
+    points[0].location, points[1].location = (0, 1), (1, 0)
+    points[1].handle_type = 'AUTO'
+    thin.mapping.update()
+    alpha = nodes.new('ShaderNodeMath')
+    alpha.operation = 'MULTIPLY'
+    links.new(ramp.outputs['Result'], alpha.inputs[0])
+    links.new(thin.outputs['Value'], alpha.inputs[1])
+    links.new(alpha.outputs[0], principled.inputs['Alpha'])
     mat.surface_render_method = 'BLENDED'
     return mat
 
@@ -1250,27 +1457,293 @@ def card(name, yaw, distance, width, bottom, top, mat):
 
 # The city's glow over the roofs to the left and at the lane's far end: light pollution from teal low to magenta,
 # fading into the night sky.
-glow = gradient_ad('City Glow', (0.02, 0.18, 0.2), (0.25, 0.03, 0.18), 0.45)
-card('City Glow', 70, 330, 420, -20, 280, glow)
-with merged('City'):
-    for i, (yaw, distance, w, d, h) in enumerate(((58, 150, 24, 20, 150), (66, 200, 34, 26, 230), (74, 165, 20, 18, 175),
-                                                  (81, 230, 40, 30, 260), (87, 140, 18, 16, 120), (62, 260, 30, 30, 210))):
-        (x, y), turn = toward(yaw, distance)
-        tower = box('Tower', (w, d, h), (x, y, h / 2 - 10), tower_dark, (0, 0, turn))
-        face = Matrix.Translation((x, y, 0)) @ Matrix.Rotation(turn, 4, 'Z')
-        for k in range(int(h / 7)):
-            if city.random() < 0.5:
-                box('Tower Window', (1.4, 0.2, 0.9), tuple(face @ Vector((city.uniform(-w / 2 + 1, w / 2 - 1), -d / 2 - 0.05, city.uniform(15, h - 15)))),
-                    tower_window, (0, 0, turn))
-        for corner in (-1, 1):
-            ellipsoid('Warning Light', (0.9, 0.9, 0.9), tuple(face @ Vector((corner * w / 2, -d / 2, h - 9.5))), warning_light)
-        # Huge vertical video ads on three of them.
-        if i < 3:
-            box('Ad', (w * 0.55, 0.3, h * 0.35), tuple(face @ Vector((0, -d / 2 - 0.3, h * city.uniform(0.45, 0.6)))), ads[i], (0, 0, turn))
+# The city beyond, far and vast: megastructure towers 0.5 to 2 km off, several hundred meters tall, built by a
+# Geometry Nodes group, lit as a city reads at that distance (floor bands, dark sections, edge strips, a fine noise of
+# windows) and mostly lost in haze; a sky glowing from below, a cloud deck the tallest pierce, fog banks between; an
+# arcology rising into the clouds and an airship drifting by with an ad.
+def haze(nodes, links, color_socket, near=700.0, far=2800.0, most=0.97):
+    """Fades a color toward the night's haze with the distance from the camera."""
+    camera = nodes.new('ShaderNodeCameraData')
+    fade = nodes.new('ShaderNodeMapRange')
+    fade.inputs['From Min'].default_value, fade.inputs['From Max'].default_value = near, far
+    fade.inputs['To Min'].default_value, fade.inputs['To Max'].default_value = 0.3, most
+    links.new(camera.outputs['View Distance'], fade.inputs['Value'])
+    mix = nodes.new('ShaderNodeMix')
+    mix.data_type = 'RGBA'
+    mix.inputs['B'].default_value = (0.045, 0.025, 0.06, 1)
+    links.new(fade.outputs['Result'], mix.inputs['Factor'])
+    links.new(color_socket, mix.inputs['A'])
+    return mix.outputs['Result'], fade.outputs['Result']
+
+
+def tower_material():
+    """A distant tower's light: thin floor bands at irregular heights, vertical strips at some corners and columns, a fine
+    noise of windows in lit sections, warm or cool, all fading into the haze; the facade itself dark."""
+    mat = bpy.data.materials.new('City Tower')
+    nodes, links = mat.node_tree.nodes, mat.node_tree.links
+    principled = nodes['Principled BSDF']
+    principled.inputs['Roughness'].default_value = 0.8
+    geometry = nodes.new('ShaderNodeNewGeometry')
+    parts = nodes.new('ShaderNodeSeparateXYZ')
+    links.new(geometry.outputs['Position'], parts.inputs['Vector'])
+
+    def op(kind, *inputs):
+        n = nodes.new('ShaderNodeMath')
+        n.operation = kind
+        for i, value in enumerate(inputs):
+            if isinstance(value, (int, float)):
+                n.inputs[i].default_value = value
+            else:
+                links.new(value, n.inputs[i])
+        return n.outputs[0]
+
+    def noise_at(vector, scale, detail=2):
+        n = nodes.new('ShaderNodeTexNoise')
+        n.inputs['Scale'].default_value, n.inputs['Detail'].default_value = scale, detail
+        links.new(vector, n.inputs['Vector'])
+        return n.outputs['Fac']
+
+    def white(*values):
+        combine = nodes.new('ShaderNodeCombineXYZ')
+        for i, value in enumerate(values):
+            if isinstance(value, (int, float)):
+                combine.inputs[i].default_value = value
+            else:
+                links.new(value, combine.inputs[i])
+        n = nodes.new('ShaderNodeTexWhiteNoise')
+        links.new(combine.outputs['Vector'], n.inputs['Vector'])
+        return n.outputs['Value']
+
+    floor = op('FLOOR', op('DIVIDE', parts.outputs['Z'], 4.0))
+    column = op('FLOOR', op('DIVIDE', op('ADD', parts.outputs['X'], parts.outputs['Y']), 12.0))
+    # Floor bands: a floor lit right across now and then, thin.
+    bands = op('MULTIPLY', op('GREATER_THAN', white(floor, op('FLOOR', op('DIVIDE', parts.outputs['X'], 300))), 0.93),
+               op('LESS_THAN', op('FRACT', op('DIVIDE', parts.outputs['Z'], 4.0)), 0.35))
+    # Vertical strips: some columns' edge lit top to bottom.
+    strips = op('MULTIPLY', op('GREATER_THAN', white(column, 3.0), 0.9),
+                op('LESS_THAN', op('FRACT', op('DIVIDE', op('ADD', parts.outputs['X'], parts.outputs['Y']), 12.0)), 0.06))
+    # A fine, noisy spread of windows in the lit sections only, never a grid.
+    sections = op('GREATER_THAN', noise_at(geometry.outputs['Position'], 0.008), 0.55)
+    specks = op('GREATER_THAN', noise_at(geometry.outputs['Position'], 2.5, 0), 0.68)
+    windows = op('MULTIPLY', op('MULTIPLY', sections, specks), 0.35)
+    light = op('MINIMUM', op('ADD', op('ADD', bands, strips), windows), 1.0)
+    upright = nodes.new('ShaderNodeSeparateXYZ')
+    links.new(geometry.outputs['Normal'], upright.inputs['Vector'])
+    light = op('MULTIPLY', light, op('LESS_THAN', op('ABSOLUTE', upright.outputs['Z']), 0.5))
+    tint = nodes.new('ShaderNodeMix')
+    tint.data_type = 'RGBA'
+    tint.inputs['A'].default_value, tint.inputs['B'].default_value = (1.0, 0.68, 0.38, 1), (0.55, 0.78, 1.0, 1)
+    links.new(op('GREATER_THAN', white(column, floor), 0.6), tint.inputs['Factor'])
+    # The air between: the farther, the more a tower is the sky's glow and the less its own lights.
+    lit = nodes.new('ShaderNodeMix')
+    lit.data_type = 'RGBA'
+    links.new(light, lit.inputs['Factor'])
+    lit.inputs['A'].default_value = (0, 0, 0, 1)
+    links.new(tint.outputs['Result'], lit.inputs['B'])
+    hazed, far = haze(nodes, links, lit.outputs['Result'])
+    links.new(hazed, principled.inputs['Emission Color'])
+    principled.inputs['Emission Strength'].default_value = 1.0
+    principled.inputs['Base Color'].default_value = (0.0, 0.0, 0.0, 1)
+    return mat
+
+
+def tower_nodes(mat):
+    """The towers' Geometry Nodes group: on each point, from its 'size' (width, depth, height) and 'turn' attributes, a
+    base block, a set-back block, a smaller one, a crown and, at random, an antenna mast; realized, with `mat`."""
+    group = bpy.data.node_groups.new('City Towers', 'GeometryNodeTree')
+    group.interface.new_socket('Geometry', in_out='INPUT', socket_type='NodeSocketGeometry')
+    group.interface.new_socket('Geometry', in_out='OUTPUT', socket_type='NodeSocketGeometry')
+    nodes, links = group.nodes, group.links
+    inp, out = nodes.new('NodeGroupInput'), nodes.new('NodeGroupOutput')
+    size = nodes.new('GeometryNodeInputNamedAttribute')
+    size.data_type, size.inputs['Name'].default_value = 'FLOAT_VECTOR', 'size'
+    turn = nodes.new('GeometryNodeInputNamedAttribute')
+    turn.data_type, turn.inputs['Name'].default_value = 'FLOAT', 'turn'
+    rotation = nodes.new('ShaderNodeCombineXYZ')
+    links.new(turn.outputs['Attribute'], rotation.inputs['Z'])
+    size_parts = nodes.new('ShaderNodeSeparateXYZ')
+    links.new(size.outputs['Attribute'], size_parts.inputs['Vector'])
+    join = nodes.new('GeometryNodeJoinGeometry')
+
+    def block(mesh_socket, scale, lift, select=None):
+        """Instances `mesh_socket` (standing on z = 0) on every point, scaled by size x `scale`, raised by height x
+        `lift`."""
+        raise_by = nodes.new('ShaderNodeVectorMath')
+        raise_by.operation = 'MULTIPLY'
+        raise_by.inputs[1].default_value = (0, 0, lift)
+        links.new(size.outputs['Attribute'], raise_by.inputs[0])
+        moved = nodes.new('GeometryNodeSetPosition')
+        links.new(inp.outputs['Geometry'], moved.inputs['Geometry'])
+        links.new(raise_by.outputs['Vector'], moved.inputs['Offset'])
+        scaled = nodes.new('ShaderNodeVectorMath')
+        scaled.operation = 'MULTIPLY'
+        scaled.inputs[1].default_value = scale
+        links.new(size.outputs['Attribute'], scaled.inputs[0])
+        put = nodes.new('GeometryNodeInstanceOnPoints')
+        links.new(moved.outputs['Geometry'], put.inputs['Points'])
+        links.new(mesh_socket, put.inputs['Instance'])
+        links.new(scaled.outputs['Vector'], put.inputs['Scale'])
+        links.new(rotation.outputs['Vector'], put.inputs['Rotation'])
+        if select is not None:
+            links.new(select, put.inputs['Selection'])
+        links.new(put.outputs['Instances'], join.inputs['Geometry'])
+
+    def standing(mesh_node):
+        lift = nodes.new('GeometryNodeTransform')
+        lift.inputs['Translation'].default_value = (0, 0, 0.5)
+        links.new(mesh_node.outputs['Mesh'], lift.inputs['Geometry'])
+        return lift.outputs['Geometry']
+
+    cube = standing(nodes.new('GeometryNodeMeshCube'))
+    mast = nodes.new('GeometryNodeMeshCylinder')
+    mast.inputs['Vertices'].default_value = 6
+    mast_standing = standing(mast)
+    block(cube, (1, 1, 0.62), 0)
+    block(cube, (0.78, 0.8, 0.25), 0.62)
+    block(cube, (0.55, 0.6, 0.13), 0.87)
+    block(cube, (0.3, 0.34, 0.04), 1.0)
+    chance = nodes.new('FunctionNodeRandomValue')
+    chance.data_type = 'BOOLEAN'
+    chance.inputs['Probability'].default_value = 0.6
+    block(mast_standing, (0.03, 0.03, 0.18), 1.04, chance.outputs[0])
+    spire_flag = nodes.new('GeometryNodeInputNamedAttribute')
+    spire_flag.data_type, spire_flag.inputs['Name'].default_value = 'BOOLEAN', 'spire'
+    spire = nodes.new('GeometryNodeMeshCone')
+    spire.inputs['Vertices'].default_value = 8
+    spire.inputs['Radius Top'].default_value = 0.0
+    block(standing(spire), (0.18, 0.2, 0.35), 1.04, spire_flag.outputs['Attribute'])
+    realize = nodes.new('GeometryNodeRealizeInstances')
+    links.new(join.outputs['Geometry'], realize.inputs['Geometry'])
+    paint = nodes.new('GeometryNodeSetMaterial')
+    paint.inputs['Material'].default_value = mat
+    links.new(realize.outputs['Geometry'], paint.inputs['Geometry'])
+    links.new(paint.outputs['Geometry'], out.inputs['Geometry'])
+    return group
+
+
+def sky_material(name, low, high, strength, alpha=None):
+    """A vertical gradient of light from `low` at its foot to `high` at its top, as emission; with `alpha`, fading out
+    toward its top."""
+    mat = gradient_ad(name, low, high, strength)
+    if alpha:
+        nodes, links = mat.node_tree.nodes, mat.node_tree.links
+        gradient = next(n for n in nodes if n.type == 'TEX_GRADIENT')
+        fade = nodes.new('ShaderNodeMath')
+        fade.operation, fade.inputs[0].default_value = 'SUBTRACT', alpha
+        links.new(gradient.outputs['Fac'], fade.inputs[1])
+        links.new(fade.outputs[0], nodes['Principled BSDF'].inputs['Alpha'])
+        mat.surface_render_method = 'BLENDED'
+    return mat
+
+
+# The sky over the city glowing from below, magenta into teal, fading up into the night.
+# Glowing only near the horizon and behind the towers, deep blue-violet above.
+card('City Glow', 72, 3200, 9000, -200, 1100, sky_material('City Glow', (0.26, 0.09, 0.2), (0.012, 0.01, 0.035), 0.35))
+
+# Towers in a wide band, nearer ones shorter, a few very tall.
+skyline = random.Random(11)
+TOWERS = []
+for distance, count, (low, high) in ((950, 10, (200, 380)), (1350, 14, (260, 500)), (1850, 16, (320, 650)), (2500, 14, (400, 800))):
+    for k in range(count):
+        yaw = 44 + (k + skyline.uniform(0.1, 0.9)) * 60 / count
+        w = skyline.uniform(28, 75)
+        TOWERS.append((yaw, distance + skyline.uniform(-80, 80), w, w * skyline.uniform(0.7, 1.0), skyline.uniform(low, high)))
+SPIRES = {len(TOWERS) - 25, len(TOWERS) - 7}
+points = bpy.data.meshes.new('City Points')
+spots = [toward(yaw, distance) for yaw, distance, *_ in TOWERS]
+points.from_pydata([(x, y, -10) for (x, y), _ in spots], [], [])
+points.attributes.new('size', 'FLOAT_VECTOR', 'POINT').data.foreach_set('vector', [v for *_, w, d, h in TOWERS for v in (w, d, h)])
+points.attributes.new('turn', 'FLOAT', 'POINT').data.foreach_set('value', [turn for _, turn in spots])
+points.attributes.new('spire', 'BOOLEAN', 'POINT').data.foreach_set('value', [i in SPIRES for i in range(len(TOWERS))])
+towers = bpy.data.objects.new('City', points)
+collection.objects.link(towers)
+city_tower = tower_material()
+towers.modifiers.new('City Towers', 'NODES').node_group = tower_nodes(city_tower)
+
+# The arcology: a colossal stepped megastructure whose top is lost in the cloud deck, a ring of light round its waist.
+ARCOLOGY = toward(76, 2100)
+(ax, ay), aturn = ARCOLOGY
+with merged('Arcology') as arcology:
+    for k, (w, z0, z1) in enumerate(((420, -10, 380), (320, 380, 760), (230, 760, 1150), (150, 1150, 1700))):
+        box('Arcology Block', (w, w * 0.8, z1 - z0), (ax, ay, (z0 + z1) / 2), city_tower, (0, 0, aturn))
+    bpy.ops.mesh.primitive_torus_add(major_radius=200, minor_radius=6, major_segments=48, minor_segments=6, location=(ax, ay, 600))
+    finish(bpy.context.object, 'Arcology Ring', material('Arcology Ring', (0.3, 0.9, 1.0), emission=4))
+
+# A low cloud deck lit from below by the city, which the arcology and the tallest towers pierce.
+cloud = bpy.data.materials.new('Cloud Deck')
+nodes, links = cloud.node_tree.nodes, cloud.node_tree.links
+principled = nodes['Principled BSDF']
+principled.inputs['Base Color'].default_value = (0.02, 0.02, 0.03, 1)
+principled.inputs['Emission Strength'].default_value = 0.6
+billows = nodes.new('ShaderNodeTexNoise')
+billows.inputs['Scale'].default_value, billows.inputs['Detail'].default_value = 0.0015, 8
+links.new(nodes.new('ShaderNodeNewGeometry').outputs['Position'], billows.inputs['Vector'])
+thick = nodes.new('ShaderNodeMapRange')
+thick.inputs['From Min'].default_value, thick.inputs['From Max'].default_value = 0.45, 0.75
+thick.inputs['To Max'].default_value = 0.6
+links.new(billows.outputs['Fac'], thick.inputs['Value'])
+links.new(thick.outputs['Result'], principled.inputs['Alpha'])
+# Brighter where the city's light catches its underside, in patches; dark between.
+patches = nodes.new('ShaderNodeTexNoise')
+patches.inputs['Scale'].default_value, patches.inputs['Detail'].default_value = 0.0006, 4
+links.new(billows.inputs['Vector'].links[0].from_socket, patches.inputs['Vector'])
+underlit = nodes.new('ShaderNodeMix')
+underlit.data_type = 'RGBA'
+underlit.inputs['A'].default_value, underlit.inputs['B'].default_value = (0.06, 0.03, 0.08, 1), (0.6, 0.24, 0.42, 1)
+catch = nodes.new('ShaderNodeMapRange')
+catch.inputs['From Min'].default_value, catch.inputs['From Max'].default_value = 0.45, 0.7
+links.new(patches.outputs['Fac'], catch.inputs['Value'])
+links.new(catch.outputs['Result'], underlit.inputs['Factor'])
+links.new(underlit.outputs['Result'], principled.inputs['Emission Color'])
+cloud.surface_render_method = 'BLENDED'
+(cx, cy), _ = toward(75, 1800)
+outline('Cloud Deck', [(cx - 4000, cy - 4000, 950), (cx + 4000, cy - 4000, 950), (cx + 4000, cy + 4000, 950), (cx - 4000, cy + 4000, 950)], cloud)
+
+# Fog banks drifting across at three depths.
 with merged('City Fog'):
-    # Banks of haze between the lane and the towers, and among them: the ads glow through, the towers fade.
-    for k, (distance, density, light) in enumerate(((110, 0.55, 0.6), (180, 0.6, 0.8), (250, 0.7, 1.0))):
-        card('Fog Card', 70 + k * 3, distance, 260 + k * 60, -10, 160 + k * 30, fog_card(f'City Fog {k + 1}', density, light))
+    for k, (distance, density, light) in enumerate(((420, 0.45, 0.8), (1000, 0.55, 1.2), (1600, 0.65, 1.6))):
+        card('Fog Card', 72 + k * 2, distance, 2500 + k * 1500, -20, 260 + k * 120, fog_card(f'City Fog {k + 1}', density, light))
+fog_drift = bpy.data.objects['City Fog']
+for frame, shift in ((1, 0), (300, 25)):
+    fog_drift.location.x = shift
+    fog_drift.keyframe_insert('location', index=0, frame=frame)
+
+# An airship drifting slowly across, a giant ad on its flank, its lights blinking.
+blink = material('Aircraft Light', (1.0, 0.1, 0.05), emission=8)
+strength = blink.node_tree.nodes['Principled BSDF'].inputs['Emission Strength']
+for frame, value in ((1, 8), (12, 0), (40, 8)):
+    strength.default_value = value
+    strength.keyframe_insert('default_value', frame=frame)
+for channel in fcurves(blink.node_tree):
+    channel.modifiers.new('CYCLES')
+    for key in channel.keyframe_points:
+        key.interpolation = 'CONSTANT'
+ad_glow = sky_material('Airship Ad', (0.9, 0.15, 0.5), (0.1, 0.8, 0.9), 1.2)
+mapping = next(n for n in ad_glow.node_tree.nodes if n.type == 'MAPPING')
+for frame, shift in ((1, 0.0), (240, 1.0)):
+    mapping.inputs['Location'].default_value[0] = shift
+    mapping.inputs['Location'].keyframe_insert('default_value', index=0, frame=frame)
+for channel in fcurves(ad_glow.node_tree):
+    channel.modifiers.new('CYCLES')
+with merged('Airship') as airship:
+    ellipsoid('Hull', (140, 32, 30), (0, 0, 0), material('Airship Hull', (0.01, 0.01, 0.015), roughness=0.6))
+    outline('Ad', [(-90, -33, -18), (90, -33, -18), (90, -33, 18), (-90, -33, 18)], ad_glow)
+    letters('Airship Kana', 'ラーメン', -60, -34, 8, 22, material('Airship Kana', (1, 0.95, 0.9), emission=2.5), -1)
+    for end in (-140, 140):
+        ellipsoid('Nav Light', (2, 2, 2), (end, 0, 0), blink)
+ship = airship['object']
+bpy.ops.object.select_all(action='DESELECT')
+ship.select_set(True)
+bpy.context.view_layer.objects.active = ship
+bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+(sx, sy), sturn = toward(72, 1150)
+for frame, along in ((1, -180), (300, 180)):
+    ship.matrix_world = Matrix.Translation((sx, sy, 300)) @ Matrix.Rotation(sturn, 4, 'Z') @ Matrix.Translation((along, 0, 0))
+    ship.keyframe_insert('location', frame=frame)
+ship.rotation_euler.z = sturn
+for channel in fcurves(ship):
+    for key in channel.keyframe_points:
+        key.interpolation = 'LINEAR'
 
 world = bpy.data.worlds.new('Night')
 world.node_tree.nodes['Background'].inputs['Color'].default_value = (0.006, 0.006, 0.012, 1)
@@ -1279,12 +1752,14 @@ scene.world = world
 camera = bpy.data.objects.new('Camera', bpy.data.cameras.new('Camera'))
 camera.data.lens = 16
 # Far enough to see the city's towers.
-camera.data.clip_end = 500
+camera.data.clip_end = 5000
 camera.location = EYE
 camera.rotation_euler = (math.radians(95), 0, math.radians(38))
 collection.objects.link(camera)
 scene.camera = camera
 scene.render.resolution_x, scene.render.resolution_y = 1280, 720
+# Render Image blurs what moves (the rain, the steam, the airship), as EEVEE's final render does.
+scene.render.use_motion_blur, scene.render.motion_blur_shutter = True, 0.5
 scene.view_settings.view_transform = 'Standard'
 # Blender's EEVEE reflects the neon in the puddles by ray tracing.
 scene.eevee.use_raytracing = True
