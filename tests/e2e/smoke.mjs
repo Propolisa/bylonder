@@ -901,8 +901,8 @@ const checks = {
   },
 
   // The scene's compositor shows in Rendered shading only as Viewport Shading > Compositor says
-  // (View3DShading.use_compositor, Disabled by default as in Blender): off, the view draws its overlays as any Rendered
-  // view does.
+  // (View3DShading.use_compositor, Disabled by default as in Blender); on or off, the view draws its overlays over its
+  // render, as Blender's draw manager draws them after the compositor.
   "Rendered shading composites only when the view's Compositor is on": { open: { example: null, node: "sphere" }, async run() {
     await app.bylonder((b) => b.world.compositor.setEnabled(true));
     const view = (use_compositor) => app.bylonder(async (b, use_compositor) => {
@@ -910,10 +910,10 @@ const checks = {
       v.setShading("rendered");
       v.setCompositor(use_compositor);
       await new Promise((done) => b.world.scene.onAfterRenderObservable.addOnce(done));
-      return { composites: !!b.world.scene.frameGraph, grid: b.world.scene.meshes.some((m) => m.metadata?.gridIter !== undefined && m.isEnabled()) };
+      return { composites: v.wantsCompositor, grid: b.world.scene.meshes.some((m) => m.metadata?.gridIter !== undefined && m.isEnabled()) };
     }, use_compositor);
     assert.deepEqual(await view("DISABLED"), { composites: false, grid: true });
-    assert.deepEqual(await view("ALWAYS"), { composites: true, grid: false });
+    assert.deepEqual(await view("ALWAYS"), { composites: true, grid: true });
     await view("DISABLED");
   } },
 

@@ -148,9 +148,9 @@ export async function createWorld({ input, engine, canvas, hooks = {}, audioCont
   world.beforeViewRender = ({ rendered, compositor, studio = { worldSpace: false, rotateZ: 0 } }) => {
     world.shadows.setActive(rendered);
     world.compositor?.setViewportActive(compositor);
-    // A rendered view draws in scene linear and displays through its camera's final post-process, or the compositor's
-    // Group Output; a graph without one displays what its own blocks draw.
-    const sceneLinear = rendered && (!scene.frameGraph || !!world.compositor?.viewTransformed);
+    // A rendered view draws in scene linear and displays through its camera's final post-process (the compositor works
+    // before it); a compositor graph of Babylon's own displays what its blocks draw.
+    const sceneLinear = rendered && !world.compositor?.drawsScene;
     world.renderSettings.setView({ rendered, sceneLinear });
     world.worlds.setViewportActive(rendered, sceneLinear);
     world.worlds.setStudio(studio);

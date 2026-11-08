@@ -1,8 +1,8 @@
-import { NodeRenderGraph } from '@babylonjs/core';
+import { CopyTextureToTexture, NodeRenderGraph } from '@babylonjs/core';
 import { bindGraph } from '../nodes/bindings.js';
 import { compositorGraph } from './compositor-tree.js';
 import { compositeFinalFrame } from './compositor-cpu.js';
-import { BlenderGroupOutputBlock } from '../nodes/blender/compositor-io.js';
+import { BlenderRenderLayersBlock } from '../nodes/blender/compositor-io.js';
 import { blendData, idStruct } from '../python/bpy_rna.js';
 
 // A new compositor without Main (a world without Blender's module): Render Layers into the Group Output.
@@ -24,12 +24,36 @@ export function createCompositor(world, { commit = () => {}, notify = console.wa
   const emit = () => listeners.forEach(fn => fn());
   const mainScene = () => world.mainSync && idStruct(world.mainSync.blender.scene);
   const cameraBlocks = () => (graph?.attachedBlocks || []).filter(b => b.getClassName() === 'NodeRenderGraphInputBlock' && b.isCamera?.());
+  // The graph's Render Layers: a graph of Blender's composites the view's render (composite below); one of Babylon's own
+  // is the scene's frame graph, which renders the scene itself.
+  const renderLayers = () => graph?.attachedBlocks.find((b) => b instanceof BlenderRenderLayersBlock) ?? null;
+  let ready = false;
+  const sceneGraph = () => (graph && !renderLayers() && enabled && viewport ? graph.frameGraph : null);
+  // A rendered view's composite: once the pass before its view transform has drawn the render (scene linear, after the
+  // film and effects), the graph runs on it and writes the composite back, which the view transform then displays.
+  const hooked = new WeakSet();
+  let copier = null;
+  const composite = (view) => {
+    const transform = world.renderSettings?.display(view)?.passes[0], chain = view._postProcesses ?? [];
+    const before = chain.slice(0, chain.indexOf(transform)).findLast(Boolean);
+    if (!transform || !before || hooked.has(before)) return;
+    hooked.add(before);
+    before.onAfterRenderObservable.add(() => {
+      const layers = renderLayers();
+      if (!layers || !ready || !enabled || !viewport || view !== camera || !transform.inputTexture) return;
+      const render = transform.inputTexture;
+      layers.setRender(render.texture);
+      graph.frameGraph.execute();
+      const result = graph.frameGraph.textureManager.getTextureFromHandle(graph.outputBlock.result);
+      if (result && result !== render.texture) (copier ??= new CopyTextureToTexture(scene.getEngine())).copy(result, render);
+    });
+  };
   const own = next => {
     graph = next;
     graph.onBuildObservable.add(() => { if (!building) { edited = true; bind(); commit(); emit(); } });
     return graph;
   };
-  const drop = () => { scene.frameGraph = null; graph?.dispose(); graph = null; shown = null; };
+  const drop = () => { ready = false; scene.frameGraph = null; graph?.dispose(); graph = null; shown = null; };
   const ensure = json => {
     if (graph) return graph;
     if (!json) return own(compositorGraph(NEW_TREE, scene).graph);
@@ -40,11 +64,13 @@ export function createCompositor(world, { commit = () => {}, notify = console.wa
   const bind = () => graph && bindGraph(animation, { id: 'compositor', title: 'Compositing', graph: () => graph, kind: 'render' });
   const build = async () => {
     building = true;
+    ready = false;
     try {
       if (camera) for (const block of cameraBlocks()) block.value = camera;
       graph.build(); await graph.whenReadyAsync();
+      ready = true;
     } finally { building = false; }
-    scene.frameGraph = enabled && viewport ? graph.frameGraph : null;
+    scene.frameGraph = sceneGraph();
   };
   const rebuild = () => build().catch(error => notify('Compositor: ' + error.message));
   // Blender's new compositing node group, the scene's (node.new_compositing_node_group, as Blender's New button runs it).
@@ -89,11 +115,16 @@ export function createCompositor(world, { commit = () => {}, notify = console.wa
     // views composite on the GPU.
     get onCPU() { return enabled && !!shown; },
     finalFrame: (camera) => api.onCPU && compositeFinalFrame(world, camera),
-    // Whether the graph ends in Blender's Group Output, which displays through the view transform (a graph made in
-    // Babylon's editor shows what its blocks draw).
-    get viewTransformed() { return !!graph?.attachedBlocks.some((block) => block instanceof BlenderGroupOutputBlock); },
+    // Whether the scene's frame graph draws the view (a graph of Babylon's own), not the view's render and its view
+    // transform.
+    get drawsScene() { return !!sceneGraph(); },
     // Per view, before it renders: whether this view shows the composite. Cheap (swaps the scene's render function).
-    setViewportActive(value) { viewport = value; const next = graph && enabled && value ? graph.frameGraph : null; if (scene.frameGraph !== next) scene.frameGraph = next; },
+    setViewportActive(value) {
+      viewport = value;
+      if (value && camera && renderLayers()) composite(camera);
+      const next = sceneGraph();
+      if (scene.frameGraph !== next) scene.frameGraph = next;
+    },
     subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     fields: () => (graph ? bindGraph(animation, { id: 'compositor', title: 'Compositing', graph: () => graph, kind: 'render' }) : []),
     // On, the scene composites through its compositing node group, a new one of Blender's when it has none.

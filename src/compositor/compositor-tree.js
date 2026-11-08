@@ -1,9 +1,8 @@
 // A scene's compositing node group, as a read .blend's Main holds it (plain: { nodes: [{ idname, name, properties,
-// values, location }], links: [[from node, output, to node, input]] }), as Bylonder's compositor graph: Babylon's
-// default render graph, its main rendering Blender's Render Layers and a Group Output before its output block (the
-// view transform, compositor-io.js), with a block per Blender node in between, linked as in the tree
-// (docs/node-editors.md).
-import { NodeRenderGraph } from '@babylonjs/core';
+// values, location }], links: [[from node, output, to node, input]] }), as Bylonder's compositor graph: a Babylon
+// render graph from Blender's Render Layers, the view's render, to its Group Output (compositor-io.js), with a block per
+// Blender node in between, linked as in the tree (docs/node-editors.md).
+import { Constants, NodeRenderGraph } from '@babylonjs/core';
 import { compositorBlockClasses } from '../nodes/blender/compositor-nodes.js';
 import { BlenderGroupOutputBlock, BlenderRenderLayersBlock } from '../nodes/blender/compositor-io.js';
 import { declaration } from '../nodes/blender/declarations.js';
@@ -13,37 +12,19 @@ const RENDER_LAYERS = 'CompositorNodeRLayers', GROUP_OUTPUT = 'NodeGroupOutput';
 // Nodes the composite does not pass through: a Viewer shows an image in Blender's editors, a frame groups nodes.
 const UNCOMPOSITED = ['CompositorNodeViewer', 'NodeFrame', 'NodeReroute'];
 
-const hideFeeding = (block) => {
-  if (block.name.startsWith('blender:')) return;
-  block.name = 'blender:' + block.name;
-  for (const input of block.inputs) if (input.connectedPoint) hideFeeding(input.connectedPoint.ownerBlock);
-};
-
-// Babylon's default graph's main rendering as Blender's Render Layers and a Group Output before its output block; what
-// feeds the rendering (camera, objects, its cleared target) and the output block are helpers, not drawn.
+// Blender's Render Layers, the view's render, and the Group Output, the graph's output block, whose composite is copied
+// back over it. Render Layers holds a placeholder until the first frame gives it the view's render.
 function blenderEnds(graph, scene) {
-  const babylonOutput = graph.outputBlock, babylonRendering = babylonOutput.texture.connectedPoint.ownerBlock;
   const rendering = new BlenderRenderLayersBlock(undefined, graph.frameGraph, scene), output = new BlenderGroupOutputBlock(undefined, graph.frameGraph, scene);
-  for (const input of babylonRendering.inputs) {
-    const from = input.connectedPoint;
-    if (!from) continue;
-    from.disconnectFrom(input);
-    from.connectTo(rendering.getInputByName(input.name));
-    hideFeeding(from.ownerBlock);
-  }
-  babylonRendering.output.disconnectFrom(babylonOutput.texture);
-  babylonRendering.dispose();
-  rendering.output.connectTo(output.source);
-  output.output.connectTo(babylonOutput.texture);
-  babylonOutput.name = 'blender:Output';
+  rendering.value = scene.getEngine().createRawTexture(new Uint8Array(4), 1, 1, Constants.TEXTUREFORMAT_RGBA, false, false, Constants.TEXTURE_NEAREST_SAMPLINGMODE);
+  rendering.output.connectTo(output.texture);
+  graph.outputBlock = output;
   graph.attachedBlocks.push(rendering, output);
   return { rendering, output };
 }
-
 // Returns the graph and the node types it does not run (left out, or passing their image through).
 export function compositorGraph(tree, scene, name = 'Compositing') {
   const graph = new NodeRenderGraph(name, scene, { rebuildGraphOnEngineResize: true });
-  graph.setToDefault();
   const { rendering, output } = blenderEnds(graph, scene), missing = new Set();
   const blocks = new Map(), locations = [];
   const place = (block, node) => node.location && locations.push({ blockId: block.uniqueId, x: node.location[0], y: -node.location[1], isCollapsed: false });
@@ -69,7 +50,7 @@ export function compositorGraph(tree, scene, name = 'Compositing') {
   for (const [from, socket, to, input] of rerouted(tree)) {
     const out = source(from, socket);
     if (to === groupOutput?.name) {
-      if (out && input === Object.keys(groupOutput.values ?? {})[0]) { output.source.connectedPoint?.disconnectFrom(output.source); out.connectTo(output.source); }
+      if (out && input === Object.keys(groupOutput.values ?? {})[0]) { output.texture.connectedPoint?.disconnectFrom(output.texture); out.connectTo(output.texture); }
       continue;
     }
     const target = blocks.get(to)?.getInputByName(input);
