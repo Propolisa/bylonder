@@ -40,4 +40,14 @@ sync.redraw();
 
 const count = blender.instances().reduce((sum, group) => sum + group.data.length / 16, 0);
 assert.equal(count, 4, "an instance on each of the circle's 4 control points, as in Blender");
-console.log("Curve objects: Object Info reads a drawn curve's curves, not its viewport wire");
+
+// A read file's curve keeps the modifiers Main holds through the scene sync's first flush (Pizza Delivery's rack lost
+// its Mirrors, and with them its geometry in the status bar's statistics).
+selection.replace([circle]);
+run('object.modifier_add', { type: 'MIRROR' });
+const read = new Scene(new NullEngine()), opened = Object.assign(sceneMain({ scene: read, objects: [] }).readBlend(sync.projectBlend(), read).nodes, { scene: read });
+const reopened = sceneMain({ scene: read, objects: opened });
+reopened.flush();
+const ring = opened.find((node) => node.name === circle.name);
+assert.deepEqual(Array.from(idStruct(reopened.objectOf(ring)).modifiers, (m) => m.type), ['MIRROR'], 'the read curve keeps its Mirror');
+console.log("Curve objects: Object Info reads a drawn curve's curves, not its viewport wire; a read curve keeps its modifiers");

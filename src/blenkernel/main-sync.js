@@ -358,7 +358,8 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     const object = curveObject(entry);
     object.data = data;
     for (const name of CURVE_TARGETS) object.target(name, objectNamed(data.targets?.[name]));
-    object.modifiers = (data.modifiers ?? []).map((m) => ({ ...m, targets: Object.fromEntries(Object.entries(m.targets ?? {}).map(([k, name]) => [k, objectNamed(name)])) }));
+    // A recipe without modifiers (a read file's curve) leaves Main's own stack as it is.
+    if (data.modifiers) object.modifiers = data.modifiers.map((m) => ({ ...m, targets: Object.fromEntries(Object.entries(m.targets ?? {}).map(([k, name]) => [k, objectNamed(name)])) }));
   }
   // A mesh object's Blender modifiers are Main's (main-modifiers.js), which its depsgraph evaluates on Mesh data of
   // Main's: a mesh Babylon built gets its geometry as its Mesh data then. A textured modifier points at Main's Tex of
