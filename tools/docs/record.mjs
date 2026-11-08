@@ -194,23 +194,24 @@ export async function recorder(feature, { example, node, size = SIZE, scale = 1,
       return r.screenOf(head.map((h, i) => h + (tail[i] - h) * along));
     },
     box,
-    // A PNG of the 3D Viewport through the scene camera in Rendered shading, without overlays, header, toolbar or the
-    // pointer's dot: the canvas below the header and right of the toolbar, `part` of it (see box). The view is left as
-    // it was.
-    async render(name, { part = [0, 0, 1, 1], wait = 10000, width } = {}) {
-      const canvas = await app.frame().locator(".viewport-canvas").first().boundingBox();
-      const header = await app.locator(".bl-view3d-header").first().boundingBox();
+    // A PNG of Render Image's result (Render > Render Image, what F12 gives a user at the scene's output size), `part` of
+    // it as fractions [left, top, right, bottom] and `width` pixels wide at most. The Render Result window is closed again
+    // and the 3D Viewport left in camera view, where the steps after it start.
+    async render(name, { part = [0, 0, 1, 1], width } = {}) {
+      const file = `${out}${name}.png`, result = app.frame().locator(".render-result");
       await app.bylonder((b) => b.views.input.enterCameraView());
-      const before = await app.bylonder((b) => ({ overlays: b.views.input.state.overlays, shading: b.views.input.state.shading }));
-      await app.bylonder((b) => { b.views.input.state.overlays = false; b.views.input.setShading("rendered"); });
-      await app.page.mouse.move(1, 1);
-      for (const where of [app.page, app.frame()]) await where.evaluate(() => document.querySelectorAll("div[style*='border-radius: 50%']").forEach((d) => (d.style.display = "none")));
-      await app.page.waitForTimeout(wait);
-      const left = canvas.x + 56, top = Math.max(canvas.y, header.y + header.height + 30);
-      const right = canvas.x + canvas.width, bottom = canvas.y + canvas.height;
-      await r.shot(name, { x: left, y: top, width: right - left, height: bottom - top }, { part, width });
-      await app.bylonder((b, before) => { b.views.input.state.overlays = before.overlays ?? true; b.views.input.setShading(before.shading); }, before);
-      for (const where of [app.page, app.frame()]) await where.evaluate(() => document.querySelectorAll("div[style*='border-radius: 50%']").forEach((d) => (d.style.display = "")));
+      await app.page.click('[data-blender="TOPBAR_MT_render"]');
+      await app.page.getByRole("menuitem", { name: "Render Image" }).click();
+      await result.locator("[data-status]").filter({ hasText: /^(Finished|Render failed)/ }).waitFor({ timeout: 300000 });
+      const status = await result.locator("[data-status]").textContent();
+      if (!status.startsWith("Finished")) throw Error(status);
+      const png = await result.locator("canvas").evaluate((canvas) => canvas.toDataURL("image/png"));
+      writeFileSync(file, Buffer.from(png.split(",")[1], "base64"));
+      await result.locator("[data-close]").click();
+      const [l, t, rt, bt] = part, crop = `crop=iw*${rt - l}:ih*${bt - t}:iw*${l}:ih*${t}`;
+      encode("-i", file, "-vf", `${crop},scale='min(${width ?? 100000},iw)':-2:flags=lanczos`, `${file}.tmp.png`);
+      renameSync(`${file}.tmp.png`, file);
+      return file;
     },
     // A PNG of `region` (see box), `width` pixels wide at most.
     async shot(name, region, { part, width } = {}) {

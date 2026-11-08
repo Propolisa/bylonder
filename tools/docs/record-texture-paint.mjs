@@ -47,8 +47,8 @@ async function pickImage(r, name) {
 const stroke = async (r, selector, from, to) => r.drag(await at(r, selector, ...from), await at(r, selector, ...to), { steps: 30 });
 
 await session("texture-paint", { example: "texture-paint", node: "Vase" }, async (r) => {
-  await r.render("render", { wait: 30000 });
-  await r.render("thumbnail", { width: 960, wait: 15000 });
+  await r.render("render");
+  await r.render("thumbnail", { width: 960 });
   await workspace(r, "texture-paint");
   // Through the camera (Numpad 0 does not reach the view in Texture Paint Mode yet).
   await r.app.bylonder((b) => b.views.input.enterCameraView());
@@ -101,10 +101,9 @@ await session("uv-editing", {}, async (r) => {
 });
 
 await session("uv-editing", { example: "tin-cans", node: "Tomato" }, async (r) => {
-  await r.render("render", { wait: 30000 });
-  await r.render("thumbnail", { width: 960, wait: 15000 });
+  await r.render("render");
+  await r.render("thumbnail", { width: 960 });
   await workspace(r, "uv-editing");
-  await frameSelected(r);
   // The image framed (Home): the Tomato can's UVs over the label atlas.
   await r.app.page.mouse.move(...(await at(r, IMAGE, 0.3, 0.5)));
   await r.keys("Home");
@@ -139,6 +138,6 @@ await session("image-textures", { example: "framed-print", node: "Print" }, asyn
   await r.page.mouse.move(1450, 120);
   await r.shot("image-node", NODES);
   await workspace(r, "layout");
-  await r.render("render", { wait: 30000 });
-  await r.render("thumbnail", { width: 960, wait: 15000 });
+  await r.render("render");
+  await r.render("thumbnail", { width: 960 });
 });

@@ -60,6 +60,6 @@ if (wanted("steps")) await record("curves-and-text", {}, async (r) => {
 });
 
 if (wanted("example")) await record("curves-and-text", { example: "neon-sign", node: "Frame", size: { width: 1600, height: 950 } }, async (r) => {
-  await r.render("render", { wait: 30000 });
-  await r.render("thumbnail", { width: 960, wait: 15000 });
+  await r.render("render");
+  await r.render("thumbnail", { width: 960 });
 });

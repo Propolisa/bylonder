@@ -8,7 +8,7 @@ const VIEW = '[data-section="viewport"]', PROPERTIES = '[data-section="propertie
 await record("grease-pencil", { example: "grease-pencil", node: "Dusk Lake" }, async (r) => {
   const { app } = r;
   await r.frame(60);
-  await r.render("thumbnail", { wait: 4000 });
+  await r.render("thumbnail");
   await app.bylonder((b) => { b.views.input.state.overlays = false; b.views.input.setShading("rendered"); });
   await r.gif("play", VIEW, async () => { await r.keys("Space", "Space"); await r.pause(5000); await r.keys("Space", "Space"); }, { part: [0.15, 0.1, 0.85, 0.9] });
   // The layers in the Outliner, maximized (Ctrl Space), three levels shown (Numpad +).

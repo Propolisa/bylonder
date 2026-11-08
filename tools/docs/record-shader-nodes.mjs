@@ -115,6 +115,6 @@ if (wanted("example")) await record("shader-nodes", { example: "blue-planet", no
   await r.page.mouse.move(5, 60);
   await r.shot("moon-tree", EDITOR);
   await workspace(r, "layout");
-  await r.render("render", { wait: 30000 });
-  await r.render("thumbnail", { part: [0.1, 0, 0.9, 1], width: 960, wait: 15000 });
+  await r.render("render");
+  await r.render("thumbnail", { part: [0.1, 0, 0.9, 1], width: 960 });
 });
