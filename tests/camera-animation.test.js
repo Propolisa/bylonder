@@ -23,4 +23,9 @@ const ob = createRNA({ world: { scene, objects: [camera] } }).pointer('Object', 
 const forward = camera.getDirection(Vector3.Forward());
 assert.ok(forward.z > 0.99, `looks forward: ${forward.asArray()}`);
 assert.ok(Math.abs(channels.get('rotation.x').get() + blender[0]) < 1e-6, 'the channel reads back what it set');
-console.log('Camera animation: an animated camera turns by Blender\'s Euler, looking down its -Z');
+// A rotation set whole reads back as set, not as an equivalent other triple: Pizza Delivery's sun at 3.92 about X was
+// written back to Main as -2.36, which turns its keys the other way round.
+const turned = [3.9199, -0.7596, -2.5729];
+ob.rotation_euler = turned;
+[...ob.rotation_euler].forEach((value, i) => assert.ok(Math.abs(value - turned[i]) < 1e-6, `rotation_euler[${i}] ${value} as set`));
+console.log('Camera animation: an animated camera turns by Blender\'s Euler, looking down its -Z, and keeps the Euler it was given');

@@ -78,21 +78,27 @@ const looksAlongZ = (ob) => ob instanceof Camera || ob instanceof Light;
 // A camera that looks at a target (an Arc Rotate camera, or one locked on a target) is turned by its view, not its rotation.
 const aimed = (ob) => ob instanceof Camera && (ob.getClassName() === 'ArcRotateCamera' || !!ob.lockedTarget);
 const viewQuaternion = (ob) => Quaternion.FromRotationMatrix(ob.getWorldMatrix().getRotationMatrix());
-const lookingRotation = {
-  get: (ob) => eulerXYZ(lookingFrame(quaternionMatrix(aimed(ob) ? viewQuaternion(ob) : babylonQuaternion(ob)))),
-  set: (ob, value) => setRotation(ob, matrixQuaternion(lookingFrame(matrixXYZ(value)))),
-};
-// A camera's or light's Blender Euler rotation one axis at a time, as an animation's channels set it: the values last set
-// while the node keeps that rotation, so an axis's value is not re-read from its matrix (an equivalent other triple).
+// A camera's or light's Blender Euler rotation: the one last set while the node keeps that rotation, so it is not re-read
+// from its matrix as an equivalent other triple (3.92 as -2.36), which would turn its keys the other way round.
 const lookingEulers = new WeakMap();
+const lookingRotation = {
+  get(ob) {
+    const kept = lookingEulers.get(ob);
+    if (kept && !aimed(ob) && kept.q.equalsWithEpsilon(babylonQuaternion(ob), 1e-9)) return [...kept.euler];
+    return eulerXYZ(lookingFrame(quaternionMatrix(aimed(ob) ? viewQuaternion(ob) : babylonQuaternion(ob))));
+  },
+  set(ob, value) {
+    setRotation(ob, matrixQuaternion(lookingFrame(matrixXYZ(value))));
+    lookingEulers.set(ob, { euler: [...value], q: babylonQuaternion(ob).clone() });
+  },
+};
 export const looksAlongZOf = (node) => looksAlongZ(node) && !aimed(node);
+// One axis at a time, as an animation's channels set it.
 export function lookingEulerAxis(node, index, value) {
-  const q = babylonQuaternion(node), kept = lookingEulers.get(node);
-  const euler = kept && kept.q.equalsWithEpsilon(q, 1e-9) ? [...kept.euler] : lookingRotation.get(node);
+  const euler = lookingRotation.get(node);
   if (value === undefined) return euler[index];
   euler[index] = value;
   lookingRotation.set(node, euler);
-  lookingEulers.set(node, { euler, q: babylonQuaternion(node).clone() });
 }
 // An object's Blender Euler rotation one axis at a time in an order Babylon lacks (its rotation_mode, kept on it), as an
 // animation's channels set it; null for Babylon's own order.
