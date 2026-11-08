@@ -251,7 +251,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
       cameraBorder.classList.toggle('passepartout', frame.passepartout > 0);
       cameraBorder.classList.toggle('guides', !!state.overlays);
     }
-    world.beforeViewRender({ rendered, compositor: view.wantsCompositor, studio: { worldSpace: state.use_world_space_lighting, rotateZ: state.studiolight_rotate_z } });
+    world.beforeViewRender({ rendered, compositor: view.wantsCompositor, frame, studio: { worldSpace: state.use_world_space_lighting, rotateZ: state.studiolight_rotate_z } });
     // Rendered draws the overlays after its film and compositor, as Blender does; a compositor graph of Babylon's own
     // that draws the scene has no pass for them.
     const film = rendered && !scene.frameGraph ? world.renderSettings.film(view.camera) : null;

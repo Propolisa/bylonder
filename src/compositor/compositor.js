@@ -1,4 +1,4 @@
-import { CopyTextureToTexture, NodeRenderGraph } from '@babylonjs/core';
+import { EffectRenderer, EffectWrapper, NodeRenderGraph, Viewport } from '@babylonjs/core';
 import { bindGraph } from '../nodes/bindings.js';
 import { compositorGraph } from './compositor-tree.js';
 import { compositeFinalFrame } from './compositor-cpu.js';
@@ -14,9 +14,40 @@ const NEW_TREE = { name: 'Compositor Nodes', nodes: [{ idname: 'CompositorNodeRL
 const structure = ({ nodes, links }) => JSON.stringify([links, nodes.map(({ idname, name, properties, mute, values = {} }) =>
   [idname, name, properties, mute, Object.entries(values).filter(([, v]) => typeof v === 'string' || typeof v === 'boolean')])]);
 
+// Copies the texels of `source` at `offset` from each texel drawn into the target (the target's `region` only, in pixels).
+function regionCopier(engine) {
+  const renderer = new EffectRenderer(engine);
+  const wrapper = new EffectWrapper({ engine, name: 'Compositor region', useShaderStore: false, uniforms: ['offset'], samplers: ['source'],
+    fragmentShader: 'uniform sampler2D source;\nuniform ivec2 offset;\nvoid main(void) { gl_FragColor = texelFetch(source, ivec2(gl_FragCoord.xy) + offset, 0); }' });
+  return (source, target, offset, region = null) => {
+    if (!wrapper.effect.isReady()) return;
+    renderer.saveStates();
+    engine.bindFramebuffer(target);
+    renderer.setViewport(region ? new Viewport(region.x / target.width, region.y / target.height, region.width / target.width, region.height / target.height) : undefined);
+    renderer.applyEffectWrapper(wrapper);
+    wrapper.effect._bindTexture('source', source);
+    wrapper.effect.setInt2('offset', offset[0], offset[1]);
+    renderer.draw();
+    // The passes after it (the view transform onto the canvas) draw with the viewport as they find it.
+    renderer.setViewport();
+    engine.unBindFramebuffer(target);
+    renderer.restoreStates();
+  };
+}
+
+// The part of a view's render Blender's viewport compositor composites (draw/engines/compositor Context::get_camera_region):
+// in camera view the camera's frame (`frame`, as parts of the view from its top left) within the view, else all of it;
+// in pixels from the bottom left.
+export function compositedRegion(frame, width, height) {
+  if (!frame) return { x: 0, y: 0, width, height };
+  const x0 = Math.max(0, Math.trunc(frame.x * width)), x1 = Math.min(width, Math.trunc((frame.x + frame.width) * width));
+  const y0 = Math.max(0, Math.trunc((1 - frame.y - frame.height) * height)), y1 = Math.min(height, Math.trunc((1 - frame.y) * height));
+  return { x: x0, y: y0, width: Math.max(1, x1 - x0), height: Math.max(1, y1 - y0) };
+}
+
 export function createCompositor(world, { commit = () => {}, notify = console.warn } = {}) {
   const { scene, animation } = world;
-  let graph = null, enabled = false, edited = false, building = false, camera = null, viewport = false;
+  let graph = null, enabled = false, edited = false, building = false, camera = null, viewport = false, frame = null;
   // shown: the structure of Main's compositing node group the graph was built from; null for a graph of Babylon's own
   // (a project saved before the compositor was Main's).
   let shown = null;
@@ -32,7 +63,7 @@ export function createCompositor(world, { commit = () => {}, notify = console.wa
   // A rendered view's composite: once the pass before its view transform has drawn the render (scene linear, after the
   // film and effects), the graph runs on it and writes the composite back, which the view transform then displays.
   const hooked = new WeakSet();
-  let copier = null;
+  let copy = null;
   const composite = (view) => {
     const transform = world.renderSettings?.display(view)?.passes[0], chain = view._postProcesses ?? [];
     const before = chain.slice(0, chain.indexOf(transform)).findLast(Boolean);
@@ -41,13 +72,14 @@ export function createCompositor(world, { commit = () => {}, notify = console.wa
     before.onAfterRenderObservable.add(() => {
       const layers = renderLayers();
       if (!layers || !ready || !enabled || !viewport || view !== camera || !transform.inputTexture) return;
-      const render = transform.inputTexture;
-      if (layers.fit(render.width, render.height)) { rebuild(); return; }
-      copier ??= new CopyTextureToTexture(scene.getEngine());
-      copier.copy(render.texture, layers.target);
+      const render = transform.inputTexture, region = compositedRegion(frame, render.width, render.height);
+      if (layers.fit(region.width, region.height)) { rebuild(); return; }
+      copy ??= regionCopier(scene.getEngine());
+      copy(render.texture, layers.target, [region.x, region.y]);
       graph.frameGraph.execute();
+      // Written back over the region, the rest of the view its plain render (compositor_engine.cc write_output).
       const result = graph.frameGraph.textureManager.getTextureFromHandle(graph.outputBlock.result);
-      if (result && result !== layers.value) copier.copy(result, render);
+      if (result && result !== layers.value) copy(result, render, [-region.x, -region.y], region);
     });
   };
   const own = next => {
@@ -129,9 +161,11 @@ export function createCompositor(world, { commit = () => {}, notify = console.wa
     // Whether the scene's frame graph draws the view (a graph of Babylon's own), not the view's render and its view
     // transform.
     get drawsScene() { return !!sceneGraph(); },
-    // Per view, before it renders: whether this view shows the composite. Cheap (swaps the scene's render function).
-    setViewportActive(value) {
+    // Per view, before it renders: whether this view shows the composite, and its camera frame in camera view
+    // (compositedRegion). Cheap (swaps the scene's render function).
+    setViewportActive(value, cameraFrame = null) {
       viewport = value;
+      frame = cameraFrame;
       if (value && camera && renderLayers()) composite(camera);
       const next = sceneGraph();
       if (scene.frameGraph !== next) scene.frameGraph = next;
