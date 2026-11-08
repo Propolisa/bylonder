@@ -42,7 +42,7 @@ const casts = (mesh) => shadedObject(mesh) && mesh.metadata?.wbVisibleShadow !==
 // itself, though EEVEE lights it from behind (its offset is the receiver's, along the normal facing the viewer). Babylon's
 // include remapping, #include<name>(from,to), moves such a face away from the light instead, by less the more it is
 // edge-on to the light so that a closed object's shadow keeps its outline.
-export const LIT_SIDE_NORMAL_BIAS = ['sinNLSM;worldPos', '(0.0<ndlSM?sinNLSM:ndlSM);worldPos'];
+const LIT_SIDE_NORMAL_BIAS = ['sinNLSM;worldPos', '(0.0<ndlSM?sinNLSM:ndlSM);worldPos'];
 const SHADOW_MAP = 'blenderShadowMap';
 ShaderStore.ShadersStore[`${SHADOW_MAP}VertexShader`] ??= shadowMapVertexShader.shader.replace('#include<shadowMapVertexNormalBias>', `#include<shadowMapVertexNormalBias>(${LIT_SIDE_NORMAL_BIAS})`);
 ShaderStore.ShadersStore[`${SHADOW_MAP}PixelShader`] ??= shadowMapPixelShader.shader;

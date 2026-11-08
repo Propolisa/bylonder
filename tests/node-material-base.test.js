@@ -72,6 +72,10 @@ assert.match(fragment, /#ifdef SHADOW\{?X?\}?|SHADOW0|computeShadow/, "the fragm
   assert.match(dithered._fragmentSourceCode, /if \(\w+\.a <= bl_dither\(gl_FragCoord\.xy, bl_dither_offset\)\) discard;/, 'hashed by its coverage');
   assert.ok(!material.needAlphaBlending() && material.needAlphaTesting(), 'in the opaque pass, depth-tested, as EEVEE draws Dithered surfaces');
   assert.equal(material.shadowDepthWrapper?.baseMaterial, material, "its shadow is drawn with its own shader, hashed as it is (EEVEE's transparent shadows)");
+  // whose world position Babylon's shadow includes (a point or spot light's distance) read by its own name
+  const [from, to] = material.shadowDepthWrapper._options.remappedVariables ?? [];
+  assert.equal(from, 'worldPos');
+  assert.match(dithered._vertexSourceCode, new RegExp(`vec4 ${to}\\s*=`), `the shadow reads the world position as ${to}`);
   material.transparencyMode = 2;
   scene.render();
   assert.doesNotMatch((await effect()).defines, /#define BL_DITHERED/, 'Blended blends it');

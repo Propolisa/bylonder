@@ -31,7 +31,6 @@ import { eeveeParity, eeveeParityChanged } from '../../draw/eevee-parity.js';
 import { ditherOffset } from '../../render/dither.js';
 import { readsSceneDepth, sceneDepth } from '../../render/scene-depth.js';
 import { AREA_SPECULAR, LIGHT_SPECULAR } from '../../blenkernel/light/area-specular.js';
-import { LIT_SIDE_NORMAL_BIAS } from '../../blenkernel/light/light-shadows.js';
 import '../graph-roots.js';
 
 // A NodeMaterial of Blender's nodes. Babylon's walks a block's inputs again for each path that reaches the block as it
@@ -1524,7 +1523,13 @@ export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock)
     material.blenderNoSurface = this._noSurface = !closure && !!this.blenderVolume;
     // EEVEE's transparent shadows: a Dithered surface's shadow is hashed per sample as the surface is, so its samples
     // average a shadow as dense as its coverage. Babylon's shadow maps draw it with the material's own shader.
-    if (material.blenderDithered) material.shadowDepthWrapper ??= new ShadowDepthWrapper(material, material.getScene(), { remappedVariables: LIT_SIDE_NORMAL_BIAS });
+    // Babylon's shadow includes name the world position worldPos; the material's own shader names it as its block does,
+    // once built.
+    if (material.blenderDithered) {
+      material.shadowDepthWrapper ??= new ShadowDepthWrapper(material, material.getScene(), {
+        get remappedVariables() { return ['worldPos', worldPosition(material).output.associatedVariableName]; },
+      });
+    }
     const [from, to, other] = material.blenderDithered ? [processing.getOutputByName('displayRgba'), this.rgba, this.rgb]
       : [processing.getOutputByName('displayRgb'), this.rgb, this.rgba];
     other.connectedPoint?.disconnectFrom(other);
