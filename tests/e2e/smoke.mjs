@@ -1628,7 +1628,7 @@ const checks = {
   } },
 
   // Add > Camera into the active collection while an object instances it (Pizza Delivery's pavement): the camera is
-  // added and the outliner and Properties go on drawing.
+  // added and the outliner and Properties go on drawing. The status bar counts it and its instance, as Blender's does.
   async "Add > Camera into an instanced collection adds the camera"() {
     await app.bylonder((b) => {
       const C = b.modules.bpyRna.contextStruct(), set = C.blend_data.collections.new("Set");
@@ -1638,11 +1638,15 @@ const checks = {
       C.scene.collection.objects.link(instancer);
       C.view_layer.active_layer_collection = C.view_layer.layer_collection.children.get("Set");
     });
-    const cameras = await app.bylonder((b) => b.world.scene.cameras.length);
+    await app.settled();
+    // The status bar updates every 250 ms.
+    await app.page.waitForTimeout(500);
+    const cameras = await app.bylonder((b) => b.world.scene.cameras.length), { Objects: [, total] } = await app.stats();
     await app.hover();
     await app.page.keyboard.press("Shift+A");
     await app.frame().getByRole("menuitem", { name: "Camera", exact: true }).click();
     await app.until((b, count) => b.world.scene.cameras.length > count, cameras);
+    await expectStats(({ Objects }) => Objects[0] === 1 && Objects[1] === total + 2);
     const name = await app.bylonder((b) => b.editor.selection.active.name);
     await app.until((b, name) => b.world.outliner.area.draw().draw.some((c) => c.op === "text" && c.text === name), name);
     await app.locator('#properties-section [role="tab"][aria-label="Object"]').click();

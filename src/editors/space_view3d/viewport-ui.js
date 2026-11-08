@@ -54,9 +54,6 @@ export function createViewportStatus({ world, editor, views, send }) {
     // The 3D View and the status bar name the active collection (view3d_draw.cc draw_selected_name: CTX_data_collection).
     const cols = world.collections, name = (id) => (!cols || !id || id === cols.MASTER ? 'Scene Collection' : cols.byId(id).name);
     const collection = name(cols?.active);
-    const visible = world.objects.filter(n => n.isEnabled() && n.isVisible !== false && !n.isDisposed() && n.getTotalVertices);
-    const verts = visible.reduce((s, n) => s + n.getTotalVertices(), 0);
-    const tris = visible.reduce((s, n) => s + (n.getTotalIndices() || n.getTotalVertices()) / 3, 0);
     // In a mode other than Object Mode it names the object and its data instead (draw_selected_name).
     const mode = active?.metadata?.wbMode, dataName = mode && mode !== 'OBJECT' ? world.mainSync?.dataName(active) : null;
     const detail = `(${Math.round(world.animation.time.frame)}) ${dataName ? `${active.name} | ${dataName}` : `${collection}${active ? ' | ' + active.name : ''}`}`;
@@ -69,12 +66,13 @@ export function createViewportStatus({ world, editor, views, send }) {
     // An armature's Edit and Pose Modes count its joints and bones, as Blender's status bar does (info_stats.cc).
     const armatureMode = active?.metadata?.wbCreation?.armature && ['EDIT', 'POSE'].includes(active.metadata.wbMode);
     // stats_object_edit: a curve counts its control points only.
-    const geometry = edit?.edges
+    const editGeometry = () => (edit.edges
       ? `Verts:${ratio(edit.verts)} | Edges:${ratio(edit.edges)} | Faces:${ratio(edit.faces)} | Tris:${count(edit.tris)}`
-      : edit ? `Verts:${ratio(edit.verts)}`
-      : `Verts:${count(verts)} | Tris:${count(Math.round(tris))}`;
-    const stats = armatureMode ? `${world.mainSync.blender.statistics()} | ${fps}`
-      : `${collection}${active ? ' | ' + active.name : ''} | ${geometry} | Objects:${editor.selection.size}/${world.objects.filter(n => n.isEnabled(false)).length} | ${fps}`;
+      : `Verts:${ratio(edit.verts)}`);
+    // Outside an edit mesh or curve, Blender's own statistics: the evaluated scene with its instances (info_stats.cc).
+    const stats = edit && !armatureMode
+      ? `${collection}${active ? ' | ' + active.name : ''} | ${editGeometry()} | Objects:${editor.selection.size}/${world.objects.filter(n => n.isEnabled(false)).length} | ${fps}`
+      : `${world.mainSync.blender.statistics()} | ${fps}`;
     const viewLayers = cols && { list: cols.viewLayers().map(({ id, name }) => [id, name]), active: cols.layer().id };
     const next = JSON.stringify([hints, stats, viewLayers]);
     if (next !== last) { last = next; send('status', { hints, stats, viewLayers }); }

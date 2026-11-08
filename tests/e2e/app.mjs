@@ -87,13 +87,14 @@ export async function openApp(browser, url, { example = "Default Cube", node = "
     // Waits until fn(window.__bylonder, arg) is truthy.
     until: (fn, arg, timeout = 15000) => frame().waitForFunction(([source, arg]) => (0, eval)(source)(window.__bylonder, arg), [String(fn), arg], { timeout }),
     locator: (selector) => frame().locator(selector),
-    // The status bar's scene statistics, as numbers: { Verts, Tris, Objects: [selected, total], ... }.
+    // The status bar's scene statistics, as numbers: { Verts, Faces, Tris, Objects: [selected, total], ... }.
     async stats() {
       const text = await page.locator("#scene-stats").textContent();
-      return Object.fromEntries([...text.matchAll(/(\w+):([\d,]+)(?:\/([\d,]+))?/g)].map(([, key, a, b]) => {
+      // Blender's statistics leave Objects out when the scene has none (info_stats.cc).
+      return { Objects: [0, 0], ...Object.fromEntries([...text.matchAll(/(\w+):([\d,]+)(?:\/([\d,]+))?/g)].map(([, key, a, b]) => {
         const n = (s) => Number(s.replaceAll(",", ""));
         return [key, b === undefined ? n(a) : [n(a), n(b)]];
-      }));
+      })) };
     },
     // A point of a 3D Viewport in page coordinates, given as fractions of its size; its center shows the Default Cube.
     async point(fx = 0.5, fy = 0.5, index = 0) {
