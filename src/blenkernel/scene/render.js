@@ -27,7 +27,7 @@ export function createRenderSettings(world, { commit = () => {}, authored = {} }
   const { scene, animation } = world;
   const listeners = new Set();
   const emit = () => listeners.forEach(fn => fn());
-  const engine = createRenderEngine(scene, { dof: (camera) => world.mainSync?.cameraDof(camera) ?? null });
+  const engine = createRenderEngine(scene, { dof: (camera) => world.mainSync?.cameraDof(camera) ?? null, displayTransform: () => world.mainSync?.displayLut() ?? null });
   let cameras = new Set();
   // Code sets render settings through the SDK's renderSettings, and view settings also through Babylon's image processing.
   const fromCode = { ...authored, viewSettings: { ...readAuthoredRender(scene), ...authored.viewSettings } };

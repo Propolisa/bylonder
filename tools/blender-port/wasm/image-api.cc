@@ -19,6 +19,9 @@
 #include "IMB_imbuf_types.hh"
 #include "bmesh.hh"
 
+#include <algorithm>
+#include <cmath>
+
 using namespace blender;
 
 #define EXPORT(name) extern "C" __attribute__((export_name(#name)))
@@ -226,4 +229,66 @@ EXPORT(view_edit_uv_extract) const EditUV *view_edit_uv_extract(const Scene *sce
   }
   result = {bm->totloop, bm->totface, reinterpret_cast<const float(*)[2]>(uvs.data()), flags.data(), visible.data()};
   return &result;
+}
+
+/* A scene's display transform as the page draws it (render/display-lut.js): Blender's display processor of its view
+ * settings (view transform, look, curves) and display, with exposure and gamma left to the page, which applies them
+ * before and after as Blender does (colormanagement.cc). The transform on a size^3 lattice (red fastest) of shaped
+ * scene linear colors up to `range`, where the view reaches white (1 for Standard, higher for a view with a highlight
+ * rolloff): with `stops` 0, a lattice value u stands for range * u^2.2, as Babylon's color grading samples a color it
+ * encoded with pow(1/2.2); else for range * 2^((u - 1) * stops), a log shaper as Blender's LUT based transforms use,
+ * fine in the darks. Valid until the next call. */
+struct DisplayLUT {
+  const float *rgba;
+  float range;
+};
+static ColormanageProcessor display_processor(const Scene *scene)
+{
+  ColorManagedViewSettings view_settings = scene->view_settings;
+  view_settings.exposure = 0.0f;
+  view_settings.gamma = 1.0f;
+  return ColormanageProcessor::display_processor_new(&view_settings, &scene->display_settings);
+}
+EXPORT(display_lut) const DisplayLUT *display_lut(const Scene *scene, int size, float stops)
+{
+  static Vector<float> rgba;
+  static DisplayLUT result;
+  const ColormanageProcessor processor = display_processor(scene);
+  float range = 1.0f;
+  for (; range < 1024.0f; range *= 1.25f) {
+    float white[3] = {range, range, range};
+    processor.apply_v3(white);
+    if (std::min({white[0], white[1], white[2]}) >= 0.999f) {
+      break;
+    }
+  }
+  rgba.resize(size * size * size * 4);
+  float *texel = rgba.data();
+  const auto shaped = [&](int i) {
+    const float u = float(i) / float(size - 1);
+    return stops > 0.0f ? range * std::exp2((u - 1.0f) * stops) : range * std::pow(u, 2.2f);
+  };
+  for (int b = 0; b < size; b++) {
+    for (int g = 0; g < size; g++) {
+      for (int r = 0; r < size; r++, texel += 4) {
+        texel[0] = shaped(r);
+        texel[1] = shaped(g);
+        texel[2] = shaped(b);
+        texel[3] = 1.0f;
+        processor.apply_v3(texel);
+      }
+    }
+  }
+  result = {rgba.data(), range};
+  return &result;
+}
+
+/* The same display transform applied to `count` scene linear RGB colors in place (exposure 0, gamma 1), as Blender
+ * displays each pixel: what the lattice stands for. */
+EXPORT(display_transform_apply) void display_transform_apply(const Scene *scene, float *rgb, int count)
+{
+  const ColormanageProcessor processor = display_processor(scene);
+  for (int i = 0; i < count; i++) {
+    processor.apply_v3(rgb + i * 3);
+  }
 }

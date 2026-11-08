@@ -130,6 +130,8 @@ acc.reset(); assert.equal(acc.count, 0);
   assert.deepEqual(effectsOf(b), kept, 'and its post processes');
   assert.ok(!scene.prePassRenderer?.enabled, 'no scene-wide prepass');
   assert.deepEqual(effectsOf(b).slice(0, 2).map((p) => p.name), ['__film', '__filmResolve'], "EEVEE's film first, in scene linear");
+  scene.onBeforeCameraRenderObservable.notifyObservers(b);
+  assert.match(effectsOf(b).at(-1).name, /displayTransform/, 'Fast GI, Screen Trace and motion blur in scene linear, before the display transform');
   assert.ok(settings.film(b) && !settings.film(a), 'a rendered view has a film');
   settings.dispose();
   assert.deepEqual(effectsOf(b), []);
@@ -152,16 +154,18 @@ acc.reset(); assert.equal(acc.count, 0);
   settings.dispose(); scene.dispose(); engine.dispose();
 }
 
-// Blender's view gamma raises the displayed color to 1 / gamma (colormanagement.cc colormanage_exponent), last of a
-// rendered view's post processes; a gamma of 1 adds none.
+// A rendered view displays through its own last post process, Blender's order of exposure, view transform and look, and
+// view gamma (render/display-transform.js), not Babylon's image processing; the gamma raises the displayed color to
+// 1 / gamma (colormanagement.cc colormanage_exponent).
 {
   const engine = new NullEngine(), scene = new Scene(engine), camera = new FreeCamera('c', Vector3.Zero(), scene);
   const settings = createRenderSettings({ scene, animation: createAnimationModel() });
   settings.setRenderedCameras([camera]);
   const names = () => camera._postProcesses.filter(Boolean).map((p) => p.name);
-  assert.ok(!names().some((name) => name.includes('displayGamma')), 'none at gamma 1');
+  assert.match(names().at(-1), /displayTransform/, 'the display transform is the last post process');
+  assert.ok(!names().some((name) => name.includes('imageProcessing')), "without Babylon's image processing");
   settings.set('viewSettings.gamma', 0.41);
-  assert.match(names().at(-1), /displayGamma/, 'the last post process at another gamma');
+  assert.match(names().at(-1), /displayTransform/, 'at another gamma too');
   assert.equal(displayExponent(0.41), 1 / 0.41);
   assert.equal(displayExponent(0), 100, "at most OCIO's exponent");
   // Material Preview and Solid display with the view transform and look only (draw_color_management.cc).

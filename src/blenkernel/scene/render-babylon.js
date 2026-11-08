@@ -1,7 +1,7 @@
 import { Camera, DefaultRenderingPipeline, DepthOfFieldEffectBlurLevel, ImageProcessingConfiguration, MotionBlurPostProcess, SSAO2RenderingPipeline, SSRRenderingPipeline } from '@babylonjs/core';
 import { seededRandom } from '../../render/clock.js';
 import { createFilm } from '../../render/film.js';
-import { createDisplayGamma } from '../../render/display-gamma.js';
+import { createDisplayTransform, setDisplaySettings } from '../../render/display-transform.js';
 import { displayedViewSettings } from '../../render/view-settings.js';
 
 // Babylon adapter for render settings. The only code that writes scene.imageProcessingConfiguration
@@ -46,7 +46,9 @@ const withSeededRandom = create => {
 const DOF_KERNEL = 51;
 
 // dof(camera): its depth of field as Blender's camera has it ({ focusDistance in meters, fStop, lens in millimeters }), or null.
-export function createRenderEngine(scene, { dof = () => null } = {}) {
+// displayTransform(): Blender's display transform of the scene as a color grading lattice (render/display-lut.js), or null
+// while there is none: the view transform and look are then Babylon's nearest tone map and contrast.
+export function createRenderEngine(scene, { dof = () => null, displayTransform = () => null } = {}) {
   const attached = new Map(); // camera -> { key, effects }
   const usesGeometry = effects => !!(effects.ssao || effects.ssr || effects.motion);
   const ownGeometryBuffer = !scene.geometryBufferRenderer;
@@ -64,25 +66,36 @@ export function createRenderEngine(scene, { dof = () => null } = {}) {
     if (!pipeline) return;
     const settings = camera.mode === Camera.PERSPECTIVE_CAMERA ? dof(camera) : null;
     if (pipeline.depthOfFieldEnabled !== !!settings) pipeline.depthOfFieldEnabled = !!settings;
+    keepDisplayLast(camera, attached.get(camera).effects.display);
     if (!settings) return;
     const focalPixels = camera.getProjectionMatrix().m[0] * scene.getEngine().getRenderWidth() * camera.viewport.width / 2;
     Object.assign(pipeline.depthOfField, { focusDistance: settings.focusDistance * 1000, fStop: settings.fStop, focalLength: settings.lens, lensSize: focalPixels / DOF_KERNEL });
   });
+  // The scene linear effects (the film, Fast GI, Screen Trace, depth of field, motion blur) before the display transform,
+  // as EEVEE's: a pipeline that builds its post processes again appends them after it.
+  const keepDisplayLast = (camera, display) => {
+    const passes = camera._postProcesses.filter(Boolean);
+    if (passes.at(-1) === display) return;
+    camera.detachPostProcess(display);
+    camera.attachPostProcess(display);
+  };
   const drop = camera => {
     const entry = attached.get(camera); if (!entry) return;
-    const e = entry.effects; e.pipeline?.dispose(); e.ssr?.dispose(); e.ssao?.dispose(); e.motion?.dispose(); e.gamma?.dispose(); e.film.dispose();
+    const e = entry.effects; e.pipeline?.dispose(); e.ssr?.dispose(); e.ssao?.dispose(); e.motion?.dispose(); e.display.dispose(camera); e.film.dispose();
     attached.delete(camera);
     if (ownGeometryBuffer && ![...attached.values()].some(a => usesGeometry(a.effects))) scene.disableGeometryBufferRenderer();
   };
   let viewportSamples = 1, view = {};
+  setDisplaySettings(scene, () => ({ exposure: view.exposure ?? 0, gamma: view.gamma ?? 1, lut: displayTransform()?.log ?? null }));
   const build = (camera, settings) => {
     const e = settings.eevee, r = settings.render, effects = {};
     // EEVEE's film first: the samples a view accumulates (its viewport samples) in scene linear.
     effects.film = Object.assign(createFilm(scene, camera), { samples: () => viewportSamples });
     // Babylon's pipeline manager keys pipelines by name, so each camera's pipelines need their own.
     const name = id => `__${id}:${camera.uniqueId}`;
-    // Drawn in half float, displayed by its image processing: the view transform, after blending, as Blender's.
+    // Drawn in half float, displayed by its own display transform (display-transform.js), after blending, as Blender's.
     effects.pipeline = new DefaultRenderingPipeline(name('display'), true, scene, [camera]);
+    effects.pipeline.imageProcessingEnabled = false;
     effects.pipeline.depthOfFieldBlurLevel = DepthOfFieldEffectBlurLevel.High;
     // Post processes draw a view drawn into part of the canvas (views.js regions) on whole textures, so the geometry
     // buffer must fill whole textures too and Fast GI must not crop its result to the camera viewport.
@@ -90,8 +103,8 @@ export function createRenderEngine(scene, { dof = () => null } = {}) {
     if (e.useRaytracing && e.rayTracingMethod === 'SCREEN') effects.ssr = new SSRRenderingPipeline(name('screenTrace'), scene, [camera], true);
     if (r.useMotionBlur) effects.motion = new MotionBlurPostProcess(name('motionBlur'), scene, 1, camera, undefined, undefined, undefined, undefined, undefined, true);
     if (usesGeometry(effects) && scene.geometryBufferRenderer) scene.geometryBufferRenderer.getGBuffer().ignoreCameraViewport = true;
-    // Last, on the displayed color.
-    if (settings.viewSettings.gamma !== 1) effects.gamma = createDisplayGamma(name('displayGamma'), camera, () => view.gamma);
+    // Last: the view settings, whole as a rendered view displays them.
+    effects.display = createDisplayTransform(name('displayTransform'), camera);
     return effects;
   };
   return {
@@ -105,7 +118,7 @@ export function createRenderEngine(scene, { dof = () => null } = {}) {
       viewportSamples = Math.max(1, Math.round(e.taaSamples));
       const wanted = new Set([...cameras].filter(c => c && !c.isDisposed?.()));
       for (const camera of [...attached.keys()]) if (!wanted.has(camera)) drop(camera);
-      const key = [e.useRaytracing && e.rayTracingMethod === 'SCREEN', e.useRaytracing, r.useMotionBlur, view.gamma !== 1].join();
+      const key = [e.useRaytracing && e.rayTracingMethod === 'SCREEN', e.useRaytracing, r.useMotionBlur].join();
       for (const camera of wanted) {
         if (attached.get(camera)?.key !== key) { drop(camera); attached.set(camera, { key, effects: build(camera, settings) }); }
         const effects = attached.get(camera).effects;
@@ -120,8 +133,8 @@ export function createRenderEngine(scene, { dof = () => null } = {}) {
     // A rendered camera's display: the view transform's input (scene linear, after the render's effects) and the post
     // processes that display it, between which Blender's compositor works (compositor-cpu.js).
     display(camera) {
-      const effects = attached.get(camera)?.effects, transform = effects?.pipeline.imageProcessing;
-      return transform?.inputTexture ? { input: transform.inputTexture, passes: [transform, effects.gamma].filter(Boolean) } : null;
+      const transform = attached.get(camera)?.effects.display;
+      return transform?.inputTexture ? { input: transform.inputTexture, passes: [transform] } : null;
     },
     resetFilms() { for (const { effects } of attached.values()) effects.film.reset(); },
     // The view about to render: whether it is rendered (its view settings as displayedViewSettings gives them) and whether
@@ -129,7 +142,10 @@ export function createRenderEngine(scene, { dof = () => null } = {}) {
     setView({ rendered, sceneLinear }) {
       const ip = scene.imageProcessingConfiguration;
       ip.applyByPostProcess = sceneLinear;
-      ip.exposure = 2 ** displayedViewSettings(view, rendered).exposure;
+      const exposure = 2 ** displayedViewSettings(view, rendered).exposure, lut = displayTransform()?.grading;
+      if (!lut) { ip.exposure = exposure; return; }
+      // Views whose materials apply it: exposure in scene linear, then the view transform and look (the lattice).
+      Object.assign(ip, { toneMappingEnabled: false, contrast: 1, colorGradingTexture: lut.texture, colorGradingEnabled: true, exposure: exposure / lut.range });
     },
     dispose() { scene.onBeforeCameraRenderObservable.remove(gateGeometryBuffer); scene.onBeforeCameraRenderObservable.remove(focus); for (const camera of [...attached.keys()]) drop(camera); },
   };

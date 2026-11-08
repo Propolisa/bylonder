@@ -26,6 +26,7 @@ import { nodeId, deleted } from '../editors/object/identity.js';
 import { watchObject } from './main-sync-hooks.js';
 import { CurveObject, CURVE_TARGETS } from './curve/curve.js';
 import { viewTransforms, looks } from './scene/render-babylon.js';
+import { createDisplayLut } from '../render/display-lut.js';
 import { BlenderAnimation } from './animation/anim-blender.js';
 import { Camera, MultiMaterial, VertexData } from '@babylonjs/core';
 import { setOrthoView } from '../editors/space_view3d/navigation.js';
@@ -744,6 +745,8 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   const api = {
     blender,
     ids,
+    // The scene's display transform as a color grading lattice (render/display-lut.js).
+    displayLut: createDisplayLut(world.scene, blender),
     flush,
     run,
     // Babylon drawn from Main after Blender's code ran (main-view.js), for editors that run it over several events (the

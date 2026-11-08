@@ -526,6 +526,16 @@ export class BlenderMain {
   // The Main's address and an object's data's address (0 for an empty), for subsystems with their own exports.
   get bmain() { return x.main_bmain(this.#context) >>> 0; }
   get scene() { return x.main_scene(this.#context) >>> 0; }
+  // The scene's display transform on a size^3 lattice of shaped colors (a log shaper over `stops` below its range, else
+  // pow 2.2) and the scene linear range it spans (image-api.cc display_lut), a copy; null with a module that has none.
+  displayLut(size, stops = 0) {
+    if (!x.display_lut) return null;
+    const p = x.display_lut(this.scene, size, stops) >>> 0, view = new DataView(x.memory.buffer, p, 8);
+    const rgba = view.getUint32(0, true), range = view.getFloat32(4, true);
+    return { rgba: new Float32Array(x.memory.buffer, rgba >>> 0, size ** 3 * 4).slice(), range };
+  }
+  // Scene linear RGB colors through the same display transform, as Blender displays each pixel.
+  displayTransform(rgb) { return withArrays([Float32Array.from(rgb)], ([p]) => { x.display_transform_apply(this.scene, p, rgb.length / 3); return new Float32Array(x.memory.buffer, p >>> 0, rgb.length).slice(); }); }
   get C() { return this.#C; }
   data(ob) { return x.object_data(ob) >>> 0; }
 
