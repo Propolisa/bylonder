@@ -105,4 +105,19 @@ assert.ok(mean.length() < 0.02, 'around the center');
   assert.ok(at(evaluatedMatrix(door).getTranslation()), 'a complete film keeps it still');
   film.dispose();
 }
+// A point light's map sees no camera: drawn again only when what it shows changed (a caster moved, a film sample's jitter,
+// Main evaluated), not every frame as a sun's view-following cascades are.
+{
+  const map = shadows.generators.find((g) => g.getLight() === door).getShadowMap();
+  const frame = () => { scene.onBeforeActiveMeshesEvaluationObservable.notifyObservers(scene); const drawn = map._shouldRender(); if (drawn) map.render(); return drawn; };
+  shadows.setActive(true);
+  frame();
+  assert.equal(frame(), false, 'nothing changed: the map is kept');
+  floor.position.x += 1;
+  floor.computeWorldMatrix(true);
+  assert.equal(frame(), true, 'a caster moved: drawn again');
+  assert.equal(frame(), false);
+  shadows.changed();
+  assert.equal(frame(), true, 'Main evaluated: drawn again');
+}
 console.log('Light shadows: a generator for each light that casts, casters by their shadow visibility passed');

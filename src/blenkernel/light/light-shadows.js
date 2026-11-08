@@ -98,10 +98,24 @@ function jitterPerSample(scene) {
   };
 }
 
+// What a point, spot or area light's map shows, which no camera changes: the light where it draws (a film sample's
+// jitter included), its casters and where they are. A caster that deforms on its own (bones, shape keys) changes always.
+const ids = new WeakMap();
+let nextId = 0;
+const idOf = (object) => (object ? ids.get(object) ?? ids.set(object, ++nextId).get(object) : 0);
+function shadowState(light, casters, sample) {
+  const parts = [evaluatedMatrix(light)?.m.join() ?? light.position.asArray().join(), light.direction?.asArray().join(), light.shadowMinZ, light.shadowMaxZ, sample];
+  for (const mesh of casters) {
+    if (mesh.skeleton || mesh.morphTargetManager || mesh.bakedVertexAnimationManager) return ++nextId;
+    parts.push(mesh.uniqueId, mesh.getWorldMatrix().updateFlag, idOf(mesh.getVertexBuffer('position')), mesh.thinInstanceCount, mesh.metadata?.instancesVersion);
+  }
+  return parts.join();
+}
+
 export function createLightShadows(scene) {
   const generators = new Map(); // light -> { generator, type }
   const jitter = jitterPerSample(scene);
-  let counted = '';
+  let counted = '', drawn = false, evaluated = 0;
   // Every light lights every material, as in Blender (Babylon's materials take 4 unless told more), up to what a vertex
   // shader holds: a uniform block per light besides the scene's, mesh's and material's (and one spare).
   const gl = scene.getEngine()._gl, blocks = gl?.getParameter?.(gl.MAX_VERTEX_UNIFORM_BLOCKS) ?? 12;
@@ -128,19 +142,32 @@ export function createLightShadows(scene) {
     for (const [light, { generator, type }] of generators) if (type !== 'SUN') fitRange(light, generator);
     for (const mesh of scene.meshes) if (shadedObject(mesh)) mesh.receiveShadows = true;
   };
+  // After the film chose its sample (onBeforeCameraRender), before the camera draws its render targets.
+  const refresh = scene.onBeforeActiveMeshesEvaluationObservable.add(() => {
+    if (!drawn) return;
+    for (const [light, entry] of generators) {
+      if (entry.type === 'SUN') continue;
+      const map = entry.generator.getShadowMap(), state = `${evaluated}:${shadowState(light, map.renderList, filmSample(scene))}`;
+      if (state !== entry.state) { entry.state = state; map.resetRefreshCounter(); }
+    }
+  });
   return {
     // Per view, before it renders: whether it shows the scene's lights.
     // Views that show no lights draw the maps empty, once (Babylon's render-once refresh rate): nothing reads them there.
+    // A sun's cascades follow the view, drawn every frame; other lights' maps only when what they show changed.
     setActive(value) {
+      drawn = value;
       sync();
       const casters = value ? scene.meshes.filter(casts) : [];
-      for (const { generator } of generators.values()) {
-        const map = generator.getShadowMap(), rate = value ? 1 : RenderTargetTexture.REFRESHRATE_RENDER_ONCE;
-        setRenderList(map, casters);
+      for (const { generator, type } of generators.values()) {
+        const map = generator.getShadowMap(), rate = value && type === 'SUN' ? 1 : RenderTargetTexture.REFRESHRATE_RENDER_ONCE;
+        if (setRenderList(map, casters)) map.resetRefreshCounter();
         if (map.refreshRate !== rate) map.refreshRate = rate;
       }
     },
+    // Main evaluated something (main-view.js): what the maps show may have changed in ways no state here sees.
+    changed() { evaluated++; },
     get generators() { return [...generators.values()].map((entry) => entry.generator); },
-    dispose() { for (const { generator } of generators.values()) generator.dispose(); generators.clear(); jitter.dispose(); },
+    dispose() { scene.onBeforeActiveMeshesEvaluationObservable.remove(refresh); for (const { generator } of generators.values()) generator.dispose(); generators.clear(); jitter.dispose(); },
   };
 }

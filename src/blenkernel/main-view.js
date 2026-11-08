@@ -526,6 +526,7 @@ export function createMainView(state) {
     if (updates.size) {
       // Rendered views accumulate their samples again (render/film.js), as EEVEE's viewport does after an update.
       world.renderSettings?.resetFilms?.();
+      world.shadows?.changed();
       state.evaluated();
     }
   }
