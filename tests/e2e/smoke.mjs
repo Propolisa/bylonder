@@ -1806,6 +1806,9 @@ async function expectStats(test, timeout = 10000) {
 // the run's: it is logged and the next check runs.
 process.on("unhandledRejection", (error) => console.log(`late rejection: ${error?.message?.split("\n")[0]}`));
 const filter = process.argv[2];
+// A check that hangs (a wait that never settles) fails after this long instead of holding the whole run.
+const CHECK_TIMEOUT = 300000;
+const timeout = (ms, what) => new Promise((_, reject) => setTimeout(() => reject(new Error(`${what} took over ${ms / 1000} s`)), ms).unref());
 // SHARD=i/n runs every n-th check from the i-th (scripts/gates.mjs runs shards in parallel).
 const [shard, shards] = (process.env.SHARD ?? "0/1").split("/").map(Number);
 const server = await startServer();
@@ -1817,7 +1820,7 @@ try {
     const started = Date.now();
     try {
       app = await openApp(browser, server.url, check.open);
-      await (check.run ?? check)();
+      await Promise.race([(check.run ?? check)(), timeout(CHECK_TIMEOUT, "the check")]);
       assert.deepEqual(app.errors, [], "page errors");
       console.log(`ok    ${name} (${Date.now() - started} ms)`);
     } catch (error) {
@@ -1826,7 +1829,7 @@ try {
       await app?.page.screenshot({ path: shot }).catch(() => {});
       console.log(`FAIL  ${name}\n${error.stack}\nScreenshot: ${shot}`);
     } finally {
-      await app?.close();
+      await Promise.race([app?.close(), timeout(30000, "closing the app")]).catch((error) => console.log(error.message));
       app = null;
     }
   }
