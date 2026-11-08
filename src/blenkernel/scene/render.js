@@ -46,6 +46,8 @@ export function createRenderSettings(world, { commit = () => {}, authored = {} }
     film: (camera) => engine.film(camera),
     display: (camera) => engine.display(camera),
     resetFilms: () => engine.resetFilms(),
+    // Whether every rendered view's film holds all its samples.
+    converged: () => engine.converged(),
     setRenderedCameras(list) { const next = new Set(list); if (next.size === cameras.size && [...next].every(c => cameras.has(c))) return; cameras = next; render(); },
     set(path, value, finish = true) {
       const { owner, key } = resolve(state, path);

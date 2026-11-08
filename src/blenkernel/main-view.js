@@ -159,7 +159,7 @@ export function createMainView(state) {
     if (type === 'WIRE') wired.add(mesh);
     else if (wired.delete(mesh)) { mesh.isVisible = true; world.workbench?.displayAsWire(mesh, false); }
   }
-  world.scene.onBeforeRenderObservable.add(() => {
+  const displayed = world.scene.onBeforeRenderObservable.add(() => {
     const rendering = !!world.collections?.rendering;
     // The workbench may come after Main's objects (main.js makes it once the world is built).
     for (const mesh of wired) if (mesh.isDisposed()) wired.delete(mesh); else { mesh.isVisible = rendering; world.workbench?.displayAsWire(mesh, true); }
@@ -724,6 +724,7 @@ export function createMainView(state) {
   return {
     pull, view, adopt, adoptScene, compositingTree, drawData, drawShading, drawEvaluated, redrawAll,
     keepMesh: (entry) => { keepMesh(entry, blender); return true; },
+    dispose: () => world.scene.onBeforeRenderObservable.remove(displayed),
   };
 }
 

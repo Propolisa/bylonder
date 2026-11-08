@@ -86,6 +86,8 @@ export function createSDK(base, overrides, onChange, onAnimationChange = () => {
       } catch (error) {
         report("ERROR", `Cannot read file "${path}": ${error.message}`);
         return [];
+      } finally {
+        sync.dispose();
       }
     },
     onDispose(fn) {

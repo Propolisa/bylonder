@@ -154,6 +154,7 @@ export function createRenderEngine(scene, { dof = () => null, displayTransform =
       return transform?.inputTexture ? { input: transform.inputTexture, passes: [transform] } : null;
     },
     resetFilms() { for (const { effects } of attached.values()) effects.film.reset(); },
+    converged: () => [...attached.values()].every(({ effects }) => effects.film.converged),
     // The view about to render: whether it is rendered (its view settings as displayedViewSettings gives them) and whether
     // it draws in scene linear, its display transform a post-process. Cheap; per view.
     setView({ rendered, sceneLinear }) {

@@ -921,6 +921,8 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       evaluatedListeners.add(fn);
       return () => evaluatedListeners.delete(fn);
     },
+    // Stops drawing into the scene (a sync that only read a file into it).
+    dispose: () => mainView.dispose(),
   };
   const evaluatedListeners = new Set();
   const state = {

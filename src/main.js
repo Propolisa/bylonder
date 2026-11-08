@@ -264,14 +264,15 @@ const paintTexture = (mesh) => {
 };
 // Instances take their selected instancer's wire color, as duplis take their instancer's base flags.
 world.workbench = createWorkbench(scene, { wireColor: (mesh) => wireColor(mesh.metadata?.drawOwner ?? mesh.metadata?.instancers?.find((node) => editor?.selection.has(node)) ?? mesh), paintTexture });
-// Views keep rendering while anything moves: playback, modal edits, user render loops and observers, animations,
-// particles, video; otherwise they stop until the next input or change.
-const observerCount = () => scene.onBeforeRenderObservable.observers.length + scene.onAfterRenderObservable.observers.length;
-const userObservers = observerCount();
-let ownObservers = 0;
+// Views keep rendering while anything moves: playback, modal edits, a rendered view's film until it holds all its
+// samples, the project's render loops and observers (those its code added as it built the scene; Bylonder's and
+// Babylon's own, such as a cascaded shadow's, draw on change), animations, particles, video; otherwise they stop until
+// the next input or change.
+const renderObservers = () => [...scene.onBeforeRenderObservable.observers, ...scene.onAfterRenderObservable.observers];
+const userObservers = new Set(renderObservers());
 const live = () =>
-  animation.playing || !!editor?.modal || userObservers > 0 ||
-  observerCount() > userObservers + ownObservers || engine._activeRenderLoops.length > 1 ||
+  animation.playing || !!editor?.modal || !world.renderSettings.converged() ||
+  renderObservers().some((o) => userObservers.has(o)) || engine._activeRenderLoops.length > 1 ||
   scene.animatables.length > 0 || scene.particleSystems.some((p) => p.isStarted?.() && p.isAlive?.()) ||
   scene.textures.some((t) => t.video && !t.video.paused);
 views = createViews({ engine, scene, live });
@@ -774,7 +775,6 @@ const fileBrowser = mountFileBrowser(document.querySelector("#files-section"), {
 for (const event of ["pointermove", "pointerdown", "wheel", "keydown"]) window.addEventListener(event, () => views.wake(), { passive: true, capture: true });
 for (const source of [documentState, world.particles, world.modifiers, animation]) source.subscribe?.(() => views.wake());
 world.modifiers.onDrawn(() => views.wake());
-ownObservers = observerCount() - userObservers;
 function undoRedo(redo) {
   creator.finish();
   redo ? history.redo() : history.undo();

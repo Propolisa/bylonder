@@ -1003,6 +1003,21 @@ const checks = {
     });
     assert.deepEqual(idle, { evaluated: 0, saved: 0 });
   } },
+  // ... and, once its film holds all its samples, draws nothing: Bylonder's and Babylon's own render observers (a sun's
+  // cascaded shadow) keep no view drawing.
+  "an idle Rendered view of an opened .blend draws no frame": { open: { link: "bouncing-ball", node: null }, async run() {
+    await app.bylonder((b) => b.views.input.setShading("rendered"));
+    await app.until((b) => b.views.idle, null, 30000).catch(() => {});
+    const drawn = await app.bylonder(async (b) => {
+      const { engine } = b.world;
+      let frames = 0;
+      const counting = engine.onEndFrameObservable.add(() => { if (engine.views.some((view) => view.enabled)) frames++; });
+      await new Promise((done) => setTimeout(done, 3000));
+      engine.onEndFrameObservable.remove(counting);
+      return { frames, converged: b.world.renderSettings.converged() };
+    });
+    assert.deepEqual(drawn, { frames: 0, converged: true });
+  } },
   // The floor grid fades through geometry on its plane, as Blender's four offset iterations draw it: a plane at z 0 keeps
   // the X axis showing over it.
   async "the floor grid's axes show over a plane on the floor"() {
