@@ -33,4 +33,17 @@ assert.ok(near(createLight('Dim', 'POINT', { energy: 2 }, scene).range, Math.sqr
   assert.ok(material.pluginManager?.getPlugin('BlenderAreaSpecular'), "a Principled BSDF's PBR material takes EEVEE's area specular");
   assert.ok(!('BlenderAreaSpecularPlugin' in material.serialize().plugins), 'which a Babylon file does not keep');
 }
+// A light's Diffuse and Specular factors weigh its color for each (eevee_light.cc Light::sync): Specular 0 makes no
+// highlight. Babylon's PBR lights a punctual light's specular and coat with its diffuse color; they take its specular.
+{
+  const lamp = createLight('Lamp', 'POINT', { color: [1, 0.5, 0.25], diffuse_factor: 0.5, specular_factor: 0 }, scene);
+  assert.deepEqual(lamp.diffuse.asArray(), [0.5, 0.25, 0.125], 'diffuse: its color times its Diffuse factor');
+  assert.deepEqual(lamp.specular.asArray(), [0, 0, 0], 'specular: its color times its Specular factor');
+  const { ShaderStore } = await import('@babylonjs/core');
+  await import('@babylonjs/core/Shaders/ShadersInclude/lightFragment.js');
+  const { LIGHT_SPECULAR } = await import('../src/blenkernel/light/area-specular.js');
+  const lit = ShaderStore.IncludesShadersStore.lightFragment.replace(LIGHT_SPECULAR.search, LIGHT_SPECULAR.replace);
+  const calls = lit.match(/info\.(specular|clearCoat)=[^;]*;/g);
+  assert.ok(calls.length >= 4 && calls.every((call) => !/diffuse\{X\}/.test(call)), calls.join(' | '));
+}
 console.log("Light power: points as radiant intensity, area lights as EEVEE's radiance passed");

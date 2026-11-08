@@ -168,6 +168,8 @@ assert.deepEqual((await lobes(['ShaderNodeBsdfDiffuse', 'ShaderNodeBsdfDiffuse']
     links: [['Diffuse', 'BSDF', 'Material Output', 'Surface']] }).material;
   if (lit._buildIsInProgress) await new Promise((resolve) => lit.onBuildObservable.addOnce(resolve));
   assert.match(lit._fragmentCompilationState._builtCompilationString, /fresnel=reflectance0[*]info[.]areaLightFresnel[.]x/);
+  // and its lights' specular is their specular color (a light's Specular factor), as a Principled material's.
+  assert.match(lit._fragmentCompilationState._builtCompilationString, /#include<blenderLightFragment>/);
 }
 
 // A node's material is ready once its images are loaded, so a world's probe never bakes an image still loading.

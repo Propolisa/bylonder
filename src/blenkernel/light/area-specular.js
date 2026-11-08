@@ -12,7 +12,14 @@ export const AREA_SPECULAR = {
   search: /fresnel=specularColor\*info\.areaLightFresnel\.x\*reflectance0\+\( vec3\( 1\.0 \)-specularColor \)\*info\.areaLightFresnel\.y\*reflectance90;/,
   replace: 'fresnel=reflectance0*info.areaLightFresnel.x+(reflectance90-reflectance0)*info.areaLightFresnel.y;',
 };
-const FORMULA = { [`!${AREA_SPECULAR.search.source}`]: AREA_SPECULAR.replace };
+// blender-port: eevee_light.cc Light::sync: a light's specular power is its color times its Specular factor, apart from
+// its diffuse. Babylon's PBR lights a punctual light's specular and coat with its diffuse color: they take its specular
+// color (Light.specular), as an area light's already do.
+export const LIGHT_SPECULAR = {
+  search: /(info\.(?:specular|clearCoat)=compute(?:Anisotropic)?(?:Specular|ClearCoat)Lighting\([^;]*,)diffuse(\d+|\{X\})\.rgb\);/g,
+  replace: '$1light$2.vLightSpecular.rgb);',
+};
+const FORMULA = { [`!${AREA_SPECULAR.search.source}`]: AREA_SPECULAR.replace, [`!${LIGHT_SPECULAR.search.source}`]: LIGHT_SPECULAR.replace };
 
 class BlenderAreaSpecularPlugin extends MaterialPluginBase {
   constructor(material) {
@@ -25,7 +32,7 @@ class BlenderAreaSpecularPlugin extends MaterialPluginBase {
   getCustomCode(shaderType) { return shaderType === 'fragment' ? FORMULA : null; }
 }
 
-// Gives a material of Blender's data EEVEE's area light specular (once).
+// Gives a material of Blender's data EEVEE's light specular (once).
 export function blenderAreaSpecular(material) {
   if (!material.pluginManager?.getPlugin(NAME)) new BlenderAreaSpecularPlugin(material);
   return material;

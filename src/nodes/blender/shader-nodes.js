@@ -30,7 +30,7 @@ import { VIEW_FORWARD, viewEye, viewForward } from '../../draw/draw-view.js';
 import { eeveeParity, eeveeParityChanged } from '../../draw/eevee-parity.js';
 import { ditherOffset } from '../../render/dither.js';
 import { readsSceneDepth, sceneDepth } from '../../render/scene-depth.js';
-import { AREA_SPECULAR } from '../../blenkernel/light/area-specular.js';
+import { AREA_SPECULAR, LIGHT_SPECULAR } from '../../blenkernel/light/area-specular.js';
 import { LIT_SIDE_NORMAL_BIAS } from '../../blenkernel/light/light-shadows.js';
 import '../graph-roots.js';
 
@@ -1256,11 +1256,14 @@ export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
     return this._areaSpecular(state);
   }
 
-  // The area light specular of the lighting functions Babylon's block emitted, as EEVEE's
+  // The light specular of the lighting Babylon's block emitted, as EEVEE's
   // (blenkernel/light/area-specular.js): the include's text with the formula put right, in its place.
   _areaSpecular(state) {
     const key = 'pbrDirectLightingFunctions', store = ShaderStore.GetIncludesShadersStore(state.shaderLanguage);
     if (state.functions[key]?.includes(`#include<${key}>`)) state.functions[key] = store[key].replace(AREA_SPECULAR.search, AREA_SPECULAR.replace);
+    // The lights' specular color (LIGHT_SPECULAR), in code emitted inline and in an include of the lights of its own name.
+    store[LIGHT_FRAGMENT] ??= store.lightFragment.replace(LIGHT_SPECULAR.search, LIGHT_SPECULAR.replace);
+    state.compilationString = state.compilationString.replaceAll('#include<lightFragment>', `#include<${LIGHT_FRAGMENT}>`).replace(LIGHT_SPECULAR.search, LIGHT_SPECULAR.replace);
     return this;
   }
 
@@ -1453,6 +1456,7 @@ export class BlenderDisplayBlock extends ImageProcessingBlock {
 }
 RegisterClass('BABYLON.BlenderDisplayBlock', BlenderDisplayBlock);
 
+const LIGHT_FRAGMENT = 'blenderLightFragment';
 const REVERSED_FACES = 'bl_reversed_faces', DITHERED = 'BL_DITHERED', DITHER_OFFSET = 'bl_dither_offset', frontPass = new WeakSet();
 // blender-port: gpu_shader_math_base_lib interleaved_gradient_noise and eevee_nodetree_lib hashed_alpha_threshold:
 // the pixel's noise shifted by the sample's offset, so the samples a film averages cover every threshold.

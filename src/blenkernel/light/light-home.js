@@ -55,7 +55,9 @@ export function makeBlenderLight(light, type, values = {}) {
 // The Babylon light as Blender's Light gives it.
 export function deriveBabylonLight(light) {
   const record = lightRecord(light);
-  light.diffuse.copyFromFloats(...record.color);
+  // EEVEE's light powers per closure (eevee_light.cc Light::sync): its color times its Diffuse and Specular factors.
+  light.diffuse.copyFromFloats(...record.color).scaleInPlace(record.diffuse_factor ?? 1);
+  light.specular.copyFromFloats(...record.color).scaleInPlace(record.specular_factor ?? 1);
   light.intensity = intensityOf(record.type, record.energy * 2 ** (record.exposure ?? 0), lightingMode(light.getScene()), record.type === 'AREA' ? areaOf(record) : 1);
   if (record.type !== 'SUN') light.falloffType = Light.FALLOFF_GLTF;
   // An area light's extent is its size; a radius would zero its photometric scale, which Babylon has no case for.
@@ -101,7 +103,7 @@ export function lightLosses(light) {
     if (r.use_temperature) lost.push('its color temperature');
     if (r.type === 'SUN' && r.angle > 0) lost.push('the sun\'s angle (soft shadows)');
     if (r.use_soft_falloff === false) lost.push('hard falloff');
-    for (const factor of ['diffuse_factor', 'specular_factor', 'transmission_factor', 'volume_factor']) if (r[factor] !== 1) lost.push(factor.replace('_', ' '));
+    for (const factor of ['transmission_factor', 'volume_factor']) if (r[factor] !== 1) lost.push(factor.replace('_', ' '));
     return lost.map((what) => `${name}: ${what} has no Babylon equivalent`);
   }
   const lost = [];
