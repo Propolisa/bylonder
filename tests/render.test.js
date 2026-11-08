@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { Constants, NullEngine, Scene, Matrix, Vector3, FreeCamera } from '@babylonjs/core';
+import { Constants, MeshBuilder, NullEngine, Scene, Matrix, Vector3, FreeCamera } from '@babylonjs/core';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
 import { createRenderSettings, outputSize } from '../src/blenkernel/scene/render.js';
 import { displayExponent, displayedViewSettings } from '../src/render/view-settings.js';
@@ -179,6 +179,12 @@ acc.reset(); assert.equal(acc.count, 0);
   const defines = {};
   scene.imageProcessingConfiguration.prepareDefines(defines);
   assert.ok(scene.imageProcessingConfiguration.isEnabled && defines.IMAGEPROCESSINGPOSTPROCESS, 'a PBR material leaves its color scene linear');
+  // Each camera draws in a render pass of its own: switching between a Solid view and a rendered one marks every pass's
+  // defines, not only the current pass's, so a render after a Solid view does not keep the Solid view's encoding.
+  const box = MeshBuilder.CreateBox('Box', {}, scene), marked = [];
+  box.subMeshes[0]._getDrawWrapper(7, true).defines = { markAsImageProcessingDirty: () => marked.push(7) };
+  settings.setView({ rendered: false, sceneLinear: false });
+  assert.deepEqual(marked, [7], "another pass's materials take the change");
   settings.set('viewSettings.gamma', 0.41);
   assert.match(names().at(-1), /displayTransform/, 'at another gamma too');
   assert.equal(displayExponent(0.41), 1 / 0.41);

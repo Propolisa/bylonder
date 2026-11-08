@@ -47,6 +47,13 @@ const DOF_KERNEL = 51;
 // The scene linear image between effects: in 8 bits the darks band.
 const HALF_FLOAT = Constants.TEXTURETYPE_HALF_FLOAT;
 
+// Each camera draws its meshes' materials in a render pass of its own (draw/workbench.js), with defines of its own,
+// and a change of the scene's image processing marks only those of the pass current as it changes: a render's camera
+// after a Solid view kept the Solid view's encoding. Every pass's are marked.
+function markImageProcessingDirty(scene) {
+  for (const mesh of scene.meshes) for (const subMesh of mesh.subMeshes ?? []) for (const wrapper of subMesh._drawWrappers) wrapper?.defines?.markAsImageProcessingDirty?.();
+}
+
 // Babylon's default pipeline without its image processing post process, which the display transform replaces. Its own
 // switch would turn the scene's image processing off for every material: a PBR material then encodes its color to
 // display itself, where a rendered view's materials must keep scene linear (applyByPostProcess).
@@ -151,12 +158,15 @@ export function createRenderEngine(scene, { dof = () => null, displayTransform =
     // it draws in scene linear, its display transform a post-process. Cheap; per view.
     setView({ rendered, sceneLinear }) {
       const ip = scene.imageProcessingConfiguration;
-      ip.applyByPostProcess = sceneLinear;
+      if (ip.applyByPostProcess !== sceneLinear) {
+        ip.applyByPostProcess = sceneLinear;
+        markImageProcessingDirty(scene);
+      }
       const exposure = 2 ** displayedViewSettings(view, rendered).exposure, lut = displayTransform()?.grading;
       if (!lut) { ip.exposure = exposure; return; }
       // Views whose materials apply it: exposure in scene linear, then the view transform and look (the lattice).
       Object.assign(ip, { toneMappingEnabled: false, contrast: 1, colorGradingTexture: lut.texture, colorGradingEnabled: true, exposure: exposure / lut.range });
     },
-    dispose() { scene.onBeforeCameraRenderObservable.remove(gateGeometryBuffer); scene.onBeforeCameraRenderObservable.remove(focus); for (const camera of [...attached.keys()]) drop(camera); },
+    dispose() { for (const observer of [gateGeometryBuffer, focus]) scene.onBeforeCameraRenderObservable.remove(observer); for (const camera of [...attached.keys()]) drop(camera); },
   };
 }
