@@ -1184,6 +1184,24 @@ const checks = {
     });
     assert.deepEqual(named, { from: "worldPos", declared: true });
   } },
+  // The selection outline keeps its list of outlined meshes while the selection stays: refilling it at every frame made
+  // Babylon mark every mesh's lights dirty, so every material resolved its shader again each frame.
+  async "the selection outline leaves materials alone from frame to frame"() {
+    await app.click();
+    await app.settled();
+    const marked = await app.bylonder(async (b) => {
+      const { engine, scene } = b.world;
+      let marks = 0;
+      const meshes = scene.meshes.filter((m) => m._markSubMeshesAsLightDirty);
+      for (const mesh of meshes) { const mark = mesh._markSubMeshesAsLightDirty.bind(mesh); mesh._markSubMeshesAsLightDirty = (...args) => { marks++; return mark(...args); }; }
+      const waking = engine.onBeginFrameObservable.add(() => b.views.wake());
+      await new Promise((done) => setTimeout(done, 1000));
+      engine.onBeginFrameObservable.remove(waking);
+      for (const mesh of meshes) delete mesh._markSubMeshesAsLightDirty;
+      return { outlined: b.editor.selection.size, marks };
+    });
+    assert.deepEqual(marked, { outlined: 1, marks: 0 });
+  },
   // The floor grid fades through geometry on its plane, as Blender's four offset iterations draw it: a plane at z 0 keeps
   // the X axis showing over it.
   async "the floor grid's axes show over a plane on the floor"() {

@@ -13,6 +13,7 @@ import { Mesh } from '@babylonjs/core/Meshes/mesh.js';
 import { view_3d as theme } from '../editors/interface/userdef-default-theme.js';
 import { mesh_batch_cache_edge_detection } from './mesh-batch-cache.js';
 import { createFullscreenPass } from './fullscreen-pass.js';
+import { setRenderList } from './render-list.js';
 
 // Replaces the top 2 bits (of 16) by the color id, leaving 16K ids to outline objects against each other.
 const outline_id_pack = (outline_id, object_id) => (outline_id << 14) | (object_id & 0x3fff);
@@ -669,9 +670,8 @@ export function createOutlineOverlay(scene, { outlined, isActive, isTransform = 
       if (!active) return;
       xray = inXray;
       pass.fit([prepassTarget, lineTarget]);
-      const transform = isTransform(), list = prepassTarget.renderList;
+      const transform = isTransform(), list = [];
       ids.clear();
-      list.length = 0;
       for (const mesh of meshes) {
         const id = outline_id_pack(outline_colorid_get(transform, isActive(mesh)), list.length + 1);
         const drawn = xray ? edgeDetection(mesh) : mesh, source = mesh.sourceMesh ?? mesh;
@@ -681,6 +681,7 @@ export function createOutlineOverlay(scene, { outlined, isActive, isTransform = 
         // An instance draws through its source.
         if (!ids.has(source)) ids.set(source, id);
       }
+      setRenderList(prepassTarget, list);
     },
     dispose() {
       show(false);
