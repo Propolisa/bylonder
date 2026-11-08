@@ -97,7 +97,11 @@ COMPOSITOR_LIBRARY = 'source/blender/compositor/shaders/library'
 # Functions of shaders written in Blender's shader language (.bsl.hh), which the libraries above leave out, as a
 # library of their own: (its name, the file, the functions' signatures).
 BSL = [('workbench_hair.glsl', 'source/blender/draw/engines/workbench/shaders/workbench_prepass.bsl.hh',
-        ['float3 hair_random_normal(', 'void hair_random_material('])]
+        ['float3 hair_random_normal(', 'void hair_random_material(']),
+       # EEVEE's Dithered transparency: the hashed alpha threshold of its surfaces and the random one of its shadows.
+       ('eevee_transparency.glsl', 'source/blender/draw/engines/eevee/shaders/eevee_transparency.bsl.hh',
+        ['float hash(', 'float hash_3d(', 'float alpha_threshold(']),
+       ('eevee_sampling.glsl', 'source/blender/draw/engines/eevee/shaders/eevee_sampling_lib.bsl.hh', ['float4 pcg4d('])]
 # Draw engines' shaders the view runs whole (src/draw/overlay-particle.js, overlay-armature.js), by file.
 DRAW = ['overlay_particle_vert.glsl', 'overlay_particle_frag.glsl', 'overlay_particle_shape_vert.glsl', 'overlay_particle_shape_frag.glsl',
         'overlay_particle_hair_vert.glsl', 'overlay_edit_particle_strand_vert.glsl', 'overlay_varying_color.glsl',

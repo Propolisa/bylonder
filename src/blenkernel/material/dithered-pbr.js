@@ -11,7 +11,7 @@ const CODE = {
   CUSTOM_FRAGMENT_DEFINITIONS: `uniform float ${OFFSET};
 ${DITHER_NOISE}
 #ifdef ${DEFINE}
-#define BL_ALPHA_DISCARDS(a) ((a) <= bl_dither(gl_FragCoord.xy, ${OFFSET}))
+#define BL_ALPHA_DISCARDS(a) ((a) <= bl_dither(vPositionW, ${OFFSET}))
 #else
 #define BL_ALPHA_DISCARDS(a) ((a) < ALPHATESTVALUE)
 #endif

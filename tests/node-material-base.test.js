@@ -69,7 +69,7 @@ assert.match(fragment, /#ifdef SHADOW\{?X?\}?|SHADOW0|computeShadow/, "the fragm
   };
   const dithered = await effect();
   assert.match(dithered.defines, /#define BL_DITHERED/, 'Dithered discards what is fully transparent');
-  assert.match(dithered._fragmentSourceCode, /if \(\w+\.a <= bl_dither\(gl_FragCoord\.xy, bl_dither_offset\)\) discard;/, 'hashed by its coverage');
+  assert.match(dithered._fragmentSourceCode, /if \(\w+\.a <= bl_dither\(\w+\.xyz, bl_dither_offset\)\) discard;/, "hashed by its coverage at its surface point (EEVEE's hashed alpha threshold)");
   assert.ok(!material.needAlphaBlending() && material.needAlphaTesting(), 'in the opaque pass, depth-tested, as EEVEE draws Dithered surfaces');
   assert.equal(material.shadowDepthWrapper?.baseMaterial, material, "its shadow is drawn with its own shader, hashed as it is (EEVEE's transparent shadows)");
   // whose world position Babylon's shadow includes (a point or spot light's distance) read by its own name

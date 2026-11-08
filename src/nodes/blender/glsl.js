@@ -22,6 +22,8 @@ const FIXES = [
   ['noise_perlin', /\b(f[xyzw]) - 1(?![.\d])/g, '$1 - 1.0', 'GLSL ES has no implicit int to float conversion'],
   ['valtorgb_nearest', 'fac * (textureSize(colormap, 0).x - 1)', 'fac * float(textureSize(colormap, 0).x - 1)', 'GLSL ES has no implicit int to float conversion'],
   ['curves_segment_get', 'drw_curves.vertex_per_segment - 1)', 'drw_curves.vertex_per_segment - 1u)', 'GLSL ES has no implicit int to uint conversion'],
+  ['alpha_threshold', '1.0 / (2 * a * one_a)', '1.0 / (2.0 * a * one_a)', INT_TO_FLOAT],
+  ['alpha_threshold', 'float one_x = (1 - x);', 'float one_x = (1.0 - x);', INT_TO_FLOAT],
 ];
 
 const PREFIX = 'bl_';

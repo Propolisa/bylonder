@@ -28,7 +28,7 @@ import { skyTexture } from '../../blenkernel/sky.js';
 import { blendData } from '../../python/bpy_rna.js';
 import { VIEW_FORWARD, viewEye, viewForward } from '../../draw/draw-view.js';
 import { eeveeParity, eeveeParityChanged } from '../../draw/eevee-parity.js';
-import { DITHER_NOISE, ditherOffset } from '../../render/dither.js';
+import { DITHER_FUNCTIONS, ditherOffset } from '../../render/dither.js';
 import { readsSceneDepth, sceneDepth } from '../../render/scene-depth.js';
 import { AREA_SPECULAR, LIGHT_SPECULAR } from '../../blenkernel/light/area-specular.js';
 import '../graph-roots.js';
@@ -1471,6 +1471,8 @@ const REVERSED_FACES = 'bl_reversed_faces', DITHERED = 'BL_DITHERED', DITHER_OFF
 export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock) {
   constructor(name, idname = 'ShaderNodeOutputMaterial') {
     super(name || 'Material Output', idname);
+    // The surface's world position, which a Dithered surface's hash reads.
+    this.registerInput('blPosition', T.Vector4, true, Targets.Fragment);
   }
 
   // Babylon draws a separate culling pass's back faces first, their winding reversed, then its front faces.
@@ -1522,6 +1524,9 @@ export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock)
     // Its coverage where the closure lets light through (blended), else its color alone (opaque, unless its Blend Mode
     // blends it).
     material.blenderDithered = closureHas(closure?.ownerBlock, transparent);
+    const position = this.getInputByName('blPosition');
+    if (material.blenderDithered) wire(worldPosition(material).output, position);
+    else position.connectedPoint?.disconnectFrom(position);
     // EEVEE draws no surface for a Volume without a Surface (and Bylonder draws no volumes yet).
     material.blenderNoSurface = this._noSurface = !closure && !!this.blenderVolume;
     // EEVEE's transparent shadows: a Dithered surface's shadow is hashed per sample as the surface is, so its samples
@@ -1552,10 +1557,10 @@ export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock)
     if (this.rgba.isConnected) {
       // Hashed: kept where its coverage passes the sample's noise, its color then the surface's alone.
       state._emitUniformFromString(DITHER_OFFSET, T.Float);
-      state._emitFunction('bl_dither', DITHER_NOISE, '');
+      for (const [name, glsl] of DITHER_FUNCTIONS) state._emitFunction(name, glsl, '');
       const rgba = this.rgba.associatedVariableName;
       state.compilationString += `#ifdef ${DITHERED}
-if (${rgba}.a <= bl_dither(gl_FragCoord.xy, ${DITHER_OFFSET})) discard;
+if (${rgba}.a <= bl_dither(${this.getInputByName('blPosition').associatedVariableName}.xyz, ${DITHER_OFFSET})) discard;
 gl_FragColor = vec4(gl_FragColor.rgb / ${rgba}.a, 1.0);
 #endif
 `;
