@@ -20,9 +20,9 @@
 .nav-buttons .bl-icon-button:hover{background:#ffffff26}
 .overlays-off .nav-gizmo,.overlays-off .nav-buttons,.overlays-off .view-label{display:none}
 .gizmos-off .nav-gizmo,.gizmos-off .nav-buttons{display:none}
-/* The camera view's border on the canvas (which spans under the header), its lines where drawviewborder draws them
-   (view3d.js), the passepartout (TH_CAMERA_PASSEPARTOUT at the camera's alpha) around it. */
-.camera-border{position:absolute;left:var(--left);top:calc(var(--top) - var(--bl-header-h));width:var(--width);height:var(--height);box-sizing:border-box;border:1px solid transparent;box-shadow:0 0 0 100vmax rgb(var(--bl-camera-passepartout) / var(--passepartout));pointer-events:none}
+/* The camera view's border, its lines where drawviewborder draws them (view3d.js), the passepartout
+   (TH_CAMERA_PASSEPARTOUT at the camera's alpha) around it. */
+.camera-border{position:absolute;left:var(--left);top:var(--top);width:var(--width);height:var(--height);box-sizing:border-box;border:1px solid transparent;box-shadow:0 0 0 100vmax rgb(var(--bl-camera-passepartout) / var(--passepartout));pointer-events:none}
 .camera-border.passepartout{border-color:var(--bl-viewport)}
 /* Its lines a pixel outside the camera frame (drawviewborder x1i = x1 - 1). drawviewborder's dashes: dash_width 6 at udash_factor 0.5, 3 pixels on and 3 off. */
 .camera-border.guides::after{content:"";position:absolute;inset:-1px;--dash:var(--bl-camera-border) 0 3px,transparent 3px 6px;background:repeating-linear-gradient(90deg,var(--dash)) top/100% 1px no-repeat,repeating-linear-gradient(90deg,var(--dash)) bottom/100% 1px no-repeat,repeating-linear-gradient(180deg,var(--dash)) left/1px 100% no-repeat,repeating-linear-gradient(180deg,var(--dash)) right/1px 100% no-repeat}

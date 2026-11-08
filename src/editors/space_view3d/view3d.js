@@ -240,10 +240,14 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     // view3d_draw.cc drawviewborder: the passepartout and its outline always, the dashed guide with the overlays.
     cameraBorder.hidden = !frame;
     if (frame) {
-      // Its lines in pixels as drawviewborder rounds them: a pixel before the frame's left and bottom, on its right and top.
-      const { clientWidth: w, clientHeight: h } = canvas, x1 = Math.floor(frame.x * w - 1), x2 = Math.floor((frame.x + frame.width) * w);
-      const y1 = Math.floor((1 - frame.y - frame.height) * h - 1), y2 = Math.floor((1 - frame.y) * h);
-      cameraBorder.style.cssText = `--left:${x1}px;--top:${h - 1 - y2}px;--width:${x2 - x1 + 1}px;--height:${y2 - y1 + 1}px;--passepartout:${frame.passepartout}`;
+      // Its lines on the display's pixels where drawviewborder rounds them (x1 - 1, x2 + 1, truncated), placed in the
+      // section from the canvas's own place (it spans under the header). Blender darkens
+      // with the passepartout in linear light: for its black, the display's (1 - alpha) to the 1 / 2.2.
+      const r = canvas.getBoundingClientRect(), at = section.getBoundingClientRect(), { clientWidth: w, clientHeight: h } = canvas;
+      const x1 = Math.trunc(frame.x * w - 1.0001), x2 = Math.trunc((frame.x + frame.width) * w + 0.9999);
+      const y1 = Math.trunc((1 - frame.y - frame.height) * h - 1.0001), y2 = Math.trunc((1 - frame.y) * h + 0.9999);
+      const left = Math.round(r.left) + x1 - at.left, top = Math.round(r.top) + h - 1 - y2 - at.top;
+      cameraBorder.style.cssText = `--left:${left}px;--top:${top}px;--width:${x2 - x1 + 1}px;--height:${y2 - y1 + 1}px;--passepartout:${1 - (1 - frame.passepartout) ** (1 / 2.2)}`;
       cameraBorder.classList.toggle('passepartout', frame.passepartout > 0);
       cameraBorder.classList.toggle('guides', !!state.overlays);
     }
