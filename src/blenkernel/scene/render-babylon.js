@@ -1,4 +1,4 @@
-import { Camera, DefaultRenderingPipeline, DepthOfFieldEffectBlurLevel, ImageProcessingConfiguration, SSAO2RenderingPipeline, SSRRenderingPipeline } from '@babylonjs/core';
+import { Camera, Constants, DefaultRenderingPipeline, DepthOfFieldEffectBlurLevel, ImageProcessingConfiguration, SSAO2RenderingPipeline, SSRRenderingPipeline } from '@babylonjs/core';
 import { seededRandom } from '../../render/clock.js';
 import { createFilm } from '../../render/film.js';
 import { createDisplayTransform, setDisplaySettings } from '../../render/display-transform.js';
@@ -44,6 +44,8 @@ const withSeededRandom = create => {
 
 // The widest blur of Babylon's depth of field (its High level's kernel), in pixels.
 const DOF_KERNEL = 51;
+// The scene linear image between effects: in 8 bits the darks band.
+const HALF_FLOAT = Constants.TEXTURETYPE_HALF_FLOAT;
 
 // Babylon's default pipeline without its image processing post process, which the display transform replaces. Its own
 // switch would turn the scene's image processing off for every material: a PBR material then encodes its color to
@@ -108,8 +110,8 @@ export function createRenderEngine(scene, { dof = () => null, displayTransform =
     effects.pipeline.depthOfFieldBlurLevel = DepthOfFieldEffectBlurLevel.High;
     // Post processes draw a view drawn into part of the canvas (views.js regions) on whole textures, so the geometry
     // buffer must fill whole textures too and Fast GI must not crop its result to the camera viewport.
-    if (e.useRaytracing) effects.ssao = Object.assign(withSeededRandom(() => new SSAO2RenderingPipeline(name('fastGI'), scene, 0.5, [camera], true)), { useViewportInCombineStage: false });
-    if (e.useRaytracing && e.rayTracingMethod === 'SCREEN') effects.ssr = new SSRRenderingPipeline(name('screenTrace'), scene, [camera], true);
+    if (e.useRaytracing) effects.ssao = Object.assign(withSeededRandom(() => new SSAO2RenderingPipeline(name('fastGI'), scene, 0.5, [camera], true, HALF_FLOAT)), { useViewportInCombineStage: false });
+    if (e.useRaytracing && e.rayTracingMethod === 'SCREEN') effects.ssr = new SSRRenderingPipeline(name('screenTrace'), scene, [camera], true, HALF_FLOAT);
     // No motion blur: EEVEE blurs motion in a render (frames.js spreads its samples over the shutter), never in a view.
     if (usesGeometry(effects) && scene.geometryBufferRenderer) scene.geometryBufferRenderer.getGBuffer().ignoreCameraViewport = true;
     // Last: the view settings, whole as a rendered view displays them.

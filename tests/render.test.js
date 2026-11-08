@@ -167,6 +167,12 @@ acc.reset(); assert.equal(acc.count, 0);
   assert.ok(!names().some((name) => name.includes('imageProcessing')), "without Babylon's image processing");
   const display = camera._postProcesses.filter(Boolean).at(-1);
   assert.equal(display._textureType, Constants.TEXTURETYPE_HALF_FLOAT, 'its scene linear input keeps half floats, so the darks do not band');
+  settings.set('eevee.useRaytracing', true);
+  settings.set('render.useMotionBlur', true);
+  const eightBit = camera._postProcesses.filter(Boolean).filter((p) => p._textureType !== Constants.TEXTURETYPE_HALF_FLOAT).map((p) => p.name);
+  assert.deepEqual(eightBit, [], 'Fast GI, Screen Trace and motion blur keep half floats too');
+  settings.set('eevee.useRaytracing', false);
+  settings.set('render.useMotionBlur', false);
   // Materials draw scene linear for it: the scene's image processing stays on, applied by post process, so a PBR material
   // (a plain Principled BSDF) does not encode its color to display itself.
   settings.setView({ rendered: true, sceneLinear: true });
