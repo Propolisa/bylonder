@@ -52,7 +52,9 @@ export function createSceneTime(initial) {
       if (previous === null) { previous = now; return; }
       const [start, end] = range();
       clock += state.syncMode === 'NONE' ? state.frameStep : (now - previous) / 1000 * frameRate(state); previous = now;
-      if (clock > end) { if (state.loop) clock = start + (clock - start) % (end - start); else { clock = end; api.pause(); } }
+      // The last frame shows for a whole frame too, then the first follows (screen_animation_step), so a loop of n frames
+      // plays all n.
+      if (clock >= end + 1) { if (state.loop) clock = start + (clock - start) % (end - start + 1); else { clock = end; api.pause(); } }
       if (clock < start) clock = start;
       const frame = start + Math.floor((clock - start) / state.frameStep) * state.frameStep;
       if (frame === state.frameCurrent) return;

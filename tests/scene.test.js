@@ -85,5 +85,10 @@ console.log('Scene: units, scene settings, world datablocks and Babylon mapping 
   ntsc.play(); ntsc.tick(0); ntsc.tick(1001);
   assert.ok(Math.abs(ntsc.frame - 31) < 1e-9, '29.97 fps is fps over fps_base: 30 frames in 1.001 s');
   assert.equal(createSceneTime().state.fps, 60, 'new scenes play at 60 fps');
+  const loop = createSceneTime({ fps: 24, frameEnd: 240, frameCurrent: 239 });
+  loop.play(); loop.tick(0); loop.tick(1000 / 24 * 1.5);
+  assert.equal(loop.frame, 240, 'the last frame of the range plays');
+  loop.tick(1000 / 24 * 2.5);
+  assert.equal(loop.frame, 1, 'then the first: a loop of 240 frames repeats every 240');
 }
 console.log('Scene time: playback sync modes passed');
