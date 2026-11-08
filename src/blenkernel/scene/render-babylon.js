@@ -45,6 +45,16 @@ const withSeededRandom = create => {
 // The widest blur of Babylon's depth of field (its High level's kernel), in pixels.
 const DOF_KERNEL = 51;
 
+// Babylon's default pipeline without its image processing post process, which the display transform replaces. Its own
+// switch would turn the scene's image processing off for every material: a PBR material then encodes its color to
+// display itself, where a rendered view's materials must keep scene linear (applyByPostProcess).
+class SceneLinearPipeline extends DefaultRenderingPipeline {
+  _buildPipeline() {
+    this._imageProcessingEnabled = false;
+    super._buildPipeline();
+  }
+}
+
 // dof(camera): its depth of field as Blender's camera has it ({ focusDistance in meters, fStop, lens in millimeters }), or null.
 // displayTransform(): Blender's display transform of the scene as a color grading lattice (render/display-lut.js), or null
 // while there is none: the view transform and look are then Babylon's nearest tone map and contrast.
@@ -94,8 +104,7 @@ export function createRenderEngine(scene, { dof = () => null, displayTransform =
     // Babylon's pipeline manager keys pipelines by name, so each camera's pipelines need their own.
     const name = id => `__${id}:${camera.uniqueId}`;
     // Drawn in half float, displayed by its own display transform (display-transform.js), after blending, as Blender's.
-    effects.pipeline = new DefaultRenderingPipeline(name('display'), true, scene, [camera]);
-    effects.pipeline.imageProcessingEnabled = false;
+    effects.pipeline = new SceneLinearPipeline(name('display'), true, scene, [camera]);
     effects.pipeline.depthOfFieldBlurLevel = DepthOfFieldEffectBlurLevel.High;
     // Post processes draw a view drawn into part of the canvas (views.js regions) on whole textures, so the geometry
     // buffer must fill whole textures too and Fast GI must not crop its result to the camera viewport.

@@ -167,6 +167,12 @@ acc.reset(); assert.equal(acc.count, 0);
   assert.ok(!names().some((name) => name.includes('imageProcessing')), "without Babylon's image processing");
   const display = camera._postProcesses.filter(Boolean).at(-1);
   assert.equal(display._textureType, Constants.TEXTURETYPE_HALF_FLOAT, 'its scene linear input keeps half floats, so the darks do not band');
+  // Materials draw scene linear for it: the scene's image processing stays on, applied by post process, so a PBR material
+  // (a plain Principled BSDF) does not encode its color to display itself.
+  settings.setView({ rendered: true, sceneLinear: true });
+  const defines = {};
+  scene.imageProcessingConfiguration.prepareDefines(defines);
+  assert.ok(scene.imageProcessingConfiguration.isEnabled && defines.IMAGEPROCESSINGPOSTPROCESS, 'a PBR material leaves its color scene linear');
   settings.set('viewSettings.gamma', 0.41);
   assert.match(names().at(-1), /displayTransform/, 'at another gamma too');
   assert.equal(displayExponent(0.41), 1 / 0.41);
