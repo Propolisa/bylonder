@@ -305,6 +305,20 @@ const checks = {
     }
   } },
 
+  // The interface draws its text in Blender's own UI font (Inter, from Blender's datafiles), as wide as Blender's.
+  async "menus draw in Blender's Inter"() {
+    await app.locator('[data-blender="VIEW3D_MT_object"]').first().click();
+    const width = await app.frame().locator(".bl-menu .bl-menu-label", { hasText: "Duplicate Objects" }).first().evaluate(async (label) => {
+      await document.fonts.ready;
+      const text = document.createRange();
+      text.selectNodeContents(label);
+      return [...document.fonts].some((f) => f.family === "Inter" && f.status === "loaded") && text.getBoundingClientRect().width;
+    });
+    // Blender 5.2.3 draws "Duplicate Objects" 93 pixels wide at UI scale 1.
+    assert.ok(Math.abs(width - 93) < 3, `Inter loaded and the label ${width} pixels wide`);
+    await app.page.keyboard.press("Escape");
+  },
+
   // A menu's sub-menu shows the shortcut that opens it, as Blender's (ui_menu_block_set_keymaps): Object > Apply, Ctrl A.
   async "a sub-menu shows its shortcut"() {
     await app.locator('[data-blender="VIEW3D_MT_object"]').first().click();

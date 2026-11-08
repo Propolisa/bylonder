@@ -8,6 +8,9 @@
 @property --bl-button-gap{syntax:'<length>';inherits:true;initial-value:2px}
 @property --bl-finger{syntax:'<length>';inherits:true;initial-value:44px}
 @property --bl-row-gap{syntax:'<length>';inherits:true;initial-value:4px}
+/* Blender's own interface fonts (datafiles/fonts): Inter for the UI, DejaVu Sans Mono for text and the console. */
+@font-face{font-family:"Inter";src:url("/fonts/Inter.woff2") format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"DejaVu Sans Mono";src:url("/fonts/DejaVuSansMono.woff2") format("woff2");font-display:swap}
 :root{
   /* Preferences > Interface > Resolution Scale (PreferencesView.ui_scale), which every size token below scales, and the
      display's pixel ratio (touch.js followPixelRatio). */
