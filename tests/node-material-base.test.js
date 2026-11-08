@@ -71,6 +71,7 @@ assert.match(fragment, /#ifdef SHADOW\{?X?\}?|SHADOW0|computeShadow/, "the fragm
   assert.match(dithered.defines, /#define BL_DITHERED/, 'Dithered discards what is fully transparent');
   assert.match(dithered._fragmentSourceCode, /if \(\w+\.a <= bl_dither\(gl_FragCoord\.xy, bl_dither_offset\)\) discard;/, 'hashed by its coverage');
   assert.ok(!material.needAlphaBlending() && material.needAlphaTesting(), 'in the opaque pass, depth-tested, as EEVEE draws Dithered surfaces');
+  assert.equal(material.shadowDepthWrapper?.baseMaterial, material, "its shadow is drawn with its own shader, hashed as it is (EEVEE's transparent shadows)");
   material.transparencyMode = 2;
   scene.render();
   assert.doesNotMatch((await effect()).defines, /#define BL_DITHERED/, 'Blended blends it');

@@ -12,7 +12,7 @@ import {
   BonesBlock, ClipPlanesBlock, Color4, ColorMergerBlock, ColorSplitterBlock, Constants, FogBlock, FragmentOutputBlock, ImageProcessingBlock, InputBlock,
   InstancesBlock, Matrix, MorphTargetsBlock, NodeMaterial, NodeMaterialBlock,
   NodeMaterialBlockConnectionPointTypes as T, NodeMaterialBlockTargets as Targets, NodeMaterialSystemValues as System, Observable, PBRMetallicRoughnessBlock,
-  RawTexture, RawTexture2DArray, ReflectionBlock, RefractionBlock, RegisterClass, SubSurfaceBlock, Texture, TransformBlock, VertexOutputBlock,
+  RawTexture, RawTexture2DArray, ReflectionBlock, RefractionBlock, RegisterClass, ShadowDepthWrapper, SubSurfaceBlock, Texture, TransformBlock, VertexOutputBlock,
 } from '@babylonjs/core';
 import { attributeKind, requestedAttributes, TANGENT_KIND } from './attributes.js';
 import { BlenderRepeatWriteBlock, repeatZoneBlocks } from './repeat-zone.js';
@@ -1429,6 +1429,9 @@ export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock)
     // Its coverage where the closure lets light through (blended), else its color alone (opaque, unless its Blend Mode
     // blends it).
     material.blenderDithered = closureHas(closure?.ownerBlock, transparent);
+    // EEVEE's transparent shadows: a Dithered surface's shadow is hashed per sample as the surface is, so its samples
+    // average a shadow as dense as its coverage. Babylon's shadow maps draw it with the material's own shader.
+    if (material.blenderDithered) material.shadowDepthWrapper ??= new ShadowDepthWrapper(material, material.getScene());
     const [from, to, other] = material.blenderDithered ? [processing.getOutputByName('displayRgba'), this.rgba, this.rgb]
       : [processing.getOutputByName('displayRgb'), this.rgb, this.rgba];
     other.connectedPoint?.disconnectFrom(other);
