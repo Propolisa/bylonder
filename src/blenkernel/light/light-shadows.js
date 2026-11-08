@@ -168,7 +168,8 @@ export function createLightShadows(scene, { warn } = {}) {
   let counted = '', drawn = false, evaluated = 0;
   // Every light lights every material, as in Blender (Babylon's materials take 4 unless told more), up to what a vertex
   // shader holds: a uniform block per light besides the scene's, mesh's and material's (and one spare).
-  const gl = scene.getEngine()._gl, blocks = gl?.getParameter?.(gl.MAX_VERTEX_UNIFORM_BLOCKS) ?? 12;
+  const engine = scene.getEngine(), gl = engine._gl;
+  const blocks = engine.currentLimits?.maxUniformBuffersPerShaderStage ?? gl?.getParameter(gl.MAX_VERTEX_UNIFORM_BLOCKS) ?? 12;
   // Past that, each mesh takes the lights that reach it, the strongest first, as EEVEE culls lights by their reach.
   const reach = createLightReach(scene, warn);
   const lightAll = () => {

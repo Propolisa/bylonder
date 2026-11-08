@@ -5,6 +5,7 @@
 // colors Blender gives (raw, as Blender's offscreen stores them), alpha blended. Their two materials (widths in world
 // units and in pixels) are compiled when the page first draws Grease Pencil, so a render needs no compilation.
 import { Scene } from '@babylonjs/core/scene.js';
+import { Engine } from '@babylonjs/core/Engines/engine.js';
 import { Camera } from '@babylonjs/core/Cameras/camera.js';
 import { Color4 } from '@babylonjs/core/Maths/math.color.js';
 import { Matrix, Vector2, Vector3 } from '@babylonjs/core/Maths/math.vector.js';
@@ -43,9 +44,11 @@ function readLines(lineData, pointData, viewPerPixel) {
   return { world, pixels };
 }
 
-// The module's grease_pencil_render import, rendering on `engine`.
+// The module's grease_pencil_render import, rendering on `engine`; on a WebGL 2 engine of its own beside WebGPU, which
+// reads back only asynchronously.
 export function provideGreasePencilRender(engine) {
   if (provided.grease_pencil_render) return;
+  if (engine.isWebGPU) engine = new Engine(document.createElement('canvas'));
   const scene = new Scene(engine, { virtual: true });
   scene.useRightHandedSystem = true;
   const camera = new Camera('__grease_pencil_render', Vector3.Zero(), scene);

@@ -24,19 +24,11 @@ function imageBuffer(image) {
     pixels: float ? new Float32Array(x.memory.buffer, floats >>> 0, width * height * 4) : new Uint8Array(x.memory.buffer, bytes >>> 0, width * height * 4) };
 }
 
-// A region of the buffer uploaded from it in place: WebGL2's unpack row length and skips pick its rows and columns.
-function uploadRegion(engine, texture, buffer, [xmin, ymin, xmax, ymax]) {
-  const gl = engine._gl, unpack = (rowLength, skipPixels, skipRows) => {
-    gl?.pixelStorei(gl.UNPACK_ROW_LENGTH, rowLength);
-    gl?.pixelStorei(gl.UNPACK_SKIP_PIXELS, skipPixels);
-    gl?.pixelStorei(gl.UNPACK_SKIP_ROWS, skipRows);
-  };
-  unpack(buffer.width, xmin, ymin);
-  try {
-    engine.updateTextureData(texture, buffer.pixels, xmin, ymin, xmax - xmin, ymax - ymin);
-  } finally {
-    unpack(0, 0, 0);
-  }
+// A region of the buffer, its rows packed, uploaded in place.
+function uploadRegion(engine, texture, { width, pixels }, [xmin, ymin, xmax, ymax]) {
+  const row = (xmax - xmin) * 4, region = new pixels.constructor(row * (ymax - ymin));
+  for (let y = ymin; y < ymax; y++) region.set(pixels.subarray((y * width + xmin) * 4, (y * width + xmin) * 4 + row), (y - ymin) * row);
+  engine.updateTextureData(texture, region, xmin, ymin, xmax - xmin, ymax - ymin);
 }
 
 // image: { session_uid, user (its PartialUpdateUser), internal (Babylon's GPU texture), stale (mipmaps behind) }.

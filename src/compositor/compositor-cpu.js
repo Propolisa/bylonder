@@ -42,7 +42,7 @@ export async function compositeFinalFrame(world, camera) {
   const display = world.renderSettings.display(camera), target = display?.input;
   if (!target || !world.mainSync) return false;
   const engine = world.scene.getEngine(), { texture, width, height } = target;
-  const render = engine._readTexturePixelsSync(texture, width, height);
+  const render = await engine._readTexturePixels(texture, width, height);
   const composite = await compositeInWorker(world.mainSync.writeBlend('/compositor.blend'), render, width, height);
   if (!composite) return false;
   // In place, at the target's own size (an upload of a whole texture would make it a power of two).
