@@ -41,7 +41,7 @@
   ],
   "modules": {
     "bmesh/bmesh.wasm": {
-      "api": ["bmesh-api.cc", "operator-properties.cc", "editor-context.cc", "main-api.cc", "anim-api.cc", "modifier-api.cc", "ui-tree.cc", "rna-fcurve.cc", "rna-space.cc", "outliner-api.cc", "region-draw.cc", "drag-drop.cc", "curve-api.cc", "grease-pencil-api.cc", "grease-pencil-render.cc", "armature-api.cc", "armature-draw.cc", "relations-draw.cc", "draw-mesh.cc", "view3d-api.cc", "gesture-api.cc", "modifier-object-main.cc", "texture-api.cc", "wm-api.cc", "ghost-window.cc", "wm-gesture.cc", "undo-api.cc", "rna-bridge.cc", "rna-operator.cc", "view-api.cc", "gpu-select.cc", "edit-api.cc", "clipboard.cc", "reports.cc", "python.cc", "movie-api.cc", "image-api.cc", "fileselect.cc", "shader-node-api.cc", "gpu-material-api.cc", "compositor-api.cc"],
+      "api": ["bmesh-api.cc", "operator-properties.cc", "editor-context.cc", "main-api.cc", "anim-api.cc", "modifier-api.cc", "ui-tree.cc", "rna-fcurve.cc", "rna-space.cc", "outliner-api.cc", "region-draw.cc", "drag-drop.cc", "curve-api.cc", "grease-pencil-api.cc", "grease-pencil-render.cc", "armature-api.cc", "armature-draw.cc", "relations-draw.cc", "draw-mesh.cc", "view3d-api.cc", "gesture-api.cc", "modifier-object-main.cc", "texture-api.cc", "wm-api.cc", "ghost-window.cc", "wm-gesture.cc", "undo-api.cc", "rna-bridge.cc", "rna-operator.cc", "view-api.cc", "gpu-select.cc", "edit-api.cc", "clipboard.cc", "reports.cc", "python.cc", "movie-api.cc", "image-api.cc", "fileselect.cc", "shader-node-api.cc", "gpu-material-api.cc", "compositor-api.cc", "fftw-threads.cc"],
       "seam_sources": ["draw/intern/attribute_convert.cc", "draw/intern/draw_cache_extract_mesh.cc", "draw/intern/draw_cache_extract_mesh_render_data.cc", "draw/intern/draw_attributes.cc", "draw/intern/mesh_extractors/", "gpu/intern/gpu_vertex_buffer.cc", "gpu/intern/gpu_index_buffer.cc", "gpu/intern/gpu_vertex_format.cc", "gpu/intern/gpu_vertex_format_normals.cc", "gpu/intern/gpu_capabilities.cc", "gpu/intern/gpu_platform.cc", "gpu/intern/gpu_immediate_util.cc", "gpu/intern/gpu_node_graph.cc"],
       "check": "tools/blender-port/check-bmesh.mjs",
       "fetch": ["release/datafiles/userdef/userdef_default_theme.c"],
@@ -61,6 +61,9 @@
         "freetype": {"url": "https://github.com/freetype/freetype.git", "tag": "VER-2-13-3", "include": "include", "private": true},
         "zstd": {"url": "https://github.com/facebook/zstd/releases/download/v1.5.7/zstd-1.5.7.tar.gz", "tag": "1.5.7",
                  "sha256": "eb33e51f49a15e023950cd7825ca74a4a2b43db8354825ac24fc1b7ee09e6fa3", "include": "lib", "private": true},
+        "fftw3": {"url": "http://www.fftw.org/fftw-3.3.10.tar.gz", "tag": "3.3.10",
+                  "sha256": "56c932549852cddcfafdab3820b0200c7742675be92179e59e6215b340e26467", "include": "include", "private": true,
+                  "build": {"script": "deps/fftw.sh", "archives": ["libfftw3f.a"]}},
         "cpython": {"url": "https://www.python.org/ftp/python/3.13.13/Python-3.13.13.tar.xz", "tag": "3.13.13",
                     "sha256": "2ab91ff401783ccca64f75d10c882e957bdfd60e2bf5a72f8421793729b78a71", "include": "prefix/include/python3.13",
                     "private": true, "host_include": "PYTHON_INCLUDE_DIR",
@@ -138,7 +141,9 @@
         "bf_imbuf_openexr": {"uses": ["openexr", "imath"]},
         "bf_imbuf_openimageio": {"uses": ["openimageio", "imath"], "defines": ["OIIO_STATIC_DEFINE"]},
         "bf_imbuf_opencolorio": {"uses": ["opencolorio", "imath"], "defines": ["OpenColorIO_SKIP_IMPORTS"]},
-        "bf_compositor": {"uses": ["opencolorio", "imath"], "defines": ["OpenColorIO_SKIP_IMPORTS"]}
+        "bf_compositor": {"uses": ["opencolorio", "imath", "fftw3"], "defines": ["OpenColorIO_SKIP_IMPORTS", "WITH_FFTW3"]},
+        "bf_nodes_composite": {"uses": ["fftw3"], "defines": ["WITH_FFTW3"]},
+        "bf_blenlib": {"uses": ["fftw3"], "defines": ["WITH_FFTW3"]}
       },
       "libraries": [
         {"dependency": "libjpeg-turbo", "path": "",

@@ -31,8 +31,22 @@ def pixel(x, y):
 source = bpy.data.images.new("Input", WIDTH, HEIGHT, float_buffer=True)
 source.pixels[:] = [v for y in range(HEIGHT) for x in range(WIDTH) for v in pixel(x, y)]
 
+# A larger image for what a small one does not show (Fog Glow's spread): a dim floor with a bright square in its middle,
+# compared at a row of probe pixels to its right.
+LARGE = (320, 180)
+PROBES = [(x, 90) for x in (172, 176, 184, 200, 232, 300)]
 
-def case(idname, inputs):
+
+def large_pixel(x, y):
+    return [8.0, 6.0, 4.0, 1.0] if abs(x - 160) < 10 and abs(y - 90) < 10 else [0.02, 0.02, 0.02, 1.0]
+
+
+large = bpy.data.images.new("Large", *LARGE, float_buffer=True)
+large.pixels[:] = [v for y in range(LARGE[1]) for x in range(LARGE[0]) for v in large_pixel(x, y)]
+
+
+def case(idname, inputs, size=None):
+    scene.render.resolution_x, scene.render.resolution_y = size or (WIDTH, HEIGHT)
     tree.nodes.clear()
     node = tree.nodes.new(idname)
     for identifier, value in inputs.items():
@@ -40,7 +54,7 @@ def case(idname, inputs):
     image_input = next((s for s in node.inputs if s.type == "RGBA"), None)
     if image_input:
         image = tree.nodes.new("CompositorNodeImage")
-        image.image = source
+        image.image = large if size else source
         tree.links.new(image.outputs["Image"], image_input)
     output = tree.nodes.new("NodeGroupOutput")
     tree.links.new(next((s for s in node.outputs if s.type == "RGBA"), node.outputs[0]), output.inputs[0])
@@ -49,6 +63,9 @@ def case(idname, inputs):
     result = bpy.data.images.load(exr, check_existing=False)
     pixels = [round(v, 5) for v in result.pixels[:]]
     bpy.data.images.remove(result)
+    if size:
+        return {"node": idname, "inputs": inputs, "size": size, "probes": PROBES,
+                "result": [v for x, y in PROBES for v in pixels[(y * size[0] + x) * 4:(y * size[0] + x) * 4 + 4]]}
     return {"node": idname, "inputs": inputs, "result": pixels}
 
 
@@ -59,6 +76,8 @@ cases = [
                                  "Color Modulation": 0.0}),  # bike_ride
     case("CompositorNodeGlare", {"Type": "Sun Beams", "Quality": "High", "Highlights Threshold": 1.0, "Strength": 0.5, "Size": 0.22}),  # cloth_tear
     case("CompositorNodeGlare", {"Type": "Fog Glow", "Highlights Threshold": 1.0, "Size": 0.5}),
+    # Neon Night's, whose glow reaches tens of pixels out.
+    case("CompositorNodeGlare", {"Type": "Fog Glow", "Quality": "High", "Highlights Threshold": 0.7, "Size": 0.85, "Strength": 1.8}, size=LARGE),
     case("CompositorNodeFilter", {"Type": "Diamond Sharpen", "Fac": 0.5}),  # impact_fracture
     case("CompositorNodeBlur", {"Type": "Gaussian", "Size": (6.0, 6.0)}),  # pizza_delivery, smaller
     case("CompositorNodeLensdist", {"Type": "Radial", "Dispersion": 0.1, "Jitter": False}),  # bike_ride, without jitter's noise
