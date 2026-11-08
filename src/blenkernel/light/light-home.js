@@ -61,7 +61,8 @@ export function deriveBabylonLight(light) {
   // An area light's extent is its size; a radius would zero its photometric scale, which Babylon has no case for.
   if (record.type !== 'AREA') light.radius = shapeRadius(record);
   light.shadowEnabled = record.use_shadow;
-  light.range = record.use_custom_distance ? record.cutoff_distance : Number.MAX_VALUE;
+  // EEVEE fades a light to nothing at its influence radius as Babylon's glTF falloff does at its range.
+  if (record.type !== 'SUN') light.range = influenceRadius(record).surface;
   if (record.type === 'SPOT') {
     light.angle = record.spot_size;
     light.innerAngle = (1 - record.spot_blend) * record.spot_size;
@@ -70,6 +71,18 @@ export function deriveBabylonLight(light) {
     light.width = record.size;
     light.height = ['RECTANGLE', 'ELLIPSE'].includes(record.shape) ? record.size_y : record.size;
   }
+}
+
+// blender-port: DNA_scene_defaults.h light_threshold: the scene's default Light Threshold.
+const LIGHT_THRESHOLD = 0.01;
+// blender-port: eevee_light.cc Light::shape_parameters_set and attenuation_radius_get: where a point, spot or area
+// light's power falls to the light threshold (its Custom Distance, if it has one), for its surface lighting (its
+// diffuse and specular factors) and at most (its volume factor too).
+export function influenceRadius(record) {
+  const power = Math.max(...record.color) * Math.abs(record.energy * 2 ** (record.exposure ?? 0) / 100);
+  const radius = (factor) => (record.use_custom_distance ? record.cutoff_distance : Math.sqrt(factor * power / LIGHT_THRESHOLD));
+  const surface = radius(Math.max(record.diffuse_factor ?? 1, record.specular_factor ?? 1)), volume = radius(record.volume_factor ?? 1);
+  return { surface, max: Math.max(surface, volume) };
 }
 
 // blender-port: eevee_light.cc Light::shape_parameters_set: a sun's radius at unit distance from its angle, a point's or

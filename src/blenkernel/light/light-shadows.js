@@ -3,7 +3,7 @@
 // into it. Materials receive them through Babylon's own light code. Shadow maps are drawn for the views that show the
 // scene's lights (Rendered shading, Render Image); other views draw them empty, which changes no material.
 import { CascadedShadowGenerator, Matrix, ShadowGenerator, Vector3 } from '@babylonjs/core';
-import { isBlenderLight, lightRecord } from './light-home.js';
+import { influenceRadius, isBlenderLight, lightRecord } from './light-home.js';
 import { areaLightShadows } from './area-light.js';
 import { filmSample } from '../../render/film.js';
 import { halton } from '../../render/sampling.js';
@@ -11,17 +11,13 @@ import { evaluatedMatrix, setEvaluatedMatrix } from '../../runtime/object-transf
 
 const MAP_SIZE = 2048;
 const CASTS = ['SUN', 'SPOT', 'POINT'];
-// blender-port: DNA_scene_defaults.h light_threshold: the scene's default Light Threshold.
-const LIGHT_THRESHOLD = 0.01;
 // How far, in meters, a caster's depth is pushed back from the light: below a brick's bump, past a cube map texel.
 const DEPTH_BIAS = 0.005;
 
-// blender-port: eevee_light.cc Light::shape_parameters_set and attenuation_radius_get: a point or spot light's shadow
-// spans its influence radius (its Custom Distance, else where its power falls to the light threshold), its near clip
+// blender-port: eevee_light.cc Light::shape_parameters_set: a local light's shadow spans its influence, its near clip
 // 1/4000 of that.
 export function shadowRange(record) {
-  const power = Math.max(...record.color) * Math.abs(record.energy * 2 ** (record.exposure ?? 0) / 100);
-  const far = record.use_custom_distance ? record.cutoff_distance : Math.sqrt(power / LIGHT_THRESHOLD);
+  const far = influenceRadius(record).max;
   return { near: far / 4000, far };
 }
 
