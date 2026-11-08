@@ -83,7 +83,7 @@ const current = computed(() => props.items?.find(([id]) => id === value.value)?.
     </template>
     <div v-else-if="kind === 'VECTOR'" class="flex size-full flex-col gap-px">
       <span class="truncate leading-[var(--node-row)]">{{ label }}</span>
-      <template v-for="(axis, i) in ['X', 'Y', 'Z']" :key="axis">
+      <template v-for="(axis, i) in ['X', 'Y', 'Z', 'W'].slice(0, value.length)" :key="axis">
         <input v-if="editing === i" ref="input" v-model="draft" class="bl-node-widget flex-1 px-1.5 text-right" @keydown.enter="accept(i)" @keydown.esc="editing = null" @blur="accept(i)" />
         <button v-else type="button" class="bl-node-widget flex flex-1 items-center justify-between px-1.5" @pointerdown="numberDown($event, i)">
           <span>{{ axis }}</span><span class="tabular-nums">{{ format(value[i]) }}</span>

@@ -16,7 +16,8 @@ export const socketColor = (type) => `var(--bl-socket-${type.toLowerCase().repla
 
 export const socketKey = (side, point) => `${side}:${point.ownerBlock?.uniqueId}:${point.name}`;
 
-const rowHeight = (socket) => (socket.value && !socket.linked && socket.type === 'VECTOR' ? ROW * VECTOR_ROWS : ROW);
+// A vector's label row and a row per component (a 2D vector's two: Blender 5's compositor positions and sizes).
+const rowHeight = (socket) => (socket.value && !socket.linked && socket.type === 'VECTOR' ? ROW * (1 + (socket.value.socket.size ?? VECTOR_ROWS - 1)) : ROW);
 
 export function nodeLayout(node) {
   const sockets = [];

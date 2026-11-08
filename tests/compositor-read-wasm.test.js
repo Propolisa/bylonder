@@ -97,3 +97,14 @@ const made = idStruct(freshSync.blender.scene).compositing_node_group;
 assert.ok(made && fresh.compositor.main, "New makes Blender's compositing node group, the scene's");
 assert.ok([...made.nodes].some((n) => n.bl_idname === 'CompositorNodeRLayers'), 'with Render Layers into the Group Output');
 console.log("Compositor: edits to Main's compositing node group are composited");
+// The Compositor draws the group as Blender's node editor: a 2D vector (Ellipse Mask's Position) has two fields, a
+// menu socket its items, and the inputs a menu leaves unused (Color Balance's Offset under Lift/Gamma/Gain) are left out.
+const { createMainNodeTree } = await import('../src/editors/space_node/main-node-tree.js');
+const drawn = createMainNodeTree(made, { kind: 'compositor' });
+const ellipse = made.nodes.new('CompositorNodeEllipseMask'), grade = made.nodes.new('CompositorNodeColorBalance');
+freshSync.blender.evaluate();
+const inputs = (node) => drawn.node(drawn.blocks().find((b) => b.rna.name === node.name)).inputs;
+assert.equal(inputs(ellipse).find((s) => s.id === 'Position').value.socket.size, 2, 'a 2D vector has two fields');
+assert.ok(inputs(ellipse).find((s) => s.id === 'Operation').value.socket.items.includes('Multiply'), "a menu socket's items");
+assert.ok(!inputs(grade).some((s) => s.id === 'Base Offset') && inputs(grade).some((s) => s.id === 'Base Gain'), "the inputs its menu uses");
+console.log("Compositor: Main's group is drawn as Blender's node editor draws it");

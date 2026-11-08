@@ -5,6 +5,7 @@
 import { blenderMain, blenderModule } from '../../bmesh/bmesh-wasm.js';
 import { pointerOf, pointerStruct, structFind } from '../../python/bpy_rna.js';
 import { nodeButtonsTree } from '../interface/ui-tree.js';
+import { declaration } from '../../nodes/blender/declarations.js';
 import { AnimArea, RGN_TYPE_WINDOW } from '../animation/anim-area.js';
 
 // Blender's node-editor y grows upward; the editor's downward.
@@ -78,7 +79,7 @@ export function createMainNodeTree(rootTree, { changed = () => {}, kind = 'geome
   const socket = (s, block, output) => {
     const p = point(s, block, output);
     const value = !output && !s.is_linked && !s.hide_value && VALUES.has(s.type) ? {
-      socket: { type: s.type, subtype: prop(s)?.subtype, name: s.name, items: s.type === 'MENU' ? menuItems(s) : undefined, min: prop(s)?.soft_min, max: prop(s)?.soft_max },
+      socket: { type: s.type, subtype: prop(s)?.subtype, name: s.name, items: s.type === 'MENU' ? menuItems(s) : undefined, min: prop(s)?.soft_min, max: prop(s)?.soft_max, size: s.type === 'VECTOR' ? prop(s)?.array_length : undefined },
       get: () => (typeof s.default_value === 'object' ? [...s.default_value] : s.default_value),
       // A menu's item changes which sockets the node shows.
       set: (v) => { s.default_value = v; changed(s.type === 'MENU'); },
@@ -89,7 +90,11 @@ export function createMainNodeTree(rootTree, { changed = () => {}, kind = 'geome
   // compositor's Babylon graph draws them.
   const shown = (s) => s.enabled && !s.hide && !(kind === 'compositor' && s.is_inactive && !s.is_linked);
   const prop = (s) => s.bl_rna.properties.get('default_value');
-  const menuItems = (s) => [...s.bl_rna.properties.get('default_value').enum_items].map((item) => item.identifier);
+  // A menu's items: RNA's when static, else the node's declaration (Blender's menu sockets list them per node).
+  const menuItems = (s) => {
+    const items = [...prop(s).enum_items].map((item) => item.identifier);
+    return items.length ? items : declaration(kind, s.node.bl_idname)?.inputs.find((d) => d.identifier === s.identifier)?.items ?? [];
+  };
   // The node's properties its draw_buttons lays out, in its order, edited through RNA: a checkbox with its text, a menu
   // (whose text is its item) without.
   const buttons = (node) => {
