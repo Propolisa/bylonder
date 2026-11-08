@@ -21,13 +21,13 @@ const built = async (material) => {
   return material._fragmentCompilationState.compilationString.split('void main').at(-1);
 };
 
-// Opened as a project's code opens a .blend, into a world with its material library.
+// Opened as a saved project opens its .blend: before the world has its material library (runtime/world.js).
 const scene = new Scene(new NullEngine());
 const animation = createAnimationModel(() => {}, { ids: createBlenderIDs(blenderMain()) });
 const world = { scene, objects: [], animation };
-world.materials = createMaterialLibrary(world);
 const sync = createMainSync({ rna: createRNA({ world }), ids: animation.ids });
 const { warnings } = sync.readBlend(readFileSync(new URL('./fixtures/shader-inline.blend', import.meta.url)), scene);
+world.materials = createMaterialLibrary(world);
 assert.deepEqual(warnings.filter((w) => w.includes('Inlined')), [], 'every node of the inlined tree opens');
 
 const material = scene.materials.find((m) => m.name === 'Inlined');
@@ -40,6 +40,8 @@ const code = await built(material), loop = code.indexOf('for (int'), close = cod
 assert.match(code.slice(loop), /^for \(int \w+ = 0; \w+ < int\(40(\.0)?\); \w+\+\+\) \{/, 'forty iterations');
 assert.equal(code.slice(loop, close).match(/bl_math_add\(|bl_math_multiply_add\(/g)?.length, 2, 'the zone\'s two nodes inside the loop');
 assert.ok(code.slice(close).includes('bl_math_multiply('), "the group's Multiply after it");
+const multiply = material.attachedBlocks.find((b) => b.idname === 'ShaderNodeMath' && b.properties.operation === 'MULTIPLY');
+assert.equal(multiply.values.Value_001, 2, "the group's Multiply keeps its value, not that of the material's first Math node");
 
 // Forty steps that each read the last one twice: Babylon would prepare a block once for each of its 2^40 paths.
 const chain = { nodes: [{ idname: 'ShaderNodeValue', name: 'Start', values: { '=Value': 0.5 } }], links: [] };

@@ -23,6 +23,7 @@ import { curvesData, curvesMesh, disposeCurvesData, CurvesPlugin } from '../draw
 import { armatureData } from './armature/armature.js';
 import { armatureChanged } from '../draw/overlay-armature.js';
 import { principledPBR, applyPBR } from './material/principled-gltf.js';
+import { materialType } from './material/schema.js';
 import { attributesWanted, nodeMaterialFromTree, nodeProperties, outputValues } from '../nodes/blender/shader-nodes.js';
 import { pullEeveeParity } from '../draw/eevee-parity.js';
 import { pullRenderExtensions } from '../draw/render-extension.js';
@@ -367,7 +368,8 @@ export function createMainView(state) {
   function drawShading(record, owner, struct, warnings = []) {
     pull(record, owner);
     if (struct === 'Material') owner.metadata = { ...owner.metadata, wbViewportDisplay: viewportDisplay(record.ptr) };
-    const type = struct === 'Material' ? world.materials?.type(owner) : null;
+    // By the material's class: a saved project opens its .blend before the world has its material library.
+    const type = struct === 'Material' ? materialType(owner) : null;
     if (type === 'node') return;
     const pbr = type === 'pbr' && mainPBR(blender, record.ptr);
     if (pbr) applyPBR(owner, pbr);
