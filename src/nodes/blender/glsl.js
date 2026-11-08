@@ -210,8 +210,10 @@ function bufferReads(text) {
   return out + text.slice(i);
 }
 
-// WebGL 2 has no 1D textures: a color band (GPU_color_band) is a 2D texture one texel high.
+// WebGL 2 has no 1D textures: a color band (GPU_color_band) is a 2D texture one texel high. C++ attributes
+// ([[maybe_unused]]) go, as Blender's shader tool removes them.
 const dialect = (text) => bufferReads(text)
+  .replace(/\[\[\w+\]\]\s*/g, '')
   .replace(/\bsampler1DArray\b/g, 'sampler2D')
   .replace(/\.([xyzwrgba]{1,4})\(\)/g, '.$1')
   .replace(/\b(\d+\.\d*|\.\d+|\d+)([eE][+-]?\d+)?[fF]\b/g, '$1$2');
@@ -285,7 +287,69 @@ export function glslShader(source, stage, macros = {}) {
   const defined = new Map([[stage === 'vertex' ? 'GPU_VERTEX_SHADER' : 'GPU_FRAGMENT_SHADER', { params: null, body: '1' }]]);
   preprocess(libraries['gpu_shader_compat_glsl.glsl'], defined);
   for (const [name, value] of Object.entries(macros)) defined.set(name, Array.isArray(value) ? { params: value[0], body: value[1] } : { params: null, body: value });
-  return dialect(preprocess(source, defined)).replace(/\b(\w+\s+\w+\s*)\(([^()]*)\)(\s*\{)/g, (_, head, params, brace) => `${head}(${references(params)})${brace}`);
+  return dialect(localConstants(instantiateTemplates(withoutOneDimensional(preprocess(source, defined))))).replace(/\b(\w+\s+\w+\s*)\(([^()]*)\)(\s*\{)/g, (_, head, params, brace) => `${head}(${references(params)})${brace}`);
+}
+
+// The source with Blender's function templates instantiated, as its shader tool does: each explicit instantiation
+// (template int2 f<int2>(int2, int2);) becomes the template's function with its type parameters replaced, a
+// specialization (template<> float f<float>(...) {...}) a function of its own, and the templates themselves go.
+function instantiateTemplates(source) {
+  const chunks = [];
+  let depth = 0, start = 0;
+  for (let i = 0; i < source.length; i++) {
+    const c = source[i];
+    if (c === '{') depth++;
+    else if ((c === '}' && --depth === 0) || (c === ';' && depth === 0)) { chunks.push(source.slice(start, i + 1)); start = i + 1; }
+  }
+  chunks.push(source.slice(start));
+  const templates = new Map();
+  return chunks.map((chunk) => {
+    const definition = /^(\s*)template\s*<([^>]+)>\s*([\s\S]*)$/.exec(chunk);
+    if (definition) {
+      const name = /\b(\w+)\s*\(/.exec(definition[3])?.[1];
+      templates.set(name, { params: definition[2].split(',').map((p) => p.trim().split(/\s+/).at(-1)), text: definition[3] });
+      return definition[1];
+    }
+    const specialization = /^(\s*)template\s*<\s*>\s*([\s\S]*)$/.exec(chunk);
+    if (specialization) return specialization[1] + specialization[2].replace(/^([\w\s]*?\b\w+)\s*<[^>(]*>\s*\(/, '$1(');
+    const instance = /^(\s*)template\s+[\w\s]*?\b(\w+)\s*<([^>]*)>\s*\([^)]*\)\s*;$/.exec(chunk);
+    if (instance && templates.has(instance[2])) {
+      const { params, text } = templates.get(instance[2]), types = instance[3].split(',').map((t) => t.trim());
+      return instance[1] + params.reduce((t, p, i) => t.replace(new RegExp(`\\b${p}\\b`, 'g'), types[i]), text);
+    }
+    return chunk;
+  }).join('');
+}
+
+// The source with its functions' local constants that are not constant expressions as variables: GLSL ES's const takes
+// constant expressions only, the desktop GLSL Blender writes any value (const int2 bounds = texture_size(tx) - 1). One of
+// literals, constructors and other constants stays a constant, which an array's size may be.
+const CONSTRUCTOR = /^(int|uint|float|bool|true|false|[iub]?vec[234]|mat[234](x[234])?)$/;
+function localConstants(source) {
+  const constants = new Set([...source.matchAll(/\bconst\s+\w+\s+(\w+)\s*=/g)].map((m) => m[1]));
+  const constant = (expression) => [...expression.replace(/\.\w+/g, '').matchAll(/\b[A-Za-z_]\w*\b/g)].every(([name]) => CONSTRUCTOR.test(name) || constants.has(name));
+  let out = '', depth = 0;
+  for (const part of source.split(/([{}])/)) {
+    depth += part === '{' ? 1 : part === '}' ? -1 : 0;
+    out += depth > 0 ? part.replace(/\bconst\s+(\w+\s+(\w+)\s*=([^;]*);)/g, (all, declaration, name, value) => {
+      if (constant(value)) return all;
+      constants.delete(name);
+      return declaration;
+    }) : part;
+  }
+  return out;
+}
+
+// The source without the functions that take a 1D sampler, which GLSL ES does not have (overloads a shader of
+// 2D images does not call: the compositor's texture_size and texture_load).
+function withoutOneDimensional(source) {
+  let out = source;
+  for (let match; (match = /^[^\S\n]*\w[\w ]*\s+\w+\s*\([^)]*\bi?u?sampler1D\b[^)]*\)\s*\{/m.exec(out));) {
+    let depth = 1, close = match.index + match[0].length;
+    while (depth) depth += { '{': 1, '}': -1 }[out[close++]] ?? 0;
+    out = out.slice(0, match.index) + out.slice(close);
+  }
+  return out;
 }
 
 // GLSL ES reserves names with two underscores in a row.

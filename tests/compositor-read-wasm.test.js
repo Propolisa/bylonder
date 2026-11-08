@@ -65,7 +65,8 @@ assert.equal(balanceBlock.values.Fac, 0.25, "the file's values");
 assert.equal(glareBlock.values.Type, 'Bloom', "the file's menu items");
 assert.ok(block('CompositorNodeViewer'), 'a Viewer is shown');
 assert.deepEqual(graph.editorData.locations.find((l) => l.blockId === rendering.uniqueId), { blockId: rendering.uniqueId, x: -300, y: -120, isCollapsed: false }, "placed where the file's nodes are");
-assert.ok(notices.some((n) => n.includes('CompositorNodeGlare') && !n.includes('CompositorNodeViewer')), 'the nodes not run are named');
+// Glare runs, replayed as Blender's GPU compositor records it (compositor-replay.js); a Viewer is not composited.
+assert.ok(!notices.some((n) => n.includes('CompositorNodeGlare') || n.includes('CompositorNodeViewer')), 'Glare runs in the views');
 console.log("Compositor: a .blend's compositing node group opens as the compositor's graph");
 
 // The Compositor edits Main's group as Blender's (main-node-tree.js): the graph follows each edit, a value on its block,

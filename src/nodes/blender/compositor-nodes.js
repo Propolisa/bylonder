@@ -8,6 +8,7 @@ import { glslIdentifier, kindOfSocket, muteLinks } from './node-code.js';
 import { convert, glslType, glslValue, socketType } from './sockets.js';
 import { graphCode, nodeGraph, nodeTypeHasGpu } from './gpu-graph.js';
 import { rampTexture } from './shader-nodes.js';
+import { BlenderReplayTask, nodeRecording, nodeTypeHasOperation } from '../../compositor/compositor-replay.js';
 import '../graph-roots.js';
 
 // The block's sampler of an image linked into an input (Blender's compositor declares one per linked output, named as
@@ -65,7 +66,10 @@ export class BlenderCompositorBlock extends NodeRenderGraphBlock {
     }
     this._addDependenciesInput();
     for (const s of outputs) this.registerOutput(s.identifier, T.Texture);
-    this._frameGraphTask = new BlenderCompositorTask(this.name, frameGraph, this._effect());
+    // A node that runs as an operation of its own replays it as Blender's GPU compositor records it.
+    this.replays = nodeTypeHasOperation(idname);
+    this._frameGraphTask = this.replays ? new BlenderReplayTask(this.name, frameGraph, outputs.map((s) => s.identifier))
+      : new BlenderCompositorTask(this.name, frameGraph, this._effect());
   }
 
   // The output the node's image is: the one set (`output`), else one that is linked, else its first available one.
@@ -74,7 +78,17 @@ export class BlenderCompositorBlock extends NodeRenderGraphBlock {
     return outputs.find((s) => s.identifier === this.output) ?? outputs.find((s) => this.getOutputByName(s.identifier)?.hasEndpoints)
       ?? outputs.find((s) => shown.has(s.identifier)) ?? outputs[0];
   }
-  get runs() { return !!this._graph(); }
+  // A replayed node runs at the size of the images it last ran on (a view's render; 1920 by 1080 before it has run).
+  get runs() { return this.replays ? !!this._recording(this._frameGraphTask.size ?? [1920, 1080])?.plan.steps : !!this._graph(); }
+  // The node's operation as Blender's GPU compositor runs it on images of `size` (compositor-replay.js).
+  _recording([width, height]) {
+    return nodeRecording(this.idname, { properties: this.properties, values: this.values, linked: [...this.linked.keys()] }, width, height);
+  }
+  // Whether the node's recorded passes differ from those the graph was built with (a value they depend on changed).
+  get stale() {
+    const task = this._frameGraphTask;
+    return this.replays && !this.mute && !!task.size && task.plan !== (this._recording(task.size)?.plan ?? null);
+  }
   // The node's GPU code as Blender builds it for its properties, values and linked inputs (gpu-graph.js).
   _graph() {
     return nodeGraph('CompositorNodeTree', this.idname, { properties: this.properties, values: this.values, linked: [...this.linked.keys()] });
@@ -128,6 +142,7 @@ export class BlenderCompositorBlock extends NodeRenderGraphBlock {
 
   _buildBlock(state) {
     super._buildBlock(state);
+    if (this.replays) { this._buildReplay(); return; }
     const task = this._frameGraphTask;
     if (this._fragment().code !== task.postProcess.code) {
       task.postProcess.dispose();
@@ -140,6 +155,14 @@ export class BlenderCompositorBlock extends NodeRenderGraphBlock {
     task.sourceTexture = this.image && linked.get(this.image.identifier)?.value;
     task.targetTexture = task.sourceTexture === undefined ? this._frameGraph.textureManager.createRenderTargetTexture(this.name, IMAGE) : undefined;
     if (this.result) this.getOutputByName(this.result.identifier).value = task.outputTexture;
+  }
+
+  _buildReplay() {
+    const task = this._frameGraphTask, linked = this.linked;
+    task.inputTextures = new Map([...linked].map(([id, point]) => [id, point.value]));
+    task.sourceTexture = this.image && linked.get(this.image.identifier)?.value;
+    task.recorder = (size) => (this.mute ? null : this._recording(size));
+    for (const [id, handle] of task.outputTextures) this.getOutputByName(id).value = handle;
   }
 
   serialize() {

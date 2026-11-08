@@ -1,0 +1,959 @@
+{
+ "compositor_alpha_crop.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_bilateral_blur.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_bokeh_blur.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_bokeh_blur_variable_size.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_bokeh_image.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_box_mask.glsl": {
+  "stores": {
+   "output_mask_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_compute_preview.glsl": {
+  "stores": {
+   "preview_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_convert.glsl": {
+  "stores": {
+   "image_out": [
+    "texel",
+    "int3(texel,0)",
+    "int3(texel,1)",
+    "int3(texel,2)",
+    "int3(texel,3)"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_cryptomatte_image.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_cryptomatte_matte.glsl": {
+  "stores": {
+   "matte_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_cryptomatte_pick.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_defocus_blur.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_defocus_radius_from_depth.glsl": {
+  "stores": {
+   "radius_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_defocus_radius_from_scale.glsl": {
+  "stores": {
+   "radius_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_deriche_gaussian_blur.glsl": {
+  "stores": {
+   "causal_output_img": [
+    "texel"
+   ],
+   "non_causal_output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_deriche_gaussian_blur_sum.glsl": {
+  "stores": {
+   "output_img": [
+    "transposed"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_despeckle.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_directional_blur.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_displace.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_displace_anisotropic.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": true
+ },
+ "compositor_double_edge_mask_compute_boundary.glsl": {
+  "stores": {
+   "inner_boundary_img": [
+    "texel"
+   ],
+   "outer_boundary_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_double_edge_mask_compute_gradient.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_edge_filter.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_ellipse_mask.glsl": {
+  "stores": {
+   "output_mask_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_filter.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_flip.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_gamma_correct.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_glare_bloom_downsample.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_glare_bloom_upsample.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_glare_ghost_accumulate.glsl": {
+  "stores": {
+   "accumulated_ghost_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_glare_ghost_base.glsl": {
+  "stores": {
+   "combined_ghost_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_glare_highlights.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_glare_kernel_downsample.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_glare_mix.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_glare_simple_star_anti_diagonal_pass.glsl": {
+  "stores": {
+   "anti_diagonal_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_glare_simple_star_diagonal_pass.glsl": {
+  "stores": {
+   "diagonal_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_glare_simple_star_horizontal_pass.glsl": {
+  "stores": {
+   "horizontal_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_glare_simple_star_vertical_pass.glsl": {
+  "stores": {
+   "vertical_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_glare_streaks_accumulate.glsl": {
+  "stores": {
+   "accumulated_streaks_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_glare_streaks_filter.glsl": {
+  "stores": {
+   "output_streak_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_glare_sun_beams.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_glare_write_glare_output.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_glare_write_highlights_output.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_horizontal_lens_distortion.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_id_mask.glsl": {
+  "stores": {
+   "output_mask_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_image_coordinates_normalized.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_image_coordinates_pixel.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_image_coordinates_uniform.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_image_crop.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_inpaint_compute_boundary.glsl": {
+  "stores": {
+   "boundary_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_inpaint_compute_region.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_inpaint_fill_region.glsl": {
+  "stores": {
+   "filled_region_img": [
+    "texel"
+   ],
+   "smoothing_radius_img": [
+    "texel"
+   ],
+   "distance_to_boundary_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_jump_flooding.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_keying_compute_image.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_keying_compute_matte.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_keying_extract_chroma.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_keying_replace_chroma.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_keying_screen.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": true
+ },
+ "compositor_keying_tweak_matte.glsl": {
+  "stores": {
+   "output_matte_img": [
+    "texel"
+   ],
+   "output_edges_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_kuwahara_anisotropic.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_kuwahara_anisotropic_compute_structure_tensor.glsl": {
+  "stores": {
+   "structure_tensor_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_kuwahara_classic.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_map_uv.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_map_uv_anisotropic.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": true
+ },
+ "compositor_mask_to_sdf_compute_boundary.glsl": {
+  "stores": {
+   "boundary_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_mask_to_sdf_compute_distance.glsl": {
+  "stores": {
+   "distance_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_morphological_blur.glsl": {
+  "stores": {
+   "blurred_input_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_morphological_distance.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_morphological_distance_feather.glsl": {
+  "stores": {
+   "output_img": [
+    "transposed"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_morphological_distance_threshold.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_morphological_distance_threshold_seeds.glsl": {
+  "stores": {
+   "masked_pixels_img": [
+    "texel"
+   ],
+   "unmasked_pixels_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_morphological_step.glsl": {
+  "stores": {
+   "output_img": [
+    "transposed"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_motion_blur.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": true
+ },
+ "compositor_motion_blur_max_velocity_dilate.glsl": {
+  "stores": {},
+  "shares": true
+ },
+ "compositor_movie_distortion.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_normalize.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_pad.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_parallel_reduction.glsl": {
+  "stores": {
+   "output_img": [
+    "int2(gl_WorkGroupID.xy)"
+   ]
+  },
+  "shares": true
+ },
+ "compositor_pixelate.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_plane_deform.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_plane_deform_anisotropic.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_plane_deform_mask.glsl": {
+  "stores": {
+   "mask_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_plane_deform_motion_blur.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_plane_deform_motion_blur_mask.glsl": {
+  "stores": {
+   "mask_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_premultiply_alpha.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_radial_lens_distortion.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_realize_on_domain.glsl": {
+  "stores": {
+   "domain_img": [
+    "texel",
+    "int3(texel,i)"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_relative_to_pixel_float.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_relative_to_pixel_float_per_dimension.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_relative_to_pixel_vector.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_sample_pixel.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_scale_variable.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_smaa_blending_weight_calculation.glsl": {
+  "stores": {
+   "weights_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_smaa_edge_detection.glsl": {
+  "stores": {
+   "edges_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_smaa_neighborhood_blending.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_split.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_summed_area_table_compute_complete_blocks.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": true
+ },
+ "compositor_summed_area_table_compute_complete_x_prologues.glsl": {
+  "stores": {
+   "complete_x_prologues_img": [
+    "int2(x,y)"
+   ],
+   "complete_x_prologues_sum_img": [
+    "int2(y,0)",
+    "int2(y,gl_WorkGroupID.x+1)"
+   ]
+  },
+  "shares": true
+ },
+ "compositor_summed_area_table_compute_complete_y_prologues.glsl": {
+  "stores": {
+   "complete_y_prologues_img": [
+    "int2(x,y)"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_summed_area_table_compute_incomplete_prologues.glsl": {
+  "stores": {
+   "incomplete_x_prologues_img": [
+    "write_texel",
+    "int2(write_texel.x,0)"
+   ],
+   "incomplete_y_prologues_img": [
+    "write_texel",
+    "int2(write_texel.x,0)"
+   ]
+  },
+  "shares": true
+ },
+ "compositor_symmetric_blur.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_symmetric_blur_variable_size.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_symmetric_separable_blur.glsl": {
+  "stores": {
+   "output_img": [
+    "transposed"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_symmetric_separable_blur_variable_size.glsl": {
+  "stores": {
+   "output_img": [
+    "transposed"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_tone_map_photoreceptor.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_tone_map_simple.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_translate_wrapped.glsl": {
+  "stores": {
+   "output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_van_vliet_gaussian_blur.glsl": {
+  "stores": {
+   "first_causal_output_img": [
+    "texel"
+   ],
+   "second_causal_output_img": [
+    "texel"
+   ],
+   "first_non_causal_output_img": [
+    "texel"
+   ],
+   "second_non_causal_output_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_van_vliet_gaussian_blur_sum.glsl": {
+  "stores": {
+   "output_img": [
+    "transposed"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_write_output.glsl": {
+  "stores": {
+   "output_img": [
+    "texel+lower_bound"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_z_combine_compute_mask.glsl": {
+  "stores": {
+   "mask_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_z_combine_from_mask_depth.glsl": {
+  "stores": {
+   "combined_z_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_z_combine_from_mask_image.glsl": {
+  "stores": {
+   "combined_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_z_combine_simple_depth.glsl": {
+  "stores": {
+   "combined_z_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ },
+ "compositor_z_combine_simple_image.glsl": {
+  "stores": {
+   "combined_img": [
+    "texel"
+   ]
+  },
+  "shares": false
+ }
+}

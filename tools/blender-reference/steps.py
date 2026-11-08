@@ -42,6 +42,8 @@ def run():
         for a in window().screen.areas:
             if step.get("shading") and a.type == "VIEW_3D":
                 a.spaces.active.shading.type = step["shading"]
+            if step.get("compositor") and a.type == "VIEW_3D":
+                a.spaces.active.shading.use_compositor = step["compositor"]
         for event in step["events"]:
             send(event)
             yield 0.15

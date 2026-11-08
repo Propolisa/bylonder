@@ -4,9 +4,10 @@
 // both get the same input. Writes NN-side-by-side.png (Blender left, Bylonder right) and NN-diff.png per step.
 // usage: node tools/blender-reference/side-by-side.mjs STEPS.json [--out DIR]
 //   STEPS.json: [{ "click": "VIEW3D_MT_object" | [x, y] | { "view": [fx, fy] } }, { "key": "Shift+A", "at": ... },
-//   { "move": ... }, { "shading": "SOLID" | "MATERIAL" | "RENDERED" | "WIREFRAME" }, { "settle": seconds }], window
+//   { "move": ... }, { "shading": "SOLID" | "MATERIAL" | "RENDERED" | "WIREFRAME" }, { "compositor": "ALWAYS" | "CAMERA" |
+//   "DISABLED" }, { "settle": seconds }], window
 //   pixels from the top left of a 1600 x 950 window; "view" is a point of the 3D Viewport as fractions of its size;
-//   "shading" sets the 3D Viewports' shading in both.
+//   "shading" sets the 3D Viewports' shading in both, "compositor" their Viewport Shading > Compositor.
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
@@ -76,10 +77,11 @@ async function runBylonder() {
         sent.push({ ...blenderKey(step.key), x: Math.round(x), y: Math.round(y) });
       }
       if (step.shading) await app.bylonder((b, type) => b.views.input.setShading(type), step.shading === "WIREFRAME" ? "wire" : step.shading.toLowerCase());
+      if (step.compositor) await app.bylonder((b, value) => b.views.input.setCompositor(value), step.compositor);
       await app.page.waitForTimeout((step.settle ?? 1) * 1000);
       await app.until((b) => b.views.idle).catch(() => {});
       shots.push(await app.page.screenshot());
-      events.push({ events: sent, settle: step.settle ?? 1, ...(step.shading && { shading: step.shading }) });
+      events.push({ events: sent, settle: step.settle ?? 1, ...(step.shading && { shading: step.shading }), ...(step.compositor && { compositor: step.compositor }) });
     }
   } finally {
     await app.close();

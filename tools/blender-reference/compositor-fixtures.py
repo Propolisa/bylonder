@@ -1,17 +1,18 @@
-# Writes what Blender's compositor outputs on its CPU path for the multi-pass nodes Blender's demo files use: each
-# case is one node between a synthetic image (an Image node, as tests/compositor-cpu-wasm.test.js gives the same image
-# as the render) and the Group Output (a node without an image input, a mask, only before the Group Output),
-# composited at the image's size and read back as float RGBA.
-# usage: blender -b --factory-startup --python tools/blender-reference/compositor-fixtures.py -- OUT.json
+# Writes what Blender's compositor outputs on its CPU path (or with GPU, on its GPU path, which the views replay) for
+# the multi-pass nodes Blender's demo files use: each case is one node between a synthetic image (an Image node, as
+# tests/compositor-cpu-wasm.test.js gives the same image as the render) and the Group Output (a node without an image
+# input, a mask, only before the Group Output), composited at the image's size and read back as float RGBA.
+# usage: blender -b --factory-startup --python tools/blender-reference/compositor-fixtures.py -- OUT.json [GPU]
 import bpy, json, os, sys, tempfile
 
-out_path = sys.argv[sys.argv.index("--") + 1]
+args = sys.argv[sys.argv.index("--") + 1:]
+out_path = args[0]
 WIDTH, HEIGHT = 48, 32
 scene = bpy.context.scene
 scene.render.engine = "CYCLES"
 scene.cycles.samples = 1
 scene.render.resolution_x, scene.render.resolution_y, scene.render.resolution_percentage = WIDTH, HEIGHT, 100
-scene.render.compositor_device = "CPU"
+scene.render.compositor_device = "GPU" if "GPU" in args[1:] else "CPU"
 scene.render.compositor_precision = "FULL"
 scene.render.image_settings.file_format = "OPEN_EXR"
 scene.render.image_settings.color_depth = "32"

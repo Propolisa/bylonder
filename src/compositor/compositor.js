@@ -93,6 +93,8 @@ export function createCompositor(world, { commit = () => {}, notify = console.wa
         const block = blocks.get(node.name);
         if (block && value !== null && id in block.values) block.values[id] = value;
       }
+      // A replayed node whose recorded passes the values changed (Blur's Size, Glare's Iterations) builds again.
+      if (enabled && graph.attachedBlocks.some((b) => b.stale)) await rebuild();
       return [];
     }
     let read;

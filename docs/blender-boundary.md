@@ -262,6 +262,17 @@ can be maintained on its own:
   draws and the page renders that into a Babylon `RenderTargetTexture` at the requested size and projection, read back
   synchronously into Blender's image (`grease-pencil-render.cc`, `draw/grease-pencil-render.js`). This is where a GPU
   offscreen of Blender's maps to Babylon.
+- **Blender's GPU module on a recording backend.** The module's GPU backend (`gpu-record.cc`) is a backend as GL or
+  Vulkan are: Blender's GPU front end (`gpu_shader.cc`, `gpu_texture.cc`, `gpu_compute.cc`, the create info registry
+  with its infos, written by Blender's shader tool at build time) runs on it, and its textures, shaders, state and
+  compute dispatches record what they are asked. The compositor's GPU path runs a node's operation on it
+  (`compositor-api.cc` `compositor_record_node`), and the views replay the recording on Babylon's frame graph
+  (`src/compositor/compositor-replay.js`): each dispatch as fragment passes of Blender's GLSL for the create info, one
+  per image it writes, the invocation of each texel found from how the shader's `imageStore` addresses its image.
+  GLSL ES lacks what desktop GLSL gives these shaders, so the replay adds it: implicit int to float conversions
+  (`glsl-conversions.js`, by the GLSL spec's rules) and clamp to border sampling. Shaders whose invocations share memory,
+  and recordings that read a texture back (Fog Glow's FFT), are not replayed. The mesh draw extraction's vertex
+  buffers are Blender's dummy backend's on the same backend.
 
 What could not be reused is copied, and marked `blender-port: <Blender file and function>` where it is
 (`grep -rn blender-port src tools/blender-port/wasm`): a few lines each, such as the weight ramp, a hair radius, the
