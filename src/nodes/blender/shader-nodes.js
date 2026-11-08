@@ -374,7 +374,12 @@ void bl_g_data(vec3 P, vec3 N, vec3 camera, float is_strand, float hair_radius, 
   g_data.hair_strand_id = int(hair_strand_id);
   g_data.ray_depth = 0.0;
   g_data.ray_length = distance(P, camera);
+  // A shadow map draws the surface for shadow rays (Babylon's shadow generator defines SM_FLOAT in its pass).
+#ifdef SM_FLOAT
+  g_data.ray_type = RAY_TYPE_SHADOW;
+#else
   g_data.ray_type = RAY_TYPE_CAMERA;
+#endif
   g_data.is_strand = is_strand > 0.5;
 }`,
   // The draw manager's object and view resources (draw_resource.hh ObjectInfos, ObjectMatrices; ViewMatrices).

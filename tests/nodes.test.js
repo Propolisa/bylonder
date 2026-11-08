@@ -144,6 +144,15 @@ assert.deepEqual((await lobes(['ShaderNodeBsdfDiffuse', 'ShaderNodeBsdfDiffuse']
   assert.match(code, /uniform highp sampler2D bl_depth/);
 }
 
+// Light Path's Is Shadow Ray is 1 where a shadow map draws the surface, as EEVEE's shadow pass sets the ray type: a
+// surface that turns transparent for shadow rays (an outline shell) casts none.
+{
+  const outline = nodeMaterialFromTree('Outline', scene, { nodes: [{ idname: 'ShaderNodeLightPath', name: 'Light Path' }, { idname: 'ShaderNodeEmission', name: 'Emission' },
+    { idname: 'ShaderNodeOutputMaterial', name: 'Material Output' }], links: [['Light Path', 'Is Shadow Ray', 'Emission', 'Strength'], ['Emission', 'Emission', 'Material Output', 'Surface']] }).material;
+  if (outline._buildIsInProgress) await new Promise((resolve) => outline.onBuildObservable.addOnce(resolve));
+  assert.match(outline._fragmentCompilationState._builtCompilationString, /#ifdef SM_FLOAT\s+g_data\.ray_type = RAY_TYPE_SHADOW;/);
+}
+
 // Data linked to a shader input is an Emission of it, and a shader linked to a data input is dropped, as Blender's
 // shader tree makes them (ntree_shader_implicit_closure_cast).
 const implicit = nodeMaterialFromTree('Implicit', scene, { nodes: [{ idname: 'ShaderNodeRGB', name: 'RGB' }, { idname: 'ShaderNodeBsdfDiffuse', name: 'Diffuse' },
