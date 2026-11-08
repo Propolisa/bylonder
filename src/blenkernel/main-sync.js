@@ -760,6 +760,8 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     // What Blender's code changed of an object's data, evaluated and drawn (an edit of Edit Mode's data).
     redraw: () => evaluate(),
     redrawAll: () => mainView.redrawAll(),
+    // The instances of cameras an evaluation drew (main-view.js keepCameraInstances).
+    cameraInstances: () => mainView.cameraInstances,
     // What a modal operator changed of the scene as it runs (anim.change_frame's frame), drawn.
     drawScene: () => mainView.drawEvaluated({ scene: true }),
     // A run over several events (a modal operator's): Main made current with the meshes' stand-ins filled, until end

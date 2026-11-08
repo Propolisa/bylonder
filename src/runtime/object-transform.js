@@ -85,7 +85,7 @@ export function setEvaluatedMatrix(node, matrix) {
       node._getViewMatrix = () => {
         const m = evaluatedMatrices.get(node), eye = m.getTranslation(), target = node.lockedTarget?.getAbsolutePosition?.() ?? node.lockedTarget;
         if (target) Matrix.LookAtLHToRef(eye, target, node.upVector ?? Vector3.Up(), node._viewMatrix);
-        else Matrix.LookAtLHToRef(eye, eye.add(Vector3.TransformNormal(BLENDER_FORWARD, m)), Vector3.TransformNormal(BLENDER_UP, m), node._viewMatrix);
+        else evaluatedViewMatrix(m, node._viewMatrix);
         // What materials see from (the scene's eye position), as Babylon's own _computeViewMatrix keeps it.
         node._globalPosition.copyFrom(eye);
         return node._viewMatrix;
@@ -93,6 +93,12 @@ export function setEvaluatedMatrix(node, matrix) {
     }
   }
   evaluatedMatrices.set(node, matrix);
+}
+// The view matrix of a camera at an evaluated world matrix: Blender's camera looks down its -Z.
+export function evaluatedViewMatrix(m, out = new Matrix()) {
+  const eye = m.getTranslation();
+  Matrix.LookAtLHToRef(eye, eye.add(Vector3.TransformNormal(BLENDER_FORWARD, m)), Vector3.TransformNormal(BLENDER_UP, m), out);
+  return out;
 }
 // A light's or camera's world matrix in Babylon's axes: the one Blender evaluated, else its own transform's.
 export const objectMatrix = (node) => evaluatedMatrices.get(node) ?? node.computeWorldMatrix();

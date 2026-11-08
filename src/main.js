@@ -227,6 +227,7 @@ const instancesOf = (instancer) => scene.meshes.filter((mesh) => mesh.isVisible 
 const overlays = createViewportOverlays(scene, {
   extras: {
     objects: () => world.objects,
+    instances: () => world.mainSync?.cameraInstances() ?? [],
     color: wireColor,
     sceneCamera: authored,
     visible: (node) => (world.objects.includes(node) ? visible(node) && (world.collections?.status(node).visible ?? true) : node.isEnabled()),

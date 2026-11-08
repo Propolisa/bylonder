@@ -14,7 +14,7 @@ import { CurveObject } from './curve/curve.js';
 import { mesh_batch_cache_apply } from '../draw/mesh-batch-cache.js';
 import { asObject, setEvaluatedMatrix } from '../runtime/object-transform.js';
 import { ID_RECALC_GEOMETRY, ID_RECALC_SHADING, ID_RECALC_SYNC_TO_EVAL, ID_RECALC_ALL } from '../bmesh/bmesh-wasm.js';
-import { Color3, FreeCamera, Material, Matrix, Mesh, PBRMaterial, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
+import { Camera, Color3, FreeCamera, Material, Matrix, Mesh, PBRMaterial, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
 import { particleShapeMesh, particleShapeMaterial, hairOverlay, particleEditOverlay } from '../draw/overlay-particle.js';
 import { drawPointClouds } from '../draw/pointcloud.js';
 import { paintWeightOverlay } from '../draw/overlay-paint-weight.js';
@@ -545,7 +545,7 @@ export function createMainView(state) {
     const nth = new Map(), nthOf = (place) => nth.set(place, (nth.get(place) ?? -1) + 1).get(place);
     // An object instanced by several instancers is one carrier: carriers sharing its geometry would share their
     // instance buffers too (Babylon keeps them on the geometry), so all would draw the last one's instances.
-    const carriers = new Map(), lights = new Map();
+    const carriers = new Map(), lights = new Map(), cameras = [];
     for (const group of blender.instances()) {
       const { instancer, ob, shape, overlay, drawSize, color } = group;
       const geometric = shape === 'MESH';
@@ -555,6 +555,7 @@ export function createMainView(state) {
         lights.set(source, [...(lights.get(source) ?? []), group]);
         continue;
       }
+      if (source instanceof Camera) { cameras.push(group); continue; }
       if ((!source?.geometry && !geometric) || (overlay && rendering)) continue;
       if (carriers.has(key)) carriers.get(key).groups.push(group);
       else carriers.set(key, { source, groups: [group] });
@@ -592,6 +593,7 @@ export function createMainView(state) {
     }
     for (const [key, carrier] of instanced) if (!drawn.has(key)) { carrier.dispose(); instanced.delete(key); }
     drawLightInstances(scene, lights);
+    keepCameraInstances(cameras, byOb);
     const clouds = blender.pointClouds().map((record) => Object.assign(record, { key: `${record.instancer}:${nthOf(record.instancer + ':POINTCLOUD')}` }));
     const shown = drawPointClouds(scene, clouds, pointClouds, materialFor);
     for (const [key, mesh] of pointClouds) if (!shown.has(key)) { mesh.dispose(); pointClouds.delete(key); }
@@ -615,6 +617,14 @@ export function createMainView(state) {
       });
       instanceLights.set(source, made);
     }
+  }
+  // An instanced camera's overlay draws at each instance (draw/overlay-extra.js), as Blender's overlay draws a dupli's:
+  // { node, instancer, matrix }, each kept while its camera is, so the overlay remakes only what is new.
+  const cameraInstances = [];
+  function keepCameraInstances(groups, byOb) {
+    const instances = groups.flatMap(({ ob, instancer, data }) => Array.from({ length: data.length / 16 }, (_, i) => ({ node: byOb.get(ob), instancer: byOb.get(instancer), matrix: Matrix.FromArray(data, i * 16) }))).filter(({ node, instancer }) => node && instancer);
+    instances.forEach((instance, i) => { if (cameraInstances[i]?.node === instance.node) Object.assign(cameraInstances[i], instance); else cameraInstances[i] = instance; });
+    cameraInstances.length = instances.length;
   }
   // The curves objects draw (Curves objects' evaluated curves, particle hair), as Blender's engines draw them (curves.js),
   // one data each for: the render engines' mesh in the object's slot material (Workbench's hair in Solid views, workbench.js), and the overlay's
@@ -723,7 +733,7 @@ export function createMainView(state) {
   }
 
   return {
-    pull, view, adopt, adoptScene, compositingTree, drawData, drawShading, drawEvaluated, redrawAll,
+    pull, view, adopt, adoptScene, compositingTree, drawData, drawShading, drawEvaluated, redrawAll, cameraInstances,
     keepMesh: (entry) => { keepMesh(entry, blender); return true; },
     dispose: () => world.scene.onBeforeRenderObservable.remove(displayed),
   };

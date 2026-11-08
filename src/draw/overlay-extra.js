@@ -16,7 +16,7 @@ import { Viewport } from '@babylonjs/core/Maths/math.viewport.js';
 import { view_3d as theme } from '../editors/interface/userdef-default-theme.js';
 import { SHAPES, VCLASS } from './overlay-shape.js';
 import { drawView, DRAW_VIEW_GLSL } from './draw-view.js';
-import { objectMatrix, outputFrame } from '../runtime/object-transform.js';
+import { evaluatedViewMatrix, objectMatrix, outputFrame } from '../runtime/object-transform.js';
 import { lightRecord } from '../blenkernel/light/light-home.js';
 
 const VIEW_UNIFORMS = `uniform mat4 viewProjection;
@@ -171,7 +171,9 @@ function lightShapes(light) {
 //   objects() -> the scene's objects (world.objects), which hold the empties
 //   color(node, themeType) -> its theme wire color (selected, active or the type's), sceneCamera() -> the scene camera,
 //   visible(node), aspect() -> the render's width / height
-export function createExtrasOverlay(scene, { objects, color: themeColor = (node, type) => theme[type], sceneCamera = () => null, visible = () => true, aspect = () => 16 / 9 }) {
+// `instances`: the instances of cameras, each { node, instancer, matrix } (its world matrix), drawn as their camera in
+// their instancer's color and visibility, as Blender's overlay draws a dupli's extras.
+export function createExtrasOverlay(scene, { objects, instances = () => [], color: themeColor = (node, type) => theme[type], sceneCamera = () => null, visible = () => true, aspect = () => 16 / 9 }) {
   const materials = new Map();
   const material = (name, vertex, { solid = false, blend = false } = {}) => {
     const key = name + solid;
@@ -227,8 +229,8 @@ export function createExtrasOverlay(scene, { objects, color: themeColor = (node,
     return mesh;
   };
 
-  const entries = new Map(); // node -> { meshes, kind }
-  let dirty = true;
+  const entries = new Map(); // node or instance -> { meshes, kind }
+  let dirty = true, instanced = new Set();
   const markDirty = () => { dirty = true; };
   const observers = [
     [scene.onNewCameraAddedObservable, markDirty], [scene.onCameraRemovedObservable, markDirty],
@@ -240,8 +242,8 @@ export function createExtrasOverlay(scene, { objects, color: themeColor = (node,
   const isEmpty = (node) => !node.getTotalVertices && !node.name.startsWith('__') && !node.metadata?.wbType;
   const isLattice = (node) => node.metadata?.wbType === 'LATTICE' && !!node.metadata.lattice;
   const kindOf = (node) => (node instanceof Camera ? 'camera' : node.getClassName?.().endsWith('Light') ? 'light' : isLattice(node) ? 'lattice' : 'empty');
-  const shapesOf = (node, kind) => {
-    if (kind === 'camera') return ['camera_frame', node === sceneCamera() ? 'camera_tria' : 'camera_tria_wire'];
+  const shapesOf = (node, kind, instance) => {
+    if (kind === 'camera') return ['camera_frame', node === sceneCamera() && !instance ? 'camera_tria' : 'camera_tria_wire'];
     if (kind === 'light') return lightShapes(node).shapes;
     if (kind === 'lattice') return ['lattice'];
     return [EMPTY_SHAPES[node.metadata?.empty_display_type] ?? 'plain_axes'];
@@ -254,23 +256,24 @@ export function createExtrasOverlay(scene, { objects, color: themeColor = (node,
   ];
   function rebuild() {
     dirty = false;
-    const nodes = new Set(extraNodes());
-    for (const [node, entry] of entries) {
-      const signature = signatureOf(node, entry.kind);
-      if (nodes.has(node) && !node.isDisposed?.() && entry.signature === signature) continue;
+    instanced = new Set(instances());
+    const keys = new Set([...extraNodes(), ...instanced]), nodeOf = (key) => (instanced.has(key) ? key.node : key);
+    for (const [key, entry] of entries) {
+      const node = nodeOf(key), signature = signatureOf(node, entry.kind);
+      if (keys.has(key) && !node.isDisposed?.() && entry.signature === signature) continue;
       entry.meshes.forEach((mesh) => mesh.dispose());
-      entries.delete(node);
+      entries.delete(key);
     }
-    for (const node of nodes) {
-      if (entries.has(node)) continue;
-      const kind = kindOf(node), shapes = shapesOf(node, kind);
-      const entry = { node, kind, lightType: kind === 'light' ? lightType(node) : null, signature: signatureOf(node, kind), metadata: node.metadata, matrix: new Float32Array(16), color: new Float32Array(4), meshes: [] };
+    for (const key of keys) {
+      if (entries.has(key)) continue;
+      const node = nodeOf(key), instance = instanced.has(key) ? key : null, kind = kindOf(node), shapes = shapesOf(node, kind, instance);
+      const entry = { node, instance, kind, lightType: kind === 'light' ? lightType(node) : null, signature: signatureOf(node, kind), metadata: node.metadata, matrix: new Float32Array(16), color: new Float32Array(4), meshes: [] };
       entry.meshes = shapes.map((shape) => {
         const mesh = kind === 'lattice' ? latticeMesh(node) : shapeMesh(shape);
         mesh.metadata = { editable: false, overlay: true, extra: { entry, shape, matrix: new Float32Array(16), color: new Float32Array(4) } };
         return mesh;
       });
-      entries.set(node, entry);
+      entries.set(key, entry);
     }
   }
 
@@ -281,8 +284,9 @@ export function createExtrasOverlay(scene, { objects, color: themeColor = (node,
     blender(x, m, 0, sx); blender(y, m, 4, sy); blender(z, m, 8, sz); blender(location, m, 12);
     m[3] = m[7] = m[11] = 0; m[15] = 1;
   };
-  const basis = (node) => {
-    const w = node.computeWorldMatrix();
+  // A camera's world matrix is its inverse view matrix (Babylon's Camera.computeWorldMatrix).
+  const basis = ({ node, instance }) => {
+    const w = instance ? evaluatedViewMatrix(instance.matrix).invert() : node.computeWorldMatrix();
     w.decompose(scaling, undefined, position);
     Vector3.TransformNormalToRef(Vector3.RightReadOnly, w, right);
     Vector3.TransformNormalToRef(Vector3.UpReadOnly, w, up);
@@ -302,9 +306,9 @@ export function createExtrasOverlay(scene, { objects, color: themeColor = (node,
   // Fills a shape's uniforms from its object (Cameras/Lights/Empties::object_sync).
   function update(data) {
     const { entry, shape, matrix: m, color } = data, node = entry.node;
-    wireColor(node, entry.kind, color);
+    wireColor(entry.instance?.instancer ?? node, entry.kind, color);
     if (entry.kind === 'camera') {
-      basis(node);
+      basis(entry);
       forward.scaleInPlace(-1);
       right.normalize(); up.normalize(); forward.normalize();
       setMatrix(m, right, up, forward, position);
@@ -316,7 +320,7 @@ export function createExtrasOverlay(scene, { objects, color: themeColor = (node,
       const facx = fac * (vertical ? ratio : 1), facy = fac * (vertical ? 1 : 1 / ratio);
       const cx = facx / Math.abs(depth), cy = facy / Math.abs(depth);
       // Looked through (camera view), only its frame is drawn, without the wires behind it (overlay_camera.hh).
-      const lookedThrough = scene.activeCamera === node;
+      const lookedThrough = scene.activeCamera === node && !entry.instance;
       if (shape === 'camera_frame') { m[3] = cx; m[7] = cy; m[11] = 0; m[15] = 0; }
       else if (lookedThrough) m[3] = m[7] = 0;
       else {
@@ -359,7 +363,7 @@ export function createExtrasOverlay(scene, { objects, color: themeColor = (node,
         color[3] = -Math.max(light.radius, 1e-30);
       }
     } else {
-      basis(node);
+      basis(entry);
       // Blender's local Y and Z are Babylon's local Z and Y.
       setMatrix(m, right, forward, up, position);
       m[15] = node.metadata?.empty_display_size ?? 1;
@@ -372,9 +376,11 @@ export function createExtrasOverlay(scene, { objects, color: themeColor = (node,
     setEnabled(value) {
       // Main gives an object new metadata when what it is drawn by changes (main-view.js extraDisplay).
       for (const entry of entries.values()) if (entry.node.metadata !== entry.metadata) { entry.metadata = entry.node.metadata; dirty = true; }
+      const now = instances();
+      if (now.length !== instanced.size || now.some((instance) => !instanced.has(instance))) dirty = true;
       if (dirty) rebuild();
       for (const entry of entries.values()) {
-        const shown = value && visible(entry.node);
+        const shown = value && visible(entry.instance?.instancer ?? entry.node);
         for (const mesh of entry.meshes) mesh.isVisible = shown;
       }
     },
@@ -387,12 +393,14 @@ export function createExtrasOverlay(scene, { objects, color: themeColor = (node,
       const region = new Viewport(0, 0, engine.getRenderWidth() * camera.viewport.width, engine.getRenderHeight() * camera.viewport.height);
       const project = (p) => Vector3.Project(p, Matrix.IdentityReadOnly, transform, region);
       for (const entry of entries.values()) {
-        if (!visible(entry.node) || !accept(entry.node)) continue;
+        // An instance selects its instancer, as Blender selects a dupli's.
+        const node = entry.instance?.instancer ?? entry.node;
+        if (!node || !visible(node) || !accept(node)) continue;
         const points = pickSegments(entry);
         for (let i = 0; i < points.length; i += 2) {
           const a = project(points[i]), b = points[i + 1] ? project(points[i + 1]) : a;
           const d = segmentDistance(x, y, a, b) - (entry.kind === 'light' && !points[i + 1] ? 12 : 0);
-          if (a.z >= 0 && a.z <= 1 && d < bestDistance) { bestDistance = d; best = entry.node; }
+          if (a.z >= 0 && a.z <= 1 && d < bestDistance) { bestDistance = d; best = node; }
         }
       }
       return bestDistance <= 5 ? best : null;
