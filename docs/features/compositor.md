@@ -64,7 +64,7 @@ limits:
   - Render Layers gives the Image pass only; its other passes (Depth, Normal, Alpha and the like) and the Viewer's image are not made.
   - The Render window shows the composite, not the Viewer node's image; there is no Image Editor view of Viewer Node.
   - Node groups inside the compositing node group composite in Render Image only.
-  - The wet street reflects the lights' highlights, not the neon tubes and the window: the view's screen-traced reflections do not reach node materials yet (Rendering).
+  - The puddles reflect the lights' highlights, not the sign, the window and the door: the view's screen-traced reflections do not reach node materials yet (Rendering), and a light's Specular factor of 0 still gives highlights.
 ---
 # Compositor
 
@@ -76,7 +76,7 @@ nodes live.
 
 [Open in Bylonder](https://propolisa.github.io/bylonder/#example=compositor)
 
-The demo, Neon Night, is a noodle bar's neon sign on a brick wall over a wet street, built in Blender by
+The demo, Neon Night, is a noodle bar's neon sign in a wet alley at night, mirrored in a puddle, built in Blender by
 `compositor.py`. The steps below make a compositing node group from the Default Cube, then open the example for its
 tree and render.
 
@@ -105,8 +105,8 @@ tree and render.
 
    ![Render Image](../media/features/compositor/render-image.png)
 
-5. **What Glare does.** Click Glare and press M to mute it, then Render Image again. Without it (left) the tubes and the
-   doorway are flat; with it (right) they glow.
+5. **What Glare does.** Click Glare and press M to mute it, then Render Image again. Without it (left) the tubes, the
+   window and the doorway are flat; with it (right) they glow.
 
    ![Glare muted, left, and on, right](../media/features/compositor/glare.png)
 
@@ -115,5 +115,6 @@ tree and render.
 - [compositor.py](../../examples/compositor/compositor.py): builds the scene and its compositing node group in Blender
   5.2.
 - [compositor.blend](../../examples/compositor/compositor.blend): the file the script saves.
+- [fonts](../../examples/compositor/fonts): Sacramento and Poiret One, with their SIL Open Font License files.
 - [index.js](../../examples/compositor/index.js): opens the .blend with Blender's reader.
 - Recorded by [record-compositor.mjs](../../tools/docs/record-compositor.mjs).

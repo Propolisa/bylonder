@@ -71,7 +71,7 @@
    "Render Layers gives the Image pass only; its other passes (Depth, Normal, Alpha and the like) and the Viewer's image are not made.",
    "The Render window shows the composite, not the Viewer node's image; there is no Image Editor view of Viewer Node.",
    "Node groups inside the compositing node group composite in Render Image only.",
-   "The wet street reflects the lights' highlights, not the neon tubes and the window: the view's screen-traced reflections do not reach node materials yet (Rendering)."
+   "The puddles reflect the lights' highlights, not the sign, the window and the door: the view's screen-traced reflections do not reach node materials yet (Rendering), and a light's Specular factor of 0 still gives highlights."
   ],
   "page": "docs/features/compositor.md",
   "open": "https://propolisa.github.io/bylonder/#example=compositor",
