@@ -27,8 +27,10 @@ async function download(urls, name) {
   for (const url of urls) {
     try {
       const response = await fetch(url);
-      if (response.ok) return new File([await response.blob()], name);
-      failure = `${url} answered ${response.status}`;
+      // A dev server answers a missing file with its page.
+      const page = response.headers.get('Content-Type')?.startsWith('text/html');
+      if (response.ok && !page) return new File([await response.blob()], name);
+      failure = page ? `${url} answered with a web page` : `${url} answered ${response.status}`;
     } catch {
       failure = `${url} does not allow downloads from a web page (no CORS headers): download it and use File > Open`;
     }

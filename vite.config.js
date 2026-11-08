@@ -5,6 +5,8 @@ import { fileURLToPath } from "node:url";
 import { scanImplemented } from "./scripts/blender-coverage.mjs";
 import { blenderIcons } from "./scripts/blender-icons.mjs";
 import { execFileSync } from "node:child_process";
+import { createReadStream } from "node:fs";
+import { demoFile } from "./scripts/demo-files.mjs";
 import pkg from "./package.json" with { type: "json" };
 
 // Commits for the splash's version and changelog, newest first, without merges and work-in-progress commits; none when
@@ -46,9 +48,28 @@ const blenderIconSet = () => ({
   },
 });
 
+// The dev server answers blender-demo-files/<id>.blend as the site does (scripts/demo-files.mjs), from a copy in .tools/.
+const demoFiles = () => ({
+  name: "blender-demo-files",
+  configureServer(server) {
+    server.middlewares.use("/blender-demo-files", async (req, res, next) => {
+      const id = /^\/([\w-]+)\.blend$/.exec(req.url.split("?")[0])?.[1];
+      try {
+        const path = id && await demoFile(id, ".tools/blender-demo-files");
+        if (!path) return next();
+        res.setHeader("Content-Type", "application/octet-stream");
+        createReadStream(path).pipe(res);
+      } catch (error) {
+        res.statusCode = 502;
+        res.end(error.message);
+      }
+    });
+  },
+});
+
 export default defineConfig({
   base: process.env.BASE_PATH || "/",
-  plugins: [vue(), tailwindcss(), blenderCoverage(), blenderIconSet(), changelog()],
+  plugins: [vue(), tailwindcss(), blenderCoverage(), blenderIconSet(), changelog(), demoFiles()],
   define: { __BYLONDER_VERSION__: JSON.stringify(pkg.version), __BYLONDER_CHANGE__: JSON.stringify(commits()[0] ?? null) },
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
   // Agents' worktrees live under .claude/: their edits must not reload this checkout's pages (a worktree's own server
