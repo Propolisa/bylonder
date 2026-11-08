@@ -10,7 +10,51 @@ export const glsl = {
  "gpu_shader_common_math_utils.glsl": "/* SPDX-FileCopyrightText: 2019-2023 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#pragma once\n\n#include \"gpu_shader_compat.hh\"\n\n[[node]]\nvoid invert_z(float3 v, float3 &outv)\n{\n  v.z = -v.z;\n  outv = v;\n}\n\n[[node]]\nvoid vector_normalize(float3 normal, float3 &outnormal)\n{\n  /* Match the safe normalize function in Cycles by defaulting to float3(0.0f) */\n  float length_sqr = dot(normal, normal);\n  outnormal = (length_sqr > 1e-35f) ? normal * inversesqrt(length_sqr) : float3(0.0f);\n}\n\n[[node]]\nvoid vector_copy(float3 normal, float3 &outnormal)\n{\n  outnormal = normal;\n}\n",
  "gpu_shader_common_mix_rgb.glsl": "/* SPDX-FileCopyrightText: 2019-2022 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#pragma once\n\n#include \"gpu_shader_compat.hh\"\n\n#include \"gpu_shader_common_color_utils.glsl\"\n\n[[node]]\nvoid mix_blend(float fac, float4 col1, float4 col2, float4 &outcol)\n{\n  outcol = mix(col1, col2, fac);\n  outcol.a = col1.a;\n}\n\n[[node]]\nvoid mix_add(float fac, float4 col1, float4 col2, float4 &outcol)\n{\n  outcol = mix(col1, col1 + col2, fac);\n  outcol.a = col1.a;\n}\n\n[[node]]\nvoid mix_mult(float fac, float4 col1, float4 col2, float4 &outcol)\n{\n  outcol = mix(col1, col1 * col2, fac);\n  outcol.a = col1.a;\n}\n\n[[node]]\nvoid mix_screen(float fac, float4 col1, float4 col2, float4 &outcol)\n{\n  float facm = 1.0f - fac;\n\n  outcol = float4(1.0f) - (float4(facm) + fac * (float4(1.0f) - col2)) * (float4(1.0f) - col1);\n  outcol.a = col1.a;\n}\n\n[[node]]\nvoid mix_overlay(float fac, float4 col1, float4 col2, float4 &outcol)\n{\n  float facm = 1.0f - fac;\n\n  outcol = col1;\n\n  if (outcol.r < 0.5f) {\n    outcol.r *= facm + 2.0f * fac * col2.r;\n  }\n  else {\n    outcol.r = 1.0f - (facm + 2.0f * fac * (1.0f - col2.r)) * (1.0f - outcol.r);\n  }\n\n  if (outcol.g < 0.5f) {\n    outcol.g *= facm + 2.0f * fac * col2.g;\n  }\n  else {\n    outcol.g = 1.0f - (facm + 2.0f * fac * (1.0f - col2.g)) * (1.0f - outcol.g);\n  }\n\n  if (outcol.b < 0.5f) {\n    outcol.b *= facm + 2.0f * fac * col2.b;\n  }\n  else {\n    outcol.b = 1.0f - (facm + 2.0f * fac * (1.0f - col2.b)) * (1.0f - outcol.b);\n  }\n}\n\n[[node]]\nvoid mix_sub(float fac, float4 col1, float4 col2, float4 &outcol)\n{\n  outcol = mix(col1, col1 - col2, fac);\n  outcol.a = col1.a;\n}\n\n[[node]]\nvoid mix_div(float fac, float4 col1, float4 col2, float4 &outcol)\n{\n  float facm = 1.0f - fac;\n\n  outcol = float4(float3(0.0f), col1.a);\n\n  if (col2.r != 0.0f) {\n    outcol.r = facm * col1.r + fac * col1.r / col2.r;\n  }\n  if (col2.g != 0.0f) {\n    outcol.g = facm * col1.g + fac * col1.g / col2.g;\n  }\n  if (col2.b != 0.0f) {\n    outcol.b = facm * col1.b + fac * col1.b / col2.b;\n  }\n}\n\n/* A variant of mix_div that fallback to the first color upon zero division. */\n[[node]]\nvoid mix_div_fallback(float fac, float4 col1, float4 col2, float4 &outcol)\n{\n  float facm = 1.0f - fac;\n\n  outcol = col1;\n\n  if (col2.r != 0.0f) {\n    outcol.r = facm * outcol.r + fac * outcol.r / col2.r;\n  }\n  if (col2.g != 0.0f) {\n    outcol.g = facm * outcol.g + fac * outcol.g / col2.g;\n  }\n  if (col2.b != 0.0f) {\n    outcol.b = facm * outcol.b + fac * outcol.b / col2.b;\n  }\n}\n\n[[node]]\nvoid mix_diff(float fac, float4 col1, float4 col2, float4 &outcol)\n{\n  outcol = mix(col1, abs(col1 - col2), fac);\n  outcol.a = col1.a;\n}\n\n[[node]]\nvoid mix_exclusion(float fac, float4 col1, float4 col2, float4 &outcol)\n{\n  outcol = max(mix(col1, col1 + col2 - 2.0f * col1 * col2, fac), 0.0f);\n  outcol.a = col1.a;\n}\n\n[[node]]\nvoid mix_dark(float fac, float4 col1, float4 col2, float4 &outcol)\n{\n  outcol.rgb = mix(col1.rgb, min(col1.rgb, col2.rgb), fac);\n  outcol.a = col1.a;\n}\n\n[[node]]\nvoid mix_light(float fac, float4 col1, float4 col2, float4 &outcol)\n{\n  outcol.rgb = mix(col1.rgb, max(col1.rgb, col2.rgb), fac);\n  outcol.a = col1.a;\n}\n\n[[node]]\nvoid mix_dodge(float fac, float4 col1, float4 col2, float4 &outcol)\n{\n  outcol = col1;\n\n  if (outcol.r != 0.0f) {\n    float tmp = 1.0f - fac * col2.r;\n    if (tmp <= 0.0f) {\n      outcol.r = 1.0f;\n    }\n    else if ((tmp = outcol.r / tmp) > 1.0f) {\n      outcol.r = 1.0f;\n    }\n    else {\n      outcol.r = tmp;\n    }\n  }\n  if (outcol.g != 0.0f) {\n    float tmp = 1.0f - fac * col2.g;\n    if (tmp <= 0.0f) {\n      outcol.g = 1.0f;\n    }\n    else if ((tmp = outcol.g / tmp) > 1.0f) {\n      outcol.g = 1.0f;\n    }\n    else {\n      outcol.g = tmp;\n    }\n  }\n  if (outcol.b != 0.0f) {\n    float tmp = 1.0f - fac * col2.b;\n    if (tmp <= 0.0f) {\n      outcol.b = 1.0f;\n    }\n    else if ((tmp = outcol.b / tmp) > 1.0f) {\n      outcol.b = 1.0f;\n    }\n    else {\n      outcol.b = tmp;\n    }\n  }\n}\n\n[[node]]\nvoid mix_burn(float fac, float4 col1, float4 col2, float4 &outcol)\n{\n  float tmp, facm = 1.0f - fac;\n\n  outcol = col1;\n\n  tmp = facm + fac * col2.r;\n  if (tmp <= 0.0f) {\n    outcol.r = 0.0f;\n  }\n  else if ((tmp = (1.0f - (1.0f - outcol.r) / tmp)) < 0.0f) {\n    outcol.r = 0.0f;\n  }\n  else if (tmp > 1.0f) {\n    outcol.r = 1.0f;\n  }\n  else {\n    outcol.r = tmp;\n  }\n\n  tmp = facm + fac * col2.g;\n  if (tmp <= 0.0f) {\n    outcol.g = 0.0f;\n  }\n  else if ((tmp = (1.0f - (1.0f - outcol.g) / tmp)) < 0.0f) {\n    outcol.g = 0.0f;\n  }\n  else if (tmp > 1.0f) {\n    outcol.g = 1.0f;\n  }\n  else {\n    outcol.g = tmp;\n  }\n\n  tmp = facm + fac * col2.b;\n  if (tmp <= 0.0f) {\n    outcol.b = 0.0f;\n  }\n  else if ((tmp = (1.0f - (1.0f - outcol.b) / tmp)) < 0.0f) {\n    outcol.b = 0.0f;\n  }\n  else if (tmp > 1.0f) {\n    outcol.b = 1.0f;\n  }\n  else {\n    outcol.b = tmp;\n  }\n}\n\n[[node]]\nvoid mix_hue(float fac, float4 col1, float4 col2, float4 &outcol)\n{\n  float facm = 1.0f - fac;\n\n  outcol = col1;\n\n  float4 hsv, hsv2, tmp;\n  rgb_to_hsv(col2, hsv2);\n\n  if (hsv2.y != 0.0f) {\n    rgb_to_hsv(outcol, hsv);\n    hsv.x = hsv2.x;\n    hsv_to_rgb(hsv, tmp);\n\n    outcol = mix(outcol, tmp, fac);\n    outcol.a = col1.a;\n  }\n}\n\n[[node]]\nvoid mix_sat(float fac, float4 col1, float4 col2, float4 &outcol)\n{\n  float facm = 1.0f - fac;\n\n  outcol = col1;\n\n  float4 hsv, hsv2;\n  rgb_to_hsv(outcol, hsv);\n\n  if (hsv.y != 0.0f) {\n    rgb_to_hsv(col2, hsv2);\n\n    hsv.y = facm * hsv.y + fac * hsv2.y;\n    hsv_to_rgb(hsv, outcol);\n  }\n}\n\n[[node]]\nvoid mix_val(float fac, float4 col1, float4 col2, float4 &outcol)\n{\n  float facm = 1.0f - fac;\n\n  float4 hsv, hsv2;\n  rgb_to_hsv(col1, hsv);\n  rgb_to_hsv(col2, hsv2);\n\n  hsv.z = facm * hsv.z + fac * hsv2.z;\n  hsv_to_rgb(hsv, outcol);\n}\n\n[[node]]\nvoid mix_color(float fac, float4 col1, float4 col2, float4 &outcol)\n{\n  float facm = 1.0f - fac;\n\n  outcol = col1;\n\n  float4 hsv, hsv2, tmp;\n  rgb_to_hsv(col2, hsv2);\n\n  if (hsv2.y != 0.0f) {\n    rgb_to_hsv(outcol, hsv);\n    hsv.x = hsv2.x;\n    hsv.y = hsv2.y;\n    hsv_to_rgb(hsv, tmp);\n\n    outcol = mix(outcol, tmp, fac);\n    outcol.a = col1.a;\n  }\n}\n\n[[node]]\nvoid mix_soft(float fac, float4 col1, float4 col2, float4 &outcol)\n{\n  float facm = 1.0f - fac;\n\n  float4 one = float4(1.0f);\n  float4 scr = one - (one - col2) * (one - col1);\n  outcol = facm * col1 + fac * ((one - col1) * col2 * col1 + col1 * scr);\n  outcol.a = col1.a;\n}\n\n[[node]]\nvoid mix_linear(float fac, float4 col1, float4 col2, float4 &outcol)\n{\n  outcol = col1 + fac * (2.0f * (col2 - float4(0.5f)));\n  outcol.a = col1.a;\n}\n\n[[node]]\nvoid clamp_color(float4 vec, const float4 min, const float4 max, float4 &out_vec)\n{\n  out_vec = clamp(vec, min, max);\n}\n\n[[node]]\nvoid multiply_by_alpha(float factor, float4 color, float &result)\n{\n  result = factor * color.a;\n}\n",
  "gpu_shader_compat_glsl.glsl": "/* SPDX-FileCopyrightText: 2022-2023 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#pragma once\n/* Do not apply C++ processing to this file. */\n#pragma no_processing\n\n#include \"gpu_shader_glsl_extension.glsl\"\n\n/** Type aliases. */\n/** IMPORTANT: Be wary of size and alignment matching for types that are present\n * in C++ shared code. */\n\n/* Matrix reshaping functions. Needs to be declared before matrix type aliases. */\n#define RESHAPE(name, mat_to, mat_from) \\\n  mat_to to_##name(mat_from m) \\\n  { \\\n    return mat_to(m); \\\n  }\n\n/* clang-format off */\nRESHAPE(float2x2, mat2x2, mat3x3)\nRESHAPE(float2x2, mat2x2, mat4x4)\nRESHAPE(float3x3, mat3x3, mat4x4)\nRESHAPE(float3x3, mat3x3, mat2x2)\nRESHAPE(float4x4, mat4x4, mat2x2)\nRESHAPE(float4x4, mat4x4, mat3x3)\n/* clang-format on */\n/* TODO(fclem): Remove. Use Transform instead. */\nRESHAPE(float3x3, mat3x3, mat3x4)\n\n#undef RESHAPE\n\n/* constexpr is equivalent to const in GLSL + special chaining rules.\n * See \"GLSL Specification section 4.3.3. Constant Expressions\". */\n#define constexpr const\n\n/* Boolean in GLSL are 32bit in interface structs. */\n#define bool32_t bool\n#define bool2 bvec2\n#define bool3 bvec3\n#define bool4 bvec4\n\n#define float2 vec2\n#define float3 vec3\n#define float4 vec4\n#define int2 ivec2\n#define int3 ivec3\n#define int4 ivec4\n#define uint2 uvec2\n#define uint3 uvec3\n#define uint4 uvec4\n/* GLSL already follows the packed alignment / size rules for vec3. */\n#define packed_float2 float2\n#define packed_int2 int2\n#define packed_uint2 uint2\n#define packed_float3 float3\n#define packed_int3 int3\n#define packed_uint3 uint3\n#define packed_float4 float4\n#define packed_int4 int4\n#define packed_uint4 uint4\n\n#define float2x2 mat2x2\n#define float3x2 mat3x2\n#define float4x2 mat4x2\n#define float2x3 mat2x3\n#define float3x3 mat3x3\n#define float4x3 mat4x3\n#define float2x4 mat2x4\n#define float3x4 mat3x4\n#define float4x4 mat4x4\n\n/* Small types are unavailable in GLSL (or badly supported), promote them to bigger type. */\n#define char int\n#define char2 int2\n#define char3 int3\n#define char4 int4\n#define short int\n#define short2 int2\n#define short3 int3\n#define short4 int4\n#define uchar uint\n#define uchar2 uint2\n#define uchar3 uint3\n#define uchar4 uint4\n#define ushort uint\n#define ushort2 uint2\n#define ushort3 uint3\n#define ushort4 uint4\n#define half float\n#define half2 float2\n#define half3 float3\n#define half4 float4\n\n/* Aliases for supported fixed width types. */\n#define int32_t int\n#define uint32_t uint\n\n/* Fast load/store variant macro. In GLSL this is the same as imageLoad/imageStore, but assumes no\n * bounds checking. */\n#define imageStoreFast imageStore\n#define imageLoadFast imageLoad\n\n/* Texture format tokens -- Type explicitness required by other Graphics APIs. */\n#define sampler2DDepth sampler2D\n#define sampler2DArrayDepth sampler2DArray\n#define samplerCubeDepth sampler2D\n#define samplerCubeArrayDepth sampler2DArray\n\n#define usampler2DArrayAtomic usampler2DArray\n#define usampler2DAtomic usampler2D\n#define usampler3DAtomic usampler3D\n#define isampler2DArrayAtomic isampler2DArray\n#define isampler2DAtomic isampler2D\n#define isampler3DAtomic isampler3D\n\n/* Pass through functions. */\n#define imageFence(image)\n\n/* Backend Functions. */\n#define select(A, B, mask) mix(A, B, mask)\n\n/* Array syntax compatibility. */\n#define float_array float[]\n#define float2_array vec2[]\n#define float3_array vec3[]\n#define float4_array vec4[]\n#define int_array int[]\n#define int2_array int2[]\n#define int3_array int3[]\n#define int4_array int4[]\n#define uint_array uint[]\n#define uint2_array uint2[]\n#define uint3_array uint3[]\n#define uint4_array uint4[]\n#define bool_array bool[]\n#define bool2_array bool2[]\n#define bool3_array bool3[]\n#define bool4_array bool4[]\n#define ARRAY_T(type) type[]\n#define ARRAY_V\n\n#define SHADER_LIBRARY_CREATE_INFO(a)\n#define VERTEX_SHADER_CREATE_INFO(a)\n#define FRAGMENT_SHADER_CREATE_INFO(a)\n#define COMPUTE_SHADER_CREATE_INFO(a)\n\n#define ATTR_FALLTHROUGH\n\n#define _in_sta\n#define _in_end\n#define _out_sta\n#define _out_end\n#define _inout_sta\n#define _inout_end\n#define _shared_sta\n#define _shared_end\n/* References (inout and out).\n * Less verbose that the above for reading processed code. */\n#define _ref(_type, _var) inout _type _var\n/* Constructor / initializer. */\n#define _ctor(_type) _type(\n#define _rotc() )\n\n/* Resource accessor. */\n#define specialization_constant_get(create_info, _res) _res\n#define shared_variable_get(create_info, _res) _res\n#define push_constant_get(create_info, _res) _res\n#define interface_get(create_info, _res) _res\n#define attribute_get(create_info, _res) _res\n#define buffer_get(create_info, _res) _res\n#define sampler_get(create_info, _res) _res\n#define image_get(create_info, _res) _res\n#define srt_access(create_info, _res) access_##create_info##_##_res()\n/**\n * WORKAROUND(fclem): Only used for cases when passing down the resource_table is impractical.\n * Note that this placeholder is just for the code to compile.\n */\n#define resource_table_get(table_type) table_type##_ctor_()\n\n/* Incompatible keywords. */\n#define static\n#define constant\n#define device\n#define thread\n#define threadgroup\n\n/* MSL component compatibility. */\n#define textureGather0(_tex, _co) textureGather(_tex, _co, 0)\n#define textureGather1(_tex, _co) textureGather(_tex, _co, 1)\n#define textureGather2(_tex, _co) textureGather(_tex, _co, 2)\n#define textureGather3(_tex, _co) textureGather(_tex, _co, 3)\n\n/**\n * This string type is much like the OSL string.\n * It is merely a hash of the actual string and it immutable.\n * Named `string_t` to avoid name collision with `std::string`.\n */\nstruct string_t {\n  uint hash;\n};\n\n#if 0 /* Causes NVidia compiler error on OpenGL. To be fixed. */\nbool equal(string_t a, string_t b)\n{\n  return a.hash == b.hash;\n}\n#endif\n\nuint as_uint(string_t str)\n{\n  return str.hash;\n}\n\nfloat4 texelFetchExtend(sampler2D samp, int2 texel, int lvl)\n{\n  texel = clamp(texel, int2(0), textureSize(samp, lvl).xy - 1);\n  return texelFetch(samp, texel, lvl);\n}\n\n/* For assert support. */\n#if defined(GPU_VERTEX_SHADER)\n#  define GPU_THREAD uint3(gl_VertexID, gl_InstanceID, 0)\n#elif defined(GPU_FRAGMENT_SHADER)\n#  define GPU_THREAD uint3(gl_FragCoord.x, gl_FragCoord.y, 0)\n#elif defined(GPU_COMPUTE_SHADER)\n#  define GPU_THREAD gl_GlobalInvocationID\n#else\n#  define GPU_THREAD error_not_in_a_shader_question_mark\n#endif\n\n/* Stage agnostic builtin function.\n * GLSL doesn't allow mixing shader stages inside the same source file.\n * Make sure builtin functions are stubbed when used in an invalid stage. */\n#ifdef GPU_FRAGMENT_SHADER\n#  define gpu_discard_fragment() discard\n#  ifdef GPU_ARB_derivative_control\n#    define gpu_dfdx(x) dFdxFine(x)\n#    define gpu_dfdy(x) dFdyFine(x)\n#  else\n#    define gpu_dfdx(x) dFdx(x)\n#    define gpu_dfdy(x) dFdy(x)\n#  endif\n#  define gpu_fwidth(x) fwidth(x)\n#else\n#  define gpu_discard_fragment()\n#  define gpu_dfdx(x) x\n#  define gpu_dfdy(x) x\n#  define gpu_fwidth(x) x\n#endif\n",
+ "gpu_shader_compositor_alpha_over.glsl": "/* SPDX-FileCopyrightText: 2022 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#include \"gpu_shader_math_base_lib.glsl\"\n#include \"gpu_shader_math_vector_lib.glsl\"\n#include \"gpu_shader_math_vector_safe_lib.glsl\"\n\n#define CMP_NODE_ALPHA_OVER_OPERATION_TYPE_OVER 0\n#define CMP_NODE_ALPHA_OVER_OPERATION_TYPE_DISJOINT_OVER 1\n#define CMP_NODE_ALPHA_OVER_OPERATION_TYPE_CONJOINT_OVER 2\n\n/* If straight_alpha is true, then the foreground is in straight alpha form and would need to be\n * premultiplied. */\nfloat4 preprocess_foreground(float4 foreground, float straight_alpha)\n{\n  const float alpha = clamp(foreground.w, 0.0f, 1.0f);\n  const float4 premultiplied_foreground = float4(foreground.xyz * alpha, alpha);\n  return straight_alpha != 0.0f ? premultiplied_foreground : foreground;\n}\n\n/* Computes the Porter and Duff Over compositing operation. */\nfloat4 alpha_over(float4 background, float4 foreground, float factor, float straight_alpha)\n{\n  const float4 foreground_color = preprocess_foreground(foreground, straight_alpha);\n\n  const float foreground_alpha = clamp(foreground.w, 0.0f, 1.0f);\n  const float4 mix_result = foreground_color + background * (1.0f - foreground_alpha);\n\n  return mix(background, mix_result, factor);\n}\n\n/* Computes the Porter and Duff Over compositing operation while assuming the background is being\n * held out by the foreground. See for reference:\n *\n *   https://benmcewan.com/blog/disjoint-over-and-conjoint-over-explained */\nfloat4 alpha_over_disjoint(float4 background,\n                           float4 foreground,\n                           float factor,\n                           float straight_alpha)\n{\n  const float4 foreground_color = preprocess_foreground(foreground, straight_alpha);\n\n  const float foreground_alpha = clamp(foreground.w, 0.0f, 1.0f);\n  const float background_alpha = clamp(background.w, 0.0f, 1.0f);\n\n  if (foreground_alpha + background_alpha < 1.0f) {\n    const float4 mix_result = foreground_color + background;\n    return mix(background, mix_result, factor);\n  }\n\n  const float4 straight_background = safe_divide(background, background_alpha);\n  const float4 mix_result = foreground_color + straight_background * (1.0f - foreground_alpha);\n\n  return mix(background, mix_result, factor);\n}\n\n/* Computes the Porter and Duff Over compositing operation but the foreground completely covers the\n * background if it is more opaque but not necessary completely opaque. See for reference:\n *\n *   https://benmcewan.com/blog/disjoint-over-and-conjoint-over-explained\n *\n * However, the equation is wrong and should actually be A+B(1-a/b), A if a>b. */\nfloat4 alpha_over_conjoint(float4 background,\n                           float4 foreground,\n                           float factor,\n                           float straight_alpha)\n{\n  const float4 foreground_color = preprocess_foreground(foreground, straight_alpha);\n\n  const float foreground_alpha = clamp(foreground.w, 0.0f, 1.0f);\n  const float background_alpha = clamp(background.w, 0.0f, 1.0f);\n\n  if (foreground_alpha > background_alpha) {\n    const float4 mix_result = foreground_color;\n    return mix(background, mix_result, factor);\n  }\n\n  const float alpha_ratio = safe_divide(foreground_alpha, background_alpha);\n  const float4 mix_result = foreground_color + background * (1.0f - alpha_ratio);\n\n  return mix(background, mix_result, factor);\n}\n\n[[node]]\nvoid node_composite_alpha_over(float4 background,\n                               float4 foreground,\n                               float factor,\n                               float type,\n                               float straight_alpha,\n                               float4 &result)\n{\n  result = background;\n  switch (int(type)) {\n    case CMP_NODE_ALPHA_OVER_OPERATION_TYPE_OVER:\n      result = alpha_over(background, foreground, factor, straight_alpha);\n      break;\n    case CMP_NODE_ALPHA_OVER_OPERATION_TYPE_DISJOINT_OVER:\n      result = alpha_over_disjoint(background, foreground, factor, straight_alpha);\n      break;\n    case CMP_NODE_ALPHA_OVER_OPERATION_TYPE_CONJOINT_OVER:\n      result = alpha_over_conjoint(background, foreground, factor, straight_alpha);\n      break;\n  }\n}\n\n#undef CMP_NODE_ALPHA_OVER_OPERATION_TYPE_OVER\n#undef CMP_NODE_ALPHA_OVER_OPERATION_TYPE_DISJOINT_OVER\n#undef CMP_NODE_ALPHA_OVER_OPERATION_TYPE_CONJOINT_OVER\n",
+ "gpu_shader_compositor_bright_contrast.glsl": "/* SPDX-FileCopyrightText: 2022 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n/* The algorithm is by Werner D. Streidt, extracted of OpenCV demhist.c:\n *   http://visca.com/ffactory/archives/5-99/msg00021.html */\n\n#include \"gpu_shader_common_color_utils.glsl\"\n\n#define FLT_EPSILON 1.192092896e-07F\n\n[[node]]\nvoid node_composite_bright_contrast(float4 color, float brightness, float contrast, float4 &result)\n{\n  float scaled_brightness = brightness / 100.0f;\n  float delta = contrast / 200.0f;\n\n  float multiplier, offset;\n  if (contrast > 0.0f) {\n    multiplier = 1.0f - delta * 2.0f;\n    multiplier = 1.0f / max(multiplier, FLT_EPSILON);\n    offset = multiplier * (scaled_brightness - delta);\n  }\n  else {\n    delta *= -1.0f;\n    multiplier = max(1.0f - delta * 2.0f, 0.0f);\n    offset = multiplier * scaled_brightness + delta;\n  }\n\n  result = float4(color.rgb * multiplier + offset, color.a);\n}\n",
+ "gpu_shader_compositor_channel_matte.glsl": "/* SPDX-FileCopyrightText: 2022 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#include \"gpu_shader_common_color_utils.glsl\"\n\n#define CMP_NODE_CHANNEL_MATTE_CS_RGB 0\n#define CMP_NODE_CHANNEL_MATTE_CS_HSV 1\n#define CMP_NODE_CHANNEL_MATTE_CS_YUV 2\n#define CMP_NODE_CHANNEL_MATTE_CS_YCC 3\n\n#define CMP_NODE_CHANNEL_MATTE_LIMIT_ALGORITHM_SINGLE 0\n#define CMP_NODE_CHANNEL_MATTE_LIMIT_ALGORITHM_MAX 1\n\nfloat3 compute_channels(const float4 color, const int color_space)\n{\n  switch (color_space) {\n    case CMP_NODE_CHANNEL_MATTE_CS_RGB: {\n      return color.xyz();\n    }\n    case CMP_NODE_CHANNEL_MATTE_CS_HSV: {\n      float4 hsv;\n      rgb_to_hsv(color, hsv);\n      return hsv.xyz();\n    }\n    case CMP_NODE_CHANNEL_MATTE_CS_YUV: {\n      float4 yuv;\n      rgba_to_yuva_itu_709(color, yuv);\n      return yuv.xyz();\n    }\n    case CMP_NODE_CHANNEL_MATTE_CS_YCC: {\n      float4 ycc;\n      rgba_to_ycca_itu_709(color, ycc);\n      return ycc.xyz();\n    }\n  }\n\n  return color.xyz();\n}\n\nint get_channel_index(const int color_space,\n                      const int rgb_channel,\n                      const int hsv_channel,\n                      const int yuv_channel,\n                      const int ycc_channel)\n{\n  switch (color_space) {\n    case CMP_NODE_CHANNEL_MATTE_CS_RGB:\n      return rgb_channel;\n    case CMP_NODE_CHANNEL_MATTE_CS_HSV:\n      return hsv_channel;\n    case CMP_NODE_CHANNEL_MATTE_CS_YUV:\n      return yuv_channel;\n    case CMP_NODE_CHANNEL_MATTE_CS_YCC:\n      return ycc_channel;\n  }\n\n  return 0;\n}\n\n/* Compute the indices of the channels used to compute the limit value. We always assume the limit\n * algorithm is Max, if it is a single limit channel, store it in both limit channels, because\n * the maximum of two identical values is the same value. */\nint2 compute_limit_channels(const int limit_method,\n                            const int matte_channel,\n                            const int limit_channel)\n{\n  /* If the algorithm is Max, store the indices of the other two channels other than the matte\n   * channel. */\n  if (limit_method == CMP_NODE_CHANNEL_MATTE_LIMIT_ALGORITHM_MAX) {\n    return int2((matte_channel + 1) % 3, (matte_channel + 2) % 3);\n  }\n\n  /* If the algorithm is Single, store the index of the limit channel in both channels. */\n  return int2(limit_channel);\n}\n\n[[node]]\nvoid node_composite_channel_matte(const float4 color,\n                                  const float minimum,\n                                  const float maximum,\n                                  const float color_space,\n                                  const float rgb_key_channel,\n                                  const float hsv_key_channel,\n                                  const float yuv_key_channel,\n                                  const float ycc_key_channel,\n                                  const float limit_method,\n                                  const float rgb_limit_channel,\n                                  const float hsv_limit_channel,\n                                  const float yuv_limit_channel,\n                                  const float ycc_limit_channel,\n                                  float4 &output_color,\n                                  float &matte)\n{\n  const float3 channels = compute_channels(color, int(color_space));\n  const int matte_channel = get_channel_index(int(color_space),\n                                              int(rgb_key_channel),\n                                              int(hsv_key_channel),\n                                              int(yuv_key_channel),\n                                              int(ycc_key_channel));\n  const int limit_channel = get_channel_index(int(color_space),\n                                              int(rgb_limit_channel),\n                                              int(hsv_limit_channel),\n                                              int(yuv_limit_channel),\n                                              int(ycc_limit_channel));\n  const int2 limit_channels = compute_limit_channels(\n      int(limit_method), int(matte_channel), int(limit_channel));\n\n  float matte_value = channels[int(matte_channel)];\n  float limit_value = max(channels[int(limit_channels.x)], channels[int(limit_channels.y)]);\n\n  float alpha = 1.0f - (matte_value - limit_value);\n  if (alpha > maximum) {\n    alpha = color.a;\n  }\n  else if (alpha < minimum) {\n    alpha = 0.0f;\n  }\n  else {\n    alpha = (alpha - minimum) / (maximum - minimum);\n  }\n\n  matte = min(alpha, color.a);\n  output_color = color * matte;\n}\n\n#undef CMP_NODE_CHANNEL_MATTE_CS_RGB\n#undef CMP_NODE_CHANNEL_MATTE_CS_HSV\n#undef CMP_NODE_CHANNEL_MATTE_CS_YUV\n#undef CMP_NODE_CHANNEL_MATTE_CS_YCC\n\n#undef CMP_NODE_CHANNEL_MATTE_LIMIT_ALGORITHM_SINGL\n#undef CMP_NODE_CHANNEL_MATTE_LIMIT_ALGORITHM_MAX\n",
+ "gpu_shader_compositor_chroma_matte.glsl": "/* SPDX-FileCopyrightText: 2022 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#include \"gpu_shader_common_color_utils.glsl\"\n#include \"gpu_shader_math_matrix_construct_lib.glsl\"\n\n/* Algorithm from the book Video Demystified. Chapter 7. Chroma Keying. */\n[[node]]\nvoid node_composite_chroma_matte(float4 color,\n                                 float4 key,\n                                 float minimum,\n                                 float maximum,\n                                 float falloff,\n                                 float4 &result,\n                                 float &matte)\n{\n  float4 color_ycca;\n  rgba_to_ycca_itu_709(color, color_ycca);\n  float4 key_ycca;\n  rgba_to_ycca_itu_709(key, key_ycca);\n\n  /* Normalize the CrCb components into the [-1, 1] range. */\n  float2 color_cc = color_ycca.yz * 2.0f - 1.0f;\n  float2 key_cc = normalize(key_ycca.yz * 2.0f - 1.0f);\n\n  /* Rotate the color onto the space of the key such that x axis of the color space passes through\n   * the key color. */\n  color_cc = from_direction(key_cc * float2(1.0f, -1.0f)) * color_cc;\n\n  /* Compute foreground key. If positive, the value is in the [0, 1] range. */\n  float foreground_key = color_cc.x - (abs(color_cc.y) / tan(maximum / 2.0f));\n\n  /* Negative foreground key values retain the original alpha. Positive values are scaled by the\n   * falloff, while colors that make an angle less than the minimum angle get a zero alpha. */\n  float alpha = color.a;\n  if (foreground_key > 0.0f) {\n    alpha = 1.0f - (foreground_key / falloff);\n\n    if (abs(atan(color_cc.y, color_cc.x)) < (minimum / 2.0f)) {\n      alpha = 0.0f;\n    }\n  }\n\n  /* Compute output. */\n  matte = min(alpha, color.a);\n  result = color * matte;\n}\n",
+ "gpu_shader_compositor_code_generation.glsl": "/* SPDX-FileCopyrightText: 2025 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n/* The file contains the implementation of functions inserted by the GPUMatrial code generator,\n * this mainly contains the [type]_to_[type] and [type]_from_[type] implicit conversion functions,\n * the former are inserted by the compositor and the latter are inserted by the code generator.\n *\n * Note that the [type]_to_[type] functions are the same as the type conversion functions but they\n * use references for the output, has the node attribute, and use float types in the interface\n * instead of int and bool types because those are not supported by GPUMatrial. */\n\n#include \"gpu_shader_compositor_type_conversion.glsl\"\n\n/* --------------------------------------------------------------------\n * Float to other.\n */\n\n[[node]]\nvoid float_to_int(float value, float &output_value)\n{\n  output_value = float(float_to_int(value));\n}\n\n[[node]]\nvoid float_to_int2(float value, float2 &output_value)\n{\n  output_value = float2(float_to_int2(value));\n}\n\n[[node]]\nvoid float_to_int3(float value, float3 &output_value)\n{\n  output_value = float3(float_to_int3(value));\n}\n\n[[node]]\nvoid float_to_float2(float value, float2 &output_value)\n{\n  output_value = float_to_float2(value);\n}\n\n[[node]]\nvoid float_to_float3(float value, float3 &output_value)\n{\n  output_value = float_to_float3(value);\n}\n\n[[node]]\nvoid float_to_color(float value, float4 &output_value)\n{\n  output_value = float_to_color(value);\n}\n\n[[node]]\nvoid float_to_float4(float value, float4 &output_value)\n{\n  output_value = float_to_float4(value);\n}\n\n[[node]]\nvoid float_to_bool(float value, float &output_value)\n{\n  output_value = float(float_to_bool(value));\n}\n\n[[node]]\nvoid float_to_quaternion(float value, float4 &output_value)\n{\n  output_value = float_to_quaternion(value);\n}\n\n/* --------------------------------------------------------------------\n * Int to other.\n */\n\n[[node]]\nvoid int_to_float(float value, float &output_value)\n{\n  output_value = int_to_float(int(value));\n}\n\n[[node]]\nvoid int_to_int2(float value, float2 &output_value)\n{\n  output_value = float2(int_to_int2(int(value)));\n}\n\n[[node]]\nvoid int_to_int3(float value, float3 &output_value)\n{\n  output_value = float3(int_to_int3(int(value)));\n}\n\n[[node]]\nvoid int_to_float2(float value, float2 &output_value)\n{\n  output_value = int_to_float2(int(value));\n}\n\n[[node]]\nvoid int_to_float3(float value, float3 &output_value)\n{\n  output_value = int_to_float3(int(value));\n}\n\n[[node]]\nvoid int_to_color(float value, float4 &output_value)\n{\n  output_value = int_to_color(int(value));\n}\n\n[[node]]\nvoid int_to_float4(float value, float4 &output_value)\n{\n  output_value = int_to_float4(int(value));\n}\n\n[[node]]\nvoid int_to_bool(float value, float &output_value)\n{\n  output_value = float(int_to_bool(int(value)));\n}\n\n/* --------------------------------------------------------------------\n * Float2 to other.\n */\n\n[[node]]\nvoid float2_to_float(float2 value, float &output_value)\n{\n  output_value = float2_to_float(value);\n}\n\n[[node]]\nvoid float2_to_int(float2 value, float &output_value)\n{\n  output_value = float(float2_to_int(value));\n}\n\n[[node]]\nvoid float2_to_int2(float2 value, float2 &output_value)\n{\n  output_value = float2(float2_to_int2(value));\n}\n\n[[node]]\nvoid float2_to_int3(float2 value, float3 &output_value)\n{\n  output_value = float3(float2_to_int3(value));\n}\n\n[[node]]\nvoid float2_to_float3(float2 value, float3 &output_value)\n{\n  output_value = float2_to_float3(value);\n}\n\n[[node]]\nvoid float2_to_color(float2 value, float4 &output_value)\n{\n  output_value = float2_to_color(value);\n}\n\n[[node]]\nvoid float2_to_float4(float2 value, float4 &output_value)\n{\n  output_value = float2_to_float4(value);\n}\n\n[[node]]\nvoid float2_to_bool(float2 value, float &output_value)\n{\n  output_value = float(float2_to_bool(value));\n}\n\n[[node]]\nvoid float2_to_quaternion(float2 value, float4 &output_value)\n{\n  output_value = float2_to_quaternion(value);\n}\n\n/* --------------------------------------------------------------------\n * Float3 to other.\n */\n\n[[node]]\nvoid float3_to_float(float3 value, float &output_value)\n{\n  output_value = float3_to_float(value);\n}\n\n[[node]]\nvoid float3_to_int(float3 value, float &output_value)\n{\n  output_value = float(float3_to_int(value));\n}\n\n[[node]]\nvoid float3_to_int2(float3 value, float2 &output_value)\n{\n  output_value = float2(float3_to_int2(value));\n}\n\n[[node]]\nvoid float3_to_int3(float3 value, float3 &output_value)\n{\n  output_value = float3(float3_to_int3(value));\n}\n\n[[node]]\nvoid float3_to_float2(float3 value, float2 &output_value)\n{\n  output_value = float3_to_float2(value);\n}\n\n[[node]]\nvoid float3_to_color(float3 value, float4 &output_value)\n{\n  output_value = float3_to_color(value);\n}\n\n[[node]]\nvoid float3_to_float4(float3 value, float4 &output_value)\n{\n  output_value = float3_to_float4(value);\n}\n\n[[node]]\nvoid float3_to_bool(float3 value, float &output_value)\n{\n  output_value = float(float3_to_bool(value));\n}\n\n[[node]]\nvoid float3_to_quaternion(float3 value, float4 &output_value)\n{\n  output_value = float3_to_quaternion(value);\n}\n\n/* --------------------------------------------------------------------\n * Color to other.\n */\n\n[[node]]\nvoid color_to_float(float4 value, float3 luminance_coefficients, float &output_value)\n{\n  output_value = color_to_float(value, luminance_coefficients);\n}\n\n[[node]]\nvoid color_to_int(float4 value, float3 luminance_coefficients, float &output_value)\n{\n  output_value = float(color_to_int(value, luminance_coefficients));\n}\n\n[[node]]\nvoid color_to_int2(float4 value, float2 &output_value)\n{\n  output_value = float2(color_to_int2(value));\n}\n\n[[node]]\nvoid color_to_int3(float4 value, float3 &output_value)\n{\n  output_value = float3(color_to_int3(value));\n}\n\n[[node]]\nvoid color_to_float2(float4 value, float2 &output_value)\n{\n  output_value = color_to_float2(value);\n}\n\n[[node]]\nvoid color_to_float3(float4 value, float3 &output_value)\n{\n  output_value = color_to_float3(value);\n}\n\n[[node]]\nvoid color_to_float4(float4 value, float4 &output_value)\n{\n  output_value = color_to_float4(value);\n}\n\n[[node]]\nvoid color_to_bool(float4 value, float3 luminance_coefficients, float &output_value)\n{\n  output_value = float(color_to_bool(value, luminance_coefficients));\n}\n\n/* --------------------------------------------------------------------\n * Float4 to other.\n */\n\n[[node]]\nvoid float4_to_float(float4 value, float &output_value)\n{\n  output_value = float4_to_float(value);\n}\n\n[[node]]\nvoid float4_to_int(float4 value, float &output_value)\n{\n  output_value = float(float4_to_int(value));\n}\n\n[[node]]\nvoid float4_to_int2(float4 value, float2 &output_value)\n{\n  output_value = float2(float4_to_int2(value));\n}\n\n[[node]]\nvoid float4_to_int3(float4 value, float3 &output_value)\n{\n  output_value = float3(float4_to_int3(value));\n}\n\n[[node]]\nvoid float4_to_float2(float4 value, float2 &output_value)\n{\n  output_value = float4_to_float2(value);\n}\n\n[[node]]\nvoid float4_to_float3(float4 value, float3 &output_value)\n{\n  output_value = float4_to_float3(value);\n}\n\n[[node]]\nvoid float4_to_color(float4 value, float4 &output_value)\n{\n  output_value = float4_to_color(value);\n}\n\n[[node]]\nvoid float4_to_bool(float4 value, float &output_value)\n{\n  output_value = float(float4_to_bool(value));\n}\n\n[[node]]\nvoid float4_to_quaternion(float4 value, float4 &output_value)\n{\n  output_value = float4_to_quaternion(value);\n}\n\n/* --------------------------------------------------------------------\n * Int2 to other.\n */\n\n[[node]]\nvoid int2_to_float(float2 value, float &output_value)\n{\n  output_value = int2_to_float(int2(value));\n}\n\n[[node]]\nvoid int2_to_int(float2 value, float &output_value)\n{\n  output_value = float(int2_to_int(int2(value)));\n}\n\n[[node]]\nvoid int2_to_int3(float2 value, float3 &output_value)\n{\n  output_value = float3(int2_to_int3(int2(value)));\n}\n\n[[node]]\nvoid int2_to_float2(float2 value, float2 &output_value)\n{\n  output_value = int2_to_float2(int2(value));\n}\n\n[[node]]\nvoid int2_to_float3(float2 value, float3 &output_value)\n{\n  output_value = int2_to_float3(int2(value));\n}\n\n[[node]]\nvoid int2_to_color(float2 value, float4 &output_value)\n{\n  output_value = int2_to_color(int2(value));\n}\n\n[[node]]\nvoid int2_to_float4(float2 value, float4 &output_value)\n{\n  output_value = int2_to_float4(int2(value));\n}\n\n[[node]]\nvoid int2_to_bool(float2 value, float &output_value)\n{\n  output_value = float(int2_to_bool(int2(value)));\n}\n\n/* --------------------------------------------------------------------\n * Int3 to other.\n */\n\n[[node]]\nvoid int3_to_float(float3 value, float &output_value)\n{\n  output_value = int3_to_float(int3(value));\n}\n\n[[node]]\nvoid int3_to_int(float3 value, float &output_value)\n{\n  output_value = float(int3_to_int(int3(value)));\n}\n\n[[node]]\nvoid int3_to_int2(float3 value, float2 &output_value)\n{\n  output_value = float2(int3_to_int2(int3(value)));\n}\n\n[[node]]\nvoid int3_to_float2(float3 value, float2 &output_value)\n{\n  output_value = int3_to_float2(int3(value));\n}\n\n[[node]]\nvoid int3_to_float3(float3 value, float3 &output_value)\n{\n  output_value = int3_to_float3(int3(value));\n}\n\n[[node]]\nvoid int3_to_color(float3 value, float4 &output_value)\n{\n  output_value = int3_to_color(int3(value));\n}\n\n[[node]]\nvoid int3_to_float4(float3 value, float4 &output_value)\n{\n  output_value = int3_to_float4(int3(value));\n}\n\n[[node]]\nvoid int3_to_bool(float3 value, float &output_value)\n{\n  output_value = float(int3_to_bool(int3(value)));\n}\n\n/* --------------------------------------------------------------------\n * Bool to other.\n */\n\n[[node]]\nvoid bool_to_float(float value, float &output_value)\n{\n  output_value = bool_to_float(bool(value));\n}\n\n[[node]]\nvoid bool_to_int(float value, float &output_value)\n{\n  output_value = float(bool_to_int(bool(value)));\n}\n\n[[node]]\nvoid bool_to_float2(float value, float2 &output_value)\n{\n  output_value = bool_to_float2(bool(value));\n}\n\n[[node]]\nvoid bool_to_float3(float value, float3 &output_value)\n{\n  output_value = bool_to_float3(bool(value));\n}\n\n[[node]]\nvoid bool_to_color(float value, float4 &output_value)\n{\n  output_value = bool_to_color(bool(value));\n}\n\n[[node]]\nvoid bool_to_float4(float value, float4 &output_value)\n{\n  output_value = bool_to_float4(bool(value));\n}\n\n[[node]]\nvoid bool_to_int2(float value, float2 &output_value)\n{\n  output_value = float2(bool_to_int2(bool(value)));\n}\n\n[[node]]\nvoid bool_to_int3(float value, float3 &output_value)\n{\n  output_value = float3(bool_to_int3(bool(value)));\n}\n\n/* --------------------------------------------------------------------\n * Float4x4 to other.\n */\n\n[[node]]\nvoid float4x4_to_quaternion(float4x4 mat, float4 &output_value)\n{\n  output_value = float4x4_to_quaternion(mat);\n}\n\n/* --------------------------------------------------------------------\n * Quaternion to other.\n */\n\n[[node]]\nvoid quaternion_to_float2(float4 value, float2 &output_value)\n{\n  output_value = quaternion_to_float2(value);\n}\n\n[[node]]\nvoid quaternion_to_float3(float4 value, float3 &output_value)\n{\n  output_value = quaternion_to_float3(value);\n}\n\n[[node]]\nvoid quaternion_to_float4(float4 value, float4 &output_value)\n{\n  output_value = quaternion_to_float4(value);\n}\n\n[[node]]\nvoid quaternion_to_float4x4(float4 value, float4x4 &output_value)\n{\n  output_value = quaternion_to_float4x4(value);\n}\n\n/* --------------------------------------------------------------------\n * Internal Code Generation Functions.\n */\n\nfloat float_from_float4(float4 value, float3 luminance_coefficients)\n{\n  return color_to_float(value, luminance_coefficients);\n}\n\nfloat float_from_float3(float3 value)\n{\n  return float3_to_float(value);\n}\n\nfloat float_from_float2(float2 value)\n{\n  return float2_to_float(value);\n}\n\nfloat2 float2_from_float4(float4 value)\n{\n  return color_to_float2(value);\n}\n\nfloat2 float2_from_float3(float3 value)\n{\n  return float3_to_float2(value);\n}\n\nfloat2 float2_from_float(float value)\n{\n  return float_to_float2(value);\n}\n\nfloat3 float3_from_float4(float4 value)\n{\n  return color_to_float3(value);\n}\n\nfloat3 float3_from_float2(float2 value)\n{\n  return float2_to_float3(value);\n}\n\nfloat3 float3_from_float(float value)\n{\n  return float_to_float3(value);\n}\n\nfloat4 float4_from_float2(float2 value)\n{\n  return float2_to_color(value);\n}\n\nfloat4 float4_from_float3(float3 value)\n{\n  return float3_to_color(value);\n}\n\nfloat4 float4_from_float(float value)\n{\n  return float_to_color(value);\n}\n\nfloat4 float4_from_float4x4(float4x4 mat)\n{\n  return float4x4_to_quaternion(mat);\n}\n\nfloat4x4 float4x4_from_float4(float4 value)\n{\n  return quaternion_to_float4x4(value);\n}\n",
  "gpu_shader_compositor_color_balance.glsl": "/* SPDX-FileCopyrightText: 2022 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#include \"gpu_shader_math_matrix_construct_lib.glsl\"\n\n#define CMP_NODE_COLOR_BALANCE_LGG 0\n#define CMP_NODE_COLOR_BALANCE_ASC_CDL 1\n#define CMP_NODE_COLOR_BALANCE_WHITEPOINT 2\n\nfloat4 lift_gamma_gain(const float4 color,\n                       const float base_lift,\n                       const float4 color_lift,\n                       const float base_gamma,\n                       const float4 color_gamma,\n                       const float base_gain,\n                       const float4 color_gain)\n{\n  const float3 lift = base_lift + color_lift.xyz();\n  const float3 lift_balanced = ((color.xyz() - 1.0f) * (2.0f - lift)) + 1.0f;\n\n  const float3 gain = base_gain * color_gain.xyz();\n  const float3 gain_balanced = max(float3(0.0f), lift_balanced * gain);\n\n  const float3 gamma = base_gamma * color_gamma.xyz();\n  const float3 gamma_balanced = pow(gain_balanced, 1.0f / max(gamma, float3(1e-6)));\n\n  return float4(gamma_balanced, color.w);\n}\n\nfloat4 offset_power_slope(const float4 color,\n                          const float base_offset,\n                          const float4 color_offset,\n                          const float base_power,\n                          const float4 color_power,\n                          const float base_slope,\n                          const float4 color_slope)\n{\n  const float3 slope = base_slope * color_slope.xyz();\n  const float3 slope_balanced = color.xyz() * slope;\n\n  const float3 offset = base_offset + color_offset.xyz();\n  const float3 offset_balanced = slope_balanced + offset;\n\n  const float3 power = base_power * color_power.xyz();\n  const float3 power_balanced = pow(max(offset_balanced, float3(0.0f)), power);\n\n  return float4(power_balanced, color.w);\n}\n\nfloat4 white_point_constant(const float4 color, const float3x3 white_point_matrix)\n{\n  const float3 balanced = white_point_matrix * color.xyz();\n  return float4(balanced, color.w);\n}\n\nfloat3 whitepoint_from_temp_tint(const float temperature, const float tint)\n{\n  /* Tabulated approximation of the Planckian locus. Based on:\n   *\n   *   http://www.brucelindbloom.com/Eqn_XYZ_to_T.html.\n   *\n   * Original source:\n   *\n   *   \"Color Science: Concepts and Methods, Quantitative Data and Formulae\", Second Edition,\n   *   Gunter Wyszecki and W. S. Stiles, John Wiley & Sons, 1982, pp. 227, 228.\n   *\n   * Note that the inverse temperature table is multiplied by 10^6 compared to the reference\n   * table. */\n  constexpr float inverse_temperatures[31] = float_array(0.0f,\n                                                         10.0f,\n                                                         20.0f,\n                                                         30.0f,\n                                                         40.0f,\n                                                         50.0f,\n                                                         60.0f,\n                                                         70.0f,\n                                                         80.0f,\n                                                         90.0f,\n                                                         100.0f,\n                                                         125.0f,\n                                                         150.0f,\n                                                         175.0f,\n                                                         200.0f,\n                                                         225.0f,\n                                                         250.0f,\n                                                         275.0f,\n                                                         300.0f,\n                                                         325.0f,\n                                                         350.0f,\n                                                         375.0f,\n                                                         400.0f,\n                                                         425.0f,\n                                                         450.0f,\n                                                         475.0f,\n                                                         500.0f,\n                                                         525.0f,\n                                                         550.0f,\n                                                         575.0f,\n                                                         600.0f);\n\n  constexpr float2 uv_coordinates[31] = float2_array(float2(0.18006f, 0.26352f),\n                                                     float2(0.18066f, 0.26589f),\n                                                     float2(0.18133f, 0.26846f),\n                                                     float2(0.18208f, 0.27119f),\n                                                     float2(0.18293f, 0.27407f),\n                                                     float2(0.18388f, 0.27709f),\n                                                     float2(0.18494f, 0.28021f),\n                                                     float2(0.18611f, 0.28342f),\n                                                     float2(0.18740f, 0.28668f),\n                                                     float2(0.18880f, 0.28997f),\n                                                     float2(0.19032f, 0.29326f),\n                                                     float2(0.19462f, 0.30141f),\n                                                     float2(0.19962f, 0.30921f),\n                                                     float2(0.20525f, 0.31647f),\n                                                     float2(0.21142f, 0.32312f),\n                                                     float2(0.21807f, 0.32909f),\n                                                     float2(0.22511f, 0.33439f),\n                                                     float2(0.23247f, 0.33904f),\n                                                     float2(0.24010f, 0.34308f),\n                                                     float2(0.24792f, 0.34655f),\n                                                     float2(0.25591f, 0.34951f),\n                                                     float2(0.26400f, 0.35200f),\n                                                     float2(0.27218f, 0.35407f),\n                                                     float2(0.28039f, 0.35577f),\n                                                     float2(0.28863f, 0.35714f),\n                                                     float2(0.29685f, 0.35823f),\n                                                     float2(0.30505f, 0.35907f),\n                                                     float2(0.31320f, 0.35968f),\n                                                     float2(0.32129f, 0.36011f),\n                                                     float2(0.32931f, 0.36038f),\n                                                     float2(0.33724f, 0.36051f));\n\n  constexpr float isotherm_parameters[31] = float_array(-0.24341f,\n                                                        -0.25479f,\n                                                        -0.26876f,\n                                                        -0.28539f,\n                                                        -0.30470f,\n                                                        -0.32675f,\n                                                        -0.35156f,\n                                                        -0.37915f,\n                                                        -0.40955f,\n                                                        -0.44278f,\n                                                        -0.47888f,\n                                                        -0.58204f,\n                                                        -0.70471f,\n                                                        -0.84901f,\n                                                        -1.0182f,\n                                                        -1.2168f,\n                                                        -1.4512f,\n                                                        -1.7298f,\n                                                        -2.0637f,\n                                                        -2.4681f,\n                                                        -2.9641f,\n                                                        -3.5814f,\n                                                        -4.3633f,\n                                                        -5.3762f,\n                                                        -6.7262f,\n                                                        -8.5955f,\n                                                        -11.324f,\n                                                        -15.628f,\n                                                        -23.325f,\n                                                        -40.770f,\n                                                        -116.45f);\n\n  /* Compute the inverse temperature, multiplying by 10^6 since the reference table is scaled by\n   * that factor. We also make sure we don't divide by zero and are less than 600 for a simpler\n   * algorithm as will be seen. */\n  const float inverse_temperature = clamp(1e6f / max(1e-6f, temperature), 0.0f, 600.0f - 1e-6f);\n\n  /* Find the index of the table entry that is less than or equal the inverse temperature. Note\n   * that the table is two arithmetic sequences concatenated, [0, 10, 20, ...] followed by [100,\n   * 125, 150, ...]. So the index in the first sequence is simply the floor division by 10, and the\n   * second is simply the floor division by 25, while of course adjusting for the start value of\n   * the sequence. */\n  const int i = inverse_temperature < 100.0f ? (int(inverse_temperature) / 10) :\n                                               (int(inverse_temperature - 100.0f) / 25 + 10);\n\n  /* Find interpolation factor. */\n  const float interpolation_factor = (inverse_temperature - inverse_temperatures[i]) /\n                                     (inverse_temperatures[i + 1] - inverse_temperatures[i]);\n\n  /* Interpolate point along Planckian locus. */\n  const float2 uv = mix(uv_coordinates[i], uv_coordinates[i + 1], interpolation_factor);\n\n  /* Compute and interpolate isotherm. */\n  const float2 lower_isotherm = normalize(float2(1.0f, isotherm_parameters[i]));\n  const float2 higher_isotherm = normalize(float2(1.0f, isotherm_parameters[i + 1]));\n  const float2 isotherm = normalize(mix(lower_isotherm, higher_isotherm, interpolation_factor));\n\n  /* Offset away from the Planckian locus according to the tint.\n   * Tint is parameterized such that +-3000 tint corresponds to +-1 delta UV. */\n  const float2 tinted_uv = uv - (isotherm * tint / 3000.0f);\n\n  /* Convert CIE 1960 uv -> xyY. */\n  const float x = 3.0f * tinted_uv.x / (2.0f * tinted_uv.x - 8.0f * tinted_uv.y + 4.0f);\n  const float y = 2.0f * tinted_uv.y / (2.0f * tinted_uv.x - 8.0f * tinted_uv.y + 4.0f);\n\n  /* Convert xyY -> XYZ (assuming Y=1). */\n  return float3(x / y, 1.0f, (1.0f - x - y) / y);\n}\n\nfloat3x3 chromatic_adaption_matrix(const float3 from_XYZ, const float3 to_XYZ)\n{\n  /* Bradford transformation matrix (XYZ -> LMS). */\n  const float3x3 bradford = float3x3(float3(0.8951f, -0.7502f, 0.0389f),\n                                     float3(0.2664f, 1.7135f, -0.0685f),\n                                     float3(-0.1614f, 0.0367f, 1.0296f));\n\n  /* Compute white points in LMS space. */\n  const float3 from_LMS = bradford * from_XYZ / from_XYZ.y;\n  const float3 to_LMS = bradford * to_XYZ / to_XYZ.y;\n\n  /* Assemble full transform: XYZ -> LMS -> adapted LMS -> adapted XYZ. */\n  return inverse(bradford) * from_scale(to_LMS / from_LMS) * bradford;\n}\n\nfloat4 white_point_variable(const float4 color,\n                            const float input_temperature,\n                            const float input_tint,\n                            const float output_temperature,\n                            const float output_tint,\n                            const float3x3 scene_to_xyz,\n                            const float3x3 xyz_to_scene)\n{\n  const float3 input_white_point = whitepoint_from_temp_tint(input_temperature, input_tint);\n  const float3 output_white_point = whitepoint_from_temp_tint(output_temperature, output_tint);\n  const float3x3 adaption = chromatic_adaption_matrix(input_white_point, output_white_point);\n  const float3x3 white_point_matrix = xyz_to_scene * adaption * scene_to_xyz;\n\n  const float3 balanced = white_point_matrix * color.xyz;\n  return float4(balanced, color.w);\n}\n\n[[node]]\nvoid node_composite_color_balance(const float4 color,\n                                  const float factor,\n                                  const float type,\n                                  const float base_lift,\n                                  const float4 color_lift,\n                                  const float base_gamma,\n                                  const float4 color_gamma,\n                                  const float base_gain,\n                                  const float4 color_gain,\n                                  const float base_offset,\n                                  const float4 color_offset,\n                                  const float base_power,\n                                  const float4 color_power,\n                                  const float base_slope,\n                                  const float4 color_slope,\n                                  const float input_temperature,\n                                  const float input_tint,\n                                  const float output_temperature,\n                                  const float output_tint,\n                                  const float4x4 scene_to_xyz,\n                                  const float4x4 xyz_to_scene,\n                                  float4 &result)\n{\n  switch (int(type)) {\n    case CMP_NODE_COLOR_BALANCE_LGG:\n      result = lift_gamma_gain(\n          color, base_lift, color_lift, base_gamma, color_gamma, base_gain, color_gain);\n      break;\n    case CMP_NODE_COLOR_BALANCE_ASC_CDL:\n      result = offset_power_slope(\n          color, base_offset, color_offset, base_power, color_power, base_slope, color_slope);\n      break;\n    case CMP_NODE_COLOR_BALANCE_WHITEPOINT:\n      result = white_point_variable(color,\n                                    input_temperature,\n                                    input_tint,\n                                    output_temperature,\n                                    output_tint,\n                                    to_float3x3(scene_to_xyz),\n                                    to_float3x3(xyz_to_scene));\n      break;\n  }\n\n  result = float4(mix(color.xyz(), result.xyz(), min(factor, 1.0f)), color.w);\n}\n\n[[node]]\nvoid node_composite_color_balance_white_point_constant(const float4 color,\n                                                       const float factor,\n                                                       const float type,\n                                                       const float base_lift,\n                                                       const float4 color_lift,\n                                                       const float base_gamma,\n                                                       const float4 color_gamma,\n                                                       const float base_gain,\n                                                       const float4 color_gain,\n                                                       const float base_offset,\n                                                       const float4 color_offset,\n                                                       const float base_power,\n                                                       const float4 color_power,\n                                                       const float base_slope,\n                                                       const float4 color_slope,\n                                                       const float input_temperature,\n                                                       const float input_tint,\n                                                       const float output_temperature,\n                                                       const float output_tint,\n                                                       const float4x4 white_point_matrix,\n                                                       float4 &result)\n{\n  const float3 balanced = to_float3x3(white_point_matrix) * color.xyz();\n  result = float4(mix(color.xyz(), balanced.xyz(), min(factor, 1.0f)), color.w);\n}\n\n#undef CMP_NODE_COLOR_BALANCE_LGG\n#undef CMP_NODE_COLOR_BALANCE_ASC_CDL\n#undef CMP_NODE_COLOR_BALANCE_WHITEPOINT\n",
+ "gpu_shader_compositor_color_correction.glsl": "/* SPDX-FileCopyrightText: 2022 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#include \"gpu_shader_common_color_utils.glsl\"\n#include \"gpu_shader_math_vector_lib.glsl\"\n#include \"gpu_shader_math_vector_safe_lib.glsl\"\n\n[[node]]\nvoid node_composite_color_correction(float4 color,\n                                     float mask,\n                                     float master_saturation,\n                                     float master_contrast,\n                                     float master_gamma,\n                                     float master_gain,\n                                     float master_offset,\n                                     float highlights_saturation,\n                                     float highlights_contrast,\n                                     float highlights_gamma,\n                                     float highlights_gain,\n                                     float highlights_offset,\n                                     float midtones_saturation,\n                                     float midtones_contrast,\n                                     float midtones_gamma,\n                                     float midtones_gain,\n                                     float midtones_offset,\n                                     float shadows_saturation,\n                                     float shadows_contrast,\n                                     float shadows_gamma,\n                                     float shadows_gain,\n                                     float shadows_offset,\n                                     float start_midtones,\n                                     float end_midtones,\n                                     float apply_on_red,\n                                     float apply_on_green,\n                                     float apply_on_blue,\n                                     const float3 luminance_coefficients,\n                                     float4 &result)\n{\n  constexpr float margin = 0.10f;\n  constexpr float margin_divider = 0.5f / margin;\n  float level = (color.r + color.g + color.b) / 3.0f;\n  float level_shadows = 0.0f;\n  float level_midtones = 0.0f;\n  float level_highlights = 0.0f;\n  if (level < (start_midtones - margin)) {\n    level_shadows = 1.0f;\n  }\n  else if (level < (start_midtones + margin)) {\n    level_midtones = ((level - start_midtones) * margin_divider) + 0.5f;\n    level_shadows = 1.0f - level_midtones;\n  }\n  else if (level < (end_midtones - margin)) {\n    level_midtones = 1.0f;\n  }\n  else if (level < (end_midtones + margin)) {\n    level_highlights = ((level - end_midtones) * margin_divider) + 0.5f;\n    level_midtones = 1.0f - level_highlights;\n  }\n  else {\n    level_highlights = 1.0f;\n  }\n\n  float contrast = level_shadows * shadows_contrast;\n  contrast += level_midtones * midtones_contrast;\n  contrast += level_highlights * highlights_contrast;\n  contrast *= master_contrast;\n  float saturation = level_shadows * shadows_saturation;\n  saturation += level_midtones * midtones_saturation;\n  saturation += level_highlights * highlights_saturation;\n  saturation *= master_saturation;\n  float gamma = level_shadows * shadows_gamma;\n  gamma += level_midtones * midtones_gamma;\n  gamma += level_highlights * highlights_gamma;\n  gamma *= master_gamma;\n  float gain = level_shadows * shadows_gain;\n  gain += level_midtones * midtones_gain;\n  gain += level_highlights * highlights_gain;\n  gain *= master_gain;\n  float offset = level_shadows * shadows_offset;\n  offset += level_midtones * midtones_offset;\n  offset += level_highlights * highlights_offset;\n  offset += master_offset;\n\n  float inverse_gamma = 1.0f / gamma;\n  float luma = get_luminance(color.rgb, luminance_coefficients);\n\n  float3 corrected = luma + saturation * (color.rgb - luma);\n  corrected = 0.5f + (corrected - 0.5f) * contrast;\n  corrected = corrected * gain + offset;\n\n  /* Don't allow colors to go negative (or more negative than before) to keep them in gamut. */\n  corrected = max(min(color.xyz(), float3(0.0f)), corrected);\n\n  corrected = fallback_pow(corrected, inverse_gamma, corrected);\n  corrected = mix(color.rgb, corrected, min(mask, 1.0f));\n\n  float3 enabled_channels = float3(apply_on_red, apply_on_green, apply_on_blue);\n  result.rgb = mix(corrected, color.rgb, equal(enabled_channels, float3(0.0f)));\n  result.a = color.a;\n}\n",
+ "gpu_shader_compositor_color_matte.glsl": "/* SPDX-FileCopyrightText: 2022 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#include \"gpu_shader_common_color_utils.glsl\"\n\n[[node]]\nvoid node_composite_color_matte(float4 color,\n                                float4 key,\n                                float hue_threshold,\n                                float saturation_epsilon,\n                                float value_epsilon,\n                                float4 &result,\n                                float &matte)\n\n{\n  float4 color_hsva;\n  rgb_to_hsv(color, color_hsva);\n  float4 key_hsva;\n  rgb_to_hsv(key, key_hsva);\n\n  /* Divide by 2 because the hue wraps around. */\n  float hue_epsilon = hue_threshold / 2.0f;\n\n  bool is_within_saturation = distance(color_hsva.y, key_hsva.y) < saturation_epsilon;\n  bool is_within_value = distance(color_hsva.z, key_hsva.z) < value_epsilon;\n  bool is_within_hue = distance(color_hsva.x, key_hsva.x) < hue_epsilon;\n  /* Hue wraps around, so check the distance around the boundary. */\n  float min_hue = min(color_hsva.x, key_hsva.x);\n  float max_hue = max(color_hsva.x, key_hsva.x);\n  is_within_hue = is_within_hue || ((min_hue + (1.0f - max_hue)) < hue_epsilon);\n\n  matte = (is_within_hue && is_within_saturation && is_within_value) ? 0.0f : color.a;\n  result = color * matte;\n}\n",
+ "gpu_shader_compositor_color_spill.glsl": "/* SPDX-FileCopyrightText: 2022 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#define CMP_NODE_COLOR_SPILL_LIMIT_ALGORITHM_SINGLE 0\n#define CMP_NODE_COLOR_SPILL_LIMIT_ALGORITHM_AVERAGE 1\n\n/* Compute the indices of the channels used to compute the limit value. We always assume the limit\n * algorithm is Average, if it is a single limit channel, store it in both limit channels, because\n * the average of two identical values is the same value. */\nint2 compute_spill_limit_channels(const int limit_method,\n                                  const int spill_channel,\n                                  const int limit_channel)\n{\n  /* If the algorithm is Average, store the indices of the other two channels other than the spill\n   * channel. */\n  if (limit_method == CMP_NODE_COLOR_SPILL_LIMIT_ALGORITHM_AVERAGE) {\n    return int2((spill_channel + 1) % 3, (spill_channel + 2) % 3);\n  }\n\n  /* If the algorithm is Single, store the index of the limit channel in both channels. */\n  return int2(limit_channel);\n}\n\nfloat3 compute_spill_scale(const bool use_spill_strength,\n                           const float4 spill_strength,\n                           const int spill_channel)\n{\n  if (use_spill_strength) {\n    float3 scale = spill_strength.xyz();\n    scale[spill_channel] *= -1.0f;\n    return scale;\n  }\n\n  float3 scale = float3(0.0f);\n  scale[spill_channel] = -1.0f;\n  return scale;\n}\n\n[[node]]\nvoid node_composite_color_spill(float4 color,\n                                float factor,\n                                float spill_channel,\n                                float limit_method,\n                                float limit_channel,\n                                float limit_strength,\n                                float use_spill_strength,\n                                float4 spill_strength,\n                                float4 &result)\n{\n  const int2 limit_channels = compute_spill_limit_channels(\n      int(limit_method), int(spill_channel), int(limit_channel));\n  const float average_limit = (color[limit_channels.x] + color[limit_channels.y]) / 2.0f;\n  const float map = factor * color[int(spill_channel)] - limit_strength * average_limit;\n  const float3 spill_scale = compute_spill_scale(\n      use_spill_strength != 0.0f, spill_strength, int(spill_channel));\n  result = float4(map > 0.0f ? color.rgb + spill_scale * map : color.rgb, color.a);\n}\n\n#undef CMP_NODE_COLOR_SPILL_LIMIT_ALGORITHM_SINGLE\n#undef CMP_NODE_COLOR_SPILL_LIMIT_ALGORITHM_AVERAGE\n",
+ "gpu_shader_compositor_color_to_luminance.glsl": "/* SPDX-FileCopyrightText: 2022 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#include \"gpu_shader_common_color_utils.glsl\"\n\n[[node]]\nvoid color_to_luminance(float4 color, float3 luminance_coefficients, float &result)\n{\n  result = get_luminance(color.rgb, luminance_coefficients);\n}\n",
+ "gpu_shader_compositor_convert_alpha.glsl": "/* SPDX-FileCopyrightText: 2025 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#define CMP_NODE_ALPHA_CONVERT_PREMULTIPLY 0\n#define CMP_NODE_ALPHA_CONVERT_UNPREMULTIPLY 1\n\n[[node]]\nvoid node_composite_convert_alpha(const float4 color, const float type, float4 &result)\n{\n  result = color;\n  switch (int(type)) {\n    case CMP_NODE_ALPHA_CONVERT_PREMULTIPLY:\n      result = float4(color.xyz() * color.w, color.w);\n      break;\n    case CMP_NODE_ALPHA_CONVERT_UNPREMULTIPLY:\n      result = color.w == 0.0f ? color : float4(color.xyz() / color.w, color.w);\n      break;\n  }\n}\n\n#undef CMP_NODE_ALPHA_CONVERT_PREMULTIPLY\n#undef CMP_NODE_ALPHA_CONVERT_UNPREMULTIPLY\n",
+ "gpu_shader_compositor_difference_matte.glsl": "/* SPDX-FileCopyrightText: 2022 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#include \"gpu_shader_math_base_lib.glsl\"\n#include \"gpu_shader_math_safe_lib.glsl\"\n\n[[node]]\nvoid node_composite_difference_matte(\n    float4 color, float4 key, float tolerance, float falloff, float4 &result, float &matte)\n{\n  float difference = dot(abs(color - key).rgb, float3(1.0f)) / 3.0f;\n\n  bool is_opaque = difference > tolerance + falloff;\n  float alpha = is_opaque ? color.a : safe_divide(max(0.0f, difference - tolerance), falloff);\n\n  matte = min(alpha, color.a);\n  result = color * matte;\n}\n",
+ "gpu_shader_compositor_distance_matte.glsl": "/* SPDX-FileCopyrightText: 2022 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#include \"gpu_shader_common_color_utils.glsl\"\n#include \"gpu_shader_math_safe_lib.glsl\"\n\n#define CMP_NODE_DISTANCE_MATTE_COLOR_SPACE_RGBA 0\n#define CMP_NODE_DISTANCE_MATTE_COLOR_SPACE_YCCA 1\n\n[[node]]\nvoid node_composite_distance_matte(const float4 color,\n                                   const float4 key,\n                                   const float color_space,\n                                   const float tolerance,\n                                   const float falloff,\n                                   float4 &result,\n                                   float &matte)\n{\n  float4 color_vector = color;\n  float4 key_vector = key;\n  switch (int(color_space)) {\n    case CMP_NODE_DISTANCE_MATTE_COLOR_SPACE_RGBA:\n      color_vector = color;\n      key_vector = key;\n      break;\n    case CMP_NODE_DISTANCE_MATTE_COLOR_SPACE_YCCA:\n      rgba_to_ycca_itu_709(color, color_vector);\n      rgba_to_ycca_itu_709(key, key_vector);\n      break;\n  }\n\n  float difference = distance(color_vector.xyz(), key_vector.xyz());\n  bool is_opaque = difference > tolerance + falloff;\n  float alpha = is_opaque ? color.w : safe_divide(max(0.0f, difference - tolerance), falloff);\n  matte = min(alpha, color.w);\n  result = color * matte;\n}\n\n#undef CMP_NODE_DISTANCE_MATTE_COLOR_SPACE_RGBA\n#undef CMP_NODE_DISTANCE_MATTE_COLOR_SPACE_YCCA\n",
+ "gpu_shader_compositor_eval.glsl": "/* SPDX-FileCopyrightText: 2025 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#pragma once\n/* This file must replaced at runtime. The following content is only a possible implementation. */\n#pragma runtime_generated\n\n#include \"infos/compositor_node_tree_infos.hh\"\n\nCOMPUTE_SHADER_CREATE_INFO(compositor_nodetree)\n\n/* Function generated from #ShaderOperation::generate_code. */\nvoid evaluate() {}\n",
+ "gpu_shader_compositor_exposure.glsl": "/* SPDX-FileCopyrightText: 2022 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n[[node]]\nvoid node_composite_exposure(float4 color, float exposure, float4 &result)\n{\n  float multiplier = exp2(exposure);\n  result = float4(color.rgb * multiplier, color.a);\n}\n",
+ "gpu_shader_compositor_hue_correct.glsl": "/* SPDX-FileCopyrightText: 2022-2023 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#include \"gpu_shader_common_color_utils.glsl\"\n\n/* Curve maps are stored in texture samplers, so ensure that the parameters evaluate the sampler at\n * the center of the pixels, because samplers are evaluated using linear interpolation. Given the\n * parameter in the [0, 1] range. */\nfloat3 compute_hue_curve_map_coordinates(float3 parameters)\n{\n  constexpr float sampler_resolution = 257.0f;\n  float sampler_offset = 0.5f / sampler_resolution;\n  float sampler_scale = 1.0f - (1.0f / sampler_resolution);\n  return parameters * sampler_scale + sampler_offset;\n}\n\n[[node]]\nvoid node_composite_hue_correct(float4 color,\n                                float factor,\n                                sampler1DArray curve_map,\n                                const float layer,\n                                float3 minimums,\n                                float3 range_dividers,\n                                float4 &result)\n{\n  float4 hsv;\n  rgb_to_hsv(color, hsv);\n\n  /* First, normalize the hue value into the [0, 1] range for each of the curve maps and compute\n   * the proper sampler coordinates for interpolation, then adjust each of the Hue, Saturation, and\n   * Values accordingly to the following rules. A curve map value of 0.5 means no change in hue,\n   * so adjust the value to get an identity at 0.5. Since the identity of addition is 0, we\n   * subtract 0.5 (0.5 - 0.5 = 0). A curve map value of 0.5 means no change in saturation or\n   * value, so adjust the value to get an identity at 0.5. Since the identity of multiplication is\n   * 1, we multiply by 2 (0.5 * 2 = 1). */\n  float3 parameters = (hsv.xxx - minimums) * range_dividers;\n  float3 coordinates = compute_hue_curve_map_coordinates(parameters);\n  hsv.x += texture(curve_map, float2(coordinates.x, layer)).x - 0.5f;\n  hsv.y *= texture(curve_map, float2(coordinates.y, layer)).y * 2.0f;\n  hsv.z *= texture(curve_map, float2(coordinates.z, layer)).z * 2.0f;\n\n  /* Sanitize the new hue and saturation values. */\n  hsv.x = fract(hsv.x);\n  hsv.y = clamp(hsv.y, 0.0f, 1.0f);\n\n  hsv_to_rgb(hsv, result);\n  result.rgb = max(result.rgb, float3(0.0f));\n\n  result = mix(color, result, factor);\n}\n",
+ "gpu_shader_compositor_hue_saturation_value.glsl": "/* SPDX-FileCopyrightText: 2022-2023 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#include \"gpu_shader_common_color_utils.glsl\"\n\n[[node]]\nvoid node_composite_hue_saturation_value(\n    float4 color, float hue, float saturation, float value, float factor, float4 &result)\n{\n  float4 hsv;\n  rgb_to_hsv(color, hsv);\n\n  hsv.x = fract(hsv.x + hue + 0.5f);\n  hsv.y = hsv.y * saturation;\n  hsv.z = hsv.z * value;\n\n  hsv_to_rgb(hsv, result);\n  result.rgb = max(result.rgb, float3(0.0f));\n\n  result = mix(color, result, factor);\n}\n",
+ "gpu_shader_compositor_image_diagonals.glsl": "/* SPDX-FileCopyrightText: 2022 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n/* Computes the number of diagonals in the matrix of the given size, where the diagonals are\n * indexed from the upper left corner to the lower right corner such that their start is at the\n * left and bottom edges of the matrix as shown in the diagram below. The numbers in the diagram\n * denote the index of the diagonal. The number of diagonals is then intuitively the number of\n * values on the left and bottom edges, which is equal to:\n *\n *   Number Of Diagonals => width + height - 1\n *\n * Notice that the minus one is due to the shared value in the corner.\n *\n *         Width = 6\n * +---+---+---+---+---+---+\n * | 0 | 1 | 2 | 3 | 4 | 5 |\n * +---+---+---+---+---+---+\n * | 1 | 2 | 3 | 4 | 5 | 6 |  Height = 3\n * +---+---+---+---+---+---+\n * | 2 | 3 | 4 | 5 | 6 | 7 |\n * +---+---+---+---+---+---+\n */\nint compute_number_of_diagonals(int2 size)\n{\n  return size.x + size.y - 1;\n}\n\n/* Computes the number of values in the diagonal of the given index in the matrix with the given\n * size, where the diagonals are indexed from the upper left corner to the lower right corner such\n * that their start is at the left and bottom edges of the matrix as shown in the diagram below.\n * The numbers in the diagram denote the index of the diagonal and its length.\n *\n *             Width = 6\n *     +---+---+---+---+---+---+\n *  1  | 0 | 1 | 2 | 3 | 4 | 5 |\n *     +---+---+---+---+---+---+\n *  2  | 1 | 2 | 3 | 4 | 5 | 6 |  Height = 3\n *     +---+---+---+---+---+---+\n *     | 2 | 3 | 4 | 5 | 6 | 7 |\n *     +---+---+---+---+---+---+\n *  3        3   3   3   2   1\n *\n * To derive the length of the diagonal from the index, we note that the lengths of the diagonals\n * start at 1 and linearly increase up to the length of the longest diagonal, then remain constant\n * until it linearly decrease to 1 at the end. The length of the longest diagonal is intuitively\n * the smaller of the width and height of the matrix. The linearly increasing and constant parts of\n * the sequence can be described using the following compact equation:\n *\n *   Length => min(Longest Length, index + 1)\n *\n * While the constant and deceasing end parts of the sequence can be described using the following\n * compact equation:\n *\n *   Length => min(Longest Length, Number Of Diagonals - index)\n *\n * All three parts of the sequence can then be combined using the minimum operation because they\n * all share the same maximum value, that is, the longest length:\n *\n *   Length => min(Longest Length, index + 1, Number Of Diagonals - index)\n */\nint compute_diagonal_length(int2 size, int diagonal_index)\n{\n  int length_of_longest_diagonal = min(size.x, size.y);\n  int start_sequence = diagonal_index + 1;\n  int end_sequence = compute_number_of_diagonals(size) - diagonal_index;\n  return min(length_of_longest_diagonal, min(start_sequence, end_sequence));\n}\n\n/* Computes the position of the start of the diagonal of the given index in the matrix with the\n * given size, where the diagonals are indexed from the upper left corner to the lower right corner\n * such that their start is at the left and bottom edges of the matrix as shown in the diagram\n * below. The numbers in the diagram denote the index of the diagonal and the position of its\n * start.\n *\n *                      Width = 6\n *         +-----+-----+-----+-----+-----+-----+\n *  (0, 2) |  0  |  1  |  2  |  3  |  4  |  5  |\n *         +-----+-----+-----+-----+-----+-----+\n *  (0, 1) |  1  |  2  |  3  |  4  |  5  |  6  |  Height = 3\n *         +-----+-----+-----+-----+-----+-----+\n *         |  2  |  3  |  4  |  5  |  6  |  7  |\n *         +-----+-----+-----+-----+-----+-----+\n *  (0, 0)        (1,0) (2,0) (3,0) (4,0) (5,0)\n *\n * To derive the start position from the index, we consider each axis separately. For the X\n * position, indices up to (height - 1) have zero x positions, while other indices linearly\n * increase from (height) to the end. Which can be described using the compact equation:\n *\n *   X => max(0, index - (height - 1))\n *\n * For the Y position, indices up to (height - 1) linearly decrease from (height - 1) to zero,\n * while other indices are zero. Which can be described using the compact equation:\n *\n *   Y => max(0, (height - 1) - index)\n */\nint2 compute_diagonal_start(int2 size, int index)\n{\n  return int2(max(0, index - (size.y - 1)), max(0, (size.y - 1) - index));\n}\n\n/* Computes a direction vector such that when added to the position of a value in a matrix will\n * yield the position of the next value in the same diagonal. According to the choice of the start\n * of the diagonal in compute_diagonal_start, this is (1, 1). */\nint2 get_diagonal_direction()\n{\n  return int2(1);\n}\n\n/* Computes the number of values in the anti diagonal of the given index in the matrix with the\n * given size, where the anti diagonals are indexed from the lower left corner to the upper right\n * corner such that their start is at the bottom and right edges of the matrix as shown in the\n * diagram below. The numbers in the diagram denote the index of the anti diagonal and its length.\n *\n *                     Width = 6\n *             +---+---+---+---+---+---+\n *             | 2 | 3 | 4 | 5 | 6 | 7 |  1\n *             +---+---+---+---+---+---+\n *  Height = 3 | 1 | 2 | 3 | 4 | 5 | 6 |  2\n *             +---+---+---+---+---+---+\n *             | 0 | 1 | 2 | 3 | 4 | 5 |\n *             +---+---+---+---+---+---+\n *               1   2   3   3   3        3\n *\n * The length of the anti diagonal is identical to the length of the diagonal of the same index, as\n * can be seen by comparing the above diagram with the one in the compute_diagonal_length function,\n * since the anti diagonals are merely flipped diagonals. */\nint compute_anti_diagonal_length(int2 size, int diagonal_index)\n{\n  return compute_diagonal_length(size, diagonal_index);\n}\n\n/* Computes the position of the start of the anti diagonal of the given index in the matrix with\n * the given size, where the anti diagonals are indexed from the lower left corner to the upper\n * right corner such that their start is at the bottom and right edges of the matrix as shown in\n * the diagram below. The numbers in the diagram denote the index of the anti diagonal and the\n * position of its start.\n *\n *                           Width = 6\n *              +-----+-----+-----+-----+-----+-----+\n *              |  2  |  3  |  4  |  5  |  6  |  7  |  (5,2)\n *              +-----+-----+-----+-----+-----+-----+\n *  Height = 3  |  1  |  2  |  3  |  4  |  5  |  6  |  (5,1)\n *              +-----+-----+-----+-----+-----+-----+\n *              |  0  |  1  |  2  |  3  |  4  |  5  |\n *              +-----+-----+-----+-----+-----+-----+\n *               (0,0) (1,0) (2,0) (3,0) (4,0)         (5,0)\n *\n * To derive the start position from the index, we consider each axis separately. For the X\n * position, indices up to (width - 1) linearly increase from zero, while other indices are all\n * (width - 1). Which can be described using the compact equation:\n *\n *   X => min((width - 1), index)\n *\n * For the Y position, indices up to (width - 1) are zero, while other indices linearly increase\n * from zero to (height - 1). Which can be described using the compact equation:\n *\n *   Y => max(0, index - (width - 1))\n */\nint2 compute_anti_diagonal_start(int2 size, int index)\n{\n  return int2(min(size.x - 1, index), max(0, index - (size.x - 1)));\n}\n\n/* Computes a direction vector such that when added to the position of a value in a matrix will\n * yield the position of the next value in the same anti diagonal. According to the choice of the\n * start of the anti diagonal in compute_anti_diagonal_start, this is (-1, 1). */\nint2 get_anti_diagonal_direction()\n{\n  return int2(-1, 1);\n}\n",
+ "gpu_shader_compositor_invert.glsl": "/* SPDX-FileCopyrightText: 2022 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#include \"gpu_shader_common_color_utils.glsl\"\n\n[[node]]\nvoid node_composite_invert(\n    float4 color, float factor, float invert_color, float invert_alpha, float4 &result)\n{\n  result = color;\n  if (invert_color != 0.0f) {\n    result.rgb = 1.0f - result.rgb;\n  }\n  if (invert_alpha != 0.0f) {\n    result.a = 1.0f - result.a;\n  }\n  result = mix(color, result, factor);\n}\n",
+ "gpu_shader_compositor_jump_flooding_lib.glsl": "/* SPDX-FileCopyrightText: 2023 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#pragma once\n\n/* A special value that indicates that the pixel has not be flooded yet, and consequently is not a\n * seed pixel. */\n#define JUMP_FLOODING_NON_FLOODED_VALUE int2(-1)\n\n/* Given the texel location of the closest seed pixel and whether the pixel is flooded, encode that\n * information in an ivec2. */\nint2 encode_jump_flooding_value(int2 closest_seed_texel, bool is_flooded)\n{\n  return is_flooded ? closest_seed_texel : JUMP_FLOODING_NON_FLOODED_VALUE;\n}\n\n/* Initialize the pixel at the given texel location for the algorithm as being seed or background.\n * This essentially calls encode_jump_flooding_value with the texel location, because the pixel is\n * the closest seed to itself. */\nint2 initialize_jump_flooding_value(int2 texel, bool is_seed)\n{\n  return encode_jump_flooding_value(texel, is_seed);\n}\n",
+ "gpu_shader_compositor_luminance_matte.glsl": "/* SPDX-FileCopyrightText: 2022-2023 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#include \"gpu_shader_common_color_utils.glsl\"\n\n[[node]]\nvoid node_composite_luminance_matte(float4 color,\n                                    float minimum,\n                                    float maximum,\n                                    const float3 luminance_coefficients,\n                                    float4 &result,\n                                    float &matte)\n{\n  float luminance = get_luminance(color.rgb, luminance_coefficients);\n  float alpha = clamp((luminance - minimum) / (maximum - minimum), 0.0f, 1.0f);\n  matte = min(alpha, color.a);\n  result = color * matte;\n}\n",
+ "gpu_shader_compositor_main.glsl": "/* SPDX-FileCopyrightText: 2022 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#include \"gpu_shader_compositor_eval.glsl\"\n\n/* The compute shader that will be dispatched by the compositor ShaderOperation. It just calls the\n * evaluate function that will be dynamically generated and appended to this shader in the\n * ShaderOperation::generate_code method. */\nvoid main()\n{\n  evaluate();\n}\n",
+ "gpu_shader_compositor_map_value.glsl": "/* SPDX-FileCopyrightText: 2022 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n/* An arbitrary value determined by Blender. */\n#define BLENDER_ZMAX 10000.0f\n\n[[node]]\nvoid node_composite_map_range(float value,\n                              float from_min,\n                              float from_max,\n                              float to_min,\n                              float to_max,\n                              const float should_clamp,\n                              float &result)\n{\n  if (abs(from_max - from_min) < 1e-6f) {\n    result = 0.0f;\n  }\n  else {\n    if (value >= -BLENDER_ZMAX && value <= BLENDER_ZMAX) {\n      result = (value - from_min) / (from_max - from_min);\n      result = to_min + result * (to_max - to_min);\n    }\n    else if (value > BLENDER_ZMAX) {\n      result = to_max;\n    }\n    else {\n      result = to_min;\n    }\n\n    if (should_clamp != 0.0f) {\n      if (to_max > to_min) {\n        result = clamp(result, to_min, to_max);\n      }\n      else {\n        result = clamp(result, to_max, to_min);\n      }\n    }\n  }\n}\n\n[[node]]\nvoid node_composite_map_value(float value,\n                              float offset,\n                              float size,\n                              const float use_min,\n                              float min,\n                              const float use_max,\n                              float max,\n                              float &result)\n{\n  result = (value + offset) * size;\n\n  if (use_min != 0.0f && result < min) {\n    result = min;\n  }\n\n  if (use_max != 0.0f && result > max) {\n    result = max;\n  }\n}\n",
+ "gpu_shader_compositor_motion_blur_lib.glsl": "/* SPDX-FileCopyrightText: 2024 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#pragma once\n\n/* Identical copy to eevee_motion_blur_lib.glsl, but with the needed macros defined inline. */\n\n#define MOTION_BLUR_TILE_SIZE 32\n#define MOTION_BLUR_MAX_TILE 512 /* 16384 / MOTION_BLUR_TILE_SIZE */\n#define MotionPayload uint\n\n/* Store velocity magnitude in the MSB to be able to use it with atomicMax operations. */\nMotionPayload motion_blur_tile_indirection_pack_payload(float2 motion, uint2 payload)\n{\n  /* NOTE: Clamp to 16383 pixel velocity. After that, it is tile position that determine the tile\n   * to dilate over. */\n  uint velocity = min(uint(ceil(length(motion))), 0x3FFFu);\n  /* Designed for 512x512 tiles max. */\n  return (velocity << 18u) | ((payload.x & 0x1FFu) << 9u) | (payload.y & 0x1FFu);\n}\n\n/* Return thread index. */\nint2 motion_blur_tile_indirection_pack_payload(uint data)\n{\n  return int2((data >> 9u) & 0x1FFu, data & 0x1FFu);\n}\n\nuint motion_blur_tile_indirection_index(uint motion_step, uint2 tile)\n{\n  uint index = tile.x;\n  index += tile.y * MOTION_BLUR_MAX_TILE;\n  index += motion_step * MOTION_BLUR_MAX_TILE * MOTION_BLUR_MAX_TILE;\n  return index;\n}\n\n#define MOTION_PREV 0u\n#define MOTION_NEXT 1u\n\n#define motion_blur_tile_indirection_store(table_, step_, tile, payload_) \\\n  if (true) { \\\n    uint index = motion_blur_tile_indirection_index(step_, tile); \\\n    atomicMax(table_[index], payload_); \\\n  }\n\n#define motion_blur_tile_indirection_load(table_, step_, tile_, result_) \\\n  if (true) { \\\n    uint index = motion_blur_tile_indirection_index(step_, tile_); \\\n    result_ = motion_blur_tile_indirection_pack_payload(table_[index]); \\\n  }\n",
+ "gpu_shader_compositor_nodetree_type.glsl": "/* SPDX-FileCopyrightText: 2022 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n/**\n * Each compositor operation can have a different UBO layout for its material data.\n * This layout is runtime generated. This file is just a placeholder for the include system.\n */\n\n#pragma once\n\n/* This file must replaced at runtime. The following content is only a possible implementation. */\n#pragma runtime_generated\n\nstruct [[host_shared]] NodeTree {\n  float _pad0;\n  float _pad1;\n  float _pad2;\n  float _pad4;\n};\n",
+ "gpu_shader_compositor_ocio_processor.glsl": "/* SPDX-FileCopyrightText: 2023 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#include \"infos/compositor_ocio_infos.hh\"\n\n#include \"gpu_shader_compositor_texture_utilities.glsl\"\n\n#include \"gpu_shader_compositor_ocio_processor_lib.glsl\"\n\nCOMPUTE_SHADER_CREATE_INFO(OCIO_Processor)\n\nvoid main()\n{\n  int2 texel = int2(gl_GlobalInvocationID.xy);\n  float4 color = texture_load(input_tx, texel);\n  color = OCIOMain(color);\n  if (premultiply_output) {\n    color.xyz() *= color.w;\n  }\n  imageStore(output_img, texel, color);\n}\n",
+ "gpu_shader_compositor_ocio_processor_lib.glsl": "/* SPDX-FileCopyrightText: 2025 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#pragma once\n\n/* This file must replaced at runtime. The following content is only a possible implementation. */\n#pragma runtime_generated\n\n/* Replaced by the OCIO generated code. */\nfloat4 OCIOMain(float4 inPixel)\n{\n  return inPixel;\n}\n",
+ "gpu_shader_compositor_posterize.glsl": "/* SPDX-FileCopyrightText: 2022 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n[[node]]\nvoid node_composite_posterize(float4 color, float steps, float4 &result)\n{\n  float sanitized_steps = clamp(steps, 2.0f, 1024.0f);\n  result = float4(floor(color.rgb * sanitized_steps) / sanitized_steps, color.a);\n}\n",
+ "gpu_shader_compositor_separate_combine.glsl": "/* SPDX-FileCopyrightText: 2022-2023 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#include \"gpu_shader_common_color_utils.glsl\"\n\n/* ** Combine/Separate XYZ ** */\n\n[[node]]\nvoid node_composite_combine_xyz(float x, float y, float z, float3 &vector)\n{\n  vector = float3(x, y, z);\n}\n\n[[node]]\nvoid node_composite_separate_xyz(float3 vector, float &x, float &y, float &z)\n{\n  x = vector.x;\n  y = vector.y;\n  z = vector.z;\n}\n\n/* ** Combine/Separate RGBA ** */\n\n[[node]]\nvoid node_composite_combine_rgba(float r, float g, float b, float a, float4 &color)\n{\n  color = float4(r, g, b, a);\n}\n\n[[node]]\nvoid node_composite_separate_rgba(float4 color, float &r, float &g, float &b, float &a)\n{\n  r = color.r;\n  g = color.g;\n  b = color.b;\n  a = color.a;\n}\n\n/* ** Combine/Separate HSVA ** */\n\n[[node]]\nvoid node_composite_combine_hsva(float h, float s, float v, float a, float4 &color)\n{\n  hsv_to_rgb(float4(h, s, v, a), color);\n}\n\n[[node]]\nvoid node_composite_separate_hsva(float4 color, float &h, float &s, float &v, float &a)\n{\n  float4 hsva;\n  rgb_to_hsv(color, hsva);\n  h = hsva.x;\n  s = hsva.y;\n  v = hsva.z;\n  a = hsva.a;\n}\n\n/* ** Combine/Separate HSLA ** */\n\n[[node]]\nvoid node_composite_combine_hsla(float h, float s, float l, float a, float4 &color)\n{\n  hsl_to_rgb(float4(h, s, l, a), color);\n  color.rgb = max(color.rgb, float3(0.0f));\n}\n\n[[node]]\nvoid node_composite_separate_hsla(float4 color, float &h, float &s, float &l, float &a)\n{\n  float4 hsla;\n  rgb_to_hsl(color, hsla);\n  h = hsla.x;\n  s = hsla.y;\n  l = hsla.z;\n  a = hsla.a;\n}\n\n/* ** Combine/Separate YCCA ** */\n\n[[node]]\nvoid node_composite_combine_ycca_itu_601(float y, float cb, float cr, float a, float4 &color)\n{\n  ycca_to_rgba_itu_601(float4(y, cb, cr, a), color);\n}\n\n[[node]]\nvoid node_composite_combine_ycca_itu_709(float y, float cb, float cr, float a, float4 &color)\n{\n  ycca_to_rgba_itu_709(float4(y, cb, cr, a), color);\n}\n\n[[node]]\nvoid node_composite_combine_ycca_jpeg(float y, float cb, float cr, float a, float4 &color)\n{\n  ycca_to_rgba_jpeg(float4(y, cb, cr, a), color);\n}\n\n[[node]]\nvoid node_composite_separate_ycca_itu_601(float4 color, float &y, float &cb, float &cr, float &a)\n{\n  float4 ycca;\n  rgba_to_ycca_itu_601(color, ycca);\n  y = ycca.x;\n  cb = ycca.y;\n  cr = ycca.z;\n  a = ycca.a;\n}\n\n[[node]]\nvoid node_composite_separate_ycca_itu_709(float4 color, float &y, float &cb, float &cr, float &a)\n{\n  float4 ycca;\n  rgba_to_ycca_itu_709(color, ycca);\n  y = ycca.x;\n  cb = ycca.y;\n  cr = ycca.z;\n  a = ycca.a;\n}\n\n[[node]]\nvoid node_composite_separate_ycca_jpeg(float4 color, float &y, float &cb, float &cr, float &a)\n{\n  float4 ycca;\n  rgba_to_ycca_jpeg(color, ycca);\n  y = ycca.x;\n  cb = ycca.y;\n  cr = ycca.z;\n  a = ycca.a;\n}\n\n/* ** Combine/Separate YUVA ** */\n\n[[node]]\nvoid node_composite_combine_yuva_itu_709(float y, float u, float v, float a, float4 &color)\n{\n  yuva_to_rgba_itu_709(float4(y, u, v, a), color);\n}\n\n[[node]]\nvoid node_composite_separate_yuva_itu_709(float4 color, float &y, float &u, float &v, float &a)\n{\n  float4 yuva;\n  rgba_to_yuva_itu_709(color, yuva);\n  y = yuva.x;\n  u = yuva.y;\n  v = yuva.z;\n  a = yuva.a;\n}\n",
+ "gpu_shader_compositor_set_alpha.glsl": "/* SPDX-FileCopyrightText: 2022 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#define CMP_NODE_SETALPHA_MODE_APPLY 0\n#define CMP_NODE_SETALPHA_MODE_REPLACE_ALPHA 1\n\n[[node]]\nvoid node_composite_set_alpha(float4 color, float alpha, float type, float4 &result)\n{\n  switch (int(type)) {\n    case CMP_NODE_SETALPHA_MODE_APPLY:\n      result = color * alpha;\n      break;\n    case CMP_NODE_SETALPHA_MODE_REPLACE_ALPHA:\n      result = float4(color.rgb, alpha);\n      break;\n  }\n}\n\n#undef CMP_NODE_SETALPHA_MODE_APPLY\n#undef CMP_NODE_SETALPHA_MODE_REPLACE_ALPHA\n",
+ "gpu_shader_compositor_set_value.glsl": "/* SPDX-FileCopyrightText: 2025 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#include \"gpu_shader_math_matrix_construct_lib.glsl\"\n\n[[node]]\nvoid set_float(float input_value, float &output_value)\n{\n  output_value = input_value;\n}\n\n[[node]]\nvoid set_float2(float2 input_value, float2 &output_value)\n{\n  output_value = input_value;\n}\n\n[[node]]\nvoid set_float3(float3 input_value, float3 &output_value)\n{\n  output_value = input_value;\n}\n\n[[node]]\nvoid set_float4(float4 input_value, float4 &output_value)\n{\n  output_value = input_value;\n}\n\n[[node]]\nvoid set_quaternion(float4 input_value, float4 &output_value)\n{\n  output_value = input_value;\n}\n\n[[node]]\nvoid set_color(float4 input_value, float4 &output_value)\n{\n  output_value = input_value;\n}\n\n[[node]]\nvoid set_float4x4(float4x4 input_value, float4x4 &output_value)\n{\n  output_value = input_value;\n}\n\n[[node]]\nvoid set_float4x4_default(float4x4 &output_value)\n{\n  output_value = mat4x4_identity();\n}\n",
+ "gpu_shader_compositor_store.glsl": "/* SPDX-FileCopyrightText: 2025 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#pragma once\n/* This file must replaced at runtime. The following content is only a possible implementation. */\n#pragma runtime_generated\n\n/* Functions generated from #ShaderOperation::generate_code_for_outputs. */\n/* Commented out because they mess with the library parser. */\n/**\n * void store_float(const uint id, float value) {}\n * void store_float2(const uint id, vec2 value) {}\n * void store_float3(const uint id, vec3 value) {}\n * void store_float4(const uint id, vec4 value) {}\n * void store_color(const uint id, vec4 value) {}\n * void store_int(const uint id, float value) {}\n * void store_int2(const uint id, vec2 value) {}\n * void store_int3(const uint id, vec3 value) {}\n * void store_int4(const uint id, vec4 value) {}\n * void store_bool(const uint id, float value) {}\n * void store_float4x4(const uint id, float4x4 value) {}\n * void store_menu(const uint id, float value) {}\n */\n",
+ "gpu_shader_compositor_store_output.glsl": "/* SPDX-FileCopyrightText: 2022 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n/* The following functions are called to store the given value in the output identified by the\n * given ID. The ID is an unsigned integer that is encoded in a float, so floatBitsToUint is called\n * to get the actual identifier. The functions have an output value as their last argument that is\n * used to establish an output link that is then used to track the nodes that contribute to the\n * output of the compositor node tree.\n *\n * The store_[type] functions are dynamically generated in\n * ShaderOperation::generate_code_for_outputs. */\n\n#include \"gpu_shader_compositor_store.glsl\"\n\n[[node]]\nvoid node_compositor_store_output_float(const float id, float value, float &out_value)\n{\n  store_float(floatBitsToUint(id), value);\n  out_value = value;\n}\n\n[[node]]\nvoid node_compositor_store_output_float2(const float id, float2 value, float2 &out_value)\n{\n  store_float2(floatBitsToUint(id), value);\n  out_value = value;\n}\n\n[[node]]\nvoid node_compositor_store_output_float3(const float id, float3 value, float3 &out_value)\n{\n  store_float3(floatBitsToUint(id), value);\n  out_value = value;\n}\n\n[[node]]\nvoid node_compositor_store_output_float4(const float id, float4 value, float4 &out_value)\n{\n  store_float4(floatBitsToUint(id), value);\n  out_value = value;\n}\n\n[[node]]\nvoid node_compositor_store_output_color(const float id, float4 value, float4 &out_value)\n{\n  store_color(floatBitsToUint(id), value);\n  out_value = value;\n}\n\n/* GPUMaterial doesn't support int, so it is passed as a float. */\n[[node]]\nvoid node_compositor_store_output_int(const float id, float value, float &out_value)\n{\n  store_int(floatBitsToUint(id), value);\n  out_value = value;\n}\n\n/* GPUMaterial doesn't support int2, so it is passed as a float2. */\n[[node]]\nvoid node_compositor_store_output_int2(const float id, float2 value, float2 &out_value)\n{\n  store_int2(floatBitsToUint(id), value);\n  out_value = value;\n}\n\n/* GPUMaterial doesn't support int3, so it is passed as a float3. */\n[[node]]\nvoid node_compositor_store_output_int3(const float id, float3 value, float3 &out_value)\n{\n  store_int3(floatBitsToUint(id), value);\n  out_value = value;\n}\n\n/* GPUMaterial doesn't support int4, so it is passed as a float4. */\n[[node]]\nvoid node_compositor_store_output_int4(const float id, float4 value, float4 &out_value)\n{\n  store_int4(floatBitsToUint(id), value);\n  out_value = value;\n}\n\n/* GPUMaterial doesn't support bool, so it is passed as a float. */\n[[node]]\nvoid node_compositor_store_output_bool(const float id, float value, float &out_value)\n{\n  store_bool(floatBitsToUint(id), value);\n  out_value = value;\n}\n\n[[node]]\nvoid node_compositor_store_output_float4x4(const float id, float4x4 value, float4x4 &out_value)\n{\n  store_float4x4(floatBitsToUint(id), value);\n  out_value = value;\n}\n\n/* GPUMaterial doesn't support int, so it is passed as a float. */\n[[node]]\nvoid node_compositor_store_output_menu(const float id, float value, float &out_value)\n{\n  store_menu(floatBitsToUint(id), value);\n  out_value = value;\n}\n\n[[node]]\nvoid node_compositor_store_output_quaternion(const float id, float4 value, float4 &out_value)\n{\n  store_quaternion(floatBitsToUint(id), value);\n  out_value = value;\n}\n",
+ "gpu_shader_compositor_summed_area_table_lib.glsl": "/* SPDX-FileCopyrightText: 2023 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#pragma once\n\n/* Computes the sum of the rectangular region defined by the given lower and upper bounds from the\n * given summed area table. It is assumed that the given upper bound is larger than the given lower\n * bound, otherwise, undefined behavior is invoked. Looking at the diagram below, in order to\n * compute the sum of area X, we sample the table at each of the corners of the area X, to get:\n *\n *   Upper Right -> A + B + C + X      (1)\n *   Upper Left -> A + B               (2)\n *   Lower Right -> B + C              (3)\n *   Lower Left -> B                   (4)\n *\n * We start from (1) and subtract (2) and (3) to get rid of A and C to get:\n *\n *  (A + B + C + X) - (A + B) - (B + C) = (X - B)\n *\n * To get rid of B, we add (4) to get:\n *\n *  (X - B) + B = X\n *\n *         ^\n *         |\n *         +-------+-----+\n *         |       |     |\n *         |   A   |  X  |\n *         |       |     |\n *         +-------+-----+\n *         |       |     |\n *         |   B   |  C  |\n *         |       |     |\n *         o-------+-----+------>\n *\n * The aforementioned equation eliminates the edges between regions X, C, and A since they get\n * subtracted with C and A. To avoid this, we subtract 1 from the lower bound and fall back to zero\n * for out of bound sampling. */\n\n#include \"gpu_shader_compositor_texture_utilities.glsl\"\n\nfloat4 summed_area_table_sum(sampler2D table, int2 lower_bound, int2 upper_bound)\n{\n  int2 corrected_lower_bound = lower_bound - int2(1);\n  int2 corrected_upper_bound = min(texture_size(table) - int2(1), upper_bound);\n  float4 addend = texture_load(table, corrected_upper_bound, float4(0.0f)) +\n                  texture_load(table, corrected_lower_bound, float4(0.0f));\n  float4 subtrahend =\n      texture_load(table, int2(corrected_lower_bound.x, corrected_upper_bound.y), float4(0.0f)) +\n      texture_load(table, int2(corrected_upper_bound.x, corrected_lower_bound.y), float4(0.0f));\n  return addend - subtrahend;\n}\n",
+ "gpu_shader_compositor_texture_utilities.glsl": "/* SPDX-FileCopyrightText: 2022 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#pragma once\n#include \"gpu_shader_compat.hh\"\n\n/* A shorthand for 1D textureSize with a zero LOD. */\nint texture_size(sampler1D sampler_1d)\n{\n  return textureSize(sampler_1d, 0);\n}\n\n/* A shorthand for 1D texelFetch with zero LOD and bounded access clamped to border. */\nfloat4 texture_load(sampler1D sampler_1d, int x)\n{\n  const int texture_bound = texture_size(sampler_1d) - 1;\n  return texelFetch(sampler_1d, clamp(x, 0, texture_bound), 0);\n}\n\n/* A shorthand for 2D textureSize with a zero LOD. */\nint2 texture_size(sampler2D sampler_2d)\n{\n  return textureSize(sampler_2d, 0);\n}\n\n/* A shorthand for 2D Array textureSize with a zero LOD. */\nint2 texture_size(sampler2DArray sampler_2d_array)\n{\n  return textureSize(sampler_2d_array, 0).xy;\n}\n\n/* A shorthand for 2D texelFetch with zero LOD and bounded access clamped to border. */\nfloat4 texture_load(sampler2D sampler_2d, int2 texel)\n{\n  const int2 texture_bounds = texture_size(sampler_2d) - int2(1);\n  return texelFetch(sampler_2d, clamp(texel, int2(0), texture_bounds), 0);\n}\n\n/* Loads a float4x4 from a 2D array texture of 4 layers, each layer stores a column of the matrix.\n * The pixel is loaded with bounded access clamped to border. */\nfloat4x4 texture_load_float4x4(sampler2DArray sampler_2d_array, int2 texel)\n{\n  const int2 texture_bounds = texture_size(sampler_2d_array) - int2(1);\n  const int2 clamped_texel = clamp(texel, int2(0), texture_bounds);\n  return float4x4(texelFetch(sampler_2d_array, int3(clamped_texel, 0), 0),\n                  texelFetch(sampler_2d_array, int3(clamped_texel, 1), 0),\n                  texelFetch(sampler_2d_array, int3(clamped_texel, 2), 0),\n                  texelFetch(sampler_2d_array, int3(clamped_texel, 3), 0));\n}\n\n/* A shorthand for 2D texelFetch with zero LOD. */\nfloat4 texture_load_unbound(sampler2D sampler_2d, int2 texel)\n{\n  return texelFetch(sampler_2d, texel, 0);\n}\n\n/* A shorthand for 2D texelFetch with zero LOD and a fallback value for out-of-bound access. */\nfloat4 texture_load(sampler2D sampler_2d, int2 texel, float4 fallback)\n{\n  const int2 texture_bounds = texture_size(sampler_2d) - int2(1);\n  if (any(lessThan(texel, int2(0))) || any(greaterThan(texel, texture_bounds))) {\n    return fallback;\n  }\n  return texelFetch(sampler_2d, texel, 0);\n}\n\n/* A shorthand for 2D textureSize with a zero LOD. */\nint2 texture_size(isampler2D sampler_2d)\n{\n  return textureSize(sampler_2d, 0);\n}\n\n/* A shorthand for 2D texelFetch with zero LOD and bounded access clamped to border. */\nint4 texture_load(isampler2D sampler_2d, int2 texel)\n{\n  const int2 texture_bounds = texture_size(sampler_2d) - int2(1);\n  return texelFetch(sampler_2d, clamp(texel, int2(0), texture_bounds), 0);\n}\n\n/* A shorthand for 2D texelFetch with zero LOD and a fallback value for out-of-bound access. */\nint4 texture_load(isampler2D sampler_2d, int2 texel, int4 fallback)\n{\n  const int2 texture_bounds = texture_size(sampler_2d) - int2(1);\n  if (any(lessThan(texel, int2(0))) || any(greaterThan(texel, texture_bounds))) {\n    return fallback;\n  }\n  return texelFetch(sampler_2d, texel, 0);\n}\n",
+ "gpu_shader_compositor_type_conversion.glsl": "/* SPDX-FileCopyrightText: 2022 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#include \"gpu_shader_math_matrix_construct_lib.glsl\"\n#include \"gpu_shader_math_rotation_conversion_lib.glsl\"\n\n/* --------------------------------------------------------------------\n * Float to other.\n */\n\nint float_to_int(float value)\n{\n  return int(value);\n}\n\nint2 float_to_int2(float value)\n{\n  return int2(float_to_int(value));\n}\n\nint3 float_to_int3(float value)\n{\n  return int3(float_to_int(value));\n}\n\nfloat2 float_to_float2(float value)\n{\n  return float2(value);\n}\n\nfloat3 float_to_float3(float value)\n{\n  return float3(value);\n}\n\nfloat4 float_to_color(float value)\n{\n  return float4(float3(value), 1.0f);\n}\n\nfloat4 float_to_float4(float value)\n{\n  return float4(value);\n}\n\nbool float_to_bool(float value)\n{\n  return value > 0.0f;\n}\n\nfloat4 float_to_quaternion(float value)\n{\n  return to_quaternion(EulerXYZ::from_float3(float3(value))).as_float4();\n}\n\n/* --------------------------------------------------------------------\n * Int to other.\n */\n\nfloat int_to_float(int value)\n{\n  return float(value);\n}\n\nint2 int_to_int2(int value)\n{\n  return int2(value);\n}\n\nint3 int_to_int3(int value)\n{\n  return int3(value);\n}\n\nfloat2 int_to_float2(int value)\n{\n  return float_to_float2(int_to_float(value));\n}\n\nfloat3 int_to_float3(int value)\n{\n  return float_to_float3(int_to_float(value));\n}\n\nfloat4 int_to_color(int value)\n{\n  return float_to_color(int_to_float(value));\n}\n\nfloat4 int_to_float4(int value)\n{\n  return float_to_float4(int_to_float(value));\n}\n\nbool int_to_bool(int value)\n{\n  return value > 0;\n}\n\n/* --------------------------------------------------------------------\n * Float2 to other.\n */\n\nfloat float2_to_float(float2 value)\n{\n  return dot(value, float2(1.0f)) / 2.0f;\n}\n\nint float2_to_int(float2 value)\n{\n  return float_to_int(float2_to_float(value));\n}\n\nint2 float2_to_int2(float2 value)\n{\n  return int2(value);\n}\n\nint3 float2_to_int3(float2 value)\n{\n  return int3(int2(value), 0);\n}\n\nfloat3 float2_to_float3(float2 value)\n{\n  return float3(value, 0.0f);\n}\n\nfloat4 float2_to_color(float2 value)\n{\n  return float4(value, 0.0f, 1.0f);\n}\n\nfloat4 float2_to_float4(float2 value)\n{\n  return float4(value, 0.0f, 0.0f);\n}\n\nbool float2_to_bool(float2 value)\n{\n  return !all(equal(value, float2(0.0f)));\n}\n\nfloat4 float2_to_quaternion(float2 value)\n{\n  return to_quaternion(EulerXYZ::from_float3(float3(value, 0.0f))).as_float4();\n}\n\n/* --------------------------------------------------------------------\n * Float3 to other.\n */\n\nfloat float3_to_float(float3 value)\n{\n  return dot(value, float3(1.0f)) / 3.0f;\n}\n\nint float3_to_int(float3 value)\n{\n  return float_to_int(float3_to_float(value));\n}\n\nint2 float3_to_int2(float3 value)\n{\n  return float_to_int2(float3_to_float(value));\n}\n\nint3 float3_to_int3(float3 value)\n{\n  return int3(value);\n}\n\nfloat2 float3_to_float2(float3 value)\n{\n  return value.xy;\n}\n\nfloat4 float3_to_color(float3 value)\n{\n  return float4(value, 1.0f);\n}\n\nfloat4 float3_to_float4(float3 value)\n{\n  return float4(value, 0.0f);\n}\n\nbool float3_to_bool(float3 value)\n{\n  return !all(equal(value, float3(0.0f)));\n}\n\nfloat4 float3_to_quaternion(float3 value)\n{\n  return to_quaternion(EulerXYZ::from_float3(value)).as_float4();\n}\n\n/* --------------------------------------------------------------------\n * Color to other.\n */\n\nfloat color_to_float(float4 value, float3 luminance_coefficients)\n{\n  return dot(value.rgb, luminance_coefficients);\n}\n\nint color_to_int(float4 value, float3 luminance_coefficients)\n{\n  return float_to_int(color_to_float(value, luminance_coefficients));\n}\n\nint2 color_to_int2(float4 value)\n{\n  return int2(value.rg);\n}\n\nint3 color_to_int3(float4 value)\n{\n  return int3(value.rgb);\n}\n\nfloat2 color_to_float2(float4 value)\n{\n  return value.rg;\n}\n\nfloat3 color_to_float3(float4 value)\n{\n  return value.rgb;\n}\n\nfloat4 color_to_float4(float4 value)\n{\n  return value;\n}\n\nbool color_to_bool(float4 value, float3 luminance_coefficients)\n{\n  return color_to_float(value, luminance_coefficients) > 0.0f;\n}\n\n/* --------------------------------------------------------------------\n * Float4 to other.\n */\n\nfloat float4_to_float(float4 value)\n{\n  return dot(value, float4(1.0f)) / 4.0f;\n}\n\nint float4_to_int(float4 value)\n{\n  return float_to_int(float4_to_float(value));\n}\n\nint2 float4_to_int2(float4 value)\n{\n  return int2(value.xy);\n}\n\nint3 float4_to_int3(float4 value)\n{\n  return int3(value.xyz);\n}\n\nfloat2 float4_to_float2(float4 value)\n{\n  return value.xy;\n}\n\nfloat3 float4_to_float3(float4 value)\n{\n  return value.xyz;\n}\n\nfloat4 float4_to_color(float4 value)\n{\n  return value;\n}\n\nbool float4_to_bool(float4 value)\n{\n  return !all(equal(value, float4(0.0f)));\n}\n\nfloat4 float4_to_quaternion(float4 value)\n{\n  return value;\n}\n\n/* --------------------------------------------------------------------\n * Int2 to other.\n */\n\nfloat int2_to_float(int2 value)\n{\n  return float2_to_float(float2(value));\n}\n\nint int2_to_int(int2 value)\n{\n  return int(int2_to_float(value));\n}\n\nint3 int2_to_int3(int2 value)\n{\n  return int3(value, 0);\n}\n\nfloat2 int2_to_float2(int2 value)\n{\n  return float2(value);\n}\n\nfloat3 int2_to_float3(int2 value)\n{\n  return float3(float2(value), 0.0f);\n}\n\nfloat4 int2_to_color(int2 value)\n{\n  return float4(float2(value), 0.0f, 1.0f);\n}\n\nfloat4 int2_to_float4(int2 value)\n{\n  return float4(float2(value), 0.0f, 0.0f);\n}\n\nbool int2_to_bool(int2 value)\n{\n  return !all(equal(value, int2(0)));\n}\n\n/* --------------------------------------------------------------------\n * Int3 to other.\n */\n\nfloat int3_to_float(int3 value)\n{\n  return float3_to_float(float3(value));\n}\n\nint int3_to_int(int3 value)\n{\n  return int(int3_to_float(value));\n}\n\nint2 int3_to_int2(int3 value)\n{\n  return value.xy;\n}\n\nfloat2 int3_to_float2(int3 value)\n{\n  return float2(value.xy);\n}\n\nfloat3 int3_to_float3(int3 value)\n{\n  return float3(value);\n}\n\nfloat4 int3_to_color(int3 value)\n{\n  return float4(float3(value), 1.0f);\n}\n\nfloat4 int3_to_float4(int3 value)\n{\n  return float4(float3(value), 0.0f);\n}\n\nbool int3_to_bool(int3 value)\n{\n  return !all(equal(value, int3(0)));\n}\n\n/* --------------------------------------------------------------------\n * Bool to other.\n */\n\nfloat bool_to_float(bool value)\n{\n  return float(value);\n}\n\nint bool_to_int(bool value)\n{\n  return int(value);\n}\n\nfloat2 bool_to_float2(bool value)\n{\n  return float2(value);\n}\n\nfloat3 bool_to_float3(bool value)\n{\n  return float3(value);\n}\n\nfloat4 bool_to_color(bool value)\n{\n  return float4(value);\n}\n\nfloat4 bool_to_float4(bool value)\n{\n  return float4(value);\n}\n\nint2 bool_to_int2(bool value)\n{\n  return int2(value);\n}\n\nint3 bool_to_int3(bool value)\n{\n  return int3(value);\n}\n\n/* --------------------------------------------------------------------\n * Float4x4 to other.\n */\n\nfloat4 float4x4_to_quaternion(float4x4 mat)\n{\n  float3x3 mat_3x3 = normalize(to_float3x3(mat));\n  return to_quaternion(to_euler(mat_3x3)).as_float4();\n}\n\n/* --------------------------------------------------------------------\n * Quaternion to other.\n */\n\nfloat2 quaternion_to_float2(float4 value)\n{\n  Quaternion quat = Quaternion{UNPACK4(value)};\n  return to_euler(from_rotation(quat)).as_float3().xy();\n}\n\nfloat3 quaternion_to_float3(float4 value)\n{\n  Quaternion quat = Quaternion{UNPACK4(value)};\n  return to_euler(from_rotation(quat)).as_float3();\n}\n\nfloat4 quaternion_to_float4(float4 value)\n{\n  return value;\n}\n\nfloat4x4 quaternion_to_float4x4(float4 value)\n{\n  Quaternion quat = Quaternion{UNPACK4(value)};\n  float3x3 mat_3x3 = from_rotation(quat);\n  return float4x4(float4(mat_3x3[0], 0.0f),\n                  float4(mat_3x3[1], 0.0f),\n                  float4(mat_3x3[2], 0.0f),\n                  float4(0.0f, 0.0f, 0.0f, 1.0f));\n}\n",
+ "gpu_shader_function_combine_matrix.glsl": "/* SPDX-FileCopyrightText: 2026 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n[[node]]\nvoid node_function_combine_matrix(const float column1_row1,\n                                  const float column1_row2,\n                                  const float column1_row3,\n                                  const float column1_row4,\n                                  const float column2_row1,\n                                  const float column2_row2,\n                                  const float column2_row3,\n                                  const float column2_row4,\n                                  const float column3_row1,\n                                  const float column3_row2,\n                                  const float column3_row3,\n                                  const float column3_row4,\n                                  const float column4_row1,\n                                  const float column4_row2,\n                                  const float column4_row3,\n                                  const float column4_row4,\n                                  float4x4 &matrix)\n{\n  matrix = float4x4(column1_row1,\n                    column1_row2,\n                    column1_row3,\n                    column1_row4,\n                    column2_row1,\n                    column2_row2,\n                    column2_row3,\n                    column2_row4,\n                    column3_row1,\n                    column3_row2,\n                    column3_row3,\n                    column3_row4,\n                    column4_row1,\n                    column4_row2,\n                    column4_row3,\n                    column4_row4);\n}\n",
+ "gpu_shader_function_invert_matrix.glsl": "/* SPDX-FileCopyrightText: 2026 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#include \"gpu_shader_math_matrix_construct_lib.glsl\"\n\n[[node]]\nvoid node_function_invert_matrix(const float4x4 matrix,\n                                 float4x4 &inverted_matrix,\n                                 float &is_invertable)\n{\n  const bool is_singular = determinant(matrix) == 0.0f;\n  inverted_matrix = is_singular ? mat4x4_identity() : inverse(matrix);\n  is_invertable = float(!is_singular);\n}\n",
+ "gpu_shader_function_matrix_determinant.glsl": "/* SPDX-FileCopyrightText: 2026 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n[[node]]\nvoid node_function_matrix_determinant(const float4x4 matrix, float &output_determinant)\n{\n  output_determinant = determinant(matrix);\n}\n",
+ "gpu_shader_function_matrix_multiply.glsl": "/* SPDX-FileCopyrightText: 2026 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n[[node]]\nvoid node_function_matrix_multiply(const float4x4 a, const float4x4 b, float4x4 &result)\n{\n  result = a * b;\n}\n",
+ "gpu_shader_function_project_point.glsl": "/* SPDX-FileCopyrightText: 2026 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#include \"gpu_shader_math_matrix_transform_lib.glsl\"\n\n[[node]]\nvoid node_function_project_point(const float3 point,\n                                 const float4x4 transform,\n                                 float3 &projected_point)\n{\n  projected_point = project_point(transform, point);\n}\n",
+ "gpu_shader_function_separate_matrix.glsl": "/* SPDX-FileCopyrightText: 2026 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n[[node]]\nvoid node_function_separate_matrix(const float4x4 matrix,\n                                   float &column1_row1,\n                                   float &column1_row2,\n                                   float &column1_row3,\n                                   float &column1_row4,\n                                   float &column2_row1,\n                                   float &column2_row2,\n                                   float &column2_row3,\n                                   float &column2_row4,\n                                   float &column3_row1,\n                                   float &column3_row2,\n                                   float &column3_row3,\n                                   float &column3_row4,\n                                   float &column4_row1,\n                                   float &column4_row2,\n                                   float &column4_row3,\n                                   float &column4_row4)\n{\n  column1_row1 = matrix[0][0];\n  column1_row2 = matrix[0][1];\n  column1_row3 = matrix[0][2];\n  column1_row4 = matrix[0][3];\n  column2_row1 = matrix[1][0];\n  column2_row2 = matrix[1][1];\n  column2_row3 = matrix[1][2];\n  column2_row4 = matrix[1][3];\n  column3_row1 = matrix[2][0];\n  column3_row2 = matrix[2][1];\n  column3_row3 = matrix[2][2];\n  column3_row4 = matrix[2][3];\n  column4_row1 = matrix[3][0];\n  column4_row2 = matrix[3][1];\n  column4_row3 = matrix[3][2];\n  column4_row4 = matrix[3][3];\n}\n",
+ "gpu_shader_function_transform_direction.glsl": "/* SPDX-FileCopyrightText: 2026 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#include \"gpu_shader_math_matrix_transform_lib.glsl\"\n\n[[node]]\nvoid node_function_transform_direction(const float3 direction,\n                                       const float4x4 transform,\n                                       float3 &transformed_direction)\n{\n  transformed_direction = transform_direction(transform, direction);\n}\n",
+ "gpu_shader_function_transform_point.glsl": "/* SPDX-FileCopyrightText: 2026 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#include \"gpu_shader_math_matrix_transform_lib.glsl\"\n\n[[node]]\nvoid node_function_transform_point(const float3 point,\n                                   const float4x4 transform,\n                                   float3 &transformed_point)\n{\n  transformed_point = transform_point(transform, point);\n}\n",
+ "gpu_shader_function_transpose_matrix.glsl": "/* SPDX-FileCopyrightText: 2026 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n[[node]]\nvoid node_function_transpose_matrix(const float4x4 matrix, float4x4 &transposed_matrix)\n{\n  transposed_matrix = transpose(matrix);\n}\n",
  "gpu_shader_glsl_extension.glsl": "/* SPDX-FileCopyrightText: 2022-2023 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n/**\n * Always start a shader with #version directive and the required #extension.\n * The extensions are different depending on the backend and implementation support.\n * For this reason this file is generated at runtime.\n * The present implementation is just for reference and documentation.\n */\n\n#pragma once\n\n#pragma runtime_generated\n\n#if defined(GPU_OPENGL)\n/* We only require OpenGL 4.3. */\n#  version 430\n/* Required: For draw call batching. */\n#  extension GL_ARB_shader_draw_parameters : enable\n/* Optional: Avoid geometry shader for layered rendering. */\n#  extension GL_ARB_shader_viewport_layer_array : enable\n/* Optional: Avoid geometry shader for barycentric coordinates. */\n#  extension GL_AMD_shader_explicit_vertex_parameter : enable\n/* Optional: For sub-pass input emulation. */\n#  extension GL_EXT_shader_framebuffer_fetch : enable\n/* Optional: For faster EEVEE GBuffer classification. */\n#  extension GL_ARB_shader_stencil_export : enable\n\n#elif defined(GPU_VULKAN)\n#  version 450\n/* Required: For draw call batching. */\n#  extension GL_ARB_shader_draw_parameters : enable\n/* Optional: Avoid geometry shader for layered rendering. */\n#  extension GL_ARB_shader_viewport_layer_array : enable\n/* Optional: Avoid geometry shader for barycentric coordinates. */\n#  extension GL_EXT_fragment_shader_barycentric : require\n/* Optional: For faster EEVEE GBuffer classification. */\n#  extension GL_ARB_shader_stencil_export : enable\n#endif\n",
  "gpu_shader_material_ambient_occlusion.glsl": "/* SPDX-FileCopyrightText: 2019-2022 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#include \"gpu_shader_math_vector_safe_lib.glsl\"\n\n[[node]]\nvoid node_ambient_occlusion(float4 color,\n                            float dist,\n                            float3 normal,\n                            const float inverted,\n                            const float sample_count,\n                            float4 &result_color,\n                            float &result_ao)\n{\n  result_ao = ambient_occlusion_eval(safe_normalize(normal), dist, inverted, sample_count);\n  result_color = result_ao * color;\n}\n",
  "gpu_shader_material_attribute.glsl": "/* SPDX-FileCopyrightText: 2019-2023 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#include \"gpu_shader_common_math.glsl\"\n\n[[node]]\nvoid node_attribute_color(float4 attr, float4 &out_attr)\n{\n  out_attr = attr_load_color_post(attr);\n}\n\n[[node]]\nvoid node_attribute_temperature(float4 attr, float4 &out_attr)\n{\n  float temperature = attr_load_temperature_post(attr.x);\n  out_attr.x = temperature;\n  out_attr.y = temperature;\n  out_attr.z = temperature;\n  out_attr.w = 1.0f;\n}\n\n[[node]]\nvoid node_attribute_density(float4 attr, float &out_attr)\n{\n  out_attr = attr.x;\n}\n\n[[node]]\nvoid node_attribute_flame(float4 attr, float &out_attr)\n{\n  out_attr = attr.x;\n}\n\n[[node]]\nvoid node_attribute_uniform(float4 attr, const float attr_hash, float4 &out_attr)\n{\n  /* Temporary solution to support both old UBO attributes and new SSBO loading.\n   * Old UBO load is already done through `attr` and will just be passed through. */\n  out_attr = attr_load_uniform(attr, floatBitsToUint(attr_hash));\n}\n\nfloat4 attr_load_layer(const uint attr_hash)\n{\n#ifdef VLATTR_LIB\n  /* The first record of the buffer stores the length. */\n  uint left = 0, right = drw_layer_attrs[0].buffer_length;\n\n  while (left < right) {\n    uint mid = (left + right) / 2;\n    uint hash = drw_layer_attrs[mid].hash_code;\n\n    if (hash < attr_hash) {\n      left = mid + 1;\n    }\n    else if (hash > attr_hash) {\n      right = mid;\n    }\n    else {\n      return drw_layer_attrs[mid].data;\n    }\n  }\n#endif\n\n  return float4(0.0f);\n}\n\n[[node]]\nvoid node_attribute(float4 attr, float4 &outcol, float3 &outvec, float &outf, float &outalpha)\n{\n  outcol = float4(attr.xyz, 1.0f);\n  outvec = attr.xyz;\n  outf = math_average(attr.xyz);\n  outalpha = attr.w;\n}\n",
@@ -79,8 +123,10 @@ export const glsl = {
  "gpu_shader_math_matrix_compare_lib.glsl": "/* SPDX-FileCopyrightText: 2023 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#pragma once\n\n#include \"gpu_shader_math_vector_compare_lib.glsl\"\n\n/* -------------------------------------------------------------------- */\n/** \\name Compare / Test\n * \\{ */\n\n/**\n * Returns true if all of the matrices components are strictly equal to 0.\n */\nbool is_zero(float3x3 a)\n{\n  if (is_zero(a[0])) {\n    if (is_zero(a[1])) {\n      if (is_zero(a[2])) {\n        return true;\n      }\n    }\n  }\n  return false;\n}\n/**\n * Returns true if all of the matrices components are strictly equal to 0.\n */\nbool is_zero(float4x4 a)\n{\n  if (is_zero(a[0])) {\n    if (is_zero(a[1])) {\n      if (is_zero(a[2])) {\n        if (is_zero(a[3])) {\n          return true;\n        }\n      }\n    }\n  }\n  return false;\n}\n\n/**\n * Returns true if matrix has inverted handedness.\n */\nbool is_negative(float3x3 mat)\n{\n  return determinant(mat) < 0.0f;\n}\n/**\n * Returns true if matrix has inverted handedness.\n *\n * \\note It doesn't use determinant(mat4x4) as only the 3x3 components are needed\n * when the matrix is used as a transformation to represent location/scale/rotation.\n */\nbool is_negative(float4x4 mat)\n{\n  return is_negative(to_float3x3(mat));\n}\n\n/**\n * Returns true if matrices are equal within the given epsilon.\n */\nbool is_equal(float2x2 a, float2x2 b, float epsilon)\n{\n  if (is_equal(a[0], b[0], epsilon)) {\n    if (is_equal(a[1], b[1], epsilon)) {\n      return true;\n    }\n  }\n  return false;\n}\n/**\n * Returns true if matrices are equal within the given epsilon.\n */\nbool is_equal(float3x3 a, float3x3 b, float epsilon)\n{\n  if (is_equal(a[0], b[0], epsilon)) {\n    if (is_equal(a[1], b[1], epsilon)) {\n      if (is_equal(a[2], b[2], epsilon)) {\n        return true;\n      }\n    }\n  }\n  return false;\n}\n/**\n * Returns true if matrices are equal within the given epsilon.\n */\nbool is_equal(float4x4 a, float4x4 b, float epsilon)\n{\n  if (is_equal(a[0], b[0], epsilon)) {\n    if (is_equal(a[1], b[1], epsilon)) {\n      if (is_equal(a[2], b[2], epsilon)) {\n        if (is_equal(a[3], b[3], epsilon)) {\n          return true;\n        }\n      }\n    }\n  }\n  return false;\n}\n/**\n * Test if the X, Y and Z axes are perpendicular with each other.\n */\nbool is_orthogonal(float3x3 mat)\n{\n  if (abs(dot(mat[0], mat[1])) > 1e-5f) {\n    return false;\n  }\n  if (abs(dot(mat[1], mat[2])) > 1e-5f) {\n    return false;\n  }\n  if (abs(dot(mat[2], mat[0])) > 1e-5f) {\n    return false;\n  }\n  return true;\n}\n/**\n * Test if the X, Y and Z axes are perpendicular with each other.\n */\nbool is_orthogonal(float4x4 mat)\n{\n  return is_orthogonal(to_float3x3(mat));\n}\n\n/**\n * Test if the X, Y and Z axes are perpendicular with each other and unit length.\n */\nbool is_orthonormal(float3x3 mat)\n{\n  if (!is_orthogonal(mat)) {\n    return false;\n  }\n  if (abs(dot(mat[0], mat[0]) - 1.0f) > 1e-5f) {\n    return false;\n  }\n  if (abs(dot(mat[1], mat[1]) - 1.0f) > 1e-5f) {\n    return false;\n  }\n  if (abs(dot(mat[2], mat[2]) - 1.0f) > 1e-5f) {\n    return false;\n  }\n  return true;\n}\n/**\n * Test if the X, Y and Z axes are perpendicular with each other and unit length.\n */\nbool is_orthonormal(float4x4 mat)\n{\n  return is_orthonormal(to_float3x3(mat));\n}\n\n/**\n * Test if the X, Y and Z axes are perpendicular with each other and the same length.\n */\nbool is_uniformly_scaled(float3x3 mat)\n{\n  if (!is_orthogonal(mat)) {\n    return false;\n  }\n  constexpr float eps = 1e-7f;\n  float x = dot(mat[0], mat[0]);\n  float y = dot(mat[1], mat[1]);\n  float z = dot(mat[2], mat[2]);\n  return (abs(x - y) < eps) && abs(x - z) < eps;\n}\n/**\n * Test if the X, Y and Z axes are perpendicular with each other and the same length.\n */\nbool is_uniformly_scaled(float4x4 mat)\n{\n  return is_uniformly_scaled(to_float3x3(mat));\n}\n\n/* Returns true if each individual columns are unit scaled. Mainly for assert usage. */\nbool is_unit_scale(float4x4 m)\n{\n  if (is_unit_scale(m[0])) {\n    if (is_unit_scale(m[1])) {\n      if (is_unit_scale(m[2])) {\n        if (is_unit_scale(m[3])) {\n          return true;\n        }\n      }\n    }\n  }\n  return false;\n}\n/* Returns true if each individual columns are unit scaled. Mainly for assert usage. */\nbool is_unit_scale(float3x3 m)\n{\n  if (is_unit_scale(m[0])) {\n    if (is_unit_scale(m[1])) {\n      if (is_unit_scale(m[2])) {\n        return true;\n      }\n    }\n  }\n  return false;\n}\n/* Returns true if each individual columns are unit scaled. Mainly for assert usage. */\nbool is_unit_scale(float2x2 m)\n{\n  if (is_unit_scale(m[0])) {\n    if (is_unit_scale(m[1])) {\n      return true;\n    }\n  }\n  return false;\n}\n\n/** \\} */\n",
  "gpu_shader_math_matrix_construct_lib.glsl": "/* SPDX-FileCopyrightText: 2023 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#pragma once\n\n#include \"gpu_shader_math_angle_lib.glsl\"\n#include \"gpu_shader_math_axis_angle_lib.glsl\"\n#include \"gpu_shader_math_base_lib.glsl\"\n#include \"gpu_shader_math_euler_lib.glsl\"\n#include \"gpu_shader_math_quaternion_lib.glsl\"\n\n/* -------------------------------------------------------------------- */\n/** \\name Static constructors\n * \\{ */\n\nfloat2x2 mat2x2_diagonal(float v)\n{\n  return float2x2(float2(v, 0.0f), float2(0.0f, v));\n}\nfloat3x3 mat3x3_diagonal(float v)\n{\n  return float3x3(float3(v, 0.0f, 0.0f), float3(0.0f, v, 0.0f), float3(0.0f, 0.0f, v));\n}\nfloat4x4 mat4x4_diagonal(float v)\n{\n  return float4x4(float4(v, 0.0f, 0.0f, 0.0f),\n                  float4(0.0f, v, 0.0f, 0.0f),\n                  float4(0.0f, 0.0f, v, 0.0f),\n                  float4(0.0f, 0.0f, 0.0f, v));\n}\n\nfloat2x2 mat2x2_all(float v)\n{\n  return float2x2(float2(v), float2(v));\n}\nfloat3x3 mat3x3_all(float v)\n{\n  return float3x3(float3(v), float3(v), float3(v));\n}\nfloat4x4 mat4x4_all(float v)\n{\n  return float4x4(float4(v), float4(v), float4(v), float4(v));\n}\n\nfloat2x2 mat2x2_zero()\n{\n  return mat2x2_all(0.0f);\n}\nfloat3x3 mat3x3_zero()\n{\n  return mat3x3_all(0.0f);\n}\nfloat4x4 mat4x4_zero()\n{\n  return mat4x4_all(0.0f);\n}\n\nfloat2x2 mat2x2_identity()\n{\n  return mat2x2_diagonal(1.0f);\n}\nfloat3x3 mat3x3_identity()\n{\n  return mat3x3_diagonal(1.0f);\n}\nfloat4x4 mat4x4_identity()\n{\n  return mat4x4_diagonal(1.0f);\n}\n\n/** \\} */\n\n/* -------------------------------------------------------------------- */\n/** \\name Init helpers.\n * \\{ */\n\n/**\n * Create a translation only matrix. Matrix dimensions should be at least 4 col x 3 row.\n */\nfloat4x4 from_location(float3 location)\n{\n  float4x4 ret = float4x4(1.0f);\n  ret[3].xyz = location;\n  return ret;\n}\n\n/**\n * Create a matrix whose diagonal is defined by the given scale vector.\n */\nfloat2x2 from_scale(float2 scale)\n{\n  float2x2 ret = float2x2(0.0f);\n  ret[0][0] = scale[0];\n  ret[1][1] = scale[1];\n  return ret;\n}\n/**\n * Create a matrix whose diagonal is defined by the given scale vector.\n */\nfloat3x3 from_scale(float3 scale)\n{\n  float3x3 ret = float3x3(0.0f);\n  ret[0][0] = scale[0];\n  ret[1][1] = scale[1];\n  ret[2][2] = scale[2];\n  return ret;\n}\n/**\n * Create a matrix whose diagonal is defined by the given scale vector.\n */\nfloat4x4 from_scale(float4 scale)\n{\n  float4x4 ret = float4x4(0.0f);\n  ret[0][0] = scale[0];\n  ret[1][1] = scale[1];\n  ret[2][2] = scale[2];\n  ret[3][3] = scale[3];\n  return ret;\n}\n\n/**\n * Create a rotation only matrix.\n */\nfloat2x2 from_rotation(AngleRadian rotation)\n{\n  float c = cos(rotation.angle);\n  float s = sin(rotation.angle);\n  return float2x2(c, -s, s, c);\n}\n/**\n * Create a rotation only matrix.\n */\nfloat3x3 from_rotation(EulerXYZ rotation)\n{\n  float ci = cos(rotation.x);\n  float cj = cos(rotation.y);\n  float ch = cos(rotation.z);\n  float si = sin(rotation.x);\n  float sj = sin(rotation.y);\n  float sh = sin(rotation.z);\n  float cc = ci * ch;\n  float cs = ci * sh;\n  float sc = si * ch;\n  float ss = si * sh;\n\n  float3x3 mat;\n  mat[0][0] = cj * ch;\n  mat[1][0] = sj * sc - cs;\n  mat[2][0] = sj * cc + ss;\n\n  mat[0][1] = cj * sh;\n  mat[1][1] = sj * ss + cc;\n  mat[2][1] = sj * cs - sc;\n\n  mat[0][2] = -sj;\n  mat[1][2] = cj * si;\n  mat[2][2] = cj * ci;\n  return mat;\n}\n/**\n * Create a rotation only matrix.\n */\nfloat3x3 from_rotation(Quaternion rotation)\n{\n  /* NOTE: Should be double but support isn't native on most GPUs. */\n  float q0 = M_SQRT2 * float(rotation.x);\n  float q1 = M_SQRT2 * float(rotation.y);\n  float q2 = M_SQRT2 * float(rotation.z);\n  float q3 = M_SQRT2 * float(rotation.w);\n\n  float qda = q0 * q1;\n  float qdb = q0 * q2;\n  float qdc = q0 * q3;\n  float qaa = q1 * q1;\n  float qab = q1 * q2;\n  float qac = q1 * q3;\n  float qbb = q2 * q2;\n  float qbc = q2 * q3;\n  float qcc = q3 * q3;\n\n  float3x3 mat;\n  mat[0][0] = float(1.0f - qbb - qcc);\n  mat[0][1] = float(qdc + qab);\n  mat[0][2] = float(-qdb + qac);\n\n  mat[1][0] = float(-qdc + qab);\n  mat[1][1] = float(1.0f - qaa - qcc);\n  mat[1][2] = float(qda + qbc);\n\n  mat[2][0] = float(qdb + qac);\n  mat[2][1] = float(-qda + qbc);\n  mat[2][2] = float(1.0f - qaa - qbb);\n  return mat;\n}\n/**\n * Create a rotation only matrix.\n */\nfloat3x3 from_rotation(AxisAngle rotation)\n{\n  float angle_sin = sin(rotation.angle);\n  float angle_cos = cos(rotation.angle);\n  float3 axis = rotation.axis;\n\n  float ico = (float(1) - angle_cos);\n  float3 nsi = axis * angle_sin;\n\n  float3 n012 = (axis * axis) * ico;\n  float n_01 = (axis[0] * axis[1]) * ico;\n  float n_02 = (axis[0] * axis[2]) * ico;\n  float n_12 = (axis[1] * axis[2]) * ico;\n\n  float3x3 mat = from_scale(n012 + angle_cos);\n  mat[0][1] = n_01 + nsi[2];\n  mat[0][2] = n_02 - nsi[1];\n  mat[1][0] = n_01 - nsi[2];\n  mat[1][2] = n_12 + nsi[0];\n  mat[2][0] = n_02 + nsi[1];\n  mat[2][1] = n_12 - nsi[0];\n  return mat;\n}\n\n/**\n * Create a transform matrix with rotation and scale applied in this order.\n */\nfloat3x3 from_rot_scale(EulerXYZ rotation, float3 scale)\n{\n  return from_rotation(rotation) * from_scale(scale);\n}\n/**\n * Create a transform matrix with rotation and scale applied in this order.\n */\nfloat3x3 from_rot_scale(Quaternion rotation, float3 scale)\n{\n  return from_rotation(rotation) * from_scale(scale);\n}\n/**\n * Create a transform matrix with rotation and scale applied in this order.\n */\nfloat3x3 from_rot_scale(AxisAngle rotation, float3 scale)\n{\n  return from_rotation(rotation) * from_scale(scale);\n}\n\n/**\n * Create a transform matrix with translation and rotation applied in this order.\n */\nfloat4x4 from_loc_rot(float3 location, EulerXYZ rotation)\n{\n  float4x4 ret = to_float4x4(from_rotation(rotation));\n  ret[3].xyz = location;\n  return ret;\n}\n/**\n * Create a transform matrix with translation and rotation applied in this order.\n */\nfloat4x4 from_loc_rot(float3 location, Quaternion rotation)\n{\n  float4x4 ret = to_float4x4(from_rotation(rotation));\n  ret[3].xyz = location;\n  return ret;\n}\n/**\n * Create a transform matrix with translation and rotation applied in this order.\n */\nfloat4x4 from_loc_rot(float3 location, AxisAngle rotation)\n{\n  float4x4 ret = to_float4x4(from_rotation(rotation));\n  ret[3].xyz = location;\n  return ret;\n}\n\n/**\n * Create a transform matrix with translation, rotation and scale applied in this order.\n */\nfloat4x4 from_loc_rot_scale(float3 location, EulerXYZ rotation, float3 scale)\n{\n  float4x4 ret = to_float4x4(from_rot_scale(rotation, scale));\n  ret[3].xyz = location;\n  return ret;\n}\n/**\n * Create a transform matrix with translation, rotation and scale applied in this order.\n */\nfloat4x4 from_loc_rot_scale(float3 location, Quaternion rotation, float3 scale)\n{\n  float4x4 ret = to_float4x4(from_rot_scale(rotation, scale));\n  ret[3].xyz = location;\n  return ret;\n}\n/**\n * Create a transform matrix with translation, rotation and scale applied in this order.\n */\nfloat4x4 from_loc_rot_scale(float3 location, AxisAngle rotation, float3 scale)\n{\n  float4x4 ret = to_float4x4(from_rot_scale(rotation, scale));\n  ret[3].xyz = location;\n  return ret;\n}\n\n/**\n * Creates a 2D rotation matrix with the angle that the given direction makes with the x axis.\n * Assumes the direction vector is normalized.\n */\nfloat2x2 from_direction(float2 direction)\n{\n  float cos_angle = direction.x;\n  float sin_angle = direction.y;\n  return float2x2(cos_angle, sin_angle, -sin_angle, cos_angle);\n}\n\n/**\n * Create a rotation matrix from 2 basis vectors.\n * The matrix determinant is given to be positive and it can be converted to other rotation types.\n * \\note `forward` and `up` must be normalized.\n */\n// mat3x3 from_normalized_axis_data(vec3 forward, vec3 up); /* TODO. */\n\n/**\n * Create a transform matrix with translation and rotation from 2 basis vectors and a translation.\n * \\note `forward` and `up` must be normalized.\n */\n// mat4x4 from_normalized_axis_data(vec3 location, vec3 forward, vec3 up); /* TODO. */\n\n/**\n * Create a rotation matrix from only one \\a up axis.\n * The other axes are chosen to always be orthogonal. The resulting matrix is a basis matrix.\n * \\note `up` must be normalized.\n * \\note This can be used to create a tangent basis from a normal vector.\n * \\note The output of this function is not given to be same across blender version. Prefer using\n * `from_orthonormal_axes` for more stable output.\n */\nfloat3x3 from_up_axis(float3 up)\n{\n  /* Duff, Tom, et al. \"Building an orthonormal basis, revisited.\" JCGT 6.1 (2017). */\n  float z_sign = up.z >= 0.0f ? 1.0f : -1.0f;\n  float a = -1.0f / (z_sign + up.z);\n  float b = up.x * up.y * a;\n\n  float3x3 basis;\n  basis[0] = float3(1.0f + z_sign * square(up.x) * a, z_sign * b, -z_sign * up.x);\n  basis[1] = float3(b, z_sign + square(up.y) * a, -up.y);\n  basis[2] = up;\n  return basis;\n}\n/** \\} */\n",
  "gpu_shader_math_matrix_conversion_lib.glsl": "/* SPDX-FileCopyrightText: 2023 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#pragma once\n\n#include \"gpu_shader_math_base_lib.glsl\"\n#include \"gpu_shader_math_euler_lib.glsl\"\n#include \"gpu_shader_math_matrix_compare_lib.glsl\"\n#include \"gpu_shader_math_quaternion_lib.glsl\"\n#include \"gpu_shader_utildefines_lib.glsl\"\n\n/* -------------------------------------------------------------------- */\n/** \\name Conversion function.\n * \\{ */\n\n/**\n * Extract the absolute 3d scale from a transform matrix.\n */\nfloat3 to_scale(float3x3 mat)\n{\n  return float3(length(mat[0]), length(mat[1]), length(mat[2]));\n}\n/**\n * Extract the absolute 3d scale from a transform matrix.\n */\nfloat3 to_scale(float4x4 mat)\n{\n  return to_scale(to_float3x3(mat));\n}\n/**\n * Extract the absolute 3d scale from a transform matrix.\n */\ntemplate<typename MatT, bool allow_negative_scale> float3 to_scale(MatT mat)\n{\n  float3 result = to_scale(mat);\n  if (allow_negative_scale) {\n    if (is_negative(mat)) {\n      result = -result;\n    }\n  }\n  return result;\n}\ntemplate float3 to_scale<float3x3, true>(float3x3 mat);\ntemplate float3 to_scale<float3x3, false>(float3x3 mat);\ntemplate float3 to_scale<float4x4, true>(float4x4 mat);\ntemplate float3 to_scale<float4x4, false>(float4x4 mat);\n\n/** \\} */\n",
+ "gpu_shader_math_matrix_normalize_lib.glsl": "/* SPDX-FileCopyrightText: 2023 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#pragma once\n\n#include \"gpu_shader_compat.hh\"\n#include \"gpu_shader_math_vector_lib.glsl\"\n\n/* -------------------------------------------------------------------- */\n/** \\name Normalize\n * \\{ */\n\n/* Needs to be defined for correct overloading. */\n#if defined(GPU_OPENGL) || defined(GPU_METAL)\nfloat2 normalize(float2 a)\n{\n  return a * inversesqrt(length_squared(a));\n}\nfloat3 normalize(float3 a)\n{\n  return a * inversesqrt(length_squared(a));\n}\nfloat4 normalize(float4 a)\n{\n  return a * inversesqrt(length_squared(a));\n}\n#endif\n\n/**\n * Normalize each column of the matrix individually.\n */\n#if 0 /* Remove unused variants as they are slow down compilation. */\nfloat2x2 normalize(float2x2 mat)\n{\n  float2x2 ret;\n  ret[0] = normalize(mat[0].xy);\n  ret[1] = normalize(mat[1].xy);\n  return ret;\n}\nfloat2x3 normalize(float2x3 mat)\n{\n  float2x3 ret;\n  ret[0] = normalize(mat[0].xyz);\n  ret[1] = normalize(mat[1].xyz);\n  return ret;\n}\nfloat2x4 normalize(float2x4 mat)\n{\n  float2x4 ret;\n  ret[0] = normalize(mat[0].xyzw);\n  ret[1] = normalize(mat[1].xyzw);\n  return ret;\n}\nfloat3x2 normalize(float3x2 mat)\n{\n  float3x2 ret;\n  ret[0] = normalize(mat[0].xy);\n  ret[1] = normalize(mat[1].xy);\n  ret[2] = normalize(mat[2].xy);\n  return ret;\n}\n#endif\nfloat3x3 normalize(float3x3 mat)\n{\n  float3x3 ret;\n  ret[0] = normalize(mat[0].xyz);\n  ret[1] = normalize(mat[1].xyz);\n  ret[2] = normalize(mat[2].xyz);\n  return ret;\n}\n#if 0 /* Remove unused variants as they are slow down compilation. */\nfloat3x4 normalize(float3x4 mat)\n{\n  float3x4 ret;\n  ret[0] = normalize(mat[0].xyzw);\n  ret[1] = normalize(mat[1].xyzw);\n  ret[2] = normalize(mat[2].xyzw);\n  return ret;\n}\nfloat4x2 normalize(float4x2 mat)\n{\n  float4x2 ret;\n  ret[0] = normalize(mat[0].xy);\n  ret[1] = normalize(mat[1].xy);\n  ret[2] = normalize(mat[2].xy);\n  ret[3] = normalize(mat[3].xy);\n  return ret;\n}\nfloat4x3 normalize(float4x3 mat)\n{\n  float4x3 ret;\n  ret[0] = normalize(mat[0].xyz);\n  ret[1] = normalize(mat[1].xyz);\n  ret[2] = normalize(mat[2].xyz);\n  ret[3] = normalize(mat[3].xyz);\n  return ret;\n}\n#endif\nfloat4x4 normalize(float4x4 mat)\n{\n  float4x4 ret;\n  ret[0] = normalize(mat[0].xyzw);\n  ret[1] = normalize(mat[1].xyzw);\n  ret[2] = normalize(mat[2].xyzw);\n  ret[3] = normalize(mat[3].xyzw);\n  return ret;\n}\n\n/**\n * Normalize each column of the matrix individually.\n * Return the length of each column vector.\n */\n#if 0 /* Remove unused variants as they are slow down compilation. */\nfloat2x2 normalize_and_get_size(float2x2 mat, float2 & r_size)\n{\n  float size_x = 0.0f, size_y = 0.0f;\n  float2x2 ret;\n  ret[0] = normalize_and_get_length(mat[0], size_x);\n  ret[1] = normalize_and_get_length(mat[1], size_y);\n  r_size = float2(size_x, size_y);\n  return ret;\n}\nfloat2x3 normalize_and_get_size(float2x3 mat, float2 & r_size)\n{\n  float size_x = 0.0f, size_y = 0.0f;\n  float2x3 ret;\n  ret[0] = normalize_and_get_length(mat[0], size_x);\n  ret[1] = normalize_and_get_length(mat[1], size_y);\n  r_size = float2(size_x, size_y);\n  return ret;\n}\nfloat2x4 normalize_and_get_size(float2x4 mat, float2 & r_size)\n{\n  float size_x = 0.0f, size_y = 0.0f;\n  float2x4 ret;\n  ret[0] = normalize_and_get_length(mat[0], size_x);\n  ret[1] = normalize_and_get_length(mat[1], size_y);\n  r_size = float2(size_x, size_y);\n  return ret;\n}\nfloat3x2 normalize_and_get_size(float3x2 mat, float3 & r_size)\n{\n  float size_x = 0.0f, size_y = 0.0f, size_z = 0.0f;\n  float3x2 ret;\n  ret[0] = normalize_and_get_length(mat[0], size_x);\n  ret[1] = normalize_and_get_length(mat[1], size_y);\n  ret[2] = normalize_and_get_length(mat[2], size_z);\n  r_size = float3(size_x, size_y, size_z);\n  return ret;\n}\n#endif\nfloat3x3 normalize_and_get_size(float3x3 mat, float3 &r_size)\n{\n  float size_x = 0.0f, size_y = 0.0f, size_z = 0.0f;\n  float3x3 ret;\n  ret[0] = normalize_and_get_length(mat[0], size_x);\n  ret[1] = normalize_and_get_length(mat[1], size_y);\n  ret[2] = normalize_and_get_length(mat[2], size_z);\n  r_size = float3(size_x, size_y, size_z);\n  return ret;\n}\n#if 0 /* Remove unused variants as they are slow down compilation. */\nfloat3x4 normalize_and_get_size(float3x4 mat, float3 & r_size)\n{\n  float size_x = 0.0f, size_y = 0.0f, size_z = 0.0f;\n  float3x4 ret;\n  ret[0] = normalize_and_get_length(mat[0], size_x);\n  ret[1] = normalize_and_get_length(mat[1], size_y);\n  ret[2] = normalize_and_get_length(mat[2], size_z);\n  r_size = float3(size_x, size_y, size_z);\n  return ret;\n}\nfloat4x2 normalize_and_get_size(float4x2 mat, float4 & r_size)\n{\n  float size_x = 0.0f, size_y = 0.0f, size_z = 0.0f, size_w = 0.0f;\n  float4x2 ret;\n  ret[0] = normalize_and_get_length(mat[0], size_x);\n  ret[1] = normalize_and_get_length(mat[1], size_y);\n  ret[2] = normalize_and_get_length(mat[2], size_z);\n  ret[3] = normalize_and_get_length(mat[3], size_w);\n  r_size = float4(size_x, size_y, size_z, size_w);\n  return ret;\n}\nfloat4x3 normalize_and_get_size(float4x3 mat, float4 & r_size)\n{\n  float size_x = 0.0f, size_y = 0.0f, size_z = 0.0f, size_w = 0.0f;\n  float4x3 ret;\n  ret[0] = normalize_and_get_length(mat[0], size_x);\n  ret[1] = normalize_and_get_length(mat[1], size_y);\n  ret[2] = normalize_and_get_length(mat[2], size_z);\n  ret[3] = normalize_and_get_length(mat[3], size_w);\n  r_size = float4(size_x, size_y, size_z, size_w);\n  return ret;\n}\n#endif\nfloat4x4 normalize_and_get_size(float4x4 mat, float4 &r_size)\n{\n  float size_x = 0.0f, size_y = 0.0f, size_z = 0.0f, size_w = 0.0f;\n  float4x4 ret;\n  ret[0] = normalize_and_get_length(mat[0], size_x);\n  ret[1] = normalize_and_get_length(mat[1], size_y);\n  ret[2] = normalize_and_get_length(mat[2], size_z);\n  ret[3] = normalize_and_get_length(mat[3], size_w);\n  r_size = float4(size_x, size_y, size_z, size_w);\n  return ret;\n}\n\n/** \\} */\n",
  "gpu_shader_math_matrix_transform_lib.glsl": "/* SPDX-FileCopyrightText: 2023 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#pragma once\n\n#include \"gpu_shader_compat.hh\"\n\n/* -------------------------------------------------------------------- */\n/** \\name Transform function.\n * \\{ */\n\n/**\n * Transform a 3d point using a 3x3 matrix (rotation & scale).\n */\nfloat3 transform_point(float3x3 mat, float3 point)\n{\n  return mat * point;\n}\n\n/**\n * Transform a 3d point using a 4x4 matrix (location & rotation & scale).\n */\nfloat3 transform_point(float4x4 mat, float3 point)\n{\n  return (mat * float4(point, 1.0f)).xyz;\n}\n\n/**\n * Transform a 2d point using a 3x3 matrix (location & rotation & scale).\n */\nfloat2 transform_point(float3x3 mat, float2 point)\n{\n  return (mat * float3(point, 1.0f)).xy;\n}\n\n/**\n * Transform a 3d direction vector using a 3x3 matrix (rotation & scale).\n */\nfloat3 transform_direction(float3x3 mat, float3 direction)\n{\n  return mat * direction;\n}\n\n/**\n * Transform a 3d direction vector using a 4x4 matrix (rotation & scale).\n */\nfloat3 transform_direction(float4x4 mat, float3 direction)\n{\n  return to_float3x3(mat) * direction;\n}\n\n/**\n * Project a point using a matrix (location & rotation & scale & perspective divide).\n */\nfloat2 project_point(float3x3 mat, float2 point)\n{\n  float3 tmp = mat * float3(point, 1.0f);\n  /* Absolute value to not flip the frustum upside down behind the camera. */\n  return tmp.xy / abs(tmp.z);\n}\n/**\n * Project a point using a matrix (location & rotation & scale & perspective divide).\n */\nfloat3 project_point(float4x4 mat, float3 point)\n{\n  float4 tmp = mat * float4(point, 1.0f);\n  /* Absolute value to not flip the frustum upside down behind the camera. */\n  return tmp.xyz / abs(tmp.w);\n}\n\n/** \\} */\n",
  "gpu_shader_math_quaternion_lib.glsl": "/* SPDX-FileCopyrightText: 2023 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#pragma once\n\n#include \"gpu_shader_compat.hh\"\n\nstruct Quaternion {\n  float x, y, z, w;\n\n  static Quaternion identity()\n  {\n    return {1, 0, 0, 0};\n  }\n\n  float4 as_float4() const\n  {\n    return float4(this->x, this->y, this->z, this->w);\n  }\n};\n\n/* -------------------------------------------------------------------- */\n/** \\name Quaternion Math\n * \\{ */\n\nQuaternion math_quaternion_multiply(Quaternion a, Quaternion b)\n{\n  Quaternion result;\n  result.x = a.x * b.x - a.y * b.y - a.z * b.z - a.w * b.w;\n  result.y = a.x * b.y + a.y * b.x + a.z * b.w - a.w * b.z;\n  result.z = a.x * b.z - a.y * b.w + a.z * b.x + a.w * b.y;\n  result.w = a.x * b.w + a.y * b.z - a.z * b.y + a.w * b.x;\n  return result;\n}\n\nQuaternion quaternion_conjugate(Quaternion q)\n{\n  return {q.x, -q.y, -q.z, -q.w};\n}\n\nfloat3 transform_point_by_quaternion(Quaternion q, float3 v)\n{\n  const Quaternion v_quat = {0.0f, v.x, v.y, v.z};\n  const Quaternion result = math_quaternion_multiply(math_quaternion_multiply(q, v_quat),\n                                                     quaternion_conjugate(q));\n  return float3(result.y, result.z, result.w);\n}\n\n/** \\} */\n",
+ "gpu_shader_math_rotation_conversion_lib.glsl": "/* SPDX-FileCopyrightText: 2023 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#pragma once\n\n#include \"gpu_shader_math_axis_angle_lib.glsl\"\n#include \"gpu_shader_math_base_lib.glsl\"\n#include \"gpu_shader_math_euler_lib.glsl\"\n#include \"gpu_shader_math_matrix_conversion_lib.glsl\"\n#include \"gpu_shader_math_matrix_normalize_lib.glsl\"\n#include \"gpu_shader_math_quaternion_lib.glsl\"\n#include \"gpu_shader_math_vector_compare_lib.glsl\"\n#include \"gpu_shader_math_vector_lib.glsl\"\n#include \"gpu_shader_utildefines_lib.glsl\"\n\nnamespace detail {\n\nQuaternion normalized_to_quat_fast(float3x3 mat)\n{\n  /* Caller must ensure matrices aren't negative for valid results, see: #24291, #94231. */\n  Quaternion q;\n\n  /* Method outlined by Mike Day, ref: https://math.stackexchange.com/a/3183435/220949\n   * with an additional `sqrtf(..)` for higher precision result.\n   * Removing the `sqrt` causes tests to fail unless the precision is set to 1e-6f or larger. */\n\n  if (mat[2][2] < 0.0f) {\n    if (mat[0][0] > mat[1][1]) {\n      float trace = 1.0f + mat[0][0] - mat[1][1] - mat[2][2];\n      float s = 2.0f * sqrt(trace);\n      if (mat[1][2] < mat[2][1]) {\n        /* Ensure W is non-negative for a canonical result. */\n        s = -s;\n      }\n      q.y = 0.25f * s;\n      s = 1.0f / s;\n      q.x = (mat[1][2] - mat[2][1]) * s;\n      q.z = (mat[0][1] + mat[1][0]) * s;\n      q.w = (mat[2][0] + mat[0][2]) * s;\n      if ((trace == 1.0f) && (q.x == 0.0f && q.z == 0.0f && q.w == 0.0f)) {\n        /* Avoids the need to normalize the degenerate case. */\n        q.y = 1.0f;\n      }\n    }\n    else {\n      float trace = 1.0f - mat[0][0] + mat[1][1] - mat[2][2];\n      float s = 2.0f * sqrt(trace);\n      if (mat[2][0] < mat[0][2]) {\n        /* Ensure W is non-negative for a canonical result. */\n        s = -s;\n      }\n      q.z = 0.25f * s;\n      s = 1.0f / s;\n      q.x = (mat[2][0] - mat[0][2]) * s;\n      q.y = (mat[0][1] + mat[1][0]) * s;\n      q.w = (mat[1][2] + mat[2][1]) * s;\n      if ((trace == 1.0f) && (q.x == 0.0f && q.y == 0.0f && q.w == 0.0f)) {\n        /* Avoids the need to normalize the degenerate case. */\n        q.z = 1.0f;\n      }\n    }\n  }\n  else {\n    if (mat[0][0] < -mat[1][1]) {\n      float trace = 1.0f - mat[0][0] - mat[1][1] + mat[2][2];\n      float s = 2.0f * sqrt(trace);\n      if (mat[0][1] < mat[1][0]) {\n        /* Ensure W is non-negative for a canonical result. */\n        s = -s;\n      }\n      q.w = 0.25f * s;\n      s = 1.0f / s;\n      q.x = (mat[0][1] - mat[1][0]) * s;\n      q.y = (mat[2][0] + mat[0][2]) * s;\n      q.z = (mat[1][2] + mat[2][1]) * s;\n      if ((trace == 1.0f) && (q.x == 0.0f && q.y == 0.0f && q.z == 0.0f)) {\n        /* Avoids the need to normalize the degenerate case. */\n        q.w = 1.0f;\n      }\n    }\n    else {\n      /* NOTE(@ideasman42): A zero matrix will fall through to this block,\n       * needed so a zero scaled matrices to return a quaternion without rotation, see: #101848. */\n      float trace = 1.0f + mat[0][0] + mat[1][1] + mat[2][2];\n      float s = 2.0f * sqrt(trace);\n      q.x = 0.25f * s;\n      s = 1.0f / s;\n      q.y = (mat[1][2] - mat[2][1]) * s;\n      q.z = (mat[2][0] - mat[0][2]) * s;\n      q.w = (mat[0][1] - mat[1][0]) * s;\n      if ((trace == 1.0f) && (q.y == 0.0f && q.z == 0.0f && q.w == 0.0f)) {\n        /* Avoids the need to normalize the degenerate case. */\n        q.x = 1.0f;\n      }\n    }\n  }\n  return q;\n}\n\nQuaternion normalized_to_quat_with_checks(float3x3 mat)\n{\n  float det = determinant(mat);\n  if (!isfinite(det)) {\n    return Quaternion::identity();\n  }\n  if (det < 0.0f) {\n    return normalized_to_quat_fast(-mat);\n  }\n  return normalized_to_quat_fast(mat);\n}\n\nvoid normalized_to_eul2(float3x3 mat, EulerXYZ &eul1, EulerXYZ &eul2)\n{\n  float cy = hypot(mat[0][0], mat[0][1]);\n  if (cy > 16.0f * FLT_EPSILON) {\n    eul1.x = atan2(mat[1][2], mat[2][2]);\n    eul1.y = atan2(-mat[0][2], cy);\n    eul1.z = atan2(mat[0][1], mat[0][0]);\n\n    eul2.x = atan2(-mat[1][2], -mat[2][2]);\n    eul2.y = atan2(-mat[0][2], -cy);\n    eul2.z = atan2(-mat[0][1], -mat[0][0]);\n  }\n  else {\n    eul1.x = atan2(-mat[2][1], mat[1][1]);\n    eul1.y = atan2(-mat[0][2], cy);\n    eul1.z = 0.0f;\n\n    eul2 = eul1;\n  }\n}\n\n}  // namespace detail\n\n/* -------------------------------------------------------------------- */\n/** \\name Quaternion Functions\n * \\{ */\n\nQuaternion to_quaternion(EulerXYZ eul)\n{\n  float ti = eul.x * 0.5f;\n  float tj = eul.y * 0.5f;\n  float th = eul.z * 0.5f;\n  float ci = cos(ti);\n  float cj = cos(tj);\n  float ch = cos(th);\n  float si = sin(ti);\n  float sj = sin(tj);\n  float sh = sin(th);\n  float cc = ci * ch;\n  float cs = ci * sh;\n  float sc = si * ch;\n  float ss = si * sh;\n\n  Quaternion quat;\n  quat.x = cj * cc + sj * ss;\n  quat.y = cj * sc - sj * cs;\n  quat.z = cj * ss + sj * cc;\n  quat.w = cj * cs - sj * sc;\n  return quat;\n}\n\n/**\n * Extract quaternion rotation from transform matrix.\n * \\note normalized is set to false by default.\n */\nQuaternion to_quaternion(float3x3 mat)\n{\n  return detail::normalized_to_quat_with_checks(normalize(mat));\n}\n/**\n * Extract quaternion rotation from transform matrix.\n * \\note normalized is set to false by default.\n */\nQuaternion to_quaternion(float3x3 mat, const bool normalized)\n{\n  if (!normalized) {\n    mat = normalize(mat);\n  }\n  return to_quaternion(mat);\n}\n/**\n * Extract quaternion rotation from transform matrix.\n * \\note normalized is set to false by default.\n */\nQuaternion to_quaternion(float4x4 mat)\n{\n  return to_quaternion(to_float3x3(mat));\n}\n/**\n * Extract quaternion rotation from transform matrix.\n * \\note normalized is set to false by default.\n */\nQuaternion to_quaternion(float4x4 mat, const bool normalized)\n{\n  return to_quaternion(to_float3x3(mat), normalized);\n}\n\nQuaternion to_quaternion(AxisAngle axis_angle)\n{\n  float angle_cos = cos(axis_angle.angle);\n  /** Using half angle identities: sin(angle / 2) = sqrt((1 - angle_cos) / 2) */\n  float sine = sqrt(0.5f - angle_cos * 0.5f);\n  float cosine = sqrt(0.5f + angle_cos * 0.5f);\n\n  /* TODO(fclem): Optimize. */\n  float angle_sin = sin(axis_angle.angle);\n  if (angle_sin < 0.0f) {\n    sine = -sine;\n  }\n\n  Quaternion quat;\n  quat.x = cosine;\n  quat.y = axis_angle.axis.x * sine;\n  quat.z = axis_angle.axis.y * sine;\n  quat.w = axis_angle.axis.z * sine;\n  return quat;\n}\n\nQuaternion to_quaternion(float3 axis, float angle)\n{\n  if (is_zero(axis)) {\n    return Quaternion::identity();\n  }\n  AxisAngle aa;\n  aa.axis = normalize(axis);\n  aa.angle = angle;\n  return to_quaternion(aa);\n}\n\n/** \\} */\n\n/* -------------------------------------------------------------------- */\n/** \\name Euler Functions\n * \\{ */\n\n/**\n * Extract euler rotation from transform matrix.\n * \\return the rotation with the smallest values from the potential candidates.\n */\nEulerXYZ to_euler(float3x3 mat, const bool normalized)\n{\n  if (!normalized) {\n    mat = normalize(mat);\n  }\n  EulerXYZ eul1, eul2;\n  detail::normalized_to_eul2(mat, eul1, eul2);\n  /* Return best, which is just the one with lowest values it in. */\n  return (length_manhattan(eul1.as_float3()) > length_manhattan(eul2.as_float3())) ? eul2 : eul1;\n}\n/**\n * Extract euler rotation from transform matrix.\n * \\return the rotation with the smallest values from the potential candidates.\n */\nEulerXYZ to_euler(float3x3 mat)\n{\n  return to_euler(mat, true);\n}\n/**\n * Extract euler rotation from transform matrix.\n * \\return the rotation with the smallest values from the potential candidates.\n */\nEulerXYZ to_euler(float4x4 mat, const bool normalized)\n{\n  return to_euler(to_float3x3(mat), normalized);\n}\n/**\n * Extract euler rotation from transform matrix.\n * \\return the rotation with the smallest values from the potential candidates.\n */\nEulerXYZ to_euler(float4x4 mat)\n{\n  return to_euler(to_float3x3(mat));\n}\n\n/** \\} */\n\n/* -------------------------------------------------------------------- */\n/** \\name Axis Angle Functions\n * \\{ */\n\nAxisAngle to_axis_angle(Quaternion quat)\n{\n  /* Calculate angle/2, and sin(angle/2). */\n  float ha = acos(quat.x);\n  float si = sin(ha);\n\n  /* From half-angle to angle. */\n  float angle = ha * 2;\n  /* Prevent division by zero for axis conversion. */\n  if (abs(si) < 0.0005f) {\n    si = 1.0f;\n  }\n\n  float3 axis = float3(quat.y, quat.z, quat.w) / si;\n  if (is_zero(axis)) {\n    axis[1] = 1.0f;\n  }\n  return {axis, angle};\n}\n\nAxisAngle to_axis_angle(EulerXYZ eul)\n{\n  /* Use quaternions as intermediate representation for now... */\n  return to_axis_angle(to_quaternion(eul));\n}\n\n/** \\} */\n\n/* -------------------------------------------------------------------- */\n/** \\name Matrices Functions\n * \\{ */\n\n/**\n * Decompose a matrix into location, rotation, and scale components.\n * \\tparam allow_negative_scale: if true, will compute determinant to know if matrix is negative.\n * Rotation and scale values will be flipped if it is negative.\n * This is a costly operation so it is disabled by default.\n */\nvoid to_rot_scale(float3x3 mat, EulerXYZ &r_rotation, float3 &r_scale)\n{\n  r_scale = to_scale(mat);\n  r_rotation = to_euler(mat, true);\n}\n\n/**\n * Decompose a matrix into location, rotation, and scale components.\n * \\tparam allow_negative_scale: if true, will compute determinant to know if matrix is negative.\n * Rotation and scale values will be flipped if it is negative.\n * This is a costly operation so it is disabled by default.\n */\nvoid to_rot_scale(float3x3 mat,\n                  EulerXYZ &r_rotation,\n                  float3 &r_scale,\n                  const bool allow_negative_scale)\n{\n  float3x3 normalized_mat = normalize_and_get_size(mat, r_scale);\n  if (allow_negative_scale) {\n    if (is_negative(normalized_mat)) {\n      normalized_mat = -normalized_mat;\n      r_scale = -r_scale;\n    }\n  }\n  r_rotation = to_euler(normalized_mat, true);\n}\nvoid to_rot_scale(float3x3 mat, Quaternion &r_rotation, float3 &r_scale)\n{\n  r_scale = to_scale(mat);\n  r_rotation = to_quaternion(mat, true);\n}\nvoid to_rot_scale(float3x3 mat,\n                  Quaternion &r_rotation,\n                  float3 &r_scale,\n                  const bool allow_negative_scale)\n{\n  float3x3 normalized_mat = normalize_and_get_size(mat, r_scale);\n  if (allow_negative_scale) {\n    if (is_negative(normalized_mat)) {\n      normalized_mat = -normalized_mat;\n      r_scale = -r_scale;\n    }\n  }\n  r_rotation = to_quaternion(normalized_mat, true);\n}\n\nvoid to_loc_rot_scale(float4x4 mat, float3 &r_location, EulerXYZ &r_rotation, float3 &r_scale)\n{\n  r_location = mat[3].xyz;\n  to_rot_scale(to_float3x3(mat), r_rotation, r_scale);\n}\nvoid to_loc_rot_scale(float4x4 mat,\n                      float3 &r_location,\n                      EulerXYZ &r_rotation,\n                      float3 &r_scale,\n                      const bool allow_negative_scale)\n{\n  r_location = mat[3].xyz;\n  to_rot_scale(to_float3x3(mat), r_rotation, r_scale, allow_negative_scale);\n}\nvoid to_loc_rot_scale(float4x4 mat, float3 &r_location, Quaternion &r_rotation, float3 &r_scale)\n{\n  r_location = mat[3].xyz;\n  to_rot_scale(to_float3x3(mat), r_rotation, r_scale);\n}\nvoid to_loc_rot_scale(float4x4 mat,\n                      float3 &r_location,\n                      Quaternion &r_rotation,\n                      float3 &r_scale,\n                      const bool allow_negative_scale)\n{\n  r_location = mat[3].xyz;\n  to_rot_scale(to_float3x3(mat), r_rotation, r_scale, allow_negative_scale);\n}\n\n/** \\} */\n",
  "gpu_shader_math_rotation_lib.glsl": "/* SPDX-FileCopyrightText: 2023 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#pragma once\n\n#include \"gpu_shader_math_axis_angle_lib.glsl\"\n#include \"gpu_shader_math_euler_lib.glsl\"\n#include \"gpu_shader_math_matrix_construct_lib.glsl\"\n#include \"gpu_shader_math_quaternion_lib.glsl\"\n#include \"gpu_shader_utildefines_lib.glsl\"\n\n/* -------------------------------------------------------------------- */\n/** \\name Interpolate\n * \\{ */\n\n/**\n * Generic function for implementing slerp\n * (quaternions and spherical vector coords).\n *\n * \\param t: factor in [0..1]\n * \\param cosom: dot product from normalized vectors/quaternions.\n * \\return calculated weights.\n */\nfloat2 interpolate_dot_slerp(float t, float cosom)\n{\n  float2 w = float2(1.0f - t, t);\n  /* Within [-1..1] range, avoid aligned axis. */\n  constexpr float eps = 1e-4f;\n  if (abs(cosom) < 1.0f - eps) {\n    float omega = acos(cosom);\n    w = sin(w * omega) / sin(omega);\n  }\n  return w;\n}\n\nQuaternion interpolate(Quaternion a, Quaternion b, float t)\n{\n  float4 quat = a.as_float4();\n  float cosom = dot(a.as_float4(), b.as_float4());\n  /* Rotate around shortest angle. */\n  if (cosom < 0.0f) {\n    cosom = -cosom;\n    quat = -quat;\n  }\n  float2 w = interpolate_dot_slerp(t, cosom);\n  quat = w.x * quat + w.y * b.as_float4();\n  return Quaternion{UNPACK4(quat)};\n}\n\n/** \\} */\n\n/* -------------------------------------------------------------------- */\n/** \\name Rotate\n * \\{ */\n\n/**\n * Equivalent to `mat * from_rotation(rotation)` but with fewer operation.\n * Optimized for rotation on basis vector (i.e: AxisAngle({1, 0, 0}, 0.2f)).\n */\nfloat3x3 rotate(float3x3 mat, AxisAngle rotation)\n{\n  float3x3 result;\n  /* axis_vec is given to be normalized. */\n  if (rotation.axis.x == 1.0f) {\n    float angle_cos = cos(rotation.angle);\n    float angle_sin = sin(rotation.angle);\n    for (int c = 0; c < 3; c++) {\n      result[0][c] = mat[0][c];\n      result[1][c] = angle_cos * mat[1][c] + angle_sin * mat[2][c];\n      result[2][c] = -angle_sin * mat[1][c] + angle_cos * mat[2][c];\n    }\n  }\n  else if (rotation.axis.y == 1.0f) {\n    float angle_cos = cos(rotation.angle);\n    float angle_sin = sin(rotation.angle);\n    for (int c = 0; c < 3; c++) {\n      result[0][c] = angle_cos * mat[0][c] - angle_sin * mat[2][c];\n      result[1][c] = mat[1][c];\n      result[2][c] = angle_sin * mat[0][c] + angle_cos * mat[2][c];\n    }\n  }\n  else if (rotation.axis.z == 1.0f) {\n    float angle_cos = cos(rotation.angle);\n    float angle_sin = sin(rotation.angle);\n    for (int c = 0; c < 3; c++) {\n      result[0][c] = angle_cos * mat[0][c] + angle_sin * mat[1][c];\n      result[1][c] = -angle_sin * mat[0][c] + angle_cos * mat[1][c];\n      result[2][c] = mat[2][c];\n    }\n  }\n  else {\n    /* Un-optimized case. Arbitrary rotation. */\n    result = mat * from_rotation(rotation);\n  }\n  return result;\n}\n/**\n * Equivalent to `mat * from_rotation(rotation)` but with fewer operation.\n * Optimized for rotation on basis vector (i.e: AxisAngle({1, 0, 0}, 0.2f)).\n */\nfloat3x3 rotate(float3x3 mat, EulerXYZ rotation)\n{\n  AxisAngle axis_angle;\n  if (rotation.y == 0.0f && rotation.z == 0.0f) {\n    axis_angle = AxisAngle{float3(1.0f, 0.0f, 0.0f), rotation.x};\n  }\n  else if (rotation.x == 0.0f && rotation.z == 0.0f) {\n    axis_angle = AxisAngle{float3(0.0f, 1.0f, 0.0f), rotation.y};\n  }\n  else if (rotation.x == 0.0f && rotation.y == 0.0f) {\n    axis_angle = AxisAngle{float3(0.0f, 0.0f, 1.0f), rotation.z};\n  }\n  else {\n    /* Un-optimized case. Arbitrary rotation. */\n    return mat * from_rotation(rotation);\n  }\n  return rotate(mat, axis_angle);\n}\n/**\n * Equivalent to `mat * from_rotation(rotation)` but with fewer operation.\n * Optimized for rotation on basis vector (i.e: AxisAngle({1, 0, 0}, 0.2f)).\n */\nfloat4x4 rotate(float4x4 mat, AxisAngle rotation)\n{\n  float4x4 result = to_float4x4(rotate(to_float3x3(mat), rotation));\n  result[0][3] = mat[0][3];\n  result[1][3] = mat[1][3];\n  result[2][3] = mat[2][3];\n  result[3][0] = mat[3][0];\n  result[3][1] = mat[3][1];\n  result[3][2] = mat[3][2];\n  result[3][3] = mat[3][3];\n  return result;\n}\n/**\n * Equivalent to `mat * from_rotation(rotation)` but with fewer operation.\n * Optimized for rotation on basis vector (i.e: AxisAngle({1, 0, 0}, 0.2f)).\n */\nfloat4x4 rotate(float4x4 mat, EulerXYZ rotation)\n{\n  float4x4 result = to_float4x4(rotate(to_float3x3(mat), rotation));\n  result[0][3] = mat[0][3];\n  result[1][3] = mat[1][3];\n  result[2][3] = mat[2][3];\n  result[3][0] = mat[3][0];\n  result[3][1] = mat[3][1];\n  result[3][2] = mat[3][2];\n  result[3][3] = mat[3][3];\n  return result;\n}\n\n/** \\} */\n",
  "gpu_shader_math_safe_lib.glsl": "/* SPDX-FileCopyrightText: 2023 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#pragma once\n\n#include \"gpu_shader_compat.hh\"\n\n#include \"gpu_shader_math_constants_lib.glsl\"\n\n/* -------------------------------------------------------------------- */\n/** \\name Safe Math Functions\n * \\{ */\n\n/**\n * Safe `a` modulo `b`.\n * If `b` equal 0 the result will be 0.\n */\nfloat safe_mod(float a, float b)\n{\n  return (b != 0.0f) ? mod(a, b) : 0.0f;\n}\n\n/**\n * Safe divide `a` by `b`.\n * If `b` equal 0 the result will be 0.\n */\nfloat safe_divide(float a, float b)\n{\n  return (b != 0.0f) ? (a / b) : 0.0f;\n}\n\n/**\n * Safe reciprocal function. Returns `1/a`.\n * If `a` equal 0 the result will be 0.\n */\nfloat safe_rcp(float a)\n{\n  return (a != 0.0f) ? (1.0f / a) : 0.0f;\n}\n\n/**\n * Safe square root function. Returns `sqrt(a)`.\n * If `a` is less or equal to 0 then the result will be 0.\n */\nfloat safe_sqrt(float a)\n{\n  return sqrt(max(0.0f, a));\n}\n\n/**\n * Safe `arccosine` function. Returns `acos(a)`.\n * If `a` is greater than 1, returns 0.\n * If `a` is less than -1, returns PI.\n */\nfloat safe_acos(float a)\n{\n  if (a <= -1.0f) {\n    return M_PI;\n  }\n  else if (a >= 1.0f) {\n    return 0.0f;\n  }\n  return acos(a);\n}\n\n/**\n * A version of pow that returns a fallback value if the computation is undefined. From the spec:\n * The result is undefined if x < 0 or if x = 0 and y is less than or equal 0.\n */\nfloat fallback_pow(float x, float y, float fallback)\n{\n  if (x < 0.0f || (x == 0.0f && y <= 0.0f)) {\n    return fallback;\n  }\n\n  return pow(x, y);\n}\n\n/**\n * A version of pow that behaves similar to C++ std::pow.\n */\nfloat compatible_pow(float x, float y)\n{\n  if (y == 0.0f) { /* x^0 -> 1, including 0^0 */\n    return 1.0f;\n  }\n\n  /* GLSL pow doesn't accept negative x. */\n  if (x < 0.0f) {\n    if (mod(-y, 2.0f) == 0.0f) {\n      return pow(-x, y);\n    }\n    else {\n      return -pow(-x, y);\n    }\n  }\n  else if (x == 0.0f) {\n    return 0.0f;\n  }\n\n  return pow(x, y);\n}\n\n/**\n * A version of mod that behaves similar to C++ `std::modf`, and is safe such that it returns 0\n * when b is also 0.\n */\nfloat compatible_mod(float a, float b)\n{\n  if (b != 0.0f) {\n    int N = int(a / b);\n    return a - N * b;\n  }\n  return 0.0f;\n}\n\n/**\n * Wrap the given value a to fall within the range [b, c].\n */\nfloat wrap(float a, float b, float c)\n{\n  float range = b - c;\n  /* Avoid discrepancy on some hardware due to floating point accuracy and fast math. */\n  float s = (a != b) ? floor((a - c) / range) : 1.0f;\n  return (range != 0.0f) ? a - range * s : c;\n}\n\n/** \\} */\n",
  "gpu_shader_math_vector_compare_lib.glsl": "/* SPDX-FileCopyrightText: 2023 Blender Authors\n *\n * SPDX-License-Identifier: GPL-2.0-or-later */\n\n#pragma once\n\n#include \"gpu_shader_compat.hh\"\n\n/* ---------------------------------------------------------------------- */\n/** \\name Comparison\n * \\{ */\n\n/**\n * Return true if all components is equal to zero.\n */\ntemplate<typename VecT> bool is_zero(VecT vec)\n{\n  return all(equal(vec, VecT(0.0f)));\n}\ntemplate bool is_zero<float2>(float2);\ntemplate bool is_zero<float3>(float3);\ntemplate bool is_zero<float4>(float4);\n\n/**\n * Return true if any component is equal to zero.\n */\ntemplate<typename VecT> bool is_any_zero(VecT vec)\n{\n  return any(equal(vec, VecT(0.0f)));\n}\ntemplate bool is_any_zero<float2>(float2);\ntemplate bool is_any_zero<float3>(float3);\ntemplate bool is_any_zero<float4>(float4);\n\n/**\n * Return true if the difference between`a` and `b` is below the `epsilon` value.\n */\ntemplate<typename VecT> bool is_equal(VecT a, VecT b, float epsilon)\n{\n  return all(lessThanEqual(abs(a - b), VecT(epsilon)));\n}\ntemplate bool is_equal<float2>(float2, float2, float);\ntemplate bool is_equal<float3>(float3, float3, float);\ntemplate bool is_equal<float4>(float4, float4, float);\n\n/**\n * Return true if the deference between`a` and `b` is below the `epsilon` value.\n * Epsilon value is scaled by magnitude of `a` before comparison.\n */\ntemplate<typename VecT, int dim>\nbool almost_equal_relative(VecT a, VecT b, const float epsilon_factor)\n{\n  for (int i = 0; i < dim; i++) {\n    if (abs(a[i] - b[i]) > epsilon_factor * abs(a[i])) {\n      return false;\n    }\n  }\n  return true;\n}\ntemplate bool almost_equal_relative<float2, 2>(float2 a, float2 b, const float epsilon_factor);\ntemplate bool almost_equal_relative<float3, 3>(float3 a, float3 b, const float epsilon_factor);\ntemplate bool almost_equal_relative<float4, 4>(float4 a, float4 b, const float epsilon_factor);\n\n/* Checks are flipped so NAN doesn't assert because we're making sure the value was\n * normalized and in the case we don't want NAN to be raising asserts since there\n * is nothing to be done in that case. */\ntemplate<typename VecT> bool is_unit_scale(VecT v)\n{\n  constexpr float assert_unit_epsilon = 0.0002f;\n  float test_unit = dot(v, v);\n  return (!(abs(test_unit - 1.0f) >= assert_unit_epsilon) ||\n          !(abs(test_unit) >= assert_unit_epsilon));\n}\ntemplate bool is_unit_scale<float2>(float2);\ntemplate bool is_unit_scale<float3>(float3);\ntemplate bool is_unit_scale<float4>(float4);\n\n/** \\} */\n",
@@ -338,6 +384,159 @@ export const functions = {
  }
 };
 export const declarations = {
+ "CompositorNodeAlphaOver": {
+  "aligned": {},
+  "menus": {
+   "Type": {
+    "items": [
+     "Over",
+     "Disjoint Over",
+     "Conjoint Over"
+    ],
+    "usage": {}
+   }
+  }
+ },
+ "CompositorNodeAntiAliasing": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {}
+ },
+ "CompositorNodeBilateralblur": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {}
+ },
+ "CompositorNodeBlankImage": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeBlur": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {
+   "Type": {
+    "items": [
+     "Flat",
+     "Tent",
+     "Quadratic",
+     "Cubic",
+     "Gaussian",
+     "Fast Gaussian",
+     "Catrom",
+     "Mitch"
+    ],
+    "usage": {}
+   }
+  }
+ },
+ "CompositorNodeBokehBlur": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {}
+ },
+ "CompositorNodeBokehImage": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeBoxMask": {
+  "aligned": {},
+  "menus": {
+   "Operation": {
+    "items": [
+     "Add",
+     "Subtract",
+     "Multiply",
+     "Not"
+    ],
+    "usage": {}
+   }
+  }
+ },
+ "CompositorNodeBrightContrast": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {}
+ },
+ "CompositorNodeChannelMatte": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {
+   "Color Space": {
+    "items": [
+     "RGB",
+     "HSV",
+     "YUV",
+     "YCbCr"
+    ],
+    "usage": {
+     "HSV Key Channel": [
+      1
+     ],
+     "RGB Key Channel": [
+      0
+     ],
+     "YCbCr Key Channel": [
+      3
+     ],
+     "YUV Key Channel": [
+      2
+     ]
+    }
+   },
+   "HSV Key Channel": {
+    "items": [],
+    "usage": {}
+   },
+   "HSV Limit Channel": {
+    "items": [],
+    "usage": {}
+   },
+   "Limit Method": {
+    "items": [
+     "Single",
+     "Max"
+    ],
+    "usage": {}
+   },
+   "RGB Key Channel": {
+    "items": [],
+    "usage": {}
+   },
+   "RGB Limit Channel": {
+    "items": [],
+    "usage": {}
+   },
+   "YCbCr Key Channel": {
+    "items": [],
+    "usage": {}
+   },
+   "YCbCr Limit Channel": {
+    "items": [],
+    "usage": {}
+   },
+   "YUV Key Channel": {
+    "items": [],
+    "usage": {}
+   },
+   "YUV Limit Channel": {
+    "items": [],
+    "usage": {}
+   }
+  }
+ },
+ "CompositorNodeChromaMatte": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {}
+ },
  "CompositorNodeColorBalance": {
   "aligned": {
    "Image": "Image"
@@ -350,25 +549,923 @@ export const declarations = {
      "White Point"
     ],
     "usage": {
-     "Base Gain": 0,
-     "Base Gamma": 0,
-     "Base Lift": 0,
-     "Base Offset": 1,
-     "Base Power": 1,
-     "Base Slope": 1,
-     "Color Gain": 0,
-     "Color Gamma": 0,
-     "Color Lift": 0,
-     "Color Offset": 1,
-     "Color Power": 1,
-     "Color Slope": 1,
-     "Input Temperature": 2,
-     "Input Tint": 2,
-     "Output Temperature": 2,
-     "Output Tint": 2
+     "Base Gain": [
+      0
+     ],
+     "Base Gamma": [
+      0
+     ],
+     "Base Lift": [
+      0
+     ],
+     "Base Offset": [
+      1
+     ],
+     "Base Power": [
+      1
+     ],
+     "Base Slope": [
+      1
+     ],
+     "Color Gain": [
+      0
+     ],
+     "Color Gamma": [
+      0
+     ],
+     "Color Lift": [
+      0
+     ],
+     "Color Offset": [
+      1
+     ],
+     "Color Power": [
+      1
+     ],
+     "Color Slope": [
+      1
+     ],
+     "Input Temperature": [
+      2
+     ],
+     "Input Tint": [
+      2
+     ],
+     "Output Temperature": [
+      2
+     ],
+     "Output Tint": [
+      2
+     ]
     }
    }
   }
+ },
+ "CompositorNodeColorCorrection": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {}
+ },
+ "CompositorNodeColorMatte": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {}
+ },
+ "CompositorNodeColorSpill": {
+  "aligned": {},
+  "menus": {
+   "Limit Channel": {
+    "items": [],
+    "usage": {}
+   },
+   "Limit Method": {
+    "items": [
+     "Single",
+     "Average"
+    ],
+    "usage": {
+     "Limit Channel": [
+      0
+     ]
+    }
+   },
+   "Spill Channel": {
+    "items": [],
+    "usage": {}
+   }
+  }
+ },
+ "CompositorNodeCombineColor": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeConvertColorSpace": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeConvertToDisplay": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeConvolve": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {
+   "Kernel Data Type": {
+    "items": [],
+    "usage": {}
+   }
+  }
+ },
+ "CompositorNodeCornerPin": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {
+   "Extension X": {
+    "items": [
+     "Clip",
+     "Extend",
+     "Repeat"
+    ],
+    "usage": {}
+   },
+   "Extension Y": {
+    "items": [
+     "Clip",
+     "Extend",
+     "Repeat"
+    ],
+    "usage": {}
+   },
+   "Interpolation": {
+    "items": [
+     "Nearest",
+     "Bilinear",
+     "Bicubic",
+     "Anisotropic"
+    ],
+    "usage": {}
+   }
+  }
+ },
+ "CompositorNodeCrop": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {}
+ },
+ "CompositorNodeCryptomatteV2": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeCurveRGB": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeDBlur": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {}
+ },
+ "CompositorNodeDefocus": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeDenoise": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {
+   "Prefilter": {
+    "items": [
+     "None",
+     "Fast",
+     "Accurate"
+    ],
+    "usage": {}
+   },
+   "Quality": {
+    "items": [
+     "Follow Scene",
+     "Balanced"
+    ],
+    "usage": {}
+   }
+  }
+ },
+ "CompositorNodeDespeckle": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {}
+ },
+ "CompositorNodeDiffMatte": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeDilateErode": {
+  "aligned": {},
+  "menus": {
+   "Falloff": {
+    "items": [],
+    "usage": {}
+   },
+   "Type": {
+    "items": [
+     "Steps",
+     "Threshold",
+     "Distance",
+     "Feather"
+    ],
+    "usage": {
+     "Falloff": [
+      3
+     ],
+     "Falloff Size": [
+      1
+     ]
+    }
+   }
+  }
+ },
+ "CompositorNodeDisplace": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {
+   "Extension X": {
+    "items": [
+     "Clip",
+     "Extend",
+     "Repeat"
+    ],
+    "usage": {}
+   },
+   "Extension Y": {
+    "items": [
+     "Clip",
+     "Extend",
+     "Repeat"
+    ],
+    "usage": {}
+   },
+   "Interpolation": {
+    "items": [
+     "Nearest",
+     "Bilinear",
+     "Bicubic",
+     "Anisotropic"
+    ],
+    "usage": {}
+   }
+  }
+ },
+ "CompositorNodeDistanceMatte": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {
+   "Color Space": {
+    "items": [
+     "RGB",
+     "YCC"
+    ],
+    "usage": {}
+   }
+  }
+ },
+ "CompositorNodeDoubleEdgeMask": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeEllipseMask": {
+  "aligned": {},
+  "menus": {
+   "Operation": {
+    "items": [
+     "Add",
+     "Subtract",
+     "Multiply",
+     "Not"
+    ],
+    "usage": {}
+   }
+  }
+ },
+ "CompositorNodeExposure": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {}
+ },
+ "CompositorNodeFilter": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {
+   "Type": {
+    "items": [
+     "Soften",
+     "Box Sharpen",
+     "Diamond Sharpen",
+     "Laplace",
+     "Sobel",
+     "Prewitt",
+     "Kirsch",
+     "Shadow"
+    ],
+    "usage": {}
+   }
+  }
+ },
+ "CompositorNodeFlip": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {}
+ },
+ "CompositorNodeGlare": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {
+   "Kernel Data Type": {
+    "items": [],
+    "usage": {}
+   },
+   "Quality": {
+    "items": [
+     "High",
+     "Medium",
+     "Low"
+    ],
+    "usage": {}
+   },
+   "Type": {
+    "items": [
+     "Bloom",
+     "Ghosts",
+     "Streaks",
+     "Fog Glow",
+     "Simple Star",
+     "Sun Beams",
+     "Kernel"
+    ],
+    "usage": {
+     "Color Modulation": [
+      1,
+      2
+     ],
+     "Diagonal Star": [
+      4
+     ],
+     "Fade": [
+      4,
+      2
+     ],
+     "Iterations": [
+      4,
+      1,
+      2
+     ],
+     "Jitter": [
+      5
+     ],
+     "Kernel Data Type": [
+      6
+     ],
+     "Size": [
+      3,
+      0,
+      5
+     ],
+     "Streaks": [
+      2
+     ],
+     "Streaks Angle": [
+      2
+     ],
+     "Sun Position": [
+      5
+     ]
+    }
+   }
+  }
+ },
+ "CompositorNodeHueCorrect": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeHueSat": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {}
+ },
+ "CompositorNodeIDMask": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeImage": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeImageCoordinates": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeImageInfo": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeInpaint": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {}
+ },
+ "CompositorNodeInvert": {
+  "aligned": {
+   "Color": "Color"
+  },
+  "menus": {}
+ },
+ "CompositorNodeKeying": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {
+   "Feather Falloff": {
+    "items": [],
+    "usage": {}
+   }
+  }
+ },
+ "CompositorNodeKeyingScreen": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeKuwahara": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {
+   "Type": {
+    "items": [
+     "Classic",
+     "Anisotropic"
+    ],
+    "usage": {}
+   }
+  }
+ },
+ "CompositorNodeLensdist": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {
+   "Type": {
+    "items": [
+     "Radial",
+     "Horizontal"
+    ],
+    "usage": {}
+   }
+  }
+ },
+ "CompositorNodeLevels": {
+  "aligned": {},
+  "menus": {
+   "Channel": {
+    "items": [
+     "Combined",
+     "Red",
+     "Green",
+     "Blue",
+     "Luminance"
+    ],
+    "usage": {}
+   }
+  }
+ },
+ "CompositorNodeLumaMatte": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {}
+ },
+ "CompositorNodeMapUV": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {
+   "Extension X": {
+    "items": [
+     "Clip",
+     "Extend",
+     "Repeat"
+    ],
+    "usage": {}
+   },
+   "Extension Y": {
+    "items": [
+     "Clip",
+     "Extend",
+     "Repeat"
+    ],
+    "usage": {}
+   },
+   "Interpolation": {
+    "items": [
+     "Nearest",
+     "Bilinear",
+     "Bicubic",
+     "Anisotropic"
+    ],
+    "usage": {}
+   }
+  }
+ },
+ "CompositorNodeMask": {
+  "aligned": {},
+  "menus": {
+   "Size Source": {
+    "items": [
+     "Fixed",
+     "Fixed/Scene"
+    ],
+    "usage": {
+     "Size X": [
+      0,
+      1
+     ],
+     "Size Y": [
+      0,
+      1
+     ]
+    }
+   }
+  }
+ },
+ "CompositorNodeMaskToSDF": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeMovieClip": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeMovieDistortion": {
+  "aligned": {},
+  "menus": {
+   "Type": {
+    "items": [],
+    "usage": {}
+   }
+  }
+ },
+ "CompositorNodeNormal": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeNormalize": {
+  "aligned": {
+   "Value": "Value"
+  },
+  "menus": {}
+ },
+ "CompositorNodeOutputFile": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodePixelate": {
+  "aligned": {
+   "Color": "Color"
+  },
+  "menus": {}
+ },
+ "CompositorNodePlaneTrackDeform": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {}
+ },
+ "CompositorNodePosterize": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {}
+ },
+ "CompositorNodePremulKey": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {
+   "Type": {
+    "items": [
+     "To Premultiplied",
+     "To Straight"
+    ],
+    "usage": {}
+   }
+  }
+ },
+ "CompositorNodeRGB": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeRGBToBW": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeRLayers": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeRelativeToPixel": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeRotate": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {
+   "Extension X": {
+    "items": [
+     "Clip",
+     "Extend",
+     "Repeat"
+    ],
+    "usage": {}
+   },
+   "Extension Y": {
+    "items": [
+     "Clip",
+     "Extend",
+     "Repeat"
+    ],
+    "usage": {}
+   },
+   "Interpolation": {
+    "items": [
+     "Nearest",
+     "Bilinear",
+     "Bicubic",
+     "Anisotropic"
+    ],
+    "usage": {}
+   }
+  }
+ },
+ "CompositorNodeScale": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {
+   "Extension X": {
+    "items": [
+     "Clip",
+     "Extend",
+     "Repeat"
+    ],
+    "usage": {}
+   },
+   "Extension Y": {
+    "items": [
+     "Clip",
+     "Extend",
+     "Repeat"
+    ],
+    "usage": {}
+   },
+   "Frame Type": {
+    "items": [
+     "Stretch",
+     "Fit",
+     "Crop"
+    ],
+    "usage": {}
+   },
+   "Interpolation": {
+    "items": [
+     "Nearest",
+     "Bilinear",
+     "Bicubic",
+     "Anisotropic"
+    ],
+    "usage": {}
+   },
+   "Type": {
+    "items": [
+     "Relative",
+     "Absolute",
+     "Scene Size",
+     "Render Size"
+    ],
+    "usage": {
+     "Frame Type": [
+      3
+     ],
+     "X": [
+      0,
+      1
+     ],
+     "Y": [
+      0,
+      1
+     ]
+    }
+   }
+  }
+ },
+ "CompositorNodeSceneTime": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeSeparateColor": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeSequencerStripInfo": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeSetAlpha": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {
+   "Type": {
+    "items": [
+     "Apply Mask",
+     "Replace Alpha"
+    ],
+    "usage": {}
+   }
+  }
+ },
+ "CompositorNodeSplit": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeStabilize": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {
+   "Extension X": {
+    "items": [
+     "Clip",
+     "Extend",
+     "Repeat"
+    ],
+    "usage": {}
+   },
+   "Extension Y": {
+    "items": [
+     "Clip",
+     "Extend",
+     "Repeat"
+    ],
+    "usage": {}
+   },
+   "Interpolation": {
+    "items": [
+     "Nearest",
+     "Bilinear",
+     "Bicubic",
+     "Anisotropic"
+    ],
+    "usage": {}
+   }
+  }
+ },
+ "CompositorNodeStringToImage": {
+  "aligned": {},
+  "menus": {
+   "Horizontal Alignment": {
+    "items": [
+     "Left",
+     "Center",
+     "Right"
+    ],
+    "usage": {}
+   },
+   "Vertical Alignment": {
+    "items": [
+     "Top",
+     "Top Baseline",
+     "Middle",
+     "Bottom Baseline",
+     "Bottom"
+    ],
+    "usage": {}
+   }
+  }
+ },
+ "CompositorNodeSwitch": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeSwitchView": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeTime": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeTonemap": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {
+   "Type": {
+    "items": [
+     "R/D Photoreceptor",
+     "Rh Simple"
+    ],
+    "usage": {}
+   }
+  }
+ },
+ "CompositorNodeTrackPos": {
+  "aligned": {},
+  "menus": {
+   "Mode": {
+    "items": [
+     "Absolute",
+     "Relative Start",
+     "Relative Frame",
+     "Absolute Frame"
+    ],
+    "usage": {}
+   }
+  }
+ },
+ "CompositorNodeTransform": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {
+   "Extension X": {
+    "items": [
+     "Clip",
+     "Extend",
+     "Repeat"
+    ],
+    "usage": {}
+   },
+   "Extension Y": {
+    "items": [
+     "Clip",
+     "Extend",
+     "Repeat"
+    ],
+    "usage": {}
+   },
+   "Interpolation": {
+    "items": [
+     "Nearest",
+     "Bilinear",
+     "Bicubic",
+     "Anisotropic"
+    ],
+    "usage": {}
+   }
+  }
+ },
+ "CompositorNodeTranslate": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {
+   "Extension X": {
+    "items": [
+     "Clip",
+     "Extend",
+     "Repeat"
+    ],
+    "usage": {}
+   },
+   "Extension Y": {
+    "items": [
+     "Clip",
+     "Extend",
+     "Repeat"
+    ],
+    "usage": {}
+   },
+   "Interpolation": {
+    "items": [
+     "Nearest",
+     "Bilinear",
+     "Bicubic",
+     "Anisotropic"
+    ],
+    "usage": {}
+   }
+  }
+ },
+ "CompositorNodeVecBlur": {
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {}
+ },
+ "CompositorNodeViewer": {
+  "aligned": {},
+  "menus": {}
+ },
+ "CompositorNodeZcombine": {
+  "aligned": {},
+  "menus": {}
  },
  "ShaderNodeMath": {
   "aligned": {},

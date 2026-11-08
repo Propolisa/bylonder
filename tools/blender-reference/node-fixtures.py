@@ -298,5 +298,22 @@ cases.append(eevee_case("ShaderNodeValue", {}, {}, "Value", {"Value": 0.37}))
 cases.append(eevee_case("ShaderNodeRGB", {}, {}, "Color", {"Color": (0.1, 0.6, 0.3, 1.0)}))
 for mode, inputs in BALANCE.items():
     cases.append(case("compositor", "CompositorNodeColorBalance", {}, {"Image": IMAGE, "Type": mode, **inputs}, "Image"))
+# The pixel nodes Blender's demo files composite with.
+HALF_ALPHA = (0.3, 0.6, 0.9, 0.5)
+cases.append(case("compositor", "CompositorNodeBrightContrast", {}, {"Image": IMAGE, "Bright": 0.1, "Contrast": 0.4}, "Image"))
+cases.append(case("compositor", "CompositorNodeInvert", {}, {"Color": HALF_ALPHA, "Fac": 0.7, "Invert Alpha": True}, "Color"))
+for mode in ("To Premultiplied", "To Straight"):
+    cases.append(case("compositor", "CompositorNodePremulKey", {}, {"Image": HALF_ALPHA, "Type": mode}, "Image"))
+for mode in ("Apply Mask", "Replace Alpha"):
+    cases.append(case("compositor", "CompositorNodeSetAlpha", {}, {"Image": HALF_ALPHA, "Alpha": 0.4, "Type": mode}, "Image"))
+cases.append(case("compositor", "CompositorNodeCurveRGB", {"mapping": mapping([BENT, LINE, BENT, LINE])},
+                  {"Image": (0.3, 0.6, 1.2, 1.0), "Fac": 0.8, "Black Level": (0.05, 0.0, 0.1, 1.0), "White Level": (0.9, 1.0, 1.1, 1.0)}, "Image"))
+for blend in ("OVERLAY", "LINEAR_LIGHT"):
+    cases.append(case("compositor", "ShaderNodeMix", {"data_type": "RGBA", "blend_type": blend}, COLORS, "Result_Color"))
+cases.append(case("compositor", "ShaderNodeGamma", {}, {"Color": IMAGE, "Gamma": 2.2}, "Color"))
+cases.append(case("compositor", "ShaderNodeMath", {"operation": "DIVIDE"}, {"Value": 0.7, "Value_001": 1.3}, "Value"))
+for operation in ("SCALE", "DOT_PRODUCT"):
+    cases.append(case("compositor", "ShaderNodeVectorMath", {"operation": operation}, {"Vector": A, "Vector_001": B, "Scale": 1.7},
+                      "Value" if operation == "DOT_PRODUCT" else "Vector"))
 json.dump({"blender": bpy.app.version_string, "cases": cases}, open(out_path, "w"), indent=1)
 print("wrote", out_path, len(cases), "cases")

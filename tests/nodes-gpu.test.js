@@ -43,13 +43,15 @@ function shaderProgram({ node, properties, inputs, output }) {
   return { code: [...samplers, ...functions.values(), `void main(void) {\n${body}gl_FragColor = ${convert(links.get('@' + output), kind, 'color4')};\n}`].join('\n'), uniforms: [], textures };
 }
 
-// A compositor node's block with the case's values, its fragment shader and uniforms, reading the image's texel.
-function compositorProgram({ node, properties, inputs }) {
+// A compositor node's block with the case's values (its image unlinked, so a value too), its fragment shader as Blender's
+// GPU code for it builds it, and its uniforms and color bands.
+function compositorProgram({ node, properties, inputs, output }) {
   const block = new compositorNodeClasses[node]('Case', frameGraph, scene);
   Object.assign(block.properties, properties);
   Object.assign(block.values, inputs);
-  const { code, uniforms } = block._fragment();
-  return { code, image: block.values[block.image.identifier], uniforms: uniforms.map(([name, id, kind]) => [name, kind, block.values[id]]) };
+  block.output = output;
+  const { code, uniforms, bands } = block._fragment(), values = block._uniformValues();
+  return { code, uniforms: uniforms.map(([name, kind], i) => [name, kind, values[i]]), textures: bands.map(([name, pixels]) => [name, [...halfFloats(pixels)]]) };
 }
 
 const programs = cases.map((c) => (c.tree === 'shader' ? shaderProgram(c) : compositorProgram(c)));
@@ -86,7 +88,7 @@ function run(programs) {
     gl.useProgram(program);
     for (const [name, kind, value] of uniforms) {
       const at = gl.getUniformLocation(program, name), v = [value].flat();
-      if (kind === 'float') gl.uniform1f(at, v[0]); else if (kind === 'vec3') gl.uniform3fv(at, v.slice(0, 3)); else gl.uniform4fv(at, v.slice(0, 4));
+      if (kind === 'float') gl.uniform1f(at, v[0]); else if (kind === 'mat4') gl.uniformMatrix4fv(at, false, v); else if (kind === 'vec2') gl.uniform2fv(at, v.slice(0, 2)); else if (kind === 'vec3') gl.uniform3fv(at, v.slice(0, 3)); else gl.uniform4fv(at, v.slice(0, 4));
     }
     // Color ramp tables, as Blender's GPU code makes them (GPU_color_band: half floats, sampled linearly).
     textures.forEach(([name, halves], i) => {

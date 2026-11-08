@@ -247,8 +247,9 @@ function includeOrder() {
 }
 
 function parse() {
-  // Every function Bylonder links runs in a fragment shader (a material's, or a compositor node's pass).
-  const macros = new Map([['GPU_FRAGMENT_SHADER', { params: null, body: '1' }]]);
+  // Every function Bylonder links runs in a fragment shader (a material's, or a compositor node's pass), on WebGL 2:
+  // Blender's OpenGL backend's code paths (its overloads of built-ins, such as normalize's).
+  const macros = new Map([['GPU_FRAGMENT_SHADER', { params: null, body: '1' }], ['GPU_OPENGL', { params: null, body: '1' }]]);
   const codes = includeOrder().map((file) => [file, flatten(preprocess(libraries[file], macros))]);
   const symbols = new Map();
   for (const [, code] of codes) for (const [name, text] of declarations(code)) {

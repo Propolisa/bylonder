@@ -45,7 +45,7 @@ export function availability(decl, properties, values = {}) {
   }
   for (const menu of decl.inputs.filter((s) => s.usage)) {
     const item = menu.items.indexOf(values[menu.identifier] ?? menu.default);
-    for (const [id, used] of Object.entries(menu.usage)) used === item ? inputs.add(id) : inputs.delete(id);
+    for (const [id, used] of Object.entries(menu.usage)) used.includes(item) ? inputs.add(id) : inputs.delete(id);
   }
   return { inputs, outputs, labels, tag };
 }

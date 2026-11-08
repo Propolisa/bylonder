@@ -14,7 +14,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, os.path.join(REPO, 'tools', 'blender-ui'))
-from transpile import TAG, fetch  # noqa: E402
+from transpile import TAG, fetch, listing  # noqa: E402
 
 OUT = os.path.join(REPO, 'src', 'nodes', 'blender', 'gpu-library.js')
 # Where Blender's shader includes are found, in order.
@@ -88,6 +88,8 @@ ROOTS = [
     'gpu_shader_common_hash.glsl',
     'gpu_shader_utildefines_lib.glsl',
 ]
+# Every GLSL library of Blender's compositor: the functions its pixel nodes' GPU code links (node_gpu_material).
+COMPOSITOR_LIBRARY = 'source/blender/compositor/shaders/library'
 # Functions of shaders written in Blender's shader language (.bsl.hh), which the libraries above leave out, as a
 # library of their own: (its name, the file, the functions' signatures).
 BSL = [('workbench_hair.glsl', 'source/blender/draw/engines/workbench/shaders/workbench_prepass.bsl.hh',
@@ -128,12 +130,26 @@ TABLES = {
     # Per feature, its functions by dimension (1D to 4D).
     'voronoi': (NODES + 'node_shader_tex_voronoi.cc', 'static const char *gpu_shader_get_name(const int feature', RNA, 'prop_feature_items'),
 }
-# The nodes Bylonder runs, by their C++ file.
+# The shader nodes Bylonder runs whose declarations have menus, by their C++ file; every compositor node is added
+# (compositor_declarations).
 DECLARATIONS = {
     'ShaderNodeMath': 'source/blender/nodes/shader/nodes/node_shader_math.cc',
     'ShaderNodeMix': 'source/blender/nodes/shader/nodes/node_shader_mix.cc',
-    'CompositorNodeColorBalance': 'source/blender/nodes/composite/nodes/node_composite_color_balance.cc',
 }
+COMPOSITOR_NODES = 'source/blender/nodes/composite/nodes'
+# Where the RNA enums node declarations take their items from (static_items) are defined.
+ENUM_FILES = [RNA, 'source/blender/makesrna/intern/rna_scene.cc', 'source/blender/makesrna/intern/rna_material.cc']
+
+
+def compositor_declarations():
+    """Every compositor node's C++ file, by the idname it registers, that declares sockets."""
+    files = {}
+    for path in listing(COMPOSITOR_NODES, '.cc'):
+        source = fetch(path)
+        idname = re.search(r'cmp_node_type_base\(&ntype,\s*"(\w+)"', source)
+        if idname and re.search(r'static void \w*declare\(', source):
+            files[idname[1]] = path
+    return files
 
 
 def find(name):
@@ -147,7 +163,7 @@ def find(name):
 
 def libraries():
     sources, todo = {name: '\n\n'.join(signature.split('(')[0] + '(' + function(fetch(path), signature) for signature in signatures)
-                     for name, path, signatures in BSL}, list(ROOTS)
+                     for name, path, signatures in BSL}, ROOTS + [os.path.basename(p) for p in listing(COMPOSITOR_LIBRARY, '.glsl')]
     while todo:
         name = todo.pop(0)
         if name in sources:
@@ -184,22 +200,30 @@ def table(cc, function, rna, items, after=''):
     return {identifiers[macro]: name for macro, name in names.items() if macro in identifiers}
 
 
+def enum_tables(source):
+    """A file's enum item arrays: per array, each item's macro and UI name."""
+    return {name: re.findall(r'\{(\w+),\s*"\w+",\s*\w+,\s*N_\("([^"]+)"\)', body(source, f'EnumPropertyItem {name}[]'))
+            for name in re.findall(r'EnumPropertyItem (\w+)\[\]', source)}
+
+
 def declaration(cc):
-    """Per menu socket: its item names in order, and the item each socket it governs is used with (usage_by_menu);
+    """Per menu socket: its item names in order, and the items each socket it governs is used with (usage_by_menu);
     per output declared align_with_previous, the input whose row it shares."""
     source = fetch(cc)
-    tables = {name: re.findall(r'\{(\w+),\s*"\w+",\s*\w+,\s*N_\("([^"]+)"\)', body(source, f'EnumPropertyItem {name}[]'))
-              for name in re.findall(r'EnumPropertyItem (\w+)\[\]', source)}
+    tables = {**{k: v for f in ENUM_FILES for k, v in enum_tables(fetch(f)).items()}, **enum_tables(source)}
     declare = body(source, re.search(r'static void \w*declare\(', source)[0])
     # The sockets in declaration order: (side, identifier, the builder calls chained on it).
-    sockets = [(m[1], m[3] or m[2], declare[m.end():].split('b.add_', 1)[0])
+    sockets = [(m[1], m[3] or m[2], re.split(r'\.add_(?:input|output|panel|layout)', declare[m.end():], maxsplit=1)[0])
                for m in re.finditer(r'add_(input|output)<decl::\w+>\("([^"]+)"_ustr(?:,\s*"([^"]+)"_ustr)?\)', declare)]
     inputs = {identifier: text for side, identifier, text in sockets if side == 'input'}
-    items = {identifier: tables[m[1]] for identifier, text in inputs.items() if (m := re.search(r'\.static_items\((\w+)\)', text))}
+    items = {identifier: tables[m[1]] for identifier, text in inputs.items() if (m := re.search(r'\.static_items\((\w+)\)', text)) and m[1] in tables}
     menus = {identifier: {'items': [name for _, name in table], 'usage': {}} for identifier, table in items.items()}
     for identifier, text in inputs.items():
-        for menu, macro in re.findall(r'\.usage_by_menu\("([^"]+)"_ustr,\s*(\w+)\)', text):
-            menus[menu]['usage'][identifier] = [m for m, _ in items[menu]].index(macro)
+        for menu, values in re.findall(r'\.usage_by_menu\("([^"]+)"_ustr,\s*(\w+|\{[^}]*\})\)', text):
+            macros = [m for m, _ in items.get(menu, [])]
+            used = [macros.index(v) for v in re.findall(r'\w+', values) if v in macros]
+            if used:
+                menus[menu]['usage'][identifier] = used
     aligned = {identifier: sockets[i - 1][1] for i, (side, identifier, text) in enumerate(sockets)
                if side == 'output' and '.align_with_previous()' in text and i and sockets[i - 1][0] == 'input'}
     return {'menus': menus, 'aligned': aligned}
@@ -207,10 +231,10 @@ def declaration(cc):
 
 def main():
     data = {'glsl': libraries(), 'draw': {name: fetch(f'{DRAW_DIR}/{name}') for name in DRAW}, 'functions': {name: table(*spec) for name, spec in TABLES.items()},
-            'declarations': {node: declaration(cc) for node, cc in DECLARATIONS.items()}}
+            'declarations': {node: declaration(cc) for node, cc in {**DECLARATIONS, **compositor_declarations()}.items()}}
     lines = [f'// Generated by tools/blender-nodes/gpu.py from Blender {TAG}; do not edit.']
     lines += [f'export const {key} = {json.dumps(value, indent=1, sort_keys=True)};' for key, value in data.items()]
-    open(OUT, 'w').write('\n'.join(lines) + '\n')
+    open(OUT, 'w', newline='\n').write('\n'.join(lines) + '\n')
     print('wrote', os.path.relpath(OUT, REPO), len(data['glsl']), 'libraries')
 
 

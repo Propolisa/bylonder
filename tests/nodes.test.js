@@ -86,7 +86,9 @@ reloaded.parseSerializedObject(saved);
 const balanceAgain = reloaded.attachedBlocks.find((b) => b.getClassName() === 'CompositorNodeColorBalance');
 assert.ok(balanceAgain, 'a Blender compositor node loads from Babylon serialization');
 assert.equal(reloaded.outputBlock.texture.connectedPoint.ownerBlock, balanceAgain);
-assert.match(balanceAgain._fragment().code, /bl_node_composite_color_balance\(texture2D\(textureSampler, vUV\), bl_Fac/);
+const balanceCode = balanceAgain._fragment().code;
+assert.match(balanceCode, /bl_set_color\(texture2D\(textureSampler, vUV\), bl_v0\)/, "its image read as Blender's compositor links an operation's input");
+assert.match(balanceCode, /bl_node_composite_color_balance\(bl_v0, /, "into the GPU function Blender's own C++ links");
 
 // Image Texture's Color alpha as node_shader_gpu_tex_image gives it from Blender's texture: a float buffer's texture
 // holds premultiplied alpha (straight in Blender's for a straight image), a byte buffer's straight.

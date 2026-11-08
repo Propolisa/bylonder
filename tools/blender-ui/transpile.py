@@ -140,16 +140,16 @@ def fetch(path):
     return open(cache).read()
 
 
-def listing(path):
-    """The Python files under a directory of Blender's repository at the tag, cached."""
-    cache = os.path.join(os.path.expanduser('~/.cache/bylonder/blender'), TAG, path, '.listing.json')
+def listing(path, suffix='.py'):
+    """The files of a type (Python's by default) under a directory of Blender's repository at the tag, cached."""
+    cache = os.path.join(os.path.expanduser('~/.cache/bylonder/blender'), TAG, path, '.listing.json' if suffix == '.py' else f'.listing{suffix}.json')
     if os.path.exists(cache):
         return json.load(open(cache))
     url = f'{BLENDER}/contents/{path.replace("/", "%2F")}?ref={TAG}'
     entries = json.loads(subprocess.run(['curl', '-sfL', url], capture_output=True, check=True).stdout)
-    files = [e['path'] for e in entries if e['type'] == 'file' and e['name'].endswith('.py')]
+    files = [e['path'] for e in entries if e['type'] == 'file' and e['name'].endswith(suffix)]
     for d in (e['path'] for e in entries if e['type'] == 'dir'):
-        files += listing(d)
+        files += listing(d, suffix)
     os.makedirs(os.path.dirname(cache), exist_ok=True)
     json.dump(files, open(cache, 'w'))
     return files

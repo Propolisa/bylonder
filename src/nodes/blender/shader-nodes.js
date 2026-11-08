@@ -20,7 +20,7 @@ import { functions } from './gpu-library.js';
 import { BABYLON_TYPES, convert, converts, glslType, glslValue, kindOf, LUMINANCE, socketType } from './sockets.js';
 import { availability, declaration, defaults } from './declarations.js';
 import { compileSteps, glslIdentifier, kindOfSocket, menuValue, muteLinks, setUniforms, socketOf, stack } from './node-code.js';
-import { colorRampTable, defaultColorRamp, halfFloats, TABLE_SIZE } from '../../blenkernel/colorband.js';
+import { colorRampTable, defaultColorRamp, halfFloats } from '../../blenkernel/colorband.js';
 import { blackbodyTable, curveMappingGPU, defaultCurveMapping, plainCurveMapping, wavelengthTable } from '../../blenkernel/colortools.js';
 import { CurvesGeometryBlock, CurvesNormalBlock } from '../../draw/curves.js';
 import { imageTexture } from '../../imbuf/image-textures.js';
@@ -681,10 +681,10 @@ function texspace(mesh) {
 
 // Color ramp tables as textures (GPU_color_band), by table.
 const rampTextures = new Map();
-function rampTexture(table, scene) {
+export function rampTexture(table, scene) {
   const key = table.join();
   if (!rampTextures.get(key)?.getScene?.()?.isDisposed && rampTextures.get(key)?.getScene() === scene) return rampTextures.get(key);
-  const texture = new RawTexture(halfFloats(table), TABLE_SIZE, 1, Constants.TEXTUREFORMAT_RGBA, scene, false, false, Texture.BILINEAR_SAMPLINGMODE, Constants.TEXTURETYPE_HALF_FLOAT);
+  const texture = new RawTexture(halfFloats(table), table.length / 4, 1, Constants.TEXTUREFORMAT_RGBA, scene, false, false, Texture.BILINEAR_SAMPLINGMODE, Constants.TEXTURETYPE_HALF_FLOAT);
   texture.wrapU = texture.wrapV = Texture.CLAMP_ADDRESSMODE;
   texture.metadata = { table };
   rampTextures.set(key, texture);
@@ -1550,7 +1550,7 @@ const plainValue = (value) => (value && typeof value === 'object' && Symbol.iter
 // A node's properties as its block keeps them, from Blender's node (RNA): those its declaration has, its color ramp and its
 // curve mapping.
 export function nodeProperties(node, tree = 'shader') {
-  const decl = declaration(tree, node.bl_idname), ramp = node.color_ramp, mapping = CURVE_MAPPINGS[node.bl_idname] && node.mapping;
+  const decl = declaration(tree, node.bl_idname), ramp = node.color_ramp, mapping = (CURVE_MAPPINGS[node.bl_idname] || tree === 'compositor') && node.mapping?.curves && node.mapping;
   return {
     // An ID pointer (an Image Texture's image) by its name.
     ...Object.fromEntries(Object.entries(decl?.properties ?? {}).map(([key, { type }]) => [key, type === 'POINTER' ? node[key]?.name ?? null : plainValue(node[key])])),
