@@ -7,6 +7,7 @@ import { shadowMapVertexShader } from '@babylonjs/core/Shaders/shadowMap.vertex.
 import { shadowMapPixelShader } from '@babylonjs/core/Shaders/shadowMap.fragment.js';
 import { influenceRadius, isBlenderLight, lightRecord } from './light-home.js';
 import { areaLightShadows } from './area-light.js';
+import { createLightReach } from './light-reach.js';
 import { filmSample } from '../../render/film.js';
 import { halton } from '../../render/sampling.js';
 import { evaluatedMatrix, setEvaluatedMatrix } from '../../runtime/object-transform.js';
@@ -117,18 +118,23 @@ function shadowState(light, casters, sample) {
   return parts.join();
 }
 
-export function createLightShadows(scene) {
+// warn(message): a Warning report, for a mesh more lights reach than its material takes (light-reach.js).
+export function createLightShadows(scene, { warn } = {}) {
   const generators = new Map(); // light -> { generator, type }
   const jitter = jitterPerSample(scene);
   let counted = '', drawn = false, evaluated = 0;
   // Every light lights every material, as in Blender (Babylon's materials take 4 unless told more), up to what a vertex
   // shader holds: a uniform block per light besides the scene's, mesh's and material's (and one spare).
   const gl = scene.getEngine()._gl, blocks = gl?.getParameter?.(gl.MAX_VERTEX_UNIFORM_BLOCKS) ?? 12;
+  // Past that, each mesh takes the lights that reach it, the strongest first, as EEVEE culls lights by their reach.
+  const reach = createLightReach(scene, warn);
   const lightAll = () => {
     const count = Math.min(scene.lights.length, blocks - 4), key = `${count}:${scene.materials.length}`;
-    if (key === counted) return;
-    counted = key;
-    for (const material of scene.materials) if (material.maxSimultaneousLights < count) material.maxSimultaneousLights = count;
+    if (key !== counted) {
+      counted = key;
+      for (const material of scene.materials) if (material.maxSimultaneousLights < count) material.maxSimultaneousLights = count;
+    }
+    reach.update(count);
   };
   const casting = (record) => record?.use_shadow && (CASTS.includes(record.type) || (record.type === 'AREA' && areaLightShadows.enabled(scene)));
   const sync = () => {

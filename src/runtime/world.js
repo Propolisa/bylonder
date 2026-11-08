@@ -2,6 +2,7 @@ import * as BABYLON from "@babylonjs/core";
 import { asObject } from "./object-transform.js";
 import "../draw/draw-view.js";
 import { createLightShadows } from "../blenkernel/light/light-shadows.js";
+import { report } from "../windowmanager/wm-reports.js";
 import { createModifierSystem, registerModifier } from "../modifiers/stack.js";
 import { geometryNodesDefinition } from "../nodes/geometry-nodes.js";
 import { createCompositor } from "../compositor/compositor.js";
@@ -144,7 +145,7 @@ export async function createWorld({ input, engine, canvas, hooks = {}, audioCont
     world.renderSettings.setRenderedCameras(renderedCameras, previewCameras);
     world.compositor?.bindCamera(compositorCamera);
   };
-  world.shadows = createLightShadows(scene);
+  world.shadows = createLightShadows(scene, { warn: (message) => report('WARNING', message) });
   // A Material Preview view (preview) draws in scene linear through its film too, over its own background (a display
   // color) where nothing is drawn, as EEVEE's film with the world's opacity 0.
   world.beforeViewRender = ({ rendered, preview = false, background = null, compositor, frame = null, studio = { worldSpace: false, rotateZ: 0 } }) => {
