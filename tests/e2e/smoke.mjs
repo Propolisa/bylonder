@@ -994,6 +994,29 @@ const checks = {
     assert.ok(differs(muted, plain) < 3, `the muted nodes' composite differs from the render by ${differs(muted, plain).toFixed(1)} on average`);
     assert.ok(differs(after, plain) < 3, `a node after a muted one differs from the render by ${differs(after, plain).toFixed(1)} on average`);
   } },
+  // A Render Image of one sample draws what one of many does, its light's shadows too: the cube's shadow on a floor
+  // under it from the startup scene's point light.
+  async "Render Image of one sample draws the light's shadows"() {
+    await app.bylonder((b) => { b.runOperator("mesh.primitive_plane_add", { size: 20, location: [0, 0, -1] }); b.world.renderSettings.set("render.resolutionX", 320); b.world.renderSettings.set("render.resolutionY", 180); });
+    await app.settled();
+    const render = async (samples) => {
+      await app.bylonder((b, samples) => b.world.renderSettings.set("eevee.taaRenderSamples", samples), samples);
+      await app.page.click('[data-blender="TOPBAR_MT_render"]');
+      await app.page.getByRole("menuitem", { name: "Render Image" }).click();
+      await rendered();
+      const pixels = await app.bylonder(() => {
+        const canvas = document.querySelector(".render-result canvas"), context = new OffscreenCanvas(canvas.width, canvas.height).getContext("2d");
+        context.drawImage(canvas, 0, 0);
+        return Array.from(context.getImageData(0, 0, canvas.width, canvas.height).data);
+      });
+      await app.frame().locator(".render-result [data-close]").click();
+      return pixels;
+    };
+    const one = await render(1), four = await render(4);
+    const mean = one.reduce((sum, v, i) => sum + Math.abs(v - four[i]), 0) / one.length;
+    await app.page.keyboard.press("Control+z");
+    assert.ok(mean < 4, `one sample differs from four by ${mean.toFixed(1)} on average`);
+  },
   // Render Image composites on Blender's CPU compositor and shows the composite at the render's size: Render Layers
   // straight into the Group Output gives the render as it is (a composite written at another size shows as stripes).
   "Render Image shows the composite at the render's size": { open: { example: null, node: "sphere" }, async run() {

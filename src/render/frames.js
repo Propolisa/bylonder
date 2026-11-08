@@ -23,6 +23,7 @@ export function createFrameRenderer({ world: built, engine, canvas, resize, cloc
     scene.activeCamera = camera;
     if (camera === shadedCamera) return camera;
     shadedCamera = camera;
+    warm = false;
     world.setViewShading({ renderedCameras: [camera], compositorCamera: camera });
     await scene.whenReadyAsync();
     return camera;
@@ -45,6 +46,9 @@ export function createFrameRenderer({ world: built, engine, canvas, resize, cloc
 
   // Frame the scene state was last advanced to, so sequential final frames pre-roll only once.
   let simulated = null;
+  // Whether the camera has drawn a frame. Its first draws what was set up for the views before (light shadows the
+  // views drew empty), so a render's first frame draws once, adding nothing to the film, before its samples.
+  let warm = false;
 
   async function drawFinalFrame(frame, width, height, progress) {
     const q = quality(), job = { ...q, width, height };
@@ -68,6 +72,11 @@ export function createFrameRenderer({ world: built, engine, canvas, resize, cloc
       film.manual = true;
       film.reset();
       try {
+        if (!warm) {
+          film.sample(null);
+          await renderSample(times[0], [0, 0], job);
+          warm = true;
+        }
         for (let s = 0; s < q.samples; s++) {
           const offset = filmJitter(s);
           film.sample(offset, s);
@@ -128,5 +137,5 @@ export function createFrameRenderer({ world: built, engine, canvas, resize, cloc
     camera.unfreezeProjectionMatrix();
   }
 
-  return { useCamera, renderFrame, forget: () => { shadedCamera = null; simulated = null; } };
+  return { useCamera, renderFrame, forget: () => { shadedCamera = null; simulated = null; warm = false; } };
 }
