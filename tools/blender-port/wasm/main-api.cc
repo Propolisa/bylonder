@@ -1526,6 +1526,20 @@ EXPORT(object_materials) int object_materials(Object *ob, Material **r_materials
   return count;
 }
 
+/* The material slots an object draws with, as its evaluated geometry has them (draw engines take the evaluated
+ * object's, BKE_object_material_get_eval): Geometry Nodes' Set Material adds slots the original object lacks. Each the
+ * original Material, or null. */
+EXPORT(object_materials_eval) int object_materials_eval(BlenderMain *ctx, Object *ob, Material **r_materials)
+{
+  Object *evaluated = DEG_get_evaluated(depsgraph_of(ctx), ob);
+  const int count = BKE_object_material_count_eval(evaluated);
+  for (int i = 0; r_materials && i < count; i++) {
+    Material *material = BKE_object_material_get_eval(evaluated, short(i + 1));
+    r_materials[i] = material ? DEG_get_original(material) : nullptr;
+  }
+  return count;
+}
+
 /* An ID's custom string property, for what only Bylonder has that a round trip needs; null when it has none. */
 EXPORT(id_property_string_set) void id_property_string_set(ID *id, const char *name, const char *value)
 {

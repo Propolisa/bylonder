@@ -14,7 +14,7 @@ import { CurveObject } from './curve/curve.js';
 import { mesh_batch_cache_apply } from '../draw/mesh-batch-cache.js';
 import { asObject, setEvaluatedMatrix } from '../runtime/object-transform.js';
 import { ID_RECALC_GEOMETRY, ID_RECALC_SHADING, ID_RECALC_SYNC_TO_EVAL, ID_RECALC_ALL } from '../bmesh/bmesh-wasm.js';
-import { Camera, Color3, FreeCamera, Material, Matrix, Mesh, PBRMaterial, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
+import { Camera, Color3, FreeCamera, Material, Matrix, Mesh, MultiMaterial, PBRMaterial, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
 import { particleShapeMesh, particleShapeMaterial, hairOverlay, particleEditOverlay } from '../draw/overlay-particle.js';
 import { drawPointClouds } from '../draw/pointcloud.js';
 import { paintWeightOverlay } from '../draw/overlay-paint-weight.js';
@@ -697,8 +697,21 @@ export function createMainView(state) {
     const weights = mode === 'WEIGHT_PAINT' ? blender.paintWeights(entry.ob, mesh.verts_num) : null;
     const colors = blender.paintColors(mesh.corners_num);
     drawMesh(entry, mesh, blender.modifiers(entry.ob).map(({ error }) => error));
+    drawEvaluatedSlots(entry);
     entry.paintWeight = paintWeightOverlay(entry.node, mesh, weights, entry.paintWeight);
     drawColors(entry.node, colors);
+  }
+  // Its evaluated slots, where they differ from the object's own (Geometry Nodes' Set Material), are drawn; its own stay
+  // the object's (Material Properties and saving read those).
+  function drawEvaluatedSlots({ node, ob }) {
+    const own = blender.materials(ob), drawn = blender.drawnMaterials(ob);
+    if (drawn.length === own.length && drawn.every((ma, i) => ma === own[i])) return;
+    // A material made since the last adoption (by Python, by a node's material field) is adopted first.
+    for (const ma of drawn) if (ma && !materialFor(ma)) adoptMaterial(ma, world.scene, []);
+    const list = drawn.map(materialFor);
+    if (world.materials) world.materials.drawSlots(node, list);
+    else if (list.length > 1) node.material = Object.assign(new MultiMaterial('__slots ' + node.name, node.getScene()), { subMaterials: list });
+    else node.material = list[0] ?? null;
   }
   // The active color attribute, which Solid shows in Vertex Paint Mode and with its Attribute color (workbench.js), one
   // color per face corner as the mesh's vertices are; materials do not multiply it (Babylon's would), as Blender's do not.

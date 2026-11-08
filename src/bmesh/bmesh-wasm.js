@@ -476,6 +476,9 @@ export class BlenderMain {
     withArrays([Uint32Array.from(materials)], ([p]) => x.object_materials_set(this.#context, ob, p, materials.length));
   }
   materials(ob) { return addresses((p) => x.object_materials(ob, p)); }
+  // The slots an object draws with, its evaluated geometry's (main-api.cc object_materials_eval): Geometry Nodes' Set
+  // Material can add ones the object lacks.
+  drawnMaterials(ob) { return addresses((p) => x.object_materials_eval(this.#context, ob, p)); }
   // An ID's custom string property (null when it has none), for what only Bylonder has.
   setProperty(id, name, value) { withString(name, (n) => withString(value, (v) => x.id_property_string_set(id, n, v))); }
   property(id, name) { const p = withString(name, (n) => x.id_property_string(id, n)) >>> 0; return p ? cString(p) : null; }
