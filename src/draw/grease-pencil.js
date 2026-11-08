@@ -16,6 +16,7 @@ import { MaterialPluginBase } from '@babylonjs/core/Materials/materialPluginBase
 import defaultTheme from '../editors/interface/theme-default.json' with { type: 'json' };
 import { overlayMaterial } from './overlay-edit-mesh.js';
 import { Vector2 } from '@babylonjs/core/Maths/math.vector.js';
+import { RenderingGroup } from '@babylonjs/core/Rendering/renderingGroup.js';
 
 // grease-pencil-api.cc's packing: a curve's ints and a point's floats.
 export const CURVE_INTS = 5, POINT_FLOATS = 14;
@@ -202,8 +203,27 @@ function editPoints(scene, name, draw, matrix, kept) {
 
 // The view's Grease Pencil drawings. `matrix(layerToWorld)`: Blender's matrix as Babylon's; `look(ob)`: GreasedLine's
 // settings for an object (BLENDER_LOOK's keys).
+// A mesh's origin's depth in the view (its frozen world matrix is its object's).
+const viewDepth = (view, mesh) => { const w = mesh.getWorldMatrix().m, v = view.m; return v[2] * w[12] + v[6] * w[13] + v[10] * w[14] + v[14]; };
+// blender-port: gpencil_cache_utils.cc gpencil_object_cache_sort (gpencil_tobject_dist_sort): Grease Pencil objects drawn
+// back to front by their origin's depth in the view, objects at one depth in the order they were made (Blender keeps
+// its object order there), each one's drawings in its layer order (their alphaIndex); other transparent meshes as
+// Babylon sorts them. Each object's drawings stay together, so overlapping objects never trade places.
+export function greasePencilSortCompare(scene) {
+  return (a, b) => {
+    const ma = a.getMesh(), mb = b.getMesh();
+    const [oa, ob] = [ma.metadata?.greasePencil && ma.metadata.drawOwner, mb.metadata?.greasePencil && mb.metadata.drawOwner];
+    if (oa && ob && oa !== ob) {
+      const view = scene.getViewMatrix();
+      return viewDepth(view, mb) - viewDepth(view, ma) || oa.uniqueId - ob.uniqueId;
+    }
+    return RenderingGroup.defaultTransparentSortCompare(a, b);
+  };
+}
+
 export function createGreasePencilDraw(scene, { matrix: babylonMatrix, look = () => BLENDER_LOOK }) {
   const drawings = new Map();
+  scene.setRenderingOrder(0, null, null, greasePencilSortCompare(scene));
   // Draws `draws` (BlenderMain.greasePencil) for the objects `nodeOf` gives; returns whether a drawing packed anew had no
   // object to draw it for yet, so the next update repacks.
   function update(draws, nodeOf) {
