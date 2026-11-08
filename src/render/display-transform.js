@@ -41,9 +41,10 @@ function bind(effect, scene) {
   effect.setTexture('lattice', lut?.texture ?? (none ??= new RawTexture3D(new Uint8Array(4), 1, 1, 1, Constants.TEXTUREFORMAT_RGBA, scene, false)));
 }
 
-// A camera's last post-process.
+// A camera's last post-process. Its input is the scene linear image the effects before it draw, so it keeps half floats:
+// in 8 bits the darks band (a linear step of 1/255 is 13 display levels).
 export function createDisplayTransform(name, camera) {
-  const post = new PostProcess(name, SHADER, UNIFORMS, SAMPLERS, 1, camera);
+  const post = new PostProcess(name, SHADER, UNIFORMS, SAMPLERS, 1, camera, Constants.TEXTURE_BILINEAR_SAMPLINGMODE, undefined, false, null, Constants.TEXTURETYPE_HALF_FLOAT);
   post.onApply = (effect) => bind(effect, camera.getScene());
   return post;
 }

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { NullEngine, Scene, Matrix, Vector3, FreeCamera } from '@babylonjs/core';
+import { Constants, NullEngine, Scene, Matrix, Vector3, FreeCamera } from '@babylonjs/core';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
 import { createRenderSettings, outputSize } from '../src/blenkernel/scene/render.js';
 import { displayExponent, displayedViewSettings } from '../src/render/view-settings.js';
@@ -165,6 +165,8 @@ acc.reset(); assert.equal(acc.count, 0);
   const names = () => camera._postProcesses.filter(Boolean).map((p) => p.name);
   assert.match(names().at(-1), /displayTransform/, 'the display transform is the last post process');
   assert.ok(!names().some((name) => name.includes('imageProcessing')), "without Babylon's image processing");
+  const display = camera._postProcesses.filter(Boolean).at(-1);
+  assert.equal(display._textureType, Constants.TEXTURETYPE_HALF_FLOAT, 'its scene linear input keeps half floats, so the darks do not band');
   settings.set('viewSettings.gamma', 0.41);
   assert.match(names().at(-1), /displayTransform/, 'at another gamma too');
   assert.equal(displayExponent(0.41), 1 / 0.41);
