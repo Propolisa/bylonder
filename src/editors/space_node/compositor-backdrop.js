@@ -10,6 +10,9 @@ export function createCompositorBackdrop({ world, overlays, camera, output, shad
     get camera() { return camera(); },
     beforeRender() {
       overlays.setEnabled(false);
+      // The render's frame, as Blender's backdrop shows the Viewer image: the camera fitted to the output (a view in
+      // camera view frames it wider, around the passepartout).
+      world.mainSync?.fitCamera(view.camera, output());
       world.beforeViewRender({ rendered: true, compositor: view.wantsCompositor });
     },
   };
