@@ -3,7 +3,8 @@
 // material's Material Output does (nodes/blender/shader-nodes.js). Babylon's alpha test is the hashed test, through a
 // material plugin's code replacement, and the shadow draws with the material's own shader (Babylon's
 // ShadowDepthWrapper), so its samples average a shadow as dense as its coverage.
-import { Material, MaterialPluginBase, ShadowDepthWrapper } from '@babylonjs/core';
+import { Material, MaterialPluginBase } from '@babylonjs/core';
+import { SharedShadowDepthWrapper } from '../../draw/shadow-depth-wrapper.js';
 import { DITHER_NOISE, ditherOffset } from '../../render/dither.js';
 
 const NAME = 'BlenderDitheredPBR', DEFINE = 'BL_DITHERED_PBR', OFFSET = 'bl_dither_offset';
@@ -40,6 +41,6 @@ const isDithered = (material) => !!material.blenderDithered && material.transpar
 // Gives a material of Blender's data the Dithered render method's hashing where it is alpha tested as Dithered.
 export function blenderDitheredPBR(material) {
   if (!material.pluginManager?.getPlugin(NAME)) new BlenderDitheredPBRPlugin(material);
-  if (isDithered(material)) material.shadowDepthWrapper ??= new ShadowDepthWrapper(material, material.getScene());
+  if (isDithered(material)) material.shadowDepthWrapper ??= new SharedShadowDepthWrapper(material, material.getScene());
   return material;
 }

@@ -12,7 +12,7 @@ import {
   BonesBlock, ClipPlanesBlock, Color4, ColorMergerBlock, ColorSplitterBlock, Constants, FogBlock, FragmentOutputBlock, ImageProcessingBlock, InputBlock,
   InstancesBlock, Matrix, MorphTargetsBlock, NodeMaterial, NodeMaterialBlock,
   NodeMaterialBlockConnectionPointTypes as T, NodeMaterialBlockTargets as Targets, NodeMaterialSystemValues as System, Observable, PBRMetallicRoughnessBlock,
-  RawTexture, RawTexture2DArray, ReflectionBlock, RefractionBlock, RegisterClass, ShaderStore, ShadowDepthWrapper, SubSurfaceBlock, Texture, TransformBlock, VertexOutputBlock,
+  RawTexture, RawTexture2DArray, ReflectionBlock, RefractionBlock, RegisterClass, ShaderStore, SubSurfaceBlock, Texture, TransformBlock, VertexOutputBlock,
 } from '@babylonjs/core';
 import { attributeKind, requestedAttributes, TANGENT_KIND } from './attributes.js';
 import { BlenderRepeatWriteBlock, repeatZoneBlocks } from './repeat-zone.js';
@@ -32,6 +32,7 @@ import { DITHER_FUNCTIONS, ditherOffset } from '../../render/dither.js';
 import { readsSceneDepth, sceneDepth } from '../../render/scene-depth.js';
 import { AREA_SPECULAR, LIGHT_SPECULAR } from '../../blenkernel/light/area-specular.js';
 import '../graph-roots.js';
+import { SharedShadowDepthWrapper } from '../../draw/shadow-depth-wrapper.js';
 
 // A NodeMaterial of Blender's nodes. Babylon's walks a block's inputs again for each path that reaches the block as it
 // prepares a build, which is exponential in a chain of shared values (an unrolled repeat zone's): this one prepares each
@@ -1534,7 +1535,7 @@ export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock)
     // Babylon's shadow includes name the world position worldPos; the material's own shader names it as its block does,
     // once built.
     if (material.blenderDithered) {
-      material.shadowDepthWrapper ??= new ShadowDepthWrapper(material, material.getScene(), {
+      material.shadowDepthWrapper ??= new SharedShadowDepthWrapper(material, material.getScene(), {
         get remappedVariables() { return ['worldPos', worldPosition(material).output.associatedVariableName]; },
       });
     }
