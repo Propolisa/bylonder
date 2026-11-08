@@ -1,11 +1,18 @@
 import { address } from './model.js';
 import { nodeId, deleted } from '../../editors/object/identity.js';
-import { looksAlongZOf, lookingEulerAxis } from '../../makesrna/rna-bylonder.js';
+import { looksAlongZOf, lookingEulerAxis, orderEulerAxis } from '../../makesrna/rna-bylonder.js';
 
 // A rotation channel's Blender axis (Babylon's x, y, z are Blender's x, z, y, each negated: model.js OBJECT_PATHS).
 const BLENDER_AXIS = { x: 0, y: 2, z: 1 };
 // A camera's or light's rotation is Blender's turned to look along Babylon's +Z (rna-bylonder.js lookingRotation).
 const lookingChannel = (node, axis) => ({ get: () => -lookingEulerAxis(node, BLENDER_AXIS[axis]), set: (value) => lookingEulerAxis(node, BLENDER_AXIS[axis], -value) });
+// An object whose Euler order Babylon lacks (Blender's default XYZ) turns by Blender's values in its own order
+// (rna-bylonder.js orderEulerAxis), its order read as the channel runs (Main may set it after the channel is made);
+// otherwise as Babylon's own Euler (`own`).
+const orderChannel = (node, axis, own) => ({
+  get: () => { const value = orderEulerAxis(node, BLENDER_AXIS[axis]); return value === null ? own.get() : -value; },
+  set: (value) => { if (orderEulerAxis(node, BLENDER_AXIS[axis]) === null) own.set(value); else orderEulerAxis(node, BLENDER_AXIS[axis], -value); },
+});
 
 export function registerStore(animation, id, title, store) {
   for(const [key,def] of Object.entries(store.schema)) {
@@ -17,13 +24,18 @@ export function registerStore(animation, id, title, store) {
 export function registerObjects(animation, objects) {
   for(const node of objects){
     if(node.isDisposed()||deleted(node))continue;
-    for(const property of ['position','rotation','scaling'])for(const axis of ['x','y','z'])animation.register({
-      id:'object:'+nodeId(node),path:property+'.'+axis,group:node.name,label:({position:'Location',rotation:'Rotation',scaling:'Scale'})[property]+' '+axis.toUpperCase(),transform:true,target:node,property:property+'.'+axis,
-      available:()=>!node.isDisposed()&&!deleted(node),
-      get:()=>property==='rotation'&&node.rotationQuaternion?node.rotationQuaternion.toEulerAngles()[axis]:node[property][axis],
-      set:value=>{if(property==='rotation'&&node.rotationQuaternion){node.rotation.copyFrom(node.rotationQuaternion.toEulerAngles());node.rotationQuaternion=null;}node[property][axis]=value;},
-      ...(property==='rotation'&&looksAlongZOf(node)&&lookingChannel(node,axis)),
-    });
+    for(const property of ['position','rotation','scaling'])for(const axis of ['x','y','z']){
+      const own={
+        get:()=>property==='rotation'&&node.rotationQuaternion?node.rotationQuaternion.toEulerAngles()[axis]:node[property][axis],
+        set:value=>{if(property==='rotation'&&node.rotationQuaternion){node.rotation.copyFrom(node.rotationQuaternion.toEulerAngles());node.rotationQuaternion=null;}node[property][axis]=value;},
+      };
+      animation.register({
+        id:'object:'+nodeId(node),path:property+'.'+axis,group:node.name,label:({position:'Location',rotation:'Rotation',scaling:'Scale'})[property]+' '+axis.toUpperCase(),transform:true,target:node,property:property+'.'+axis,
+        available:()=>!node.isDisposed()&&!deleted(node),
+        ...own,
+        ...(property==='rotation'&&(looksAlongZOf(node)?lookingChannel(node,axis):orderChannel(node,axis,own))),
+      });
+    }
   }
 }
 

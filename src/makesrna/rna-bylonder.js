@@ -94,6 +94,17 @@ export function lookingEulerAxis(node, index, value) {
   lookingRotation.set(node, euler);
   lookingEulers.set(node, { euler, q: babylonQuaternion(node).clone() });
 }
+// An object's Blender Euler rotation one axis at a time in an order Babylon lacks (its rotation_mode, kept on it), as an
+// animation's channels set it; null for Babylon's own order.
+export function orderEulerAxis(node, index, value) {
+  const mode = ownOrder(node);
+  if (!mode || looksAlongZOf(node)) return null;
+  const euler = [...orderEuler(node)];
+  if (value === undefined) return euler[index];
+  euler[index] = value;
+  node.metadata = { ...node.metadata, wbEuler: euler };
+  setRotation(node, orderQuaternion(mode, euler));
+}
 
 // A number or boolean array (bpy_prop_array), its elements named x, y, z (or w, x, y, z): bind gives a copy whose elements
 // write through.
