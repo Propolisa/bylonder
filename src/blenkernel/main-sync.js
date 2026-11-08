@@ -196,6 +196,8 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       const field = dnaProperty(record.struct, name);
       if (!field || field.kind === 'pointer' || field.kind === 'struct') continue;
       const value = plain(binding.get());
+      // A value the Babylon object does not have (a sun's cascade settings on a point light): Main keeps its own.
+      if (value == null) continue;
       if (record.shadow.has(name) && same(record.shadow.get(name), value)) continue;
       if (!holds(field, value)) {
         // An enum whose items Blender makes per call (a unit's): Main keeps its own.

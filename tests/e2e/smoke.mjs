@@ -1046,6 +1046,43 @@ const checks = {
     });
     assert.deepEqual(drawn, { frames: 0, converged: true });
   } },
+
+  // The startup scene's too: its point light has no sun's cascade settings, which the scene sync wrote into Main at every
+  // flush, so Main evaluated again and again.
+  async "the startup scene's idle Rendered view evaluates nothing and draws no frame"() {
+    await app.bylonder((b) => b.views.input.setShading("rendered"));
+    await app.until((b) => b.views.idle, null, 30000).catch(() => {});
+    const idle = await app.bylonder(async (b) => {
+      const { engine, mainSync } = b.world;
+      let evaluated = 0, frames = 0;
+      const stop = mainSync.onEvaluated(() => evaluated++);
+      const counting = engine.onEndFrameObservable.add(() => { if (engine.views.some((view) => view.enabled)) frames++; });
+      await new Promise((done) => setTimeout(done, 3000));
+      stop();
+      engine.onEndFrameObservable.remove(counting);
+      return { evaluated, frames };
+    });
+    assert.deepEqual(idle, { evaluated: 0, frames: 0 });
+  },
+  // A Dithered surface's shadow is drawn by its own shader (ShadowDepthWrapper), whose world position a point light's
+  // shadow reads as worldPos: the wrapper names the variable the material's vertex shader holds it in. Unnamed, the
+  // shadow's shader failed to compile and was compiled again every frame (bike_ride: 3.5 frames/s in Rendered).
+  "a Dithered material's shadow reads its world position by the name its shader gives it": { open: { link: "shader-gallery", node: "Checker" }, async run() {
+    await app.bylonder((b) => {
+      b.editor.selection.replace([b.world.scene.getNodeByName("Half Transparent")]);
+      b.runOperator("wm.context_set_enum", { data_path: "object.active_material.surface_render_method", value: "DITHERED" });
+    });
+    await app.settled();
+    await app.bylonder((b) => b.views.input.setShading("rendered"));
+    await app.until((b) => b.views.idle, null, 60000);
+    const named = await app.bylonder((b) => {
+      const mesh = b.world.scene.getNodeByName("Half Transparent"), [from, to] = mesh.material.shadowDepthWrapper?._options?.remappedVariables ?? [];
+      // The material's own pass, the view's camera's.
+      const vertex = mesh.subMeshes[0]._drawWrappers[b.views.input.camera.renderPassId]?.effect?.vertexSourceCode ?? "";
+      return { from, declared: !!to && vertex.includes(` ${to} = `) };
+    });
+    assert.deepEqual(named, { from: "worldPos", declared: true });
+  } },
   // The floor grid fades through geometry on its plane, as Blender's four offset iterations draw it: a plane at z 0 keeps
   // the X axis showing over it.
   async "the floor grid's axes show over a plane on the floor"() {
