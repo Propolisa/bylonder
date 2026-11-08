@@ -331,12 +331,15 @@ export function createMainView(state) {
     const rnaNode = rnaNodes.get(node.name);
     return { ...node, values: { ...node.inputs, ...wholeValues(node.inputs, rnaNode), ...outputValues(rnaNode) }, properties: nodeProperties(rnaNode) };
   }) });
-  // The scene's compositing node group (Blender 5's own NodeTree ID) as plain data, with its nodes' locations.
-  function compositingTree(group) {
+  // The scene's compositing node group (Blender 5's own NodeTree ID) as plain data, with its nodes' locations and mutes;
+  // null without one.
+  function compositingTree() {
+    const group = idStruct(blender.scene).compositing_node_group;
+    if (!group) return null;
     const { nodes, links } = blender.nodeGroup(group.as_pointer());
     return { name: group.name, links, nodes: nodes.map((node) => {
       const rnaNode = group.nodes.get(node.name);
-      return { ...node, values: { ...node.inputs, ...wholeValues(node.inputs, rnaNode, true) }, properties: nodeProperties(rnaNode, 'compositor'), location: [...rnaNode.location] };
+      return { ...node, values: { ...node.inputs, ...wholeValues(node.inputs, rnaNode, true) }, properties: nodeProperties(rnaNode, 'compositor'), location: [...rnaNode.location], mute: rnaNode.mute };
     }) };
   }
   function nodeTreeOf(ma, warnings = [], label = 'Material') {
@@ -407,8 +410,8 @@ export function createMainView(state) {
     } finally {
       state.applying = false;
     }
-    const sce = idStruct(blender.scene), group = sce.compositing_node_group;
-    return group && world.compositor?.adopt(compositingTree(group), { use_compositing: sce.render.use_compositing });
+    const sce = idStruct(blender.scene);
+    return sce.compositing_node_group && world.compositor?.adopt({ use_compositing: sce.render.use_compositing });
   }
 
   // Babylon drawn from Main, after Blender's code ran: what it deleted is deleted, every object's values, relations,
@@ -719,7 +722,7 @@ export function createMainView(state) {
   }
 
   return {
-    pull, view, adopt, adoptScene, drawData, drawShading, drawEvaluated, redrawAll,
+    pull, view, adopt, adoptScene, compositingTree, drawData, drawShading, drawEvaluated, redrawAll,
     keepMesh: (entry) => { keepMesh(entry, blender); return true; },
   };
 }

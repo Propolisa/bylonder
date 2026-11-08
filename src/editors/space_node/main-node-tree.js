@@ -1,6 +1,6 @@
-// A node tree of Main's (a Geometry Nodes modifier's node group) as Blender's node editor sees it, read and edited
-// through Blender's RNA (bpy_rna.js): its nodes are blocks, its links links, its frames frames, as createNodeTree gives
-// a Babylon graph's. Blender holds the tree and evaluates it; every edit is Blender's own API (nodes.new, links.new,
+// A node tree of Main's (a Geometry Nodes modifier's node group, the scene's compositing node group) as Blender's node
+// editor sees it, read and edited through Blender's RNA (bpy_rna.js): its nodes are blocks, its links links, its frames
+// frames, as createNodeTree gives a Babylon graph's. Blender holds the tree and evaluates it; every edit is Blender's own API (nodes.new, links.new,
 // default_value), then `changed(rebuild)`.
 import { blenderMain, blenderModule } from '../../bmesh/bmesh-wasm.js';
 import { pointerOf, pointerStruct, structFind } from '../../python/bpy_rna.js';
@@ -9,7 +9,7 @@ import { AnimArea, RGN_TYPE_WINDOW } from '../animation/anim-area.js';
 
 // Blender's node-editor y grows upward; the editor's downward.
 const Y = -1;
-const VALUES = new Set(['VALUE', 'INT', 'BOOLEAN', 'VECTOR', 'RGBA']);
+const VALUES = new Set(['VALUE', 'INT', 'BOOLEAN', 'VECTOR', 'RGBA', 'MENU']);
 const idOf = (struct) => pointerOf(struct)[2];
 // The same data as a struct read before: an undo may have put other data at its address.
 const same = (a, b) => !!a && pointerOf(a)[0] === pointerOf(b)[0] && pointerOf(a)[2] === pointerOf(b)[2];
@@ -27,7 +27,7 @@ function nodeArea(rnaTree) {
 
 // The tree shown is the area's edit tree (SpaceNode.edit_tree): the group its path entered (node.group_edit), else
 // rootTree itself.
-export function createMainNodeTree(rootTree, { changed = () => {} } = {}) {
+export function createMainNodeTree(rootTree, { changed = () => {}, kind = 'geometry' } = {}) {
   const blocks = new Map(), points = new Map();
   const point = (socket, block, output) => {
     const id = idOf(socket);
@@ -78,13 +78,18 @@ export function createMainNodeTree(rootTree, { changed = () => {} } = {}) {
   const socket = (s, block, output) => {
     const p = point(s, block, output);
     const value = !output && !s.is_linked && !s.hide_value && VALUES.has(s.type) ? {
-      socket: { type: s.type, subtype: s.bl_rna.properties.get('default_value')?.subtype, name: s.name },
+      socket: { type: s.type, subtype: prop(s)?.subtype, name: s.name, items: s.type === 'MENU' ? menuItems(s) : undefined, min: prop(s)?.soft_min, max: prop(s)?.soft_max },
       get: () => (typeof s.default_value === 'object' ? [...s.default_value] : s.default_value),
-      set: (v) => { s.default_value = v; changed(false); },
+      // A menu's item changes which sockets the node shows.
+      set: (v) => { s.default_value = v; changed(s.type === 'MENU'); },
     } : null;
     return { point: p, id: s.identifier, type: s.type, shape: s.display_shape, label: s.label || s.name, linked: s.is_linked, value };
   };
-  const shown = (s) => s.enabled && !s.hide;
+  // The compositor's nodes leave out the inputs their menus do not use (Blender's socket usage, is_inactive), as the
+  // compositor's Babylon graph draws them.
+  const shown = (s) => s.enabled && !s.hide && !(kind === 'compositor' && s.is_inactive && !s.is_linked);
+  const prop = (s) => s.bl_rna.properties.get('default_value');
+  const menuItems = (s) => [...s.bl_rna.properties.get('default_value').enum_items].map((item) => item.identifier);
   // The node's properties its draw_buttons lays out, in its order, edited through RNA: a checkbox with its text, a menu
   // (whose text is its item) without.
   const buttons = (node) => {
@@ -117,7 +122,7 @@ export function createMainNodeTree(rootTree, { changed = () => {} } = {}) {
   const tree = {
     get area() { return editorArea().area; },
     operate,
-    kind: 'geometry', get graph() { return edited(); }, catalog: { categories: {} }, blenderClasses: {},
+    kind, get graph() { return edited(); }, catalog: { categories: {} }, blenderClasses: {},
     // Every node type Blender has: its code runs them all.
     runs: () => true,
     blocks: () => nodesOf().filter((n) => !isFrame(n)).map(blockOf),

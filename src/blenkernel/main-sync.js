@@ -869,6 +869,8 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       return { nodes, warnings: [...read, ...warnings] };
     },
     adopt: (scene) => mainView.adopt(scene),
+    // The scene's compositing node group as plain data (compositor-tree.js reads it), null without one.
+    compositingTree: () => mainView.compositingTree(),
     // The selected objects, whose geometry operators on the selection are given.
     selected: () => selection.nodes.filter((node) => objects.has(node)),
     objectOf: (node) => objects.get(node)?.ob ?? null,
@@ -928,6 +930,8 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   };
   const mainView = createMainView(state);
   api.modifiers = createMainModifiers(api);
+  // Before the adoption: a read file's compositor reads Main's compositing node group through it.
+  world.mainSync = api;
   // Objects Main already holds (a project's .blend, a file the project's code opened) are the ones of their ids, with
   // Main's selection; then a read file's scene settings and collections.
   const { nodes, revived } = mainView.adopt();

@@ -56,7 +56,8 @@ export function compositorGraph(tree, scene, name = 'Compositing') {
     const block = new Block(node.name, graph.frameGraph, scene);
     Object.assign(block.properties, structuredClone(node.properties ?? {}));
     for (const [id, value] of Object.entries(node.values ?? {})) if (value !== null && id in block.values) block.values[id] = value;
-    if (!block.runs && !UNCOMPOSITED.includes(node.idname)) missing.add(node.idname);
+    block.mute = !!node.mute;
+    if (!block.runs && !block.mute && !UNCOMPOSITED.includes(node.idname)) missing.add(node.idname);
     blocks.set(node.name, block);
     graph.attachedBlocks.push(block);
     place(block, node);

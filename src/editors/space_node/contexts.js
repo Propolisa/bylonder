@@ -19,10 +19,10 @@ const toggle = (label, checked, run) => {
 };
 
 // Bylonder's Node Editor (blender-node-editor.js), loaded when first shown, on a Babylon graph or a node tree of Main's.
-const blenderEditor = (graph, changed, mainTree = false) => (host) => {
+const blenderEditor = (graph, changed, mainTree = false, kind = undefined) => (host) => {
   let mounted = null, disposed = false;
   Promise.all([import('./blender-node-editor.js'), mainTree && import('./main-node-tree.js')]).then(([{ mountBlenderNodeEditor }, main]) => {
-    if (!disposed) mounted = mountBlenderNodeEditor(host, graph, { changed, ...(main && { tree: main.createMainNodeTree(graph, { changed }) }) });
+    if (!disposed) mounted = mountBlenderNodeEditor(host, graph, { changed, ...(main && { tree: main.createMainNodeTree(graph, { changed, kind }) }) });
   });
   return { frameAll: () => mounted?.frameAll(), refresh: () => mounted?.editor.refresh(), dispose: () => { disposed = true; mounted?.dispose(); } };
 };
@@ -80,9 +80,13 @@ export function createNodeContexts({ world, editor, commit = () => {} }) {
       const c = world.compositor;
       // Blender 5 shows the compositor node group as a datablock: New when there is none, its name and X otherwise.
       if (!c.enabled || !c.graph) return { key: 'off:' + c.enabled, title: '', actions: [newButton(() => c.setEnabled(true))], message: 'Add a compositor node group to composite the scene through a Babylon frame graph.', buttons: [['New', () => c.setEnabled(true), 'add']] };
+      const remove = iconButton('x', 'Unlink the compositing node group', () => c.remove());
+      const hint = 'The composite shows in the backdrop, and in a Rendered viewport whose Viewport Shading > Compositor is on.';
+      // The scene's compositing node group, which Blender holds: edited as Blender's, and composited as edited.
+      if (c.main) return { key: 'main:' + pointerOf(c.group)[2], title: c.group.name, actions: [remove], graph: c.group, babylon: false, hint, mount: blenderEditor(c.group, () => { world.mainSync.view(); c.edit(); }, true, 'compositor') };
       return {
-        key: 'on:' + c.graph.uniqueId, title: 'Compositing', actions: [iconButton('x', 'Remove the compositor', () => c.setEnabled(false))], graph: c.graph,
-        hint: 'The composite shows in the backdrop, and in a viewport in Rendered shading.',
+        key: 'on:' + c.graph.uniqueId, title: 'Compositing', actions: [remove], graph: c.graph,
+        hint,
         mount: blenderEditor(c.graph, (rebuild) => c.edit(rebuild)),
       };
     },

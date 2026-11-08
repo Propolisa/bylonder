@@ -67,3 +67,33 @@ assert.ok(block('CompositorNodeViewer'), 'a Viewer is shown');
 assert.deepEqual(graph.editorData.locations.find((l) => l.blockId === rendering.uniqueId), { blockId: rendering.uniqueId, x: -300, y: -120, isCollapsed: false }, "placed where the file's nodes are");
 assert.ok(notices.some((n) => n.includes('CompositorNodeGlare') && !n.includes('CompositorNodeViewer')), 'the nodes not run are named');
 console.log("Compositor: a .blend's compositing node group opens as the compositor's graph");
+
+// The Compositor edits Main's group as Blender's (main-node-tree.js): the graph follows each edit, a value on its block,
+// a new node, link or mute rebuilt from the tree (a NullEngine builds no frame graph: the graph is checked, not drawn).
+const { world: edited, sync: editedSync } = open(sync.blender.writeBlend('/compositing.blend'));
+await new Promise((resolve) => setTimeout(resolve));
+const c = edited.compositor, group = idStruct(editedSync.blender.scene).compositing_node_group;
+assert.ok(c.main, "the graph is Main's compositing node group, the tree final renders composite");
+const before = c.graph;
+group.nodes.get('Color Balance').inputs.get('Fac').default_value = 0.75;
+await c.edit();
+assert.equal(c.graph, before, 'a value is set on the block, without a rebuild');
+assert.equal(c.graph.attachedBlocks.find((b) => b.idname === 'CompositorNodeColorBalance').values.Fac, 0.75, "the value Blender's tree holds");
+const invert = group.nodes.new('CompositorNodeInvert');
+group.links.new(group.nodes.get('Glare').outputs.get('Image'), invert.inputs.get('Color'));
+group.links.new(invert.outputs.get('Color'), group.nodes.get('Group Output').inputs[0]);
+group.nodes.get('Glare').mute = true;
+await c.edit();
+const invertBlock = c.graph.attachedBlocks.find((b) => b.idname === 'CompositorNodeInvert');
+assert.equal(c.graph.outputBlock.texture.connectedPoint.ownerBlock.source.connectedPoint.ownerBlock, invertBlock, "a node added and linked in Blender's tree is composited");
+assert.ok(c.graph.attachedBlocks.find((b) => b.idname === 'CompositorNodeGlare').mute, 'a muted node is muted');
+await c.remove();
+assert.equal(idStruct(editedSync.blender.scene).compositing_node_group, null, "the X unlinks the scene's group");
+
+// New: Blender's own new compositing node group (node.new_compositing_node_group), the scene's.
+const { world: fresh, sync: freshSync } = open();
+await fresh.compositor.setEnabled(true);
+const made = idStruct(freshSync.blender.scene).compositing_node_group;
+assert.ok(made && fresh.compositor.main, "New makes Blender's compositing node group, the scene's");
+assert.ok([...made.nodes].some((n) => n.bl_idname === 'CompositorNodeRLayers'), 'with Render Layers into the Group Output');
+console.log("Compositor: edits to Main's compositing node group are composited");
