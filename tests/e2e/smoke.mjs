@@ -1064,6 +1064,18 @@ const checks = {
     });
     assert.deepEqual(idle, { evaluated: 0, frames: 0 });
   },
+  // Navigating changes where the view looks and its name, not its header: Blender redraws the window region only, so
+  // orbiting draws no header or tool settings again.
+  async "navigating the view redraws its name, not its header"() {
+    await app.hover(0.5, 0.5);
+    await app.page.keyboard.press("Numpad6");
+    await app.settled();
+    await app.bylonder((b) => { const regions = b.views.input.regions, draw = regions.draw; b.headerDraws = 0; regions.draw = () => { b.headerDraws++; draw(); }; });
+    for (const key of ["Numpad4", "Numpad8", "Numpad1"]) await app.page.keyboard.press(key);
+    await app.until((b) => b.views.input.section.querySelector(".view-name").textContent === "Front Orthographic").catch(() => {});
+    const after = await app.bylonder((b) => ({ draws: b.headerDraws, name: b.views.input.section.querySelector(".view-name").textContent }));
+    assert.deepEqual(after, { draws: 0, name: "Front Orthographic" });
+  },
   // A Dithered surface's shadow is drawn by its own shader (ShadowDepthWrapper), whose world position a point light's
   // shadow reads as worldPos: the wrapper names the variable the material's vertex shader holds it in. Unnamed, the
   // shadow's shader failed to compile and was compiled again every frame (bike_ride: 3.5 frames/s in Rendered).

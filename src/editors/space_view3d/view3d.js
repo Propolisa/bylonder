@@ -96,7 +96,8 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   section.append(cameraBorder, label, gizmo, navButtons);
 
   const toolOverlay = createToolOverlay(view);
-  const nav = createNavigation({ camera: editorCamera, engine: world.engine, onSync: () => sync() });
+  // Navigating changes the view's name only: its regions draw nothing of where it looks.
+  const nav = createNavigation({ camera: editorCamera, engine: world.engine, onSync: () => { nameView(); views.wake(); } });
   view.nav = nav;
 
   // Looking through a camera hands it the view's input, as a project's Babylon camera takes it; a Blender camera (a
@@ -209,8 +210,12 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
 
   // The camera whose workbench shading this view set: the editor camera's, or the scene camera's in camera view.
   let shadedCamera = editorCamera;
+  const nameView = () => {
+    const text = state.cameraView ? (view.camera.mode === 1 ? 'Camera Orthographic' : 'Camera Perspective') : nav.viewName + (editorCamera.mode === 0 ? ' Perspective' : ' Orthographic');
+    if (name.textContent !== text) name.textContent = text;
+  };
   const sync = () => {
-    name.textContent = state.cameraView ? (view.camera.mode === 1 ? 'Camera Orthographic' : 'Camera Perspective') : nav.viewName + (editorCamera.mode === 0 ? ' Perspective' : ' Orthographic');
+    nameView();
     section.classList.toggle('overlays-off', !state.overlays);
     section.classList.toggle('gizmos-off', !state.show_gizmo);
     section.classList.toggle('camera-view', state.cameraView);
@@ -228,7 +233,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   // Per-view render state, applied by the view manager right before and after this view renders.
   let authored = null, overlaysDrawn = null, materialsDrawn = null;
   view.beforeRender = () => {
-    const aspect = canvas.clientWidth / Math.max(1, canvas.clientHeight);
+    const [width, height] = view.cssSize(), aspect = width / Math.max(1, height);
     editorCamera.fov = 2 * Math.atan(LENS_HALF_TAN / Math.max(1, aspect));
     if (editorCamera.mode) nav.updateBounds();
     const rendered = view.rendered;
@@ -236,7 +241,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     if (!rendered) { authored = scene.clearColor; scene.clearColor = background; }
     // Camera view shows the scene's output framed in the region, the passepartout darkening around it.
     const area = state.cameraView && world.renderSettings && world.view3dArea?.(view);
-    const frame = area ? world.mainSync?.viewCamera(view.camera, outputSize(world.renderSettings.state.render), area.camera(), { width: canvas.clientWidth, height: canvas.clientHeight }) : null;
+    const frame = area ? world.mainSync?.viewCamera(view.camera, outputSize(world.renderSettings.state.render), area.camera(), { width, height }) : null;
     // view3d_draw.cc drawviewborder: the passepartout and its outline always, the dashed guide with the overlays.
     cameraBorder.hidden = !frame;
     if (frame) {
@@ -266,8 +271,9 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     overlaysDrawn = materialsDrawn = null;
   };
   view.tick = () => {
-    if (!state.cameraView && state.overlays) drawGizmo();
+    // The tool overlay reads the page's layout: before the gizmo changes it, so the read forces no layout.
     toolOverlay.tick();
+    if (!state.cameraView && state.overlays) drawGizmo();
     const queued = view.rendered || view.preview ? ctx.shaderCompile.queued : 0, text = queued ? `Compiling shaders (${queued} remaining)` : '';
     if (info.textContent !== text) Object.assign(info, { textContent: text, hidden: !text });
   };

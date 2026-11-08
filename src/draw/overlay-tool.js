@@ -28,10 +28,10 @@ export function createToolOverlay(view) {
   view.section.append(canvas);
   let drawn = '';
   const redraw = () => {
-    const rect = view.canvas.getBoundingClientRect(), dpr = devicePixelRatio || 1;
-    const width = Math.round(rect.width * dpr), height = Math.round(rect.height * dpr);
+    const [cssWidth, cssHeight] = view.cssSize(), dpr = devicePixelRatio || 1;
+    const width = Math.round(cssWidth * dpr), height = Math.round(cssHeight * dpr);
     if (canvas.width !== width || canvas.height !== height) Object.assign(canvas, { width, height });
-    Object.assign(canvas.style, { width: rect.width + 'px', height: rect.height + 'px' });
+    Object.assign(canvas.style, { width: cssWidth + 'px', height: cssHeight + 'px' });
     const ctx = canvas.getContext('2d');
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, width, height);
@@ -47,7 +47,7 @@ export function createToolOverlay(view) {
   return {
     // Once per frame: redraws when asked or when the view changed.
     tick() {
-      const key = [revision, view.camera.getViewMatrix().m.join(), view.canvas.clientWidth, view.canvas.clientHeight, view.state.overlays, view.state.cameraView].join();
+      const key = [revision, view.camera.getViewMatrix().m.join(), view.canvas.width, view.canvas.height, view.state.overlays, view.state.cameraView].join();
       if (key === drawn) return;
       drawn = key;
       redraw();

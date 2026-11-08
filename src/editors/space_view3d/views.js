@@ -15,9 +15,12 @@ export function createViews({ engine, scene, live = () => false }) {
   const views = new Map(); // canvas -> { view, engineView }
   let anchor = null, workSize = [0, 0], lastWake = 0, inputView = null, focused = null, layoutDirty = true, idle = false, held = false;
   const scaling = () => engine.getHardwareScalingLevel();
-  const cssSize = view => [view.canvas.clientWidth, view.canvas.clientHeight];
+  // Each canvas's CSS size as the last resize observed it: read every frame, a layout read there would force a layout
+  // after the page's style changes.
+  const sizes = new WeakMap();
+  const cssSize = view => sizes.get(view.canvas) ?? [view.canvas.clientWidth, view.canvas.clientHeight];
   const pixelSize = view => cssSize(view).map(v => Math.max(1, Math.floor(v / scaling())));
-  const visible = view => view.active && view.canvas.isConnected && view.canvas.clientWidth > 0 && view.canvas.clientHeight > 0;
+  const visible = view => view.active && view.canvas.isConnected && cssSize(view).every(v => v > 0);
 
   // Working canvas size and every view's region; runs only when the layout changed.
   const layout = () => {
@@ -37,7 +40,10 @@ export function createViews({ engine, scene, live = () => false }) {
       view.region = view === anchor ? new Viewport(0, 0, 1, 1) : new Viewport(0, 1 - ph / workSize[1], pw / workSize[0], ph / workSize[1]);
     }
   };
-  const observer = new ResizeObserver(() => { layoutDirty = true; api.wake(); });
+  const observer = new ResizeObserver((entries) => {
+    for (const { target } of entries) sizes.set(target, [target.clientWidth, target.clientHeight]);
+    layoutDirty = true; api.wake();
+  });
   // Anything else resizing the engine (hardware scaling, engine.resize() in user code) re-runs the layout.
   const resized = engine.onResizeObservable.add(() => { if (!held) { layoutDirty = true; api.wake(); } });
 
@@ -73,6 +79,7 @@ export function createViews({ engine, scene, live = () => false }) {
   };
   const api = {
     add(view) {
+      view.cssSize = () => cssSize(view);
       const engineView = engine.registerView(view.canvas, view.camera);
       // Our layout owns sizes; Babylon must not resize per view.
       engineView.customResize = () => {};
