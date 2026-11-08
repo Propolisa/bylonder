@@ -28,7 +28,7 @@ import { skyTexture } from '../../blenkernel/sky.js';
 import { blendData } from '../../python/bpy_rna.js';
 import { VIEW_FORWARD, viewEye, viewForward } from '../../draw/draw-view.js';
 import { eeveeParity, eeveeParityChanged } from '../../draw/eevee-parity.js';
-import { ditherSeed } from '../../render/dither.js';
+import { ditherOffset } from '../../render/dither.js';
 import { sceneDepth } from '../../render/scene-depth.js';
 import '../graph-roots.js';
 
@@ -1366,11 +1366,11 @@ export class BlenderDisplayBlock extends ImageProcessingBlock {
 }
 RegisterClass('BABYLON.BlenderDisplayBlock', BlenderDisplayBlock);
 
-const REVERSED_FACES = 'bl_reversed_faces', DITHERED = 'BL_DITHERED', DITHER_SEED = 'bl_dither_seed', frontPass = new WeakSet();
-// blender-port: eevee_sampling_lib / common_math_lib interleaved_gradient_noise, offset by the sample's seed.
-const DITHER_NOISE = `float bl_dither(vec2 p, float seed) {
-  p += seed * vec2(47.0, 17.0);
-  return fract(52.9829189 * fract(0.06711056 * p.x + 0.00583715 * p.y));
+const REVERSED_FACES = 'bl_reversed_faces', DITHERED = 'BL_DITHERED', DITHER_OFFSET = 'bl_dither_offset', frontPass = new WeakSet();
+// blender-port: gpu_shader_math_base_lib interleaved_gradient_noise and eevee_nodetree_lib hashed_alpha_threshold:
+// the pixel's noise shifted by the sample's offset, so the samples a film averages cover every threshold.
+const DITHER_NOISE = `float bl_dither(vec2 pixel, float offset) {
+  return fract(offset + 52.9829189 * fract(0.06711056 * pixel.x + 0.00583715 * pixel.y));
 }
 `;
 // Material Output (node_shader_output_material.cc) as Babylon's fragment output: the Surface closure's radiance through
@@ -1385,7 +1385,7 @@ export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock)
     super.bind(effect, nodeMaterial, mesh);
     const separate = nodeMaterial.separateCullingPass && !nodeMaterial.backFaceCulling;
     effect.setFloat(REVERSED_FACES, separate ? 1 : 0);
-    effect.setFloat(DITHER_SEED, ditherSeed(nodeMaterial.getScene()));
+    effect.setFloat(DITHER_OFFSET, ditherOffset(nodeMaterial.getScene()));
     if (!separate || !mesh || frontPass.has(mesh)) return;
     frontPass.add(mesh);
     mesh.onBetweenPassObservable.add((subMesh) => subMesh.effect?.setFloat(REVERSED_FACES, 0));
@@ -1447,11 +1447,11 @@ export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock)
     FragmentOutputBlock.prototype._buildBlock.call(this, state);
     if (this.rgba.isConnected) {
       // Hashed: kept where its coverage passes the sample's noise, its color then the surface's alone.
-      state._emitUniformFromString(DITHER_SEED, T.Float);
+      state._emitUniformFromString(DITHER_OFFSET, T.Float);
       state._emitFunction('bl_dither', DITHER_NOISE, '');
       const rgba = this.rgba.associatedVariableName;
       state.compilationString += `#ifdef ${DITHERED}
-if (${rgba}.a <= bl_dither(gl_FragCoord.xy, ${DITHER_SEED})) discard;
+if (${rgba}.a <= bl_dither(gl_FragCoord.xy, ${DITHER_OFFSET})) discard;
 gl_FragColor = vec4(gl_FragColor.rgb / ${rgba}.a, 1.0);
 #endif
 `;

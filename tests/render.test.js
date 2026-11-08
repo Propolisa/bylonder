@@ -6,7 +6,8 @@ import { displayExponent, displayedViewSettings } from '../src/render/view-setti
 import { outputSpec, encodeSize, containers } from '../src/render/formats.js';
 import { installVirtualClock, seededRandom } from '../src/render/clock.js';
 import { halton, jitter, sampleTimes, jitterProjection, createAccumulator } from '../src/render/sampling.js';
-import { filmJitter } from '../src/render/film.js';
+import { createFilm, filmJitter } from '../src/render/film.js';
+import { ditherOffset } from '../src/render/dither.js';
 
 // Output settings live in the render slice, shaped like Blender's scene.render.
 const engine = new NullEngine(), scene = new Scene(engine);
@@ -91,6 +92,19 @@ assert.ok(Math.abs(Vector3.TransformCoordinates(Vector3.Zero(), jo).x - 0.02) < 
 
 // EEVEE's film jitters each sample within its pixel.
 assert.ok(Array.from({ length: 64 }, (_, i) => filmJitter(i)).every(([x, y]) => Math.abs(x) <= 0.5 && Math.abs(y) <= 0.5));
+// Hashed transparency over a film's samples: each sample shifts every pixel's noise by its own offset, so what a pixel
+// keeps over the samples is the surface's coverage, whatever the pixel's noise (EEVEE's hashed_alpha_threshold).
+{
+  const filmScene = new Scene(engine), camera = new FreeCamera('Film', new Vector3(0, 0, -5), filmScene);
+  const film = createFilm(filmScene, camera), offsets = [];
+  for (let i = 0; i < 16; i++) offsets.push((film.sample(filmJitter(i)), ditherOffset(filmScene)));
+  film.sample(null);
+  assert.equal(ditherOffset(filmScene), 0, 'a complete film draws with no offset');
+  const coverage = 0.3, kept = (noise) => offsets.slice(0, 16).filter((offset) => coverage > (offset + noise) % 1).length / 16;
+  for (const noise of [0, 0.13, 0.5, 0.77, 0.99]) assert.ok(Math.abs(kept(noise) - coverage) <= 1 / 16, `a pixel of noise ${noise} keeps ${kept(noise)}`);
+  film.dispose();
+  filmScene.dispose();
+}
 // Accumulator averages in floating point.
 const acc = createAccumulator(1, 1);
 acc.add([0, 10, 255, 255]); acc.add([1, 11, 0, 255]);

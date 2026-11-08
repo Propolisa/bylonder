@@ -5,7 +5,7 @@
 // divides; the display transform comes after, as EEVEE's does.
 import { Camera, Constants, Matrix, PostProcess, ShaderStore } from '@babylonjs/core';
 import { halton, jitterProjection } from './sampling.js';
-import { setDitherSeed } from './dither.js';
+import { setDitherOffset } from './dither.js';
 
 // blender-port: DNA_scene_defaults.h filter_size: Blender's default filter width, in pixels.
 export const FILTER_RADIUS = 1.5;
@@ -83,7 +83,7 @@ export function createFilm(scene, camera) {
   // A view's samples while it stays the same (EEVEE's viewport): up to `samples()` of them, each jittered; any change of
   // its view, size or compiled shaders, or a reset() (Main evaluated), starts again. `manual` leaves the
   // samples to a render (frames.js), which jitters and adds them itself.
-  let count = 0, signature = '', jittered = false, seed = 0;
+  let count = 0, signature = '', jittered = false, drawn = 0;
   const viewOf = () => {
     const projection = camera.getProjectionMatrix(true).m, effects = engine._compiledEffects ? Object.keys(engine._compiledEffects).length : 0;
     return [...camera.getViewMatrix().m, ...projection, engine.getRenderWidth(), engine.getRenderHeight(), effects].join();
@@ -102,7 +102,7 @@ export function createFilm(scene, camera) {
   });
   const after = scene.onAfterCameraRenderObservable.add((rendering) => {
     if (rendering !== camera) return;
-    setDitherSeed(scene, 0);
+    setDitherOffset(scene, 0);
     if (!jittered) return;
     camera.unfreezeProjectionMatrix();
     jittered = false;
@@ -119,7 +119,7 @@ export function createFilm(scene, camera) {
     sample(jitter) {
       state.adding = !!jitter;
       if (jitter) state.jitter = jitter;
-      setDitherSeed(scene, jitter ? (seed = (seed % 4096) + 1) : 0);
+      setDitherOffset(scene, jitter ? halton((drawn = (drawn % 4096) + 1), 2) : 0);
     },
     dispose() {
       scene.onBeforeCameraRenderObservable.remove(before);
