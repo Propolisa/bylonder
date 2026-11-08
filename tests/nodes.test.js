@@ -103,6 +103,18 @@ assert.deepEqual(imageAlpha(true, 'STRAIGHT', true), ['color_alpha_unpremultiply
 assert.deepEqual(imageAlpha(true, 'PREMUL', false), ['color_alpha_clear']);
 assert.deepEqual(imageAlpha(true, 'PREMUL', true), ['color_alpha_unpremultiply']);
 assert.deepEqual(imageAlpha(true, 'CHANNEL_PACKED', true), ['color_alpha_clear']);
+// Image Texture's projections as node_shader_gpu_tex_image links them: Box blends three planar samples by the object
+// space normal, Sphere and Tube map the vector first.
+const projected = (projection) => SHADER_NODES.ShaderNodeTexImage({ interpolation: 'Linear', projection, projection_blend: 0.2 }, null, {
+  connected: () => true, linked: () => false, image: () => ({ is_float: false, alpha_mode: 'STRAIGHT', colorspace_settings: { is_data: false } }),
+});
+assert.deepEqual(projected('BOX').map(([name, args]) => [name, args.filter((a) => typeof a !== 'object')]), [
+  ['tex_box_sample_linear', ['Vector', '$object_normal']],
+  ['tex_box_blend', ['$object_normal', '#color1', '#color2', '#color3', 0.2]],
+], 'Box samples the image on three planes, not on the XY of its vector alone');
+assert.deepEqual(projected('SPHERE').map(([name]) => name), ['point_texco_remap_square', 'point_map_to_sphere', 'node_tex_image_linear']);
+assert.deepEqual(projected('TUBE').map(([name]) => name), ['point_texco_remap_square', 'point_map_to_tube', 'node_tex_image_linear']);
+assert.deepEqual(projected('FLAT').map(([name, args]) => [name, args[0]]), [['node_tex_image_linear', 'Vector']]);
 
 // Reflections lit as EEVEE's closure bins: a Diffuse with a Glossy, and two Glossy BSDFs, each lobe by a surface of its
 // own, the second in a scope of its own over the first's radiance.

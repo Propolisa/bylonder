@@ -91,13 +91,12 @@ export const SHADER_NODES = {
   ShaderNodeTexImage: (p, decl, { connected, linked, image }) => {
     const ima = image();
     if (!ima) return [['node_tex_image_empty', [], ['@Color', '@Alpha']]];
-    const sample = ['Cubic', 'Smart'].includes(p.interpolation) ? 'node_tex_image_cubic' : 'node_tex_image_linear';
     const premul = ima.alpha_mode === 'PREMUL', alpha = linked('Alpha');
     const steps = ['CHANNEL_PACKED', 'NONE'].includes(ima.alpha_mode) || ima.colorspace_settings.is_data ? ['color_alpha_clear']
       : !ima.is_float ? [alpha ? 'color_alpha_clear' : 'color_alpha_premultiply']
       : alpha ? ['color_alpha_unpremultiply', !premul && 'color_alpha_clear'] : [premul && 'color_alpha_clear'];
     return [
-      [sample, [connected('Vector') ? 'Vector' : '$uv', { image: ima }], ['@Color', '@Alpha']],
+      ...imageProjection(p, connected('Vector') ? 'Vector' : '$uv', { image: ima }, ['Cubic', 'Smart'].includes(p.interpolation)),
       ...(linked('Color') ? steps.filter(Boolean).map((name) => [name, ['@Color'], ['@Color']]) : []),
     ];
   },
@@ -311,6 +310,26 @@ const CURVE_MAPPINGS = { ShaderNodeRGBCurve: [4, [0, 1]], ShaderNodeVectorCurve:
 const attribute = (name, fallback = '') => `$attribute:${name || (fallback && ':' + fallback)}`;
 // A UV map's tangent (GPU_attribute(CD_TANGENT)).
 const tangent = (uvMap) => `$tangent:${uvMap}`;
+
+// blender-port: node_shader_tex_image.cc node_shader_gpu_tex_image, its projections: Box blends three planar samples by
+// the object space normal (normal_transform_world_to_object of the world normal points as the mesh's own normal does);
+// Sphere and Tube map the vector first.
+function imageProjection({ projection, projection_blend: blend = 0 }, vector, image, cubic) {
+  const sample = cubic ? 'node_tex_image_cubic' : 'node_tex_image_linear';
+  if (projection === 'BOX') {
+    const samples = [['#color1', 'vec4'], ['#color2', 'vec4'], ['#color3', 'vec4']];
+    return [
+      [cubic ? 'tex_box_sample_cubic' : 'tex_box_sample_linear', [vector, '$object_normal', image], samples],
+      ['tex_box_blend', ['$object_normal', ...samples.map(([id]) => id), blend], ['@Color', '@Alpha']],
+    ];
+  }
+  if (projection === 'SPHERE' || projection === 'TUBE') return [
+    ['point_texco_remap_square', [vector], [['#square', 'vec3']]],
+    [projection === 'SPHERE' ? 'point_map_to_sphere' : 'point_map_to_tube', ['#square'], [['#mapped', 'vec3']]],
+    [sample, ['#mapped', image], ['@Color', '@Alpha']],
+  ];
+  return [[sample, [vector, image], ['@Color', '@Alpha']]];
+}
 
 // A texture node's function linked with its vector, Generated when unlinked (node_shader_gpu_default_tex_coord).
 function texture(decl, { connected }, name, extra) {
