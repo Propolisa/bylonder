@@ -945,6 +945,21 @@ const checks = {
     await view("DISABLED");
   } },
 
+  // Screen Trace reflects every glossy surface, as EEVEE's does: a dielectric's reflectivity (0.04, Blender's default
+  // IOR) is traced, not skipped as Babylon's threshold would, so wet ground mirrors the lights in a Rendered view.
+  "Screen Trace reflects a dielectric surface": { open: { example: null, node: "sphere" }, async run() {
+    const threshold = await app.bylonder(async (b) => {
+      b.world.renderSettings.set("eevee.useRaytracing", true);
+      b.views.input.setShading("rendered");
+      for (let i = 0; i < 5; i++) { b.views.wake?.(); await Promise.race([new Promise((done) => b.world.scene.onAfterRenderObservable.addOnce(done)), new Promise((done) => setTimeout(done, 100))]); }
+      const trace = b.world.scene.postProcessRenderPipelineManager.supportedPipelines.find((p) => p._name.includes("screenTrace"));
+      b.world.renderSettings.set("eevee.useRaytracing", false);
+      b.views.input.setShading("solid");
+      return trace?.reflectivityThreshold;
+    });
+    assert.ok(threshold < 0.04, `the Rendered view's Screen Trace skips a dielectric's 0.04 reflectivity (threshold ${threshold})`);
+  } },
+
   // A muted node passes its image through, as Blender's muting does: a Rendered view compositing as the tree is edited
   // (a muted Glare, Color Balance with its Lift far off and a Mix whose other color is a mask, added while it shows the
   // composite) shows the render as it is, and a node after the muted ones reads the render through them.

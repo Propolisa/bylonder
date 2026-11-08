@@ -121,7 +121,10 @@ export function createRenderEngine(scene, { dof = () => null, displayTransform =
     // Post processes draw a view drawn into part of the canvas (views.js regions) on whole textures, so the geometry
     // buffer must fill whole textures too and Fast GI must not crop its result to the camera viewport.
     if (e.useRaytracing) effects.ssao = Object.assign(withSeededRandom(() => new SSAO2RenderingPipeline(name('fastGI'), scene, 0.5, [camera], true, HALF_FLOAT)), { useViewportInCombineStage: false });
-    if (e.useRaytracing && e.rayTracingMethod === 'SCREEN') effects.ssr = new SSRRenderingPipeline(name('screenTrace'), scene, [camera], true, HALF_FLOAT);
+    // EEVEE screen-traces every glossy surface; Babylon skips reflectivities up to its threshold, by default 0.04, the F0
+    // its geometry buffer writes for every dielectric (Blender's IOR 1.5), so wet ground and glass would reflect
+    // nothing. Below it, near-black metals and unlit pixels still skip the trace.
+    if (e.useRaytracing && e.rayTracingMethod === 'SCREEN') effects.ssr = Object.assign(new SSRRenderingPipeline(name('screenTrace'), scene, [camera], true, HALF_FLOAT), { reflectivityThreshold: 0.03 });
     // No motion blur: EEVEE blurs motion in a render (frames.js spreads its samples over the shutter), never in a view.
     if (usesGeometry(effects) && scene.geometryBufferRenderer) scene.geometryBufferRenderer.getGBuffer().ignoreCameraViewport = true;
     // Last: the view settings, whole as a rendered view displays them.
