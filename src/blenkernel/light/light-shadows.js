@@ -2,7 +2,9 @@
 // sun's cascaded as EEVEE's sun shadow is (directional clipmaps), and every object whose Visibility > Shadow is on casts
 // into it. Materials receive them through Babylon's own light code. Shadow maps are drawn for the views that show the
 // scene's lights (Rendered shading, Render Image); other views draw them empty, which changes no material.
-import { CascadedShadowGenerator, Matrix, ShadowGenerator, Vector3 } from '@babylonjs/core';
+import { CascadedShadowGenerator, Matrix, ShaderStore, ShadowGenerator, Vector3 } from '@babylonjs/core';
+import { shadowMapVertexShader } from '@babylonjs/core/Shaders/shadowMap.vertex.js';
+import { shadowMapPixelShader } from '@babylonjs/core/Shaders/shadowMap.fragment.js';
 import { influenceRadius, isBlenderLight, lightRecord } from './light-home.js';
 import { areaLightShadows } from './area-light.js';
 import { filmSample } from '../../render/film.js';
@@ -35,6 +37,15 @@ export function shadowJitter(index, radius) {
 export const shadedObject = (mesh) => !mesh.name.startsWith('__') && !mesh.metadata?.overlay && mesh.getTotalVertices() > 0;
 const casts = (mesh) => shadedObject(mesh) && mesh.metadata?.wbVisibleShadow !== false && mesh.isEnabled() && mesh.isVisible;
 
+// Babylon's normal bias moves every caster along -N, so a face turned away from the light moves toward it and shadows
+// itself, though EEVEE lights it from behind (its offset is the receiver's, along the normal facing the viewer). Babylon's
+// include remapping, #include<name>(from,to), moves such a face away from the light instead, by less the more it is
+// edge-on to the light so that a closed object's shadow keeps its outline.
+export const LIT_SIDE_NORMAL_BIAS = ['sinNLSM;worldPos', '(0.0<ndlSM?sinNLSM:ndlSM);worldPos'];
+const SHADOW_MAP = 'blenderShadowMap';
+ShaderStore.ShadersStore[`${SHADOW_MAP}VertexShader`] ??= shadowMapVertexShader.shader.replace('#include<shadowMapVertexNormalBias>', `#include<shadowMapVertexNormalBias>(${LIT_SIDE_NORMAL_BIAS})`);
+ShaderStore.ShadersStore[`${SHADOW_MAP}PixelShader`] ??= shadowMapPixelShader.shader;
+
 function createGenerator(light, type, drawn) {
   // A sun's map spans the view's frustum in cascades, fine near the eye, as EEVEE's clipmaps are: one map over the
   // whole scene's bounds is too coarse for what a large scene (a sky dome, a ground plane) holds.
@@ -44,7 +55,7 @@ function createGenerator(light, type, drawn) {
   // Poisson sampling.
   if (light.needCube()) generator.usePoissonSampling = true;
   else Object.assign(generator, { usePercentageCloserFiltering: true, filteringQuality: ShadowGenerator.QUALITY_HIGH });
-  Object.assign(generator, { bias: 0.002, normalBias: 0.02 });
+  Object.assign(generator, { bias: 0.002, normalBias: 0.02, customShaderOptions: { shaderName: SHADOW_MAP } });
   generator.getShadowMap().renderListPredicate = (mesh) => drawn() && casts(mesh);
   return generator;
 }

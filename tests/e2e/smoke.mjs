@@ -900,6 +900,34 @@ const checks = {
     assert.ok(solid.color.every((c, i) => Math.abs(c - rendered.color[i]) <= 24), `outline ${rendered.color} in Rendered, ${solid.color} in Solid`);
   },
 
+  // A face turned away from the light is lit from behind, as EEVEE lights back faces: a floor upside down under the
+  // light shows as the floor the right way up, not self-shadowed.
+  async "Rendered shading lights a floor upside down as the right way up"() {
+    const floor = async (rotation) => {
+      await app.bylonder((b, rotation) => b.runOperator("mesh.primitive_plane_add", { size: 40, location: [0, 0, -1], rotation }), rotation);
+      await app.settled();
+      await app.bylonder((b) => b.views.input.setShading("rendered"));
+      await app.until((b) => b.world.scene.isReady(), null, 60000);
+      const mean = await app.bylonder(async (b) => {
+        const { canvas } = b.views.input, { width, height } = canvas, scene = b.world.scene;
+        // A few frames for the film's samples (the view is not idle in Rendered while it accumulates).
+        await new Promise((done) => { let frames = 0; const o = scene.onAfterRenderObservable.add(() => { if (++frames > 20) { scene.onAfterRenderObservable.remove(o); done(); } }); });
+        const context = new OffscreenCanvas(width, height).getContext("2d");
+        context.drawImage(await createImageBitmap(canvas), 0, 0);
+        const { data } = context.getImageData(0, Math.round(height * 0.8), width, Math.round(height * 0.15));
+        let sum = 0;
+        for (let i = 0; i < data.length; i += 4) sum += data[i] + data[i + 1] + data[i + 2];
+        return sum / (data.length * 0.75);
+      });
+      await app.bylonder((b) => b.views.input.setShading("solid"));
+      await app.page.keyboard.press("Control+z");
+      await app.settled();
+      return mean;
+    };
+    const up = await floor([0, 0, 0]), down = await floor([Math.PI, 0, 0]);
+    assert.ok(Math.abs(up - down) < 4, `the floor's mean ${up.toFixed(1)} the right way up, ${down.toFixed(1)} upside down`);
+  },
+
   // The scene's compositor shows in Rendered shading only as Viewport Shading > Compositor says
   // (View3DShading.use_compositor, Disabled by default as in Blender); on or off, the view draws its overlays over its
   // render, as Blender's draw manager draws them after the compositor.
