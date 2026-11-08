@@ -121,6 +121,8 @@ export function mesh_batch_cache_apply(mesh, babylonMesh) {
     const p = mesh.vert_positions, lines = Array.from(loose, (e) => [babylonPoint(p, mesh.edges[e * 2]), babylonPoint(p, mesh.edges[e * 2 + 1])]);
     const wire = CreateLineSystem(babylonMesh.name + ' loose edges', { lines }, babylonMesh.getScene());
     wire.color = WIRE;
+    // Babylon's own material for it is no scene material: Main must not take it in (a '__' name, material/library.js).
+    wire.material.name = '__' + wire.name;
     wire.parent = babylonMesh;
     wire.intersectionThreshold = 0.05;
     wire.metadata = { drawOwner: babylonMesh };

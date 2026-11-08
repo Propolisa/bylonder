@@ -1146,6 +1146,25 @@ const checks = {
     assert.deepEqual({ ...view, corner: undefined }, { film: true, converged: true, idle: true, corner: undefined });
     assert.ok(view.corner.every((c, i) => Math.abs(c - theme[i]) <= 2), `the background ${view.corner}, the theme's ${theme}`);
   },
+  // A curve drawn as lines (a curve without bevel, a modifier's loose edges): the lines' own Babylon material stays out
+  // of Main, so the idle view evaluates nothing and draws no frame, as with the startup scene.
+  async "an idle view of a curve drawn as lines evaluates nothing and draws no frame"() {
+    await app.bylonder((b) => { b.runOperator("curve.primitive_bezier_curve_add", {}); b.runOperator("object.modifier_add", { type: "ARRAY" }); });
+    await app.settled();
+    await app.bylonder((b) => b.views.input.setShading("material"));
+    await app.until((b) => b.views.idle, null, 30000).catch(() => {});
+    const idle = await app.bylonder(async (b) => {
+      const { engine, mainSync } = b.world;
+      let evaluated = 0, frames = 0;
+      const stop = mainSync.onEvaluated(() => evaluated++);
+      const counting = engine.onEndFrameObservable.add(() => { if (engine.views.some((view) => view.enabled)) frames++; });
+      await new Promise((done) => setTimeout(done, 3000));
+      stop();
+      engine.onEndFrameObservable.remove(counting);
+      return { evaluated, frames, lineMaterialsInMain: b.world.materials.all().filter((m) => m.name === "colorShader").length };
+    });
+    assert.deepEqual(idle, { evaluated: 0, frames: 0, lineMaterialsInMain: 0 });
+  },
   // A Dithered surface's shadow is drawn by its own shader (ShadowDepthWrapper), whose world position a point light's
   // shadow reads as worldPos: the wrapper names the variable the material's vertex shader holds it in. Unnamed, the
   // shadow's shader failed to compile and was compiled again every frame (bike_ride: 3.5 frames/s in Rendered).

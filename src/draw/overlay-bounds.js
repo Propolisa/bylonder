@@ -15,5 +15,8 @@ export function boundsLines(scene, name, box, matrices = [Matrix.Identity()], ke
     const at = local.map((p) => Vector3.TransformCoordinates(p, m));
     return EDGES.map(([a, b]) => [at[a], at[b]]);
   });
-  return Object.assign(MeshBuilder.CreateLineSystem(name, { lines }, scene), { color: WIRE, isPickable: false, metadata: { overlay: true } });
+  const mesh = Object.assign(MeshBuilder.CreateLineSystem(name, { lines }, scene), { color: WIRE, isPickable: false, metadata: { overlay: true } });
+  // Babylon's own material for it is no scene material: Main must not take it in (a '__' name, material/library.js).
+  mesh.material.name = '__' + name;
+  return mesh;
 }
