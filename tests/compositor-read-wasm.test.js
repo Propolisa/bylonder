@@ -74,6 +74,8 @@ const { world: edited, sync: editedSync } = open(sync.blender.writeBlend('/compo
 await new Promise((resolve) => setTimeout(resolve));
 const c = edited.compositor, group = idStruct(editedSync.blender.scene).compositing_node_group;
 assert.ok(c.main, "the graph is Main's compositing node group, the tree final renders composite");
+// A NullEngine cannot build the views' frame graph: the scene still composites its tree in final renders.
+assert.ok(c.onCPU, "final renders composite Main's group though the views cannot draw it");
 const before = c.graph;
 group.nodes.get('Color Balance').inputs.get('Fac').default_value = 0.75;
 await c.edit();

@@ -96,7 +96,14 @@ export function createCompositor(world, { commit = () => {}, notify = console.wa
       return [];
     }
     let read;
-    try { read = compositorGraph(tree, scene, tree.name); } catch (error) { notify(`Compositor: "${tree.name}" is not opened: ${error.message}`); return []; }
+    // A tree the views cannot draw is still the scene's: final renders composite it (onCPU).
+    try { read = compositorGraph(tree, scene, tree.name); } catch (error) {
+      notify(`Compositor: "${tree.name}" is not shown in the views: ${error.message}`);
+      drop();
+      shown = key;
+      emit();
+      return [];
+    }
     drop();
     own(read.graph);
     shown = key;
@@ -135,8 +142,8 @@ export function createCompositor(world, { commit = () => {}, notify = console.wa
       if (value) {
         if (world.mainSync && !graph && !mainScene().compositing_node_group) newGroup();
         if (world.mainSync && !graph) await fromMain();
-        ensure();
-        try { await build(); bind(); } catch (error) { enabled = false; scene.frameGraph = null; notify('Compositor: ' + error.message); }
+        if (!shown) ensure();
+        if (graph) try { await build(); bind(); } catch (error) { if (!shown) enabled = false; scene.frameGraph = null; notify('Compositor: ' + error.message); }
       } else scene.frameGraph = null;
       if (record) commit();
       emit();
