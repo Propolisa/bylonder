@@ -25,6 +25,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 import urllib.parse
 
 import convert
@@ -37,11 +38,25 @@ EDITOR_INCLUDES = ('blenloader', 'modifiers', 'modifiers/intern', 'modifiers/int
 BLENDER = 'https://projects.blender.org/api/v1/repos/blender/blender'
 
 
+def download(url):
+    """The bytes at url, retried: GitHub's release downloads and Blender's server fail now and then."""
+    return subprocess.run(['curl', '-sfL', '--retry', '6', '--retry-all-errors', '--retry-delay', '10', url], capture_output=True, check=True).stdout
+
+
+def clone(url, tag, path):
+    """A shallow clone of url at tag, retried as download is."""
+    for attempt in range(6):
+        shutil.rmtree(path, ignore_errors=True)
+        if not subprocess.run(['git', '-c', 'advice.detachedHead=false', 'clone', '-q', '--depth', '1', '--branch', tag, url, path]).returncode:
+            return
+        time.sleep(10)
+    sys.exit(f'{url} at {tag} could not be cloned')
+
+
 def fetch_blender_paths(root, paths, tag):
     """Blender files and directories the source tree lacks, from Blender's repository at the manifest's tag."""
     def fetch(path):
-        listing = json.loads(subprocess.run(['curl', '-sfL', f'{BLENDER}/contents/{urllib.parse.quote(path)}?ref={tag}'],
-                                            capture_output=True, check=True).stdout)
+        listing = json.loads(download(f'{BLENDER}/contents/{urllib.parse.quote(path)}?ref={tag}'))
         for entry in listing if isinstance(listing, list) else [listing]:
             target = os.path.join(root, entry['path'])
             if entry['type'] == 'dir':
@@ -49,7 +64,7 @@ def fetch_blender_paths(root, paths, tag):
             elif not os.path.exists(target):
                 os.makedirs(os.path.dirname(target), exist_ok=True)
                 raw = f'{BLENDER}/raw/{urllib.parse.quote(entry["path"])}?ref={tag}'
-                open(target, 'wb').write(subprocess.run(['curl', '-sfL', raw], capture_output=True, check=True).stdout)
+                open(target, 'wb').write(download(raw))
 
     for path in paths:
         if not os.path.exists(os.path.join(root, path)):
@@ -65,7 +80,7 @@ def fetched_files(build, paths, tag):
         if not os.path.exists(target):
             os.makedirs(os.path.dirname(target), exist_ok=True)
             url = f'{BLENDER}/raw/{urllib.parse.quote(path, safe="")}?ref={tag}'
-            open(target, 'wb').write(subprocess.run(['curl', '-sfL', url], capture_output=True, check=True).stdout)
+            open(target, 'wb').write(download(url))
         files.append(target)
     return files
 
@@ -113,14 +128,13 @@ def dependencies(build, deps, build_all=True):
         path = os.path.join(build, 'deps', f'{name}-{dep["tag"]}')
         if not os.path.exists(path):
             if 'sha256' in dep:  # An archive, checked against the hash Blender pins.
-                data = subprocess.run(['curl', '-sfL', dep['url']], capture_output=True, check=True).stdout
+                data = download(dep['url'])
                 if hashlib.sha256(data).hexdigest() != dep['sha256']:
                     sys.exit(f'{name}: {dep["url"]} does not match its pinned hash')
                 os.makedirs(path)
                 subprocess.run(['tar', '-xJ' if dep['url'].endswith('.xz') else '-xz', '--strip-components=1', '-C', path], input=data, check=True)
             else:
-                subprocess.run(['git', '-c', 'advice.detachedHead=false', 'clone', '-q', '--depth', '1', '--branch', dep['tag'], dep['url'], path],
-                               check=True)
+                clone(dep['url'], dep['tag'], path)
         apply_patches(path, [os.path.join(WASM, 'patches', 'deps', p) for p in dep.get('patches', [])])
         for target, variables in dep.get('configure', {}).items():
             configure(os.path.join(path, target), variables, path)
