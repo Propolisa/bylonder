@@ -225,6 +225,9 @@ EXPORT(main_view_layer) ViewLayer *main_view_layer(BlenderMain *ctx) { return ct
 /* The scene's active camera (an object, or null). */
 EXPORT(main_scene_camera_set) void main_scene_camera_set(BlenderMain *ctx, Object *camera)
 {
+  if (ctx->scene->camera == camera) {
+    return;
+  }
   ctx->scene->camera = camera;
   DEG_relations_tag_update(ctx->bmain);
 }

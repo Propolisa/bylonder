@@ -14,15 +14,18 @@ export function relationsDraw(C) {
 
 // sync(): the scene's Main sync (createMainSync); wake(): the views draw again.
 export function createRelationsOverlay(scene, { sync, wake }) {
-  let mesh = null, dirty = true, subscribed = null, shown = true;
+  let mesh = null, drawn = null, dirty = true, subscribed = null, shown = true;
+  const same = (a, b) => !!b && a.length === b.length && a.every((v, i) => v === b[i]);
   const frame = scene.getEngine().onBeginFrameObservable.add(() => {
     const main = sync();
     if (!main) return;
-    if (subscribed !== main) { subscribed = main; main.onEvaluated(() => { dirty = true; }); dirty = true; }
+    if (subscribed !== main) { subscribed = main; main.onEvaluated(() => { dirty = true; }); dirty = true; drawn = null; }
     if (!dirty) return;
     dirty = false;
-    mesh?.dispose();
     const lines = relationsDraw(main.blender.C);
+    if (same(lines, drawn)) return;
+    drawn = lines;
+    mesh?.dispose();
     mesh = lines.length ? relationLinesMesh(scene, lines) : null;
     mesh?.setEnabled(shown);
     wake();

@@ -986,6 +986,23 @@ const checks = {
     const mean = composited.reduce((sum, v, i) => sum + Math.abs(v - plain[i]), 0) / composited.length;
     assert.ok(mean < 3, `the composite differs from the render by ${mean.toFixed(1)} on average`);
   } },
+  // An idle view does nothing, as Blender redraws and evaluates only on change: an opened .blend's Rendered view
+  // neither evaluates Main nor saves it again once it settled.
+  "an idle Rendered view of an opened .blend evaluates and saves nothing": { open: { link: "bouncing-ball", node: null }, async run() {
+    await app.bylonder((b) => b.views.input.setShading("rendered"));
+    await app.page.waitForTimeout(2000);
+    const idle = await app.bylonder(async (b) => {
+      const sync = b.world.mainSync, write = sync.projectBlend;
+      let evaluated = 0, saved = 0;
+      sync.projectBlend = () => { saved++; return write(); };
+      const stop = sync.onEvaluated(() => evaluated++);
+      await new Promise((done) => setTimeout(done, 3000));
+      stop();
+      sync.projectBlend = write;
+      return { evaluated, saved };
+    });
+    assert.deepEqual(idle, { evaluated: 0, saved: 0 });
+  } },
   // The floor grid fades through geometry on its plane, as Blender's four offset iterations draw it: a plane at z 0 keeps
   // the X axis showing over it.
   async "the floor grid's axes show over a plane on the floor"() {

@@ -84,9 +84,10 @@ child.parent = parent;
 const selection = createSelection(scene, objects);
 const sync = createMainSync({ rna: createRNA({ world: { scene, objects, animation: createAnimationModel() }, selection }) });
 sync.debug = true;
+// The scene's Main is current while its operators run (the file's first part made a Main of its own), as the app's is.
 const app = {
-  poll: (idname) => { sync.flush(); return sync.blender.poll(idname); },
-  run: (idname, props) => sync.run(() => sync.blender.run(idname, props), { meshes: sync.selected() }),
+  poll: (idname) => sync.blender.current(() => { sync.flush(); return sync.blender.poll(idname); }),
+  run: (idname, props) => sync.blender.current(() => sync.run(() => sync.blender.run(idname, props), { meshes: sync.selected() })),
 };
 const worldPositions = (node) => {
   const m = node.computeWorldMatrix(true), p = node.getVerticesData('position');
