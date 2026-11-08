@@ -4,7 +4,7 @@
 // overlapping legs flicker.
 import assert from 'node:assert/strict';
 import { FreeCamera, Mesh, NullEngine, Scene, TransformNode, Vector3 } from '@babylonjs/core';
-import { greasePencilSortCompare } from '../src/draw/grease-pencil.js';
+import { greasePencilSortCompare, greasedLineMaterial } from '../src/draw/grease-pencil.js';
 
 const scene = new Scene(new NullEngine());
 new FreeCamera('Camera', Vector3.Zero(), scene).setTarget(new Vector3(0, 0, 1));
@@ -23,4 +23,6 @@ assert.deepEqual(sorted(drawing(near, 0), drawing(far, 30), drawing(near, 9), dr
 const left = owner('Left leg', 7), right = owner('Right leg', 7);
 assert.deepEqual(sorted(drawing(right, 1), drawing(left, 20), drawing(right, 12), drawing(left, 2)), ['Left leg 2', 'Left leg 20', 'Right leg 1', 'Right leg 12'],
   'objects at one depth in their order, never interleaved');
-console.log('Grease Pencil sort: whole objects back to front, ties in object order, layers in order');
+// Strokes blend as fills do, so they sort among them; a stroke in the opaque pass drew under every fill.
+assert.equal(greasedLineMaterial(scene, 'Strokes', false).needAlphaBlending(), true, 'strokes draw in the transparent pass');
+console.log('Grease Pencil sort: whole objects back to front, ties in object order, layers in order, strokes with the fills');

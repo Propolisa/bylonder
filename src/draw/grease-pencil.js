@@ -114,7 +114,7 @@ export const BLENDER_LOOK = { sizeAttenuation: false, screenScale: 1, useDash: f
 export function greasedLineMaterial(scene, name, sizeAttenuation) {
   const material = CreateGreasedLineMaterial(name, { useColors: true, width: 1, sizeAttenuation, colorMode: COLOR_MODE_SET,
     colorDistributionType: COLOR_DISTRIBUTION_SEGMENT, cameraFacing: true }, scene);
-  Object.assign(material, { transparencyMode: Constants.MATERIAL_ALPHABLEND, disableDepthWrite: true, backFaceCulling: false, disableLighting: true });
+  Object.assign(material, { transparencyMode: Material.MATERIAL_ALPHABLEND, disableDepthWrite: true, backFaceCulling: false, disableLighting: true });
   new SceneLinearStrokePlugin(material);
   return material;
 }
