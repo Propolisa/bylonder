@@ -18,4 +18,19 @@ assert.ok(near(ellipse.intensity, 100 / (Math.PI * 2 * Math.PI / 4)), `a 2 by 1 
 assert.ok(near(point.range, 10), `a 100 W bulb reaches ${point.range} m`);
 assert.equal(createLight('Near', 'POINT', { energy: 100, use_custom_distance: true, cutoff_distance: 3 }, scene).range, 3);
 assert.ok(near(createLight('Dim', 'POINT', { energy: 2 }, scene).range, Math.sqrt(2)), 'a 2 W bulb reaches 1.4 m');
+// An area light's specular weighs Babylon's LTC lookup by the surface's F0 and F90, not by the light's intensity again,
+// which made a small (high radiance) light's highlight its intensity squared.
+{
+  const { ShaderStore } = await import('@babylonjs/core');
+  await import('@babylonjs/core/Shaders/ShadersInclude/pbrDirectLightingFunctions.js');
+  const { AREA_SPECULAR, blenderAreaSpecular } = await import('../src/blenkernel/light/area-specular.js');
+  const fixed = ShaderStore.IncludesShadersStore.pbrDirectLightingFunctions.replace(AREA_SPECULAR.search, AREA_SPECULAR.replace);
+  assert.match(fixed, /fresnel=reflectance0\*info\.areaLightFresnel\.x\+\(reflectance90-reflectance0\)\*info\.areaLightFresnel\.y;return specularColor\*fresnel/);
+  const { PBRMaterial } = await import('@babylonjs/core');
+  const { applyPBR } = await import('../src/blenkernel/material/principled-gltf.js');
+  const material = new PBRMaterial('Floor', scene);
+  applyPBR(material, []);
+  assert.ok(material.pluginManager?.getPlugin('BlenderAreaSpecular'), "a Principled BSDF's PBR material takes EEVEE's area specular");
+  assert.ok(!('BlenderAreaSpecularPlugin' in material.serialize().plugins), 'which a Babylon file does not keep');
+}
 console.log("Light power: points as radiant intensity, area lights as EEVEE's radiance passed");

@@ -162,6 +162,14 @@ assert.deepEqual((await lobes(['ShaderNodeBsdfDiffuse', 'ShaderNodeBsdfDiffuse']
   assert.match(outline._fragmentCompilationState._builtCompilationString, /#ifdef SM_FLOAT\s+g_data\.ray_type = RAY_TYPE_SHADOW;/);
 }
 
+// A lit node material's area light specular is EEVEE's (blenkernel/light/area-specular.js), not Babylon's squared one.
+{
+  const lit = nodeMaterialFromTree('Lit', scene, { nodes: [{ idname: 'ShaderNodeBsdfDiffuse', name: 'Diffuse' }, { idname: 'ShaderNodeOutputMaterial', name: 'Material Output' }],
+    links: [['Diffuse', 'BSDF', 'Material Output', 'Surface']] }).material;
+  if (lit._buildIsInProgress) await new Promise((resolve) => lit.onBuildObservable.addOnce(resolve));
+  assert.match(lit._fragmentCompilationState._builtCompilationString, /fresnel=reflectance0[*]info[.]areaLightFresnel[.]x/);
+}
+
 // Data linked to a shader input is an Emission of it, and a shader linked to a data input is dropped, as Blender's
 // shader tree makes them (ntree_shader_implicit_closure_cast).
 const implicit = nodeMaterialFromTree('Implicit', scene, { nodes: [{ idname: 'ShaderNodeRGB', name: 'RGB' }, { idname: 'ShaderNodeBsdfDiffuse', name: 'Diffuse' },

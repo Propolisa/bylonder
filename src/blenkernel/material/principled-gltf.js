@@ -8,6 +8,7 @@
 // Each is a table; principledPBR composes them into every PBRMaterial property the loader sets, so a material is drawn
 // whole each time: what an absent extension would leave is a new PBRMaterial's value.
 import { Color3, Constants, PBRMaterial } from '@babylonjs/core';
+import { blenderAreaSpecular } from '../light/area-specular.js';
 
 // io/com/constants.py
 const GLTF_IOR = 1.5, BLENDER_COAT_ROUGHNESS = 0.03;
@@ -114,6 +115,7 @@ const same = (a, b) => (Array.isArray(a) ? a.every((v, i) => Math.abs(v - b?.[i]
 
 // Sets the properties that differ, a color as a new Color3.
 export function applyPBR(material, values) {
+  blenderAreaSpecular(material);
   for (const [path, value] of values) {
     if (same(value, read(material, path))) continue;
     const [o, key] = owner(material, path);

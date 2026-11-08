@@ -3,6 +3,7 @@ import { BlenderNodeMaterial, blenderDefaultTree, buildMaterial } from '../../no
 import { nodeId, deleted } from '../../editors/object/identity.js';
 import { fields, materialType, materialTypes, resolve, textureSlots } from './schema.js';
 import { bindGraph } from '../../nodes/bindings.js';
+import { blenderAreaSpecular } from '../light/area-specular.js';
 
 export const materialId = material => material.metadata?.wbId || material.name;
 const imageFile = /\.(png|jpe?g|webp|gif|bmp|ktx2?|dds|env|hdr)$/i;
@@ -15,7 +16,7 @@ function defaultSurface(scene) {
   material.metallic = 0;
   material.roughness = 0.5;
   material.indexOfRefraction = 1.5;
-  return material;
+  return blenderAreaSpecular(material);
 }
 
 export function createMaterialLibrary(world, { commit = () => {}, asset = path => path, files = [] } = {}) {

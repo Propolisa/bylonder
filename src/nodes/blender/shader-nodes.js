@@ -12,7 +12,7 @@ import {
   BonesBlock, ClipPlanesBlock, Color4, ColorMergerBlock, ColorSplitterBlock, Constants, FogBlock, FragmentOutputBlock, ImageProcessingBlock, InputBlock,
   InstancesBlock, Matrix, MorphTargetsBlock, NodeMaterial, NodeMaterialBlock,
   NodeMaterialBlockConnectionPointTypes as T, NodeMaterialBlockTargets as Targets, NodeMaterialSystemValues as System, Observable, PBRMetallicRoughnessBlock,
-  RawTexture, RawTexture2DArray, ReflectionBlock, RefractionBlock, RegisterClass, ShadowDepthWrapper, SubSurfaceBlock, Texture, TransformBlock, VertexOutputBlock,
+  RawTexture, RawTexture2DArray, ReflectionBlock, RefractionBlock, RegisterClass, ShaderStore, ShadowDepthWrapper, SubSurfaceBlock, Texture, TransformBlock, VertexOutputBlock,
 } from '@babylonjs/core';
 import { attributeKind, requestedAttributes, TANGENT_KIND } from './attributes.js';
 import { BlenderRepeatWriteBlock, repeatZoneBlocks } from './repeat-zone.js';
@@ -30,6 +30,7 @@ import { VIEW_FORWARD, viewEye, viewForward } from '../../draw/draw-view.js';
 import { eeveeParity, eeveeParityChanged } from '../../draw/eevee-parity.js';
 import { ditherOffset } from '../../render/dither.js';
 import { readsSceneDepth, sceneDepth } from '../../render/scene-depth.js';
+import { AREA_SPECULAR } from '../../blenkernel/light/area-specular.js';
 import '../graph-roots.js';
 
 // A NodeMaterial of Blender's nodes. Babylon's walks a block's inputs again for each path that reaches the block as it
@@ -1239,12 +1240,20 @@ export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
         this._scoped(state, build, `${lit} = finalColor.rgb;\n`);
       } else build();
       state.compilationString += `${state._declareOutput(this.radiance)} = bl_closure_radiance(${closure}, ${lit});\n`;
-      return this;
+      return this._areaSpecular(state);
     }
     const lit = state._getFreeVariableName('lobeLit');
     state.compilationString += `vec3 ${lit};\n`;
     this._scoped(state, () => super._buildBlock(state), `${lit} = finalColor.rgb;\n`);
     state.compilationString += `${state._declareOutput(this.radiance)} = ${this.under.associatedVariableName} + vec4(${lit} * bl_closure_lobe(${closure}, ${this.lobe}).weight, 0.0);\n`;
+    return this._areaSpecular(state);
+  }
+
+  // The area light specular of the lighting functions Babylon's block emitted, as EEVEE's
+  // (blenkernel/light/area-specular.js): the include's text with the formula put right, in its place.
+  _areaSpecular(state) {
+    const key = 'pbrDirectLightingFunctions', store = ShaderStore.GetIncludesShadersStore(state.shaderLanguage);
+    if (state.functions[key]?.includes(`#include<${key}>`)) state.functions[key] = store[key].replace(AREA_SPECULAR.search, AREA_SPECULAR.replace);
     return this;
   }
 
