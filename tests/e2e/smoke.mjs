@@ -319,6 +319,15 @@ const checks = {
     await app.page.keyboard.press("Escape");
   },
 
+  // A menu's separator is Blender's space at the scale in whole device pixels (Layout::separator, 7 at scale 1): at a
+  // 2.625 pixel ratio 18, as Blender's Object menu measures between Snap and Duplicate Objects.
+  "menu separators are Blender's space at a fractional pixel ratio": { open: { scale: 2.625 }, async run() {
+    await app.locator('[data-blender="VIEW3D_MT_object"]').first().click();
+    const space = await app.frame().locator(".bl-menu .bl-menu-sep").first().evaluate((sep) => sep.getBoundingClientRect().height * 2.625);
+    assert.ok(Math.abs(space - 18) < 0.1, `${space} device pixels`);
+    await app.page.keyboard.press("Escape");
+  } },
+
   // A menu's sub-menu shows the shortcut that opens it, as Blender's (ui_menu_block_set_keymaps): Object > Apply, Ctrl A.
   async "a sub-menu shows its shortcut"() {
     await app.locator('[data-blender="VIEW3D_MT_object"]').first().click();

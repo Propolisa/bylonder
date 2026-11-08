@@ -19,6 +19,10 @@
      rounded, and a line width (U.pixelsize, U.dpi / 64) on each side; U.dpi is 72 at scale 1, truncated. */
   --bl-dpi:round(down,calc(72*var(--bl-dpr)*var(--bl-ui-scale)),1);
   --bl-pixelsize:max(1,round(down,calc(var(--bl-dpi)/64),1));
+  /* A line's width (U.pixelsize) and a menu separator's space (Layout::separator: 7 pixels at the scale, truncated), in
+     whole device pixels. */
+  --bl-line-width:calc(var(--bl-pixelsize)*1px/var(--bl-dpr));
+  --bl-menu-sep-space:calc(round(down,calc(7*var(--bl-dpi)/72),1)*1px/var(--bl-dpr));
   --bl-font-family:"Inter","DejaVu Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--bl-font-size:calc(11px*var(--bl-ui-scale));
   --bl-font:var(--bl-font-size) var(--bl-font-family);
   --bl-gap:#161616;--bl-topbar:#181818;--bl-header:#303030;--bl-view3d-header:#303030b3;--bl-region:#303030;--bl-back:#282828;--bl-viewport:#3d3d3d;--bl-camera-passepartout:0 0 0;--bl-camera-border:#000;
@@ -144,7 +148,7 @@ canvas,.bl-area-main,.bl-outliner{--bl-touch:list;touch-action:none}
 .bl-menu kbd{margin-left:calc(var(--u)*.75);padding-right:calc(var(--u)*.25);font:inherit;color:color-mix(in srgb,currentColor 50%,transparent)}
 .bl-menu.has-sub .bl-menu-item{padding-right:calc(var(--inset-r) - 1px + var(--u)*.3)}
 .bl-menu-arrow{position:absolute;right:calc(var(--inset-r) - 1px + var(--u)*.21);width:calc(var(--u)*.28);height:calc(var(--u)*.32);background:currentColor;opacity:.8;clip-path:polygon(0 0,100% 50%,0 100%)}
-.bl-menu-sep{height:1px;margin:round(down,calc((var(--u)*.35 - 1px)/2),1px) calc(var(--u)*.35);border:0;background:var(--bl-menu-sep)}
+.bl-menu-sep{height:var(--bl-menu-sep-space);margin:0 calc(var(--u)*.35);border:0;background:linear-gradient(var(--bl-menu-sep),var(--bl-menu-sep)) center/100% var(--bl-line-width) no-repeat}
 .bl-menu-heading,.bl-menu-title{height:var(--u);line-height:var(--u);color:var(--bl-menu-back-text);white-space:nowrap}
 .bl-menu-heading{padding:0 calc(var(--u)*.25) 0 calc(var(--u)*1.5)}.bl-menu-title{padding:0 calc(var(--u)*.25) 0 calc(var(--u)*.4)}
 .bl-menu.searching{min-width:calc(var(--u)*24)}.bl-menu-path{color:var(--bl-menu-back-text)}
