@@ -6,6 +6,7 @@ import { blendData } from '../../python/bpy_rna.js';
 import { InputBlock, NodeMaterial, NodeMaterialBlockConnectionPointTypes as M, NodeRenderGraphBlockConnectionPointTypes as R } from '@babylonjs/core';
 import { isBlenderShader, OUTPUT_VALUES, shaderNodeClasses } from '../../nodes/blender/shader-nodes.js';
 import { BlenderCompositorBlock, compositorNodeClasses } from '../../nodes/blender/compositor-nodes.js';
+import { BlenderGroupOutputBlock, BlenderRenderLayersBlock } from '../../nodes/blender/compositor-io.js';
 import { availability } from '../../nodes/blender/declarations.js';
 import { categoryOf } from './block-categories.js';
 import { nodeLayout, U } from './node-layout.js';
@@ -28,7 +29,7 @@ const ELBOWS = new Set(['ElbowBlock', 'NodeRenderGraphElbowBlock']), REROUTE = '
 // Babylon's port names (worldPosition, rgba) as Blender labels (World Position, RGBA).
 const ACRONYMS = /^(rgba?|xyz|xy|uv|ior)$/i;
 const titleCase = (name) => name.replace(/([a-z0-9])([A-Z])/g, '$1 $2').split(' ').map((w) => (ACRONYMS.test(w) ? w.toUpperCase() : w[0].toUpperCase() + w.slice(1))).join(' ');
-export const isBlender = (block) => isBlenderShader(block) || block instanceof BlenderCompositorBlock;
+export const isBlender = (block) => isBlenderShader(block) || [BlenderCompositorBlock, BlenderRenderLayersBlock, BlenderGroupOutputBlock].some((type) => block instanceof type);
 // Bylonder's helper blocks, which link Blender nodes to Babylon's geometry and outputs: named `blender:`, or feeding
 // only what is hidden (a Blender node's own inputs Bylonder links, other helpers). Not drawn.
 const internalInput = (input) => isBlender(input.ownerBlock) && input.ownerBlock.declared?.(input.name) === false;

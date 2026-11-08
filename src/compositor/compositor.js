@@ -1,6 +1,11 @@
 import { NodeRenderGraph } from '@babylonjs/core';
 import { bindGraph } from '../nodes/bindings.js';
 import { compositorGraph } from './compositor-tree.js';
+import { BlenderGroupOutputBlock } from '../nodes/blender/compositor-io.js';
+
+// Blender's new compositing node group (node.new_compositing_node_group): Render Layers into the Group Output.
+const NEW_TREE = { name: 'Compositor Nodes', nodes: [{ idname: 'CompositorNodeRLayers', name: 'Render Layers', location: [-200, 0] },
+  { idname: 'NodeGroupOutput', name: 'Group Output', values: { Socket_0: null }, location: [200, 0] }], links: [['Render Layers', 'Image', 'Group Output', 'Socket_0']] };
 
 export function createCompositor(world, { commit = () => {}, notify = console.warn } = {}) {
   const { scene, animation } = world;
@@ -16,8 +21,9 @@ export function createCompositor(world, { commit = () => {}, notify = console.wa
   };
   const ensure = json => {
     if (graph) return graph;
+    if (!json) return own(compositorGraph(NEW_TREE, scene).graph);
     const next = new NodeRenderGraph('Compositing', scene, { rebuildGraphOnEngineResize: true });
-    if (json) next.parseSerializedObject(json); else next.setToDefault();
+    next.parseSerializedObject(json);
     return own(next);
   };
   const bind = () => graph && bindGraph(animation, { id: 'compositor', title: 'Compositing', graph: () => graph, kind: 'render' });
@@ -32,6 +38,9 @@ export function createCompositor(world, { commit = () => {}, notify = console.wa
   const api = {
     get graph() { return graph; },
     get enabled() { return enabled; },
+    // Whether the graph ends in Blender's Group Output, which displays through the view transform (a graph made in
+    // Babylon's editor shows what its blocks draw).
+    get viewTransformed() { return !!graph?.attachedBlocks.some((block) => block instanceof BlenderGroupOutputBlock); },
     // Per view, before it renders: whether this view shows the composite. Cheap (swaps the scene's render function).
     setViewportActive(value) { viewport = value; const next = graph && enabled && value ? graph.frameGraph : null; if (scene.frameGraph !== next) scene.frameGraph = next; },
     subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },

@@ -1,9 +1,11 @@
 // A scene's compositing node group, as a read .blend's Main holds it (plain: { nodes: [{ idname, name, properties,
 // values, location }], links: [[from node, output, to node, input]] }), as Bylonder's compositor graph: Babylon's
-// default render graph, whose main rendering is the Render Layers node's Image and whose output block is the Group
-// Output, with a block per Blender node in between, linked as in the tree (docs/node-editors.md).
+// default render graph, its main rendering Blender's Render Layers and a Group Output before its output block (the
+// view transform, compositor-io.js), with a block per Blender node in between, linked as in the tree
+// (docs/node-editors.md).
 import { NodeRenderGraph } from '@babylonjs/core';
 import { compositorBlockClasses } from '../nodes/blender/compositor-nodes.js';
+import { BlenderGroupOutputBlock, BlenderRenderLayersBlock } from '../nodes/blender/compositor-io.js';
 import { declaration } from '../nodes/blender/declarations.js';
 import { rerouted } from '../nodes/blender/shader-nodes.js';
 
@@ -17,15 +19,32 @@ const hideFeeding = (block) => {
   for (const input of block.inputs) if (input.connectedPoint) hideFeeding(input.connectedPoint.ownerBlock);
 };
 
+// Babylon's default graph's main rendering as Blender's Render Layers and a Group Output before its output block; what
+// feeds the rendering (camera, objects, its cleared target) and the output block are helpers, not drawn.
+function blenderEnds(graph, scene) {
+  const babylonOutput = graph.outputBlock, babylonRendering = babylonOutput.texture.connectedPoint.ownerBlock;
+  const rendering = new BlenderRenderLayersBlock(undefined, graph.frameGraph, scene), output = new BlenderGroupOutputBlock(undefined, graph.frameGraph, scene);
+  for (const input of babylonRendering.inputs) {
+    const from = input.connectedPoint;
+    if (!from) continue;
+    from.disconnectFrom(input);
+    from.connectTo(rendering.getInputByName(input.name));
+    hideFeeding(from.ownerBlock);
+  }
+  babylonRendering.output.disconnectFrom(babylonOutput.texture);
+  babylonRendering.dispose();
+  rendering.output.connectTo(output.source);
+  output.output.connectTo(babylonOutput.texture);
+  babylonOutput.name = 'blender:Output';
+  graph.attachedBlocks.push(rendering, output);
+  return { rendering, output };
+}
+
 // Returns the graph and the node types it does not run (left out, or passing their image through).
 export function compositorGraph(tree, scene, name = 'Compositing') {
   const graph = new NodeRenderGraph(name, scene, { rebuildGraphOnEngineResize: true });
   graph.setToDefault();
-  const output = graph.outputBlock, rendering = output.texture.connectedPoint.ownerBlock, missing = new Set();
-  // Named as Blender's nodes; what feeds the main rendering (camera, objects, its cleared target) is a helper, not drawn.
-  rendering.name = 'Render Layers';
-  output.name = 'Group Output';
-  for (const input of rendering.inputs) if (input.connectedPoint) hideFeeding(input.connectedPoint.ownerBlock);
+  const { rendering, output } = blenderEnds(graph, scene), missing = new Set();
   const blocks = new Map(), locations = [];
   const place = (block, node) => node.location && locations.push({ blockId: block.uniqueId, x: node.location[0], y: -node.location[1], isCollapsed: false });
   for (const node of tree.nodes) {
@@ -49,7 +68,7 @@ export function compositorGraph(tree, scene, name = 'Compositing') {
   for (const [from, socket, to, input] of rerouted(tree)) {
     const out = source(from, socket);
     if (to === groupOutput?.name) {
-      if (out && input === Object.keys(groupOutput.values ?? {})[0]) { output.texture.connectedPoint?.disconnectFrom(output.texture); out.connectTo(output.texture); }
+      if (out && input === Object.keys(groupOutput.values ?? {})[0]) { output.source.connectedPoint?.disconnectFrom(output.source); out.connectTo(output.source); }
       continue;
     }
     const target = blocks.get(to)?.getInputByName(input);
