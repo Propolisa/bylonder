@@ -3,7 +3,7 @@
 // lights, shadows and reflection, fog, and image processing; its compiled shaders keep each of Babylon's paths.
 import assert from 'node:assert/strict';
 import { FreeCamera, MeshBuilder, NullEngine, Scene, Vector3 } from '@babylonjs/core';
-import { nodeMaterialFromTree } from '../src/nodes/blender/shader-nodes.js';
+import { meshValue, nodeMaterialFromTree } from '../src/nodes/blender/shader-nodes.js';
 
 const scene = new Scene(new NullEngine());
 new FreeCamera('Camera', new Vector3(0, 0, -5), scene);
@@ -80,5 +80,16 @@ assert.match(fragment, /#ifdef SHADOW\{?X?\}?|SHADOW0|computeShadow/, "the fragm
   scene.render();
   assert.doesNotMatch((await effect()).defines, /#define BL_DITHERED/, 'Blended blends it');
   assert.ok(material.needAlphaBlending(), 'sorted and blended');
+}
+// A draw's matrices in Blender's axes are made again only when their source changes, not at every draw.
+{
+  const mesh = MeshBuilder.CreateBox('Bound', {}, scene), [, model] = meshValue('$model'), [, view] = meshValue('$viewmat');
+  mesh.computeWorldMatrix(true);
+  assert.equal(model(mesh, scene), model(mesh, scene), 'the same model matrix while the mesh stays');
+  assert.equal(view(mesh, scene), view(mesh, scene), 'the same view matrix while the view stays');
+  const before = model(mesh, scene).m[12];
+  mesh.position.x += 1;
+  mesh.computeWorldMatrix(true);
+  assert.equal(model(mesh, scene).m[12], before + 1, 'and a new one once it moved');
 }
 console.log("Node material base: Babylon's morph targets, bones, instances, clip planes, lights with shadows, fog and image processing passed");

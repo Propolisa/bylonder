@@ -683,9 +683,18 @@ const blenderAxes = (m, { rows = SWAP, flipRow = -1, flipColumn = -1 } = {}) => 
   return m.m[SWAP[c] * 4 + rows[r]] * (r === flipRow ? -1 : 1) * (c === flipColumn ? -1 : 1);
 }));
 const IDENTITY_ROWS = [0, 1, 2, 3];
-const model = (mesh) => blenderAxes(mesh.getWorldMatrix());
-const viewmat = (scene) => blenderAxes(scene.getViewMatrix(), { rows: IDENTITY_ROWS, flipRow: 2 });
-const winmat = (scene) => Matrix.FromArray(Array.from(scene.getProjectionMatrix().m, (v, i) => ((i >> 2) === 2 ? -v : v)));
+// What each draw binds, made again only when its source matrix changed (Matrix.updateFlag), not per draw.
+const derived = new WeakMap();
+const derive = (m, kind, make) => {
+  const entries = derived.get(m) ?? derived.set(m, {}).get(m), entry = entries[kind];
+  return entry?.flag === m.updateFlag ? entry.value : (entries[kind] = { flag: m.updateFlag, value: make(m) }).value;
+};
+const VIEW_AXES = { rows: IDENTITY_ROWS, flipRow: 2 };
+const model = (mesh) => derive(mesh.getWorldMatrix(), 'model', (m) => blenderAxes(m));
+const modelInverse = (mesh) => derive(mesh.getWorldMatrix(), 'modelInverse', (m) => blenderAxes(m).invert());
+const viewmat = (scene) => derive(scene.getViewMatrix(), 'view', (m) => blenderAxes(m, VIEW_AXES));
+const viewinv = (scene) => derive(scene.getViewMatrix(), 'viewInverse', (m) => blenderAxes(m, VIEW_AXES).invert());
+const winmat = (scene) => derive(scene.getProjectionMatrix(), 'win', (m) => Matrix.FromArray(Array.from(m.m, (v, i) => ((i >> 2) === 2 ? -v : v))));
 // The rays a scene's world is drawn for (eevee_defines.hh RAY_TYPE_*): its view's, else its probe's while it renders.
 export const RAY_TYPE = { CAMERA: 0, DIFFUSE: 2, GLOSSY: 3 };
 const rayTypes = new WeakMap();
@@ -693,9 +702,9 @@ export const setRayType = (scene, type) => rayTypes.set(scene, type);
 // Per drawn mesh values ('$name' read as uniforms): [Babylon type, value from the mesh and scene].
 const MESH_VALUES = {
   $model: [T.Matrix, (mesh) => model(mesh)],
-  $model_inverse: [T.Matrix, (mesh) => model(mesh).invert()],
+  $model_inverse: [T.Matrix, (mesh) => modelInverse(mesh)],
   $viewmat: [T.Matrix, (mesh, scene) => viewmat(scene)],
-  $viewinv: [T.Matrix, (mesh, scene) => viewmat(scene).invert()],
+  $viewinv: [T.Matrix, (mesh, scene) => viewinv(scene)],
   $winmat: [T.Matrix, (mesh, scene) => winmat(scene)],
   $object_color: [T.Vector4, (mesh) => objectInfo(mesh).color],
   // Pass index, random and flags (OBJECT_NEGATIVE_SCALE).
