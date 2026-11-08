@@ -233,7 +233,13 @@ export class CurveObject {
     const view = new DataView(x.memory.buffer), curve = this.#curve;
     return ['font', 'font_bold', 'font_italic', 'font_bold_italic'].map((name) => {
       const vfont = view.getUint32(curve + dna.TextCurve.properties[name].offset, true);
-      return [...fonts].find(([, address]) => address === vfont)?.[0] ?? null;
+      if (!vfont || vfont === font(null)) return null;
+      const known = [...fonts].find(([, address]) => address === vfont)?.[0];
+      if (known) return known;
+      // A font of an opened file (packed in it): known by its name in Main from now on.
+      const id = this.main.name(vfont);
+      fonts.set(id, vfont);
+      return id;
     });
   }
 

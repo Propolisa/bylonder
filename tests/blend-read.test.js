@@ -152,7 +152,11 @@ else {
       assert(node.computeWorldMatrix(true) && matrix(node).every(Number.isFinite));
       if (ob.data?.type === 'Mesh') assert.equal(objectMesh(node).faces_num, ob.data.faces, `${name}'s faces`);
       if (ob.type === 'MESH') assert.deepEqual(user.world.modifiers.stack(node).map((m) => m.type), ob.modifiers.map((m) => m.type), `${name}'s modifiers`);
-      if (ob.type === 'FONT') assert.equal(node.metadata.wbCreation.curve.text?.body, ob.data.body, `${name}'s text`);
+      if (ob.type === 'FONT') {
+        assert.equal(node.metadata.wbCreation.curve.text?.body, ob.data.body, `${name}'s text`);
+        // in the file's own font (packed in it), not Blender's built-in one
+        assert.equal(node.metadata.wbCreation.curve.text?.fonts[0], ob.data.font, `${name}'s font`);
+      }
       if (ob.type === 'LIGHT') assert(Math.abs(r.data.energy - ob.data.energy) < 1e-3, `${name}'s energy ${r.data.energy}`);
     }
     const red = user.world.objects.find((n) => n.name === 'Cube').material;

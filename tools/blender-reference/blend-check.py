@@ -61,7 +61,7 @@ def data(ob):
     elif ob.type == "CAMERA":
         out.update(camera=d.type, lens=round(d.lens, 4), clip=[round(d.clip_start, 4), round(d.clip_end, 4)], sensor_fit=d.sensor_fit)
     elif ob.type in ("CURVE", "FONT"):
-        out.update(splines=len(d.splines), **({"body": d.body} if ob.type == "FONT" else {}))
+        out.update(splines=len(d.splines), **({"body": d.body, "font": d.font.name} if ob.type == "FONT" else {}))
     return out
 
 

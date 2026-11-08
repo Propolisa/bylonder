@@ -1,9 +1,9 @@
 # Saves a typical user's .blend from Blender's startup scene: the Default Cube with a Bevel and a Subdivision Surface
 # modifier and a red Principled material (its Viewport Display a green apart from it), a second object in a collection of its own with an Array modifier, a sun,
-# a text object, a dim blue world, the ball turned and keyed on two axes in XYZ Euler, the camera moved, location keys on the cube, and a light parented to a bone with Ctrl P (which keeps
+# a text object in a font packed in the file (tests/fixtures/fonts), a dim blue world, the ball turned and keyed on two axes in XYZ Euler, the camera moved, location keys on the cube, and a light parented to a bone with Ctrl P (which keeps
 # a parent inverse).
 # usage: blender -b --factory-startup --python tools/blender-reference/user-file.py -- OUT.blend
-import bpy, sys
+import bpy, os, sys
 
 out = sys.argv[sys.argv.index("--") + 1]
 scene = bpy.context.scene
@@ -40,6 +40,9 @@ bpy.ops.object.light_add(type="SUN", location=(0, 0, 6))
 bpy.context.object.data.energy = 3
 bpy.ops.object.text_add(location=(-3, 0, 0))
 bpy.context.object.data.body = "Hello"
+font = bpy.data.fonts.load(os.path.join(os.path.dirname(__file__), "..", "..", "tests", "fixtures", "fonts", "Sacramento-Regular.ttf"))
+font.pack()
+bpy.context.object.data.font = font
 bpy.data.objects["Camera"].location = (8, -7, 5)
 background = scene.world.node_tree.nodes["Background"]
 background.inputs["Color"].default_value = (0.2, 0.3, 0.6, 1)
