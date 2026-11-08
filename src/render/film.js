@@ -114,6 +114,8 @@ export function createFilm(scene, camera) {
     jittered = false;
     count++;
   });
+  // A frame a frame graph draws fires no camera observables: its sample ends with the frame.
+  const afterFrame = scene.onAfterRenderObservable.add(() => sampling.delete(scene));
   const controls = {
     manual: false,
     // The render target the scene draws into, its depth a texture.
@@ -131,6 +133,7 @@ export function createFilm(scene, camera) {
     dispose() {
       scene.onBeforeCameraRenderObservable.remove(before);
       scene.onAfterCameraRenderObservable.remove(after);
+      scene.onAfterRenderObservable.remove(afterFrame);
       if (jittered) camera.unfreezeProjectionMatrix();
       film.dispose(camera);
       resolve.dispose(camera);

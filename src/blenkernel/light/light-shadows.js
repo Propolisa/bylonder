@@ -74,13 +74,15 @@ function jitterPerSample(scene) {
       light.position.addInPlace(light.parent ? Vector3.TransformNormal(offset, Matrix.Invert(light.parent.getWorldMatrix())) : offset);
     }
   };
-  const after = scene.onAfterCameraRenderObservable.add(() => {
-    for (const restore of moved.values()) restore();
+  const restore = () => {
+    for (const back of moved.values()) back();
     moved.clear();
-  });
+  };
+  // After the camera's draw, or after the frame where a frame graph draws it (no camera observables fire then).
+  const afterCamera = scene.onAfterCameraRenderObservable.add(restore), afterFrame = scene.onAfterRenderObservable.add(restore);
   return {
     add: (light, generator) => generator.getShadowMap().onBeforeBindObservable.add(() => before(light), undefined, true),
-    dispose: () => scene.onAfterCameraRenderObservable.remove(after),
+    dispose: () => { scene.onAfterCameraRenderObservable.remove(afterCamera); scene.onAfterRenderObservable.remove(afterFrame); },
   };
 }
 

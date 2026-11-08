@@ -84,6 +84,11 @@ assert.ok(mean.length() < 0.02, 'around the center');
   const moved = drawnAt(5);
   assert.ok(!at(moved) && Vector3.Distance(moved, home) <= 0.1 + 1e-6, 'a later one within its radius');
   assert.ok(at(evaluatedMatrix(door).getTranslation()), 'and back after the view draws');
+  // A frame graph draws without the camera's observables: the light is back after the frame.
+  film.sample(filmJitter(3), 3);
+  map.onBeforeBindObservable.notifyObservers(map);
+  scene.onAfterRenderObservable.notifyObservers(scene);
+  assert.ok(at(evaluatedMatrix(door).getTranslation()), 'and back after a frame a frame graph draws');
   film.sample(null);
   map.onBeforeBindObservable.notifyObservers(map);
   assert.ok(at(evaluatedMatrix(door).getTranslation()), 'a complete film keeps it still');
