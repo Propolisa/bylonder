@@ -7,7 +7,11 @@ import { createLight } from '../src/blenkernel/light/light-home.js';
 import { createLightShadows } from '../src/blenkernel/light/light-shadows.js';
 import { areaLightShadows } from '../src/blenkernel/light/area-light.js';
 
-const scene = new Scene(new NullEngine());
+const engine = new NullEngine();
+// The app's WebGL 2 engine has cascades (texture arrays with a depth texture); a NullEngine stands in for them.
+Object.assign(engine, { createDepthStencilTexture: () => null });
+engine._features.supportCSM = true;
+const scene = new Scene(engine);
 new FreeCamera('Camera', new Vector3(0, 5, -5), scene);
 const sun = createLight('Sun', 'SUN', { use_shadow: true }, scene);
 createLight('Lamp', 'POINT', { use_shadow: false }, scene);
@@ -25,6 +29,7 @@ shadows.setActive(true);
 assert.deepEqual(shadows.generators.map((g) => g.getLight().name), ['Sun'], 'none for the area light with Area Light Shadows off');
 const [generator] = shadows.generators;
 assert.equal(generator.getLight(), sun);
+assert.equal(generator.getClassName(), 'CascadedShadowGenerator', "a sun's shadow spans the view in cascades, fine near the eye, as EEVEE's clipmaps");
 const map = generator.getShadowMap();
 const casters = () => scene.meshes.filter((mesh) => map.renderListPredicate(mesh)).map((mesh) => mesh.name);
 assert.deepEqual(casters(), ['Floor', 'Ball'], "objects cast but those whose Visibility > Shadow is off and Bylonder's helpers");

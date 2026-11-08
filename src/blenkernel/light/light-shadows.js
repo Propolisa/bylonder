@@ -13,8 +13,10 @@ export const shadedObject = (mesh) => !mesh.name.startsWith('__') && !mesh.metad
 const casts = (mesh) => shadedObject(mesh) && mesh.metadata?.wbVisibleShadow !== false && mesh.isEnabled() && mesh.isVisible;
 
 function createGenerator(light, type, drawn) {
-  const generator = new ShadowGenerator(MAP_SIZE, light);
-  if (type === 'SUN') light.autoCalcShadowZBounds = true;
+  // A sun's map spans the view's frustum in cascades, fine near the eye, as EEVEE's clipmaps are: one map over the
+  // whole scene's bounds is too coarse for what a large scene (a sky dome, a ground plane) holds.
+  const generator = type === 'SUN' && CascadedShadowGenerator.IsSupported ? Object.assign(new CascadedShadowGenerator(MAP_SIZE, light), { numCascades: 4, lambda: 0.9, cascadeBlendPercentage: 0.05 })
+    : new ShadowGenerator(MAP_SIZE, light);
   // EEVEE filters its shadows by a pixel or two (shadow_filter_radius); a cube map (a point or area light's) takes
   // Poisson sampling.
   if (light.needCube()) generator.usePoissonSampling = true;
