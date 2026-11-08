@@ -332,6 +332,8 @@ export function createExtrasOverlay(scene, { objects, instances = () => [], colo
       color[3] = lookedThrough ? (ortho ? -depth : node.minZ) : depth;
     } else if (entry.kind === 'light') {
       const light = node, type = entry.lightType;
+      // In the world: where Main's evaluation (a bone or object parent) puts it, not its own local direction.
+      const placed = light.computeTransformedInformation?.();
       position.copyFrom(light.getAbsolutePosition?.() ?? light.position ?? Vector3.ZeroReadOnly);
       if (type === 'POINT') { right.copyFromFloats(1, 0, 0); up.copyFromFloats(0, 0, 1); forward.copyFromFloats(0, 1, 0); }
       else if (type === 'AREA') {
@@ -344,7 +346,7 @@ export function createExtrasOverlay(scene, { objects, instances = () => [], colo
       }
       else {
         // Blender's lights shine down their -Z; a hemispheric light's direction points at its sky.
-        forward.copyFrom(light.direction).normalize();
+        forward.copyFrom(placed ? light.transformedDirection : light.direction).normalize();
         if (!(light instanceof HemisphericLight)) forward.scaleInPlace(-1);
         perpendicular(forward);
       }

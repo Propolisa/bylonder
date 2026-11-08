@@ -35,4 +35,17 @@ scene.render();
 const shape = Array.from(cone.metadata.extra.matrix), [a, b] = [Math.cos(0.5), 0.8], c = a * b - a - b;
 assert.ok(Math.abs(shape[7] - Math.sqrt((a * a - a * a * c * c) / (c * c - a * a * c * c))) < 1e-6, 'the blend circle at its Spot Blend');
 assert.ok(Math.abs(shape[11] - 0.2) < 1e-6, 'its clip start');
-console.log('Extras overlay: a rotated Area light drawn at its object matrix, a Spot light by its own settings passed');
+// A Spot light parented to a bone (Robot Arm's Work Light) points its cone down its evaluated -Z, not its local one.
+const parented = createLight('Work Light', 'SPOT', {}, scene);
+parented.direction = new Vector3(1, 0, 0);
+setEvaluatedMatrix(parented, babylonMatrix(Array.from(blender.m)));
+overlay.changed();
+overlay.setEnabled(true);
+scene.render();
+const turned = overlay.meshes.find((mesh) => mesh.metadata.extra.entry.node === parented && mesh.metadata.extra.shape === 'light_spot_lines');
+for (let i = 0; i < 20 && !turned.material.getEffect()?.isReady(); i++) { scene.render(); await new Promise((r) => setTimeout(r, 50)); }
+scene.render();
+const spotMatrix = Array.from(turned.metadata.extra.matrix, (v) => Math.round(v * 1e6) / 1e6 + 0);
+assert.deepEqual(spotMatrix.slice(8, 11).map((v) => v / 10), [0, -1, 0], "the cone along the object's evaluated Z");
+assert.deepEqual(spotMatrix.slice(12, 15), [1, 2, 3], "at the object's evaluated location");
+console.log('Extras overlay: a rotated Area light drawn at its object matrix, a Spot light by its own settings and a parented one at its evaluated matrix passed');
