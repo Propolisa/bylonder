@@ -1073,7 +1073,7 @@ const checks = {
   // cascaded shadow) keep no view drawing.
   "an idle Rendered view of an opened .blend draws no frame": { open: { link: "bouncing-ball", node: null }, async run() {
     await app.bylonder((b) => b.views.input.setShading("rendered"));
-    await app.until((b) => b.views.idle, null, 30000).catch(() => {});
+    await quiet().catch(() => {});
     const drawn = await app.bylonder(async (b) => {
       const { engine } = b.world;
       let frames = 0;
@@ -1089,7 +1089,7 @@ const checks = {
   // flush, so Main evaluated again and again.
   async "the startup scene's idle Rendered view evaluates nothing and draws no frame"() {
     await app.bylonder((b) => b.views.input.setShading("rendered"));
-    await app.until((b) => b.views.idle, null, 30000).catch(() => {});
+    await quiet().catch(() => {});
     const idle = await app.bylonder(async (b) => {
       const { engine, mainSync } = b.world;
       let evaluated = 0, frames = 0;
@@ -1106,7 +1106,7 @@ const checks = {
   async "hovering a menu's items draws no view frame"() {
     await app.locator('.bl-pulldown[data-blender="VIEW3D_MT_object"]').first().click();
     await app.locator(".bl-menu .bl-menu-item").first().waitFor();
-    await app.until((b) => b.views.idle);
+    await quiet();
     await app.bylonder((b) => { const { engine } = b.world; b.viewFrames = 0; b.counting = engine.onEndFrameObservable.add(() => { if (engine.views.some((v) => v.enabled)) b.viewFrames++; }); });
     for (const item of (await app.locator(".bl-menu").first().locator(".bl-menu-item").all()).slice(0, 10)) await item.hover({ timeout: 3000 }).catch(() => {});
     const drawn = await app.bylonder((b) => { b.world.engine.onEndFrameObservable.remove(b.counting); return b.viewFrames; });
@@ -1152,7 +1152,7 @@ const checks = {
     await app.bylonder((b) => { b.runOperator("curve.primitive_bezier_curve_add", {}); b.runOperator("object.modifier_add", { type: "ARRAY" }); });
     await app.settled();
     await app.bylonder((b) => b.views.input.setShading("material"));
-    await app.until((b) => b.views.idle, null, 30000).catch(() => {});
+    await quiet().catch(() => {});
     const idle = await app.bylonder(async (b) => {
       const { engine, mainSync } = b.world;
       let evaluated = 0, frames = 0;
@@ -2015,6 +2015,17 @@ async function menu(id, item) {
   await app.page.getByRole("menuitem", { name: item }).click();
 }
 
+// Waits until the views have stayed idle for `ms`: under load a view can go idle for a frame and wake again (a shader
+// compiled late), which a frame count started then would see.
+async function quiet(ms = 1000, timeout = 30000) {
+  await app.bylonder((b) => { b.quietSince = 0; });
+  await app.until((b, ms) => {
+    if (!b.views.idle) return (b.quietSince = 0);
+    b.quietSince ||= performance.now();
+    return performance.now() - b.quietSince >= ms;
+  }, ms, timeout);
+}
+
 async function expectStats(test, timeout = 10000) {
   const until = Date.now() + timeout;
   let stats;
@@ -2035,11 +2046,13 @@ const CHECK_TIMEOUT = 300000;
 const timeout = (ms, what) => new Promise((_, reject) => setTimeout(() => reject(new Error(`${what} took over ${ms / 1000} s`)), ms).unref());
 // SHARD=i/n runs every n-th check from the i-th (scripts/gates.mjs runs shards in parallel).
 const [shard, shards] = (process.env.SHARD ?? "0/1").split("/").map(Number);
+// SMOKE_CHECKS: the names of the checks to run, one a line (scripts/gates.mjs --fast).
+const only = process.env.SMOKE_CHECKS && new Set(process.env.SMOKE_CHECKS.split("\n"));
 const server = await startServer();
 const browser = await chromium.launch();
 let failed = 0;
 try {
-  for (const [name, check] of Object.entries(checks).filter((_, i) => i % shards === shard)) {
+  for (const [name, check] of Object.entries(checks).filter(([name]) => !only || only.has(name)).filter((_, i) => i % shards === shard)) {
     if (filter && !name.includes(filter)) continue;
     const started = Date.now();
     try {

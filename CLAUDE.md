@@ -12,7 +12,9 @@ this checkout as CI does and installs it: on Linux directly, on Windows in a WSL
 
 Commit subjects are the app's changelog (Splash Screen > Changelog): one commit per user-visible change, its subject
 saying what a user gets. No WIP commits reach `main`; branches merge with `git merge --squash`. Before pushing to
-`main`: `npm test`, `npm run build` and `npm run test:prod` pass (the Pages deploy runs the same).
+`main`: `node scripts/gates.mjs --fast` passes (`npm test`, `npm run build`, `npm run test:prod`, the smoke checks the
+change touches and the perf guard); a batch of several commits runs the full `node scripts/gates.mjs` instead (the Pages
+deploy runs the build and the production check).
 
 ## Roadmap
 
