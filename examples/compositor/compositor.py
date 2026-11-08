@@ -7,14 +7,18 @@ usage: blender -b --factory-startup -P compositor.py
 import math
 import os
 import random
+from contextlib import contextmanager
 
 import bpy
 from mathutils import Matrix, Vector
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+# Where the camera stands (x, y, eye height); the city and the people behind paper are placed from it.
+EYE = (2.4, -3.6, 1.6)
 bpy.ops.wm.read_factory_settings(use_empty=True)
 scene = bpy.context.scene
 collection = scene.collection
+wobble = random.Random(3)
 
 
 def material(name, color, roughness=0.5, metallic=0.0, emission=0.0):
@@ -66,9 +70,18 @@ def join(name, parts):
     return obj
 
 
-def textured(name, color_a, color_b, scale, roughness=(0.5, 0.5), metallic=0.0, waves=0.0):
-    """A Principled BSDF whose color and roughness a Noise Texture mixes between two ends, with grain bands (a Wave
-    Texture) for wood."""
+@contextmanager
+def merged(name):
+    """Joins the objects made inside the block into one, so the scene stays a few hundred objects, not thousands."""
+    before, group = set(bpy.data.objects), {}
+    yield group
+    parts = [obj for obj in bpy.data.objects if obj not in before]
+    group['object'] = join(name, parts) if len(parts) > 1 else parts[0] if parts else None
+
+
+def textured(name, color_a, color_b, scale, roughness=(0.5, 0.5), metallic=0.0, waves=0.0, bands='Z', distortion=6):
+    """A Principled BSDF whose color and roughness a Noise Texture mixes between two ends, with bands (a Wave
+    Texture) for wood grain, boards or ridges."""
     mat = bpy.data.materials.new(name)
     nodes, links = mat.node_tree.nodes, mat.node_tree.links
     principled = nodes['Principled BSDF']
@@ -84,8 +97,8 @@ def textured(name, color_a, color_b, scale, roughness=(0.5, 0.5), metallic=0.0, 
     if waves:
         wave = nodes.new('ShaderNodeTexWave')
         wave.inputs['Scale'].default_value = waves
-        wave.inputs['Distortion'].default_value = 6
-        wave.bands_direction = 'Z'
+        wave.inputs['Distortion'].default_value = distortion
+        wave.bands_direction = bands
         links.new(coord.outputs['Object'], wave.inputs['Vector'])
         grain = nodes.new('ShaderNodeMath')
         grain.operation = 'MULTIPLY'
@@ -102,6 +115,60 @@ def textured(name, color_a, color_b, scale, roughness=(0.5, 0.5), metallic=0.0, 
     rough.inputs['To Min'].default_value, rough.inputs['To Max'].default_value = roughness
     links.new(factor.outputs['Result'], rough.inputs['Value'])
     links.new(rough.outputs['Result'], principled.inputs['Roughness'])
+    return mat
+
+
+def weather(mat, streaks, base, rust=None, moss=0.0):
+    """Darkens a textured material in vertical water streaks (a Noise Texture stretched along Z) and toward the ground,
+    and mixes in rust and moss by noise."""
+    nodes, links = mat.node_tree.nodes, mat.node_tree.links
+    principled = nodes['Principled BSDF']
+    color = principled.inputs['Base Color'].links[0].from_socket
+    position = nodes.new('ShaderNodeNewGeometry').outputs['Position']
+    stretch = nodes.new('ShaderNodeMapping')
+    stretch.inputs['Scale'].default_value = (5, 5, 0.35)
+    links.new(position, stretch.inputs['Vector'])
+    streak = nodes.new('ShaderNodeTexNoise')
+    streak.inputs['Scale'].default_value, streak.inputs['Detail'].default_value = 2.5, 4
+    links.new(stretch.outputs['Vector'], streak.inputs['Vector'])
+    height = nodes.new('ShaderNodeSeparateXYZ')
+    links.new(position, height.inputs['Vector'])
+
+    def ramp(source, low, high, at_low, at_high):
+        node = nodes.new('ShaderNodeMapRange')
+        node.inputs['From Min'].default_value, node.inputs['From Max'].default_value = low, high
+        node.inputs['To Min'].default_value, node.inputs['To Max'].default_value = at_low, at_high
+        links.new(source, node.inputs['Value'])
+        return node.outputs['Result']
+
+    def mix(a, b, factor, blend='MIX'):
+        node = nodes.new('ShaderNodeMix')
+        node.data_type, node.blend_type = 'RGBA', blend
+        links.new(factor, node.inputs['Factor'])
+        for socket, value in (('A', a), ('B', b)):
+            if isinstance(value, tuple):
+                node.inputs[socket].default_value = (*value, 1)
+            else:
+                links.new(value, node.inputs[socket])
+        return node.outputs['Result']
+
+    grime = nodes.new('ShaderNodeMath')
+    grime.operation, grime.use_clamp = 'ADD', True
+    links.new(ramp(streak.outputs['Fac'], 0.5, 0.7, 0, streaks), grime.inputs[0])
+    links.new(ramp(height.outputs['Z'], 0, 0.7, base, 0), grime.inputs[1])
+    color = mix(color, (0.25, 0.22, 0.18), grime.outputs['Value'], 'MULTIPLY')
+    if rust:
+        patches = nodes.new('ShaderNodeTexNoise')
+        patches.inputs['Scale'].default_value, patches.inputs['Detail'].default_value = 1.2, 6
+        links.new(position, patches.inputs['Vector'])
+        color = mix(color, rust, ramp(patches.outputs['Fac'], 0.52, 0.68, 0, 0.9))
+    if moss:
+        cracks = nodes.new('ShaderNodeMath')
+        cracks.operation = 'MULTIPLY'
+        links.new(ramp(height.outputs['Z'], 0, 0.35, moss, 0), cracks.inputs[0])
+        links.new(ramp(streak.outputs['Fac'], 0.4, 0.6, 0, 1), cracks.inputs[1])
+        color = mix(color, (0.03, 0.05, 0.015), cracks.outputs['Value'])
+    links.new(color, principled.inputs['Base Color'])
     return mat
 
 
@@ -124,48 +191,32 @@ def curve(name, points, mat, radius, cyclic=False, smooth=True, resolution=6):
 
 
 # Materials: neon glass in two colors, the warm light behind the window and the door, and the alley's surfaces.
-magenta = material('Neon Magenta', (1.0, 0.05, 0.42), emission=12)
-cyan = material('Neon Cyan', (0.05, 0.75, 1.0), emission=9)
-steam_neon = material('Neon White', (0.75, 0.9, 1.0), emission=5)
-amber = material('Warm Interior', (1.0, 0.38, 0.09), emission=1.6)
+magenta = material('Neon Magenta', (1.0, 0.05, 0.42), emission=6)
+cyan = material('Neon Cyan', (0.05, 0.75, 1.0), emission=5)
+steam_neon = material('Neon White', (0.75, 0.9, 1.0), emission=3)
 dark_metal = material('Dark Metal', (0.02, 0.02, 0.025), roughness=0.35, metallic=1)
-backplate = material('Sign Backplate', (0.006, 0.006, 0.01), roughness=0.3)
-# Matte black: the tubes' light panels face it and must not show in it.
+backplate = material('Sign Backplate', (0.006, 0.006, 0.01), roughness=0.3, metallic=1)
+# Black metal reflecting almost nothing: the tubes' light panels face it and must not show in it, nor the tubes in its
+# screen-traced reflections.
 backplate.node_tree.nodes['Principled BSDF'].inputs['Specular IOR Level'].default_value = 0
-paint = material('Green Paint', (0.01, 0.03, 0.025), roughness=0.45)
 wood = textured('Crate Wood', (0.16, 0.09, 0.045), (0.05, 0.03, 0.02), 3, (0.55, 0.8), waves=6)
 rubber = material('Rubber', (0.008, 0.008, 0.008), roughness=0.6)
 rusty_paint = textured('Rusty Paint', (0.3, 0.03, 0.02), (0.1, 0.035, 0.012), 14, (0.3, 0.85), metallic=0.3)
 chrome = material('Chrome', (0.6, 0.6, 0.62), roughness=0.2, metallic=1)
-silhouette = material('Silhouette', (0.0, 0.0, 0.0), roughness=1)
 rain = material('Rain', (0.6, 0.65, 0.7), roughness=0.2)
 mirror = material('Puddle', (0.003, 0.003, 0.004), roughness=0.02)
 
-# The wall: a slab with the window and the door cut out, Brick Texture over its object coordinates in meters.
-brick_mat = bpy.data.materials.new('Brick')
-nodes, links = brick_mat.node_tree.nodes, brick_mat.node_tree.links
-principled = nodes['Principled BSDF']
-principled.inputs['Roughness'].default_value = 0.75
-coord = nodes.new('ShaderNodeTexCoord')
-facade = nodes.new('ShaderNodeMapping')
-facade.inputs['Rotation'].default_value = (math.pi / 2, 0, 0)
-brick = nodes.new('ShaderNodeTexBrick')
-brick.inputs['Scale'].default_value = 0.8
-brick.inputs['Color1'].default_value = (0.11, 0.035, 0.028, 1)
-brick.inputs['Color2'].default_value = (0.05, 0.028, 0.024, 1)
-brick.inputs['Mortar'].default_value = (0.02, 0.02, 0.022, 1)
-brick.inputs['Mortar Size'].default_value = 0.025
-brick.inputs['Bias'].default_value = 0.3
-bump = nodes.new('ShaderNodeBump')
-bump.inputs['Strength'].default_value = 0.5
-links.new(coord.outputs['Object'], facade.inputs['Vector'])
-links.new(facade.outputs['Vector'], brick.inputs['Vector'])
-links.new(brick.outputs['Color'], principled.inputs['Base Color'])
-links.new(brick.outputs['Fac'], bump.inputs['Height'])
-links.new(bump.outputs['Normal'], principled.inputs['Normal'])
+# The facades: dark timber boards below, weathered plaster or corrugated metal above, tiled eaves between.
+timber = textured('Timber', (0.1, 0.055, 0.03), (0.03, 0.018, 0.01), 2, (0.5, 0.8), waves=5, bands='X', distortion=0.4)
+weathered_plaster = textured('Weathered Plaster', (0.3, 0.25, 0.18), (0.12, 0.1, 0.07), 1.5, (0.8, 0.95))
+corrugated = textured('Corrugated Metal', (0.15, 0.11, 0.08), (0.05, 0.035, 0.025), 3, (0.35, 0.7), metallic=0.5, waves=20, bands='X', distortion=0)
+roof_tiles = textured('Roof Tiles', (0.045, 0.045, 0.05), (0.015, 0.015, 0.018), 4, (0.3, 0.55), waves=25, bands='X', distortion=0)
+weather(timber, 0.5, 0.7, moss=0.7)
+weather(weathered_plaster, 0.8, 0.5)
+weather(corrugated, 0.4, 0.4, rust=(0.22, 0.07, 0.02))
 
-wall = box('Wall', (16, 0.3, 7.5), (1, 0.15, 3.6), brick_mat)
-box('Side Wall', (0.3, 12, 7.5), (-6.15, -6, 3.6), brick_mat)
+wall = box('Wall', (8.6, 0.3, 2.9), (0.1, 0.15, 1.3), timber)
+upper_wall = box('Upper Wall', (8.6, 0.3, 3.4), (0.1, 0.15, 4.45), weathered_plaster)
 openings = [box('Window Opening', (2.8, 1.0, 1.5), (-1.6, 0.15, 1.75), None),
             box('Door Opening', (1.15, 1.0, 2.25), (2.4, 0.15, 1.125), None)]
 for opening in openings:
@@ -175,13 +226,13 @@ for opening in openings:
     bpy.ops.object.modifier_apply(modifier=opening.name)
     bpy.data.objects.remove(opening)
 
-# The street: a raised sidewalk and the road below its curb, wet asphalt with grain, and puddles that mirror the
-# neon.
-asphalt = textured('Wet Asphalt', (0.022, 0.022, 0.024), (0.008, 0.008, 0.009), 1.5, (0.45, 0.2))
-box('Sidewalk', (16, 2.2, 0.15), (1, -1.1, -0.075), asphalt)
-box('Road', (16, 14, 0.15), (1, -9.2, -0.225), asphalt)
-box('Curb', (16, 0.18, 0.17), (1, -2.2, -0.065), dark_metal, bevel=0.02)
-
+# The street: a narrow road between raised sidewalks, wet asphalt with grain, and puddles that mirror the neon.
+asphalt = textured('Wet Asphalt', (0.022, 0.022, 0.024), (0.008, 0.008, 0.009), 1.5, (0.25, 0.08))
+box('Sidewalk', (60, 1.2, 0.15), (-15, -0.6, -0.075), asphalt)
+box('Road', (60, 2.8, 0.15), (-15, -2.6, -0.225), asphalt)
+box('Far Sidewalk', (60, 0.8, 0.15), (-15, -4.4, -0.075), asphalt)
+for y in (-1.2, -4.0):
+    box('Curb', (60, 0.18, 0.17), (-15, y, -0.065), dark_metal, bevel=0.02)
 
 def outline(name, verts, mat):
     """A flat face through the points."""
@@ -200,14 +251,17 @@ def puddle(name, x, y, z, rx, ry, seed):
     return outline(name, [(x + rx * w * math.cos(a), y + ry * w * math.sin(a), z + 0.003) for a, w in zip(angles, wobble)], mirror)
 
 
-for i, (x, y, z, rx, ry) in enumerate(((1.0, -7.6, -0.15, 2.6, 1.3), (-2.6, -4.6, -0.15, 1.5, 0.7), (4.6, -5.0, -0.15, 1.2, 0.6),
-                                       (-1.3, -1.2, 0.0, 1.1, 0.45), (5.2, -3.4, -0.15, 0.7, 0.35))):
+for i, (x, y, z, rx, ry) in enumerate(((0.5, -2.6, -0.15, 2.2, 0.8), (-4.5, -2.5, -0.15, 2.6, 0.8), (-9.5, -2.7, -0.15, 3.0, 0.8),
+                                       (-1.3, -0.7, 0.0, 0.9, 0.3), (2.6, -2.9, -0.15, 1.6, 0.7))):
     puddle(f'Puddle {i + 1}', x, y, z, rx, ry, i * 1.7)
+for i in range(6):
+    puddle(f'Puddle {i + 6}', wobble.uniform(-22, -3), wobble.uniform(-3.4, -1.8), -0.15, wobble.uniform(0.3, 1.6), wobble.uniform(0.15, 0.5), i)
 
 # The sign: script words and a bowl of noodles in glass tubes, standing off a dark backplate.
-box('Backplate', (7.0, 0.05, 2.5), (-0.4, -0.05, 4.05), backplate, bevel=0.06)
-for x, z in ((-3.6, 5.0), (2.8, 5.0), (-3.6, 3.1), (2.8, 3.1)):
-    cylinder('Standoff', 0.04, 0.12, (x, -0.13, z), dark_metal, (math.pi / 2, 0, 0), 8)
+box('Backplate', (3.6, 0.05, 1.3), (0.2, -0.05, 3.6), backplate, bevel=0.04)
+with merged('Standoffs'):
+    for x, z in ((-1.45, 4.1), (1.85, 4.1), (-1.45, 3.1), (1.85, 3.1)):
+        cylinder('Standoff', 0.04, 0.12, (x, -0.13, z), dark_metal, (math.pi / 2, 0, 0), 8)
 
 
 def neon_text(name, body, font, location, size, mat, tube, offset, spacing=1.0):
@@ -225,57 +279,412 @@ def neon_text(name, body, font, location, size, mat, tube, offset, spacing=1.0):
     return obj
 
 
-script = bpy.data.fonts.load(os.path.join(HERE, 'fonts', 'Sacramento-Regular.ttf'))
+kanji = bpy.data.fonts.load(os.path.join(HERE, 'fonts', 'ZenMaruGothic-Light.ttf'))
 display = bpy.data.fonts.load(os.path.join(HERE, 'fonts', 'PoiretOne-Regular.ttf'))
-sign = neon_text('Noodles', 'Noodles', script, (0.6, -0.2, 4.25), 2.2, magenta, 0.03, -0.012)
-neon_text('Open Late', 'OPEN  LATE', display, (0.6, -0.2, 3.25), 0.42, cyan, 0.018, -0.008, 1.25)
+sign = neon_text('Menya Akari', '麺屋 灯', kanji, (0.7, -0.2, 3.75), 0.62, magenta, 0.016, -0.005)
+# One tube of 灯 is dead: the sign's rightmost contour is unlit glass.
+bpy.ops.object.select_all(action='DESELECT')
+sign.select_set(True)
+bpy.context.view_layer.objects.active = sign
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.select_all(action='SELECT')
+bpy.ops.mesh.separate(type='LOOSE')
+bpy.ops.object.mode_set(mode='OBJECT')
+contours = list(bpy.context.selected_objects)
+dead = max(contours, key=lambda part: sum((part.matrix_world @ v.co).x for v in part.data.vertices) / len(part.data.vertices))
+dead.data.materials[0] = material('Dead Neon', (0.04, 0.02, 0.03), roughness=0.15)
+sign = join('Menya Akari', [sign] + [part for part in contours if part is not sign])
+neon_text('Open Late', 'MENYA AKARI   OPEN LATE', display, (0.7, -0.2, 3.24), 0.15, cyan, 0.009, -0.003, 1.25)
 
-# The bowl: a half circle under a rim, chopsticks and three wisps of steam.
-bx, by, bz = -2.75, -0.2, 3.8
-bowl = [(bx + 0.62 * math.cos(a), by, bz + 0.55 * math.sin(a)) for a in [math.pi + i * math.pi / 8 for i in range(9)]]
-curve('Bowl', bowl, cyan, 0.03)
-curve('Rim', [(bx - 0.75, by, bz + 0.02), (bx + 0.75, by, bz + 0.02)], cyan, 0.03, smooth=False)
-curve('Foot', [(bx - 0.22, by, bz - 0.62), (bx + 0.22, by, bz - 0.62)], cyan, 0.03, smooth=False)
-curve('Chopstick', [(bx + 0.1, by, bz + 0.25), (bx + 0.85, by, bz + 1.0)], magenta, 0.025, smooth=False)
-curve('Chopstick 2', [(bx + 0.25, by, bz + 0.18), (bx + 1.0, by, bz + 0.85)], magenta, 0.025, smooth=False)
-for i, dx in enumerate((-0.4, -0.1, 0.2)):
-    wisp = [(bx + dx + 0.08 * math.sin(t * 2.2), by, bz + 0.2 + t * 0.22) for t in range(5)]
-    curve(f'Steam {i + 1}', wisp, steam_neon, 0.02)
+# The bowl: a half circle under a rim, chopsticks and three wisps of steam, drawn at half size around (bx, bz).
+bx, by, bz, k = -1.0, -0.2, 3.55, 0.5
 
-# The window: warm light behind blinds, a figure's silhouette between them.
-box('Window Glow', (2.8, 0.02, 1.5), (-1.6, 0.6, 1.75), amber)
-for i in range(6):
-    box(f'Blind {i + 1}', (2.76, 0.03, 0.06), (-1.6, 0.22, 2.46 - i * 0.055), paint, (math.radians(-10), 0, 0))
-box('Blind Bar', (2.78, 0.05, 0.03), (-1.6, 0.22, 2.16), paint)
-# The figure: a bust's outline, half of it mirrored, raising a bowl to the chin with chopsticks.
-half = [(0.46, 0), (0.46, 0.3), (0.44, 0.42), (0.37, 0.5), (0.22, 0.55), (0.08, 0.58), (0.065, 0.62)]
-half += [(0.115 * math.cos(math.radians(a)), 0.75 + 0.14 * math.sin(math.radians(a))) for a in range(-55, 91, 15)]
-bust = half + [(-x, z) for x, z in reversed(half)]
-fx, fy, fz = -1.05, 0.45, 0.95
-outline('Figure', [(fx + x, fy, fz + z) for x, z in bust], silhouette)
-outline('Bowl in Hand', [(fx + 0.27 + 0.15 * math.cos(math.radians(a)), fy - 0.02, fz + 0.57 + 0.07 * math.sin(math.radians(a)))
-                         for a in range(180, 361, 15)], silhouette)
-for end in (0.05, 0.08):
-    curve('Chopstick', [(fx + 0.3, fy - 0.02, fz + 0.59), (fx + end, fy - 0.02, fz + 0.72)], silhouette, 0.01, smooth=False)
-box('Window Sill', (3.1, 0.25, 0.08), (-1.6, -0.08, 0.96), paint, bevel=0.015)
-for side, x in (('Left', -3.05), ('Right', -0.15)):
-    box(f'Window Frame {side}', (0.1, 0.1, 1.5), (x, -0.02, 1.75), paint)
-box('Window Frame Top', (3.0, 0.1, 0.1), (-1.6, -0.02, 2.53), paint)
 
-# The door: ajar, the warm interior behind it.
-box('Door Glow', (1.15, 0.02, 2.25), (2.4, 1.6, 1.125), amber)
-swing = math.radians(65)
-box('Door Leaf', (1.13, 0.05, 2.2), (1.85 + 0.56 * math.cos(swing), 0.3 + 0.56 * math.sin(swing), 1.11), paint, (0, 0, swing))
-box('Door Frame Top', (1.4, 0.12, 0.12), (2.4, -0.04, 2.3), paint)
+def icon(dx, dz):
+    return (bx + k * dx, by, bz + k * dz)
 
-# Pipes and cables: a drainpipe, a conduit under the roofline and power lines sagging across the alley.
-cylinder('Drainpipe', 0.07, 7.5, (3.3, -0.1, 3.75), dark_metal)
-cylinder('Conduit', 0.045, 12, (0, -0.1, 6.1), dark_metal, (0, math.pi / 2, 0))
-for i, (start, end, sag) in enumerate((((-6.0, -4.0, 6.6), (2.0, 0.0, 6.4), 0.9), ((-6.0, -6.5, 6.0), (5.0, 0.0, 6.8), 1.2),
-                                       ((-0.6, -0.1, 5.3), (-0.6, -0.1, 6.1), 0.0))):
-    cable = [tuple(s + (e - s) * t for s, e in zip(start, end)) for t in (0, 0.25, 0.5, 0.75, 1)]
-    cable = [(x, y, z - sag * 4 * t * (1 - t)) for (x, y, z), t in zip(cable, (0, 0.25, 0.5, 0.75, 1))]
-    curve(f'Cable {i + 1}', cable, rubber, 0.012)
+
+curve('Bowl', [icon(0.62 * math.cos(a), 0.55 * math.sin(a)) for a in [math.pi + i * math.pi / 8 for i in range(9)]], cyan, 0.018)
+curve('Rim', [icon(-0.75, 0.02), icon(0.75, 0.02)], cyan, 0.018, smooth=False)
+curve('Foot', [icon(-0.22, -0.62), icon(0.22, -0.62)], cyan, 0.018, smooth=False)
+curve('Chopstick', [icon(0.1, 0.25), icon(0.85, 1.0)], magenta, 0.015, smooth=False)
+curve('Chopstick 2', [icon(0.25, 0.18), icon(1.0, 0.85)], magenta, 0.015, smooth=False)
+with merged('Neon Steam'):
+    for i, dx in enumerate((-0.4, -0.1, 0.2)):
+        curve(f'Steam {i + 1}', [icon(dx + 0.08 * math.sin(t * 2.2), 0.2 + t * 0.22) for t in range(5)], steam_neon, 0.012)
+
+def ellipsoid(name, scale, location, mat):
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=16, ring_count=10, radius=1, location=location)
+    obj = finish(bpy.context.object, name, mat)
+    obj.scale = scale
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    return obj
+
+
+steam_puff = material('Steam Puff', (0.85, 0.8, 0.75), roughness=1)
+steam_puff.node_tree.nodes['Principled BSDF'].inputs['Alpha'].default_value = 0.12
+steam_puff.surface_render_method = 'BLENDED'
+
+
+def puffs(name, x, y, z, drift, count=5, size=1.0):
+    """Steam rising from (x, y, z): ellipsoids growing and drifting by `drift` (dx, dy) per step."""
+    with merged(name):
+        for i in range(count):
+            r = (0.08 + i * 0.05) * size
+            ellipsoid('Puff', (r * 1.3, r, r), (x + drift[0] * i + wobble.uniform(-0.05, 0.05) * size, y + drift[1] * i, z + i * 0.18 * size), steam_puff)
+
+
+# The bar: one shallow room behind the window and the door, plaster walls, a wooden counter, a row of menu tags over
+# the cook, paper lanterns and a stockpot.
+plaster = textured('Plaster', (0.6, 0.4, 0.22), (0.5, 0.32, 0.17), 4, (0.8, 0.9))
+counter_wood = textured('Counter Wood', (0.3, 0.16, 0.07), (0.12, 0.06, 0.03), 3, (0.35, 0.6), waves=5)
+dark_wood = material('Dark Wood', (0.03, 0.015, 0.01), roughness=0.6)
+porcelain = material('Porcelain', (0.8, 0.75, 0.65), roughness=0.25)
+paper = material('Menu Paper', (0.9, 0.8, 0.6), roughness=0.9, emission=0.1)
+slip_paper = material('Slip Paper', (0.32, 0.28, 0.2), roughness=0.9)
+lantern_paper = material('Lantern Paper', (1.0, 0.12, 0.03), emission=2.5)
+white_lantern = material('White Lantern', (1.0, 0.8, 0.55), emission=2.2)
+steel = material('Steel', (0.5, 0.48, 0.45), roughness=0.3, metallic=1)
+
+box('Back Wall', (10.0, 0.1, 3.0), (-1.55, 2.5, 1.5), plaster)
+box('Ceiling', (10.0, 2.3, 0.1), (-1.55, 1.35, 2.95), dark_wood)
+box('Floor', (10.0, 2.3, 0.15), (-1.55, 1.35, 0.075), dark_wood)
+for x in (-6.55, 3.45):
+    box('Side Wall', (0.1, 2.3, 3.0), (x, 1.35, 1.5), plaster)
+box('Counter', (9.4, 0.4, 1.37), (-1.7, 1.6, 0.685), timber)
+box('Wainscot', (3.0, 0.04, 1.1), (2.0, 2.43, 0.55), dark_wood)
+for sx in (1.5, 2.25):
+    cylinder('Bar Stool', 0.17, 0.05, (sx, 1.15, 0.85), counter_wood, vertices=16)
+    cylinder('Stool Leg', 0.03, 0.7, (sx, 1.15, 0.5), dark_metal, vertices=8)
+    bpy.ops.mesh.primitive_torus_add(major_radius=0.15, minor_radius=0.012, major_segments=16, minor_segments=4, location=(sx, 1.15, 0.36))
+    finish(bpy.context.object, 'Footrest', dark_metal)
+box('Counter Top', (9.5, 0.5, 0.05), (-1.7, 1.55, 1.395), counter_wood, bevel=0.01)
+box('Counter Edge', (9.5, 0.03, 0.06), (-1.7, 1.29, 1.39), material('Hinoki Edge', (0.55, 0.38, 0.2), roughness=0.4))
+box('Menu Board', (2.9, 0.04, 0.42), (-4.7, 2.43, 2.25), dark_wood)
+sake_glass = material('Sake Bottle', (0.05, 0.12, 0.05), roughness=0.1)
+# Through the door: a shelf of sake bottles and a calendar.
+with merged('Doorway Shelf'):
+    box('Bottle Shelf', (1.0, 0.2, 0.03), (2.4, 2.38, 1.55), dark_wood)
+    for i in range(7):
+        cylinder('Sake Bottle', 0.04, 0.3, (1.98 + i * 0.14, 2.38, 1.72), sake_glass if i % 3 else porcelain, vertices=10)
+    box('Calendar', (0.36, 0.01, 0.5), (2.55, 2.44, 2.05), slip_paper, (0, math.radians(2), 0))
+    box('Calendar Picture', (0.3, 0.012, 0.22), (2.55, 2.435, 2.17), material('Calendar Picture', (0.2, 0.3, 0.35), roughness=0.8), (0, math.radians(2), 0))
+tube_light = material('Tube Light', (1.0, 0.88, 0.72), emission=2.5)
+odd_tube = material('Odd Tube', (0.55, 1.0, 0.65), emission=2.5)
+with merged('Tube Lights'):
+    for i, x in enumerate((-5.7, -4.6, -3.5)):
+        cylinder('Tube Light', 0.018, 0.9, (x, 2.42, 2.58), odd_tube if i == 1 else tube_light, (0, math.pi / 2, 0), 8)
+with merged('Menu Tags'):
+    for i in range(11):
+        box(f'Menu Tag {i + 1}', (0.12, 0.02, 0.32), (-6.0 + i * 0.26, 2.4, 2.25), slip_paper)
+box('Bowl Shelf', (0.7, 0.18, 0.03), (-3.6, 2.36, 1.75), dark_wood)
+
+
+def bowl(name, x, y, z, radius=0.08, mat=porcelain):
+    """A bowl: a cone wide at the top on a short foot."""
+    bpy.ops.mesh.primitive_cone_add(vertices=16, radius1=radius * 0.5, radius2=radius, depth=radius * 0.8, location=(x, y, z + radius * 0.4))
+    return finish(bpy.context.object, name, mat)
+
+
+with merged('Bowls'):
+    for i, x in enumerate((-3.85, -3.7, -3.55, -3.4, -3.25)):
+        for k in range(2 if i % 2 else 3):
+            bowl('Shelf Bowl', x, 2.35, 1.765 + k * 0.05, 0.065)
+    for x in (-4.1, -2.9, -1.9):
+        bowl('Counter Bowl', x, 1.45, 1.42)
+for x in (-4.1, -2.9, -1.9):
+    puffs('Bowl Steam', x, 1.45, 1.55, (0.02, 0.0), 3)
+cylinder('Stockpot', 0.2, 0.35, (-4.8, 2.2, 1.475), steel, vertices=20)
+with merged('Traces'):
+    bowl('Half-Eaten Bowl', -1.55, 1.45, 1.42)
+    for dy in (-0.012, 0.012):
+        box('Resting Chopstick', (0.22, 0.008, 0.008), (-1.55, 1.45 + dy, 1.495), dark_wood, (0, 0, math.radians(8)))
+    cylinder('Umbrella Stand', 0.13, 0.5, (3.35, -0.3, 0.25), dark_metal, vertices=14)
+    for k, (tilt, color) in enumerate(((6, (0.55, 0.58, 0.6)), (-8, (0.02, 0.03, 0.09)), (3, (0.35, 0.02, 0.02)))):
+        bpy.ops.mesh.primitive_cone_add(vertices=10, radius1=0.012, radius2=0.055, depth=0.75, location=(3.32 + k * 0.04, -0.3, 0.62),
+                                        rotation=(math.radians(tilt), math.radians(tilt * 0.6), 0))
+        finish(bpy.context.object, 'Closed Umbrella', material('Closed Umbrella', color, roughness=0.3))
+    for bx_, turn in ((1.95, 8), (2.15, -5), (2.55, 15)):
+        cylinder('Rubber Boot', 0.055, 0.3, (bx_, -0.25, 0.15), material('Boot Rubber', (0.02, 0.03, 0.02), roughness=0.4), vertices=10)
+    bpy.ops.mesh.primitive_cone_add(vertices=12, radius1=0.24, radius2=0.12, depth=0.8, location=(2.95, 2.36, 1.45))
+    finish(bpy.context.object, 'Coat on a Hook', material('Hung Coat', (0.04, 0.07, 0.04), roughness=0.9))
+    box('Radio', (0.24, 0.12, 0.14), (2.75, 2.36, 1.64), material('Radio Case', (0.25, 0.08, 0.04), roughness=0.4))
+    box('Radio Dial', (0.12, 0.01, 0.04), (2.75, 2.29, 1.66), material('Radio Dial', (1.0, 0.6, 0.2), emission=4))
+puffs('Pot Steam', -4.8, 2.2, 1.75, (0.04, 0.0), 4)
+puffs('Cook Steam', -5.7, 1.8, 1.5, (0.03, -0.02), 5)
+
+
+def lantern(name, x, y, z, mat=lantern_paper, top=2.9, size=1.0):
+    """A paper lantern (chochin) on a cord: an egg of glowing paper between dark caps."""
+    z += wobble.uniform(-0.06, 0.06)
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=16, ring_count=10, radius=0.12 * size, location=(x, y, z))
+    shade = finish(bpy.context.object, name, mat)
+    shade.scale.z = 1.35
+    shade.rotation_euler = (math.radians(wobble.uniform(-6, 6)), math.radians(wobble.uniform(-6, 6)), 0)
+    for dz in (-0.155, 0.155):
+        cylinder('Lantern Cap', 0.06 * size, 0.03 * size, (x, y, z + dz * size), dark_wood, vertices=12)
+    curve('Lantern Cord', [(x, y, z + 0.17 * size), (x, y, top)], rubber, 0.005, smooth=False)
+
+
+with merged('Lanterns'):
+    for i, (x, z) in enumerate(((-4.2, 2.08), (-3.15, 2.08), (-2.1, 2.08), (2.3, 1.7))):
+        lantern(f'Lantern {i + 1}', x, 1.15, z)
+
+
+# Clothes.
+coats = [material(name, color, roughness=0.8) for name, color in (('Dark Coat', (0.02, 0.018, 0.018)), ('Denim Jacket', (0.05, 0.09, 0.18)),
+                                                                   ('Beige Trench', (0.3, 0.22, 0.13)), ('Grey Parka', (0.12, 0.12, 0.11)))]
+umbrellas = [material(name, color, roughness=0.3) for name, color in (('Clear Umbrella Canopy', (0.55, 0.58, 0.6)), ('Navy Umbrella Canopy', (0.02, 0.03, 0.09)),
+                                                                       ('Red Umbrella Canopy', (0.35, 0.02, 0.02)))]
+hair = material('Hair', (0.01, 0.008, 0.007), roughness=0.6)
+
+# People from CC0 models (models/), each seated from its own rig: its own sitting animation where it has one, else its
+# legs bent at the hips and knees; its arms turned to bring both hands together at the chest, round a cup.
+# Bone names of the rigs these models come with, {} for the side's name.
+RIGS = {
+    'HumanArmature': dict(sides=('L', 'R'), arm='UpperArm.{}', forearm='LowerArm.{}', hand='Palm.{}', thigh='UpperLeg.{}',
+                          shin='LowerLeg.{}', foot='Foot.{}'),
+    'CharacterArmature': dict(sides=('L', 'R'), arm='UpperArm.{}', forearm='LowerArm.{}', hand='Wrist.{}', thigh='UpperLeg.{}',
+                              shin='LowerLeg.{}', foot='Foot.{}'),
+    'Armature': dict(sides=('Left', 'Right'), arm='{}Arm', forearm='{}ForeArm', hand='{}Hand', thigh='{}UpLeg', shin='{}Leg',
+                     foot='{}Foot'),
+}
+
+
+def holding(rig, bones, sit):
+    """Directions (world space, facing -Y) that seat the rig and bring its hands together at the chest: its legs only
+    when it has no sitting animation of its own."""
+    pose, world = rig.pose.bones, rig.matrix_world
+    directions = []
+    for side in bones['sides']:
+        out = 1 if (world @ pose[bones['arm'].format(side)].head).x > 0 else -1
+        if not sit:
+            directions += [(bones['thigh'].format(side), (0.12 * out, -1, -0.05)), (bones['shin'].format(side), (0.04 * out, 0.12, -1)),
+                           (bones['foot'].format(side), (0, -1, -0.3))]
+        # Elbows in near the body, forearms rising to the chest, wrists relaxed round the cup.
+        directions += [(bones['arm'].format(side), (0.12 * out, -0.2, -1)), (bones['forearm'].format(side), (-0.55 * out, -0.75, 0.4)),
+                       (bones['hand'].format(side), (-0.55 * out, -0.35, 0.75))]
+    # The head bowed until the face points down into the cup.
+    return directions + [('Head', (0, -0.8, 0.6))]
+
+
+def curl_fingers(rig, angle=70):
+    """Curls every finger joint of the rig's hands, as round a cup."""
+    for bone in rig.pose.bones:
+        if any(finger in bone.name for finger in ('Index', 'Middle', 'Ring', 'Pinky', 'Thumb', 'Fingers')):
+            bone.rotation_mode = 'XYZ'
+            bone.rotation_euler.x += math.radians(angle if 'Thumb' not in bone.name else angle / 2)
+    bpy.context.view_layer.update()
+
+
+def posed(rig, directions):
+    """Turns each bone to point where `directions` says (world space, the body facing -Y), parents first."""
+    pose, to_rig = rig.pose.bones, rig.matrix_world.to_3x3().inverted()
+    for bone, world_direction in directions:
+        direction = to_rig @ Vector(world_direction)
+        matrix = pose[bone].matrix.copy()
+        turn = matrix.to_3x3().col[1].normalized().rotation_difference(Vector(direction).normalized()).to_matrix().to_4x4()
+        head = matrix.translation.copy()
+        matrix = turn @ matrix.normalized()
+        matrix.translation = head
+        pose[bone].matrix = matrix @ Matrix.Diagonal(pose[bone].matrix.to_scale()).to_4x4()
+        bpy.context.view_layer.update()
+    return pose
+
+
+
+
+def repaint(body, palette):
+    """Recolours a model's palette texture: each pixel nearest a color of `palette` (sRGB) gets its new color."""
+    for slot in body.material_slots:
+        texture = next((node for node in slot.material.node_tree.nodes if node.type == 'TEX_IMAGE'), None)
+        if not texture:
+            continue
+        image = texture.image.copy()
+        pixels = list(image.pixels)
+        for i in range(0, len(pixels), 4):
+            old = min(palette, key=lambda color: sum((a - b) ** 2 for a, b in zip(color, pixels[i:i + 3])))
+            if sum((a - b) ** 2 for a, b in zip(old, pixels[i:i + 3])) < 0.01:
+                pixels[i:i + 3] = palette[old]
+        image.pixels = pixels
+        image.pack()
+        texture.image = image
+        principled = slot.material.node_tree.nodes['Principled BSDF']
+        principled.inputs['Roughness'].default_value = 0.75
+        principled.inputs['Specular IOR Level'].default_value = 0.3
+
+
+def seated(name, model, x, y, facing, seat, palette=None, floor=0.0):
+    """A person from `model` (a .glb in models/) seated with the hips `seat` meters above the feet on a floor at `floor`,
+    turned `facing` degrees from facing -Y, holding a cup at the chest, recoloured by `palette` (repaint()); returns the
+    figure, where its hands meet, the top of the head and the underside of the hips (where a seat goes)."""
+    before = set(bpy.data.objects)
+    bpy.ops.import_scene.gltf(filepath=os.path.join(HERE, 'models', model))
+    imported = [obj for obj in bpy.data.objects if obj not in before]
+    rig = next(obj for obj in imported if obj.type == 'ARMATURE')
+    bones = next(names for names in RIGS.values() if names['hand'].format(names['sides'][0]) in rig.pose.bones)
+    sit = next((action for action in bpy.data.actions if action.name.split('|')[-1] in ('Man_Sitting', 'Female_Sitting', 'SitIdle')), None)
+    rig.animation_data_create().action = sit
+    if not sit:
+        for bone in rig.pose.bones:
+            bone.matrix_basis.identity()
+    scene.frame_set(int(sum(sit.frame_range) / 2) if sit else 1)
+    pose = posed(rig, holding(rig, bones, sit))
+    curl_fingers(rig)
+    world = rig.matrix_world
+    hands = [world @ pose[bones['hand'].format(side)].tail for side in bones['sides']]
+    hips, feet = world @ pose['Hips'].head, world @ pose[bones['foot'].format(bones['sides'][0])].head
+    parts = [obj for obj in imported if obj.type == 'MESH' and obj.parent is rig]
+    bpy.ops.object.select_all(action='DESELECT')
+    for part in parts:
+        part.select_set(True)
+    bpy.context.view_layer.objects.active = parts[0]
+    bpy.ops.object.convert(target='MESH')
+    for part in parts:
+        matrix = part.matrix_world.copy()
+        part.parent = None
+        part.matrix_world = matrix
+    bpy.ops.object.join()
+    body = bpy.context.object
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    for obj in imported:
+        if obj not in parts:
+            bpy.data.objects.remove(obj)
+    scene.frame_set(1)
+    body.name = name
+    # Sized so the head's top sits 0.85 m above the hips, as a seated adult's does.
+    top = max(v.co.z for v in body.data.vertices)
+    k = 0.85 / (top - hips.z)
+    cup = (hands[0] + hands[1]) / 2
+    placement = (Matrix.Translation((x, y, floor + seat)) @ Matrix.Rotation(math.radians(facing), 4, 'Z') @ Matrix.Scale(k, 4)
+                 @ Matrix.Translation(-Vector((hips.x, hips.y, hips.z))))
+    body.matrix_world = placement
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    bpy.ops.object.shade_auto_smooth(angle=math.radians(40))
+    if palette:
+        repaint(body, palette)
+    head = max((body.matrix_world @ v.co for v in body.data.vertices), key=lambda co: co.z)
+    under = [v.co for v in body.data.vertices if (v.co.xy - Vector((x, y))).length < 0.12]
+    return body, placement @ cup, head, min(co.z for co in under)
+
+
+
+
+whites = material('Cook Whites', (0.7, 0.66, 0.6), roughness=0.8)
+
+# The window: blinds raised to the top, a worn painted frame and sill.
+worn_paint = textured('Weathered Wood', (0.06, 0.035, 0.02), (0.025, 0.015, 0.01), 9, (0.4, 0.85))
+with merged('Window Frame'):
+    for i in range(4):
+        box(f'Blind {i + 1}', (2.76, 0.03, 0.06), (-1.6, 0.22, 2.46 - i * 0.055), worn_paint, (math.radians(-10), 0, 0))
+    box('Blind Bar', (2.78, 0.05, 0.03), (-1.6, 0.22, 2.27), worn_paint)
+    box('Window Sill', (3.1, 0.25, 0.08), (-1.6, -0.08, 0.96), worn_paint, bevel=0.015)
+    for side, x in (('Left', -3.05), ('Right', -0.15)):
+        box(f'Window Frame {side}', (0.1, 0.1, 1.5), (x, -0.02, 1.75), worn_paint)
+    box('Window Frame Top', (3.0, 0.1, 0.1), (-1.6, -0.02, 2.53), worn_paint)
+fog = material('Fogged Glass', (0.8, 0.7, 0.6), roughness=0.5)
+fog_nodes = fog.node_tree.nodes
+fog_height = fog_nodes.new('ShaderNodeSeparateXYZ')
+fog_fade = fog_nodes.new('ShaderNodeMapRange')
+fog_fade.inputs['From Min'].default_value, fog_fade.inputs['From Max'].default_value = 1.0, 1.3
+fog_fade.inputs['To Min'].default_value, fog_fade.inputs['To Max'].default_value = 0.22, 0.0
+fog.node_tree.links.new(fog_nodes.new('ShaderNodeNewGeometry').outputs['Position'], fog_height.inputs['Vector'])
+fog.node_tree.links.new(fog_height.outputs['Z'], fog_fade.inputs['Value'])
+fog.node_tree.links.new(fog_fade.outputs['Result'], fog_nodes['Principled BSDF'].inputs['Alpha'])
+fog.surface_render_method = 'BLENDED'
+with merged('Fogged Glass'):
+    for side in ((-3.0, -2.215, -1.715, -3.0), (-0.2, -2.185, -1.685, -0.2)):
+        outline('Fog', [(side[0], 0.05, 1.0), (side[1], 0.05, 1.0), (side[2], 0.05, 1.6), (side[3], 0.05, 1.6)], fog)
+# Paper menu slips taped inside the glass, in the lower corner.
+with merged('Menu Slips'):
+    for i, (x, z, turn) in enumerate(((-0.45, 1.16, 4), (-0.62, 1.14, -3))):
+        box(f'Menu Slip {i + 1}', (0.15, 0.005, 0.2), (x, 0.32, z), slip_paper, (0, math.radians(turn), 0))
+
+# The door: slid open behind the wall, a noren of three indigo panels hanging across the top.
+with merged('Noren'):
+    box('Door Frame Top', (1.4, 0.12, 0.12), (2.4, -0.04, 2.3), worn_paint)
+    noren = material('Noren', (0.015, 0.025, 0.08), roughness=1.0)
+    for i in range(4):
+        drop = 0.85 + wobble.uniform(-0.04, 0.03)
+        box(f'Noren {i + 1}', (0.27, 0.012, drop), (1.95 + i * 0.3, -0.12, 2.22 - drop / 2), noren,
+            (math.radians(wobble.uniform(-4, 4)), 0, math.radians(wobble.uniform(-2, 2))))
+    cylinder('Noren Rod', 0.015, 1.3, (2.4, -0.12, 2.24), dark_metal, (0, math.pi / 2, 0), 8)
+paper_screen = material('Paper Screen', (1.0, 0.6, 0.28), roughness=0.9, emission=0.3)
+paper_screen.node_tree.nodes['Principled BSDF'].inputs['Alpha'].default_value = 0.45
+paper_screen.surface_render_method = 'BLENDED'
+lamplit = material('Lamplit Wall', (1.0, 0.55, 0.25), emission=2.5)
+
+
+def room(wall, x, z, w, h, depth=1.1, front=0.0, out=-1):
+    """A lit room behind a pane in `wall`: the wall cut open there, a lamp-lit wall `depth` behind it and the pane as
+    translucent paper, so what sits between shows through softened."""
+    hole = box('Opening', (w, 1.0, h), (x, front, z), None)
+    cut = wall.modifiers.new('Opening', 'BOOLEAN')
+    cut.operation, cut.object = 'DIFFERENCE', hole
+    bpy.context.view_layer.objects.active = wall
+    bpy.ops.object.modifier_apply(modifier='Opening')
+    bpy.data.objects.remove(hole)
+    # The lit wall where the camera's view through the pane lands, wide enough to fill it.
+    eye = Vector(EYE)
+    ray = (Vector((x, front, z)) - eye).normalized()
+    seen = Vector((x, front, z)) + ray * (-out * depth / abs(ray.y))
+    box('Room Wall', (w + 2.5, 0.05, h + 1.5), (seen.x, front - out * depth, seen.z), lamplit)
+    y = front + out * 0.01
+    return outline('Paper Pane', [(x - w / 2, y, z - h / 2), (x + w / 2, y, z - h / 2), (x + w / 2, y, z + h / 2), (x - w / 2, y, z + h / 2)], paper_screen)
+
+
+with merged('Shop Front'):
+    box('Shop Eave', (8.8, 0.75, 0.06), (0.1, -0.37, 2.8), roof_tiles, (math.radians(-14), 0, 0))
+    for i, x in enumerate((-2.7, -1.6, -0.5)):
+        lantern('Shop Lantern', x, -0.6, 2.35, lantern_paper if i % 2 == 0 else white_lantern, 2.75, 1.25)
+    box('Shop Roof Eave', (8.8, 0.5, 0.06), (0.1, -0.25, 6.15), roof_tiles, (math.radians(-14), 0, 0))
+    room(upper_wall, -1.6, 4.85, 2.4, 1.0)
+    for i in range(9):
+        box('Mullion', (0.025, 0.03, 1.0), (-2.8 + i * 0.3, -0.03, 4.85), dark_wood)
+    for dz in (-0.5, -0.17, 0.17, 0.5):
+        box('Mullion', (2.4, 0.03, 0.025), (-1.6, -0.03, 4.85 + dz), dark_wood)
+    box('Air Conditioner', (0.8, 0.45, 0.55), (2.2, -0.23, 4.8), dark_metal, bevel=0.03)
+frosted = material('Frosted Pane', (0.4, 0.26, 0.13), roughness=0.4, emission=0.5)
+frosted_low = material('Frosted Pane Low', (0.4, 0.26, 0.13), roughness=0.4, emission=0.3)
+box('Kitchen Vent', (0.35, 0.25, 0.3), (3.85, -0.12, 2.3), dark_metal, bevel=0.02)
+with merged('Sliding Door'):
+    box('Door Frame', (0.6, 0.05, 2.22), (2.67, 0.12, 1.11), worn_paint)
+    for dz in (0.55, 1.15, 1.75):
+        box('Door Pane', (0.24, 0.02, 0.52), (2.53, 0.1, dz), frosted if dz > 1 else frosted_low)
+        box('Door Pane', (0.24, 0.02, 0.52), (2.81, 0.1, dz), frosted if dz > 1 else frosted_low)
+    box('Step', (1.3, 0.4, 0.1), (2.4, -0.2, 0.05), timber)
+    box('Mat', (0.9, 0.3, 0.012), (2.3, -0.22, 0.106), material('Mat', (0.25, 0.04, 0.03), roughness=1))
+lantern('Door Lantern', 1.72, -0.55, 2.25, lantern_paper, 2.75, 1.4)
+# A paper lightbox beside the door: らーめん in red on lit paper.
+box('Lightbox', (0.36, 0.08, 1.3), (1.45, -0.04, 1.95), paper, bevel=0.01)
+
+
+def lettering(name, text, x, y, z, size, mat, facing=-1):
+    """Flat letters written top to bottom on a sign facing -Y (or +Y); the long vowel mark turns upright, as in
+    vertical Japanese."""
+    with merged(name):
+        letters(name, text, x, y, z, size, mat, facing)
+
+
+def letters(name, text, x, y, z, size, mat, facing):
+    for i, char in enumerate(text):
+        turn = math.pi / 2 if char == 'ー' else 0
+        bpy.ops.object.text_add(location=(x, y, z - i * size * 1.05), rotation=(math.pi / 2, turn, 0 if facing < 0 else math.pi))
+        glyph = bpy.context.object
+        glyph.data.body, glyph.data.font, glyph.data.size, glyph.data.offset = char, kanji, size, size * 0.02
+        glyph.data.align_x, glyph.data.align_y = 'CENTER', 'CENTER'
+        finish(glyph, name, mat)
+        bpy.ops.object.convert(target='MESH')
+
+
+with merged('Noren Mark'):
+    bpy.ops.object.text_add(location=(2.4, -0.135, 1.85), rotation=(math.pi / 2, 0, 0))
+    mark = bpy.context.object
+    mark.data.body, mark.data.font, mark.data.size, mark.data.offset = '麺', kanji, 0.42, 0.006
+    mark.data.align_x, mark.data.align_y = 'CENTER', 'CENTER'
+    finish(mark, 'Noren Mark', material('Noren White', (0.75, 0.72, 0.66), roughness=0.9))
+    bpy.ops.object.convert(target='MESH')
+lettering('Ramen', 'らーめん', 1.45, -0.085, 2.43, 0.3, material('Lightbox Ink', (0.5, 0.02, 0.01), roughness=0.6))
 
 # Props: wooden crates stacked by the door and a rusty bicycle leaning on the wall.
 
@@ -293,8 +702,9 @@ def crate(name, x, y, z, turn):
     return obj
 
 
-for i, (x, y, z, turn) in enumerate(((3.95, -0.4, 0, 4), (4.6, -0.45, 0, -6), (4.25, -0.4, 0.36, 9))):
-    crate(f'Crate {i + 1}', x, y, z, turn)
+with merged('Crates'):
+    for i, (x, y, z, turn) in enumerate(((-15.6, -0.4, 0, 4), (-15.0, -0.45, 0, -6), (-15.3, -0.4, 0.36, 9))):
+        crate(f'Crate {i + 1}', x, y, z, turn)
 
 bike = []
 for x in (-4.65, -3.6):
@@ -328,7 +738,7 @@ streaks = bpy.data.meshes.new('Rain')
 verts, faces = [], []
 rng = random.Random(7)
 for k in range(900):
-    x, y, z = rng.uniform(-5.5, 6.0), rng.uniform(-5.0, -0.6), rng.uniform(-0.1, 6.8)
+    x, y, z = rng.uniform(-14.0, 6.0), rng.uniform(-4.2, -0.6), rng.uniform(-0.1, 6.0)
     length = rng.uniform(0.25, 0.45)
     dx = 0.08 * length
     n = len(verts)
@@ -338,8 +748,400 @@ streaks.from_pydata(verts, [], faces)
 streaks.materials.append(rain)
 collection.objects.link(bpy.data.objects.new('Rain', streaks))
 
-# An air conditioner on the wall above the crates.
-box('Air Conditioner', (0.8, 0.5, 0.55), (5.3, -0.25, 2.4), dark_metal, bevel=0.03)
+
+# Plastic stools under the window, a bucket by the crates and an A-frame menu board.
+red_plastic = material('Red Plastic', (0.45, 0.02, 0.02), roughness=0.35)
+
+
+def stool(name, x, y, z=0.0, height=0.425):
+    """A plastic stool at (x, y) standing on z, its seat's top `height` up."""
+    bpy.ops.mesh.primitive_cone_add(vertices=16, radius1=0.17, radius2=0.13, depth=height - 0.025, location=(x, y, z + (height - 0.025) / 2))
+    finish(bpy.context.object, name, red_plastic)
+    cylinder('Stool Seat', 0.15, 0.03, (x, y, z + height - 0.015), red_plastic, vertices=16)
+
+
+with merged('Stools and Board'):
+    stool('Stool', -2.75, -0.55)
+    stool('Stool', -2.1, -0.7)
+    stool('Stool', -2.1, -0.7, 0.18)
+    bpy.ops.mesh.primitive_cone_add(vertices=16, radius1=0.13, radius2=0.17, depth=0.32, location=(4.15, -0.4, 0.16))
+    finish(bpy.context.object, 'Bucket', material('Blue Plastic', (0.02, 0.1, 0.35), roughness=0.4))
+    chalkboard = material('Chalkboard', (0.012, 0.02, 0.016), roughness=0.9)
+    chalk = material('Chalk', (0.5, 0.48, 0.42), roughness=1, emission=0.15)
+    for side in (-1, 1):
+        box('A-Frame Board', (0.6, 0.03, 0.9), (1.25, -0.85 + side * 0.1, 0.44), chalkboard, (math.radians(side * 12), 0, 0), bevel=0.01)
+    for i, width in enumerate((0.42, 0.3, 0.36, 0.22)):
+        box('Chalk Line', (width, 0.005, 0.025), (1.25 - (0.42 - width) / 2, -0.965, 0.72 - i * 0.12), chalk, (math.radians(-12), 0, 0))
+
+# The street: a yokocho of narrow two-storey frontages, timber below and plaster or corrugated metal above, tiled
+# eaves, lanterns, vertical signboards and noren; one more izakaya open, a kissa with its shutter half down, others
+# shut, warm upstairs windows.
+shutter = textured('Shutter', (0.2, 0.19, 0.17), (0.06, 0.06, 0.06), 2, (0.3, 0.6), metallic=0.7, waves=14)
+weather(shutter, 0.5, 0.5, rust=(0.2, 0.07, 0.02))
+shoji = material('Shoji', (1.0, 0.62, 0.3), emission=0.5)
+dark_window = material('Dark Window', (0.01, 0.012, 0.018), roughness=0.08)
+dim_shop = material('Dim Shop', (1.0, 0.45, 0.15), emission=0.25)
+doorway_glow = material('Doorway Glow', (1.0, 0.5, 0.18), emission=0.7)
+red_noren = material('Red Noren', (0.6, 0.04, 0.02), roughness=0.9, emission=0.35)
+sign_paper = material('Sign Paper', (1.0, 0.92, 0.75), emission=0.5)
+neighbor_lantern = material('Neighbor Lantern', (1.0, 0.12, 0.03), emission=1.1)
+neighbor_white = material('Neighbor White Lantern', (1.0, 0.8, 0.55), emission=0.9)
+sign_ink = material('Sign Ink', (0.04, 0.02, 0.015), roughness=0.6)
+
+
+aquarium = material('Aquarium', (0.1, 0.8, 0.65), emission=1.3)
+unlit_lantern = material('Unlit Lantern', (0.25, 0.05, 0.03), roughness=0.8)
+meter_gray = material('Meter Gray', (0.35, 0.36, 0.34), roughness=0.5)
+flyers = [textured(name, a, b, 6, (0.7, 0.9)) for name, a, b in (('Faded Flyer', (0.55, 0.5, 0.4), (0.3, 0.27, 0.2)),
+                                                                   ('Red Flyer', (0.45, 0.08, 0.05), (0.3, 0.2, 0.15)),
+                                                                   ('Blue Flyer', (0.08, 0.15, 0.35), (0.3, 0.3, 0.3)))]
+laundry = [material(name, color, roughness=0.9) for name, color in (('White Towel', (0.7, 0.68, 0.62)), ('Blue Towel', (0.05, 0.12, 0.35)),
+                                                                      ('Pink Towel', (0.6, 0.2, 0.25)))]
+
+
+def frontage(name, x0, x1, kind, height=5.8, upper=weathered_plaster, front=0.0, out=-1, lit=True, sign=None, upstairs=None, dead=None):
+    """A narrow two-storey front from x0 to x1, its face at y = front facing out (-1: -Y, +1: +Y): timber below, `upper`
+    above, a tiled eave between and one at the top, an upstairs window (shoji, lit or dark), and a ground floor that is
+    an open izakaya (a glowing doorway under a lit noren, a row of red and white chochin along the eave, one maybe
+    `dead`, a standing lightbox with its name), a shutter half down over a dim glow, or a shutter shut. Flyers, a
+    conduit and a meter box on every front; `upstairs`: an aquarium, a jacket drying or laundry."""
+    with merged(name):
+        frontage_parts(name, x0, x1, kind, height, upper, front, out, lit, sign, upstairs, dead)
+
+
+def frontage_parts(name, x0, x1, kind, height, upper, front, out, lit, sign, upstairs, dead):
+    x, w = (x0 + x1) / 2, x1 - x0
+
+    def at(depth):
+        return front + out * depth
+
+    box(f'{name} Lower', (w, 0.3, 2.9), (x, at(-0.15), 1.3), timber)
+    wall = box(f'{name} Upper', (w, 0.3, height - 2.75), (x, at(-0.15), (height + 2.75) / 2), upper)
+    for z, depth in ((2.85, 0.75), (height, 0.5)):
+        box(f'{name} Eave', (w + 0.1, depth, 0.06), (x, at(depth / 2), z), roof_tiles, (math.radians(out * 14), 0, 0))
+    if upstairs == 'room':
+        room(wall, x, 4.3, min(w - 0.8, 1.8), 1.0, front=front, out=out)
+    else:
+        box(f'{name} Window', (min(w - 0.8, 1.8), 0.02, 1.0), (x, at(0.01), 4.3), aquarium if upstairs == 'aquarium' else shoji if lit else dark_window)
+    for dx in (-0.45, 0, 0.45):
+        box('Lattice', (0.03, 0.03, 1.0), (x + dx, at(0.03), 4.3), dark_wood)
+    box('Lattice', (min(w - 0.8, 1.8), 0.03, 0.03), (x, at(0.03), 4.3), dark_wood)
+    if kind == 'izakaya':
+        box(f'{name} Doorway', (1.2, 0.02, 2.1), (x, at(0.01), 1.05), doorway_glow)
+        for i in range(3):
+            box(f'{name} Noren', (0.38, 0.01, 0.7), (x - 0.4 + i * 0.4, at(0.12), 1.75 + wobble.uniform(-0.04, 0.03)), red_noren,
+                (math.radians(wobble.uniform(-6, 6)), 0, math.radians(wobble.uniform(-3, 3))))
+        count = int(w / 0.7)
+        for i in range(count):
+            shade = unlit_lantern if i == dead else neighbor_lantern if i % 3 else neighbor_white
+            lantern(f'{name} Lantern', x - (count - 1) * 0.35 + i * 0.7 + wobble.uniform(-0.08, 0.08), at(0.6), 2.4, shade, 2.75, 1.25)
+    elif kind == 'half':
+        box(f'{name} Inside', (w - 0.4, 0.02, 0.7), (x, at(0.01), 0.35), dim_shop)
+        box(f'{name} Shutter', (w - 0.4, 0.06, 1.9), (x, at(0.04), 1.65), shutter)
+    else:
+        box(f'{name} Shutter', (w - 0.4, 0.06, 2.6), (x, at(0.04), 1.3), shutter)
+    if sign:
+        text, mat = sign
+        tall = len(text) * 0.33 + 0.25
+        sx = x1 - 0.45 if out < 0 else x0 + 0.45
+        with merged(f'{name} Sign') as standing:
+            box(f'{name} Signboard', (0.36, 0.25, tall), (sx, at(0.45), tall / 2 + 0.1), mat, bevel=0.015)
+            lettering(f'{name} Letters', text, sx, at(0.58), tall + 0.1 - 0.28, 0.28, sign_ink, out)
+        standing['object'].rotation_euler.y = math.radians(wobble.uniform(-2.5, 2.5))
+    cylinder('Downpipe', 0.04, height, (x1 - 0.06, at(0.08), height / 2), dark_metal, vertices=8)
+    cylinder('Conduit', 0.022, w, (x, at(0.04), 2.68), dark_metal, (0, math.pi / 2, 0), 8)
+    box('Meter Box', (0.22, 0.12, 0.3), (x0 + 0.3, at(0.06), 1.75), meter_gray)
+    for fx in (x0 + 0.35 + wobble.uniform(0, 0.3), x1 - 1.1 - wobble.uniform(0, 0.3)):
+        box('Flyer', (0.24, 0.01, 0.34), (fx, at(0.01), wobble.uniform(1.15, 1.6)), wobble.choice(flyers),
+            (0, math.radians(wobble.uniform(-7, 7)), 0))
+    if upstairs == 'laundry':
+        cylinder('Laundry Pole', 0.015, w - 0.4, (x, at(0.45), 4.95), dark_metal, (0, math.pi / 2, 0), 6)
+        for k, tx in enumerate((-0.7, -0.25, 0.3, 0.75)):
+            box('Laundry', (0.3, 0.01, 0.5 + 0.1 * (k % 2)), (x + tx, at(0.45), 4.65 - 0.05 * (k % 2)), wobble.choice(laundry),
+                (math.radians(wobble.uniform(-5, 5)), 0, 0))
+
+
+machine_paint = material('Machine Paint', (0.2, 0.22, 0.25), roughness=0.4)
+cans = [material(f'{name} Can', hue, 0.4, emission=0.8)
+        for name, hue in (('Red', (0.9, 0.1, 0.05)), ('Blue', (0.1, 0.4, 0.9)), ('Yellow', (0.95, 0.7, 0.1)), ('Green', (0.1, 0.6, 0.2)))]
+styrofoam_white = material('Styrofoam', (0.75, 0.75, 0.72), roughness=0.9)
+clay = material('Clay Pot', (0.25, 0.08, 0.03), roughness=0.8)
+leaves = material('Leaves', (0.02, 0.05, 0.015), roughness=0.7)
+yellow_plastic = material('Yellow Crate', (0.6, 0.35, 0.02), roughness=0.4)
+sold_out = material('Sold Out', (1.0, 0.05, 0.03), emission=3)
+
+
+def vending(name, x, y, glow, left_can=False):
+    box(name, (0.95, 0.7, 1.85), (x, y, 0.925), machine_paint, bevel=0.02)
+    box(f'{name} Window', (0.8, 0.02, 0.95), (x, y - 0.36, 1.25), glow)
+    for row in range(3):
+        for col in range(6):
+            box('Can', (0.07, 0.02, 0.14), (x - 0.28 + col * 0.11, y - 0.38, 1.48 - row * 0.3), cans[(row + col * 2) % 4])
+    box(f'{name} Slot', (0.5, 0.04, 0.16), (x, y - 0.37, 0.35), rubber)
+    for col in range(6):
+        box('Sold Out', (0.06, 0.015, 0.02), (x - 0.28 + col * 0.11, y - 0.38, 1.37), sold_out)
+    if left_can:
+        cylinder('Left Can', 0.033, 0.12, (x + 0.27, y - 0.15, 1.91), material('Left Can', (0.5, 0.05, 0.03), roughness=0.3, metallic=0.6), vertices=12)
+
+
+def styrofoam(x, y, count):
+    for k in range(count):
+        box('Styrofoam Box', (0.55, 0.38, 0.22), (x, y, 0.11 + k * 0.22), styrofoam_white, (0, 0, math.radians(k * 7 - 5)))
+
+
+def plant(x, y, size=1.0):
+    cylinder('Pot', 0.16 * size, 0.3 * size, (x, y, 0.15 * size), clay, vertices=12)
+    ellipsoid('Plant', (0.25 * size, 0.22 * size, 0.35 * size), (x, y, 0.55 * size), leaves)
+
+
+def beer_crates(x, y, count):
+    for k in range(count):
+        box('Beer Crate', (0.45, 0.33, 0.3), (x, y, 0.15 + k * 0.3), yellow_plastic, (0, 0, math.radians(k * 9 - 4)))
+
+
+# Our side, down the street.
+frontage('Kissa', -7.6, -4.9, 'half', upper=corrugated, upstairs='room', sign=('喫茶', material('Kissa Sign', (0.8, 0.65, 0.4), emission=0.35)))
+frontage('Yakitori', -11.2, -7.6, 'izakaya', sign=('やきとり', sign_paper), dead=3)
+frontage('Shut', -14.2, -11.2, 'shut', upper=corrugated, upstairs='aquarium')
+frontage('Izakaya', -17.8, -14.2, 'izakaya', height=6.2, sign=('居酒屋', sign_paper))
+frontage('Second Kissa', -21.0, -17.8, 'half', upper=corrugated)
+frontage('Bar', -25.0, -21.0, 'izakaya', sign=('酒', sign_paper))
+frontage('End', -30.0, -25.0, 'izakaya', lit=False)
+frontage('Corner', 4.4, 8.0, 'shut', upper=corrugated, lit=False)
+frontage('Corner 2', 8.0, 12.0, 'half')
+# The near side of the lane, across from the shop. Each front is an object of its own, so it is lit by the few lights
+# near it.
+signs = ('酒', 'やきとり', '居酒屋')
+for i, (x0, x1, kind) in enumerate(((-30, -26, 'izakaya'), (-26, -22, 'half'), (-22, -18.5, 'izakaya'), (-18.5, -15, 'shut'),
+                                    (-15, -11, 'izakaya'), (-11, -7.5, 'half'), (-7.5, -4, 'izakaya'), (-4, 0, 'half'), (0, 4, 'shut'))):
+    frontage(f'Near {i + 1}', x0, x1, kind, height=5.8 + (i % 3) * 0.4, upper=corrugated if i % 2 else weathered_plaster,
+             front=-4.8, out=1, lit=i % 3 != 1, sign=(signs[i % 3], sign_paper) if kind == 'izakaya' else None,
+             upstairs='laundry' if i in (1, 6) else None)
+with merged('Vending Machines'):
+    vending('Vending Machine', -7.0, -0.42, material('Vending Glow', (0.55, 0.75, 1.0), emission=0.5), left_can=True)
+    vending('Far Vending Machine', -12.2, -0.42, material('Far Vending Glow', (0.9, 0.95, 1.0), emission=0.7))
+# Clutter: styrofoam boxes, potted plants, beer crates, a scooter at the curb.
+with merged('Clutter'):
+    styrofoam(-8.0, -0.4, 3)
+    styrofoam(-10.6, -0.45, 2)
+    for x, size in ((-3.75, 1.0), (-11.0, 1.2), (-14.4, 0.9)):
+        plant(x, -0.35, size)
+    beer_crates(-13.7, -0.4, 4)
+    beer_crates(-13.2, -0.45, 2)
+    scooter_paint = material('Scooter Paint', (0.25, 0.45, 0.4), roughness=0.3)
+    for x in (-7.3, -6.2):
+        bpy.ops.mesh.primitive_torus_add(major_radius=0.2, minor_radius=0.06, major_segments=24, minor_segments=8,
+                                         location=(x, -1.55, 0.05), rotation=(math.pi / 2, 0, 0))
+        finish(bpy.context.object, 'Scooter Wheel', rubber)
+    box('Scooter Body', (0.95, 0.32, 0.3), (-6.95, -1.55, 0.33), scooter_paint, bevel=0.1)
+    box('Scooter Seat', (0.6, 0.28, 0.1), (-7.0, -1.55, 0.53), rubber, bevel=0.04)
+    box('Scooter Shield', (0.14, 0.4, 0.75), (-6.35, -1.55, 0.55), scooter_paint, (0, math.radians(-15), 0), bevel=0.05)
+    curve('Scooter Handlebar', [(-6.25, -1.9, 0.95), (-6.3, -1.55, 0.97), (-6.25, -1.2, 0.95)], chrome, 0.015)
+# A utility pole with a transformer and signs, and power lines tangled between it, the next pole and the eaves.
+soil = material('Soil', (0.03, 0.02, 0.015), roughness=1)
+tomato = material('Tomato', (0.6, 0.05, 0.02), roughness=0.3)
+old_chopstick = material('Old Chopstick', (0.35, 0.25, 0.14), roughness=0.7)
+bottle_glass = material('Bottle Glass', (0.12, 0.05, 0.01), roughness=0.1)
+tape = material('Gray Tape', (0.3, 0.3, 0.3), roughness=0.6)
+with merged('Leftovers'):
+    # Herbs and a leggy tomato in a styrofoam fish box, staked with old chopsticks, under the window and by the yakitori.
+    for gx, gy in ((-1.3, -0.3), (-9.0, -0.35)):
+        box('Fish Box', (0.6, 0.4, 0.26), (gx, gy, 0.13), styrofoam_white)
+        box('Soil', (0.54, 0.34, 0.02), (gx, gy, 0.25), soil)
+        for hx in (-0.18, 0.0, 0.17):
+            ellipsoid('Herbs', (0.1, 0.09, 0.08), (gx + hx, gy + wobble.uniform(-0.05, 0.05), 0.3), leaves)
+        stem = [(gx + 0.12 + 0.05 * math.sin(t * 2.0), gy, 0.26 + t * 0.14) for t in range(7)]
+        curve('Tomato Stem', stem, leaves, 0.008)
+        for sx, sz in ((0.08, 0.6), (0.17, 0.82), (0.1, 0.95)):
+            bpy.ops.mesh.primitive_uv_sphere_add(segments=10, ring_count=6, radius=0.025, location=(gx + sx, gy - 0.03, sz))
+            finish(bpy.context.object, 'Tomato', tomato)
+        for cx in (0.05, 0.2):
+            box('Chopstick Stake', (0.008, 0.008, 0.85), (gx + cx, gy + 0.02, 0.6), old_chopstick,
+                (0, math.radians(wobble.uniform(-6, 6)), 0))
+    # A mop beside the bucket, a delivery box on the scooter, umbrellas at the yakitori's door, empty bottles.
+    cylinder('Mop', 0.015, 1.3, (4.0, -0.25, 0.63), material('Mop Handle', (0.1, 0.3, 0.15), roughness=0.4), (math.radians(-12), math.radians(4), 0), 8)
+    box('Mop Head', (0.25, 0.12, 0.1), (4.0, -0.4, 0.05), styrofoam_white)
+    box('Delivery Box', (0.42, 0.4, 0.36), (-7.4, -1.55, 0.78), material('Delivery Red', (0.45, 0.03, 0.02), roughness=0.4), bevel=0.02)
+    for name, ux, color in (('Clear Umbrella', -8.45, (0.7, 0.72, 0.75)), ('Navy Umbrella', -8.3, (0.02, 0.03, 0.1))):
+        bpy.ops.mesh.primitive_cone_add(vertices=10, radius1=0.01, radius2=0.06, depth=0.8, location=(ux, -0.2, 0.42),
+                                        rotation=(math.radians(-8), math.radians(ux * 20 % 9), 0))
+        finish(bpy.context.object, name, material(name, color, roughness=0.3))
+    for k in range(5):
+        cylinder('Bottle', 0.035, 0.28, (-12.9 + k * 0.09, -0.75 + wobble.uniform(-0.05, 0.05), 0.14),
+                 bottle_glass, vertices=10)
+    # An orange extension cord from the ramen bar across the lane to the neighbor's lightbox, taped down twice,
+    # sagging into the puddle.
+    cord = [(1.7, -0.02, 0.4), (1.6, -0.15, 0.01), (1.0, -1.05, 0.01), (0.85, -1.3, -0.14), (0.3, -2.2, -0.14),
+            (-0.3, -2.75, -0.16), (-1.0, -3.4, -0.14), (-1.6, -3.95, -0.14), (-1.75, -4.1, 0.01), (-3.3, -4.3, 0.02), (-3.45, -4.32, 0.15)]
+    curve('Extension Cord', cord, material('Orange Cord', (0.8, 0.22, 0.02), roughness=0.5), 0.012)
+    for tx, ty, tz, turn in ((1.3, -0.6, 0.012, 40), (-1.0, -3.4, -0.128, 45)):
+        box('Tape', (0.14, 0.05, 0.004), (tx, ty, tz), tape, (0, 0, math.radians(turn)))
+    # Upstairs over the bar, the cook's white jacket hung to dry.
+    box('Jacket', (0.42, 0.04, 0.55), (0.0, -0.18, 4.75), whites, (0, math.radians(3), 0))
+    for side in (-1, 1):
+        box('Jacket Sleeve', (0.1, 0.04, 0.42), (side * 0.27, -0.18, 4.78), whites, (0, math.radians(side * -12), 0))
+    curve('Hanger', [(-0.2, -0.18, 5.05), (0.0, -0.18, 5.12), (0.2, -0.18, 5.05)], chrome, 0.006)
+    cylinder('Drying Rod', 0.012, 1.2, (0.0, -0.18, 5.13), dark_metal, (0, math.pi / 2, 0), 6)
+# The cook on a smoke break in the gap beside the bar, on an upturned crate, face lit by a phone.
+with merged('Gap'):
+    for gx in (-4.85, -4.25):
+        box('Gap Wall', (0.1, 0.9, 6.0), (gx, 0.45, 2.85), corrugated)
+    box('Gap Back', (0.7, 0.1, 6.0), (-4.55, 0.9, 2.85), weathered_plaster)
+beer_crates(-4.55, 0.5, 1)
+with merged('Poles and Lines'):
+    pole_concrete = material('Pole Concrete', (0.18, 0.18, 0.17), roughness=0.8)
+    transformer_gray = material('Transformer Gray', (0.3, 0.32, 0.3), roughness=0.5)
+    for px in (-5.9, -19.0):
+        cylinder('Utility Pole', 0.14, 9.0, (px, -1.0, 4.5), pole_concrete, vertices=12)
+        box('Crossarm', (0.08, 1.4, 0.1), (px, -1.0, 8.2), dark_metal)
+        cylinder('Transformer', 0.22, 0.6, (px + 0.3, -1.0, 6.8), transformer_gray, vertices=12)
+    box('Pole Sign', (0.06, 0.32, 1.1), (-5.9, -1.15, 2.6), material('Pole Sign Yellow', (0.7, 0.5, 0.05), roughness=0.6))
+    box('Pole Sign', (0.06, 0.28, 0.8), (-5.9, -0.85, 3.6), material('Pole Sign Blue', (0.03, 0.1, 0.35), roughness=0.6))
+    lines = [((-5.9, -0.4, 8.2), (-19.0, -0.4, 8.2), 0.6), ((-5.9, -1.6, 8.2), (-19.0, -1.6, 8.2), 0.7),
+             ((-5.9, -1.0, 7.6), (-19.0, -1.0, 7.6), 0.9), ((-5.9, -0.4, 8.2), (4.3, -0.1, 6.0), 0.8),
+             ((-5.9, -1.6, 8.2), (6.0, -4.7, 6.4), 1.0), ((-5.9, -1.0, 7.6), (-9.0, -0.1, 5.6), 0.4),
+             ((-5.9, -1.0, 7.6), (-4.0, -4.7, 5.9), 0.6), ((-19.0, -1.0, 7.6), (-15.0, -0.1, 6.0), 0.4),
+             ((-19.0, -1.0, 7.6), (-23.0, -4.7, 5.9), 0.5), ((-5.9, -1.6, 8.2), (2.0, -0.1, 6.1), 1.4)]
+    for i, (start, end, sag) in enumerate(lines):
+        points = [tuple(a + (b - a) * t for a, b in zip(start, end)) for t in (0, 0.25, 0.5, 0.75, 1)]
+        points = [(x, y, z - sag * 4 * t * (1 - t)) for (x, y, z), t in zip(points, (0, 0.25, 0.5, 0.75, 1))]
+        curve(f'Power Line {i + 1}', points, rubber, 0.012)
+
+# People, by implication: shadows on the shoji, the cook and a customer behind the glass, one person outside on a
+# tea break.
+
+
+def simple_bike(name, x, y, facing, lamp=False):
+    """A bicycle along its local Y: two wheels, a frame, a handlebar and, lit, a headlamp."""
+    with merged(name) as group:
+        for wy in (-0.5, 0.5):
+            bpy.ops.mesh.primitive_torus_add(major_radius=0.32, minor_radius=0.025, major_segments=24, minor_segments=6,
+                                             location=(0, wy, 0.33), rotation=(0, math.pi / 2, 0))
+            finish(bpy.context.object, 'Wheel', rubber)
+        for a, b in (((0, -0.5, 0.33), (0, -0.05, 0.75)), ((0, -0.05, 0.75), (0, 0.4, 0.8)), ((0, 0.4, 0.8), (0, 0.5, 0.33)),
+                     ((0, -0.5, 0.33), (0, 0.0, 0.35)), ((0, 0.0, 0.35), (0, -0.05, 0.75)), ((0, 0.4, 0.8), (0, 0.38, 0.98))):
+            curve('Bike Tube', [a, b], dark_metal, 0.02, smooth=False)
+        curve('Handlebar', [(-0.25, 0.36, 0.98), (0.25, 0.36, 0.98)], dark_metal, 0.015, smooth=False)
+        if lamp:
+            cylinder('Bike Lamp', 0.035, 0.05, (0, 0.47, 0.9), material('Bike Lamp', (1.0, 0.95, 0.8), emission=12), (math.pi / 2, 0, 0), 10)
+    group['object'].matrix_world = Matrix.Translation((x, y, 0)) @ Matrix.Rotation(math.radians(facing), 4, 'Z')
+
+
+with merged('Passers-by'):
+    # Under the noren, empty stools: a bag at one's foot, an umbrella leaning on the other.
+    box('Bag', (0.32, 0.14, 0.24), (1.85, 1.05, 0.27), material('Leather Bag', (0.12, 0.05, 0.02), roughness=0.5), (0, 0, math.radians(12)), bevel=0.02)
+    bpy.ops.mesh.primitive_cone_add(vertices=10, radius1=0.012, radius2=0.055, depth=0.8, location=(2.42, 1.0, 0.42), rotation=(0, math.radians(-14), 0))
+    finish(bpy.context.object, 'Leaning Umbrella', umbrellas[1])
+# People in the lit rooms, seen as soft shapes: the same model seated behind paper or fogged glass, between it and
+# the room's light, cut by the window frame (rooms(), frontage()).
+# Turned three-quarters away, toward the bar's window, so the window rims the outline.
+
+
+# A diner behind the bar's window, a dark shape against its lit wall, traced as
+# filled 2D Bezier curves in profile (facing +X, meters, the feet or the hips at 0), about 7.5 heads tall, arms and
+# held things as tubes.
+HEAD = [(-0.055, 0.0), (-0.085, 0.035), (-0.115, 0.09), (-0.11, 0.16), (-0.07, 0.205), (0.0, 0.225), (0.06, 0.2),
+        (0.085, 0.16), (0.092, 0.12), (0.118, 0.088), (0.096, 0.072), (0.1, 0.052), (0.078, 0.03), (0.045, 0.022),
+        (0.035, 0.0)]
+SEATED = [(-0.13, 0.0), (-0.14, 0.2), (-0.12, 0.42), (-0.08, 0.55), (-0.06, 0.6), (0.035, 0.6), (0.045, 0.57),
+          (0.085, 0.53), (0.1, 0.44), (0.09, 0.28), (0.1, 0.06), (0.14, 0.04), (0.42, 0.06), (0.47, 0.01), (0.45, -0.05),
+          (0.42, -0.4), (0.49, -0.45), (0.49, -0.47), (0.35, -0.47), (0.36, -0.1), (0.02, -0.08), (-0.12, -0.05)]
+
+
+def placed(points, x=0.0, z=0.0, turn=0.0):
+    """Points turned `turn` degrees (positive tips them back) about the origin, then moved to (x, z)."""
+    c, s = math.cos(math.radians(turn)), math.sin(math.radians(turn))
+    return [(x + px * c - pz * s, z + px * s + pz * c) for px, pz in points]
+
+
+def ellipse(cx, cz, rx, rz, steps=12):
+    return [(cx + rx * math.cos(a), cz + rz * math.sin(a)) for a in (i * math.tau / steps for i in range(steps))]
+
+
+def filled(points, mat):
+    """A closed, filled 2D Bezier curve through the points, standing in the local XZ plane."""
+    data = bpy.data.curves.new('Silhouette', 'CURVE')
+    data.dimensions, data.fill_mode, data.resolution_u = '2D', 'BOTH', 8
+    spline = data.splines.new('BEZIER')
+    spline.bezier_points.add(len(points) - 1)
+    for point, (px, pz) in zip(spline.bezier_points, points):
+        point.co = (px, pz, 0)
+        point.handle_left_type = point.handle_right_type = 'AUTO'
+    spline.use_cyclic_u = True
+    data.materials.append(mat)
+    obj = bpy.data.objects.new('Silhouette', data)
+    obj.rotation_euler = (math.pi / 2, 0, 0)
+    collection.objects.link(obj)
+    return obj
+
+
+def silhouette(name, fills, tubes, mat, x, y, z, facing, mirror=False, within=None):
+    """One figure from its filled outlines and its (points, radius) tubes, set at (x, y, z) with its plane turned
+    `facing` degrees about Z; mirrored, it faces -X. `within` (x0, x1, z0, z1) cuts it to a pane, as a shadow on it."""
+    with merged(name) as group:
+        for points in fills:
+            filled(points, mat)
+        for points, radius in tubes:
+            curve('Limb', [(px, 0, pz) for px, pz in points], mat, radius)
+    figure = group['object']
+    bpy.ops.object.select_all(action='DESELECT')
+    figure.select_set(True)
+    bpy.context.view_layer.objects.active = figure
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    figure.matrix_world = (Matrix.Translation((x, y, z)) @ Matrix.Rotation(math.radians(facing), 4, 'Z')
+                           @ Matrix.Scale(-1 if mirror else 1, 4, (1, 0, 0)))
+    if within:
+        x0, x1, z0, z1 = within
+        pane = box('Pane', (x1 - x0, 1, z1 - z0), ((x0 + x1) / 2, y, (z0 + z1) / 2), None)
+        cut = figure.modifiers.new('Pane', 'BOOLEAN')
+        cut.operation, cut.object = 'INTERSECT', pane
+        bpy.context.view_layer.objects.active = figure
+        bpy.ops.object.modifier_apply(modifier='Pane')
+        bpy.data.objects.remove(pane)
+    return figure
+
+
+def eating():
+    """Seated, a bowl raised to the chin, chopsticks lifting noodles to the mouth."""
+    fills = [SEATED, placed(HEAD, 0.0, 0.6, -10), ellipse(0.19, 0.645, 0.085, 0.045)]
+    tubes = [([(0.0, 0.55), (0.07, 0.38), (0.16, 0.6)], 0.042), ([(-0.03, 0.55), (0.1, 0.43), (0.21, 0.74)], 0.04),
+             ([(0.3, 0.79), (0.1, 0.705)], 0.005), ([(0.31, 0.77), (0.11, 0.695)], 0.005)]
+    return fills, tubes
+
+
+ink = material('Silhouette', (0.006, 0.005, 0.005), roughness=0.7)
+silhouette('Eating', *eating(), ink, -2.6, 1.0, 1.05, 47)
+
+def behind(pane, depth, seat=0.46):
+    """Where to seat someone `depth` behind a pane so that, seen from the camera, the head shows near `pane` (a point
+    on it): the camera's line through that point, followed into the room, the hips below it."""
+    eye = Vector(EYE)
+    ray = (Vector(pane) - eye).normalized()
+    head = Vector(pane) + ray * (depth / ray.y)
+    return head.x, head.y, head.z - 0.75 - seat
+
+
+# Two people upstairs, seen as soft shapes through the paper: the same model, seated, its head and shoulders cut by
+# the window's frame.
+for name, pane, depth, facing in (('Upstairs Kissa', (-6.0, 0.0, 4.25), 0.4, 90), ('Upstairs Bar', (-1.9, 0.0, 4.7), 0.45, -90)):
+    x, y, floor = behind(pane, depth)
+    seated(name, 'animated-woman.glb', x, y, facing, 0.46, floor=floor)
+# A woman on a tea break, in muted colours: a dusty rose knit top, dark denim, brown hair, dark shoes.
+TEA_BREAK = {(0.91, 0.4, 0.36): (0.55, 0.4, 0.39), (0.94, 0.28, 0.18): (0.13, 0.11, 0.1), (0.82, 0.76, 0.44): (0.18, 0.11, 0.07),
+             (0.38, 0.53, 0.83): (0.13, 0.17, 0.27), (0.91, 0.74, 0.57): (0.84, 0.64, 0.52)}
+drinker, cup_at, crown, seat_top = seated('Tea Break', 'animated-woman.glb', -0.35, -0.6, 140, 0.5, palette=TEA_BREAK)
+stool('Low Stool', -0.35, -0.6, height=seat_top)
+cylinder('Tea Cup', 0.045, 0.1, tuple(cup_at), material('Tea Cup', (0.55, 0.45, 0.35), roughness=0.4), vertices=14)
+puffs('Tea Steam', cup_at.x, cup_at.y, cup_at.z + 0.1, (0.01, -0.01), 3, size=0.35)
+simple_bike('Parked Bicycle', -5.4, -0.55, 92, lamp=True)
+# Ripples in the puddles where the rain lands.
+ripple = material('Ripple', (0.15, 0.16, 0.18), roughness=0.2)
+with merged('Ripples'):
+    for i in range(14):
+        rx, ry = wobble.choice(((0.5, -2.6), (3.8, -3.2), (-4.5, -2.4)))
+        bpy.ops.mesh.primitive_torus_add(major_radius=wobble.uniform(0.03, 0.1), minor_radius=0.003, major_segments=20, minor_segments=4,
+                                         location=(rx + wobble.uniform(-1.2, 1.2), ry + wobble.uniform(-0.4, 0.4), -0.145))
+        finish(bpy.context.object, 'Ripple', ripple)
 
 
 def light(name, kind, color, energy, location, radius=0.1, rotation=(0, 0, 0), specular=1.0):
@@ -360,25 +1162,126 @@ def light(name, kind, color, energy, location, radius=0.1, rotation=(0, 0, 0), s
 
 # The tubes' light: panels facing the wall, so the puddles see only their backs; no highlights on the backplate.
 glow = (math.pi / 2, 0, 0)
-light('Magenta Light', 'AREA', (1, 0.08, 0.45), 600, (0.4, -0.8, 4.1), (5, 2), glow, specular=0).data.shape = 'RECTANGLE'
-light('Cyan Light', 'AREA', (0.1, 0.65, 1), 220, (-2.75, -0.7, 3.9), (1.6, 1.6), glow, specular=0)
+light('Magenta Light', 'AREA', (1, 0.08, 0.45), 140, (0.7, -0.6, 3.7), (2.6, 1.0), glow, specular=0).data.shape = 'RECTANGLE'
+light('Cyan Light', 'AREA', (0.1, 0.65, 1), 50, (-1.0, -0.5, 3.6), (0.8, 0.8), glow, specular=0)
 # The window's and the door's light on the street (no highlights of their own: the puddles mirror the openings), a
 # cold moon from above and a street lamp off to the right.
-light('Window Light', 'POINT', (1, 0.45, 0.15), 160, (-1.6, -0.7, 1.7), 0.5, specular=0)
-light('Door Light', 'POINT', (1, 0.45, 0.15), 140, (2.4, -0.4, 1.2), 0.3, specular=0)
+light('Window Light', 'POINT', (1, 0.45, 0.15), 260, (-1.6, -0.45, 0.5), 0.6, specular=0)
+light('Door Light', 'POINT', (1, 0.45, 0.15), 160, (2.0, -1.7, 0.4), 0.5, specular=0)
+# The bar's own light: one over the counter, one inside the doorway; and the vending machine's cold glow.
+light('Bar Light', 'POINT', (1, 0.6, 0.3), 200, (-3.5, 1.9, 2.5), 0.4)
+light('Doorway Light', 'POINT', (1, 0.5, 0.2), 80, (2.0, 0.8, 1.2), 0.3)
+light('Vending Light', 'POINT', (0.6, 0.8, 1), 25, (-7.0, -1.6, 1.3), 0.4, specular=0)
+light('Yakitori Light', 'POINT', (1, 0.4, 0.12), 110, (-9.4, -0.9, 1.8), 0.5, specular=0)
+light('Izakaya Light', 'POINT', (1, 0.45, 0.15), 90, (-16.0, -0.9, 1.8), 0.5, specular=0)
+light('Far Izakaya Light', 'POINT', (1, 0.42, 0.14), 60, (-2.0, -3.9, 1.8), 0.5, specular=0)
+light('Far End Light', 'POINT', (1, 0.45, 0.16), 220, (-24.0, -2.4, 2.6), 1.0, specular=0)
+# Fill for the realtime engines, which bounce no light: warm light under the eaves onto the sidewalks, and a dim warm
+# bounce from the wet lane up onto the fronts and the eaves' undersides.
+down, up = (0, 0, 0), (math.pi, 0, 0)
+light('Bar Eave Light', 'AREA', (1, 0.5, 0.2), 160, (0.1, -0.55, 2.55), (8.0, 0.6), down, specular=0).data.shape = 'RECTANGLE'
+light('Lane Eave Light', 'AREA', (1, 0.45, 0.18), 260, (-14.0, -0.55, 2.55), (20.0, 0.6), down, specular=0).data.shape = 'RECTANGLE'
+light('Lane Bounce', 'AREA', (1, 0.5, 0.3), 120, (-8.0, -2.4, 0.1), (26.0, 3.0), up, specular=0).data.shape = 'RECTANGLE'
 light('Moon', 'SUN', (0.35, 0.5, 1), 0.08, (0, 0, 10), 0.1, (math.radians(35), math.radians(-20), 0))
-lamp = light('Street Lamp', 'SPOT', (0.3, 0.7, 1), 700, (7.5, -4.0, 5.0), 0.2)
-lamp.rotation_euler = (Vector((5.0, -0.8, 0.8)) - lamp.location).to_track_quat('-Z', 'Y').to_euler()
-lamp.data.spot_size, lamp.data.spot_blend = math.radians(50), 0.6
+
+# The city beyond: megastructure towers far behind the lane's roofs, dark with sparse lit windows, red warning lights
+# and tall video ads, half lost in banks of fog.
+tower_dark = material('Tower', (0.008, 0.009, 0.012), roughness=0.6)
+tower_window = material('Tower Window', (1.0, 0.75, 0.45), emission=1.5)
+warning_light = material('Warning Light', (1.0, 0.05, 0.02), emission=6)
+
+
+def gradient_ad(name, low, high, strength):
+    """A video ad's glow: a vertical Gradient Texture between two colors, as emission."""
+    mat = bpy.data.materials.new(name)
+    nodes, links = mat.node_tree.nodes, mat.node_tree.links
+    principled = nodes['Principled BSDF']
+    principled.inputs['Base Color'].default_value = (0, 0, 0, 1)
+    coord, mapping, gradient, mix = nodes.new('ShaderNodeTexCoord'), nodes.new('ShaderNodeMapping'), nodes.new('ShaderNodeTexGradient'), nodes.new('ShaderNodeMix')
+    mapping.inputs['Rotation'].default_value = (0, -math.pi / 2, 0)
+    mix.data_type = 'RGBA'
+    mix.inputs['A'].default_value, mix.inputs['B'].default_value = (*low, 1), (*high, 1)
+    links.new(coord.outputs['Generated'], mapping.inputs['Vector'])
+    links.new(mapping.outputs['Vector'], gradient.inputs['Vector'])
+    links.new(gradient.outputs['Fac'], mix.inputs['Factor'])
+    links.new(mix.outputs['Result'], principled.inputs['Emission Color'])
+    principled.inputs['Emission Strength'].default_value = strength
+    return mat
+
+
+def fog_card(name, density, glow=1.0):
+    """Haze: a pale card whose Alpha is a stretched Noise Texture, so the towers fade in and out behind it."""
+    mat = bpy.data.materials.new(name)
+    nodes, links = mat.node_tree.nodes, mat.node_tree.links
+    principled = nodes['Principled BSDF']
+    principled.inputs['Base Color'].default_value = (0.02, 0.025, 0.04, 1)
+    principled.inputs['Emission Color'].default_value = (0.06, 0.05, 0.08, 1)
+    principled.inputs['Emission Strength'].default_value = glow
+    coord, noise, ramp = nodes.new('ShaderNodeTexCoord'), nodes.new('ShaderNodeTexNoise'), nodes.new('ShaderNodeMapRange')
+    noise.inputs['Scale'].default_value, noise.inputs['Detail'].default_value = 2.5, 4
+    ramp.inputs['From Min'].default_value, ramp.inputs['From Max'].default_value = 0.35, 0.7
+    ramp.inputs['To Max'].default_value = density
+    links.new(coord.outputs['Generated'], noise.inputs['Vector'])
+    links.new(noise.outputs['Fac'], ramp.inputs['Value'])
+    links.new(ramp.outputs['Result'], principled.inputs['Alpha'])
+    mat.surface_render_method = 'BLENDED'
+    return mat
+
+
+ads = [gradient_ad('Ad Teal', (0.0, 0.25, 0.3), (0.1, 0.9, 0.8), 0.6), gradient_ad('Ad Magenta', (0.3, 0.0, 0.2), (1.0, 0.2, 0.6), 0.6),
+       gradient_ad('Ad Amber', (0.35, 0.1, 0.0), (1.0, 0.6, 0.15), 0.5)]
+city = random.Random(5)
+
+
+def toward(yaw, distance):
+    """A ground point `distance` meters from the camera, `yaw` degrees left of the lane's +Y, and the turn about Z that
+    faces a card there back at the camera."""
+    turn = math.radians(yaw)
+    return (EYE[0] - distance * math.sin(turn), EYE[1] + distance * math.cos(turn)), turn
+
+
+def card(name, yaw, distance, width, bottom, top, mat):
+    """A flat card facing the camera, `width` wide from `bottom` to `top` meters up."""
+    (x, y), turn = toward(yaw, distance)
+    c, s_ = math.cos(turn), math.sin(turn)
+    corners = [(-width / 2, bottom), (width / 2, bottom), (width / 2, top), (-width / 2, top)]
+    return outline(name, [(x + u * c, y + u * s_, z) for u, z in corners], mat)
+
+
+# The city's glow over the roofs to the left and at the lane's far end: light pollution from teal low to magenta,
+# fading into the night sky.
+glow = gradient_ad('City Glow', (0.02, 0.18, 0.2), (0.25, 0.03, 0.18), 0.45)
+card('City Glow', 70, 330, 420, -20, 280, glow)
+with merged('City'):
+    for i, (yaw, distance, w, d, h) in enumerate(((58, 150, 24, 20, 150), (66, 200, 34, 26, 230), (74, 165, 20, 18, 175),
+                                                  (81, 230, 40, 30, 260), (87, 140, 18, 16, 120), (62, 260, 30, 30, 210))):
+        (x, y), turn = toward(yaw, distance)
+        tower = box('Tower', (w, d, h), (x, y, h / 2 - 10), tower_dark, (0, 0, turn))
+        face = Matrix.Translation((x, y, 0)) @ Matrix.Rotation(turn, 4, 'Z')
+        for k in range(int(h / 7)):
+            if city.random() < 0.5:
+                box('Tower Window', (1.4, 0.2, 0.9), tuple(face @ Vector((city.uniform(-w / 2 + 1, w / 2 - 1), -d / 2 - 0.05, city.uniform(15, h - 15)))),
+                    tower_window, (0, 0, turn))
+        for corner in (-1, 1):
+            ellipsoid('Warning Light', (0.9, 0.9, 0.9), tuple(face @ Vector((corner * w / 2, -d / 2, h - 9.5))), warning_light)
+        # Huge vertical video ads on three of them.
+        if i < 3:
+            box('Ad', (w * 0.55, 0.3, h * 0.35), tuple(face @ Vector((0, -d / 2 - 0.3, h * city.uniform(0.45, 0.6)))), ads[i], (0, 0, turn))
+with merged('City Fog'):
+    # Banks of haze between the lane and the towers, and among them: the ads glow through, the towers fade.
+    for k, (distance, density, light) in enumerate(((110, 0.55, 0.6), (180, 0.6, 0.8), (250, 0.7, 1.0))):
+        card('Fog Card', 70 + k * 3, distance, 260 + k * 60, -10, 160 + k * 30, fog_card(f'City Fog {k + 1}', density, light))
 
 world = bpy.data.worlds.new('Night')
-world.node_tree.nodes['Background'].inputs['Color'].default_value = (0.002, 0.004, 0.012, 1)
+world.node_tree.nodes['Background'].inputs['Color'].default_value = (0.006, 0.006, 0.012, 1)
 scene.world = world
 
 camera = bpy.data.objects.new('Camera', bpy.data.cameras.new('Camera'))
-camera.data.lens = 17
-camera.location = (1.6, -10.0, 0.45)
-camera.rotation_euler = (math.radians(90), 0, math.radians(8))
+camera.data.lens = 16
+# Far enough to see the city's towers.
+camera.data.clip_end = 500
+camera.location = EYE
+camera.rotation_euler = (math.radians(95), 0, math.radians(38))
 collection.objects.link(camera)
 scene.camera = camera
 scene.render.resolution_x, scene.render.resolution_y = 1280, 720
@@ -386,6 +1289,7 @@ scene.view_settings.view_transform = 'Standard'
 # Blender's EEVEE reflects the neon in the puddles by ray tracing.
 scene.eevee.use_raytracing = True
 scene.eevee.taa_render_samples = 64
+scene.eevee.shadow_pool_size = '1024'
 
 # The compositor: Render Layers, Glare's Fog Glow around what is brighter than 1, a little Lens Distortion with color
 # fringes, a Color Balance that cools the shadows and warms the highlights, then a vignette: a soft Ellipse Mask
@@ -410,7 +1314,7 @@ def node(idname, location, **inputs):
 
 layers = node('CompositorNodeRLayers', (-700, 0))
 glare = node('CompositorNodeGlare', (-450, 0), Type='Fog Glow', Quality='High', Highlights_Threshold=0.7, Size=0.85, Strength=1.8)
-lens = node('CompositorNodeLensdist', (-200, 0), Distortion=-0.03, Dispersion=0.04)
+lens = node('CompositorNodeLensdist', (-200, 0), Distortion=-0.03, Dispersion=0.012)
 grade = node('CompositorNodeColorBalance', (50, 0))
 grade.inputs['Color Lift'].default_value = (0.99, 1.0, 1.02, 1)
 grade.inputs['Color Gain'].default_value = (1.05, 1.0, 0.95, 1)

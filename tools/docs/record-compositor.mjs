@@ -68,7 +68,7 @@ if (wanted("steps")) await record("compositor", { size: SIZE }, async (r) => {
   }, { hold: 2500, part: [0.22, 0, 0.78, 1] });
 });
 
-if (wanted("example")) await record("compositor", { example: "compositor", node: "Noodles", size: SIZE }, async (r) => {
+if (wanted("example")) await record("compositor", { example: "compositor", node: "Menya Akari", size: SIZE }, async (r) => {
   const { app, page } = r;
   await workspace(r, "compositing");
   await nodes(r, "CompositorNodeGlare").waitFor();

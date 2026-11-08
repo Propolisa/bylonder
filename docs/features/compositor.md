@@ -1,7 +1,7 @@
 ---
 id: compositor
 title: Compositor
-summary: Finish a render in Blender's Compositor, here a neon sign at night with Glare's Fog Glow, Lens Distortion, a Color Balance grade and a vignette, composited by Blender's own code.
+summary: Finish a render in Blender's Compositor, here a ramen bar's neon sign in a wet lane at night with Glare's Fog Glow, Lens Distortion, a Color Balance grade and a vignette, composited by Blender's own code.
 expect: Render Image composites with Blender's own compositor, so every node renders as in Blender (Glare, Blur, Lens Distortion and the other multi-pass nodes included); the Compositor's backdrop and a Rendered view with Viewport Shading > Compositor on run the pixel nodes and Blender's own GPU passes for Glare, Blur, Lens Distortion, Kuwahara, Filter and the masks live; in camera view only the camera's frame is composited, as in Blender.
 blender_version: 5.2.3
 blender_manual:
@@ -65,6 +65,7 @@ limits:
   - The Render window shows the composite, not the Viewer node's image; there is no Image Editor view of Viewer Node.
   - Node groups inside the compositing node group composite in Render Image only.
   - The puddles reflect the lights' highlights, not the sign, the window and the door: the view's screen-traced reflections do not reach node materials yet (Rendering).
+  - In the Rendered view the example's steam (materials with Render Method Blended) draws opaque; Render Image blends it.
 ---
 # Compositor
 
@@ -76,7 +77,8 @@ nodes live.
 
 [Open in Bylonder](https://propolisa.github.io/bylonder/#example=compositor)
 
-The demo, Neon Night, is a noodle bar's neon sign in a wet alley at night, mirrored in a puddle, built in Blender by
+The demo, Neon Night, is a small ramen bar's neon sign in a narrow lane on a wet night, with customers at the counter
+behind the window and the lane's lanterns mirrored in a puddle, built in Blender by
 `compositor.py`. The steps below make a compositing node group from the Default Cube, then open the example for its
 tree and render.
 
@@ -94,7 +96,7 @@ tree and render.
 
 3. **The example's tree.** Open the example. Render Layers goes through Glare (Fog Glow, Threshold 0.7, Size 0.85, Strength 1.8),
    which spreads a glow around everything brighter than the threshold, then Lens Distortion (Distortion -0.03,
-   Dispersion 0.04) for a slight barrel and color fringes at the edges, and Color Balance (Lift a little blue, Gain a
+   Dispersion 0.012) for a slight barrel and color fringes at the edges, and Color Balance (Lift a little blue, Gain a
    little warm). An Ellipse Mask, softened by a Blur, is multiplied over the image by a Mix for the vignette. A Viewer
    shows the result.
 
@@ -115,6 +117,6 @@ tree and render.
 - [compositor.py](../../examples/compositor/compositor.py): builds the scene and its compositing node group in Blender
   5.2.
 - [compositor.blend](../../examples/compositor/compositor.blend): the file the script saves.
-- [fonts](../../examples/compositor/fonts): Sacramento and Poiret One, with their SIL Open Font License files.
+- [fonts](../../examples/compositor/fonts): Zen Maru Gothic (a subset of the glyphs the scene uses) and Poiret One, with their SIL Open Font License files.
 - [index.js](../../examples/compositor/index.js): opens the .blend with Blender's reader.
 - Recorded by [record-compositor.mjs](../../tools/docs/record-compositor.mjs).
