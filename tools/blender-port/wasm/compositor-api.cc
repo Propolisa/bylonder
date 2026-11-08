@@ -4,6 +4,7 @@
  * Context), its render result Bylonder's buffers. */
 #include <cstring>
 
+#include "BLI_listbase.h"
 #include "BLI_math_vector_types.hh"
 #include "BLI_vector.hh"
 #include "DNA_node_types.h"
@@ -48,11 +49,13 @@ class BylonderContext : public Context {
   void write_viewer(Result & /*viewer_result*/) override {}
   ResultPrecision get_precision() const override { return ResultPrecision::Full; }
 
-  /* The render's Image (Blender's Combined pass); other passes are not rendered. */
-  Result get_pass(const Scene * /*scene*/, int /*view_layer*/, const char *name) override
+  /* The render's Image (Blender's Combined pass) for a view layer the scene has, as render/intern/compositor.cc
+   * Context::get_pass finds it (by its index); other passes are not rendered. */
+  Result get_pass(const Scene *scene, int view_layer, const char *name) override
   {
     Result pass = this->create_result(ResultType::Color, ResultPrecision::Full);
-    if (StringRef(name) == "Image" || StringRef(name) == "Combined") {
+    const bool has_layer = scene && BLI_findlink(&scene->view_layers, view_layer);
+    if (has_layer && (StringRef(name) == "Image" || StringRef(name) == "Combined")) {
       pass.share_data(render_, size_);
     }
     else {

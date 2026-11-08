@@ -41,3 +41,10 @@ for (const { node: idname, inputs, result, size, probes } of cases) {
 assert.deepEqual(failures, []);
 console.log(`Compositor CPU: ${cases.length} multi-pass nodes composite as Blender's CPU compositor`);
 
+// A Render Layers whose view layer the scene does not have gives nothing, as Blender's render pipeline gives it
+// (render/intern/compositor.cc Context::get_pass): race_spaceship's (its node's layer index -1, kept with its compositor
+// in compositor-no-view-layer.blend) composites to black, alpha 0.
+blender.readBlend(new Uint8Array(readFileSync(new URL('./fixtures/compositor-no-view-layer.blend', import.meta.url))));
+const nothing = compositeOnCPU(blender, image, width, height);
+assert.ok(!nothing || nothing.every((v) => v === 0), 'no view layer, no image');
+console.log("Compositor CPU: a Render Layers without its view layer gives nothing, as Blender's");
