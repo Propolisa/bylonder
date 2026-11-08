@@ -23,6 +23,14 @@ assert.deepEqual(sorted(drawing(near, 0), drawing(far, 30), drawing(near, 9), dr
 const left = owner('Left leg', 7), right = owner('Right leg', 7);
 assert.deepEqual(sorted(drawing(right, 1), drawing(left, 20), drawing(right, 12), drawing(left, 2)), ['Left leg 2', 'Left leg 20', 'Right leg 1', 'Right leg 12'],
   'objects at one depth in their order, never interleaved');
+// Other transparent meshes (an overlay in the middle of the layers' alphaIndex range) sort around the drawings as a
+// block: an inconsistent order let Babylon's sort put some of an object's layers after the next object's.
+const overlay = { getMesh: () => ({ name: 'Overlay', metadata: { overlay: true } }), _alphaIndex: 10, _distanceToCamera: 50 };
+const mixed = [drawing(near, 0), overlay, drawing(far, 30), drawing(near, 9), drawing(far, 3), drawing(far, 12), drawing(near, 20)];
+for (let i = 0; i < 20; i++) {
+  mixed.unshift(mixed.pop());
+  assert.deepEqual(sorted(...mixed), ['Far 3', 'Far 12', 'Far 30', 'Near 0', 'Near 9', 'Near 20', 'Overlay'], 'a total order, whatever the input order');
+}
 // Strokes blend as fills do, so they sort among them; a stroke in the opaque pass drew under every fill.
 assert.equal(greasedLineMaterial(scene, 'Strokes', false).needAlphaBlending(), true, 'strokes draw in the transparent pass');
 console.log('Grease Pencil sort: whole objects back to front, ties in object order, layers in order, strokes with the fills');
