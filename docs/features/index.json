@@ -22,7 +22,8 @@
    "compositor/color-balance.gif",
    "compositor/tree.png",
    "compositor/render-image.png",
-   "compositor/glare.png"
+   "compositor/glare.png",
+   "compositor/loop.gif"
   ],
   "ui": [
    "NODE_EDITOR",

@@ -21,6 +21,7 @@ media:
   - compositor/tree.png
   - compositor/render-image.png
   - compositor/glare.png
+  - compositor/loop.gif
 ui:
   - NODE_EDITOR
   - CompositorNodeTree
@@ -79,7 +80,8 @@ nodes live.
 
 The demo, Neon Night, is a small ramen bar's neon sign in a narrow lane on a wet night, with customers at the counter
 behind the window and the lane's lanterns mirrored in a puddle, built in Blender by
-`compositor.py`. The steps below make a compositing node group from the Default Cube, then open the example for its
+`compositor.py`. It is also a 10 s animation that loops: keyframes repeated by F-Curve Cycles modifiers sway the
+lanterns and the noren, flicker the dead neon tube and move the woman's rig for a breath and a sip. The steps below make a compositing node group from the Default Cube, then open the example for its
 tree and render.
 
 ## Steps
@@ -111,6 +113,10 @@ tree and render.
    window and the doorway are flat; with it (right) they glow.
 
    ![Glare muted, left, and on, right](../media/features/compositor/glare.png)
+
+6. **The loop.** Press Space in the 3D Viewport to play the timeline: frames 1 to 240 run into each other.
+
+   ![The example played through its camera in Rendered shading](../media/features/compositor/loop.gif)
 
 ## Project files
 

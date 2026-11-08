@@ -1,10 +1,11 @@
 // Records docs/features/compositor.md's media: a compositing node group made from the Default Cube through real input
 // (New, then a Color Balance between Render Layers and the Group Output, shown on the backdrop), then the Neon Night
-// example's tree and its Render Image, with Glare muted and not.
-// usage: node tools/docs/record-compositor.mjs [steps] [example]
+// example's tree and its Render Image, with Glare muted and not, and its 240-frame loop played in the viewport.
+// usage: node tools/docs/record-compositor.mjs [steps] [example] [loop]
 import { ffmpeg } from "../media.mjs";
 import { execFileSync } from "node:child_process";
-import { rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { record } from "./record.mjs";
 
 const SIZE = { width: 1600, height: 950 };
@@ -89,4 +90,38 @@ if (wanted("example")) await record("compositor", { example: "compositor", node:
   ffmpegRun("-i", `${r.out}muted.png`, "-i", `${r.out}render-image.png`, "-filter_complex", "[0]scale=800:-2[a];[1]scale=800:-2[b];[a][b]hstack", `${r.out}glare.png`);
   ffmpegRun("-i", `${r.out}render-image.png`, "-vf", "scale=800:-2:flags=lanczos", `${r.out}thumbnail.png`);
   rmSync(`${r.out}muted.png`);
+});
+// The loop through the camera in Rendered shading, the camera's frame filling the view (Home): every third frame of the
+// timeline drawn by the viewport, a GIF at 8 fps that runs into its own start, made smaller until it is under 1 MB.
+if (wanted("loop")) await record("compositor", { example: "compositor", node: "Menya Akari", size: SIZE }, async (r) => {
+  const { app, page } = r;
+  await app.bylonder((b) => { b.views.input.enterCameraView(); b.views.input.state.overlays = false; });
+  // Rendered straight after opening draws washed out until the shading changes once: Material Preview first.
+  for (const shading of ["material", "rendered"]) {
+    await app.bylonder((b, shading) => b.views.input.setShading(shading), shading);
+    await app.settled();
+    await r.pause(1500);
+  }
+  await page.mouse.move(...center(await r.box('[data-section="viewport"]')));
+  await r.keys("Home");
+  await page.mouse.move(5, 60);
+  await r.pause(2000);
+  const clip = await r.box('[data-section="viewport"]', [0.33, 0.1, 0.82, 0.82]);
+  const dir = mkdtempSync(`${tmpdir()}/bylonder-loop-`);
+  const [start, end] = await app.bylonder((b) => b.world.animation.time.range());
+  for (let frame = start, i = 0; frame <= end; frame += 3, i++) {
+    await app.bylonder((b, frame) => b.world.animation.time.seek(frame), frame);
+    await app.settled();
+    // Long enough for the view to gather its samples: a still frame dithers less.
+    await r.pause(600);
+    await page.screenshot({ path: `${dir}/${String(i).padStart(4, "0")}.png`, clip });
+  }
+  const file = `${r.out}loop.gif`;
+  for (const [width, colors] of [[400, 64], [340, 48], [300, 40], [260, 32]]) {
+    ffmpegRun("-framerate", "8", "-i", `${dir}/%04d.png`, "-vf",
+      `scale=${width}:-2:flags=lanczos,split[a][b];[a]palettegen=max_colors=${colors}:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4:diff_mode=rectangle`, "-loop", "0", file);
+    if (statSync(file).size < 1024 * 1024) break;
+  }
+  console.log(`loop.gif ${(statSync(file).size / 1024).toFixed(0)} KB`);
+  rmSync(dir, { recursive: true });
 });

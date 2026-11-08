@@ -11,7 +11,7 @@ from contextlib import contextmanager
 
 import bpy
 from bpy_extras import anim_utils
-from mathutils import Matrix, Vector
+from mathutils import Matrix, Quaternion, Vector
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 # Where the camera stands (x, y, eye height); the city and the people behind paper are placed from it.
@@ -23,6 +23,11 @@ bpy.ops.wm.read_factory_settings(use_empty=True)
 scene = bpy.context.scene
 collection = scene.collection
 wobble = random.Random(3)
+# The animation's phases, apart from `wobble` so the still frame stays as it was.
+breeze = random.Random(5)
+# The loop: 240 frames, 10 s at 24 fps. Every animation's period divides it, so the last frame runs into the first.
+LOOP = 240
+scene.frame_start, scene.frame_end, scene.render.fps = 1, LOOP, 24
 
 
 def material(name, color, roughness=0.5, metallic=0.0, emission=0.0):
@@ -87,6 +92,44 @@ def fcurves(owner):
     """The F-curves of what `owner` animates (its action's channels for its slot)."""
     data = owner.animation_data
     return anim_utils.action_get_channelbag_for_slot(data.action, data.action_slot).fcurves
+
+
+def looping(owner, path, keys, index=-1, interpolation='BEZIER'):
+    """Keys `path` of `owner` at (frame, value) pairs and repeats them with a Cycles modifier: the first and the last key
+    are one period apart, a period that divides LOOP."""
+    for frame, value in keys:
+        if index < 0:
+            setattr(owner, path, value)
+        else:
+            getattr(owner, path)[index] = value
+        owner.keyframe_insert(path, index=index, frame=frame)
+    full = path if owner == owner.id_data else owner.path_from_id(path)
+    for channel in fcurves(owner.id_data):
+        if channel.data_path == full and index in (-1, channel.array_index) and not channel.modifiers:
+            channel.modifiers.new('CYCLES')
+            for key in channel.keyframe_points:
+                key.interpolation = interpolation
+            channel.update()
+
+
+def wave(owner, path, index, amplitude, period, phase=0.0):
+    """A sine-like sway of `amplitude` about the current value, `period` frames long, its rise through the middle
+    `phase` frames after frame 1."""
+    middle = getattr(owner, path)[index]
+    looping(owner, path, [(1 + phase + period * k / 4, middle + amplitude * (0, 1, 0, -1, 0)[k]) for k in range(5)], index)
+
+
+def pivoted(obj, pivot):
+    """Moves a mesh object's origin to `pivot` (world space), its shape staying where it is: what it turns about."""
+    obj.data.transform(Matrix.Translation(-Vector(pivot)) @ obj.matrix_world)
+    obj.matrix_world = Matrix.Translation(pivot)
+    return obj
+
+
+def sway(obj, amplitude, periods=(80, 120)):
+    """Swings `obj` about its origin, `amplitude` degrees about X and two thirds of it about Y, at a random phase."""
+    for axis, (degrees, period) in enumerate(((amplitude, periods[0]), (amplitude * 2 / 3, periods[1]))):
+        wave(obj, 'rotation_euler', axis, math.radians(degrees), period, breeze.uniform(0, period))
 
 
 def textured(name, color_a, color_b, scale, roughness=(0.5, 0.5), metallic=0.0, waves=0.0, bands='Z', distortion=6):
@@ -302,6 +345,14 @@ bpy.ops.object.mode_set(mode='OBJECT')
 contours = list(bpy.context.selected_objects)
 dead = max(contours, key=lambda part: sum((part.matrix_world @ v.co).x for v in part.data.vertices) / len(part.data.vertices))
 dead.data.materials[0] = material('Dead Neon', (0.04, 0.02, 0.03), roughness=0.15)
+# Once a loop it stutters back to life for a moment, then dies again.
+dying = dead.data.materials[0].node_tree.nodes['Principled BSDF']
+dying.inputs['Emission Color'].default_value = magenta.node_tree.nodes['Principled BSDF'].inputs['Emission Color'].default_value
+looping(dying.inputs['Emission Strength'], 'default_value', [(1, 0), (150, 4), (151, 0), (154, 5), (156, 0), (157, 3), (158, 0), (1 + LOOP, 0)],
+        interpolation='CONSTANT')
+# The cyan tubes hum: their light dips for a frame or two, twice a loop.
+looping(cyan.node_tree.nodes['Principled BSDF'].inputs['Emission Strength'], 'default_value',
+        [(1, 5), (88, 3.8), (89, 5), (91, 4.3), (92, 5), (203, 4), (205, 5), (1 + LOOP, 5)], interpolation='CONSTANT')
 sign = join('Menya Akari', [sign] + [part for part in contours if part is not sign])
 neon_text('Open Late', 'MENYA AKARI   OPEN LATE', display, (0.7, -0.2, 3.24), 0.15, cyan, 0.009, -0.003, 1.25)
 
@@ -407,11 +458,12 @@ def steam_particles(name, x, y, z, width, height, drift, count):
     system = emitter.modifiers.new(name, 'PARTICLE_SYSTEM').particle_system
     settings = system.settings
     settings.name = name
-    # `count` alive at a time: emitted evenly from well before the first frame to after the last.
-    settings.frame_start, settings.frame_end = -120, 250
-    settings.count = int(count * (settings.frame_end - settings.frame_start) // 36)
-    settings.lifetime, settings.lifetime_random = 36, 0.3
-    # Rising about half a meter over a life of 36 frames (1.5 s at 24 fps), a little sideways.
+    # `count` alive at a time: emitted evenly from well before the first frame (already rising at frame 1) to after the
+    # loop's last; a life of 40 frames divides the loop.
+    settings.frame_start, settings.frame_end = -120, LOOP + 10
+    settings.lifetime, settings.lifetime_random = 40, 0.3
+    settings.count = int(count * (settings.frame_end - settings.frame_start) // settings.lifetime)
+    # Rising about half a meter over its life (1.7 s at 24 fps), a little sideways.
     settings.emit_from, settings.normal_factor, settings.factor_random = 'FACE', 0.35, 0.05
     settings.object_align_factor = (drift[0], drift[1], 0)
     settings.brownian_factor = 0.15
@@ -554,15 +606,16 @@ steam('Pot Steam', -4.8, 2.2, 1.66, 0.6, 1.1, density=6, drift=(0.1, -0.1))
 
 
 def lantern(name, x, y, z, mat=lantern_paper, top=2.9, size=1.0):
-    """A paper lantern (chochin) on a cord: an egg of glowing paper between dark caps."""
+    """A paper lantern (chochin) on a cord: an egg of glowing paper between dark caps, one object hung from the cord's
+    top, which it swings about."""
     z += wobble.uniform(-0.06, 0.06)
     bpy.ops.mesh.primitive_uv_sphere_add(segments=16, ring_count=10, radius=0.12 * size, location=(x, y, z))
     shade = finish(bpy.context.object, name, mat)
     shade.scale.z = 1.35
     shade.rotation_euler = (math.radians(wobble.uniform(-6, 6)), math.radians(wobble.uniform(-6, 6)), 0)
-    for dz in (-0.155, 0.155):
-        cylinder('Lantern Cap', 0.06 * size, 0.03 * size, (x, y, z + dz * size), dark_wood, vertices=12)
-    curve('Lantern Cord', [(x, y, z + 0.17 * size), (x, y, top)], rubber, 0.005, smooth=False)
+    caps = [cylinder('Lantern Cap', 0.06 * size, 0.03 * size, (x, y, z + dz * size), dark_wood, vertices=12) for dz in (-0.155, 0.155)]
+    cord = curve('Lantern Cord', [(x, y, z + 0.17 * size), (x, y, top)], rubber, 0.005, smooth=False)
+    return pivoted(join(name, [shade, *caps, cord]), (x, y, top))
 
 
 with merged('Lanterns'):
@@ -590,9 +643,9 @@ RIGS = {
 }
 
 
-def holding(rig, bones, sit):
+def holding(rig, bones, sit, sip=False):
     """Directions (world space, facing -Y) that seat the rig and bring its hands together at the chest: its legs only
-    when it has no sitting animation of its own."""
+    when it has no sitting animation of its own. Sipping, the hands come up to the mouth and the head lifts to them."""
     pose, world = rig.pose.bones, rig.matrix_world
     directions = []
     for side in bones['sides']:
@@ -601,10 +654,11 @@ def holding(rig, bones, sit):
             directions += [(bones['thigh'].format(side), (0.12 * out, -1, -0.05)), (bones['shin'].format(side), (0.04 * out, 0.12, -1)),
                            (bones['foot'].format(side), (0, -1, -0.3))]
         # Elbows in near the body, forearms rising to the chest, wrists relaxed round the cup.
-        directions += [(bones['arm'].format(side), (0.12 * out, -0.2, -1)), (bones['forearm'].format(side), (-0.55 * out, -0.75, 0.4)),
-                       (bones['hand'].format(side), (-0.55 * out, -0.35, 0.75))]
+        forearm, hand = ((-0.5 * out, -0.55, 0.68), (-0.5 * out, -0.2, 0.85)) if sip else ((-0.55 * out, -0.75, 0.4), (-0.55 * out, -0.35, 0.75))
+        directions += [(bones['arm'].format(side), (0.12 * out, -0.2, -1)), (bones['forearm'].format(side), forearm),
+                       (bones['hand'].format(side), hand)]
     # The head bowed until the face points down into the cup.
-    return directions + [('Head', (0, -0.8, 0.6))]
+    return directions + [('Head', (0, -0.62, 0.78) if sip else (0, -0.8, 0.6))]
 
 
 def curl_fingers(rig, angle=70):
@@ -653,10 +707,21 @@ def repaint(body, palette):
         principled.inputs['Specular IOR Level'].default_value = 0.3
 
 
-def seated(name, model, x, y, facing, seat, palette=None, floor=0.0):
+def shape(obj):
+    """The world positions of an object's vertices as evaluated (posed by its rig)."""
+    bpy.context.view_layer.update()
+    evaluated = obj.evaluated_get(bpy.context.evaluated_depsgraph_get())
+    points = [evaluated.matrix_world @ v.co for v in evaluated.to_mesh().vertices]
+    evaluated.to_mesh_clear()
+    return points
+
+
+def seated(name, model, x, y, facing, seat, palette=None, floor=0.0, rigged=False):
     """A person from `model` (a .glb in models/) seated with the hips `seat` meters above the feet on a floor at `floor`,
     turned `facing` degrees from facing -Y, holding a cup at the chest, recoloured by `palette` (repaint()); returns the
-    figure, where its hands meet, the top of the head and the underside of the hips (where a seat goes)."""
+    figure, where its hands meet, the top of the head, the underside of the hips (where a seat goes) and, `rigged`, its
+    rig (posed as it sits, the pose its own, no longer its animation's) with each bone's rotation for a sip of the cup;
+    else the pose is the mesh's and the rig is gone."""
     before = set(bpy.data.objects)
     bpy.ops.import_scene.gltf(filepath=os.path.join(HERE, 'models', model))
     imported = [obj for obj in bpy.data.objects if obj not in before]
@@ -673,38 +738,56 @@ def seated(name, model, x, y, facing, seat, palette=None, floor=0.0):
     world = rig.matrix_world
     hands = [world @ pose[bones['hand'].format(side)].tail for side in bones['sides']]
     hips, feet = world @ pose['Hips'].head, world @ pose[bones['foot'].format(bones['sides'][0])].head
+    sip = None
+    if rigged:
+        rest = {bone.name: bone.rotation_quaternion.copy() for bone in pose}
+        posed(rig, holding(rig, bones, sit, sip=True))
+        sip = {bone: pose[bone].rotation_quaternion.copy() for bone, rotation in rest.items() if pose[bone].rotation_quaternion != rotation}
+        for bone, rotation in rest.items():
+            pose[bone].rotation_quaternion = rotation
+        rig.animation_data.action = None
+        matrix = rig.matrix_world.copy()
+        rig.parent = None
+        rig.matrix_world = matrix
     parts = [obj for obj in imported if obj.type == 'MESH' and obj.parent is rig]
     bpy.ops.object.select_all(action='DESELECT')
     for part in parts:
         part.select_set(True)
     bpy.context.view_layer.objects.active = parts[0]
-    bpy.ops.object.convert(target='MESH')
-    for part in parts:
-        matrix = part.matrix_world.copy()
-        part.parent = None
-        part.matrix_world = matrix
+    if not rigged:
+        bpy.ops.object.convert(target='MESH')
+        for part in parts:
+            matrix = part.matrix_world.copy()
+            part.parent = None
+            part.matrix_world = matrix
     bpy.ops.object.join()
     body = bpy.context.object
-    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    if not rigged:
+        bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
     for obj in imported:
-        if obj not in parts:
+        if obj not in parts and not (rigged and obj is rig):
             bpy.data.objects.remove(obj)
     scene.frame_set(1)
     body.name = name
     # Sized so the head's top sits 0.85 m above the hips, as a seated adult's does.
-    top = max(v.co.z for v in body.data.vertices)
+    top = max(co.z for co in shape(body))
     k = 0.85 / (top - hips.z)
     cup = (hands[0] + hands[1]) / 2
     placement = (Matrix.Translation((x, y, floor + seat)) @ Matrix.Rotation(math.radians(facing), 4, 'Z') @ Matrix.Scale(k, 4)
                  @ Matrix.Translation(-Vector((hips.x, hips.y, hips.z))))
-    body.matrix_world = placement
-    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    if rigged:
+        rig.name = f'{name} Rig'
+        rig.matrix_world = placement @ rig.matrix_world
+    else:
+        body.matrix_world = placement
+        bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
     bpy.ops.object.shade_auto_smooth(angle=math.radians(40))
     if palette:
         repaint(body, palette)
-    head = max((body.matrix_world @ v.co for v in body.data.vertices), key=lambda co: co.z)
-    under = [v.co for v in body.data.vertices if (v.co.xy - Vector((x, y))).length < 0.12]
-    return body, placement @ cup, head, min(co.z for co in under)
+    points = shape(body)
+    head = max(points, key=lambda co: co.z)
+    under = [co for co in points if (co.xy - Vector((x, y))).length < 0.12]
+    return body, placement @ cup, head, min(co.z for co in under), rig if rigged else None, sip
 
 
 
@@ -739,15 +822,18 @@ with merged('Menu Slips'):
     for i, (x, z, turn) in enumerate(((-0.45, 1.16, 4), (-0.62, 1.14, -3))):
         box(f'Menu Slip {i + 1}', (0.15, 0.005, 0.2), (x, 0.32, z), slip_paper, (0, math.radians(turn), 0))
 
-# The door: slid open behind the wall, a noren of three indigo panels hanging across the top.
-with merged('Noren'):
+# The door: slid open behind the wall, a noren of four indigo panels hanging across the top, each swaying from the rod.
+with merged('Noren Rod'):
     box('Door Frame Top', (1.4, 0.12, 0.12), (2.4, -0.04, 2.3), worn_paint)
-    noren = material('Noren', (0.015, 0.025, 0.08), roughness=1.0)
-    for i in range(4):
-        drop = 0.85 + wobble.uniform(-0.04, 0.03)
-        box(f'Noren {i + 1}', (0.27, 0.012, drop), (1.95 + i * 0.3, -0.12, 2.22 - drop / 2), noren,
-            (math.radians(wobble.uniform(-4, 4)), 0, math.radians(wobble.uniform(-2, 2))))
     cylinder('Noren Rod', 0.015, 1.3, (2.4, -0.12, 2.24), dark_metal, (0, math.pi / 2, 0), 8)
+noren = material('Noren', (0.015, 0.025, 0.08), roughness=1.0)
+norens = []
+for i in range(4):
+    drop = 0.85 + wobble.uniform(-0.04, 0.03)
+    panel = box(f'Noren {i + 1}', (0.27, 0.012, drop), (1.95 + i * 0.3, -0.12, 2.22 - drop / 2), noren,
+                (math.radians(wobble.uniform(-4, 4)), 0, math.radians(wobble.uniform(-2, 2))))
+    norens.append(pivoted(panel, (1.95 + i * 0.3, -0.12, 2.22)))
+    sway(norens[-1], 2.5, (60, 120))
 paper_screen = material('Paper Screen', (1.0, 0.6, 0.28), roughness=0.9, emission=0.3)
 paper_screen.node_tree.nodes['Principled BSDF'].inputs['Alpha'].default_value = 0.45
 paper_screen.surface_render_method = 'BLENDED'
@@ -774,8 +860,6 @@ def room(wall, x, z, w, h, depth=1.1, front=0.0, out=-1):
 
 with merged('Shop Front'):
     box('Shop Eave', (8.8, 0.75, 0.06), (0.1, -0.37, 2.8), roof_tiles, (math.radians(-14), 0, 0))
-    for i, x in enumerate((-2.7, -1.6, -0.5)):
-        lantern('Shop Lantern', x, -0.6, 2.35, lantern_paper if i % 2 == 0 else white_lantern, 2.75, 1.25)
     box('Shop Roof Eave', (8.8, 0.5, 0.06), (0.1, -0.25, 6.15), roof_tiles, (math.radians(-14), 0, 0))
     room(upper_wall, -1.6, 4.85, 2.4, 1.0)
     for i in range(9):
@@ -783,6 +867,9 @@ with merged('Shop Front'):
     for dz in (-0.5, -0.17, 0.17, 0.5):
         box('Mullion', (2.4, 0.03, 0.025), (-1.6, -0.03, 4.85 + dz), dark_wood)
     box('Air Conditioner', (0.8, 0.45, 0.55), (2.2, -0.23, 4.8), dark_metal, bevel=0.03)
+# The lanterns under the eave sway in the wind, each at its own phase.
+for i, x in enumerate((-2.7, -1.6, -0.5)):
+    sway(lantern(f'Shop Lantern {i + 1}', x, -0.6, 2.35, lantern_paper if i % 2 == 0 else white_lantern, 2.75, 1.25), 2.5)
 frosted = material('Frosted Pane', (0.4, 0.26, 0.13), roughness=0.4, emission=0.5)
 frosted_low = material('Frosted Pane Low', (0.4, 0.26, 0.13), roughness=0.4, emission=0.3)
 box('Kitchen Vent', (0.35, 0.25, 0.3), (3.85, -0.12, 2.3), dark_metal, bevel=0.02)
@@ -794,7 +881,7 @@ with merged('Sliding Door'):
         box('Door Pane', (0.24, 0.02, 0.52), (2.81, 0.1, dz), frosted if dz > 1 else frosted_low)
     box('Step', (1.3, 0.4, 0.1), (2.4, -0.2, 0.05), timber)
     box('Mat', (0.9, 0.3, 0.012), (2.3, -0.22, 0.106), material('Mat', (0.25, 0.04, 0.03), roughness=1))
-lantern('Door Lantern', 1.72, -0.55, 2.25, lantern_paper, 2.75, 1.4)
+sway(lantern('Door Lantern', 1.72, -0.55, 2.25, lantern_paper, 2.75, 1.4), 2.0)
 # A paper lightbox beside the door: らーめん in red on lit paper.
 box('Lightbox', (0.36, 0.08, 1.3), (1.45, -0.04, 1.95), paper, bevel=0.01)
 
@@ -824,6 +911,22 @@ with merged('Noren Mark'):
     mark.data.align_x, mark.data.align_y = 'CENTER', 'CENTER'
     finish(mark, 'Noren Mark', material('Noren White', (0.75, 0.72, 0.66), roughness=0.9))
     bpy.ops.object.convert(target='MESH')
+# The mark is dyed across the middle two panels: cut at the gap between them, each half sways with its panel.
+mark = bpy.data.objects['Noren Mark']
+halves = [mark, mark.copy()]
+halves[1].data = mark.data.copy()
+collection.objects.link(halves[1])
+for half, panel, keep in zip(halves, norens[1:3], ('LEFT', 'RIGHT')):
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.context.view_layer.objects.active = half
+    half.select_set(True)
+    bpy.ops.object.mode_set(mode='EDIT')
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.mesh.bisect(plane_co=(2.395, 0, 0), plane_no=(1, 0, 0), clear_inner=keep == 'RIGHT', clear_outer=keep == 'LEFT', use_fill=True)
+    bpy.ops.object.mode_set(mode='OBJECT')
+    half.name = f'Noren Mark {keep.title()}'
+    half.parent = panel
+    half.matrix_parent_inverse = panel.matrix_world.inverted()
 lettering('Ramen', 'らーめん', 1.45, -0.085, 2.43, 0.3, material('Lightbox Ink', (0.5, 0.02, 0.01), roughness=0.6))
 
 # Props: wooden crates stacked by the door and a rusty bicycle leaning on the wall.
@@ -897,12 +1000,23 @@ alpha = nodes.new('ShaderNodeMath')
 alpha.operation = 'MULTIPLY'
 links.new(soft.outputs['Value'], alpha.inputs[0])
 links.new(faint.outputs['Fac'], alpha.inputs[1])
-links.new(alpha.outputs[0], principled.inputs['Alpha'])
+# Drawn only below 6.5 m, where the rain starts: the copy falling in from above shows once it gets there.
+height = nodes.new('ShaderNodeSeparateXYZ')
+links.new(nodes.new('ShaderNodeNewGeometry').outputs['Position'], height.inputs['Vector'])
+below = nodes.new('ShaderNodeMath')
+below.operation, below.inputs[1].default_value = 'LESS_THAN', 6.5
+links.new(height.outputs['Z'], below.inputs[0])
+within = nodes.new('ShaderNodeMath')
+within.operation = 'MULTIPLY'
+links.new(alpha.outputs[0], within.inputs[0])
+links.new(below.outputs[0], within.inputs[1])
+links.new(within.outputs[0], principled.inputs['Alpha'])
 rain_streak.surface_render_method = 'BLENDED'
 streaks = bpy.data.meshes.new('Rain')
 verts, faces, opacity = [], [], []
 rng = random.Random(7)
 eye = Vector(EYE)
+RAIN_FALL = 6.6
 for k in range(1600):
     x, y, z = rng.uniform(-24.0, 6.0), rng.uniform(-4.4, -0.4), rng.uniform(-0.1, 6.5)
     far = min(1.0, (Vector((x, y, z)) - eye).length / 25)
@@ -911,11 +1025,14 @@ for k in range(1600):
     # Across the streak, square to the line of sight.
     side = (Vector((x, y, z)) - eye).cross(Vector((0, 0, 1))).normalized() * width
     lean = Vector((0.08 * length, 0, length))
-    root = Vector((x, y, z))
-    n = len(verts)
-    verts += [tuple(root - side), tuple(root + side), tuple(root + side + lean), tuple(root - side + lean)]
-    faces.append((n, n + 1, n + 2, n + 3))
-    opacity += [rng.uniform(0.12, 0.22) * (1 - 0.5 * far)] * 4
+    alpha = rng.uniform(0.12, 0.22) * (1 - 0.5 * far)
+    # Twice, one fall apart: as the rain falls through its 6.6 m, the copy above takes its place.
+    for lift in (0.0, RAIN_FALL):
+        root = Vector((x, y, z + lift))
+        n = len(verts)
+        verts += [tuple(root - side), tuple(root + side), tuple(root + side + lean), tuple(root - side + lean)]
+        faces.append((n, n + 1, n + 2, n + 3))
+        opacity += [alpha] * 4
 streaks.from_pydata(verts, [], faces)
 corners = streaks.uv_layers.new(name='UVMap')
 corners.data.foreach_set('uv', [v for _ in faces for v in (0, 0, 1, 0, 1, 1, 0, 1)])
@@ -931,18 +1048,13 @@ drop_glass.use_raytrace_refraction = True
 with merged('Rain Near') as near:
     for k in range(40):
         x, y, z = rng.uniform(-1.5, 3.0), rng.uniform(-3.0, -2.0), rng.uniform(0.2, 3.2)
-        bpy.ops.mesh.primitive_uv_sphere_add(segments=8, ring_count=6, radius=0.006, location=(x, y, z))
-        drop = finish(bpy.context.object, 'Drop', drop_glass)
-        drop.scale.z = 6
-# The rain falls 9 m/s, round and round through its 6.6 m: what motion blur draws as it falls.
+        for lift in (0.0, RAIN_FALL):
+            bpy.ops.mesh.primitive_uv_sphere_add(segments=8, ring_count=6, radius=0.006, location=(x, y, z + lift))
+            drop = finish(bpy.context.object, 'Drop', drop_glass)
+            drop.scale.z = 6
+# The rain falls 8 m/s, round and round through its 6.6 m every 20 frames: what motion blur draws as it falls.
 for falling in (rain, near['object']):
-    for frame, z in ((1, 0.0), (19, -6.6)):
-        falling.location.z = z
-        falling.keyframe_insert('location', index=2, frame=frame)
-    for channel in fcurves(falling):
-        channel.modifiers.new('CYCLES')
-        for key in channel.keyframe_points:
-            key.interpolation = 'LINEAR'
+    looping(falling, 'location', [(1, 0.0), (21, -RAIN_FALL)], index=2, interpolation='LINEAR')
 
 
 # Plastic stools under the window, a bucket by the crates and an A-frame menu board.
@@ -1271,9 +1383,10 @@ def filled(points, mat):
     return obj
 
 
-def silhouette(name, fills, tubes, mat, x, y, z, facing, mirror=False, within=None):
+def silhouette(name, fills, tubes, mat, x, y, z, facing, mirror=False, within=None, pivot=(0.0, 0.0)):
     """One figure from its filled outlines and its (points, radius) tubes, set at (x, y, z) with its plane turned
-    `facing` degrees about Z; mirrored, it faces -X. `within` (x0, x1, z0, z1) cuts it to a pane, as a shadow on it."""
+    `facing` degrees about Z; mirrored, it faces -X. `within` (x0, x1, z0, z1) cuts it to a pane, as a shadow on it.
+    Its origin is at `pivot` (in the figure's plane), what it turns about."""
     with merged(name) as group:
         for points in fills:
             filled(points, mat)
@@ -1284,8 +1397,10 @@ def silhouette(name, fills, tubes, mat, x, y, z, facing, mirror=False, within=No
     figure.select_set(True)
     bpy.context.view_layer.objects.active = figure
     bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-    figure.matrix_world = (Matrix.Translation((x, y, z)) @ Matrix.Rotation(math.radians(facing), 4, 'Z')
-                           @ Matrix.Scale(-1 if mirror else 1, 4, (1, 0, 0)))
+    figure.data.transform(Matrix.Translation((-pivot[0], 0, -pivot[1])))
+    flip = -1 if mirror else 1
+    figure.location = Vector((x, y, z)) + Matrix.Rotation(math.radians(facing), 3, 'Z') @ Vector((flip * pivot[0], 0, pivot[1]))
+    figure.rotation_euler.z, figure.scale.x = math.radians(facing), flip
     if within:
         x0, x1, z0, z1 = within
         pane = box('Pane', (x1 - x0, 1, z1 - z0), ((x0 + x1) / 2, y, (z0 + z1) / 2), None)
@@ -1298,16 +1413,21 @@ def silhouette(name, fills, tubes, mat, x, y, z, facing, mirror=False, within=No
 
 
 def eating():
-    """Seated, a bowl raised to the chin, chopsticks lifting noodles to the mouth."""
+    """Seated, a bowl raised to the chin; apart, the forearm with chopsticks lifting noodles to the mouth, from the
+    elbow."""
     fills = [SEATED, placed(HEAD, 0.0, 0.6, -10), ellipse(0.19, 0.645, 0.085, 0.045)]
-    tubes = [([(0.0, 0.55), (0.07, 0.38), (0.16, 0.6)], 0.042), ([(-0.03, 0.55), (0.1, 0.43), (0.21, 0.74)], 0.04),
-             ([(0.3, 0.79), (0.1, 0.705)], 0.005), ([(0.31, 0.77), (0.11, 0.695)], 0.005)]
-    return fills, tubes
+    tubes = [([(0.0, 0.55), (0.07, 0.38), (0.16, 0.6)], 0.042), ([(-0.03, 0.55), (0.1, 0.43)], 0.04)]
+    forearm = [([(0.1, 0.43), (0.21, 0.74)], 0.04), ([(0.3, 0.79), (0.1, 0.705)], 0.005), ([(0.31, 0.77), (0.11, 0.695)], 0.005)]
+    return fills, tubes, forearm
 
 
 ink = material('Silhouette', (0.006, 0.005, 0.005), roughness=0.7)
 # Facing away from the woman outside, so the two do not mirror each other.
-silhouette('Eating', *eating(), ink, -2.6, 1.0, 1.05, 47, mirror=True)
+fills, tubes, forearm = eating()
+silhouette('Eating', fills, tubes, ink, -2.6, 1.0, 1.05, 47, mirror=True)
+# Once a loop the chopsticks come up to the mouth, slowly, and go back down.
+lifting = silhouette('Eating Forearm', [], forearm, ink, -2.6, 1.0, 1.05, 47, mirror=True, pivot=(0.1, 0.43))
+looping(lifting, 'rotation_euler', [(1, 0), (60, 0), (84, math.radians(12)), (110, math.radians(12)), (130, 0), (1 + LOOP, 0)], index=1)
 
 def behind(pane, depth, seat=0.46):
     """Where to seat someone `depth` behind a pane so that, seen from the camera, the head shows near `pane` (a point
@@ -1326,19 +1446,40 @@ for name, pane, depth, facing in (('Upstairs Kissa', (-6.0, 0.0, 4.25), 0.4, 90)
 # A woman on a tea break, in muted colours: a dusty rose knit top, washed denim, brown hair, tan shoes.
 TEA_BREAK = {(0.91, 0.4, 0.36): (0.55, 0.4, 0.39), (0.94, 0.28, 0.18): (0.42, 0.36, 0.3), (0.82, 0.76, 0.44): (0.18, 0.11, 0.07),
              (0.38, 0.53, 0.83): (0.25, 0.34, 0.5), (0.91, 0.74, 0.57): (0.84, 0.64, 0.52)}
-drinker, cup_at, crown, seat_top = seated('Tea Break', 'animated-woman.glb', -0.35, -0.6, 140, 0.5, palette=TEA_BREAK)
+drinker, cup_at, crown, seat_top, drinker_rig, sip = seated('Tea Break', 'animated-woman.glb', -0.35, -0.6, 140, 0.5,
+                                                             palette=TEA_BREAK, rigged=True)
 stool('Low Stool', -0.35, -0.6, height=seat_top)
-cylinder('Tea Cup', 0.045, 0.1, tuple(cup_at), material('Tea Cup', (0.55, 0.45, 0.35), roughness=0.4), vertices=14)
-steam('Tea Steam', cup_at.x, cup_at.y, cup_at.z + 0.05, 0.14, 0.3, density=4)
+tea_cup = cylinder('Tea Cup', 0.045, 0.1, tuple(cup_at), material('Tea Cup', (0.55, 0.45, 0.35), roughness=0.4), vertices=14)
+tea_steam = steam('Tea Steam', cup_at.x, cup_at.y, cup_at.z + 0.05, 0.14, 0.3, density=4)
+# The cup in her left hand (the steam over it), so it follows the hand.
+for child, parent, bone in ((tea_cup, drinker_rig, 'LeftHand'), (tea_steam, tea_cup, '')):
+    bpy.context.view_layer.update()
+    matrix = child.matrix_world.copy()
+    child.parent, child.parent_type, child.parent_bone = parent, 'BONE' if bone else 'OBJECT', bone
+    bpy.context.view_layer.update()
+    child.matrix_world = matrix
+# She breathes slowly, twice a loop, and once a loop lifts the cup to her lips for a sip.
+chest = drinker_rig.pose.bones['Spine2']
+rest = chest.rotation_quaternion.copy()
+looping(chest, 'rotation_quaternion', [(1, rest), (61, rest @ Quaternion((1, 0, 0), math.radians(1.5))), (121, rest)])
+for bone, sipping in sip.items():
+    pose_bone = drinker_rig.pose.bones[bone]
+    rest = pose_bone.rotation_quaternion.copy()
+    looping(pose_bone, 'rotation_quaternion', [(1, rest), (150, rest), (172, sipping), (192, sipping), (214, rest), (1 + LOOP, rest)])
 simple_bike('Parked Bicycle', -5.4, -0.55, 92, lamp=True)
-# Ripples in the puddles where the rain lands.
+# Ripples in the puddles where the rain lands: each ring rises out of the water, spreads and sinks back, over and over.
 ripple = material('Ripple', (0.15, 0.16, 0.18), roughness=0.2)
-with merged('Ripples'):
-    for i in range(14):
-        rx, ry = wobble.choice(((0.5, -2.6), (3.8, -3.2), (-4.5, -2.4)))
-        bpy.ops.mesh.primitive_torus_add(major_radius=wobble.uniform(0.03, 0.1), minor_radius=0.003, major_segments=20, minor_segments=4,
-                                         location=(rx + wobble.uniform(-1.2, 1.2), ry + wobble.uniform(-0.4, 0.4), -0.145))
-        finish(bpy.context.object, 'Ripple', ripple)
+for i in range(14):
+    rx, ry = wobble.choice(((0.5, -2.6), (3.8, -3.2), (-4.5, -2.4)))
+    bpy.ops.mesh.primitive_torus_add(major_radius=wobble.uniform(0.03, 0.1), minor_radius=0.003, major_segments=20, minor_segments=4,
+                                     location=(rx + wobble.uniform(-1.2, 1.2), ry + wobble.uniform(-0.4, 0.4), -0.145))
+    ring = finish(bpy.context.object, f'Ripple {i + 1}', ripple)
+    period = breeze.choice((24, 30, 40, 48))
+    start = 1 - breeze.uniform(0, period)
+    for axis in (0, 1):
+        looping(ring, 'scale', [(start, 0.3), (start + period, 1.6)], index=axis, interpolation='LINEAR')
+    looping(ring, 'location', [(start, -0.152), (start + 3, -0.145), (start + 0.7 * period, -0.145), (start + period, -0.152)], index=2,
+            interpolation='LINEAR')
 
 
 def light(name, kind, color, energy, location, radius=0.1, rotation=(0, 0, 0), specular=1.0, shadow=False):
@@ -1703,28 +1844,15 @@ outline('Cloud Deck', [(cx - 4000, cy - 4000, 950), (cx + 4000, cy - 4000, 950),
 with merged('City Fog'):
     for k, (distance, density, light) in enumerate(((420, 0.45, 0.8), (1000, 0.55, 1.2), (1600, 0.65, 1.6))):
         card('Fog Card', 72 + k * 2, distance, 2500 + k * 1500, -20, 260 + k * 120, fog_card(f'City Fog {k + 1}', density, light))
-fog_drift = bpy.data.objects['City Fog']
-for frame, shift in ((1, 0), (300, 25)):
-    fog_drift.location.x = shift
-    fog_drift.keyframe_insert('location', index=0, frame=frame)
+wave(bpy.data.objects['City Fog'], 'location', 0, 6.0, LOOP)
 
 # An airship drifting slowly across, a giant ad on its flank, its lights blinking.
 blink = material('Aircraft Light', (1.0, 0.1, 0.05), emission=8)
 strength = blink.node_tree.nodes['Principled BSDF'].inputs['Emission Strength']
-for frame, value in ((1, 8), (12, 0), (40, 8)):
-    strength.default_value = value
-    strength.keyframe_insert('default_value', frame=frame)
-for channel in fcurves(blink.node_tree):
-    channel.modifiers.new('CYCLES')
-    for key in channel.keyframe_points:
-        key.interpolation = 'CONSTANT'
+looping(strength, 'default_value', [(1, 8), (12, 0), (41, 8)], interpolation='CONSTANT')
 ad_glow = sky_material('Airship Ad', (0.9, 0.15, 0.5), (0.1, 0.8, 0.9), 1.2)
 mapping = next(n for n in ad_glow.node_tree.nodes if n.type == 'MAPPING')
-for frame, shift in ((1, 0.0), (240, 1.0)):
-    mapping.inputs['Location'].default_value[0] = shift
-    mapping.inputs['Location'].keyframe_insert('default_value', index=0, frame=frame)
-for channel in fcurves(ad_glow.node_tree):
-    channel.modifiers.new('CYCLES')
+wave(mapping.inputs['Location'], 'default_value', 0, 0.5, LOOP)
 with merged('Airship') as airship:
     ellipsoid('Hull', (140, 32, 30), (0, 0, 0), material('Airship Hull', (0.01, 0.01, 0.015), roughness=0.6))
     outline('Ad', [(-90, -33, -18), (90, -33, -18), (90, -33, 18), (-90, -33, 18)], ad_glow)
@@ -1737,13 +1865,10 @@ ship.select_set(True)
 bpy.context.view_layer.objects.active = ship
 bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 (sx, sy), sturn = toward(72, 1150)
-for frame, along in ((1, -180), (300, 180)):
-    ship.matrix_world = Matrix.Translation((sx, sy, 300)) @ Matrix.Rotation(sturn, 4, 'Z') @ Matrix.Translation((along, 0, 0))
-    ship.keyframe_insert('location', frame=frame)
-ship.rotation_euler.z = sturn
-for channel in fcurves(ship):
-    for key in channel.keyframe_points:
-        key.interpolation = 'LINEAR'
+ship.matrix_world = Matrix.Translation((sx, sy, 300)) @ Matrix.Rotation(sturn, 4, 'Z') @ Matrix.Translation((-180, 0, 0))
+# Riding the wind in place: a slow bob and a slight sway of its heading.
+wave(ship, 'location', 2, 4.0, LOOP / 2)
+wave(ship, 'rotation_euler', 2, math.radians(1.5), LOOP)
 
 world = bpy.data.worlds.new('Night')
 world.node_tree.nodes['Background'].inputs['Color'].default_value = (0.006, 0.006, 0.012, 1)
@@ -1755,6 +1880,9 @@ camera.data.lens = 16
 camera.data.clip_end = 5000
 camera.location = EYE
 camera.rotation_euler = (math.radians(95), 0, math.radians(38))
+# Breathing: a drift of a few centimeters, side to side once a loop and up and down twice.
+wave(camera, 'location', 0, 0.03, LOOP)
+wave(camera, 'location', 2, 0.015, LOOP / 2)
 collection.objects.link(camera)
 scene.camera = camera
 scene.render.resolution_x, scene.render.resolution_y = 1280, 720
