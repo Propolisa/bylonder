@@ -24,7 +24,7 @@ import { cursorRotationMatrix, cursorRotationSet } from '../blenkernel/scene/cur
 import { SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE } from '../bmesh/intern/bmesh-marking.js';
 import { curveStructs } from './rna-curve.js';
 import { textureSettings, textureStruct } from '../blenkernel/texture/texture.js';
-import { isBlenderLight, lightRecord, deriveBabylonLight, lightingMode, intensityOf, wattsOf } from '../blenkernel/light/light-home.js';
+import { isBlenderLight, lightRecord, deriveBabylonLight, lightingMode, intensityOf, wattsOf, spotBlend, spotInnerAngle } from '../blenkernel/light/light-home.js';
 import { lightFields } from '../blenkernel/light/light-fields.js';
 
 // Swapping two axes is its own inverse and flips handedness.
@@ -326,7 +326,7 @@ const babylonLight = {
   shadow_soft_size: synced(settable('radius'), (light) => lightType(light) !== 'SUN'),
   use_shadow: synced(settable('shadowEnabled')),
   spot_size: synced(settable('angle'), (light) => lightType(light) === 'SPOT'),
-  spot_blend: { get: (light) => (light.angle ? 1 - light.innerAngle / light.angle : 0), set: (light, value) => { light.innerAngle = (1 - value) * light.angle; },
+  spot_blend: { get: (light) => spotBlend(light.angle, light.innerAngle), set: (light, value) => { light.innerAngle = spotInnerAngle(light.angle, value); },
     sync: (light) => lightType(light) === 'SPOT' },
 };
 // Every Light setting Blender's DNA has for the light's type, over its record.

@@ -68,13 +68,25 @@ export function deriveBabylonLight(light) {
   if (record.type !== 'SUN') light.range = influenceRadius(record).surface;
   if (record.type === 'SPOT') {
     light.angle = record.spot_size;
-    light.innerAngle = (1 - record.spot_blend) * record.spot_size;
+    light.innerAngle = spotInnerAngle(record.spot_size, record.spot_blend);
   }
   if (record.type === 'AREA') {
     light.width = record.size;
     light.height = ['RECTANGLE', 'ELLIPSE'].includes(record.shape) ? record.size_y : record.size;
   }
 }
+
+// blender-port: eevee_light.cc Light::shape_parameters_set, eevee_light_lib.bsl.hh light_spot_attenuation: a spot's
+// Blend is the share of its cone's cosine range, from the edge inward, over which it fades in; Babylon's spot fades
+// between the cosines of its angle and its inner angle.
+export const spotInnerAngle = (size, blend) => {
+  const edge = Math.cos(size / 2);
+  return 2 * Math.acos(Math.min(1, edge + blend * (1 - edge)));
+};
+export const spotBlend = (size, innerAngle) => {
+  const edge = Math.cos(size / 2);
+  return edge < 1 ? Math.min(1, Math.max(0, (Math.cos(innerAngle / 2) - edge) / (1 - edge))) : 0;
+};
 
 // blender-port: DNA_scene_defaults.h light_threshold: the scene's default Light Threshold.
 const LIGHT_THRESHOLD = 0.01;

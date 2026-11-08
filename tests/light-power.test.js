@@ -2,7 +2,7 @@
 // as EEVEE converts it (eevee_light.cc shape_radiance_get: W / (pi * area), an ellipse's area pi / 4 of its rectangle).
 import assert from 'node:assert/strict';
 import { NullEngine, Scene } from '@babylonjs/core';
-import { createLight } from '../src/blenkernel/light/light-home.js';
+import { createLight, spotBlend } from '../src/blenkernel/light/light-home.js';
 
 const scene = new Scene(new NullEngine());
 const near = (a, b) => Math.abs(a - b) < 1e-6;
@@ -46,4 +46,12 @@ assert.ok(near(createLight('Dim', 'POINT', { energy: 2 }, scene).range, Math.sqr
   const calls = lit.match(/info\.(specular|clearCoat)=[^;]*;/g);
   assert.ok(calls.length >= 4 && calls.every((call) => !/diffuse\{X\}/.test(call)), calls.join(' | '));
 }
-console.log("Light power: points as radiant intensity, area lights as EEVEE's radiance passed");
+// A spot's Blend as EEVEE's light_spot_attenuation fades it: full from the cosine its share of the cone's cosine range in
+// from the edge, as Babylon's inner angle.
+{
+  const spot = createLight('Spot', 'SPOT', { spot_size: Math.PI / 2, spot_blend: 0.3 }, scene), edge = Math.cos(Math.PI / 4);
+  assert.ok(near(Math.cos(spot.innerAngle / 2), edge + 0.3 * (1 - edge)), `the cone is full from its blend's cosine: ${spot.innerAngle}`);
+  assert.ok(near(spotBlend(spot.angle, spot.innerAngle), 0.3), 'and its blend reads back');
+  assert.ok(near(createLight('Hard', 'SPOT', { spot_size: 1, spot_blend: 0 }, scene).innerAngle, 1), 'a blend of 0 is a hard edge');
+}
+console.log("Light power: points as radiant intensity, area lights as EEVEE's radiance, spots' blend as EEVEE's passed");
