@@ -11,7 +11,9 @@ const ATTRIBUTE = 'pointcloud';
 const VERTEX_DEFINITIONS = `#ifdef POINTCLOUD
 attribute vec4 ${ATTRIBUTE};
 varying vec2 vPointCorner;
-varying vec3 vPointCenter, vPointRight, vPointUp;
+varying vec3 vPointCenter;
+varying vec3 vPointRight;
+varying vec3 vPointUp;
 varying float vPointRadius;
 #endif`;
 const VERTEX_WORLDPOS = `#ifdef POINTCLOUD
@@ -25,7 +27,9 @@ vPositionW = worldPos.xyz;
 #endif`;
 const FRAGMENT_DEFINITIONS = `#ifdef POINTCLOUD
 varying vec2 vPointCorner;
-varying vec3 vPointCenter, vPointRight, vPointUp;
+varying vec3 vPointCenter;
+varying vec3 vPointRight;
+varying vec3 vPointUp;
 varying float vPointRadius;
 #endif`;
 const FRAGMENT_MAIN_BEGIN = `#ifdef POINTCLOUD

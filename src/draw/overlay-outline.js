@@ -3,6 +3,8 @@
 // renders the outlined meshes' ids and depth, the detect pass finds the pixels where the id changes and writes each
 // one's color and line, and the anti-aliasing pass draws those lines over the view at a constant pixel width, dimmed
 // where the scene hides them. With X-ray the prepass draws each mesh's silhouette edges instead of its faces.
+// Blender's `ref` and `target` are named ref_id and target_texel here: both are reserved words in WGSL, which WebGPU
+// compiles this GLSL to.
 import { RenderTargetTexture } from '@babylonjs/core/Materials/Textures/renderTargetTexture.js';
 import { MultiRenderTarget } from '@babylonjs/core/Materials/Textures/multiRenderTarget.js';
 import { ShaderMaterial } from '@babylonjs/core/Materials/shaderMaterial.js';
@@ -124,17 +126,17 @@ vec4 outline_texel(vec2 uv) {
 }
 uint outline_id(vec2 uv) { return uint(outline_texel(uv).r + 0.5); }
 
-bool has_edge(uint id, vec2 uv, uint ref, inout uint ref_col, inout vec2 depth_uv)
+bool has_edge(uint id, vec2 uv, uint ref_id, inout uint ref_col, inout vec2 depth_uv)
 {
   if (ref_col == 0u) {
     /* Make outline bleed on the background. */
     ref_col = id;
     depth_uv = uv;
   }
-  return (id != ref);
+  return (id != ref_id);
 }
 
-bvec4 gather_edges(vec2 uv, uint ref)
+bvec4 gather_edges(vec2 uv, uint ref_id)
 {
   uvec4 ids;
   vec3 ofs = vec3(0.5, 0.5, -0.5) * (1.0 / size_viewport).xyy;
@@ -142,7 +144,7 @@ bvec4 gather_edges(vec2 uv, uint ref)
   ids.y = outline_id(uv + ofs.xy);
   ids.z = outline_id(uv + ofs.xz);
   ids.w = outline_id(uv - ofs.xy);
-  return notEqual(ids, uvec4(ref));
+  return notEqual(ids, uvec4(ref_id));
 }
 
 /* Clockwise */
@@ -256,8 +258,8 @@ void main()
 {
   vec2 size_viewport_inv = 1.0 / size_viewport;
   vec2 uvs = gl_FragCoord.xy * size_viewport_inv;
-  uint ref = outline_id(uvs);
-  uint ref_col = ref;
+  uint ref_id = outline_id(uvs);
+  uint ref_col = ref_id;
   vec3 ofs = vec3(size_viewport_inv, 0.0);
 
   vec2 depth_uv = uvs;
@@ -268,10 +270,10 @@ void main()
   ids.z = outline_id(uvs + ofs.zy);
   ids.w = outline_id(uvs - ofs.zy);
 
-  bool has_edge_pos_x = has_edge(ids.x, uvs + ofs.xz, ref, ref_col, depth_uv);
-  bool has_edge_neg_x = has_edge(ids.y, uvs - ofs.xz, ref, ref_col, depth_uv);
-  bool has_edge_pos_y = has_edge(ids.z, uvs + ofs.zy, ref, ref_col, depth_uv);
-  bool has_edge_neg_y = has_edge(ids.w, uvs - ofs.zy, ref, ref_col, depth_uv);
+  bool has_edge_pos_x = has_edge(ids.x, uvs + ofs.xz, ref_id, ref_col, depth_uv);
+  bool has_edge_neg_x = has_edge(ids.y, uvs - ofs.xz, ref_id, ref_col, depth_uv);
+  bool has_edge_pos_y = has_edge(ids.z, uvs + ofs.zy, ref_id, ref_col, depth_uv);
+  bool has_edge_neg_y = has_edge(ids.w, uvs - ofs.zy, ref_id, ref_col, depth_uv);
 
   if (do_thick_outlines) {
     if (!any(bvec4(has_edge_pos_x, has_edge_neg_x, has_edge_pos_y, has_edge_neg_y))) {
@@ -280,10 +282,10 @@ void main()
       ids.z = outline_id(uvs + 2.0 * ofs.zy);
       ids.w = outline_id(uvs - 2.0 * ofs.zy);
 
-      has_edge_pos_x = has_edge(ids.x, uvs + 2.0 * ofs.xz, ref, ref_col, depth_uv);
-      has_edge_neg_x = has_edge(ids.y, uvs - 2.0 * ofs.xz, ref, ref_col, depth_uv);
-      has_edge_pos_y = has_edge(ids.z, uvs + 2.0 * ofs.zy, ref, ref_col, depth_uv);
-      has_edge_neg_y = has_edge(ids.w, uvs - 2.0 * ofs.zy, ref, ref_col, depth_uv);
+      has_edge_pos_x = has_edge(ids.x, uvs + 2.0 * ofs.xz, ref_id, ref_col, depth_uv);
+      has_edge_neg_x = has_edge(ids.y, uvs - 2.0 * ofs.xz, ref_id, ref_col, depth_uv);
+      has_edge_pos_y = has_edge(ids.z, uvs + 2.0 * ofs.zy, ref_id, ref_col, depth_uv);
+      has_edge_neg_y = has_edge(ids.w, uvs - 2.0 * ofs.zy, ref_id, ref_col, depth_uv);
     }
   }
 
@@ -333,13 +335,13 @@ void main()
   bvec4 extra_edges, extra_edges2;
   /* Straight lines. */
   if (edge_case == YPOS) {
-    extra_edges = gather_edges(uvs + size_viewport_inv * vec2(2.5, 0.5), ref);
-    extra_edges2 = gather_edges(uvs + size_viewport_inv * vec2(-2.5, 0.5), ref);
+    extra_edges = gather_edges(uvs + size_viewport_inv * vec2(2.5, 0.5), ref_id);
+    extra_edges2 = gather_edges(uvs + size_viewport_inv * vec2(-2.5, 0.5), ref_id);
     straight_line_dir(extra_edges, extra_edges2, line_start, line_end);
   }
   else if (edge_case == YNEG) {
-    extra_edges = gather_edges(uvs + size_viewport_inv * vec2(-2.5, -0.5), ref);
-    extra_edges2 = gather_edges(uvs + size_viewport_inv * vec2(2.5, -0.5), ref);
+    extra_edges = gather_edges(uvs + size_viewport_inv * vec2(-2.5, -0.5), ref_id);
+    extra_edges2 = gather_edges(uvs + size_viewport_inv * vec2(2.5, -0.5), ref_id);
     extra_edges = rotate_180(extra_edges);
     extra_edges2 = rotate_180(extra_edges2);
     straight_line_dir(extra_edges, extra_edges2, line_start, line_end);
@@ -347,8 +349,8 @@ void main()
     line_end = rotate_180(line_end);
   }
   else if (edge_case == XPOS) {
-    extra_edges = gather_edges(uvs + size_viewport_inv * vec2(0.5, 2.5), ref);
-    extra_edges2 = gather_edges(uvs + size_viewport_inv * vec2(0.5, -2.5), ref);
+    extra_edges = gather_edges(uvs + size_viewport_inv * vec2(0.5, 2.5), ref_id);
+    extra_edges2 = gather_edges(uvs + size_viewport_inv * vec2(0.5, -2.5), ref_id);
     extra_edges = rotate_90(extra_edges);
     extra_edges2 = rotate_90(extra_edges2);
     straight_line_dir(extra_edges, extra_edges2, line_start, line_end);
@@ -356,8 +358,8 @@ void main()
     line_end = rotate_90(line_end);
   }
   else if (edge_case == XNEG) {
-    extra_edges = gather_edges(uvs + size_viewport_inv * vec2(-0.5, 2.5), ref);
-    extra_edges2 = gather_edges(uvs + size_viewport_inv * vec2(-0.5, -2.5), ref);
+    extra_edges = gather_edges(uvs + size_viewport_inv * vec2(-0.5, 2.5), ref_id);
+    extra_edges2 = gather_edges(uvs + size_viewport_inv * vec2(-0.5, -2.5), ref_id);
     extra_edges = rotate_270(extra_edges);
     extra_edges2 = rotate_270(extra_edges2);
     straight_line_dir(extra_edges, extra_edges2, line_start, line_end);
@@ -366,13 +368,13 @@ void main()
   }
   /* Diagonal */
   else if (edge_case == DIAG_XNEG_YPOS) {
-    extra_edges = gather_edges(uvs + ofs.xy * vec2(1.5), ref);
-    extra_edges2 = gather_edges(uvs + ofs.xy * vec2(-1.5), ref);
+    extra_edges = gather_edges(uvs + ofs.xy * vec2(1.5), ref_id);
+    extra_edges2 = gather_edges(uvs + ofs.xy * vec2(-1.5), ref_id);
     diag_dir(extra_edges, extra_edges2, line_start, line_end);
   }
   else if (edge_case == DIAG_XPOS_YNEG) {
-    extra_edges = gather_edges(uvs - ofs.xy * vec2(1.5), ref);
-    extra_edges2 = gather_edges(uvs - ofs.xy * vec2(-1.5), ref);
+    extra_edges = gather_edges(uvs - ofs.xy * vec2(1.5), ref_id);
+    extra_edges2 = gather_edges(uvs - ofs.xy * vec2(-1.5), ref_id);
     extra_edges = rotate_180(extra_edges);
     extra_edges2 = rotate_180(extra_edges2);
     diag_dir(extra_edges, extra_edges2, line_start, line_end);
@@ -380,8 +382,8 @@ void main()
     line_end = rotate_180(line_end);
   }
   else if (edge_case == DIAG_XPOS_YPOS) {
-    extra_edges = gather_edges(uvs + ofs.xy * vec2(1.5, -1.5), ref);
-    extra_edges2 = gather_edges(uvs - ofs.xy * vec2(1.5, -1.5), ref);
+    extra_edges = gather_edges(uvs + ofs.xy * vec2(1.5, -1.5), ref_id);
+    extra_edges2 = gather_edges(uvs - ofs.xy * vec2(1.5, -1.5), ref_id);
     extra_edges = rotate_90(extra_edges);
     extra_edges2 = rotate_90(extra_edges2);
     diag_dir(extra_edges, extra_edges2, line_start, line_end);
@@ -389,8 +391,8 @@ void main()
     line_end = rotate_90(line_end);
   }
   else if (edge_case == DIAG_XNEG_YNEG) {
-    extra_edges = gather_edges(uvs - ofs.xy * vec2(1.5, -1.5), ref);
-    extra_edges2 = gather_edges(uvs + ofs.xy * vec2(1.5, -1.5), ref);
+    extra_edges = gather_edges(uvs - ofs.xy * vec2(1.5, -1.5), ref_id);
+    extra_edges2 = gather_edges(uvs + ofs.xy * vec2(1.5, -1.5), ref_id);
     extra_edges = rotate_270(extra_edges);
     extra_edges2 = rotate_270(extra_edges2);
     diag_dir(extra_edges, extra_edges2, line_start, line_end);
@@ -478,17 +480,17 @@ float neighbor_dist(TexelData neighbor, ivec2 offset)
   return neighbor.line.dist + dot(vec2(offset), -neighbor.line.dir);
 }
 
-void neighbor_blend(TexelData neighbor, inout TexelData target, float line_coverage)
+void neighbor_blend(TexelData neighbor, inout TexelData target_texel, float line_coverage)
 {
   neighbor.color *= line_coverage;
-  if (line_coverage > 0.0 && neighbor.depth < target.depth) {
+  if (line_coverage > 0.0 && neighbor.depth < target_texel.depth) {
     /* Alpha over blending, and update to new closest target depth. */
-    target.color = neighbor.color + target.color * (1.0 - neighbor.color.a);
-    target.depth = neighbor.depth;
+    target_texel.color = neighbor.color + target_texel.color * (1.0 - neighbor.color.a);
+    target_texel.depth = neighbor.depth;
   }
   else {
     /* Alpha under blending */
-    target.color = target.color + neighbor.color * (1.0 - target.color.a);
+    target_texel.color = target_texel.color + neighbor.color * (1.0 - target_texel.color.a);
   }
 }
 

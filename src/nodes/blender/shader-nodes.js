@@ -426,7 +426,7 @@ void bl_engine(mat4 model, mat4 model_inverse, mat4 viewmat, mat4 viewinv, mat4 
   return dot(T, T) > 0.0 ? vec4(normalize(T), dot(cross(N, T), B) < 0.0 ? -1.0 : 1.0) : vec4(0.0, 0.0, 0.0, 1.0);
 }`,
   bl_vector_copy: 'void bl_vector_copy(vec3 v, inout vec3 result) { result = v; }',
-  bl_set_ray_type: 'void bl_set_ray_type(float type) { g_data.ray_type = int(type); }',
+  bl_set_ray_type: 'void bl_set_ray_type(float ray_type) { g_data.ray_type = int(ray_type); }',
   // EEVEE's texture LOD bias (the film's, 1 at full resolution).
   texture_lod_bias_get: 'float texture_lod_bias_get() { return 1.0; }',
   bl_tex_coord: `void bl_tex_coord(vec3 orco, vec3 normal_in, vec3 uv_in, vec3 object_in, vec3 camera_in, vec3 window_in, vec3 reflection_in,

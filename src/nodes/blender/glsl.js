@@ -213,9 +213,11 @@ function bufferReads(text) {
 }
 
 // WebGL 2 has no 1D textures: a color band (GPU_color_band) is a 2D texture one texel high. C++ attributes
-// ([[maybe_unused]]) go, as Blender's shader tool removes them.
+// ([[maybe_unused]]) go, as Blender's shader tool removes them. A name that WGSL reserves (Blender's parameters named
+// type), which WebGPU's compilation to WGSL rejects, takes a bl_ prefix.
 const dialect = (text) => bufferReads(text)
   .replace(/\[\[\w+\]\]\s*/g, '')
+  .replace(/\btype\b/g, 'bl_type')
   .replace(/\bsampler1DArray\b/g, 'sampler2D')
   .replace(/\.([xyzwrgba]{1,4})\(\)/g, '.$1')
   .replace(/\b(\d+\.\d*|\.\d+|\d+)([eE][+-]?\d+)?[fF]\b/g, '$1$2');

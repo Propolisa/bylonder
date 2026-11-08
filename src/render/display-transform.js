@@ -13,7 +13,10 @@ precision highp sampler3D;
 varying vec2 vUV;
 uniform sampler2D textureSampler;
 uniform sampler3D lattice;
-uniform float exposure, range, exponent, latticed;
+uniform float exposure;
+uniform float range;
+uniform float exponent;
+uniform float latticed;
 // A view's own background (a display color, alpha 1) where its film's coverage leaves it, or none (alpha 0).
 uniform vec4 background;
 vec3 srgb(vec3 c) { return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(0.0031308, c)); }
