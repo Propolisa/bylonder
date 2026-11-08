@@ -1268,6 +1268,105 @@
    }
   }
  },
+ "RaytraceEEVEE": {
+  "sdna": "RaytraceEEVEE",
+  "size": 32,
+  "properties": {
+   "resolution_scale": {
+    "offset": 12,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      1,
+      "1"
+     ],
+     [
+      2,
+      "2"
+     ],
+     [
+      4,
+      "4"
+     ],
+     [
+      8,
+      "8"
+     ],
+     [
+      16,
+      "16"
+     ]
+    ]
+   },
+   "use_backface_hit": {
+    "offset": 16,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "backface_radiance_scale": {
+    "offset": 24,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_denoise": {
+    "offset": 16,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "denoise_spatial": {
+    "offset": 20,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "denoise_temporal": {
+    "offset": 20,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "denoise_bilateral": {
+    "offset": 20,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   },
+   "screen_trace_thickness": {
+    "offset": 4,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "trace_max_roughness": {
+    "offset": 8,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "screen_trace_quality": {
+    "offset": 0,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   }
+  }
+ },
  "RenderSettings": {
   "sdna": "RenderData",
   "size": 4316,
@@ -2583,6 +2682,544 @@
     "size": 8,
     "kind": "struct",
     "type": "POINTER"
+   }
+  }
+ },
+ "SceneEEVEE": {
+  "sdna": "SceneEEVEE",
+  "size": 240,
+  "properties": {
+   "gi_diffuse_bounces": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "gi_cubemap_resolution": {
+    "offset": 8,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      128,
+      "128"
+     ],
+     [
+      256,
+      "256"
+     ],
+     [
+      512,
+      "512"
+     ],
+     [
+      1024,
+      "1024"
+     ],
+     [
+      2048,
+      "2048"
+     ],
+     [
+      4096,
+      "4096"
+     ]
+    ]
+   },
+   "gi_visibility_resolution": {
+    "offset": 12,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      8,
+      "8"
+     ],
+     [
+      16,
+      "16"
+     ],
+     [
+      32,
+      "32"
+     ],
+     [
+      64,
+      "64"
+     ]
+    ]
+   },
+   "gi_glossy_clamp": {
+    "offset": 16,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "gi_irradiance_pool_size": {
+    "offset": 20,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      16,
+      "16"
+     ],
+     [
+      32,
+      "32"
+     ],
+     [
+      64,
+      "64"
+     ],
+     [
+      128,
+      "128"
+     ],
+     [
+      256,
+      "256"
+     ],
+     [
+      512,
+      "512"
+     ],
+     [
+      1024,
+      "1024"
+     ]
+    ]
+   },
+   "taa_samples": {
+    "offset": 28,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "taa_render_samples": {
+    "offset": 32,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "use_taa_reprojection": {
+    "offset": 0,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2048,
+    "type": "BOOLEAN"
+   },
+   "ray_tracing_method": {
+    "offset": 196,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "PROBE"
+     ],
+     [
+      1,
+      "SCREEN"
+     ]
+    ]
+   },
+   "use_shadow_jitter_viewport": {
+    "offset": 0,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 67108864,
+    "type": "BOOLEAN"
+   },
+   "clamp_surface_direct": {
+    "offset": 172,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "clamp_surface_indirect": {
+    "offset": 176,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "clamp_volume_direct": {
+    "offset": 180,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "clamp_volume_indirect": {
+    "offset": 184,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "direct_light_intensity": {
+    "offset": 188,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "indirect_light_intensity": {
+    "offset": 192,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "volumetric_start": {
+    "offset": 36,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "volumetric_end": {
+    "offset": 40,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "volumetric_tile_size": {
+    "offset": 44,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      1,
+      "1"
+     ],
+     [
+      2,
+      "2"
+     ],
+     [
+      4,
+      "4"
+     ],
+     [
+      8,
+      "8"
+     ],
+     [
+      16,
+      "16"
+     ]
+    ]
+   },
+   "volumetric_samples": {
+    "offset": 48,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "volumetric_sample_distribution": {
+    "offset": 52,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "volumetric_ray_depth": {
+    "offset": 64,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "volumetric_light_clamp": {
+    "offset": 56,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_volumetric_shadows": {
+    "offset": 0,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   },
+   "volumetric_shadow_samples": {
+    "offset": 60,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "use_volume_custom_range": {
+    "offset": 0,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 134217728,
+    "type": "BOOLEAN"
+   },
+   "use_fast_gi": {
+    "offset": 0,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 268435456,
+    "type": "BOOLEAN"
+   },
+   "fast_gi_thickness_near": {
+    "offset": 100,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "fast_gi_quality": {
+    "offset": 92,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "fast_gi_step_count": {
+    "offset": 84,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "fast_gi_ray_count": {
+    "offset": 88,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "fast_gi_method": {
+    "offset": 104,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      1,
+      "AMBIENT_OCCLUSION_ONLY"
+     ],
+     [
+      0,
+      "GLOBAL_ILLUMINATION"
+     ]
+    ]
+   },
+   "fast_gi_distance": {
+    "offset": 96,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "fast_gi_bias": {
+    "offset": 76,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "fast_gi_resolution": {
+    "offset": 80,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      1,
+      "1"
+     ],
+     [
+      2,
+      "2"
+     ],
+     [
+      4,
+      "4"
+     ],
+     [
+      8,
+      "8"
+     ],
+     [
+      16,
+      "16"
+     ]
+    ]
+   },
+   "bokeh_max_size": {
+    "offset": 116,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "bokeh_threshold": {
+    "offset": 120,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "bokeh_neighbor_max": {
+    "offset": 124,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_bokeh_jittered": {
+    "offset": 0,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8388608,
+    "type": "BOOLEAN"
+   },
+   "bokeh_overblur": {
+    "offset": 112,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "motion_blur_depth_scale": {
+    "offset": 148,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "motion_blur_max": {
+    "offset": 132,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "motion_blur_steps": {
+    "offset": 136,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "use_shadows": {
+    "offset": 0,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16777216,
+    "type": "BOOLEAN"
+   },
+   "shadow_pool_size": {
+    "offset": 156,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      16,
+      "16"
+     ],
+     [
+      32,
+      "32"
+     ],
+     [
+      64,
+      "64"
+     ],
+     [
+      128,
+      "128"
+     ],
+     [
+      256,
+      "256"
+     ],
+     [
+      512,
+      "512"
+     ],
+     [
+      1024,
+      "1024"
+     ],
+     [
+      1536,
+      "1536"
+     ],
+     [
+      2048,
+      "2048"
+     ]
+    ]
+   },
+   "shadow_ray_count": {
+    "offset": 160,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "shadow_step_count": {
+    "offset": 164,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "light_threshold": {
+    "offset": 236,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_overscan": {
+    "offset": 0,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2097152,
+    "type": "BOOLEAN"
+   },
+   "overscan_size": {
+    "offset": 232,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "ray_tracing_options": {
+    "offset": 200,
+    "size": 32,
+    "kind": "struct",
+    "type": "POINTER"
+   },
+   "use_raytracing": {
+    "offset": 0,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16384,
+    "type": "BOOLEAN"
+   },
+   "shadow_resolution_scale": {
+    "offset": 168,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
    }
   }
  },

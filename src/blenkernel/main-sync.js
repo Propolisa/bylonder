@@ -118,14 +118,16 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   const blenderCameraOf = (camera) => camera.metadata?.wbHome === 'BLENDER' && objects.get(camera)?.ob;
   // The scene's records follow Main's scene, which a read file or an undo step replaces.
   const scene = { struct: 'Scene', get ptr() { return blender.scene; }, shadow: new Map() };
-  const SCENE_STRUCTS = { RenderSettings: 'render', UnitSettings: 'unit_settings', ColorManagedViewSettings: 'view_settings', ColorManagedDisplaySettings: 'display_settings', View3DCursor: 'cursor' };
+  const SCENE_STRUCTS = { RenderSettings: 'render', SceneEEVEE: 'eevee', UnitSettings: 'unit_settings', ColorManagedViewSettings: 'view_settings', ColorManagedDisplaySettings: 'display_settings', View3DCursor: 'cursor' };
   // A struct of the scene's (not an ID): its holder, the scene, is tagged when it is written.
   const sceneStruct = (name) => { const { offset } = dnaProperty('Scene', SCENE_STRUCTS[name]); return { struct: name, get ptr() { return blender.scene + offset; }, get holder() { return blender.scene; }, shadow: new Map() }; };
   const render = sceneStruct('RenderSettings'), units = sceneStruct('UnitSettings'), cursor = sceneStruct('View3DCursor');
-  const view = sceneStruct('ColorManagedViewSettings'), display = sceneStruct('ColorManagedDisplaySettings');
+  const view = sceneStruct('ColorManagedViewSettings'), display = sceneStruct('ColorManagedDisplaySettings'), eevee = sceneStruct('SceneEEVEE');
+  const raytrace = { struct: 'RaytraceEEVEE', get ptr() { return eevee.ptr + dnaProperty('SceneEEVEE', 'ray_tracing_options').offset; }, get holder() { return blender.scene; }, shadow: new Map() };
   const tools = { struct: 'ToolSettings', get ptr() { return dnaGet('Scene', blender.scene, 'tool_settings'); }, get holder() { return blender.scene; }, shadow: new Map() };
-  // The scene's records, over the world: the scene, its render, unit and tool settings and 3D cursor, those whose slices it has.
-  const sceneRecords = () => [scene, ...(world.renderSettings ? [render, view] : []), ...(world.sceneSettings ? [units, cursor] : []), tools, display];
+  // The scene's records, over the world: the scene, its render, EEVEE, unit and tool settings and 3D cursor, those whose
+  // slices it has.
+  const sceneRecords = () => [scene, ...(world.renderSettings ? [render, eevee, raytrace, view] : []), ...(world.sceneSettings ? [units, cursor] : []), tools, display];
   // The scene's view transform and look as Blender names them (Bylonder's are Babylon's tone maps).
   const viewNames = () => {
     const settings = rna.pointer('Scene', world).view_settings;
