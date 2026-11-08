@@ -7,6 +7,7 @@ import { blenderModule } from '../../bmesh/bmesh-wasm.js';
 import { contextStruct, pointerOf } from '../../python/bpy_rna.js';
 import { imageTexture, imagePremultiplied } from '../../imbuf/image-textures.js';
 import { overlayMaterial } from '../../draw/overlay-edit-mesh.js';
+import { pointSprites, setPoints } from '../../draw/point-sprites.js';
 
 const { exports: x, withArrays } = blenderModule;
 // overlay_shader_shared.hh's flags, as view_edit_uv_extract gives them per corner.
@@ -58,7 +59,7 @@ export function createImageView(main, engine, views) {
   const part = (name, options) => Object.assign(new Mesh(name, scene), { isPickable: false, alwaysSelectAsActiveMesh: true, material: overlayMaterial(scene, name, options) });
   const faces = part('UV Faces', { fillMode: Constants.MATERIAL_TriangleFillMode, alpha: true });
   const edges = part('UV Edges', { fillMode: Constants.MATERIAL_LineListDrawMode });
-  const verts = part('UV Vertices', { fillMode: Constants.MATERIAL_PointFillMode, round: 1 });
+  const verts = pointSprites(part('UV Vertices', { fillMode: Constants.MATERIAL_PointFillMode, round: 1 }));
   let shown = null;
 
   function setGeometry(mesh, positions, colors, indices) {
@@ -101,7 +102,8 @@ export function createImageView(main, engine, views) {
       }
     }
     setGeometry(edges, edgePositions, edgeColors, edgeIndices);
-    setGeometry(verts, vertPositions, vertColors, vertIndices);
+    setPoints(verts, { point: [vertPositions, 3], color: [vertColors, 4] }, vertIndices.length);
+    verts.setEnabled(true);
     verts.material.setFloat('pointSize', theme.vertex_size * devicePixelRatio);
   }
 

@@ -8,6 +8,7 @@ import { Material } from '@babylonjs/core/Materials/material.js';
 import { Constants } from '@babylonjs/core/Engines/constants.js';
 import { view_3d as theme } from '../editors/interface/userdef-default-theme.js';
 import { SCE_SELECT_VERTEX } from '../bmesh/intern/bmesh-marking.js';
+import { POINT_SPRITE_FRAGMENT, POINT_SPRITE_OPTIONS, POINT_SPRITE_VERTEX, pointSprites, setPoints } from './point-sprites.js';
 
 // blender-port: gpu_matrix.cc GPU_polygon_offset_calc at distance 1, Blender's unit of overlay depth offset
 // (View::OffsetData::polygon_offset_factor) for a view's projection (Babylon's, row-major): a share of the perspective's
@@ -25,25 +26,41 @@ const SHADER = {
 attribute vec3 position; attribute vec4 color;
 uniform mat4 worldViewProjection; uniform float pointSize; uniform float ndcOffsetFactor; uniform float ndcOffset;
 varying vec4 vColor;
+#ifdef POINT_SPRITES
+attribute vec3 point;
+${POINT_SPRITE_VERTEX}
+#else
+#define point position
+#endif
 void main() {
-  gl_Position = worldViewProjection * vec4(position, 1.0);
+  gl_Position = worldViewProjection * vec4(point, 1.0);
   gl_Position.z -= ndcOffsetFactor * ndcOffset;
-  gl_PointSize = pointSize;
+#ifdef POINT_SPRITES
+  gl_Position = bl_point_sprite(gl_Position, pointSize);
+#endif
   vColor = color;
 }`,
   fragment: `precision highp float;
 varying vec4 vColor; uniform float roundPoint;
+#ifdef POINT_SPRITES
+${POINT_SPRITE_FRAGMENT}
+#endif
 void main() {
-  if (roundPoint > 0.5) { vec2 c = gl_PointCoord * 2.0 - 1.0; if (dot(c, c) > 1.0) discard; }
+#ifdef POINT_SPRITES
+  if (roundPoint > 0.5) { vec2 c = bl_point_coord * 2.0 - 1.0; if (dot(c, c) > 1.0) discard; }
+#endif
   gl_FragColor = vColor;
 }`,
 };
 
+// A material of points draws them as point sprites (point-sprites.js) on a mesh made pointSprites.
 export function overlayMaterial(scene, name, { fillMode, pointSize = 1, ndcOffset = 0, round = 0, alpha = false }) {
+  const points = fillMode === Material.PointListDrawMode || fillMode === Material.PointFillMode, sprites = points ? POINT_SPRITE_OPTIONS : { attributes: [], uniforms: [], defines: [] };
   const material = new ShaderMaterial(name, scene, { vertexSource: SHADER.vertex, fragmentSource: SHADER.fragment }, {
-    attributes: ['position', 'color'], uniforms: ['worldViewProjection', 'pointSize', 'ndcOffsetFactor', 'ndcOffset', 'roundPoint'], needAlphaBlending: alpha,
+    attributes: ['position', 'color', ...sprites.attributes], uniforms: ['worldViewProjection', 'pointSize', 'ndcOffsetFactor', 'ndcOffset', 'roundPoint', ...sprites.uniforms],
+    defines: sprites.defines, needAlphaBlending: alpha,
   });
-  material.fillMode = fillMode;
+  material.fillMode = points ? Material.TriangleFillMode : fillMode;
   material.backFaceCulling = false;
   material.setFloat('pointSize', pointSize);
   material.setFloat('ndcOffset', ndcOffset);
@@ -73,6 +90,7 @@ export function createEditMeshOverlay(owner) {
   const faces = part('edit faces', { fillMode: Material.TriangleFillMode, alpha: true });
   const edges = part('edit edges', { fillMode: Material.LineListDrawMode, ndcOffset: 1 });
   const verts = part('edit verts', { fillMode: Material.PointListDrawMode, pointSize: theme.vertex_size * 2, ndcOffset: 1.5, round: 1 });
+  pointSprites(verts);
   // Positions, colors and drawn indices per part, kept while the topology stays, as Blender keeps its edit mode
   // buffers and refills the ones out of date.
   let buffers = null;
@@ -119,6 +137,11 @@ export function createEditMeshOverlay(owner) {
 
   const buffer = (elements, perElement) => ({ positions: new Float32Array(elements * perElement * 3), colors: new Float32Array(elements * perElement * 4), indices: new Uint32Array(elements * perElement), count: 0 });
   const drawn = (b) => b.indices.subarray(0, b.count);
+  const gather = (data, indices, size) => {
+    const out = new Float32Array(indices.length * size);
+    indices.forEach((i, n) => out.set(data.subarray(i * size, (i + 1) * size), n * size));
+    return out;
+  };
 
   return {
     // Redraws from the edit mesh's Mesh (selection and hiding in its attributes) and the active element, refilling
@@ -128,7 +151,9 @@ export function createEditMeshOverlay(owner) {
       if (topology) buffers = { verts: buffer(mesh.verts_num, 1), edges: buffer(mesh.edges_num, 2), faces: buffer(mesh.corner_tris().length / 3, 3) };
       if (topology || positions) fillPositions(mesh);
       if (topology || flags) fillColors(mesh, selectmode, active);
-      for (const [target, b] of [[verts, buffers.verts], [edges, buffers.edges], [faces, buffers.faces]]) {
+      const shown = drawn(buffers.verts);
+      setPoints(verts, { point: [gather(buffers.verts.positions, shown, 3), 3], color: [gather(buffers.verts.colors, shown, 4), 4] }, shown.length);
+      for (const [target, b] of [[edges, buffers.edges], [faces, buffers.faces]]) {
         if (topology) {
           target.geometry?.dispose();
           const data = new VertexData();

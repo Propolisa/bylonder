@@ -6,6 +6,7 @@ import { VertexData } from '@babylonjs/core/Meshes/mesh.vertexData.js';
 import { Material } from '@babylonjs/core/Materials/material.js';
 import { view_3d as theme, curves } from '../editors/interface/userdef-default-theme.js';
 import { overlayMaterial } from './overlay-edit-mesh.js';
+import { pointSprites, setPoints } from './point-sprites.js';
 
 const ACTIVE = [1, 1, 1, 1];
 const HANDLE = { FREE: 'free', AUTO: 'auto', VECTOR: 'vect', ALIGNED: 'align' };
@@ -25,8 +26,8 @@ export function createEditCurveOverlay(owner) {
     return mesh;
   };
   const lines = part('edit curve lines', { fillMode: Material.LineListDrawMode, ndcOffset: 1 });
-  const points = part('edit curve points', { fillMode: Material.PointListDrawMode, pointSize: theme.vertex_size * 2, ndcOffset: 1.5 });
-  const handlePoints = part('edit curve handle points', { fillMode: Material.PointListDrawMode, pointSize: curves.handle_vertex_size, ndcOffset: 1.5, round: 1 });
+  const points = pointSprites(part('edit curve points', { fillMode: Material.PointListDrawMode, pointSize: theme.vertex_size * 2, ndcOffset: 1.5 }));
+  const handlePoints = pointSprites(part('edit curve handle points', { fillMode: Material.PointListDrawMode, pointSize: curves.handle_vertex_size, ndcOffset: 1.5, round: 1 }));
 
   const fill = (mesh, vertices) => {
     mesh.geometry?.dispose();
@@ -38,6 +39,7 @@ export function createEditCurveOverlay(owner) {
     data.applyToMesh(mesh, true);
     mesh.setEnabled(true);
   };
+  const fillPoints = (mesh, vertices) => setPoints(mesh, { point: [vertices.flatMap(([[x, y, z]]) => [x, z, y]), 3], color: [vertices.flatMap(([, color]) => color), 4] }, vertices.length);
 
   return {
     // Redraws from Curve data (blenkernel/curve/curve.js) with its active point, showing handles as `handles` says
@@ -72,8 +74,8 @@ export function createEditCurveOverlay(owner) {
         });
       });
       fill(lines, line);
-      fill(points, point);
-      fill(handlePoints, handle);
+      fillPoints(points, point);
+      fillPoints(handlePoints, handle);
     },
     dispose() { for (const mesh of [lines, points, handlePoints]) { mesh.material.dispose(); mesh.dispose(); } },
   };

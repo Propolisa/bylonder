@@ -20,6 +20,7 @@ import { glslShader } from '../nodes/blender/glsl.js';
 import { drawView, DRAW_VIEW_GLSL } from './draw-view.js';
 import { CURVES_VERTEX_GLSL, CURVES_UNIFORMS, CURVES_SAMPLERS, curvesDefines, bindCurves } from './curves.js';
 import { view_3d as theme } from '../editors/interface/userdef-default-theme.js';
+import { CORNERS, POINT_SPRITE_FRAGMENT, POINT_SPRITE_OPTIONS, POINT_SPRITE_VERTEX, QUAD, pointSprites, setPoints } from './point-sprites.js';
 
 // blender-port: overlay_shader_shared.hh.
 const PART_SHAPE = { AXIS: 1, CIRCLE: 2, CROSS: 3 }, PARTICLE_SHAPE_CIRCLE_RESOLUTION = 7;
@@ -77,9 +78,12 @@ const SOURCES = {
 vec3 part_pos;
 vec4 part_rot;
 float part_val;
-${fixed(glslShader(draw['overlay_particle_vert.glsl'], 'vertex', MACROS))}
-void main() { part_pos = world0.xyz; part_val = world0.w; part_rot = world1; bl_main(); }`,
-    fragment: `${FRAGMENT_PRELUDE}\n${glslShader(draw['overlay_particle_frag.glsl'], 'fragment', MACROS)}\nvoid main() { bl_main(); }`,
+float bl_point_size;
+#define bl_viewport size_viewport
+${POINT_SPRITE_VERTEX.replace('uniform vec2 bl_viewport;', '')}
+${fixed(glslShader(draw['overlay_particle_vert.glsl'], 'vertex', { ...MACROS, gl_PointSize: 'bl_point_size' }))}
+void main() { part_pos = world0.xyz; part_val = world0.w; part_rot = world1; bl_main(); gl_Position = bl_point_sprite(gl_Position, bl_point_size); }`,
+    fragment: `${FRAGMENT_PRELUDE}\n${POINT_SPRITE_FRAGMENT}\n${glslShader(draw['overlay_particle_frag.glsl'], 'fragment', { ...MACROS, gl_PointCoord: 'bl_point_coord' })}\nvoid main() { bl_main(); }`,
   },
   shape: {
     vertex: `${VERTEX_PRELUDE}
@@ -112,7 +116,9 @@ export function particleShapeMesh(scene, shape) {
   const { shapes } = sceneData(scene);
   if (!shapes.has(shape)) {
     const mesh = new Mesh('__shape ' + shape, scene), count = VERTICES[shape];
-    Object.assign(new VertexData(), { positions: Array.from({ length: count }, (_, i) => [i, 0, 0]).flat(), indices: Array.from({ length: count }, (_, i) => i) }).applyToMesh(mesh);
+    // A dot is a point sprite's quad (point-sprites.js).
+    Object.assign(new VertexData(), shape === 'DOT' ? { positions: CORNERS, indices: QUAD }
+      : { positions: Array.from({ length: count }, (_, i) => [i, 0, 0]).flat(), indices: Array.from({ length: count }, (_, i) => i) }).applyToMesh(mesh);
     mesh.setEnabled(false);
     shapes.set(shape, mesh);
   }
@@ -126,7 +132,7 @@ export function particleShapeMaterial(scene, shape, color, drawSize) {
   const material = new ShaderMaterial('__particle ' + shape, scene, { vertexSource: SOURCES[kind].vertex, fragmentSource: SOURCES[kind].fragment }, {
     attributes: ['position'], uniforms: ['viewProjection', 'viewinv', 'winmat', 'size_viewport', 'ucolor', 'shape_type'], samplers: ['weight_tx'],
   });
-  material.fillMode = shape === 'DOT' ? Material.PointListDrawMode : Material.LineListDrawMode;
+  material.fillMode = shape === 'DOT' ? Material.TriangleFillMode : Material.LineListDrawMode;
   material.backFaceCulling = false;
   material.setTexture('weight_tx', weightRampTexture(scene));
   material.setVector4('ucolor', { x: color[0], y: color[1], z: color[2], w: drawSize });
@@ -199,7 +205,7 @@ const EDIT_THEME = ['wire', 'wire_edit', 'vertex', 'vertex_select'];
 // blender-port: overlay_private.hh vertex_size_get.
 const VERTEX_SIZE = Math.max(1, (theme.vertex_size * Math.SQRT2) / 2);
 const EDIT_MACROS = { ...MACROS, pos: 'position', use_grease_pencil: 'false', do_stroke_endpoints: 'false', vflag: '0u', GP_EDIT_STROKE_START: '1u', GP_EDIT_STROKE_END: '2u', gpu_discard_fragment: [[], 'discard'] };
-const editVertex = (face, file) => `precision highp float;
+const editVertex = (face, file, sprites = false) => `precision highp float;
 precision highp int;
 attribute vec3 position;
 attribute float selection;
@@ -213,29 +219,41 @@ struct ThemeSizes { float vert, vertex_gpencil; };
 struct Theme { ThemeColors colors; ThemeSizes sizes; };
 Theme theme;
 vec3 drw_point_object_to_world(vec3 p) { return p; }
-${glslShader(draw[file], 'vertex', EDIT_MACROS)}
+${sprites ? `attribute vec3 point;\nfloat bl_point_size;\n${POINT_SPRITE_VERTEX}` : ''}
+${glslShader(draw[file], 'vertex', sprites ? { ...EDIT_MACROS, pos: 'point', gl_PointSize: 'bl_point_size' } : EDIT_MACROS)}
 void main() {
   ThemeColors colors = ThemeColors(theme_colors[0], theme_colors[1], theme_colors[2], theme_colors[3], theme_colors[1], theme_colors[3], theme_colors[2]);
   theme = Theme(colors, ThemeSizes(${VERTEX_SIZE.toFixed(4)}, ${VERTEX_SIZE.toFixed(4)}));
   bl_main();
+  ${sprites ? 'gl_Position = bl_point_sprite(gl_Position, bl_point_size);' : ''}
 }`;
 const EDIT = {
   strands: { vertex: editVertex(iface('smooth'), 'overlay_edit_particle_strand_vert.glsl'), fragment: `${fragmentPrelude(iface('smooth'))}\n${glslShader(draw['overlay_varying_color.glsl'], 'fragment', EDIT_MACROS)}\nvoid main() { bl_main(); }`, fillMode: Material.LineStripDrawMode },
-  points: { vertex: editVertex(INTERFACE, 'overlay_edit_particle_point_vert.glsl'), fragment: `${FRAGMENT_PRELUDE}\n${glslShader(draw['overlay_point_varying_color_frag.glsl'], 'fragment', EDIT_MACROS)}\nvoid main() { bl_main(); }`, fillMode: Material.PointListDrawMode },
+  points: { vertex: editVertex(INTERFACE, 'overlay_edit_particle_point_vert.glsl', true), fragment: `${FRAGMENT_PRELUDE}\n${POINT_SPRITE_FRAGMENT}\n${glslShader(draw['overlay_point_varying_color_frag.glsl'], 'fragment', { ...EDIT_MACROS, gl_PointCoord: 'bl_point_coord' })}\nvoid main() { bl_main(); }`, sprites: true },
 };
 function editPart(scene, name, kind) {
   const mesh = Object.assign(new Mesh('__particle edit ' + name, scene), { isPickable: false, alwaysSelectAsActiveMesh: true, metadata: { points: null } });
   const material = new ShaderMaterial(mesh.name, scene, { vertexSource: EDIT[kind].vertex, fragmentSource: EDIT[kind].fragment }, {
-    attributes: ['position', 'selection'], uniforms: ['viewProjection', 'use_weight', 'theme_colors'], samplers: ['weight_tx'],
+    attributes: ['position', 'selection', ...(EDIT[kind].sprites ? POINT_SPRITE_OPTIONS.attributes : [])],
+    uniforms: ['viewProjection', 'use_weight', 'theme_colors', ...(EDIT[kind].sprites ? POINT_SPRITE_OPTIONS.uniforms : [])], samplers: ['weight_tx'],
   });
-  material.fillMode = EDIT[kind].fillMode;
+  material.fillMode = EDIT[kind].fillMode ?? Material.TriangleFillMode;
   material.backFaceCulling = false;
   material.setArray4('theme_colors', EDIT_THEME.flatMap((key) => theme[key].slice(0, 4)));
   material.setTexture('weight_tx', weightRampTexture(scene));
   mesh.material = material;
   mesh._getRenderingFillMode = (fillMode) => fillMode;
   mesh.onDisposeObservable.add(() => material.dispose());
+  if (EDIT[kind].sprites) pointSprites(mesh);
   return mesh;
+}
+// A part of points (x, y, z, selection each) as point sprites.
+function fillPoints(mesh, points, useWeight) {
+  const count = points.length / 4, positions = new Float32Array(count * 3), selection = new Float32Array(count);
+  for (let i = 0; i < count; i++) { positions.set(points.subarray(i * 4, i * 4 + 3), i * 3); selection[i] = points[i * 4 + 3]; }
+  setPoints(mesh, { point: [positions, 3], selection: [selection, 1] }, count);
+  mesh.setEnabled(count > 0);
+  mesh.material.setInt('use_weight', useWeight ? 1 : 0);
 }
 // Copies a part's points into its buffer (grown by doubling, else reused) and draws them, or hides it without any.
 function fillPart(mesh, points, useWeight, indices = null) {
@@ -263,7 +281,7 @@ export function particleEditOverlay(scene, edit, parts = null) {
   parts ??= { strands: editPart(scene, 'strands', 'strands'), inner: editPart(scene, 'inner', 'points'), tips: editPart(scene, 'tips', 'points') };
   const none = new Float32Array(0);
   fillPart(parts.strands, edit?.strands ?? none, edit?.useWeight, edit?.indices);
-  fillPart(parts.inner, edit?.showInner ? edit.inner : none, edit?.useWeight);
-  fillPart(parts.tips, edit?.showTips ? edit.tips : none, edit?.useWeight);
+  fillPoints(parts.inner, edit?.showInner ? edit.inner : none, edit?.useWeight);
+  fillPoints(parts.tips, edit?.showTips ? edit.tips : none, edit?.useWeight);
   return parts;
 }

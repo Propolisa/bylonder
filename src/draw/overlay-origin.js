@@ -3,7 +3,7 @@
 // everything.
 import { Mesh } from '@babylonjs/core/Meshes/mesh.js';
 import { ShaderMaterial } from '@babylonjs/core/Materials/shaderMaterial.js';
-import { Material } from '@babylonjs/core/Materials/material.js';
+import { POINT_SPRITE_FRAGMENT, POINT_SPRITE_OPTIONS, POINT_SPRITE_VERTEX, pointSprites, setPoints } from './point-sprites.js';
 import { Constants } from '@babylonjs/core/Engines/constants.js';
 import { view_3d as theme } from '../editors/interface/userdef-default-theme.js';
 
@@ -18,9 +18,10 @@ attribute vec4 color;
 uniform mat4 viewProjection;
 varying vec4 fillColor;
 varying vec4 radii;
+attribute vec3 point;
+${POINT_SPRITE_VERTEX}
 void main() {
-  gl_Position = viewProjection * vec4(position, 1.0);
-  gl_PointSize = ${OBJECT_CENTER}.0;
+  gl_Position = bl_point_sprite(viewProjection * vec4(point, 1.0), ${OBJECT_CENTER}.0);
   float radius = 0.5 * ${OBJECT_CENTER}.0;
   radii = vec4(radius, radius - 1.0, radius - ${PIXEL}.0, radius - ${PIXEL}.0 - 1.0) / ${OBJECT_CENTER}.0;
   fillColor = color;
@@ -28,9 +29,10 @@ void main() {
 const FRAGMENT = `precision highp float;
 varying vec4 fillColor;
 varying vec4 radii;
+${POINT_SPRITE_FRAGMENT}
 const vec4 outlineColor = vec4(${OUTLINE.join(', ')});
 void main() {
-  float dist = length(gl_PointCoord - vec2(0.5));
+  float dist = length(bl_point_coord - vec2(0.5));
   float midStroke = 0.5 * (radii[1] + radii[2]);
   if (dist > midStroke) gl_FragColor = vec4(outlineColor.rgb, mix(outlineColor.a, 0.0, smoothstep(radii[1], radii[0], dist)));
   else gl_FragColor = mix(fillColor, outlineColor, smoothstep(radii[3], radii[2], dist));
@@ -43,14 +45,13 @@ export const originColor = (node, { selected, active }) => (node === active ? th
 //   objects() -> the scene's objects, color(node) -> its origin's color, or null when it shows none
 export function createOriginOverlay(scene, { objects, color }) {
   const material = new ShaderMaterial('__overlayOrigin', scene, { vertexSource: VERTEX, fragmentSource: FRAGMENT }, {
-    attributes: ['position', 'color'], uniforms: ['viewProjection'], needAlphaBlending: true,
+    attributes: ['position', 'color', ...POINT_SPRITE_OPTIONS.attributes], uniforms: ['viewProjection', ...POINT_SPRITE_OPTIONS.uniforms], needAlphaBlending: true,
   });
   Object.assign(material, { disableDepthWrite: true, depthFunction: Constants.ALWAYS });
   const mesh = new Mesh('__origins', scene);
-  Object.assign(mesh, { isUnIndexed: true, isPickable: false, alwaysSelectAsActiveMesh: true, doNotSerialize: true, material, renderingGroupId: 1 });
-  mesh._getRenderingFillMode = () => Material.PointListDrawMode;
+  pointSprites(Object.assign(mesh, { isPickable: false, alwaysSelectAsActiveMesh: true, doNotSerialize: true, material, renderingGroupId: 1 }));
   mesh.metadata = { editable: false, overlay: true };
-  let positions = new Float32Array(0), colors = new Float32Array(0), count = -1;
+  let positions = new Float32Array(0), colors = new Float32Array(0);
   return {
     mesh,
     // Fills the points from the objects and shows them, or hides them; called per view before it renders.
@@ -59,9 +60,6 @@ export function createOriginOverlay(scene, { objects, color }) {
       if (positions.length < list.length * 3) {
         positions = new Float32Array(list.length * 6);
         colors = new Float32Array(list.length * 8);
-        mesh.setVerticesData('position', positions, true, 3);
-        mesh.setVerticesData('color', colors, true, 4);
-        count = -1;
       }
       let n = 0;
       for (const node of list) {
@@ -72,11 +70,7 @@ export function createOriginOverlay(scene, { objects, color }) {
         colors.set(c, n * 4);
         n++;
       }
-      mesh.isVisible = n > 0;
-      if (!n) return;
-      mesh.updateVerticesData('position', positions);
-      mesh.updateVerticesData('color', colors);
-      if (n !== count) { count = n; mesh.subMeshes[0].verticesCount = n; }
+      setPoints(mesh, { point: [positions, 3], color: [colors, 4] }, n);
     },
     dispose() { mesh.dispose(); material.dispose(); },
   };

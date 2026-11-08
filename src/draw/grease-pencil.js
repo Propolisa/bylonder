@@ -15,6 +15,7 @@ import { Material } from '@babylonjs/core/Materials/material.js';
 import { MaterialPluginBase } from '@babylonjs/core/Materials/materialPluginBase.js';
 import defaultTheme from '../editors/interface/theme-default.json' with { type: 'json' };
 import { overlayMaterial } from './overlay-edit-mesh.js';
+import { pointSprites, setPoints } from './point-sprites.js';
 import { Vector2 } from '@babylonjs/core/Maths/math.vector.js';
 import { RenderingGroup } from '@babylonjs/core/Rendering/renderingGroup.js';
 
@@ -189,14 +190,14 @@ function editPoints(scene, name, draw, matrix, kept) {
   if (!draw.pointsShown || !draw.points.length) { kept?.dispose(); return null; }
   const mesh = kept ?? Object.assign(new Mesh(name, scene), { isPickable: false, alwaysSelectAsActiveMesh: true, doNotSerialize: true, renderingGroupId: 1 });
   mesh._getRenderingFillMode = (fillMode) => fillMode;
-  mesh.material ??= overlayMaterial(scene, name, { fillMode: Material.PointListDrawMode, pointSize: theme.gp_vertex_size * 2 });
+  if (!mesh.material) pointSprites(Object.assign(mesh, { material: overlayMaterial(scene, name, { fillMode: Material.PointListDrawMode, pointSize: theme.gp_vertex_size * 2 }) }));
   const count = draw.points.length / POINT_FLOATS, positions = new Float32Array(count * 3), colors = new Float32Array(count * 4);
   for (let p = 0; p < count; p++) {
     const o = p * POINT_FLOATS;
     positions.set(draw.points.subarray(o, o + 3), p * 3);
     colors.set([...(draw.points[o + 12] > 0 ? theme.gp_vertex_select : theme.gp_vertex), 1], p * 4);
   }
-  Object.assign(new VertexData(), { positions, colors, indices: Uint32Array.from({ length: count }, (_, i) => i) }).applyToMesh(mesh, false);
+  setPoints(mesh, { point: [positions, 3], color: [colors, 4] }, count);
   mesh.freezeWorldMatrix(matrix);
   return mesh;
 }
