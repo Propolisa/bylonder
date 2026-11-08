@@ -13,6 +13,10 @@ let history;const mods=createModifierSystem(world,{commit:()=>history?.commit(),
 const initial=VertexData.ExtractFromMesh(box).serialize(),modifier=mods.add(box);assert.equal(box.thinInstanceCount,2);assert.equal(box.getTotalVertices(),24);
 // The refresh, which runs every frame, registers a modifier's animation channels once, not again each time (that drops
 // the animation's cached F-Curves).
+// ... and reads Main's stacks again only after Main evaluated something.
+{let reads=0,evaluated=null;world.mainSync={modifiers:{of:()=>(reads++,[])},onEvaluated:(fn)=>{evaluated=fn;}};
+mods.refresh();const first=reads;mods.refresh();assert.equal(reads,first,"Main's stacks read again with nothing evaluated");
+evaluated();mods.refresh();assert.ok(reads>first,"and read once Main evaluated");delete world.mainSync;}
 {const register=world.animation.register;let registered=0;world.animation.register=(...args)=>{registered++;return register(...args);};mods.refresh();mods.refresh();world.animation.register=register;assert.equal(registered,0,'channels registered again by a refresh');}
 mods.set(box,modifier.id,'count',3);assert.equal(box.thinInstanceCount,3);assert.equal(box.getBoundingInfo().boundingBox.maximum.x,5);
 history.undo();assert.equal(mods.stack(box)[0].values.count,2);history.redo();assert.equal(mods.stack(box)[0].values.count,3);

@@ -46,6 +46,9 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn}={
   // Each modifier's channels registered once per name (the refresh runs every frame; registering again drops the
   // animation's cached F-Curves).
   const registered=new WeakMap();
+  // Main's evaluations so far, counted from the Main sync the world has now.
+  let evaluations=0,counted=null,mainRead=-1;
+  const mainEvaluations=()=>{const m=main();if(m&&m!==counted){counted=m;m.onEvaluated(()=>evaluations++);evaluations++;}return evaluations;};
   function registerChannels(node,modifier){
     const definition=modifierDefinitions.get(modifier.type);if(!definition||!world.animation)return;
     const group=node.name+' › '+modifier.name,names=registered.get(node)??registered.set(node,new Map()).get(node);
@@ -192,13 +195,16 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn}={
     },
     refresh(){
       if(applying)return;
+      // Main's stacks are read again only after Main evaluated something (an edit of one is evaluated): the refresh runs
+      // every frame.
+      const mainChanged=mainEvaluations()!==mainRead;mainRead=mainEvaluations();
       for(const node of world.objects){
         // Files saved before Blender's Array came keep Bylonder's as ARRAY.
         for(const m of node.metadata?.wbModifiers||[])if(m.type==='ARRAY'&&'shape' in m.values)m.type='GN_ARRAY';
         // Edit Mode draws the object itself, with Blender's modifiers evaluated on the edit mesh.
         if(node.isDisposed()||deleted(node)||!hasMesh(node)||node.metadata?.editing)continue;
-        const all=stack(node),own=ownModifiers(all),prior=cache.get(node);
-        for(const modifier of all)registerChannels(node,modifier);
+        const own=ownModifiers(modifierStack(node)),prior=cache.get(node);
+        for(const modifier of mainChanged?stack(node):modifierStack(node))registerChannels(node,modifier);
         if(!own.length){
           if(prior){restoreInstances(node);VertexData.Parse(prior.base).applyToMesh(node);cache.delete(node);}
           continue;
@@ -208,7 +214,7 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn}={
           if(prior&&!evaluated.has(node)&&(node.geometry!==prior.geometry||node.metadata.wbCreation!==prior.creation)&&node.metadata.wbModifierBase===prior.base){node.metadata.wbModifierBase=meshBase(node);cache.delete(node);}
           const sig=signature(node),from=base(node),drawnAs=cache.get(node);
           if(drawnAs?.signature===sig&&drawnAs.base===from)continue;
-          draw(node,evaluate(node,all),{signature:sig,base:from,creation:node.metadata.wbCreation});
+          draw(node,evaluate(node,stack(node)),{signature:sig,base:from,creation:node.metadata.wbCreation});
           clearError(node);
         }catch(error){report(node,error);}
       }
