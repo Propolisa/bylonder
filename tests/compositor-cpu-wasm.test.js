@@ -1,7 +1,7 @@
 // Blender's compositor on its CPU path in the module (compositor-cpu.js) composites as Blender does: each case of
 // tests/fixtures/blender-compositor.json (Blender's own CPU compositor on a synthetic image, from
 // tools/blender-reference/compositor-fixtures.py) is the node between Render Layers, given the same image as the
-// render, and the Group Output, in the scene's compositing node group in Main.
+// render, and the Group Output (a mask only before the Group Output), in the scene's compositing node group in Main.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { blenderMain } from '../src/bmesh/bmesh-wasm.js';
@@ -26,8 +26,9 @@ for (const { node: idname, inputs, result } of cases) {
   tree.nodes.clear();
   const node = tree.nodes.new(idname), layers = tree.nodes.new('CompositorNodeRLayers'), output = tree.nodes.new('NodeGroupOutput');
   for (const [id, value] of Object.entries(inputs)) [...node.inputs].find((s) => s.identifier === id).default_value = value;
-  tree.links.new(layers.outputs.get('Image'), [...node.inputs].find((s) => s.type === 'RGBA'));
-  tree.links.new([...node.outputs].find((s) => s.type === 'RGBA'), output.inputs[0]);
+  const imageInput = [...node.inputs].find((s) => s.type === 'RGBA');
+  if (imageInput) tree.links.new(layers.outputs.get('Image'), imageInput);
+  tree.links.new([...node.outputs].find((s) => s.type === 'RGBA') ?? node.outputs[0], output.inputs[0]);
   const started = performance.now(), got = compositeOnCPU(blender, image, width, height), ms = performance.now() - started;
   const worst = result.reduce((m, v, i) => Math.max(m, Math.abs(v - got[i]) / Math.max(1, Math.abs(v))), 0);
   if (!(worst < 2e-3)) failures.push(`${idname} ${JSON.stringify(inputs)}: off by ${worst}`);

@@ -1,6 +1,7 @@
 # Writes what Blender's compositor outputs on its CPU path for the multi-pass nodes Blender's demo files use: each
 # case is one node between a synthetic image (an Image node, as tests/compositor-cpu-wasm.test.js gives the same image
-# as the render) and the Group Output, composited at the image's size and read back as float RGBA.
+# as the render) and the Group Output (a node without an image input, a mask, only before the Group Output),
+# composited at the image's size and read back as float RGBA.
 # usage: blender -b --factory-startup --python tools/blender-reference/compositor-fixtures.py -- OUT.json
 import bpy, json, os, sys, tempfile
 
@@ -36,11 +37,13 @@ def case(idname, inputs):
     node = tree.nodes.new(idname)
     for identifier, value in inputs.items():
         next(s for s in node.inputs if s.identifier == identifier).default_value = value
-    image = tree.nodes.new("CompositorNodeImage")
-    image.image = source
-    tree.links.new(image.outputs["Image"], next(s for s in node.inputs if s.type == "RGBA"))
+    image_input = next((s for s in node.inputs if s.type == "RGBA"), None)
+    if image_input:
+        image = tree.nodes.new("CompositorNodeImage")
+        image.image = source
+        tree.links.new(image.outputs["Image"], image_input)
     output = tree.nodes.new("NodeGroupOutput")
-    tree.links.new(next(s for s in node.outputs if s.type == "RGBA"), output.inputs[0])
+    tree.links.new(next((s for s in node.outputs if s.type == "RGBA"), node.outputs[0]), output.inputs[0])
     bpy.ops.render.render()
     bpy.data.images["Render Result"].save_render(exr)
     result = bpy.data.images.load(exr, check_existing=False)
@@ -62,6 +65,7 @@ cases = [
     case("CompositorNodeLensdist", {"Type": "Horizontal", "Dispersion": 0.3, "Jitter": False}),  # gaku
     case("CompositorNodeKuwahara", {"Type": "Anisotropic", "Size": 4.0}),  # pizza_delivery
     case("CompositorNodeKuwahara", {"Type": "Classic", "Size": 3.0}),
+    case("CompositorNodeEllipseMask", {"Operation": "Add", "Value": 1.0, "Position": (0.5, 0.5), "Size": (0.8, 0.8)}),  # pizza_delivery
 ]
 json.dump({"blender": bpy.app.version_string, "width": WIDTH, "height": HEIGHT, "cases": cases}, open(out_path, "w"))
 print("wrote", out_path, len(cases), "cases")
