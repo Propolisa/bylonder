@@ -4,6 +4,7 @@
 // E2E_ENGINE). WebGPU falls back to WebGL 2 where the browser has no adapter.
 import { Engine, PBRBaseMaterial, WebGPUEngine } from '@babylonjs/core';
 import { deriveDepthMetrics } from './depth-metric-varyings.js';
+import { wgslNames } from './wgsl-names.js';
 
 const KEY = 'bylonder-gpu-backend';
 // Babylon's GLSL to WGSL compilers, served by the app (scripts/webgpu-compilers.mjs).
@@ -13,7 +14,7 @@ const compiler = (name) => ({ jsPath: new URL(`webgpu/${name}.js`, document.base
 // not compile leaves its effect waiting for ever. It fails here as on WebGL 2, through the effect's own error path.
 // A pipeline the GPU rejects (FXC, a shader compiler of Dawn's D3D12 backend, fails some WGSL) fails its effect the same
 // way, so its meshes are skipped and reported once instead of invalidating every frame's command buffer.
-class ReportingWebGPUEngine extends WebGPUEngine {
+export class ReportingWebGPUEngine extends WebGPUEngine {
   async initAsync(...args) {
     await super.initAsync(...args);
     failRejectedPipelines(this._cacheRenderPipeline, this._device);
@@ -26,6 +27,14 @@ class ReportingWebGPUEngine extends WebGPUEngine {
       options = { ...options, processCodeAfterIncludes: (type, code, defines) => deriveDepthMetrics(type, after ? after(type, code, defines) : code) };
     }
     return super.createEffect(baseName, options, ...args);
+  }
+
+  // Converted GLSL keeps GLSL's rules: identifiers WGSL reserves (wgsl-names.js), renamed once Babylon has bound every
+  // input by name, and derivatives and implicit-level samples in any control flow (Babylon's own switch for a shader,
+  // DISABLE_UNIFORMITY_ANALYSIS, which writes WGSL's diagnostic(off, derivative_uniformity)).
+  _compileRawShaderToSpirV(source, type) { return super._compileRawShaderToSpirV(wgslNames(source), type); }
+  _createPipelineStageDescriptor(vertex, fragment, shaderLanguage, ...uniformity) {
+    return super._createPipelineStageDescriptor(vertex, fragment, shaderLanguage, ...(shaderLanguage === 0 ? [true, true] : uniformity));
   }
 
   async _preparePipelineContextAsync(context, ...args) {

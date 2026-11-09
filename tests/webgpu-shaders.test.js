@@ -1,15 +1,16 @@
 // Bylonder's shaders as WebGPU compiles them: each processed by Babylon's WebGPU shader processor and converted to WGSL
 // by the glslang and Tint builds the app serves, with no glslang error and nothing in the WGSL that WebGPU rejects (a
-// NaN constant, an explicitly strided array). The floor grid, the volume passes, and a Principled (PBR) and a node
-// material drawing hair, lit by an area light.
+// NaN constant, an explicitly strided array). The floor grid, the volume passes, a Principled (PBR) and a node material
+// drawing hair, lit by an area light, and a shader of the user's naming what WGSL reserves; and every converted GLSL
+// shader keeps GLSL's freedom to take derivatives in any control flow.
 import assert from 'node:assert/strict';
-import { Scene, FreeCamera, Vector3, MeshBuilder, PBRMaterial, RectAreaLight, EffectWrapper } from '@babylonjs/core';
+import { Scene, FreeCamera, Vector3, MeshBuilder, PBRMaterial, RectAreaLight, EffectWrapper, ShaderMaterial, WebGPUEngine } from '@babylonjs/core';
 import '@babylonjs/core/Shaders/postprocess.vertex.js';
 import { compilersPresent, createCompiler, WebGPUShaderEngine } from './webgpu-shaders.js';
 import { createGridOverlay } from '../src/draw/overlay-grid.js';
 import { INTEGRATION, RESOLVE, scatterShader } from '../src/draw/volume-shaders.js';
 import { engineGLSL } from '../src/nodes/blender/glsl.js';
-import { materialsFromGLSL } from '../src/render/gpu-engine.js';
+import { materialsFromGLSL, ReportingWebGPUEngine } from '../src/render/gpu-engine.js';
 import { CurvesPlugin } from '../src/draw/curves.js';
 import { BlenderNodeMaterial, blenderDefaultTree, buildMaterial } from '../src/nodes/blender/shader-nodes.js';
 import '../src/blenkernel/light/area-specular.js';
@@ -56,4 +57,40 @@ const nodes = new BlenderNodeMaterial('Node hair', scene);
 blenderDefaultTree(nodes);
 buildMaterial(nodes);
 await compiled('node material hair', hair(nodes));
+// A shader naming its uniform, attribute, sampler and a parameter what WGSL reserves converts, its names WGSL's own in
+// the code only: the effect binds them by the names it was given.
+const reserved = new ShaderMaterial('Reserved names', scene, {
+  vertexSource: `precision highp float;
+attribute vec3 position;
+attribute vec3 from;
+uniform mat4 worldViewProjection;
+varying vec3 vType;
+void main() { vType = from; gl_Position = worldViewProjection * vec4(position, 1.0); }`,
+  fragmentSource: `precision highp float;
+uniform float let;
+uniform sampler2D ref;
+varying vec3 vType;
+float shade(vec2 from) { return texture2D(ref, from).r * let; }
+void main() { gl_FragColor = vec4(vType * shade(vType.xy), 1.0); }`,
+}, { attributes: ['position', 'from'], uniforms: ['worldViewProjection', 'let'], samplers: ['ref'] });
+const named = MeshBuilder.CreateBox('Reserved', {}, scene);
+named.setVerticesData('from', new Float32Array(named.getTotalVertices() * 3), false, 3);
+named.material = reserved;
+await compiled('a shader naming what WGSL reserves', () => () => reserved.isReady(named));
+const { wgsl } = engine.results.at(-1);
+assert.match(wgsl.fragment, /bl_from/, 'a parameter named from is bl_from in WGSL');
+assert.doesNotMatch(wgsl.fragment + wgsl.vertex, /\b(from|let|ref)\b\s*:/, 'no WGSL-reserved name declared');
+const effect = Object.values(engine._compiledEffects).find((e) => e.getUniformNames().includes('let'));
+assert.ok(effect?.getSamplers().includes('ref') && effect.getAttributesNames().includes('from'), 'bound by the names it was given');
+
+// Every converted GLSL shader's WGSL allows derivatives in any control flow (WGSL's derivative_uniformity diagnostic
+// off), as GLSL does; WGSL of Babylon's own keeps its analysis.
+const flags = [];
+const descriptor = (shaderLanguage) => ReportingWebGPUEngine.prototype._createPipelineStageDescriptor.call(
+  Object.assign(Object.create(ReportingWebGPUEngine.prototype), { _tintWASM: { convertSpirV2WGSL: (code, off) => (flags.push(off), code) }, _device: { createShaderModule: (d) => d } }),
+  'vertex', 'fragment', shaderLanguage, false, false);
+descriptor(0);
+assert.deepEqual(flags, [true, true], 'GLSL: off');
+assert.equal(descriptor(1).fragmentStage.module.code, 'fragment', "WGSL: Babylon's as it is");
+assert.ok(WebGPUEngine.prototype._createPipelineStageDescriptor, "Babylon's engine compiles its pipelines' stages there");
 console.log(`WebGPU shaders: ${engine.results.length} effects convert to WGSL that WebGPU accepts`);

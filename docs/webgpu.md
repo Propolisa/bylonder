@@ -25,13 +25,15 @@ Bylonder's shaders are GLSL only, on both backends; Babylon converts them on Web
   materials draw with Babylon's WGSL; Bylonder's edits to them carry WGSL too (`getCustomCode` per shader language):
   the shadow map's lit-side bias and Grease Pencil's scene linear strokes.
 - GLSL that does not convert is rewritten into a form that does: one declaration per line (Babylon's GLSL processor
-  does not split `uniform float a, b;`), and no names WGSL reserves (Blender's `type`, `ref` and `target` take other
-  names).
+  does not split `uniform float a, b;`). Any GLSL, Bylonder's, Blender's, an example's or a user's, keeps GLSL's rules
+  once converted: the engine renames the identifiers WGSL reserves (`from`, `let`, `type`...; `src/render/wgsl-names.js`)
+  after Babylon has bound every input by name, and turns WGSL's derivative uniformity analysis off (Babylon's own
+  switch), as GLSL takes derivatives and samples in any control flow.
 - Babylon's GLSL to WGSL conversion (Tint) writes WGSL that WebGPU rejects for a NaN constant and, in a shader that
   uses `isnan` or `isinf`, for its uniform arrays; Bylonder's shaders use neither (Blender's curves code makes its
-  strip-restarting NaN at run time). WGSL samples with derivatives only in uniform control flow, so a pass that samples
-  per pixel in a loop or branch reads an explicit level. `tests/webgpu-shaders.test.js` converts Bylonder's shaders with
-  the app's glslang and Tint builds and fails on any of these.
+  strip-restarting NaN at run time). FXC (D3D12) fails an implicit-derivative sample in a loop it cannot unroll, so a
+  pass that samples per pixel in such a loop reads an explicit level. `tests/webgpu-shaders.test.js` converts
+  Bylonder's shaders with the app's glslang and Tint builds and fails on a conversion error or on WGSL WebGPU rejects.
 - WebGPU's GLSL takes no sampler as a function argument. On WebGPU, each of Blender's functions called with an image
   runs as a copy for that image (`src/nodes/blender/glsl.js` `specializeSamplers`), as do the volume passes' atlas
   samples. Babylon's own inliner (`#define inline`) does not fit Blender's functions: it matches by name only and
