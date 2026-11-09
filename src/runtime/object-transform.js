@@ -56,7 +56,8 @@ export function syncLightDirections(scene) {
 }
 
 // Blender's light and camera point along their local -Z with +Y up: Babylon's (x, z, y) of them.
-const BLENDER_FORWARD = new Vector3(0, -1, 0), BLENDER_UP = new Vector3(0, 0, 1);
+export const BLENDER_FORWARD = new Vector3(0, -1, 0);
+const BLENDER_UP = new Vector3(0, 0, 1);
 const evaluatedMatrices = new WeakMap();
 // A light or camera drawn at the world matrix Blender evaluated (its constraints, drivers and parents; Babylon's axes),
 // as Babylon reads it: a light's position and direction in the world, a camera's view.

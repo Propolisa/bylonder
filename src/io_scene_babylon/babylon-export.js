@@ -1,6 +1,7 @@
 // File > Export > Babylon (.babylon): the scene as Babylon's SceneSerializer writes it, from the evaluated scene, as
 // Blender's glTF exporter exports the evaluated depsgraph (docs/blender-boundary.md, Export for Babylon).
-import { Animation, AnimationKeyInterpolation, Quaternion, SceneSerializer, Texture, Vector3, VertexBuffer } from '@babylonjs/core';
+import { Animation, AnimationKeyInterpolation, Camera, Light, Quaternion, SceneSerializer, Texture, Vector3, VertexBuffer } from '@babylonjs/core';
+import { evaluatedMatrix, BLENDER_FORWARD } from '../runtime/object-transform.js';
 import { idStruct } from '../python/bpy_rna.js';
 import { deleted, nodeId } from '../editors/object/identity.js';
 import { exportRuntimes } from '../runtimes/runtimes.js';
@@ -91,15 +92,22 @@ async function environment(json, scene) {
 
 // An object Main holds is drawn at the world matrix Blender evaluated (its drivers, constraints, NLA and parents;
 // main-view.js), which its own transform may not be: the export writes that matrix as its transform, relative to its
-// parent's, as Blender's glTF exporter writes the evaluated depsgraph.
-const placed = (world, nodes) => (world.mainSync ? [...nodes].filter((node) => node.freezeWorldMatrix && world.mainSync.objectOf(node)) : []);
+// parent's, as Blender's glTF exporter writes the evaluated depsgraph. A light is its position and direction, a camera
+// its position and the rotation its view looks with (a Track To aims both).
+const placed = (world, nodes) => (world.mainSync ? [...nodes].filter((node) => (node.freezeWorldMatrix || evaluatedMatrix(node)) && world.mainSync.objectOf(node)) : []);
 function evaluatedTransform(sync, node) {
-  const matrix = sync.worldMatrix(node), parent = node.parent && (sync.worldMatrix(node.parent) ?? node.parent.computeWorldMatrix(true));
+  const parent = node.parent && (sync.worldMatrix(node.parent) ?? node.parent.computeWorldMatrix(true)), toParent = parent?.clone().invert();
   const position = new Vector3(), rotationQuaternion = new Quaternion(), scaling = new Vector3();
-  (parent ? matrix.multiply(parent.clone().invert()) : matrix).decompose(scaling, rotationQuaternion, position);
-  return { position, rotationQuaternion, scaling };
+  if (node instanceof Light) {
+    const matrix = evaluatedMatrix(node), direction = Vector3.TransformNormal(BLENDER_FORWARD, matrix);
+    if (!toParent) return { position: matrix.getTranslation(), direction: direction.normalize() };
+    return { position: Vector3.TransformCoordinates(matrix.getTranslation(), toParent), direction: Vector3.TransformNormal(direction, toParent).normalize() };
+  }
+  const matrix = node instanceof Camera ? node.getViewMatrix(true).clone().invert() : sync.worldMatrix(node);
+  (toParent ? matrix.multiply(toParent) : matrix).decompose(scaling, rotationQuaternion, position);
+  return node instanceof Camera ? { position, rotationQuaternion } : { position, rotationQuaternion, scaling };
 }
-const TRANSFORM = ['position', 'rotation', 'rotationQuaternion', 'scaling'];
+const TRANSFORM = ['position', 'rotation', 'rotationQuaternion', 'scaling', 'direction'];
 // Each placed object's evaluated transform at every frame of the scene range, as Blender's animation system evaluates
 // the frames (anything animates an object: its own animation data or constraints, or its parent's); the frame shown is
 // evaluated again after.
@@ -118,8 +126,8 @@ function transformsByFrame(world, nodes) {
 // The animations of the transforms that change over the range.
 function transformAnimations(name, frames, { frameStart, fps }) {
   const changes = (key) => frames.some((t) => !t[key].equalsWithEpsilon(frames[0][key], 1e-6));
-  return [['position', Animation.ANIMATIONTYPE_VECTOR3], ['rotationQuaternion', Animation.ANIMATIONTYPE_QUATERNION], ['scaling', Animation.ANIMATIONTYPE_VECTOR3]].filter(([key]) => changes(key)).map(([key, type]) => {
-    const animation = new Animation(name + ' ' + key, key, fps, type, Animation.ANIMATIONLOOPMODE_CYCLE);
+  return Object.keys(frames[0]).filter(changes).map((key) => {
+    const animation = new Animation(name + ' ' + key, key, fps, ANIMATION_TYPES[frames[0][key].getClassName()], Animation.ANIMATIONLOOPMODE_CYCLE);
     animation.setKeys(frames.map((t, i) => ({ frame: frameStart + i, value: t[key] })));
     return animation;
   });
@@ -273,10 +281,18 @@ async function serializeMapped(world, { geometry, live, mapped, parity }) {
     restores.forEach((restore) => restore());
   }
   const json = await pending;
-  for (const entry of [...json.meshes, ...(json.transformNodes ?? [])]) {
+  for (const entry of [...json.meshes, ...(json.transformNodes ?? []), ...json.lights, ...json.cameras]) {
     const transform = transforms.get(entry.uniqueId);
     if (!transform) continue;
-    Object.assign(entry, { position: transform.position.asArray(), rotationQuaternion: transform.rotationQuaternion.asArray(), rotation: [0, 0, 0], scaling: transform.scaling.asArray() });
+    for (const [key, value] of Object.entries(transform)) entry[key] = value.asArray();
+    if (transform.rotationQuaternion) entry.rotation = [0, 0, 0];
+  }
+  // Babylon's camera parser reads no rotationQuaternion: a camera keeps its rotation as Euler angles, Babylon's yaw,
+  // pitch and roll.
+  for (const entry of json.cameras) {
+    if (!entry.rotationQuaternion) continue;
+    entry.rotation = Quaternion.FromArray(entry.rotationQuaternion).toEulerAngles().asArray();
+    delete entry.rotationQuaternion;
   }
   json.materials = await Promise.all(json.materials.map(async (entry) => {
     const material = scene.materials.find((m) => m.uniqueId === entry.uniqueId);

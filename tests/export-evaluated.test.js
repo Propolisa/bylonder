@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { NullEngine, Scene, Vector3 } from '@babylonjs/core';
+import { NullEngine, Quaternion, Scene, Vector3 } from '@babylonjs/core';
 import { blenderMain } from '../src/bmesh/bmesh-wasm.js';
 import '../src/python/bpy_interface.js';
 import { idStruct, setContextPointer } from '../src/python/bpy_rna.js';
@@ -54,11 +54,11 @@ const SCENARIOS = {
   // File > Export > JavaScript of scenes with instances: their buffers are not vertex data.
   async javascript() {
     const { world } = open('geometry-nodes');
-    assert.match(await exportModule(world), /export async function createScene/);
+    assert.match((await exportModule(world))['scene.js'], /export async function createScene/);
   },
   async compositor() {
     const { world } = open('compositor');
-    assert.match(await exportModule(world), /export async function createScene/);
+    assert.match((await exportModule(world))['scene.js'], /export async function createScene/);
   },
   async instances() {
     // Geometry Nodes' instances (the planet's trees and rocks) are thin instances in both exports, which no longer throw.
@@ -68,7 +68,7 @@ const SCENARIOS = {
     assert.ok(instanced.length && instanced.every((m) => m.name.endsWith('Instances')), `instances are exported: ${json.meshes.map((m) => m.name)}`);
     assert.ok(instanced.every((m) => m.thinInstances.matrixData.length >= 16 * m.thinInstances.instancesCount && json.geometries.vertexData.some((g) => g.id === m.geometryId)),
       'each with its matrices and its source geometry');
-    assert.match(await exportModule(world), /thinInstanceSetBuffer/, 'the JavaScript export writes them too');
+    assert.match((await exportModule(world))['scene.js'], /thinInstanceSetBuffer/, 'the JavaScript export writes them too');
   },
   async driver() {
   // The Steam Engine's crosshead, moved by a driver only, slides in the export as it does in Blender.
@@ -94,6 +94,25 @@ const SCENARIOS = {
     const json = await serializeScene(world);
     const at = Vector3.FromArray(json.meshes.find((m) => m.name === 'Box').position), expected = sync.worldMatrix(node('Camera')).getTranslation();
     assert.ok(Vector3.Distance(at, expected) < 1e-3, `the box is at the camera's location: ${at} vs ${expected}`);
+  },
+  // A camera and a sun aimed by Track To at the moving box look at it in the export, and follow it.
+  async aimed() {
+    const { world, sync, node } = open('nla');
+    const box = idStruct(sync.objectOf(node('Box')));
+    for (const name of ['Camera', 'Light']) {
+      const track = idStruct(sync.objectOf(node(name))).constraints.new('TRACK_TO');
+      Object.assign(track, { target: box, track_axis: 'TRACK_NEGATIVE_Z', up_axis: 'UP_Y' });
+    }
+    sync.sceneChanged();
+    const json = await serializeScene(world);
+    const target = sync.worldMatrix(node('Box')).getTranslation();
+    const camera = json.cameras.find((c) => c.name === 'Camera'), light = json.lights.find((l) => l.name === 'Light');
+    const toBox = (from) => target.subtract(Vector3.FromArray(from)).normalize();
+    // Babylon's camera parser reads its rotation as Euler angles.
+    const looks = new Vector3(0, 0, 1).applyRotationQuaternion(Quaternion.FromEulerVector(Vector3.FromArray(camera.rotation)));
+    assert.ok(Vector3.Dot(looks, toBox(camera.position)) > 0.999, `the camera looks at the box: ${looks} vs ${toBox(camera.position)}`);
+    assert.ok(Vector3.Dot(Vector3.FromArray(light.direction), toBox(light.position)) > 0.999, 'the sun shines at the box');
+    assert.ok(animated(json, 'Camera', 'rotationQuaternion') && animated(json, 'Light', 'direction'), 'and both follow it as it moves');
   },
 };
 
