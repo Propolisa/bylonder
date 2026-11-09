@@ -4,7 +4,8 @@
 import assert from 'node:assert/strict';
 import { FreeCamera, Matrix, MeshBuilder, NullEngine, Scene, Vector3 } from '@babylonjs/core';
 import { createLight } from '../src/blenkernel/light/light-home.js';
-import { cameraVolumes, depthParams, packLights, viewPoint, volumeCoordinate, froxelGrid, readVolumeSettings, viewZToVolumeZ, VOLUME_DEFAULTS, volumeLight, volumeZToViewZ } from '../src/draw/volumes.js';
+import { cameraVolumes, depthParams, historyOpacity, packLights, viewPoint, volumeCoordinate, volumeHistoryUvw, volumeJitterOffset, froxelGrid, readVolumeSettings, viewZToVolumeZ, VOLUME_DEFAULTS, volumeLight, volumeZToViewZ } from '../src/draw/volumes.js';
+import { jitterProjection } from '../src/render/sampling.js';
 import { nodeMaterialFromTree, ShaderNodeOutputVolume } from '../src/nodes/blender/shader-nodes.js';
 import { scatterShader, shadowSamplers } from '../src/draw/volume-shaders.js';
 
@@ -63,6 +64,47 @@ const close = (a, b, message) => assert.ok(Math.abs(a - b) < 1e-6 * Math.max(1, 
   const zoomed = Matrix.PerspectiveFovLH(0.25, 1.6, 0.1, 100), point = new Vector3(-1.5, 2.6, 3);
   const pixel = Vector3.TransformCoordinates(point, view.multiply(zoomed)), grid = volumeCoordinate(point, frame);
   assert.ok(Math.abs(pixel.x * 0.5 + 0.5 - grid.x) > 0.05, 'a zoomed view draws the point elsewhere than the grid holds it');
+}
+
+// volume_history_uvw_get: a froxel's center found in the last frame's grid, through both frames' stable projections and
+// depths. A still view finds it where it is; a view moved sideways finds it shifted by the move over its depth; one moved
+// ahead finds it deeper; a point the last view did not see has no history.
+{
+  const projection = Matrix.PerspectiveFovLH(0.6, 1.5, 0.1, 100);
+  const frameAt = (eye, depth = [3, 12], coordScale = [0.97, 0.94]) => {
+    const view = Matrix.LookAtLH(eye, eye.add(new Vector3(0, 0, 1)), Vector3.Up());
+    return { view, inverseView: view.clone().invert(), stableProjection: projection, stableInverseProjection: projection.clone().invert(), perspective: true,
+      coordScale, depth: depthParams(VOLUME_DEFAULTS, 0.1, 100, true, depth) };
+  };
+  const still = frameAt(new Vector3(0, 1, -6));
+  for (const uvw of [[0.1, 0.2, 0.3], [0.5, 0.5, 0.5], [0.9, 0.8, 0.95]]) {
+    volumeHistoryUvw(uvw, still, still).forEach((c, i) => close(c, uvw[i], 'a still view keeps each froxel where it is'));
+  }
+  const dx = 0.2, moved = frameAt(new Vector3(dx, 1, -6)), uvw = [0.5, 0.5, 0.5];
+  const viewZ = -volumeZToViewZ(still.depth, true, uvw[2]), last = volumeHistoryUvw(uvw, moved, still);
+  close(last[0] - uvw[0], (dx * projection.m[0] / viewZ / 2) * still.coordScale[0], 'a move sideways shifts it by the move over its depth');
+  close(last[1], uvw[1], 'and not up');
+  close(last[2], uvw[2], 'nor in depth');
+  const ahead = volumeHistoryUvw(uvw, frameAt(new Vector3(0, 1, -5.5)), still);
+  close(volumeZToViewZ(still.depth, true, ahead[2]), -(viewZ + 0.5), 'a move ahead finds it half a unit deeper in the last grid');
+  // The grid's depths follow the volumes in view: the last frame's own depths place it.
+  const narrowed = { ...still, depth: depthParams(VOLUME_DEFAULTS, 0.1, 100, true, [4, 10]) };
+  close(volumeZToViewZ(narrowed.depth, true, volumeHistoryUvw(uvw, still, narrowed)[2]), -viewZ, 'by the last frame\'s depths');
+  assert.equal(volumeHistoryUvw([0.02, 0.5, 0.5], frameAt(new Vector3(-3, 1, -6)), still), null, 'a point out of the last view has none');
+  // The film's jitter taken back out gives the stable projection the history is found with.
+  const jittered = Matrix.FromArray(jitterProjection(Array.from(projection.m), [0.3, -0.2], 800, 600));
+  const stable = jitterProjection(Array.from(jittered.m), [-0.3, 0.2], 800, 600);
+  stable.forEach((v, i) => close(v, projection.m[i], 'the stable projection'));
+  // set_view: an exponential average of at most 16 frames held still, 8 while moving, none once the volumes change.
+  const history = { ...still, key: 'k', frames: 40 };
+  close(historyOpacity(history, { ...still, key: 'k' }), 16 / 17, 'a still view');
+  close(historyOpacity(history, { ...moved, key: 'k' }), 8 / 9, 'a moving view');
+  close(historyOpacity({ ...history, frames: 1 }, { ...moved, key: 'k' }), 1 / 2, 'a new history');
+  assert.equal(historyOpacity(history, { ...still, key: 'other' }), 0, 'changed volumes');
+  assert.equal(historyOpacity(null, still), 0);
+  // Sampling::step: the noise's first sample is 0 and the next ones spread over the slice.
+  close(volumeJitterOffset(0), 0, 'the first sample');
+  assert.equal(new Set(Array.from({ length: 32 }, (_, i) => volumeJitterOffset(i).toFixed(4))).size, 32, '32 distinct offsets');
 }
 
 // Light::sync: a point light's radiant intensity (its power over the sphere) times its Volume factor; a spot's cone; a

@@ -2161,7 +2161,7 @@
   "id": "volumes",
   "title": "Volumes",
   "summary": "Fill an object with fog, dust or smoke from a material's Volume shader and light it as EEVEE does, here sunset shafts through a temple's windows into drifting dust.",
-  "expect": "Principled Volume, Volume Scatter and Volume Absorption on objects and the world draw in EEVEE's froxel grid from the scene's Volumes settings, lit by sun, spot and point lights through their shadows (light shafts) and by the world, close to EEVEE in shape, density and color; a volume fills its object's bounding box rather than its mesh, a 4D Noise Texture's density draws empty, and a moving view shows the grid's noise until it holds still.",
+  "expect": "Principled Volume, Volume Scatter and Volume Absorption on objects and the world draw in EEVEE's froxel grid from the scene's Volumes settings, lit by sun, spot and point lights through their shadows (light shafts) and by the world, close to EEVEE in shape, density and color; a volume fills its object's bounding box rather than its mesh, and a 4D Noise Texture's density draws empty; a moving view keeps the grid's noise down by reprojecting its last frames, as EEVEE does, so thin fog trails a little behind fast moves.",
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/render/shader_nodes/shader/volume_principled.html",
@@ -2214,7 +2214,6 @@
    "A volume object's grids (OpenVDB) are not drawn; a mesh's volume reads no attributes, so a Density Attribute is 1 and a Temperature Attribute 0.",
    "Volumes show behind opaque surfaces only: a blended surface in front of a volume does not hide it, and volumes cast no shadow onto surfaces.",
    "Shadows in volumes take one depth comparison per froxel (EEVEE filters them); area lights light volumes from their center on both sides and cast no shadow into them.",
-   "The grid's noise averages away while the view holds still (EEVEE reprojects it as the view moves too), so a moving view shows it in thin fog.",
    "Volumes are Bylonder's render extension (Properties > Render > Volumes, Bylonder icon), with no Babylon runtime: Babylon's fog is a depth tint, not a volume, and an export to Babylon leaves volumes out."
   ],
   "page": "docs/features/volumes.md",

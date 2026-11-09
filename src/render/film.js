@@ -158,6 +158,8 @@ export function createFilm(scene, camera) {
     samples: () => 1,
     // Starts again: the next sample is the first.
     reset() { state.clear = true; count = 0; },
+    // The jitter, in pixels, of the sample rendering now (none once the film is complete).
+    get jitter() { return state.adding ? state.jitter : [0, 0]; },
     // Whether the view holds all its samples (EEVEE's viewport stops drawing then).
     get converged() { return controls.manual || count >= controls.samples(); },
     // The sample about to render: its jitter and index, or none to add (the film is complete and keeps what it holds);

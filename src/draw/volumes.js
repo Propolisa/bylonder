@@ -5,12 +5,12 @@
 // froxel properties, a MultiRenderTarget of the domains' slabs, then the scatter and integration passes) and a
 // post-process first in its chain (the resolve, in scene linear before the film). A scene without volumes draws
 // none of it. The scene's Volumes settings (Properties > Render > Volumes) drive it.
-import { CascadedShadowGenerator, Color4, Constants, EffectRenderer, EffectWrapper, Matrix, Mesh, MultiRenderTarget, PostProcess, ShaderStore, Vector3, VertexData } from '@babylonjs/core';
+import { CascadedShadowGenerator, Color4, Constants, EffectRenderer, EffectWrapper, Matrix, Mesh, MultiRenderTarget, PostProcess, ShaderStore, Vector3, Vector4, VertexData } from '@babylonjs/core';
 import { renderExtension } from './render-extension.js';
 import { nodeMaterialFromTree, FROXEL_CLIP, FROXEL_CORNER, FROXEL_SLICE, ShaderNodeOutputVolume } from '../nodes/blender/shader-nodes.js';
 import { influenceRadius, isBlenderLight, lightRecord } from '../blenkernel/light/light-home.js';
 import { filmSample } from '../render/film.js';
-import { halton } from '../render/sampling.js';
+import { halton, jitterProjection } from '../render/sampling.js';
 import { INTEGRATION, MAX_LIGHTS, RESOLVE, scatterShader, shadowSamplers, shadowUniforms } from './volume-shaders.js';
 import { engineGLSL } from '../nodes/blender/glsl.js';
 
@@ -135,15 +135,15 @@ export function cameraVolumes(scene, camera, film = null) {
     const key = shadows.join();
     if (!scatters.has(key)) scatters.set(key, effect(`Volume scatter ${key}`, scatterShader(shadows), ['inverseView', 'cameraPosition', 'jitterOffset', 'lightCount', 'lightPosition',
       'lightAxis', 'lightColor', 'lightSpot', 'worldRadiance', 'volumeClamp', 'viewMatrix', 'projection', 'shadowSteps', 'shadowReach', 'ndcHalfZ',
-      'historyOpacity', ...shadowUniforms(shadows)],
+      'historyOpacity', 'stableInverseProjection', 'currViewToPastView', 'historyProjection', 'historyDepthParams', 'historyCoordScale', ...shadowUniforms(shadows)],
     ['scatteringProps', 'extinctionProps', 'emissionProps', 'phaseProps', 'scatteringHistory', 'extinctionHistory', ...shadowSamplers(shadows)]));
     return scatters.get(key);
   };
   const integration = effect('Volume integration', INTEGRATION, [], ['scatteringTexture', 'extinctionTexture']);
   // In 32-bit floats where the GPU renders, filters and blends them: thin fog's extinction over a slice loses its bits in halves.
   const caps = engine.getCaps(), type = caps.textureFloatRender && caps.textureFloatLinearFiltering && caps.blendFloat ? Constants.TEXTURETYPE_FLOAT : HALF;
-  const targets = (name, count, size, sampling = NEAREST) => new MultiRenderTarget(name, { width: size[0], height: size[1] }, count, scene, {
-    types: Array(count).fill(type), samplingModes: Array(count).fill(sampling), generateMipMaps: false, generateDepthBuffer: false, defaultType: type,
+  const targets = (name, count, size, sampling = NEAREST, types = Array(count).fill(type)) => new MultiRenderTarget(name, { width: size[0], height: size[1] }, count, scene, {
+    types, samplingModes: Array(count).fill(sampling), generateMipMaps: false, generateDepthBuffer: false, defaultType: type,
   });
   let props = null, integrated = null, current = null, resolve = null, grid = null, frame = null, drawing = false;
   const slabs = new Map(); // domain mesh -> { slab, source (the surface material), tree, material }
@@ -156,9 +156,10 @@ export function cameraVolumes(scene, camera, film = null) {
     const key = grid.atlas.join('x');
     if (!sized.has(key)) {
       // Linear, as the volume shadows sample its extinction.
-      // The scatter's results alternate: one written, the other the last frame's, its history (linear, as reprojected).
+      // The scatter's results alternate: one written, the other the last frame's, its history (linear, as reprojected),
+      // which keeps a copy in half floats (EEVEE keeps its history in 11/11/10 floats) for half the fetches' bandwidth.
       const entry = { props: targets('__volumeProperties', 4, grid.atlas, Constants.TEXTURE_BILINEAR_SAMPLINGMODE),
-        results: [0, 1].map(() => targets('__volumeScatter', 2, grid.atlas, Constants.TEXTURE_BILINEAR_SAMPLINGMODE)),
+        results: [0, 1].map(() => targets('__volumeScatter', 4, grid.atlas, Constants.TEXTURE_BILINEAR_SAMPLINGMODE, [type, type, HALF, HALF])),
         integrated: targets('__volumeIntegration', 2, grid.atlas, Constants.TEXTURE_BILINEAR_SAMPLINGMODE), history: null };
       entry.props.clearColor = new Color4(0, 0, 0, 0);
       entry.props.onAfterRenderObservable.add(lightAndIntegrate);
@@ -197,14 +198,18 @@ export function cameraVolumes(scene, camera, film = null) {
     frame.pending = false;
     const { shadows } = frame.lights, { results, history } = current;
     const scattered = results[0], previous = results[1];
-    // blender-port: eevee_volume.cc VolumeModule::draw_compute history_opacity: an exponential average over at most
-    // 16 frames while the view and the volumes stay the same; none after they change. port-override: EEVEE reprojects
-    // its history as the view moves; here a moving view starts again.
-    const opacity = history && history.key === frame.key ? Math.min(history.frames, 15) / (Math.min(history.frames, 15) + 1) : 0;
+    const opacity = historyOpacity(history, frame);
     const lit = pass(scatterOf(shadows.map((shadow) => shadow.kind)), scattered, (fx) => {
-      fx.setTexture('scatteringHistory', previous.textures[0]);
-      fx.setTexture('extinctionHistory', previous.textures[1]);
+      fx.setTexture('scatteringHistory', previous.textures[2]);
+      fx.setTexture('extinctionHistory', previous.textures[3]);
       fx.setFloat('historyOpacity', opacity);
+      fx.setMatrix('stableInverseProjection', frame.stableInverseProjection);
+      if (opacity) {
+        fx.setMatrix('currViewToPastView', frame.inverseView.multiply(history.view));
+        fx.setMatrix('historyProjection', history.stableProjection);
+        fx.setFloat3('historyDepthParams', ...history.depth);
+        fx.setFloat2('historyCoordScale', ...history.coordScale);
+      }
       ['scatteringProps', 'extinctionProps', 'emissionProps', 'phaseProps'].forEach((name, i) => fx.setTexture(name, props.textures[i]));
       fx.setMatrix('inverseView', frame.inverseView);
       fx.setFloat4('cameraPosition', ...frame.eye);
@@ -226,7 +231,8 @@ export function cameraVolumes(scene, camera, film = null) {
     });
     if (lit) {
       current.results.reverse();
-      current.history = { key: frame.key, frames: opacity ? history.frames + 1 : 1 };
+      const { key, view, stableProjection, depth, coordScale } = frame;
+      current.history = { key, view, stableProjection, depth, coordScale, frames: (opacity ? history.frames : 0) + 1 };
     }
     if (frame.integrated !== drawing) { drawing = frame.integrated; film?.reset(); }
   }
@@ -333,7 +339,7 @@ export function cameraVolumes(scene, camera, film = null) {
     const width = Math.max(1, Math.round(engine.getRenderWidth() * camera.viewport.width)), height = Math.max(1, Math.round(engine.getRenderHeight() * camera.viewport.height));
     const s = volumeSettings(scene);
     grid = froxelGrid(width, height, s, engine.getCaps().maxTextureSize);
-    frame = viewFrame(scene, camera, s, grid, domains);
+    frame = viewFrame(scene, camera, s, grid, domains, film?.jitter ?? [0, 0], [width, height]);
     ensureTargets();
     attachResolve();
     const drawn = domains.map((domain) => { const entry = slabOf(domain); return drawSlab(domain, entry) ? entry.slab : null; }).filter(Boolean);
@@ -373,11 +379,36 @@ export function viewPoint(frame, u, v, viewZ, out) {
   return Vector3.LerpToRef(a, b, (-viewZ - a.z) / (b.z - a.z), out);
 }
 
+// blender-port: eevee_volume_lib.bsl.hh volume_history_uvw_get: where a froxel's center (uvw, unjittered) lay in the
+// last frame's grid: its point through this frame's stable (unjittered) projection and depths, moved into the last
+// view, placed by the last frame's stable projection, depths and padding (coordScale). Null outside the last grid.
+export function volumeHistoryUvw([u, v, z], frame, history) {
+  const current = { inverseProjection: frame.stableInverseProjection, coordScale: frame.coordScale };
+  const vsP = viewPoint(current, u, v, volumeZToViewZ(frame.depth, frame.perspective, z), new Vector3());
+  const vsPHistory = Vector3.TransformCoordinates(vsP, frame.inverseView.multiply(history.view));
+  const hs = Vector4.TransformCoordinates(vsPHistory, history.stableProjection);
+  const uvw = [(hs.x / hs.w * 0.5 + 0.5) * history.coordScale[0], (hs.y / hs.w * 0.5 + 0.5) * history.coordScale[1],
+    viewZToVolumeZ(history.depth, frame.perspective, -vsPHistory.z)];
+  return hs.w < 0 || uvw.some((c) => c < 0 || c > 1) ? null : uvw;
+}
+
+// blender-port: eevee_volume.cc VolumeModule::set_view, draw_compute: how much of its last frame each froxel keeps,
+// an exponential average over at most 16 frames (8 while the view moves, reprojected); none once the volumes, their
+// objects, the grid or the settings change.
+export function historyOpacity(history, frame) {
+  if (!history || history.key !== frame.key) return 0;
+  const moving = !history.view.equals(frame.view) || !history.stableProjection.equals(frame.stableProjection);
+  const frames = Math.min(history.frames, moving ? 8 : 16);
+  return frames / (frames + 1);
+}
+
 // What a frame of the camera draws its volumes with: its matrices (the film's jitter in them), the grid's depths over
 // the domains, the slices' jitter for the film's sample, the lights and the world's light.
 let frameCount = 0;
-function viewFrame(scene, camera, s, grid, domains) {
+function viewFrame(scene, camera, s, grid, domains, [dx, dy], [width, height]) {
   const view = scene.getViewMatrix().clone(), projection = scene.getProjectionMatrix().clone(), perspective = camera.mode === 0;
+  // eevee_volume.cc set_view winmat_stable: the projection without the film's jitter, which the history is placed by.
+  const stableProjection = Matrix.FromArray(jitterProjection(Array.from(projection.m), [-dx, -dy], width, height, !perspective));
   const depths = domains.flatMap((domain) => corners(domain).map((p) => Vector3.TransformCoordinates(p, view).z));
   const clipStart = camera.minZ, clipEnd = camera.maxZ > 0 ? camera.maxZ : 1e6;
   // eevee_volume.cc end_sync: object volumes alone narrow the grid to their bounds; a world volume fills the clip range.
@@ -387,16 +418,21 @@ function viewFrame(scene, camera, s, grid, domains) {
   const environment = scene.environmentTexture?.sphericalPolynomial, intensity = scene.environmentIntensity ?? 1;
   const world = environment ? ['x', 'y', 'z'].map((c) => Math.max(0, (environment.xx[c] + environment.yy[c] + environment.zz[c]) / 3) * intensity) : [0, 0, 0];
   return {
-    view, inverseView, projection, inverseProjection: projection.clone().invert(), perspective, reach: bounds ? reach(domains) : clipEnd - clipStart,
+    view, inverseView, projection, inverseProjection: projection.clone().invert(), stableProjection, stableInverseProjection: stableProjection.clone().invert(), perspective, reach: bounds ? reach(domains) : clipEnd - clipStart,
     depth: depthParams(s, clipStart, clipEnd, perspective, bounds), coordScale: grid.coordScale, settings: s,
-    // The froxels' noise moves every frame (the film's sample, else the frame's), so the history averages it away.
-    jitterOffset: halton((sample ?? (frameCount = (frameCount % 64) + 1)) + 1, 5), pending: true,
-    // What the history holds only while it stays: the view, the volumes' materials and objects, and the settings.
-    key: JSON.stringify([s, grid.size, Array.from(view.m, (v) => v.toFixed(5)), camera.fov, domains.map((domain) => [domain.uniqueId, domain.material?.uniqueId, domain.getWorldMatrix().updateFlag])]),
+    // blender-port: eevee_sampling.cc Sampling::step SAMPLING_VOLUME_W: the froxels' noise moves every frame (the film's
+    // sample, else the frame's, looping over 32 as EEVEE's interactive samples do), so the history averages it away.
+    jitterOffset: volumeJitterOffset(sample || (frameCount = (frameCount + 1) % 32)), pending: true,
+    // What the history holds only while it stays (eevee_volume.cc valid_history_): the volumes' materials and objects,
+    // the grid, the projection's kind and the settings. The view and its projection are reprojected.
+    key: JSON.stringify([s, grid.size, perspective, domains.map((domain) => [domain.uniqueId, domain.material?.uniqueId, domain.getWorldMatrix().updateFlag])]),
     eye: perspective ? [eye.x, eye.y, eye.z, 1] : [forward.x, forward.y, forward.z, 0],
     lights: packLights(scene, camera, domains), world,
   };
 }
+
+// blender-port: eevee_sampling.cc Sampling::step: the Halton base 5 sample offset so the first is 0.
+export const volumeJitterOffset = (sample) => (halton(sample + 1, 5) + 4 / 5) % 1;
 
 // The shadow maps a scatter pass samples, besides its own textures, within WebGL's sixteen texture units.
 const MAX_SHADOWS = 8;

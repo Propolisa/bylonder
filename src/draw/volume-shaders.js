@@ -23,19 +23,22 @@ float volume_z_to_view_z(float z) {
   if (perspective > 0.5) return (exp2(z / distribution) - near) / far;
   return near + (far - near) * z;
 }
-float view_z_to_volume_z(float depth) {
-  float near = depthParams.x, far = depthParams.y, distribution = depthParams.z;
+float view_z_to_volume_z(float depth, vec3 params) {
+  float near = params.x, far = params.y, distribution = params.z;
   if (perspective > 0.5) return distribution * log2(max(1e-8, depth * far + near));
   return (depth - near) / (far - near);
 }
-// The point of Babylon's view space seen at a volume uv (the screen's, scaled by coordScale) at Blender's view z.
-vec3 volume_view_point(vec2 uv, float view_z) {
+float view_z_to_volume_z(float depth) { return view_z_to_volume_z(depth, depthParams); }
+// The point of Babylon's view space seen at a volume uv (the screen's, scaled by coordScale) at Blender's view z,
+// through the inverse of a projection.
+vec3 volume_view_point(mat4 wininv, vec2 uv, float view_z) {
   vec2 ndc = uv / coordScale * 2.0 - 1.0;
-  vec4 a = inverseProjection * vec4(ndc, 0.0, 1.0), b = inverseProjection * vec4(ndc, 0.5, 1.0);
+  vec4 a = wininv * vec4(ndc, 0.0, 1.0), b = wininv * vec4(ndc, 0.5, 1.0);
   a.xyz /= a.w;
   b.xyz /= b.w;
   return mix(a.xyz, b.xyz, (-view_z - a.z) / (b.z - a.z));
 }
+vec3 volume_view_point(vec2 uv, float view_z) { return volume_view_point(inverseProjection, uv, view_z); }
 vec3 tile_sample(sampler2D atlas, vec2 xy, float slice) {
   vec2 tile = vec2(mod(slice, atlasColumns), floor(slice / atlasColumns));
   return texture2D(atlas, (tile * volumeSize.xy + xy) / (vec2(textureSize(atlas, 0)))).rgb;
@@ -73,10 +76,10 @@ export const MAX_LIGHTS = 16;
 // without singularity, through the Henyey-Greenstein phase of its mean anisotropy) and of the world (isotropic, its
 // spherical harmonics' L0), clamped as the scene's volume clamps say. A light that casts shadows is hidden where its
 // shadow map says (shadow_sample: a sun's cascades, a spot's map, a point's cube, each one depth comparison) and, with
-// the scene's Volumes > Shadows, dimmed by the volumes' extinction toward it. While the view holds still, each froxel's
-// light and extinction blend with its last frame's, so its jitter's noise averages away over frames.
+// the scene's Volumes > Shadows, dimmed by the volumes' extinction toward it. Each froxel's light and extinction blend
+// with the last frame's at its point (reprojected as the view moves), so its jitter's noise averages away over frames.
 // `shadows`: the shadow maps' kinds ('SUN', 'SPOT', 'CUBE') in the order of the lights' shadow slots.
-export const scatterShader = (shadows) => `${TARGETS(2)}${shadows.map(shadowDeclaration).join('\n')}
+export const scatterShader = (shadows) => `${TARGETS(4)}${shadows.map(shadowDeclaration).join('\n')}
 uniform float ndcHalfZ;
 uniform sampler2D scatteringProps;
 uniform sampler2D extinctionProps;
@@ -89,6 +92,13 @@ uniform float jitterOffset;
 uniform sampler2D scatteringHistory;
 uniform sampler2D extinctionHistory;
 uniform float historyOpacity;
+// eevee_volume.cc set_view: this frame's projection without the film's jitter (inverted), this view to the last's, and
+// the last frame's stable projection, depths and padding.
+uniform mat4 stableInverseProjection;
+uniform mat4 currViewToPastView;
+uniform mat4 historyProjection;
+uniform vec3 historyDepthParams;
+uniform vec2 historyCoordScale;
 uniform float lightCount;
 // xyz: position (a sun's unused); w: 0 point, 1 spot, 2 sun, 3 area.
 uniform vec4 lightPosition[${MAX_LIGHTS}];
@@ -128,6 +138,17 @@ vec3 volume_world_to_uvw(vec3 P) {
   vec3 v = (viewMatrix * vec4(P, 1.0)).xyz;
   vec4 clip = projection * vec4(v, 1.0);
   return vec3((clip.xy / clip.w * 0.5 + 0.5) * coordScale, view_z_to_volume_z(-v.z));
+}
+// blender-port: eevee_volume_lib.bsl.hh volume_history_uvw_get: a froxel's center in the last frame's grid, or -1
+// outside it (volumeHistoryUvw in volumes.js).
+vec3 volume_history_uvw_get(ivec3 froxel) {
+  vec3 uvw = (vec3(froxel) + 0.5) / volumeSize;
+  vec3 vs_P = volume_view_point(stableInverseProjection, uvw.xy, volume_z_to_view_z(uvw.z));
+  vec3 vs_P_history = (currViewToPastView * vec4(vs_P, 1.0)).xyz;
+  vec4 hs_P_history = historyProjection * vec4(vs_P_history, 1.0);
+  vec3 uvw_history = vec3((hs_P_history.xy / hs_P_history.w * 0.5 + 0.5) * historyCoordScale, view_z_to_volume_z(-vs_P_history.z, historyDepthParams));
+  if (hs_P_history.w < 0.0 || any(lessThan(uvw_history, vec3(0.0))) || any(greaterThan(uvw_history, vec3(1.0)))) return vec3(-1.0);
+  return uvw_history;
 }
 // blender-port: eevee_volume.bsl.hh volume_shadow: the volumes' extinction marched toward the light, clamped to the
 // grid's edge. port-override: a sun's march spans the volumes (shadowReach) where EEVEE's spans the view's frustum;
@@ -222,15 +243,20 @@ void main(void) {
   direct = brightness_clamp_max(direct * s_scattering, volumeClamp.x);
   indirect = brightness_clamp_max(indirect * s_scattering, volumeClamp.y);
   scattering += direct + indirect;
-  // eevee_volume.bsl.hh scatter_main's temporal accumulation, while the view holds still: the froxel's last values.
+  // eevee_volume.bsl.hh scatter_main's temporal reprojection.
   if (historyOpacity > 0.0) {
-    vec3 last = (vec3(froxel) + 0.5) / volumeSize;
-    scattering = mix(scattering, atlas_sample(scatteringHistory, last), historyOpacity);
-    extinction = mix(extinction, atlas_sample(extinctionHistory, last), historyOpacity);
+    vec3 last = volume_history_uvw_get(froxel);
+    if (last.x != -1.0) {
+      scattering = mix(scattering, atlas_sample(scatteringHistory, last), historyOpacity);
+      extinction = mix(extinction, atlas_sample(extinctionHistory, last), historyOpacity);
+    }
   }
   if (any(isnan(scattering)) || any(isnan(extinction))) { scattering = vec3(0.0); extinction = vec3(0.0); }
   glFragData[0] = vec4(scattering, 1.0);
   glFragData[1] = vec4(extinction, 1.0);
+  // The same as the next frame's history, in half floats.
+  glFragData[2] = glFragData[0];
+  glFragData[3] = glFragData[1];
 }
 `;
 
