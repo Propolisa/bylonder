@@ -10,9 +10,12 @@ import { exportNodeMaterial } from './node-material-export.js';
 const WORLD_SKYBOX = '__worldSkybox';
 // Overlays, gizmos, extras, the grid and editor cameras are named "__" or marked doNotSerialize. A Mesh's loose edges
 // (a line child it draws, mesh-batch-cache.js) stay out, as Blender's glTF exporter leaves them out by default.
-const helper = (node) => node.doNotSerialize || node.name.startsWith('__') || deleted(node) || !!node.metadata?.drawOwner;
+// The objects and Geometry Nodes instances the view draws (main-view.js drawInstances) are thin instances of a mesh
+// sharing their source's geometry: exported as such; a particle system's display shapes are overlays.
+const instances = (node) => !!node.metadata?.instancers && !!node.metadata.workbench;
+const helper = (node) => node.doNotSerialize || (node.name.startsWith('__') && !instances(node)) || deleted(node) || !!node.metadata?.drawOwner;
 const excluded = (node) => { for (let n = node; n; n = n.parent) if (helper(n)) return true; return false; };
-const BYLONDER_METADATA = /^(wb|editable$|editing$|drawOwner$)/;
+const BYLONDER_METADATA = /^(wb|editable$|editing$|drawOwner$|workbench$|instances|instancers$)/;
 // A URL another page can load: a public https URL. Others (blob, data from code, this server) are embedded.
 const portable = (url) => /^https:/.test(url) && !url.startsWith(globalThis.location?.origin);
 
@@ -211,6 +214,8 @@ async function serializeMapped(world, { geometry, live, mapped, parity }) {
     setFor(scene.textures.filter((t) => t instanceof Texture && !t.isRenderTarget), '_forceSerialize', (t) => t._forceSerialize || !portable(t.url ?? '')),
     // A float image's texture is written from Blender's straight pixels (Texture.serialize's data URL buffer), not read back.
     setFor([...straight.keys()], '_buffer', (t) => straight.get(t)),
+    // Instances named by their instancers.
+    setFor([...content.nodes].filter(instances), 'name', (node) => `${node.metadata.instancers.map((n) => n.name).join(', ') || 'Scene'} Instances`),
     setFor(all, 'metadata', authoredMetadata),
     setFor([scene], 'metadata', () => null),
     uniqueIds(content.nodes),

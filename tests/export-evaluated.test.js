@@ -60,6 +60,16 @@ const SCENARIOS = {
     const { world } = open('compositor');
     assert.match(await exportModule(world), /export async function createScene/);
   },
+  async instances() {
+    // Geometry Nodes' instances (the planet's trees and rocks) are thin instances in both exports, which no longer throw.
+    const { world } = open('geometry-nodes');
+    const json = await serializeScene(world);
+    const instanced = json.meshes.filter((m) => m.thinInstances?.instancesCount);
+    assert.ok(instanced.length && instanced.every((m) => m.name.endsWith('Instances')), `instances are exported: ${json.meshes.map((m) => m.name)}`);
+    assert.ok(instanced.every((m) => m.thinInstances.matrixData.length >= 16 * m.thinInstances.instancesCount && json.geometries.vertexData.some((g) => g.id === m.geometryId)),
+      'each with its matrices and its source geometry');
+    assert.match(await exportModule(world), /thinInstanceSetBuffer/, 'the JavaScript export writes them too');
+  },
 };
 
 const scenario = process.argv[2];
