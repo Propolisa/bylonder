@@ -132,6 +132,8 @@ function unmorph(view, entry, state) {
 
 // The view's morphed objects by Object address: { manager, targets, signature, count, bounds }.
 const morphed = new Map();
+// Objects morphed for an export only: the view keeps their basis drawn while the export evaluates other frames.
+const exporting = new Set();
 const issuesByKey = new Map();
 let lastView = null;
 const meshKey = (ob) => (ob.type === 'MESH' ? ob.data?.shape_keys ?? null : null);
@@ -194,13 +196,17 @@ function exportShapeKeys(world) {
       if (!state) continue;
       blend(entry, state, ob, key);
       temporary.push([entry, state]);
+      exporting.add(entry.ob);
     }
     mapped.push({ entry, ob, key, state });
   }
   return {
     reports: mapped.map(({ key }) => ({ title: `${key.name}: exported`, issues: [NORMALS(key)] })),
     animations: influenceAnimations(world, mapped),
-    restore() { for (const [entry, state] of temporary) unmorph(view, entry, state); },
+    restore() {
+      exporting.clear();
+      for (const [entry, state] of temporary) unmorph(view, entry, state);
+    },
   };
 }
 function influenceAnimations(world, mapped) {
@@ -238,7 +244,7 @@ registerRuntime({
   poll: (key) => key?.rna_type?.identifier === 'Key' && key.user?.rna_type?.identifier === 'Mesh',
   issues,
   instances: (context) => [...new Map([...context.scene.objects].map(meshKey).filter(Boolean).map((key) => [address(key), key])).values()],
-  evaluates: (entry) => morphed.has(entry.ob),
+  evaluates: (entry) => morphed.has(entry.ob) || exporting.has(entry.ob),
   evaluate,
   export: exportShapeKeys,
 });

@@ -221,6 +221,8 @@ function poseBounds(node, boxes) {
 // The view's mappings, by armature Object address: { mapping, applied: skins drawn, by mesh Object address }.
 const mapped = new Map();
 let skinned = new Set(), lastView = null;
+// Meshes skinned for an export only: the view keeps their rest mesh drawn while the export evaluates other frames.
+const exporting = new Set();
 const settingsOf = (arm) => arm.bylonder?.babylon;
 
 // Draws a mapping's skins on their meshes (the Mesh Main holds, skinned) and the meshes it no longer skins as Blender
@@ -345,11 +347,15 @@ function exportArmatures(world) {
     mappings.push(state.mapping);
   }
   const animations = poseAnimations(world, mappings);
-  for (const state of temporary) drawSkins({ ...view, world: { animation: { playing: true } } }, state, (key) => view.blender.mesh(key));
+  for (const state of temporary) {
+    drawSkins({ ...view, world: { animation: { playing: true } } }, state, (key) => view.blender.mesh(key));
+    for (const key of state.applied.keys()) exporting.add(key);
+  }
   return {
     reports: mappings.map((m) => ({ title: `${m.arm.name}: exported`, issues: m.issues.filter((i) => !i.silent) })),
     animations,
     restore() {
+      exporting.clear();
       for (const state of temporary) {
         for (const key of [...state.applied.keys()]) unskin(view, byOb.get(key), state, key);
         state.mapping.dispose();
@@ -371,7 +377,7 @@ registerRuntime({
   note: (ob) => (ob.mode === 'EDIT' ? 'Edit Mode evaluates as Blender' : null),
   issues,
   instances: (context) => [...context.scene.objects].filter((ob) => ob.type === 'ARMATURE'),
-  evaluates: (entry) => skinned.has(entry.ob),
+  evaluates: (entry) => skinned.has(entry.ob) || exporting.has(entry.ob),
   evaluate,
   export: exportArmatures,
 });

@@ -18,6 +18,15 @@ import { createCurveObjects } from '../src/editors/curve/curve-objects.js';
 import { createSelection } from '../src/editors/object/selection.js';
 import { createRNA } from '../src/makesrna/rna-bylonder.js';
 import { createMainSync } from '../src/blenkernel/main-sync.js';
+// The runtimes the app registers (main.js), which map shape keys and armatures into Babylon for an export.
+import { registerRuntimeTypes } from '../src/runtimes/runtimes.js';
+import '../src/runtimes/armature.js';
+import '../src/runtimes/image.js';
+import '../src/runtimes/grease-pencil.js';
+import '../src/runtimes/shape-keys.js';
+import { bylonderIcon } from '../src/python/bpy_icons.js';
+
+registerRuntimeTypes(bylonderIcon());
 
 export function openExample(id) {
   // NullEngine has no GL to upload an image's pixels to.

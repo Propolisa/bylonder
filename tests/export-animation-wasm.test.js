@@ -2,7 +2,8 @@
 // by its animation group and the F-Curves its page runs, puts every animated mesh where Main evaluates it at that frame,
 // with exact keys where an F-curve is all that moves a value, the clean-room F-Curve unit where Babylon cannot play it
 // (rotations, easings), and samples elsewhere (drivers, NLA, constraints), or samples wherever Babylon cannot play it
-// with Bake Animation. A location eased with Elastic runs live.
+// with Bake Animation. A location eased with Elastic runs live. Meshes deformed by shape keys and armatures are drawn by
+// Babylon's morph targets and skeletons where Main evaluates them.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -15,7 +16,8 @@ import { openExample } from './open-example.js';
 import { writePackage } from './export-package.js';
 
 // Per example: frames to check, and the least share of its tracks that must be exact keys (not a sample per frame).
-const EXAMPLES = { 'drivers-and-graph-editor': [1, 7, 13, 30, 61, 96], nla: [1, 10, 25, 49, 60, 80], compositor: [1, 37, 120, 240] };
+const EXAMPLES = { 'drivers-and-graph-editor': [1, 7, 13, 30, 61, 96], nla: [1, 10, 25, 49, 60, 80], compositor: [1, 37, 120, 240], 'shape-keys': [1, 18, 25, 48],
+  'desk-lamp': [1, 36, 49, 96] };
 // The Elastic case: the first location F-Curve of the Compositor example's objects (the airship's), its first key eased
 // with Elastic.
 const ELASTIC = 'compositor';
@@ -43,23 +45,34 @@ async function check(id, { bake = false, elastic = false } = {}) {
   const page = blend.scene, group = page.animationGroups[0];
   const animated = new Set([...group.targetedAnimations.map((t) => t.target), ...live.map(([, e]) => page.getNodeById(ir.properties[e.outputs.value.property].bind.node))]);
   const meshes = scene.meshes.filter((m) => sync.objectOf(m) && animated.has(page.getMeshById(m.name)));
-  assert.ok(meshes.length, `${id}: animated meshes`);
+  // Meshes Babylon deforms: morph targets (shape keys) and skeletons (armatures).
+  const deformed = scene.meshes.filter((m) => sync.objectOf(m) && (page.getMeshById(m.name)?.morphTargetManager || page.getMeshById(m.name)?.skeleton));
+  assert.ok(meshes.length || deformed.length, `${id}: animated meshes`);
   group.stop();
   for (const frame of EXAMPLES[id]) {
     group.start(false, 1, frame, frame);
     group.goToFrame(frame);
-    // What the page runs after Babylon's animation each frame.
-    page.onAfterAnimationsObservable.notifyObservers(page);
+    // A frame drawn, held there: Babylon's animation sets what it plays, the page runs what reads it, the skeletons pose.
+    group.pause();
+    page.render();
     await blend.settled();
     sync.frameChanged(frame);
     for (const mesh of meshes) {
       const drawn = page.getMeshById(mesh.name).computeWorldMatrix(true).asArray(), main = babylonMatrix(sync.blender.transform(sync.objectOf(mesh)).matrix_world).asArray();
       assert.ok(drawn.every((v, i) => Math.abs(v - main[i]) < 1e-4), `${id} ${mesh.name} at frame ${frame}: ${drawn.map((v) => v.toFixed(3))}, Main ${main.map((v) => v.toFixed(3))}`);
     }
+    // Each corner as drawn (morphed and skinned on the CPU as the GPU does) where Main's evaluated mesh puts its vertex.
+    for (const mesh of deformed) {
+      const evaluated = sync.blender.evaluatedMesh(sync.objectOf(mesh)), p = evaluated.vert_positions, corners = evaluated.corner_verts;
+      const drawn = page.getMeshById(mesh.name).getPositionData(true, true);
+      let error = 0;
+      for (let c = 0; c < evaluated.corners_num; c++) error = Math.max(error, ...[0, 2, 1].map((axis, k) => Math.abs(drawn[c * 3 + k] - p[corners[c] * 3 + axis])));
+      assert.ok(error < 1e-4, `${id} ${mesh.name} at frame ${frame}: drawn off Main's evaluated mesh by ${error}`);
+    }
     group.stop();
   }
   const keys = group.targetedAnimations.map((t) => t.animation.getKeys().length);
-  console.log(`${id}${bake ? ' (Bake Animation)' : elastic ? ' (Elastic)' : ''}: ${meshes.length} meshes at ${EXAMPLES[id].length} frames as Main; ${keys.length} tracks, ${keys.reduce((a, b) => a + b, 0)} keys, ${live.length} F-Curves run live`);
+  console.log(`${id}${bake ? ' (Bake Animation)' : elastic ? ' (Elastic)' : ''}: ${meshes.length} meshes and ${deformed.length} deformed at ${EXAMPLES[id].length} frames as Main; ${keys.length} tracks, ${keys.reduce((a, b) => a + b, 0)} keys, ${live.length} F-Curves run live`);
   blend.dispose();
   written.remove();
 }
