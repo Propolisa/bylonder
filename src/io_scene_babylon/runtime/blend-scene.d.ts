@@ -18,6 +18,14 @@ export function placement({ mode, parent_inverse, offset, direction }: Transform
     direction: Vector3 | null;
 };
 /**
+ * A bone's local matrix from its pose's location, rotation and scale, as Blender's pose of a bone without constraints:
+ * its rest matrix relative to its parent's (Babylon's Bone.getRestMatrix), after the pose's own.
+ * @param {Transform} transform
+ * @param {(name: string, count: number) => number[]} vector the pose bone's value of a property (`location`, 3)
+ * @param {Matrix} rest
+ */
+export function posedBone(transform: Transform, vector: (name: string, count: number) => number[], rest: Matrix): Matrix;
+/**
  * A scene exported from Bylonder, loaded: `url` is its scene.js.
  * @param {import('@babylonjs/core').AbstractEngine} engine
  * @param {string | URL} url
@@ -64,7 +72,7 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
             node?: string | undefined;
             evaluated?: {
                 matrix_world: number[];
-                geometry?: Record<string, any> | undefined;
+                geometry? /** @type {Knob} */: Record<string, any> | undefined;
             } | undefined;
         }>;
         references: {
@@ -199,4 +207,5 @@ export type Change = {
 };
 import { Quaternion } from '@babylonjs/core';
 import { Vector3 } from '@babylonjs/core';
+import { Matrix } from '@babylonjs/core';
 import { Observable } from '@babylonjs/core';

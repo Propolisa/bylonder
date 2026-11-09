@@ -65,12 +65,16 @@ import { readIR } from './ir.js';
 /** @typedef {{ path: string, value: Value }} Change */
 
 /**
- * Blender's rotation of a mode as a quaternion (w, x, y, z): an Euler mode turns about its first axis first.
+ * Blender's rotation of a mode as a quaternion (w, x, y, z), normalized as Blender uses it: an Euler mode turns about
+ * its first axis first.
  * @param {string} mode
  * @param {number[]} values
  */
 function blenderQuaternion(mode, values) {
-  if (mode === 'QUATERNION') return values;
+  if (mode === 'QUATERNION') {
+    const length = Math.hypot(...values) || 1;
+    return values.map((v) => v / length);
+  }
   /** @type {number[]} */
   let q = [1, 0, 0, 0];
   for (const letter of mode) {
@@ -110,6 +114,18 @@ export function placement({ mode, parent_inverse, offset, direction }, vector) {
     matrix.decompose(scaling, rotation, position);
   }
   return { position, rotation, scaling, direction: direction ? Vector3.FromArray(direction).applyRotationQuaternion(rotation) : null };
+}
+
+/**
+ * A bone's local matrix from its pose's location, rotation and scale, as Blender's pose of a bone without constraints:
+ * its rest matrix relative to its parent's (Babylon's Bone.getRestMatrix), after the pose's own.
+ * @param {Transform} transform
+ * @param {(name: string, count: number) => number[]} vector the pose bone's value of a property (`location`, 3)
+ * @param {Matrix} rest
+ */
+export function posedBone(transform, vector, rest) {
+  const { position, rotation, scaling } = placement(transform, vector);
+  return Matrix.Compose(scaling, rotation, position).multiply(rest);
 }
 
 /**
@@ -262,14 +278,19 @@ export class BlendScene {
 
   /**
    * Places a node by the part of its object's transform a control at `path` sets (location, rotation or scale): the
-   * rest of the node stays as it is, which Babylon's animation may be playing.
+   * rest of the node stays as it is, which Babylon's animation may be playing. A bone is posed by all three.
    * @param {any} node
    * @param {string} path
    * @param {Transform} transform
    */
   #place(node, path, transform) {
     const base = path.slice(0, path.lastIndexOf('.')), part = path.slice(base.length + 1).replace(/\[\d+\]$/, '');
-    const placed = placement(transform, (name, count) => Array.from({ length: count }, (_, i) => /** @type {number} */ (this.#values.get(`${base}.${name}[${i}]`) ?? 1)));
+    const vector = (/** @type {string} */ name, /** @type {number} */ count) => Array.from({ length: count }, (_, i) => /** @type {number} */ (this.#values.get(`${base}.${name}[${i}]`) ?? 1));
+    if (node.getRestMatrix) {
+      node._matrix = posedBone(transform, vector, node.getRestMatrix());
+      return;
+    }
+    const placed = placement(transform, vector);
     if (part === 'location') node.position?.copyFrom(placed.position);
     else if (transform.direction !== undefined) {
       if (part !== 'scale' && placed.direction) node.direction = placed.direction;

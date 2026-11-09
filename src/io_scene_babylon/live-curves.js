@@ -5,11 +5,11 @@
 // drivers, constraints, F-modifiers but Cycles, delta transforms) leaves it sampled.
 import { Quaternion } from '@babylonjs/core';
 import { idStruct } from '../python/bpy_rna.js';
-import { placement } from './runtime/blend-scene.js';
+import { placement, posedBone } from './runtime/blend-scene.js';
 import { evaluateFCurve, prepareFCurve } from './runtime/drivers/fcurve.js';
 import { packKeys, unpackKeys } from './runtime/fcurve-evaluator.js';
 import { curveInput } from './driver-export.js';
-import { transformBinding } from './controls-export.js';
+import { key, transformBinding } from './controls-export.js';
 import { actionFCurves } from './ir-export.js';
 
 // The clean room's acceptance tolerance, relative to values above 1.
@@ -47,4 +47,25 @@ export function liveTransform(sync, node) {
     if (!frames.every((sample, i) => { const value = placed(frameStart + i); return value && close(value, sample[key]); })) return null;
     return curves.map(({ fc, settings, keys }) => ({ id: ob, fc, settings, keys, node: node.id }));
   };
+}
+
+// For a bone of an armature (RNA's Object and PoseBone) and its Babylon Bone, the F-Curves the page runs for its pose
+// when, posed as blend-scene.js poses a bone, they give its local matrices (`samples`, one per frame from `frameStart`):
+// each `{ id, fc, settings, keys, node }`, none when nothing animates a pose that holds, or null when they do not
+// reproduce the samples (constraints, IK, NLA, drivers, F-modifiers but Cycles, another inheritance).
+export function livePose(arm, pose, bone, samples, frameStart) {
+  const base = `pose.bones${key(pose.name)}`, mode = pose.rotation_mode, animation = arm.animation_data;
+  if (mode === 'AXIS_ANGLE' || animation?.nla_tracks.length || [...(animation?.drivers ?? [])].some((d) => d.data_path.startsWith(base))) return null;
+  const rotation = mode === 'QUATERNION' ? 'rotation_quaternion' : 'rotation_euler', parts = ['location', rotation, 'scale'];
+  const own = actionFCurves(animation).filter((fc) => !fc.mute && parts.some((part) => fc.data_path === `${base}.${part}`));
+  if (own.some((fc) => [...fc.modifiers].some((m) => m.type !== 'CYCLES'))) return null;
+  const curves = own.map((fc) => ({ fc, part: fc.data_path.slice(base.length + 1), ...pageCurve(fc) }));
+  const defaults = Object.fromEntries(parts.map((part) => [part, [...pose[part]]]));
+  const posed = (frame) => {
+    const values = Object.fromEntries(parts.map((part) => [part, [...defaults[part]]]));
+    for (const { fc, part, curve } of curves) values[part][fc.array_index] = evaluateFCurve(curve, frame);
+    return posedBone({ mode }, (name) => values[name], bone.getRestMatrix());
+  };
+  if (!samples.every((sample, i) => close(posed(frameStart + i), sample))) return null;
+  return curves.map(({ fc, settings, keys }) => ({ id: arm, fc, settings, keys, node: bone.id }));
 }

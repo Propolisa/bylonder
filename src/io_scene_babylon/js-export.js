@@ -172,7 +172,7 @@ export async function exportModule(world, { live: keepLive = false, parity = fal
   const live = new Map(keepLive ? world.objects.map((node) => [node, world.modifiers.live(node)]).filter(([node, stack]) => stack && !stack.modifiers.some(needsOpenVDB) && !readsOtherIDs(world, node)) : []);
   await world.modifiers.settled();
   // The mapped meshes' geometry is read below: their mapping holds until the module is written.
-  const mapped = exportRuntimes(world);
+  const mapped = exportRuntimes(world, { bake: bakeAnimation });
   try {
     return await moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation });
   } finally {

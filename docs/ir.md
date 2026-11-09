@@ -126,7 +126,11 @@ Each frame, the scheduler runs again what reads `frame_current` and is not Babyl
 copied into the IR: Babylon's animation that plays it exactly (`native`) holds them, or, for an object's transform
 Babylon cannot play exactly (an Euler rotation, an easing, another extrapolation), they are a buffer of `scene.bin` and
 the clean-room F-Curve unit runs it (`fcurve`), writing its property after Babylon's animation, from which blend-scene.js
-places the node's location, rotation or scale. Any other FLOAT property an action animates (a light's power, a material's or
+places the node's location, rotation or scale. A pose bone's location, rotation and scale
+(`objects["Rig"].pose.bones["Arm"].rotation_euler[0]`, bound to the Babylon Bone) run the same way where they alone give
+its pose, which blend-scene.js composes with the bone's rest matrix; a bone they do not give (constraints, IK, NLA,
+drivers, another inheritance, an armature drawn by several skeletons) keeps its sampled pose.
+Any other FLOAT property an action animates (a light's power, a material's or
 world's node input through its node tree's action, a modifier's setting, a custom property, a Geometry Nodes input, `modifiers["GeometryNodes"]["Socket_2"]` writing `...modifiers["GeometryNodes"].properties.inputs.Socket_2.value`)
 runs on `fcurve` too, so what reads it runs each frame. The export option Bake Animation samples those per frame instead. Consecutive modifiers of a
 stack on the same shipped implementation run as one call (its `runChain`), so what one writes (sharp edges, creases,

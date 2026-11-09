@@ -319,9 +319,9 @@ const authoredMetadata = (node) => {
 // package whose page runs F-Curves Babylon cannot play exactly.
 export async function serializeScene(world, { geometry = true, live = null, mapped = null, parity = false, graphOf = () => null, bake = true } = {}) {
   await world.modifiers.settled();
-  const runtimes = mapped ?? exportRuntimes(world);
+  const runtimes = mapped ?? exportRuntimes(world, { bake });
   try {
-    return await serializeMapped(world, { geometry, live, mapped: runtimes.animations, parity, graphOf, bake });
+    return await serializeMapped(world, { geometry, live, mapped: runtimes, parity, graphOf, bake });
   } finally {
     if (!mapped) runtimes.restore();
   }
@@ -372,12 +372,13 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
     uniqueIds(content.nodes),
   ];
   let pending, animationGroups, activeCameraID, shadowGenerators;
-  const curves = bake || !world.mainSync ? null : [], gaps = curves && [];
+  // The runtimes' (a skeleton's bones) first.
+  const curves = bake || !world.mainSync ? null : [...mapped.curves], gaps = curves && [...mapped.gaps];
   try {
     // The serializer reads the scene synchronously; only texture readbacks finish later.
     pending = SceneSerializer.SerializeAsync(scene);
     shadowGenerators = shadowsOf(world, content);
-    animationGroups = bakeAnimations(world, sampled, content, liveIds, mapped, evaluated.transforms, keys, curves, gaps);
+    animationGroups = bakeAnimations(world, sampled, content, liveIds, mapped.animations, evaluated.transforms, keys, curves, gaps);
     activeCameraID = camera?.id;
   } finally {
     restores.forEach((restore) => restore());

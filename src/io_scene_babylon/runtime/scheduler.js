@@ -139,17 +139,23 @@ export function createScheduler(ir, page) {
     }
   };
 
+  /** What reads the frame and is not Babylon's own. */
+  const timedLive = () => timed.filter((key) => unitFor(entities[key].type) || !NATIVE.includes(entities[key].implementation ?? ''));
+
   // After Babylon's animation: what reads the frame runs again when it changed, and live values are written over the baked ones.
   const replay = scene.onAfterAnimationsObservable.add(() => {
     if (controls.frame() !== frame) {
       frame = controls.frame();
-      timed.filter((key) => unitFor(entities[key].type) || !NATIVE.includes(entities[key].implementation ?? '')).forEach(mark);
+      timedLive().forEach(mark);
       run();
     }
     for (const [key, result] of outputs) for (const [name, target] of Object.entries(entities[key].outputs)) {
       if (target && 'property' in target && result?.[name] !== undefined) controls.write(target.property, result[name]);
     }
   });
+
+  // What reads the frame loads its implementation now, so it runs as the first frame draws.
+  timedLive().forEach(implementation);
 
   return {
     /** A property was set. @param {string} path */
@@ -160,7 +166,7 @@ export function createScheduler(ir, page) {
     /** Resolves once every entity set going has run. */
     async settled() {
       while (pending) await pending;
-      await Promise.all([...loaded.values()].map((module) => module.settled?.()));
+      await Promise.all([...loaded.values()].map(async (module) => (await module).settled?.()));
     },
     dispose: () => scene.onAfterAnimationsObservable.remove(replay),
   };

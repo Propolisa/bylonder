@@ -49,14 +49,18 @@ export function transformBinding(node, ob, rotation, parentInverse) {
   return { node: node.id, transform: { mode, ...parent, ...(offset && { offset }) } };
 }
 
-function objectControls(node, ob, parentInverse) {
-  const base = `objects${key(ob.name)}`, list = [];
-  const [property, meta] = { QUATERNION: ['rotation_quaternion', { type: 'FLOAT', subtype: 'QUATERNION' }], AXIS_ANGLE: ['rotation_axis_angle', { type: 'FLOAT', subtype: 'AXISANGLE' }] }[ob.rotation_mode]
+// The location, rotation and scale of an object or a pose bone at `base`, each bound by `bind`.
+function transformControls(base, owner, bind) {
+  const [property, meta] = { QUATERNION: ['rotation_quaternion', { type: 'FLOAT', subtype: 'QUATERNION' }], AXIS_ANGLE: ['rotation_axis_angle', { type: 'FLOAT', subtype: 'AXISANGLE' }] }[owner.rotation_mode]
     ?? ['rotation_euler', { type: 'FLOAT', subtype: 'EULER', unit: 'ROTATION' }];
-  const bind = transformBinding(node, ob, [...ob[property]], parentInverse);
-  [...ob.location].forEach((v, i) => list.push(knob(`${base}.location[${i}]`, v, { type: 'FLOAT', subtype: 'TRANSLATION', unit: 'LENGTH' }, bind)));
-  [...ob[property]].forEach((v, i) => list.push(knob(`${base}.${property}[${i}]`, v, meta, bind)));
-  [...ob.scale].forEach((v, i) => list.push(knob(`${base}.scale[${i}]`, v, { type: 'FLOAT', subtype: 'XYZ' }, bind)));
+  return [...[...owner.location].map((v, i) => knob(`${base}.location[${i}]`, v, { type: 'FLOAT', subtype: 'TRANSLATION', unit: 'LENGTH' }, bind)),
+    ...[...owner[property]].map((v, i) => knob(`${base}.${property}[${i}]`, v, meta, bind)),
+    ...[...owner.scale].map((v, i) => knob(`${base}.scale[${i}]`, v, { type: 'FLOAT', subtype: 'XYZ' }, bind))];
+}
+
+function objectControls(node, ob, parentInverse) {
+  const base = `objects${key(ob.name)}`, property = { QUATERNION: 'rotation_quaternion', AXIS_ANGLE: 'rotation_axis_angle' }[ob.rotation_mode] ?? 'rotation_euler';
+  const list = transformControls(base, ob, transformBinding(node, ob, [...ob[property]], parentInverse));
   for (const hide of ['viewport', 'render']) list.push(knob(`${base}.hide_${hide}`, !!ob[`hide_${hide}`], {}, { node: node.id, hide }));
   return [...list, ...customProperties(ob, base)];
 }
@@ -132,6 +136,15 @@ function worldControls(scene) {
 }
 
 // The project's SDK controls (sdk.controls), as Main holds them: custom properties of the Scene.
+// An armature's pose bones, where one skeleton of the file draws it (armature.js): each bone's location, rotation and
+// scale pose its Babylon Bone (blend-scene.js posedBone); an Axis Angle rotation is not composed.
+function poseControls(ob, skeletons) {
+  const drawn = skeletons.filter((s) => s.id === ob.name || s.id.startsWith(`${ob.name} `));
+  if (drawn.length !== 1) return [];
+  return [...ob.pose.bones].flatMap((pose) => transformControls(`objects${key(ob.name)}.pose.bones${key(pose.name)}`, pose,
+    pose.rotation_mode !== 'AXIS_ANGLE' && { node: `${drawn[0].id} ${pose.name}`, transform: { mode: pose.rotation_mode } }));
+}
+
 function sdkControls(world, scene) {
   const base = `scenes${key(scene.name)}`;
   return [...world.animation.channels].filter(([, channel]) => channel.id.startsWith('store:') && channel.available())
@@ -153,6 +166,7 @@ export function exportControls(world, data) {
     list.push(...objectControls(node, ob, sync.blender.transform(pointer).matrix_parent_inverse));
     if (ob.type === 'LIGHT') list.push(...lightControls(node, ob.data));
     if (ob.type === 'CAMERA') list.push(...cameraControls(node, ob.data));
+    if (ob.type === 'ARMATURE') list.push(...poseControls(ob, data.skeletons ?? []));
   }
   list.push(...data.materials.flatMap(nodeMaterialControls), ...data.materials.flatMap((entry) => principledControls(entry, scene, sync)));
   if (!data.materials.some((m) => m.name?.startsWith('__world '))) list.push(...worldControls(mainScene));

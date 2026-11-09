@@ -158,8 +158,8 @@ function curveTarget(id, fc, properties) {
   return [`${path}[${fc.array_index}]`, path, socket && `${id.path}.${socket[1]}.properties.inputs.${socket[2]}.value`].find((p) => p && properties[p]) ?? null;
 }
 
-// An object's transform, whose F-Curves run live only where Main's samples confirm them (live-curves.js).
-const TRANSFORM = /^objects\[.*\]\.(location|rotation_euler|rotation_quaternion|scale)\[\d\]$/;
+// An object's or a pose bone's transform, whose F-Curves run live only where Main's samples confirm them (live-curves.js).
+const TRANSFORM = /^objects\[.*\]\.(pose\.bones\[.*\]\.)?(location|rotation_euler|rotation_quaternion|scale)\[\d\]$/;
 
 // A FLOAT property (a light's power, a material's input, a modifier's setting, a custom property, a Geometry Nodes
 // input) whose F-Curve the unit runs as Blender evaluates it and nothing else animates: its F-Curve as the `fcurve`

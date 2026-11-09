@@ -213,6 +213,8 @@ playing.pause();
 function loadedError(loadedScene, frame) {
   const group = loadedScene.animationGroups[0], mesh = loadedScene.getMeshByName('Body');
   group.goToFrame(frame);
+  // Drawn: the page poses the bones its F-Curves run after Babylon's animation.
+  loadedScene.render();
   mesh.skeleton.prepare(true);
   sync.frameChanged(frame);
   const evaluated = blender.evaluatedMesh(bodyOb), p = evaluated.vert_positions, corners = evaluated.corner_verts, skinned = mesh.getPositionData(true);
@@ -224,8 +226,13 @@ for (const frame of [1, 6, 16, 21]) assert.ok(loadedError(loaded, frame) < PRECI
 // Its Area light's loader keeps a reloaded scene alive in Node (no XMLHttpRequest for its LTC textures).
 loaded.getEngine().dispose();
 // The JavaScript export builds the same skeleton, skin and animation.
-const written = writePackage(await exportModule(world));
-const built = await (await import(written.url)).createScene(new NullEngine(), null);
+const files = await exportModule(world), ir = JSON.parse(typeof files['scene.ir.json'] === 'string' ? files['scene.ir.json'] : new TextDecoder().decode(files['scene.ir.json']));
+const poses = Object.values(ir.entities).filter((e) => /^pose\.bones/.test(e.inputs.data_path));
+assert.ok(poses.length && poses.every((e) => e.implementation === 'fcurve'), "the action's pose bones run on the F-Curve unit");
+const written = writePackage(files);
+const blend = await (await import(written.url)).load(new NullEngine());
+await blend.settled();
+const built = blend.scene;
 written.remove();
 assert.equal(built.getMeshByName('Body').skeleton.name, 'Rig');
 built.animationGroups[0].pause();

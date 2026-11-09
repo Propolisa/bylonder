@@ -20,7 +20,7 @@ export const APPROXIMATION = 'APPROXIMATION', FALLBACK = 'FALLBACK';
 // or a function of the context giving it),
 // runtimes (the identifiers it offers), settings (its Babylon-only settings, bpy.props by name), poll(struct),
 // issues(struct): [{ kind, setting, message }], instances(view): the structs it evaluates, evaluates(entry),
-// evaluate(view), export(world): { issues, animations, restore } }.
+// evaluate(view), export(world, { bake }): { issues, animations, curves?, gaps?, restore } }.
 const features = [];
 export function registerRuntime(feature) {
   features.push(feature);
@@ -48,11 +48,13 @@ function reportIssues(title, issues) {
 
 // Export (io_scene_babylon): every feature's instances mapped into Babylon for the file (those in Blender for its
 // duration), their issues reported, and Babylon animations of what Blender's animation system drives that the mapping
-// makes (a skeleton's bones). Returns { animations: [{ animation, target }], restore() }.
-export function exportRuntimes(world) {
-  const results = features.map((feature) => feature.export(world));
+// makes (a skeleton's bones). Without `bake`, F-Curves a package's page runs instead (live-curves.js) go in `curves`,
+// and what is still sampled in `gaps`. Returns { animations: [{ animation, target }], curves, gaps, restore() }.
+export function exportRuntimes(world, { bake = true } = {}) {
+  const results = features.map((feature) => feature.export(world, { bake }));
   for (const { title, issues } of results.flatMap((r) => r.reports)) reportIssues(title, issues);
-  return { animations: results.flatMap((r) => r.animations), restore: () => results.forEach((r) => r.restore()) };
+  return { animations: results.flatMap((r) => r.animations), curves: results.flatMap((r) => r.curves ?? []), gaps: results.flatMap((r) => r.gaps ?? []),
+    restore: () => results.forEach((r) => r.restore()) };
 }
 
 // ---- Blender's side: `bylonder` on each struct a feature lives on, as an add-on registers its properties, and the panels.
