@@ -23,6 +23,7 @@ import { createRNA } from '../src/makesrna/rna-bylonder.js';
 import { createMainSync } from '../src/blenkernel/main-sync.js';
 import { babylonMatrix } from '../src/blenkernel/main-view.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
+import { nodeId } from '../src/editors/object/identity.js';
 import { writePackage } from './export-package.js';
 
 // The example opened as a project opens it, in a world with the slices the view reads.
@@ -47,6 +48,10 @@ sync.view();
 
 // A custom property, as the Custom Properties panel adds one.
 setCustomProperty(sync.objectOf(objects.find((n) => n.name === 'Flywheel')), 'speed', 2.5);
+// The Key Light (an area light) keyed to slide along X: its rig carries the motion.
+const keyLight = objects.find((n) => n.name === 'Key Light'), slide = animation.ref('object:' + nodeId(keyLight), 'position.x');
+animation.insert([slide], 1, keyLight.position.x);
+animation.insert([slide], 30, keyLight.position.x + 2);
 const files = await exportModule(world);
 assert.ok(files['scene.d.ts'].includes(`'objects["Flywheel"].location[0]': number;`), 'scene.d.ts types the controls');
 const written = writePackage(files);
@@ -106,6 +111,16 @@ function setBoth(name, property, index, value) {
   blend.set(path, value);
   ob[property][index] = value;
   sync.view();
+}
+// The area light's rectangle at frames of its slide, as the app draws it from Main.
+const group = page.animationGroups[0], current = animation.time.frame;
+assert.ok(group.targetedAnimations.some((t) => t.target.name === 'Key Light rig'), 'the rig is animated');
+for (const frame of [1, 15, 30, current]) {
+  group.start(false, 1, frame, frame);
+  group.goToFrame(frame);
+  sync.frameChanged(frame);
+  lit('Key Light');
+  group.stop();
 }
 for (const name of ['Steam Cylinder', 'Governor Cap', 'Camera', 'Key Light', 'Rim Light', 'Governor Ball']) {
   if (!node(name)) continue;

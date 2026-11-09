@@ -9,7 +9,6 @@ import { exportRuntimes } from '../runtimes/runtimes.js';
 import { exportControls, controlTypes } from './controls-export.js';
 import { createSceneBin } from './scene-bin.js';
 import { imageFiles } from './image-files.js';
-import { areaRigs } from './area-lights.js';
 
 const CDN = `https://cdn.jsdelivr.net/npm/@babylonjs/core@${AbstractEngine.Version}/+esm`;
 const json = (value) => JSON.stringify(value);
@@ -114,7 +113,7 @@ async function moduleSource(world, live, mapped, parity, hostCompression) {
     geometries.set(mesh.geometry, `geometries[${geometries.size}]`);
     geometryLines.push(`  ${geometryCode(mesh, bin)},`);
   }
-  const controls = exportControls(world, data), rigs = areaRigs(world, data);
+  const controls = exportControls(world, data);
   const parented = [...data.transformNodes, ...data.meshes, ...data.lights, ...data.cameras].filter((e) => e.parentId !== undefined);
   const parse = (name, list, code) => (list?.length ? `  for (const entry of ${name}) ${code};\n` : '');
   const settings = {
@@ -161,7 +160,6 @@ const RENDERING_PIPELINES = ${json(data.renderingPipelines)};
 const POST_PROCESSES = ${json(data.postProcesses)};
 const BUFFERS = ${json(bin.views)};
 const CONTROLS = ${json(controls)};
-const AREA_RIGS = ${json(rigs)};
 
 export async function load(engine) {
   return new BlendScene(await createScene(engine, engine.getRenderingCanvas()), CONTROLS);
@@ -201,15 +199,6 @@ ${geometryLines.join('\n')}
 ${objectLines}
 ${parse('LIGHTS', data.lights, 'nodes[entry.uniqueId] = Light.Parse(entry, scene)')}${parse('CAMERAS', data.cameras, 'nodes[entry.uniqueId] = Camera.Parse(entry, scene)')}
 ${parented.map((e) => `  nodes[${e.uniqueId}].parent = nodes[${e.parentId}] ?? null;`).join('\n')}
-  // An area light turns by its parent: a rig placed as its object.
-  for (const rig of AREA_RIGS) {
-    const light = nodes[rig.light], node = new TransformNode(rig.id, scene);
-    node.rotationQuaternion = new Quaternion();
-    Matrix.FromArray(rig.matrix).decompose(node.scaling, node.rotationQuaternion, node.position);
-    node.parent = light.parent;
-    light.parent = node;
-    light.position.setAll(0);
-  }
 
 ${parse('REFLECTION_PROBES', data.reflectionProbes, "ReflectionProbe.Parse(entry, scene, ROOT)")}${parse('SHADOW_GENERATORS', data.shadowGenerators, "(entry.className === 'CascadedShadowGenerator' ? CascadedShadowGenerator : ShadowGenerator).Parse(entry, scene)")}${parse('EFFECT_LAYERS', data.effectLayers, "EffectLayer.Parse(entry, scene, ROOT)")}${parse('PARTICLE_SYSTEMS', data.particleSystems, "ParticleSystem.Parse(entry, scene, ROOT)")}  if (SCENE.environmentProbe) scene.environmentTexture = scene.reflectionProbes.find((p) => p.name === SCENE.environmentProbe)?.cubeTexture ?? scene.environmentTexture;
   scene.activeCamera = scene.getCameraById(${json(data.activeCameraID ?? null)}) ?? scene.cameras[0] ?? null;

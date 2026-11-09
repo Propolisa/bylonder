@@ -1,6 +1,6 @@
 // File > Export > Babylon (.babylon): the scene as Babylon's SceneSerializer writes it, from the evaluated scene, as
 // Blender's glTF exporter exports the evaluated depsgraph (docs/blender-boundary.md, Export for Babylon).
-import { Animation, AnimationKeyInterpolation, Camera, Light, Quaternion, SceneSerializer, Texture, Vector3, VertexBuffer } from '@babylonjs/core';
+import { Animation, AnimationKeyInterpolation, Camera, Light, Quaternion, RectAreaLight, SceneSerializer, Texture, Vector3, VertexBuffer } from '@babylonjs/core';
 import { evaluatedMatrix, BLENDER_FORWARD } from '../runtime/object-transform.js';
 import { idStruct } from '../python/bpy_rna.js';
 import { deleted, nodeId } from '../editors/object/identity.js';
@@ -8,6 +8,7 @@ import { exportRuntimes } from '../runtimes/runtimes.js';
 import { straightImageData } from '../imbuf/image-textures.js';
 import { exportNodeMaterial } from './node-material-export.js';
 import { exactAnimation } from './exact-keys.js';
+import { AREA_LIGHT, rigAreaLights, rigId, rigTransform } from './area-lights.js';
 
 // The World's skybox is Bylonder's (world-babylon.js) but is what a render shows; the loader rebuilds it.
 const WORLD_SKYBOX = '__worldSkybox';
@@ -99,6 +100,8 @@ const placed = (world, nodes) => (world.mainSync ? [...nodes].filter((node) => (
 function evaluatedTransform(sync, node) {
   const parent = node.parent && (sync.worldMatrix(node.parent) ?? node.parent.computeWorldMatrix(true)), toParent = parent?.clone().invert();
   const position = new Vector3(), rotationQuaternion = new Quaternion(), scaling = new Vector3();
+  // An area light's transform is its rig's (area-lights.js).
+  if (node instanceof RectAreaLight) return rigTransform(evaluatedMatrix(node), toParent);
   if (node instanceof Light) {
     const matrix = evaluatedMatrix(node), direction = Vector3.TransformNormal(BLENDER_FORWARD, matrix);
     if (!toParent) return { position: matrix.getTranslation(), direction: direction.normalize() };
@@ -192,7 +195,7 @@ function bakeAnimations(world, samples, content, live, mapped, transforms, keys)
   }
   const targetedAnimations = mapped.map(({ animation, target }) => ({ animation: animation.serialize(), targetId: target.id }));
   for (const [node, frames] of transforms ?? []) {
-    for (const animation of transformAnimations(node, keys.get(node), frames, { frameStart, fps })) targetedAnimations.push({ animation: animation.serialize(), targetId: node.id });
+    for (const animation of transformAnimations(node, keys.get(node), frames, { frameStart, fps })) targetedAnimations.push({ animation: animation.serialize(), targetId: node instanceof RectAreaLight ? rigId(node.id) : node.id });
   }
   for (const { owner, path, value, components, step } of tracks.values()) {
     if (typeof value !== 'number' && !ANIMATION_TYPES[value?.getClassName?.()]) continue;
@@ -312,9 +315,10 @@ async function serializeMapped(world, { geometry, live, mapped, parity }) {
     restores.forEach((restore) => restore());
   }
   const json = await pending;
+  rigAreaLights(json, transforms);
   for (const entry of [...json.meshes, ...(json.transformNodes ?? []), ...json.lights, ...json.cameras]) {
     const transform = transforms.get(entry.uniqueId);
-    if (!transform) continue;
+    if (!transform || entry.type === AREA_LIGHT) continue;
     for (const [key, value] of Object.entries(transform)) entry[key] = value.asArray();
     if (transform.rotationQuaternion) entry.rotation = [0, 0, 0];
   }
