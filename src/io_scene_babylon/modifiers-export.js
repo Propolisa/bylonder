@@ -80,10 +80,11 @@ function settingInputs(paths) {
 }
 
 // A modifier's settings, one per DNA field: a property that is another's field in other units (Bevel's `width_pct`,
-// its `width`) is left out, as the page, setting the one, would have the other write its stale value back.
-function ownFields(values, layouts) {
+// its `width`) is left out, as the page, setting the one, would have the other write its stale value back. Of such
+// twins the one animated (`animated`, paths) stays, as the animation sets it (Simple Deform's `angle`, its `factor`).
+function ownFields(values, layouts, animated) {
   const fields = new Set();
-  return Object.entries(values).filter(([path]) => {
+  return Object.entries(values).sort(([a], [b]) => animated.has(b.replace(/\[\d+\]$/, '')) - animated.has(a.replace(/\[\d+\]$/, ''))).filter(([path]) => {
     const [, prop, index] = /^(\w+)(?:\[(\d+)\])?$/.exec(path), layout = layouts[prop];
     const field = layout && `${layout.offset}:${layout.bit}:${index}`;
     return !field || (!fields.has(field) && fields.add(field));
@@ -114,16 +115,25 @@ function chain(ob, node, modifiers, base) {
   return entities;
 }
 
+// The data paths an object's F-Curves and drivers set (`modifiers["Bend"].angle`).
+function animatedPaths(ob) {
+  const animation = ob.animation_data, action = animation?.action;
+  const bags = action ? [...action.layers].flatMap((layer) => [...layer.strips].flatMap((strip) => [...strip.channelbags])) : [];
+  return new Set([...bags.flatMap((bag) => [...bag.fcurves]), ...(animation ? animation.drivers : [])].map((fc) => fc.data_path));
+}
+
 // The `live` stacks' settings added to `properties`, and their entities.
 export function modifierEntities(world, live, properties, bin) {
   const entities = {};
   for (const [node, stack] of live) {
     const ob = idStruct(world.mainSync.objectOf(node)), shown = [...ob.modifiers].filter((m) => m.show_viewport), names = shown.map((m) => m.name);
+    const animated = animatedPaths(ob);
     const modifiers = stack.modifiers.map(({ kind, type, layouts, values }, i) => {
-      const named = nameSettings(shown[i]);
+      const named = nameSettings(shown[i]), prefix = `modifiers${key(names[i])}.`;
+      const own = new Set([...animated].filter((path) => path.startsWith(prefix)).map((path) => path.slice(prefix.length)));
       return {
         name: names[i], type: kind, implementation: 'modifiers', output: 'mesh',
-        inputs: { ...settingInputs(ownFields(values, layouts).map(([path, value]) => {
+        inputs: { ...settingInputs(ownFields(values, layouts, own).map(([path, value]) => {
           const float = typeof value === 'number' && layouts[/^\w+/.exec(path)[0]]?.kind === 'float', property = `objects${key(ob.name)}.modifiers${key(names[i])}.${path}`;
           properties.push(knob(property, value, float ? { type: 'FLOAT' } : {}, { node: node.id, channel: channelKey(i, path) }));
           return [path, { property }];
