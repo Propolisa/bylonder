@@ -5,7 +5,7 @@ import { evaluatedMatrix, BLENDER_FORWARD } from '../runtime/object-transform.js
 import { idStruct } from '../python/bpy_rna.js';
 import { deleted, nodeId } from '../editors/object/identity.js';
 import { exportRuntimes } from '../runtimes/runtimes.js';
-import { straightImageData } from '../imbuf/image-textures.js';
+import { imageFile } from '../imbuf/image-textures.js';
 import { exportNodeMaterial } from './node-material-export.js';
 import { exactAnimation } from './exact-keys.js';
 import { channelKey } from './modifiers-export.js';
@@ -305,7 +305,7 @@ async function serializeMapped(world, { geometry, live, mapped, parity }) {
   world.shadows?.setActive(true, world.renderSettings.state.eevee.shadowRayCount);
   const effects = camera ? cameraEffects(world, scene, camera) : { renderingPipelines: [], postProcesses: [] };
   const all = [...scene.meshes, ...scene.transformNodes, ...scene.lights, ...scene.cameras];
-  const straight = new Map(scene.textures.filter((t) => t instanceof Texture).map((t) => [t, straightImageData(t)]).filter(([, data]) => data));
+  const imageData = new Map(scene.textures.filter((t) => t instanceof Texture).map((t) => [t, imageFile(t)]).filter(([, data]) => data));
   // Sampled before the export's flags and metadata are set, which channels read to know they are available.
   const samples = world.animation.sample(), liveIds = live && new Map([...live].map(([node, stack]) => [nodeId(node), [node, stack]]));
   // Objects' evaluated transforms too, while their metadata, which evaluating a frame reads, is theirs.
@@ -321,8 +321,9 @@ async function serializeMapped(world, { geometry, live, mapped, parity }) {
     setFor(scene.materials, 'doNotSerialize', (m) => !content.materials.has(m)),
     geometry ? () => {} : withoutGeometry(scene.getGeometries()),
     setFor(scene.textures.filter((t) => t instanceof Texture && !t.isRenderTarget), '_forceSerialize', (t) => t._forceSerialize || !portable(t.url ?? '')),
-    // A float image's texture is written from Blender's straight pixels (Texture.serialize's data URL buffer), not read back.
-    setFor([...straight.keys()], '_buffer', (t) => straight.get(t)),
+    // An image of Main's is written from Blender's data (Texture.serialize's data URL buffer), not read back, top row first.
+    setFor([...imageData.keys()], '_buffer', (t) => imageData.get(t)),
+    setFor([...imageData.keys()], '_invertY', () => true),
     // Instances named by their instancers.
     setFor([...content.nodes].filter(instances), 'name', (node) => `${node.metadata.instancers.map((n) => n.name).join(', ') || 'Scene'} Instances`),
     setFor(all, 'metadata', authoredMetadata),

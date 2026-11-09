@@ -63,27 +63,16 @@ assert.ok(['objects["Subdivision"].modifiers["Subdivision"].levels', 'objects["A
   .every((path) => controls.some((c) => c.path === path)), 'modifier settings are controls by their Blender paths');
 assert.doesNotMatch(files['scene.js'], /bylonderModifiers|base64/, 'no Babylon-side paths and no geometry in the source');
 
-// A module worker in this realm, as Node has no Web Worker: the bundled worker sets the global onmessage, which a
-// worker's global scope has.
-globalThis.onmessage = null;
-globalThis.Worker = class {
-  constructor(url) {
-    this.loaded = import(url.href);
-    globalThis.postMessage = (data) => this.onmessage({ data });
-  }
-  postMessage(data) { this.loaded.then(() => globalThis.onmessage({ data })); }
-  terminate() {}
-};
-
 const geometry = (mesh) => ['position', 'normal'].map((kind) => Array.from(mesh.getVerticesData(kind))).concat([Array.from(mesh.getIndices())]);
 // Normals within a 16-bit snorm step: the app draws Blender's draw buffers' normals (draw-mesh.cc), the export's
 // polyfill its own float ones.
 const TOLERANCE = [1e-5, 1 / 32767, 0];
 const same = (a, b) => a.length === b.length && a.every((array, i) => array.length === b[i].length && array.every((v, j) => Math.abs(v - b[i][j]) <= TOLERANCE[i] + 1e-6));
 
-let workers = 0;
-const Shim = globalThis.Worker;
-globalThis.Worker = class extends Shim { constructor(url) { super(url); workers++; } };
+// Node has no Web Worker: the evaluator runs the worker's module in this thread, which reads modifiers.wasm.
+let wasmReads = 0;
+const fs = process.getBuiltinModule('fs/promises'), readFile = fs.readFile;
+fs.readFile = (path, ...rest) => (wasmReads += String(path).endsWith('modifiers.wasm'), readFile(path, ...rest));
 const blend = await (await import(written.url)).load(new NullEngine());
 const built = blend.scene;
 const group = built.animationGroups[0];
@@ -91,7 +80,7 @@ group.pause();
 group.goToFrame(1);
 built.render();
 await blend.settled();
-assert.equal(workers, 0, 'no stack runs before a setting changes: the page draws the applied geometry');
+assert.equal(wasmReads, 0, 'no stack runs before a setting changes: the page draws the applied geometry');
 
 // Each stack run with one setting changed, and again at its value at export: the result is the applied geometry.
 const DEFAULTS = { Subdivision: ['levels', 2], Array: ['count', 3], Bevel: ['segments', 3], Mirror: ['use_axis[1]', false], Solidify: ['thickness', 0.1] };
@@ -105,7 +94,7 @@ for (const cube of cubes) {
   await blend.settled();
   assert.ok(same(geometry(mesh), geometry(cube)), `${cube.name}: the live result is the applied geometry`);
 }
-assert.equal(workers, 1, 'one worker runs every stack');
+assert.equal(wasmReads, 1, 'one module runs every stack');
 
 // Frame 20: the animation group sets the thickness through its channel, the stack runs again, and the result is Bylonder's.
 group.goToFrame(20);
@@ -122,6 +111,7 @@ await blend.settled();
 world.modifiers.set(cubes[4], added[4].id, 'thickness', 0.25);
 await world.modifiers.settled();
 assert.ok(same(geometry(built.getMeshByName('Solidify')), geometry(cubes[4])), 'Solidify set to 0.25 by path: the live result is the applied geometry');
+fs.readFile = readFile;
 blend.dispose();
 written.remove();
 console.log('Live modifiers: settings by Blender path; Subdivision, Array, Bevel, Mirror and Solidify, and an animated Solidify thickness, match the applied export; nothing runs until a setting changes');

@@ -442,7 +442,8 @@ Decided 2026-10-28. Exports apply modifiers; File > Export > JavaScript, Live Mo
 - **In the page.** The `modifiers` evaluator of the package's dependency table (`docs/controllable-exports.md`):
   `runtime/modifiers-evaluator.js` starts `bylonder-modifiers/modifiers-worker.js` (`polyfill/worker.js` bundled by
   `scripts/modifiers-polyfill.mjs` into `modifiers-worker.bundle.js`, which a test keeps current) with `modifiers.wasm`
-  on the first set of a modifier setting; until then the applied geometry shows.
+  on the first set of a modifier setting; until then the applied geometry shows. Where there are no workers (Node), it
+  imports the same module and calls its `handle` in its own thread.
 - **What a live object carries.** An object whose shown modifiers are all Blender's (`modifiers.live(node)`) has each
   setting as a control by its RNA path (`objects["Cube"].modifiers["Subdivision"].levels`) and one `modifiers`
   operation reading them, with its base Mesh as the module takes it (positions, edges, face offsets, corner verts and

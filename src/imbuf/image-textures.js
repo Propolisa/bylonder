@@ -3,9 +3,10 @@
 // changed regions only), with its mipmaps made again once it stops changing. Each user samples it through a Texture of
 // its own wrapping (an Image Texture node's extension), all sharing the one GPU texture.
 import { Constants, Texture } from '@babylonjs/core';
-import { GenerateBase64StringFromPixelData } from '@babylonjs/core/Misc/copyTools.js';
 import { blenderModule } from '../bmesh/bmesh-wasm.js';
 import { blendData, contextStruct, pointerOf } from '../python/bpy_rna.js';
+import { files } from '../port/wasm.js';
+import { pngDataUrl, webImage } from './data-url.js';
 
 const { exports: x, withArrays } = blenderModule;
 // image-api.cc ImageBufferKind.
@@ -52,15 +53,33 @@ function upload(engine, image, pointer) {
   return true;
 }
 
-// A float image's texture as an export writes it, straight as Babylon's own materials sample it: Blender's pixels
-// (Image.pixels, straight) as the PNG data URL Babylon's read-back would encode (GenerateBase64StringFromPixelData);
-// null for any other texture, whose read-back is what it holds.
-export function straightImageData(texture) {
+// An image's texture as an export writes it, from Blender's data rather than a GPU read-back, so a headless export
+// writes the same file: the image's own file (packed, or read) when Blender has it unchanged in a format browsers
+// load; else its buffer as a PNG, a float buffer straight as Babylon's own materials sample it and at 8 bits as
+// Babylon's read-back encodes it (GenerateBase64StringFromPixelData). Either way its rows are top first, so its
+// texture inverts Y. null for a texture of no Image.
+export function imageFile(texture) {
   const internal = texture.getInternalTexture();
-  if (!premultiplied(internal)) return null;
   const uid = [...images].find(([, image]) => image.internal === internal)?.[0];
   const image = uid !== undefined && [...blendData().images].find((candidate) => candidate.session_uid === uid);
-  return image ? GenerateBase64StringFromPixelData(Float32Array.from(image.pixels), texture.getSize(), internal.invertY) : null;
+  if (!image) return null;
+  const file = !image.is_dirty && image.source === 'FILE' && webImage(fileBytes(image));
+  if (file) return file;
+  const buffer = imageBuffer(pointerOf(image)[2]);
+  if (!buffer) return null;
+  const rgba = buffer.float ? Uint8Array.from(image.pixels, (v) => Math.min(1, Math.max(0, v)) * 255) : buffer.pixels.slice();
+  return pngDataUrl(rgba, buffer.width, buffer.height);
+}
+
+// An image's file as Blender holds it: its packed file's bytes (DNA PackedFile: int size, int seek, void *data, the
+// size checked against RNA's), else the file at its path in the module's file system.
+function fileBytes(image) {
+  const packed = image.packed_file;
+  if (packed) {
+    const [size, , data] = new Int32Array(x.memory.buffer, pointerOf(packed)[2] >>> 0, 3);
+    return size === packed.size ? new Uint8Array(x.memory.buffer, data >>> 0, size).slice() : null;
+  }
+  return files.get(image.filepath_from_user()) ?? null;
 }
 
 // Every image's texture filled again from Blender's buffer (after a lost context).

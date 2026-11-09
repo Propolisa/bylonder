@@ -136,6 +136,32 @@ types. `controls()` fields are named as Blender's RNA names them.
 - Interop: a pair of FlowGraph blocks (Get and Set Bylonder Property) calls `get` and `set`, so a user's own FlowGraph
   or glTF interactivity drives the same knobs. Nothing else is FlowGraph's.
 
+#### Use it from Node
+
+The same package runs in Node without a page, on Babylon's `NullEngine`: install `@babylonjs/core` beside it (its
+`package.json` names the version), import its `scene.js` by file URL, set controls and read the evaluated scene from
+Babylon's objects. Drivers run in the clean-room units, live modifiers run `modifiers.wasm` in the script's own thread
+(Node has no Web Worker) and the Blender fallback runs Blender's module, each reading its files from the package
+folder. Values read back are in Babylon's axes (y up).
+
+```js
+import { pathToFileURL } from 'node:url';
+import { NullEngine } from '@babylonjs/core';
+
+const { load } = await import(pathToFileURL('steam-engine/scene.js').href);
+const blend = await load(new NullEngine());
+blend.set('objects["Flywheel"].rotation_euler[1]', 1.2);
+await blend.settled();                                // once an evaluator has loaded
+blend.scene.getNodeById('Crosshead').computeWorldMatrix(true);
+blend.scene.getMeshById('Crosshead').getVerticesData('position');
+blend.dispose();
+```
+
+`docs/examples/headless-sdk.mjs` is a complete script: it takes a package, controls as JSON and object names, and
+prints each object's world matrix and evaluated positions. `tests/headless-sdk-wasm.test.js` runs it on exported
+examples in a process of its own and compares with the app. Nothing draws: textures are created, not decoded, and
+Babylon warns that an area light has no LTC data.
+
 ### Bindings
 
 Each knob's binding says where its value lands in Babylon: a target (node, light, camera, material InputBlock, morph
@@ -593,6 +619,13 @@ Each step lands on its own, with its tests, and leaves exports working.
    the exporter asks the module, which decodes images with Blender's own readers (`tests/images-wasm.test.js`); today a
    Node-side export writes an Image Texture's name, not its file. Checks: a script sets paths and reads the evaluated
    mesh and transforms, matching the app; a headless export of the Framed Print writes its images.
+
+   Built: a package loads in Node (Use it from Node, above). An export writes each image from Blender's data, never a
+   GPU read-back, so the app and Node write the same files (`imbuf/image-textures.js` `imageFile`): an unchanged image
+   whose file Blender holds (packed, or in the module's file system) in a format browsers load (PNG, JPEG, WebP) ships
+   that file as it is; any other (generated, painted, OpenEXR, Radiance HDR) ships as a PNG of its buffer, a float one
+   straight at 8 bits, so high dynamic range is lost. With the Framed Print's two images saved as JPEG, its package
+   is 0.73 MB, 2.11 MB when they were PNGs of their pixels.
 9. **Blender add-on.** A thin desktop add-on, File > Export > Bylonder Package, that saves the `.blend` and runs the
    same exporter headless through the headless SDK (Node and the module). One exporter, a native entry for Blender
    users, and no second mapping in Python. Checks: the add-on's package of an example equals the app's.

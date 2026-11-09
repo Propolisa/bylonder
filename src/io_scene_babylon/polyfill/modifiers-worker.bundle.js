@@ -552,15 +552,23 @@ function createEvaluator(exports) {
 
 // src/io_scene_babylon/polyfill/worker.js
 var evaluator;
-onmessage = async ({ data }) => {
+async function handle(data) {
   if (data.wasm) {
     evaluator = instantiate(new URL(data.wasm)).then(({ exports }) => createEvaluator(exports));
-    return;
+    return null;
   }
   try {
-    const buffers = (await evaluator)(data.base, data.stack);
-    postMessage({ id: data.id, buffers }, Object.values(buffers).map((array) => array.buffer));
+    return { id: data.id, buffers: (await evaluator)(data.base, data.stack) };
   } catch (error) {
-    postMessage({ id: data.id, error: error.message });
+    return { id: data.id, error: error.message };
   }
+}
+if (typeof WorkerGlobalScope !== "undefined") {
+  onmessage = async ({ data }) => {
+    const reply = await handle(data);
+    if (reply) postMessage(reply, Object.values(reply.buffers ?? {}).map((array) => array.buffer));
+  };
+}
+export {
+  handle
 };

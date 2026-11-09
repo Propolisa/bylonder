@@ -8,14 +8,14 @@ import {
   AddBlock, ClampBlock, ClearCoatBlock, ColorMergerBlock, ColorSplitterBlock, CustomBlock, DivideBlock, LerpBlock, MaxBlock, MultiplyBlock, FragmentOutputBlock, ImageProcessingBlock, ImageSourceBlock, InputBlock, NodeMaterial, PBRMetallicRoughnessBlock, ReflectionBlock, ScaleBlock, SubtractBlock,
   NodeMaterialBlockConnectionPointTypes as T, NodeMaterialSystemValues as System, Vector3, Vector4,
 } from '@babylonjs/core';
-import { zlibSync } from 'fflate';
 import {
   BlenderClosureNormalBlock, BlenderDisplayBlock, BlenderReflectionBlock, BlenderFarPlaneBlock, BlenderWorldProbeClampBlock, BlenderSurfaceBlock, BlenderUnlitSurfaceBlock, BlenderViewEyeBlock, isBlenderShader, meshValue,
   ShaderNodeOutputMaterial, STAND_INS,
 } from '../nodes/blender/shader-nodes.js';
 import { CurvesGeometryBlock, CurvesNormalBlock } from '../draw/curves.js';
 import { glslValue, LUMINANCE } from '../nodes/blender/sockets.js';
-import { straightImageData } from '../imbuf/image-textures.js';
+import { imageFile } from '../imbuf/image-textures.js';
+import { pngDataUrl } from '../imbuf/data-url.js';
 
 const GLSL = { [T.Float]: 'float', [T.Vector2]: 'vec2', [T.Vector3]: 'vec3', [T.Vector4]: 'vec4', [T.Color3]: 'vec3', [T.Color4]: 'vec4', [T.Matrix]: 'mat4' };
 const typeName = (type) => T[type];
@@ -299,50 +299,16 @@ function blenderNodes(material, { closure, merge, scene, textures, systemValue }
   };
 }
 
-// A texture as Babylon's serialization of one: its pixels as a PNG data URL (Blender's straight pixels for an image, a
-// color ramp's table at 8 bits).
+// A texture as Babylon's serialization of one: an image's file (imageFile), a color ramp's table as an 8 bit PNG.
 async function textureJson(texture) {
   const table = texture.metadata?.table;
-  const data = table ? pngDataUrl(table, table.length / 4, 1) : straightImageData(texture) ?? null;
+  const data = table ? pngDataUrl(Uint8Array.from(table, (v) => Math.round(Math.min(1, Math.max(0, v)) * 255)), table.length / 4, 1) : imageFile(texture);
   const forced = texture._forceSerialize;
   texture._forceSerialize = !data;
   let json;
   try { json = texture.serialize() ?? {}; } finally { texture._forceSerialize = forced; }
   const base64String = data ?? (await json.base64String);
-  return { ...json, name: texture.name || 'blender', url: '', base64String, wrapU: texture.wrapU, wrapV: texture.wrapV, samplingMode: texture.samplingMode, invertY: false,
+  return { ...json, name: texture.name || 'blender', url: '', base64String, wrapU: texture.wrapU, wrapV: texture.wrapV, samplingMode: texture.samplingMode, invertY: !!data,
     noMipmap: !!table };
 }
 
-// RGBA floats in [0, 1] as an 8 bit PNG.
-function pngDataUrl(values, width, height) {
-  const rows = new Uint8Array((width * 4 + 1) * height);
-  for (let y = 0; y < height; y++) for (let x = 0; x < width * 4; x++) rows[y * (width * 4 + 1) + 1 + x] = Math.round(Math.min(1, Math.max(0, values[y * width * 4 + x])) * 255);
-  const chunk = (type, data) => {
-    const body = new Uint8Array(4 + data.length);
-    body.set([...type].map((ch) => ch.charCodeAt(0)));
-    body.set(data, 4);
-    const out = new Uint8Array(12 + data.length), view = new DataView(out.buffer);
-    view.setUint32(0, data.length);
-    out.set(body, 4);
-    view.setUint32(8 + data.length, crc32(body));
-    return out;
-  };
-  const header = new Uint8Array(13), view = new DataView(header.buffer);
-  view.setUint32(0, width);
-  view.setUint32(4, height);
-  header.set([8, 6, 0, 0, 0], 8);
-  const parts = [Uint8Array.of(137, 80, 78, 71, 13, 10, 26, 10), chunk('IHDR', header), chunk('IDAT', zlibSync(rows)), chunk('IEND', new Uint8Array())];
-  const png = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
-  parts.reduce((at, p) => (png.set(p, at), at + p.length), 0);
-  let text = '';
-  for (const byte of png) text += String.fromCharCode(byte);
-  return 'data:image/png;base64,' + btoa(text);
-}
-function crc32(bytes) {
-  let crc = ~0;
-  for (const byte of bytes) {
-    crc ^= byte;
-    for (let k = 0; k < 8; k++) crc = (crc >>> 1) ^ (0xedb88320 & -(crc & 1));
-  }
-  return ~crc >>> 0;
-}

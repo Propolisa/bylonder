@@ -19,24 +19,41 @@ function setting(layouts, path, value) {
   return typeof value === 'number' && layout && layout.kind !== 'float' && !layout.boolean ? Math.round(value) : value;
 }
 
-/** @param {import('./scheduler.js').Page} page @returns {Promise<import('./scheduler.js').Evaluator>} */
-export async function load({ scene, root, buffers }) {
-  const worker = new Worker(new URL('bylonder-modifiers/modifiers-worker.js', root), { type: 'module' });
-  worker.postMessage({ wasm: new URL('bylonder-modifiers/modifiers.wasm', root).href });
-  /** @type {Map<number, { resolve(buffers: Record<string, any>): void, reject(error: Error): void }>} */
+/**
+ * The polyfill's message handler: its worker, or the worker's module run in this thread where there are no workers
+ * (Node), as a script has no page to keep responsive.
+ * @param {URL} url
+ * @returns {Promise<(message: any) => Promise<any>>}
+ */
+async function connect(url) {
+  if (typeof Worker === 'undefined') return (await import(url.href)).handle;
+  const worker = new Worker(url, { type: 'module' });
+  /** @type {Map<number, (reply: any) => void>} */
   const replies = new Map();
   let next = 0;
   worker.onmessage = ({ data }) => {
-    const reply = replies.get(data.id);
+    replies.get(data.id)?.(data);
     replies.delete(data.id);
-    if (data.error) reply?.reject(new Error(data.error));
-    else reply?.resolve(data.buffers);
   };
+  return async (message) => {
+    if (message.wasm) return worker.postMessage(message);
+    return new Promise((resolve) => {
+      replies.set(next, resolve);
+      worker.postMessage({ ...message, id: next++ });
+    });
+  };
+}
+
+/** @param {import('./scheduler.js').Page} page @returns {Promise<import('./scheduler.js').Evaluator>} */
+export async function load({ scene, root, buffers }) {
+  const handle = await connect(new URL('bylonder-modifiers/modifiers-worker.js', root));
+  await handle({ wasm: new URL('bylonder-modifiers/modifiers.wasm', root).href });
   /** @param {any} base @param {any[]} stack @returns {Promise<Record<string, any>>} */
-  const evaluate = (base, stack) => new Promise((resolve, reject) => {
-    replies.set(next, { resolve, reject });
-    worker.postMessage({ id: next++, base, stack });
-  });
+  const evaluate = async (base, stack) => {
+    const reply = await handle({ base, stack });
+    if (reply.error) throw new Error(reply.error);
+    return reply.buffers;
+  };
 
   /** Each operation's evaluation going, and the settings to evaluate after it. */
   const running = new Map(), queued = new Map();

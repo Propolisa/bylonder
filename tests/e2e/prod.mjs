@@ -190,10 +190,10 @@ try {
   // An export writes a float image's texture with straight alpha, Blender's pixels, though it is drawn premultiplied.
   await step("an export writes float images straight", async () => {
     const { written, straight, serialized } = await app.bylonder(async (b) => {
-      const { blendData } = b.modules.bpyRna, { imageTexture, straightImageData } = b.modules.imageTextures;
+      const { blendData } = b.modules.bpyRna, { imageTexture, imageFile } = b.modules.imageTextures;
       const image = blendData().images.new("Half", 4, 4, true, true);
       image.generated_color = [1, 0.5, 0.25, 0.5];
-      const texture = imageTexture(image, b.world.scene), data = straightImageData(texture);
+      const texture = imageTexture(image, b.world.scene), data = imageFile(texture);
       const png = Object.assign(new Image(), { src: data }), canvas = Object.assign(document.createElement("canvas"), { width: 4, height: 4 });
       await png.decode();
       canvas.getContext("2d").drawImage(png, 0, 0);
