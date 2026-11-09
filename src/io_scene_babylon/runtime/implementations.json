@@ -6,6 +6,7 @@
       { "implementation": "page runtime (blend-scene.js) composing location, rotation and scale", "license": "MIT OR Apache-2.0", "fidelity": "exact" }
     ],
     "constraint:*": [
+      { "implementation": "Babylon's matrices (runtime/constraints-evaluator.js): an object's Track To, Copy Location, Copy Rotation (all axes, replacing) and Child Of (all channels) in world space at full influence, applied to its node before each frame draws, kept where they give Main's world matrix at every frame", "license": "MIT OR Apache-2.0", "fidelity": "exact" },
       { "implementation": "Blender's module (the fallback evaluator)", "license": "GPL-2.0-or-later", "fidelity": "exact", "status": "planned" },
       { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
     ],

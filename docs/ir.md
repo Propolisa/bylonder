@@ -132,6 +132,7 @@ What each kind of entity reads and gives:
 | `grease_pencil:LAYER` | `layer`, `blend`, `matrix`, `scale`, `frames` (the layer's keyed frames) and `drawings` (each key's drawing, its arrays buffers, or null), `frame` | `geometry` (the drawing shown at the frame: its last key's at or before it) |
 | `curves:CURVES` | Main's curves draw at export (Geometry) | `geometry` (`{ curves }`, drawn once by Blender's curve shape functions in `bylonder-curves/`, GPL) |
 | `animation:FCURVE` | its action's RNA path, `data_path` and `array_index` as names, `animation` (the Babylon AnimationGroup and target node that play it, `native`) or `curve` (`extrapolation`, `auto_smoothing`, `cycles`, and `keyframes` as a buffer of 13 floats per key: co, handles, interpolation, easing, handle types, back, amplitude, period; `fcurve`), `frame` | `value` |
+| `constraints:OBJECT` | `node`, `constraints` (each `type`, `target` node and its settings: Track To's axes, Copy Location's axes, inversions and offset, Child Of's `inverse_matrix` by rows of Blender's axes), `frame` | none: the node is placed (`constraints`) |
 
 Each frame, the scheduler runs again what reads `frame_current` and is not Babylon's own. What reads no property or
 entity (curves) runs once, at load. An F-Curve's keys are not

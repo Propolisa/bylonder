@@ -3,11 +3,12 @@
 // cannot repeat. One is kept only when the page's result, the curves through scene.bin's floats composed as blend-scene.js
 // places the node, is what Main evaluated at every frame of the range; anything else that moves the transform (NLA,
 // drivers, constraints, F-modifiers but Cycles, delta transforms) leaves it sampled.
-import { Quaternion } from '@babylonjs/core';
+import { Matrix, Quaternion } from '@babylonjs/core';
 import { idStruct } from '../python/bpy_rna.js';
 import { placement, posedBone } from './runtime/blend-scene.js';
 import { evaluateFCurve, prepareFCurve } from './runtime/drivers/fcurve.js';
 import { packKeys, unpackKeys } from './runtime/fcurve-evaluator.js';
+import { constrained, swapped } from './runtime/constraints-evaluator.js';
 import { curveInput } from './driver-export.js';
 import { key, transformBinding } from './controls-export.js';
 import { actionFCurves } from './ir-export.js';
@@ -68,4 +69,45 @@ export function livePose(arm, pose, bone, samples, frameStart) {
   };
   if (!samples.every((sample, i) => close(posed(frameStart + i), sample))) return null;
   return curves.map(({ fc, settings, keys }) => ({ id: arm, fc, settings, keys, node: bone.id }));
+}
+
+// Each constraint the page applies (runtime/constraints-evaluator.js), as it reads it, in world space at full influence:
+// its settings, or null when the page does not apply it.
+const AXES = ['x', 'y', 'z'];
+const CONSTRAINTS = {
+  TRACK_TO: (c) => ({ track_axis: c.track_axis, up_axis: c.up_axis, use_target_z: c.use_target_z }),
+  COPY_LOCATION: (c) => ({ use: AXES.map((a) => c[`use_${a}`]), invert: AXES.map((a) => c[`invert_${a}`]), use_offset: c.use_offset }),
+  COPY_ROTATION: (c) => (AXES.every((a) => c[`use_${a}`] && !c[`invert_${a}`]) && c.mix_mode === 'REPLACE' ? {} : null),
+  CHILD_OF: (c) => (['location', 'rotation', 'scale'].every((k) => AXES.every((a) => c[`use_${k}_${a}`])) ? { inverse_matrix: [...c.inverse_matrix] } : null),
+};
+
+// For an object's node whose own transform nothing animates, its constraints as the page applies them: `{ own, check,
+// entity }`, `own` its transform before them, `check()` comparing the page's result with Main's world matrix at the
+// frame Main is on, and `entity()` the IR entity's inputs (`node`, `constraints`, by the nodes' ids then) once every check
+// held, else null; null when the page cannot apply them. `nodeOf` gives the node of an object.
+export function liveConstraints(sync, node, nodeOf) {
+  const ob = idStruct(sync.objectOf(node)), rotation = ob.rotation_mode === 'QUATERNION' ? 'rotation_quaternion' : 'rotation_euler', animation = ob.animation_data;
+  if (!ob.constraints.length || !['Mesh', 'TransformNode', 'InstancedMesh'].includes(node.getClassName())) return null;
+  if (actionFCurves(animation).some((fc) => /^(location|rotation_|scale|delta_)/.test(fc.data_path)) || animation?.nla_tracks.length || animation?.drivers.length) return null;
+  const bind = transformBinding(node, ob, [...ob[rotation]], sync.blender.transform(sync.objectOf(node)).matrix_parent_inverse);
+  if (!bind || bind.transform.offset) return null;
+  const stack = [];
+  for (const c of [...ob.constraints].filter((c) => !c.mute)) {
+    const settings = c.influence === 1 && c.owner_space === 'WORLD' && c.target_space === 'WORLD' && !c.subtarget && c.target && CONSTRAINTS[c.type]?.(c);
+    const target = settings && nodeOf(c.target);
+    if (!target) return null;
+    stack.push({ type: c.type, target, settings });
+  }
+  const own = placement(bind.transform, (name) => [...ob[name]]), local = Matrix.Compose(own.scaling, own.rotation, own.position);
+  let checked = 0, held = true;
+  return {
+    own,
+    check() {
+      const world = node.parent ? local.multiply(sync.worldMatrix(node.parent)) : local, targets = new Map(stack.map((c) => [c.target.id, c.target]));
+      const result = constrained(swapped(world), stack.map(({ type, target, settings }) => ({ type, target: target.id, ...settings })), (id) => swapped(sync.worldMatrix(targets.get(id))));
+      held &&= close(result.asArray(), swapped(sync.worldMatrix(node)).asArray());
+      checked++;
+    },
+    entity: () => (checked && held ? { node: node.id, constraints: stack.map(({ type, target, settings }) => ({ type, target: target.id, ...settings })) } : null),
+  };
 }

@@ -245,10 +245,18 @@ function evaluatedIDs(ids, graphs, entities, sync, bin) {
   }
 }
 
+// An object's constraints the page applies to its node each frame, after what places it (`constraints:OBJECT`), by the
+// node's id.
+function constraintEntities(ids, constraints, time) {
+  const idOf = new Map(Object.entries(ids).filter(([, id]) => id.node !== undefined).map(([k, id]) => [id.node, k]));
+  return Object.fromEntries(constraints.filter((c) => idOf.has(c.node)).map((inputs) => [`${idOf.get(inputs.node)}/constraints/object`,
+    { type: 'constraints:OBJECT', id: idOf.get(inputs.node), inputs: { ...inputs, ...(time && { frame: { property: time } }) }, outputs: {}, implementation: 'constraints' }]));
+}
+
 // The package's IR (docs/ir.md): `controls` (controls-export.js) as its properties, with what the `live` stacks and the
-// Geometry Nodes modifiers add; the carried IDs, their node trees, and the computed entities, with the F-Curves the page
-// runs (`curves`, live-curves.js).
-export function exportIR(world, { controls, live, bin, animationGroups = [], curves = [] }) {
+// Geometry Nodes modifiers add; the carried IDs, their node trees, and the computed entities, with the F-Curves and the
+// objects' constraints the page runs (`curves`, `constraints`, live-curves.js).
+export function exportIR(world, { controls, live, bin, animationGroups = [], curves = [], constraints = [] }) {
   const sync = world.mainSync, objects = world.objects.map((node) => [node, sync?.objectOf(node)]).filter(([, pointer]) => pointer);
   const { ids, references } = sync ? exportIDs(rootIDs(objects.map(([, pointer]) => pointer))) : { ids: {}, references: [] };
   for (const [node, pointer] of objects) if (ids[idKey(idStruct(pointer))]) ids[idKey(idStruct(pointer))].node = node.id;
@@ -267,7 +275,7 @@ export function exportIR(world, { controls, live, bin, animationGroups = [], cur
     for (const entity of Object.values(entities)) if (time && entity.type === 'modifier:NODES' && readsTime(graphs, entity.inputs.graph.graph)) entity.inputs.frame = { property: time };
     Object.assign(entities, driverEntities(properties), animationEntities(ids, properties, time, animationGroups, curves, bin),
       greasePencilEntities(world, objects.map(([node]) => node), bin, time),
-      curvesEntities(world, objects.map(([node]) => node), bin));
+      curvesEntities(world, objects.map(([node]) => node), bin), constraintEntities(ids, constraints, time));
   }
   // What the page computes from is offered to authors.
   for (const entity of Object.values(entities)) if (entity.implementation) for (const [ref] of referencesIn(entity.inputs)) if ('property' in ref) properties[ref.property].suggested = true;

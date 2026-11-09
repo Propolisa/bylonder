@@ -8,7 +8,7 @@ import { exportRuntimes } from '../runtimes/runtimes.js';
 import { imageFile } from '../imbuf/image-textures.js';
 import { exportNodeMaterial } from './node-material-export.js';
 import { exactAnimation, stripKeys } from './exact-keys.js';
-import { liveTransform } from './live-curves.js';
+import { liveConstraints, liveTransform } from './live-curves.js';
 import { report } from '../windowmanager/wm-reports.js';
 import { channelKey } from './modifiers-export.js';
 import { AREA_LIGHT, rigAreaLights, rigId, rigTransform } from './area-lights.js';
@@ -129,8 +129,9 @@ function evaluatedTransform(sync, node) {
 const TRANSFORM = ['position', 'rotation', 'rotationQuaternion', 'scaling', 'direction'];
 // Each placed object's evaluated transform and each animated channel's evaluated value at every frame of the scene
 // range, as Blender's animation system evaluates the frames (its actions, NLA strips, drivers and constraints, or a
-// parent's); the frame shown is evaluated again after. `refs`: channels whose owner has animation data.
-function evaluatedFrames(world, nodes, refs) {
+// parent's); the frame shown is evaluated again after. `refs`: channels whose owner has animation data; `checks`:
+// constraint stacks the page may apply (live-curves.js liveConstraints), checked at each frame.
+function evaluatedFrames(world, nodes, refs, checks) {
   const sync = world.mainSync, { frameStart, frameEnd } = world.animation.time.state, current = world.animation.time.frame;
   const moves = (node) => { const ob = idStruct(sync.objectOf(node)); return !!ob.animation_data || ob.constraints.length > 0; };
   if (frameEnd <= frameStart || (!nodes.some(moves) && !refs.length)) return { transforms: null, channels: new Map() };
@@ -139,6 +140,7 @@ function evaluatedFrames(world, nodes, refs) {
     sync.frameChanged(frame);
     for (const node of nodes) transforms.get(node).push(evaluatedTransform(sync, node));
     for (const ref of refs) channels.get(ref).push(world.animation.evaluated(ref));
+    for (const stack of checks) stack.check();
   }
   sync.frameChanged(current);
   return { transforms, channels: new Map([...channels].filter(([, values]) => values.every((v) => v !== undefined))) };
@@ -361,12 +363,19 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
   const samples = world.animation.sample(), liveIds = live && new Map([...live].map(([node, stack]) => [nodeId(node), [node, stack]]));
   // Objects' evaluated transforms too, while their metadata, which evaluating a frame reads, is theirs.
   const objects = placed(world, content.nodes), refs = world.mainSync ? animatedChannels(world, content, liveIds) : [];
-  const evaluated = objects.length || refs.length ? evaluatedFrames(world, objects, refs) : { transforms: null, channels: new Map() };
+  // Without Bake Animation, an object's constraints the page applies where they give Main's world matrix at every frame.
+  const nodeOf = (ob) => objects.find((node) => idStruct(world.mainSync.objectOf(node)).name === ob.name);
+  const stacks = bake || !world.mainSync ? new Map() : new Map(objects.map((node) => [node, liveConstraints(world.mainSync, node, nodeOf)]).filter(([, stack]) => stack));
+  const evaluated = objects.length || refs.length ? evaluatedFrames(world, objects, refs, [...stacks.values()]) : { transforms: null, channels: new Map() };
+  for (const [node, stack] of stacks) if (!stack.entity()) stacks.delete(node);
   const { frameStart } = world.animation.time.state, keys = transformKeys(world, objects);
   // A channel Main evaluates is its value at each frame (its NLA strips and drivers too), not its F-curve's.
   const sampled = [...samples.filter(({ channel }) => !evaluated.channels.has(world.animation.ref(channel.id, channel.path))),
     ...[...evaluated.channels].map(([ref, values]) => ({ channel: world.animation.channels.get(ref), start: frameStart, values }))];
-  const transforms = new Map(objects.map((node) => [node.uniqueId, evaluatedTransform(world.mainSync, node)]));
+  // A constrained object the page places is written at its own transform, which its constraints start from.
+  const transforms = new Map(objects.map((node) => [node.uniqueId, stacks.has(node) ? { position: stacks.get(node).own.position, rotationQuaternion: stacks.get(node).own.rotation, scaling: stacks.get(node).own.scaling }
+    : evaluatedTransform(world.mainSync, node)]));
+  for (const node of stacks.keys()) evaluated.transforms?.delete(node);
   // Taken after the frames are evaluated, which redraw what the view draws per frame (a Grease Pencil's strokes).
   const all = [...scene.meshes, ...scene.transformNodes, ...scene.lights, ...scene.cameras];
   const restores = [
@@ -383,7 +392,7 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
     setFor([scene], 'metadata', () => null),
     uniqueIds(content.nodes),
   ];
-  let pending, animationGroups, activeCameraID, shadowGenerators;
+  let pending, animationGroups, activeCameraID, shadowGenerators, constraints;
   // The runtimes' (a skeleton's bones) first.
   const curves = bake || !world.mainSync ? null : [...mapped.curves], gaps = curves && [...mapped.gaps];
   try {
@@ -392,6 +401,7 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
     shadowGenerators = shadowsOf(world, content);
     animationGroups = bakeAnimations(world, sampled, content, liveIds, mapped.animations, evaluated.transforms, keys, curves, gaps);
     activeCameraID = camera?.id;
+    constraints = [...stacks.values()].map((stack) => stack.entity());
   } finally {
     restores.forEach((restore) => restore());
   }
@@ -426,6 +436,6 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
   await environment(json, scene);
   // The F-Curves the page runs (live-curves.js), for the package's IR, and what it still plays as samples (sampledGaps):
   // neither is part of the file.
-  Object.defineProperties(json, { liveCurves: { value: curves ?? [] }, sampledAnimation: { value: gaps ?? [] } });
+  Object.defineProperties(json, { liveCurves: { value: curves ?? [] }, liveConstraints: { value: constraints }, sampledAnimation: { value: gaps ?? [] } });
   return json;
 }

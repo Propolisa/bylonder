@@ -26,6 +26,7 @@ import { drawGeometry } from './mesh.js';
 export const EVALUATORS = {
   driver: () => import('./driver-evaluator.js'),
   fcurve: () => import('./fcurve-evaluator.js'),
+  constraints: (page) => import('./constraints-evaluator.js').then((module) => module.load(page)),
   modifiers: (page) => import('./modifiers-evaluator.js').then((module) => module.load(page)),
   'geometry-nodes': (page) => import('./geometry-nodes-evaluator.js').then((module) => module.load(page)),
   grease_pencil: () => import('./grease-pencil.js').then(({ run }) => ({ run })),

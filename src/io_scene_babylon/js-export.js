@@ -216,7 +216,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   // unless one of its effects is on.
   if (display) data.renderingPipelines = data.renderingPipelines.filter((p) => !(p._name?.startsWith('__display:') && !PIPELINE_EFFECTS.some((e) => p[e])));
   const controls = [...exportControls(world, data), ...(composited?.knobs ?? [])];
-  const ir = exportIR(world, { controls, live, bin, animationGroups: data.animationGroups, curves: data.liveCurves }), irJson = json(ir);
+  const ir = exportIR(world, { controls, live, bin, animationGroups: data.animationGroups, curves: data.liveCurves, constraints: data.liveConstraints }), irJson = json(ir);
   sampledGaps(data, ir);
   greasePencilClock(world, ir, data.animationGroups);
   const kernels = await irMaterials(data.materials, graphs, ir, parity), code = sharedCode(data.materials);
