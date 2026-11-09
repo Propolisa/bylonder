@@ -165,8 +165,9 @@ export function createScheduler(ir, page) {
     }
   });
 
-  // What reads the frame loads its implementation now, so it runs as the first frame draws.
-  timedLive().forEach(implementation);
+  // What reads the frame loads its implementation now, so it runs as the first frame draws; a load that fails (the
+  // scene disposed and its files gone first) fails again when the entity runs, where it is reported.
+  timedLive().forEach((key) => Promise.resolve(implementation(key)).catch(() => {}));
   // What the package bakes none of (curves) and reads no property or entity runs once: nothing runs it later. What the
   // package bakes (a modifier's mesh in scene.bin) stays as baked.
   Object.keys(entities).filter((key) => UNBAKED.includes(entities[key].implementation ?? '')
