@@ -26,6 +26,9 @@ export PKG_CONFIG_PATH= PKG_CONFIG_LIBDIR=/nonexistent
 export CONFIG_SITE="$SRC/Tools/wasm/config.site-wasm32-wasi $TOOLS/config.site-cpython"
 export CFLAGS="-O2 -D_WASI_EMULATED_PROCESS_CLOCKS -D_WASI_EMULATED_SIGNAL -D_WASI_EMULATED_GETPID"
 export OPT="-DNDEBUG"
+# CPython's WASI threads link gives its own interpreter a 10 MiB maximum memory, below its 20 MiB initial one: the
+# module's maximum instead (the interpreter is only linked, make libainstall builds it).
+export LDFLAGS_NODIST="-Wl,--max-memory=4294967296"
 export LDFLAGS="-lwasi-emulated-process-clocks -lwasi-emulated-signal -lwasi-emulated-getpid"
 export ZLIB_CFLAGS="-I$ZLIB" ZLIB_LIBS="$BUILD/libz.a" LIBEXPAT_CFLAGS="-I$EXPAT -DXML_STATIC" LIBEXPAT_LDFLAGS="$BUILD/libexpat.a"
 if [ ! -f Makefile ]; then

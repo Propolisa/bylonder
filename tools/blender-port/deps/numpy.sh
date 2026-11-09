@@ -19,14 +19,14 @@ if [ ! -x venv/bin/cython ]; then
 fi
 cat >python <<EOF
 #!/bin/sh
-_PYTHON_HOST_PLATFORM=wasi-wasm32 _PYTHON_SYSCONFIGDATA_NAME=_sysconfigdata__wasi_wasm32-wasi \
+_PYTHON_HOST_PLATFORM=wasi-wasm32 _PYTHON_SYSCONFIGDATA_NAME=_sysconfigdata__wasi_wasm32-wasi-threads \
 PYTHONPATH=$PY/$(cat "$PY/pybuilddir.txt") exec python3.13 "\$@"
 EOF
 chmod +x python
 cat >cross.ini <<EOF
 [binaries]
-c = ['$TOOLS/clang-wasi']
-cpp = ['$TOOLS/clang-wasi', '-fignore-exceptions', '-isystem', '$TOOLS/../wasm/include']
+c = ['$TOOLS/clang-wasi', '-include', '$TOOLS/errno-location.h']
+cpp = ['$TOOLS/clang-wasi', '-fignore-exceptions', '-isystem', '$TOOLS/../wasm/include', '-include', '$TOOLS/errno-location.h']
 ar = 'llvm-ar-18'
 python = '$BUILD/python'
 cython = '$BUILD/venv/bin/cython'
