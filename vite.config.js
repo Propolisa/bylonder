@@ -67,9 +67,24 @@ const demoFiles = () => ({
   },
 });
 
+// Cross-origin isolation for Blender's threads (SharedArrayBuffer), as the site's service worker gives it
+// (public/workspace-sw.js): every page and file but the docs viewer's page, whose embeds are other sites' pages.
+const isolation = () => ({
+  name: "cross-origin-isolation",
+  configureServer(server) {
+    server.middlewares.use((req, res, next) => {
+      if (!req.url.split("?")[0].endsWith("/docs.html")) {
+        res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+        res.setHeader("Cross-Origin-Embedder-Policy", "credentialless");
+      }
+      next();
+    });
+  },
+});
+
 export default defineConfig({
   base: process.env.BASE_PATH || "/",
-  plugins: [vue(), tailwindcss(), blenderCoverage(), blenderIconSet(), changelog(), demoFiles()],
+  plugins: [vue(), tailwindcss(), blenderCoverage(), blenderIconSet(), changelog(), demoFiles(), isolation()],
   define: { __BYLONDER_VERSION__: JSON.stringify(pkg.version), __BYLONDER_CHANGE__: JSON.stringify(commits()[0] ?? null) },
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
   // Agents' worktrees live under .claude/: their edits must not reload this checkout's pages (a worktree's own server

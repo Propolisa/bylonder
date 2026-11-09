@@ -5,13 +5,25 @@ self.addEventListener("install", (event) =>
 self.addEventListener("activate", (event) =>
   event.waitUntil(self.clients.claim()),
 );
+// Cross-origin isolation, which Blender's threads need, where the host cannot send its headers (isolation.js): the
+// site's pages and workers are answered with COOP and COEP added; the other files go to the network untouched, as they
+// need neither. The docs viewer stays as served, for its embeds.
+const ISOLATED = new Set(["document", "iframe", "worker", "sharedworker"]);
+const isolated = (response) => {
+  if (!response.status) return response;
+  const headers = new Headers(response.headers);
+  headers.set("Cross-Origin-Opener-Policy", "same-origin");
+  headers.set("Cross-Origin-Embedder-Policy", "credentialless");
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+};
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
-  if (
-    url.origin !== self.location.origin ||
-    !url.pathname.startsWith(new URL("__workspace_run/", self.registration.scope).pathname)
-  )
+  if (url.origin !== self.location.origin) return;
+  if (!url.pathname.startsWith(new URL("__workspace_run/", self.registration.scope).pathname)) {
+    const page = event.request.mode === "navigate" || ISOLATED.has(event.request.destination);
+    if (page && !url.pathname.endsWith("/docs.html")) event.respondWith(fetch(event.request).then(isolated));
     return;
+  }
   event.respondWith(
     (async () => {
       const cache = await caches.open(CACHE);

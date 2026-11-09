@@ -1,7 +1,8 @@
 // Production check: the built app (dist/) boots in headless Chromium without a page error or console error, runs the
 // Blender operators and classes src/coverage/runtime.json lists, its
 // topbar menus, the 3D View header menus and the context menus open with items, every workspace tab shows a screen in
-// its object mode, examples made in Blender open with their objects in the scene sync, an #example= link opens its
+// its object mode, the app is cross-origin isolated (Blender's threads) without the server's headers, examples made in
+// Blender open with their objects in the scene sync, an #example= link opens its
 // example and the manual (docs.html) shows its feature pages with their media. CI runs it after the build and before
 // deploying, since some failures only happen in the production build.
 // usage: npm run build && npm run test:prod   (E2E_URL checks a running server instead)
@@ -52,6 +53,8 @@ try {
     assert.ok(JSON.stringify(await runtimeCoverage(app), null, 1) + "\n" === saved, "the run-time coverage list changed: run node scripts/feature-docs.mjs --runtime");
   });
   noErrors("booting");
+  // GitHub Pages sends no isolation headers: the site's service worker adds them, so Blender's module runs on threads.
+  await step("cross-origin isolated for Blender's threads", async () => assert.ok(await app.frame().evaluate(() => crossOriginIsolated)));
 
   for (const id of TOPBAR) {
     await step(`topbar ${id}`, async () => {

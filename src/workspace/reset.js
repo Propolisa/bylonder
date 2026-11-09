@@ -11,5 +11,8 @@ export async function resetApp(before = () => {}) {
   sessionStorage.clear();
   for (const key of (await globalThis.caches?.keys()) ?? []) await caches.delete(key);
   for (const registration of (await navigator.serviceWorker?.getRegistrations()) ?? []) await registration.unregister();
+  // The app's own service worker again before the restart, so the restarted page is cross-origin isolated at once and
+  // public/isolation.js does not load it a second time while it starts.
+  await navigator.serviceWorker?.register(new URL("workspace-sw.js", document.baseURI), { scope: "./" }).then(() => navigator.serviceWorker.ready).catch(() => {});
   location.replace(location.pathname);
 }
