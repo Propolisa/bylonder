@@ -276,11 +276,12 @@ const authoredMetadata = (node) => {
 // runtime (runtimes.js) are written through their mapping to Babylon: `mapped`, an exportRuntimes result the caller
 // restores, else one made and restored here. Materials of Blender's shader nodes are written as Babylon's own blocks
 // (node-material-export.js), with Bylonder's EEVEE extensions when `parity`.
-export async function serializeScene(world, { geometry = true, live = null, mapped = null, parity = false } = {}) {
+// `graphOf` gives a material's IR graph key, for a package whose page builds its nodes from the IR.
+export async function serializeScene(world, { geometry = true, live = null, mapped = null, parity = false, graphOf = () => null } = {}) {
   await world.modifiers.settled();
   const runtimes = mapped ?? exportRuntimes(world);
   try {
-    return await serializeMapped(world, { geometry, live, mapped: runtimes.animations, parity });
+    return await serializeMapped(world, { geometry, live, mapped: runtimes.animations, parity, graphOf });
   } finally {
     if (!mapped) runtimes.restore();
   }
@@ -296,7 +297,7 @@ function shadowsOf(world, content) {
   return generators.filter((g) => lights.has(g.getLight().name)).map((g) => ({ ...g.serialize(), lightId: lights.get(g.getLight().name).id, customShaderOptions: undefined }));
 }
 
-async function serializeMapped(world, { geometry, live, mapped, parity }) {
+async function serializeMapped(world, { geometry, live, mapped, parity, graphOf }) {
   const { scene } = world;
   const camera = world.sceneSettings.camera() ?? scene.activeCamera;
   const content = exportedContent(scene);
@@ -359,7 +360,7 @@ async function serializeMapped(world, { geometry, live, mapped, parity }) {
   }
   json.materials = await Promise.all(json.materials.map(async (entry) => {
     const material = scene.materials.find((m) => m.uniqueId === entry.uniqueId);
-    return (material && await exportNodeMaterial(material, { parity })) ?? withoutOwnPlugins(entry, scene);
+    return (material && await exportNodeMaterial(material, { parity, graph: graphOf(material) })) ?? withoutOwnPlugins(entry, scene);
   }));
   const kept = (list, items, keep) => list.filter((_, i) => keep(items[i]));
   json.multiMaterials = kept(json.multiMaterials, scene.multiMaterials, (m) => content.materials.has(m) || content.meshes.some((mesh) => mesh.material === m));

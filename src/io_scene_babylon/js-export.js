@@ -2,20 +2,22 @@
 // empties) are written as their initialization code, with geometry read straight from the evaluated meshes into
 // scene.bin (scene-bin.js); materials, lights, cameras, shadows, animation and effects are Babylon's own serialization,
 // passed to their Parse functions as Babylon's .babylon loader does, with images as files beside it. `load(engine)`
-// gives the scene with its controls (runtime/blend-scene.js), `createScene(engine, canvas)` the scene alone.
+// gives the scene with its controls (runtime/blend-scene.js), `createScene(engine, canvas)` the scene alone. The scene's IR
+// (docs/ir.md), its properties and computed entities among it, is scene.ir.json beside it.
 import { AbstractEngine, Matrix } from '@babylonjs/core';
 import { objectMatrix } from '../runtime/object-transform.js';
 import { serializeScene } from './babylon-export.js';
 import { exportRuntimes } from '../runtimes/runtimes.js';
 import { exportControls, controlTypes } from './controls-export.js';
-import { exportNodeMaterial } from './node-material-export.js';
+import { exportNodeMaterial, materialKernels } from './node-material-export.js';
+import { fillMaterials } from './runtime/materials.js';
 import { worldNodes } from '../blenkernel/scene/world-babylon.js';
 import { createSceneBin } from './scene-bin.js';
 import { imageFiles } from './image-files.js';
 import { exportCompositor } from './compositor-export.js';
-import { exportDependencies } from './dependency-export.js';
-import { channels, modifierOperations, readsOtherIDs } from './modifiers-export.js';
-import { gplFolders } from './runtime-files.js';
+import { exportIR, idKey } from './ir-export.js';
+import { channels, readsOtherIDs } from './modifiers-export.js';
+import { gplFolders, NODE_KERNELS } from './runtime-files.js';
 import { idStruct } from '../python/bpy_rna.js';
 import { displayExponent } from '../render/view-settings.js';
 import { LOG_SIZE, STOPS } from '../render/display-lut.js';
@@ -97,9 +99,39 @@ function parentInstances(objects) {
 const indent = (lines, by = '    ') => lines.map((l) => by + l).join('\n');
 
 // The world's node material, as the export writes a material's, or null for a world of one color.
-async function worldMaterial(scene, parity) {
+async function worldMaterial(scene, parity, graphOf) {
   const material = worldNodes.get(scene);
-  return material ? exportNodeMaterial(material, { parity }) : null;
+  return material ? exportNodeMaterial(material, { parity, graph: graphOf(material) }) : null;
+}
+
+// The per-node kernels of the materials built from the IR's graphs (runtime-files.js NODE_KERNELS), or null. A material
+// whose nodes the page cannot build from its graph ships its own code instead.
+async function irMaterials(materials, graphs, ir, parity) {
+  const source = await materialKernels(graphs, { parity });
+  const kernels = source && JSON.parse(source.slice(source.indexOf('export default ') + 'export default '.length).trim().replace(/;$/, ''));
+  for (const [material, key] of graphs) {
+    const at = materials.findIndex((entry) => entry.blocks?.some((block) => block.options?.blender?.graph === key) && entry.name === material.name);
+    if (at < 0) continue;
+    try {
+      fillMaterials([structuredClone(materials[at])], ir, kernels);
+    } catch (error) {
+      console.warn(`${material.name}: built from its own code, not the IR (${error.message})`);
+      materials[at] = await exportNodeMaterial(material, { parity });
+    }
+  }
+  return materials.some((entry) => entry.blocks?.some((block) => block.options?.blender)) ? source : null;
+}
+
+// The IR graph key of each material and world of Blender's nodes (ir-export.js idGraphs), which the page builds them
+// from (runtime/materials.js fillMaterials); `graphs` collects them, for their kernels.
+function materialGraphs(world, graphs) {
+  const sync = world.mainSync, mainWorld = sync && idStruct(sync.blender.scene).world;
+  return (material) => {
+    const ma = sync?.materialOf(material), id = ma ? idStruct(ma) : material === worldNodes.get(world.scene) ? mainWorld : null;
+    if (!id?.node_tree) return null;
+    graphs.push([material, `${idKey(id)}/node_tree`]);
+    return graphs.at(-1)[1];
+  };
 }
 
 // Node materials' custom block code, each body once: the blocks name its index in the module's CODE.
@@ -133,7 +165,7 @@ async function displaySettings(world, bin, composites) {
   return { exposure: 2 ** view.exposure, exponent: displayExponent(view.gamma), lattice };
 }
 
-// The package's files but the runtime's: scene.js, scene.d.ts, scene.bin and images/. With `live`, objects whose
+// The package's files but the runtime's: scene.js, scene.d.ts, scene.ir.json, scene.bin and images/. With `live`, objects whose
 // modifiers are all Blender's keep them live (modifiers-export.js), run by modifiers.wasm in bylonder-modifiers/. With
 // `sourceBlend`, the scene's .blend too, as scene.blend, and the controls only Blender evaluates, which the page's
 // Blender fallback runs on it.
@@ -150,9 +182,10 @@ export async function exportModule(world, { live: keepLive = false, parity = fal
 }
 
 async function moduleSource(world, live, mapped, { parity, hostCompression, sourceBlend }) {
-  const data = await serializeScene(world, { geometry: false, live, mapped, parity });
+  const graphs = [], graphOf = materialGraphs(world, graphs);
+  const data = await serializeScene(world, { geometry: false, live, mapped, parity, graphOf });
   const { scene } = world;
-  const worldEntry = await worldMaterial(scene, parity);
+  const worldEntry = await worldMaterial(scene, parity, graphOf);
   if (worldEntry) data.materials.push(worldEntry);
   const bin = createSceneBin({ gzip: !hostCompression }), images = imageFiles(data);
   const geometries = new Map(), geometryLines = [];
@@ -167,8 +200,9 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, sour
   // off, so materials would encode to display themselves: with the view transform, which displays instead, it stays out
   // unless one of its effects is on.
   if (display) data.renderingPipelines = data.renderingPipelines.filter((p) => !(p._name?.startsWith('__display:') && !PIPELINE_EFFECTS.some((e) => p[e])));
-  const controls = [...exportControls(world, data, { blender: sourceBlend }), ...(composited?.knobs ?? [])], code = sharedCode(data.materials);
-  const dependencies = exportDependencies(world, controls, modifierOperations(world, live, controls, bin));
+  const controls = [...exportControls(world, data), ...(composited?.knobs ?? [])];
+  const ir = exportIR(world, { controls, live, bin, blender: sourceBlend }), irJson = json(ir);
+  const kernels = await irMaterials(data.materials, graphs, ir, parity), code = sharedCode(data.materials);
   parentInstances(objects);
   const parented = [...data.transformNodes, ...data.meshes, ...data.lights, ...data.cameras].filter((e) => e.parentId !== undefined);
   const parse = (name, list, code) => (list?.length ? `  for (const entry of ${name}) ${code};\n` : '');
@@ -184,15 +218,17 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, sour
   const name = world.sceneSettings.state.name || 'Scene';
   const source = `// ${name}, exported from Bylonder: load(engine) gives it with its controls, createScene(engine, canvas) builds it
 // alone, with Babylon.js ${AbstractEngine.Version}. In a page, map @babylonjs/core to the same version:
-// <script type="importmap">{ "imports": { "@babylonjs/core": "${CDN}" } }</script>${gplFolders(json(dependencies)).map((folder) => `
+// <script type="importmap">{ "imports": { "@babylonjs/core": "${CDN}" } }</script>${[...gplFolders(irJson), ...(kernels ? [NODE_KERNELS.split('/')[0]] : [])].map((folder) => `
 // Includes GPL code: ${folder}/, Blender's code (GPL-3.0-or-later, ${folder}/LICENSE.md), loaded only when a control
 // that needs it is set.`).join('')}
-import { readBuffers } from './bylonder/buffers.js';
+import { readBuffers, readBytes } from './bylonder/buffers.js';
 import { worldColor, worldNodes } from './bylonder/world.js';
 import { BlendScene } from './bylonder/blend-scene.js';
 import { derivativeUniformity } from './bylonder/overrides/webgpu/derivative-uniformity.js';
 import { reservedNames } from './bylonder/overrides/webgpu/reserved-names.js';
-import { webgpuSamplers } from './bylonder/overrides/webgpu/samplers.js';${display ? `
+import { webgpuSamplers } from './bylonder/overrides/webgpu/samplers.js';${kernels ? `
+import { fillMaterials } from './bylonder/materials.js';
+import kernels from './${NODE_KERNELS}';` : ''}${display ? `
 import { viewTransform } from './bylonder-view-transform.js';` : ''}${composited ? `
 import { compositor } from './bylonder-blocks.js';` : ''}
 import { Animation, AnimationGroup, CascadedShadowGenerator, Color3, Color4, CubeTexture, EffectLayer, Geometry, HDRCubeTexture, Light, LinesMesh, Material, Matrix, Mesh, MorphTargetManager, MultiMaterial, PostProcess, Quaternion, ReflectionProbe, Scene, SerializationHelper, ShadowGenerator, Skeleton, SubMesh, TransformNode, Vector3, Camera, ParticleSystem } from '@babylonjs/core';
@@ -224,9 +260,7 @@ const PARTICLE_SYSTEMS = ${json(data.particleSystems)};
 const ANIMATION_GROUPS = ${json(data.animationGroups)};
 const RENDERING_PIPELINES = ${json(data.renderingPipelines)};
 const POST_PROCESSES = ${json(data.postProcesses)};
-const BUFFERS = ${json(bin.views)};
-const CONTROLS = ${json(controls)};
-const DEPENDENCIES = ${json(dependencies)};${display ? `
+const BUFFERS = ${json(bin.views)};${display ? `
 const DISPLAY = ${json(display)};` : ''}${composited ? `
 const COMPOSITOR = ${json(composited.compositor)};` : ''}
 
@@ -237,12 +271,11 @@ const SCREEN_SPACE = {
   SSAO2RenderingPipeline: (entry, scene) => new BABYLON.SSAO2RenderingPipeline(entry._name, scene, entry._ratio, undefined, true, BABYLON.Constants.TEXTURETYPE_HALF_FLOAT),
 };
 
-// Each built scene's world and compositor, which load gives their controls.
-// Each built scene's world, compositor and scene.bin buffers, which load gives its controls.
-const WORLDS = new WeakMap(), COMPOSITORS = new WeakMap(), SCENE_BUFFERS = new WeakMap();
+// Each built scene's IR, world, compositor and scene.bin buffers, which load gives its controls.
+const IRS = new WeakMap(), WORLDS = new WeakMap(), COMPOSITORS = new WeakMap(), SCENE_BUFFERS = new WeakMap();
 export async function load(engine) {
   const scene = await createScene(engine, engine.getRenderingCanvas());
-  return new BlendScene(scene, CONTROLS, { root: ROOT, world: WORLDS.get(scene), compositor: COMPOSITORS.get(scene), table: DEPENDENCIES, buffers: SCENE_BUFFERS.get(scene) });
+  return new BlendScene(scene, IRS.get(scene), { root: ROOT, world: WORLDS.get(scene), compositor: COMPOSITORS.get(scene), buffers: SCENE_BUFFERS.get(scene) });
 }
 
 export async function createScene(engine, canvas) {
@@ -266,12 +299,17 @@ export async function createScene(engine, canvas) {
   scene.iblIntensity = SCENE.iblIntensity ?? 1;
   const buffers = await readBuffers(new URL('scene.bin', ROOT), BUFFERS, ${!hostCompression});
   SCENE_BUFFERS.set(scene, buffers);
+  // The IR as data: read as bytes, as Node's fetch reads no file: URL.
+  const ir = JSON.parse(new TextDecoder().decode(await readBytes(new URL('scene.ir.json', ROOT))));
+  IRS.set(scene, ir);
 
   const materials = {};
   // A custom block's code is written once for every material that shares it.
   for (const entry of MATERIALS) for (const block of entry.blocks ?? []) if (typeof block.options?.code === 'number') block.options.code = CODE[block.options.code];
-  for (const entry of MATERIALS) materials[entry.uniqueId] = Material.Parse(entry, scene, ROOT);
-  // Node materials' images as WebGPU takes them.
+${kernels ? `  // Blender's nodes of each material and world, made from the IR's graphs.
+  fillMaterials(MATERIALS, ir, kernels);
+` : ''}  for (const entry of MATERIALS) materials[entry.uniqueId] = Material.Parse(entry, scene, ROOT);
+  // Node materials' samplers as WebGPU binds them.
   for (const material of Object.values(materials)) if (material.getClassName() === 'NodeMaterial') webgpuSamplers(material);
   // A multi-material's slots by the exported materials' unique ids, as Babylon's loader resolves them after parsing.
   for (const entry of MULTI_MATERIALS) {
@@ -321,6 +359,6 @@ ${parse('REFLECTION_PROBES', data.reflectionProbes, "ReflectionProbe.Parse(entry
 `;
   // An ES module package in Node too (the headless SDK), needing only Babylon.
   const manifest = { name: name.toLowerCase().replace(/[^a-z0-9-]+/g, '-'), type: 'module', main: 'scene.js', types: 'scene.d.ts', peerDependencies: { '@babylonjs/core': AbstractEngine.Version } };
-  return { 'scene.js': source, 'scene.d.ts': controlTypes(controls), 'scene.bin': bin.bytes(), 'package.json': `${JSON.stringify(manifest, null, 2)}\n`, ...images,
+  return { 'scene.js': source, 'scene.d.ts': controlTypes(Object.entries(ir.properties).map(([path, { type }]) => ({ path, type }))), 'scene.ir.json': irJson, ...(kernels && { [NODE_KERNELS]: kernels }), 'scene.bin': bin.bytes(), 'package.json': `${JSON.stringify(manifest, null, 2)}\n`, ...images,
     ...(sourceBlend && world.mainSync && { 'scene.blend': world.mainSync.blender.writeBlend() }) };
 }

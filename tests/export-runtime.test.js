@@ -1,5 +1,5 @@
-// The page runtime (src/io_scene_babylon/runtime/), which JavaScript packages carry: MIT OR Apache-2.0, so it holds
-// no code derived from Blender and imports only Babylon and its own files; its JSDoc types check, its committed .d.ts
+// The page runtime (src/io_scene_babylon/runtime/), which JavaScript packages carry: MIT OR Apache-2.0 but for Zod's
+// bundled copy (MIT), so it holds no code derived from Blender and imports only Babylon and its own files; its JSDoc types check, its committed .d.ts
 // files are what tsc writes from them, and a package's scene.d.ts makes `set` and `get` take only the scene's paths and
 // their value types.
 import assert from 'node:assert/strict';
@@ -9,12 +9,17 @@ import { tmpdir } from 'node:os';
 import { join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { controlTypes } from '../src/io_scene_babylon/controls-export.js';
+import { schemaFile, zodFiles } from '../scripts/ir-runtime.mjs';
 import { BLOCK_FILES, EVALUATOR_FILES, MATERIAL_FILES, OVERRIDE_FILES, RUNTIME_FILES } from '../src/io_scene_babylon/runtime-files.js';
 
 const runtime = fileURLToPath(new URL('../src/io_scene_babylon/runtime/', import.meta.url));
 const tsc = (args) => execFileSync(process.execPath, [fileURLToPath(new URL('../node_modules/typescript/bin/tsc', import.meta.url)), ...args], { encoding: 'utf8' });
 
-const sources = readdirSync(runtime).filter((name) => name.endsWith('.js'));
+// zod.js is Zod's (MIT), bundled from the installed package, and ir.schema.json is made from ir.js: both as
+// scripts/ir-runtime.mjs writes them.
+const made = { ...(await zodFiles()), 'ir.schema.json': await schemaFile() };
+for (const [name, text] of Object.entries(made)) assert.equal(readFileSync(join(runtime, name), 'utf8'), text, `${name} is out of date: run node scripts/ir-runtime.mjs`);
+const sources = readdirSync(runtime).filter((name) => name.endsWith('.js') && name !== 'zod.js');
 for (const name of sources) {
   const text = readFileSync(join(runtime, name), 'utf8');
   assert.doesNotMatch(text, /blender-port|port-override/i, `${name} holds no code derived from Blender`);

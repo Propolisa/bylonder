@@ -20,14 +20,18 @@ assert.equal(await bundleFallback(), readFileSync(new URL('../src/io_scene_babyl
 const { world, sync, node } = openExample('geometry-nodes');
 sync.view();
 const tunable = await exportModule(world);
-assert.ok(!tunable['scene.blend'] && !tunable['scene.js'].includes('"evaluator":"blender"'), 'without its .blend, a package has no Blender fallback');
+assert.ok(!tunable['scene.blend'] && !tunable['scene.ir.json'].includes('"implementation":"blender"'), 'without its .blend, a package has no Blender fallback');
 const files = await exportModule(world, { sourceBlend: true });
-const table = JSON.parse(/const DEPENDENCIES = (.*);/.exec(files['scene.js'])[1]);
+const ir = JSON.parse(files['scene.ir.json']);
 const inputs = (name) => `objects["Planet"].modifiers["Planet"].properties.inputs.${name}.value`;
 const [seed, mountains] = [inputs('Socket_2'), inputs('Socket_3')];
-const controls = JSON.parse(/const CONTROLS = (.*);/.exec(files['scene.js'])[1]);
-assert.deepEqual(table.operations.filter((op) => op.evaluator === 'blender').map((op) => op.reads.map((i) => controls[i].path)), [['Socket_2', 'Socket_3', 'Socket_4', 'Socket_5', 'Socket_6'].map(inputs)],
-  'one Blender operation reads the modifier\'s inputs');
+const planet = ir.entities['OB:Planet/modifier/Planet'];
+assert.equal(planet.type, 'modifier:NODES');
+assert.equal(planet.implementation, 'blender', 'Geometry Nodes run on the interim Blender fallback');
+assert.deepEqual(Object.values(planet.inputs).filter((v) => v.property).map((v) => v.property), ['Socket_2', 'Socket_3', 'Socket_4', 'Socket_5', 'Socket_6'].map(inputs),
+  'the modifier entity reads its inputs');
+assert.ok(ir.graphs[planet.inputs.graph.graph]?.type === 'GEOMETRY' && planet.inputs.geometry.mesh.vert_positions.buffer !== undefined, 'and its graph and base mesh');
+assert.deepEqual(planet.outputs, { geometry: { draw: 'Planet' } });
 assert.ok(files['scene.blend']?.length > 0 && files['scene.js'].includes('Includes GPL code'), 'the package ships its .blend and says its fallback is GPL');
 
 // Reads of the package's files, by name, through the platform's file reads (fetch's in Node).

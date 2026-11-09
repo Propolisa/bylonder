@@ -14,7 +14,13 @@ export function literal(value: any, type: string): string | null;
  * active one among equals, else the first.
  * @param {Graph} graph
  */
-export function outputNode(graph: Graph): import("./ir.js").GraphNode;
+export function outputNode(graph: Graph): {
+    [x: string]: unknown;
+    name: string;
+    type: string;
+    settings: Record<string, any>;
+    inputs: Record<string, any>;
+};
 /**
  * A graph's nodes as one GLSL body, `bl_nodes`, taking what `sources` gives (in the order asked, `inputs`) and giving
  * the output node's outputs: the code of its helper and node functions, then the body.

@@ -33,7 +33,7 @@ for (const name of ['scene.js', 'bylonder/blend-scene.js', 'bylonder/world.js'])
   writeFileSync(path, readFileSync(path, 'utf8').replaceAll(JSON.stringify(import.meta.resolve('@babylonjs/core')), "'@babylonjs/core'"));
 }
 const strength = 'worlds["World"].node_tree.nodes["Background"].inputs[1].default_value';
-const lavaInput = JSON.parse(/const CONTROLS = (.*);/.exec(files['scene.js'])[1]).find((c) => /^materials\[.*\.inputs\[\d+\]\.default_value$/.test(c.path)).path;
+const lavaInput = Object.keys(JSON.parse(files['scene.ir.json']).properties).find((path) => /^materials\[.*\.inputs\[\d+\]\.default_value$/.test(path));
 writeFileSync(join(written.dir, 'index.html'), `<!doctype html><meta charset="utf-8"><title>Exported package</title>
 <style>html,body{margin:0;background:#000}canvas{width:640px;height:400px;display:block}</style>
 <script type="importmap">{ "imports": { "@babylonjs/core": "/core/index.js" } }</script>

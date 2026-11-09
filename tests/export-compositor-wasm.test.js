@@ -53,11 +53,11 @@ console.log(JSON.stringify(graph.attachedBlocks.map((b) => [b.name, b.getClassNa
   assert.deepEqual(slots.subMaterials.map((m) => m?.name), constant('MULTI_MATERIALS').find((m) => m.name === slots.name).materials, "the Shop Front's slots hold its materials");
   const block = (name) => blend.compositor.attachedBlocks.find((b) => b.name === name);
   const gain = 'node_groups["Compositor Nodes"].nodes["Color Balance"].inputs[8].default_value[0]';
-  const { uniform, component } = constant('CONTROLS').find((c) => c.path === gain).bind;
+  const { uniform, component } = JSON.parse(files['scene.ir.json']).properties[gain].bind;
   blend.set(gain, 1.5);
   assert.equal(block('Color Balance').pass.fragment.uniforms[uniform].value[component], 1.5, "Color Balance's Gain sets its uniform");
   const mask = 'node_groups["Compositor Nodes"].nodes["Ellipse Mask"].inputs[2].default_value';
-  const { upload } = constant('CONTROLS').find((c) => c.path === mask).bind;
+  const { upload } = JSON.parse(files['scene.ir.json']).properties[mask].bind;
   blend.set(mask, 0.25);
   const data = block('Ellipse Mask')._frameGraphTask.recorder().data;
   assert.equal(new DataView(data.buffer, data.byteOffset).getFloat32(upload, true), 0.25, "the Ellipse Mask's Value sets the float its plan uploads");

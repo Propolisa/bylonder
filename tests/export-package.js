@@ -12,9 +12,9 @@ const src = (path) => readFileSync(new URL(`../src/${path}`, import.meta.url));
 
 export function writePackage(files) {
   const dir = mkdtempSync(join(tmpdir(), 'bylonder-package-'));
-  const all = { ...files, ...Object.fromEntries(packageRuntime(files['scene.js']).map(([path, name]) => [path, packagedRuntime(String(src(`io_scene_babylon/runtime/${name}`)))])),
+  const all = { ...files, ...Object.fromEntries(packageRuntime(files).map(([path, name]) => [path, packagedRuntime(String(src(`io_scene_babylon/runtime/${name}`)))])),
     ...Object.fromEntries(packageOverrides().map(([path, from]) => [path, src(from)])),
-    ...Object.fromEntries(gplFiles(files['scene.js']).map(([path, from]) => [path, src(from)])) };
+    ...Object.fromEntries(gplFiles(files).map(([path, from]) => [path, src(from)])) };
   for (const [path, data] of Object.entries(all)) {
     mkdirSync(dirname(join(dir, path)), { recursive: true });
     writeFileSync(join(dir, path), /\.m?js$/.test(path) ? String(data).replace(/(['"])@babylonjs\/core\1/g, CORE) : data);

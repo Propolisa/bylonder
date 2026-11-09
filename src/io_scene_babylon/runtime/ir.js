@@ -1,84 +1,252 @@
 // @ts-check
 // SPDX-License-Identifier: MIT OR Apache-2.0
-// Bylonder's IR (docs/ir.md, ir.schema.json): an exported scene as data, which the scheduler walks.
+// Bylonder's IR (docs/ir.md): an exported scene as data, which the scheduler walks. This schema is the one source of
+// its shape: ir.schema.json and the types are made from it (scripts/ir-runtime.mjs), and readIR rehydrates a file with
+// it, filling defaults and repairing what it can with a warning.
+import * as z from './zod.js';
+
+const Data = z.record(z.string(), z.any());
+const Name = z.string();
+/** @param {RegExp} pattern */
+const matching = (pattern) => z.string().check(z.regex(pattern));
+/** A default of a fresh object or array each time. @template T @param {z.ZodMiniType<T>} schema @param {() => any} value */
+const fresh = (schema, value) => z._default(schema, value);
+
+export const IDSchema = z.object({
+  /** RNA's struct name in capitals (`OBJECT`, `MESH`, `SHADERNODETREE`) */
+  type: Name, name: Name,
+  /** from bpy.data, null for an ID outside its collections */
+  path: z._default(z.nullable(Name), null),
+  /** the Babylon node or material it draws as */
+  node: z.optional(Name),
+  /** its RNA properties that differ from their defaults; an ID pointer as `{ id }` */
+  data: z._default(z.nullable(Data), null),
+});
+
+export const IDReferenceSchema = z.object({ from: Name, path: Name, to: Name });
+
+export const PROPERTY_TYPES = /** @type {const} */ (['FLOAT', 'INT', 'BOOLEAN', 'STRING']);
+/** A value a page sets and reads, by RNA path; `bind` is where it lands in Babylon (blend-scene.js Binding). */
+export const PropertySchema = z.object({
+  id: z._default(z.nullable(Name), null),
+  type: z.enum(PROPERTY_TYPES),
+  default: z.union([z.number(), z.boolean(), z.string()]),
+  soft_min: z.optional(z.number()), soft_max: z.optional(z.number()),
+  subtype: z.optional(Name), unit: z.optional(Name), suggested: z.optional(z.boolean()),
+  bind: z.optional(Data),
+});
+
+export const GraphNodeSchema = z.looseObject({
+  name: Name,
+  /** `node:<idname>` */
+  type: matching(/^node:/),
+  settings: fresh(Data, () => ({})),
+  /** unlinked inputs by socket identifier: values or references */
+  inputs: fresh(Data, () => ({})),
+});
+
+export const GraphSchema = z.object({
+  type: z.enum(['SHADER', 'GEOMETRY', 'COMPOSITOR']),
+  nodes: fresh(z.array(GraphNodeSchema), () => []),
+  /** `[from node, output, to node, input]` */
+  links: fresh(z.array(z.tuple([Name, Name, Name, Name])), () => []),
+  interface: fresh(z.array(Data), () => []),
+});
+
+const Output = z.nullable(z.union([z.object({ property: Name }), z.object({ draw: Name })]));
+/** A computed entity: its type key, the ID it belongs to, its inputs, where its outputs land, and what the package ships for it (none: baked). */
+export const EntitySchema = z.object({
+  type: matching(/^[a-z_]+:/),
+  id: Name,
+  inputs: fresh(Data, () => ({})),
+  outputs: fresh(z.record(Name, Output), () => ({})),
+  implementation: z.optional(Name),
+});
+
+export const IR_SCHEMA = 'bylonder-ir', IR_VERSION = 1;
+export const IRSchema = z.object({
+  schema: z.literal(IR_SCHEMA),
+  version: z.literal(IR_VERSION),
+  ids: fresh(z.record(matching(/^[A-Z]{2,3}:/), IDSchema), () => ({})),
+  references: fresh(z.array(IDReferenceSchema), () => []),
+  properties: fresh(z.record(Name, PropertySchema), () => ({})),
+  graphs: fresh(z.record(Name, GraphSchema), () => ({})),
+  entities: fresh(z.record(matching(/^[A-Z]{2,3}:.+\/[a-z_]+\/.+$/), EntitySchema), () => ({})),
+  order: fresh(z.array(Name), () => []),
+});
+
+// Geometry as units take it and give it (docs/ir.md, Geometry): typed arrays in Blender's axes.
+const Floats = z.instanceof(Float32Array), Ints = z.instanceof(Int32Array);
+export const AttributesSchema = fresh(z.record(Name, z.object({ domain: z.enum(['POINT', 'EDGE', 'FACE', 'CORNER', 'INSTANCE']), type: Name, data: z.any() })), () => ({}));
+export const MeshSchema = z.object({ vert_positions: Floats, edges: Ints, face_offsets: Ints, corner_verts: Ints, corner_edges: Ints, uvs: z.optional(Floats), attributes: AttributesSchema });
+/** Points; a radius is the attribute `radius`. */
+export const PointsSchema = z.object({ positions: Floats, attributes: AttributesSchema });
+/**
+ * Instances: each of `references` an ID (`{ id: 'OB:Tree' }`) or a geometry; per instance its reference's index and its
+ * transform, 4x4 by columns.
+ */
+export const InstancesSchema = z.object({ references: z.array(z.union([z.object({ id: Name }), z.object({ geometry: z.any() })])), reference_indices: Ints,
+  transforms: Floats, attributes: AttributesSchema });
+export const GeometrySchema = z.object({ mesh: z.optional(MeshSchema), points: z.optional(PointsSchema), instances: z.optional(InstancesSchema) });
 
 /**
+ * @typedef {z.infer<typeof IRSchema>} IR
+ * @typedef {z.infer<typeof IDSchema>} ID
+ * @typedef {z.infer<typeof IDReferenceSchema>} IDReference
+ * @typedef {z.infer<typeof PropertySchema>} Property
+ * @typedef {z.infer<typeof GraphSchema>} Graph
+ * @typedef {z.infer<typeof GraphNodeSchema>} GraphNode
+ * @typedef {z.infer<typeof EntitySchema>} Entity
+ * @typedef {z.infer<typeof MeshSchema>} Mesh
+ * @typedef {z.infer<typeof PointsSchema>} Points
+ * @typedef {z.infer<typeof InstancesSchema>} Instances
+ * @typedef {z.infer<typeof GeometrySchema>} Geometry
  * A reference an entity's input may hold, resolved before a unit runs.
  * @typedef {{ property: string } | { entity: string, output: string } | { buffer: number } | { data: [string, string] } | { graph: string }} Reference
  */
 
+const REFERENCES = ['property', 'entity', 'buffer', 'data', 'graph'];
+/** Whether a value is a reference. @param {any} value @returns {value is Reference} */
+export const isReference = (value) => value?.constructor === Object && REFERENCES.some((kind) => kind in value)
+  && Object.keys(value).every((key) => key === 'output' || REFERENCES.includes(key));
+
 /**
- * @typedef {object} ID
- * @property {string} type RNA's struct name in capitals (`OBJECT`, `MESH`, `SHADERNODETREE`)
- * @property {string} name
- * @property {string | null} path from bpy.data, null for an ID outside its collections
- * @property {string} [node] the Babylon node or material it draws as
- * @property {Record<string, any> | null} data its RNA properties that differ from their defaults; an ID pointer as `{ id }`
+ * Every reference in a value, with where it is.
+ * @param {any} value
+ * @param {string} [at]
+ * @returns {Generator<[Reference, string]>}
  */
-
-/** @typedef {{ from: string, path: string, to: string }} IDReference */
+export function* referencesIn(value, at = '') {
+  if (isReference(value)) yield [value, at];
+  else if (Array.isArray(value)) for (let i = 0; i < value.length; i++) yield* referencesIn(value[i], `${at}[${i}]`);
+  else if (value?.constructor === Object) for (const key in value) yield* referencesIn(value[key], `${at}.${key}`);
+}
 
 /**
- * A value a page sets and reads, by RNA path.
- * @typedef {object} Property
- * @property {string | null} id
- * @property {'FLOAT' | 'INT' | 'BOOLEAN' | 'STRING'} type
- * @property {number | boolean | string} default
- * @property {number} [soft_min]
- * @property {number} [soft_max]
- * @property {string} [subtype]
- * @property {string} [unit]
- * @property {boolean} [suggested]
- * @property {import('./blend-scene.js').Binding} [bind]
+ * The keys of `entities` so that each comes after those that write a property it reads or give an output it reads.
+ * @param {Record<string, Entity>} entities
  */
+export function entityOrder(entities) {
+  const writers = new Map(Object.entries(entities).flatMap(([key, e]) => Object.values(e.outputs).flatMap((o) => (o && 'property' in o ? [[o.property, key]] : []))));
+  /** @type {string[]} */
+  const order = [];
+  const state = new Map();
+  /** @param {string} key */
+  const visit = (key) => {
+    if (state.get(key) === 'done') return;
+    if (state.get(key) === 'visiting') throw new Error(`${key} depends on itself through other entities`);
+    state.set(key, 'visiting');
+    for (const [ref] of referencesIn(entities[key].inputs)) {
+      const from = 'entity' in ref ? ref.entity : 'property' in ref ? writers.get(ref.property) : undefined;
+      if (from && from !== key && entities[from]) visit(from);
+    }
+    state.set(key, 'done');
+    order.push(key);
+  };
+  Object.keys(entities).forEach(visit);
+  return order;
+}
 
 /**
- * @typedef {object} GraphNode
- * @property {string} name
- * @property {string} type `node:<idname>`
- * @property {Record<string, any>} [settings]
- * @property {Record<string, any>} [inputs]
+ * The value at an RNA path (`fcurves[0].keyframe_points`, `modifiers["Bevel"].width`) of an ID's data: a collection's
+ * item by index or by its `name`.
+ * @param {IR} ir
+ * @param {[string, string]} reference
  */
+export function dataAt(ir, [id, path]) {
+  let value = ir.ids[id]?.data;
+  for (const [, name, index, key] of path.matchAll(/\.?(\w+)|\[(\d+)\]|\["((?:[^"\\]|\\.)*)"\]/g)) {
+    value = name !== undefined ? value?.[name] : index !== undefined ? value?.[+index] : value?.find?.((/** @type {any} */ item) => item?.name === key.replace(/\\(.)/g, '$1'));
+  }
+  return value;
+}
+
+/** Steps from each older version to the next: `MIGRATIONS[n]` takes an IR of version n to n + 1. @type {Record<number, (ir: any) => any>} */
+export const MIGRATIONS = {};
+
+const typeOf = (/** @type {unknown} */ value) => (typeof value === 'boolean' ? 'BOOLEAN' : typeof value === 'string' ? 'STRING' : Number.isInteger(value) ? 'INT' : 'FLOAT');
+/** @param {PropertyKey[]} path */
+const where = (path) => 'ir' + path.map((key) => (typeof key === 'number' ? `[${key}]` : /^\w+$/.test(String(key)) ? `.${String(key)}` : `[${JSON.stringify(key)}]`)).join('');
 
 /**
- * @typedef {object} Graph
- * @property {'SHADER' | 'GEOMETRY' | 'COMPOSITOR'} type
- * @property {GraphNode[]} nodes
- * @property {[string, string, string, string][]} links
- * @property {any[]} [interface]
+ * Explains a schema's issues: where, what was expected and what is there.
+ * @param {{ issues: any[] }} error
+ * @param {string} [label]
  */
+export function explain({ issues }, label = '') {
+  return issues.map((/** @type {any} */ issue) => {
+    // A union's issues name what each of its options expected.
+    const expected = issue.expected ?? [...new Set(issue.errors?.flat().map((/** @type {any} */ e) => e.expected).filter(Boolean))].join(' or ');
+    const what = expected ? `expected ${expected}, got ${JSON.stringify(issue.input) ?? 'nothing'}` : issue.message;
+    return `${label}${where(issue.path).slice(label ? 2 : 0)}: ${what}`;
+  }).join('\n');
+}
 
 /**
- * A computed entity: its type key, the ID it belongs to, its inputs, where its outputs land, and the implementation the
- * package ships for it (none: only its baked result).
- * @typedef {object} Entity
- * @property {string} type
- * @property {string} id
- * @property {Record<string, any>} inputs
- * @property {Record<string, { property: string } | { draw: string } | null>} outputs
- * @property {string} [implementation]
- */
-
-/**
- * @typedef {object} IR
- * @property {'bylonder-ir'} schema
- * @property {1} version
- * @property {Record<string, ID>} ids
- * @property {IDReference[]} references
- * @property {Record<string, Property>} properties
- * @property {Record<string, Graph>} graphs
- * @property {Record<string, Entity>} entities
- * @property {string[]} order
- */
-
-export const IR_SCHEMA = 'bylonder-ir', IR_VERSION = 1;
-
-/**
- * The IR, checked to be one this runtime reads.
- * @param {any} ir
+ * An IR file's data as this runtime reads it: an older version migrated, omitted fields given their defaults, and what
+ * can be solved repaired with a warning (a property's type from its default, a reference to what the IR lacks dropped,
+ * an implementation this runtime does not ship left baked, `order` made whole). Throws on what cannot be read, naming
+ * the path, what was expected and what is there.
+ * @param {any} raw
+ * @param {{ warn?: (message: string) => void, implementations?: string[] }} [options] the implementations this runtime ships
  * @returns {IR}
  */
-export function readIR(ir) {
-  if (ir?.schema !== IR_SCHEMA || ir.version !== IR_VERSION) throw new Error(`Not a Bylonder IR of version ${IR_VERSION}`);
+export function readIR(raw, { warn = (message) => console.warn(`Bylonder IR: ${message}`), implementations } = {}) {
+  if (raw?.schema !== IR_SCHEMA) throw new Error(`Not a Bylonder IR: ir.schema is ${JSON.stringify(raw?.schema)}, expected "${IR_SCHEMA}"`);
+  if (!Number.isInteger(raw.version) || raw.version > IR_VERSION) throw new Error(`ir.version is ${JSON.stringify(raw.version)}: this runtime reads versions up to ${IR_VERSION}`);
+  let ir = raw;
+  for (let version = raw.version; version < IR_VERSION; version++) {
+    if (!MIGRATIONS[version]) throw new Error(`ir.version is ${version}, which no step migrates`);
+    ir = MIGRATIONS[version](ir);
+  }
+  const properties = Object.fromEntries(Object.entries(ir.properties ?? {}).map(([path, p]) => {
+    if (p?.type !== undefined || p?.default === undefined) return [path, p];
+    warn(`properties[${JSON.stringify(path)}] has no type: ${typeOf(p.default)}, from its default`);
+    return [path, { ...p, type: typeOf(p.default) }];
+  }));
+  const parsed = z.safeParse(IRSchema, { ...ir, properties }, { reportInput: true });
+  if (!parsed.success) throw new Error(explain(parsed.error));
+  return repair(parsed.data, warn, implementations);
+}
+
+/**
+ * @param {IR} ir
+ * @param {(message: string) => void} warn
+ * @param {string[]} [implementations]
+ */
+function repair(ir, warn, implementations) {
+  /** @param {Reference} ref */
+  const exists = (ref) => ('property' in ref ? ref.property in ir.properties : 'entity' in ref ? ref.entity in ir.entities
+    : 'graph' in ref ? ref.graph in ir.graphs : 'data' in ref ? ref.data[0] in ir.ids : true);
+  /** @param {any} value @param {string} at @returns {any} */
+  const prune = (value, at) => {
+    if (isReference(value)) {
+      if (exists(value)) return value;
+      warn(`${at} refers to ${JSON.stringify(value)}, which the IR lacks: dropped`);
+      return undefined;
+    }
+    if (Array.isArray(value)) return value.map((v, i) => prune(v, `${at}[${i}]`) ?? null);
+    if (value?.constructor !== Object) return value;
+    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, prune(v, `${at}.${k}`)]).filter(([, v]) => v !== undefined));
+  };
+  for (const [key, entity] of Object.entries(ir.entities)) {
+    const at = `entities[${JSON.stringify(key)}]`;
+    if (entity.implementation && implementations && !implementations.includes(entity.implementation)) {
+      warn(`${at} names the implementation "${entity.implementation}", which this runtime does not ship: it stays baked`);
+      delete entity.implementation;
+    }
+    entity.inputs = prune(entity.inputs, `${at}.inputs`);
+    for (const [name, output] of Object.entries(entity.outputs)) {
+      if (output && 'property' in output && !(output.property in ir.properties)) {
+        warn(`${at}.outputs.${name} lands on the property ${output.property}, which the IR lacks: dropped`);
+        entity.outputs[name] = null;
+      }
+    }
+  }
+  const order = ir.order.filter((key) => key in ir.entities);
+  if (order.length !== ir.order.length || order.length !== Object.keys(ir.entities).length) {
+    warn('order does not list the entities: made from their references');
+    ir.order = entityOrder(ir.entities);
+  }
   return ir;
 }

@@ -27,9 +27,9 @@ const SOURCES = {
 // The package's files as the zip holds them.
 async function scenePackage(world, options) {
   const files = await exportModule(world, options);
-  for (const [path, name] of packageRuntime(files['scene.js'])) files[path] = packagedRuntime(runtime['./runtime/' + name]);
+  for (const [path, name] of packageRuntime(files)) files[path] = packagedRuntime(runtime['./runtime/' + name]);
   for (const [path, from] of packageOverrides()) files[path] = overrides['../' + from];
-  for (const [path, from] of gplFiles(files['scene.js'])) files[path] = await SOURCES[from]();
+  for (const [path, from] of gplFiles(files)) files[path] = await SOURCES[from]();
   return Object.fromEntries(Object.entries(files).map(([path, data]) => [path, typeof data === 'string' ? strToU8(data) : data]));
 }
 

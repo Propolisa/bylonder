@@ -169,7 +169,7 @@ export function fuse(ir, key, { kernels, sources, outputs: wanted }) {
     if (type === 'BlClosure' && out[1] !== 'BlClosure') {
       const name = `${from} ${socket} Emission`;
       if (!nodes.has(name)) {
-        nodes.set(name, { name, type: 'node:ShaderNodeEmission', inputs: { Strength: 1 } });
+        nodes.set(name, { name, type: 'node:ShaderNodeEmission', settings: {}, inputs: { Strength: 1 } });
         into.set(`${name}\0Color`, [from, socket]);
       }
       return linked(name, 'Emission', type);

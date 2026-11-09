@@ -44,6 +44,14 @@ units; the scheduler prefers them to what the package ships.
 
 Materials move onto the IR graph alongside step 3 (brief below).
 
+Status: steps 1 and 2 are built. Every package ships `scene.ir.json`; `scene.js` holds no controls or table. The
+scheduler (`runtime/scheduler.js`) runs drivers on the clean-room units, each Live Modifier as its own entity on
+`modifiers.wasm`, Geometry Nodes modifiers on the interim `blender` implementation, and leaves F-Curves to Babylon's
+AnimationGroup. Known limits: a modifier's mesh fed to the next carries positions, topology and UVs only, so sharp
+edges and faces, creases, weights and other attributes a modifier writes do not reach the next one (the module's mesh
+input takes no more); graphs of Geometry Nodes groups that reach a struct cycle are not written yet; a long action's
+keyframes are JSON in `ids`, not `scene.bin` buffers.
+
 ## Relation gaps
 
 v1 reads references by walking each ID's RNA pointers. It misses relations that are not ID pointers:
@@ -55,8 +63,8 @@ v1 reads references by walking each ID's RNA pointers. It misses relations that 
 - Geometry Nodes' Object Info and Collection Info inputs given by a link rather than a socket's own value, and
   Self Object.
 
-The IR records time as an input where it can see it (a driver's expression). `tests/ir-relations.test.js` lists the
-other cases on the examples so the gap stays visible. A `deg_relations` seam (Blender's depsgraph relations between
+The IR records time as an input where it can see it (a driver's expression, an F-Curve). `tests/ir-relations.test.js`
+lists the other cases on the examples so the gap stays visible. A `deg_relations` seam (Blender's depsgraph relations between
 IDs, read at export) closes it with the next module rebuild.
 
 ## Inventory and later units

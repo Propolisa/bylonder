@@ -1,0 +1,23 @@
+{
+  "schema": "bylonder-ir",
+  "version": 1,
+  "ids": {
+    "OB:Cube": { "type": "OBJECT", "name": "Cube", "path": "objects[\"Cube\"]", "node": "Cube", "data": { "location": [0, 0, 1.25], "data": { "id": "ME:Cube" } } },
+    "ME:Cube": { "type": "MESH", "name": "Cube", "path": "meshes[\"Cube\"]", "data": null }
+  },
+  "references": [{ "from": "OB:Cube", "path": "data", "to": "ME:Cube" }],
+  "properties": {
+    "objects[\"Cube\"].location[2]": { "id": "OB:Cube", "type": "FLOAT", "default": 1.25, "subtype": "TRANSLATION", "unit": "LENGTH" },
+    "objects[\"Cube\"].modifiers[\"Bevel\"].width": { "id": "OB:Cube", "type": "FLOAT", "default": 0.1, "suggested": true }
+  },
+  "graphs": {},
+  "entities": {
+    "OB:Cube/modifier/Bevel": {
+      "type": "modifier:BEVEL", "id": "OB:Cube", "implementation": "modifiers",
+      "inputs": { "mesh": { "vert_positions": { "buffer": 0 }, "edges": { "buffer": 1 }, "face_offsets": { "buffer": 2 }, "corner_verts": { "buffer": 3 }, "corner_edges": { "buffer": 4 } },
+        "width": { "property": "objects[\"Cube\"].modifiers[\"Bevel\"].width" } },
+      "outputs": { "mesh": { "draw": "Cube" } }
+    }
+  },
+  "order": ["OB:Cube/modifier/Bevel"]
+}

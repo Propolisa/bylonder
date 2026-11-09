@@ -1,6 +1,10 @@
 // The package's IR (docs/ir.md): the carried IDs with their RNA data and the references between them, the properties,
 // the node graphs and the computed entities, as plain data for scene.ir.json.
 import { blendData, idStruct, pointerOf } from '../python/bpy_rna.js';
+import { writeGraph } from './ir-graphs.js';
+import { driverEntities } from './driver-export.js';
+import { geometryNodesEntities, modifierEntities } from './modifiers-export.js';
+import { entityOrder, IR_SCHEMA, IR_VERSION, referencesIn } from './runtime/ir.js';
 
 // Blender's two-letter ID codes, by the bpy.data collection of each ID type.
 const CODES = { objects: 'OB', meshes: 'ME', materials: 'MA', node_groups: 'NT', scenes: 'SC', actions: 'AC', collections: 'GR', worlds: 'WO',
@@ -31,6 +35,9 @@ const LAYOUT = new Set(['location', 'color']);
 const BULK = /^(MeshNormalValue|ReadOnlyInteger|Mesh(Vertex|Edge|Polygon|Loop|LoopTriangle|LoopColor|UVLoop|VertColor|Normal)|.*Attribute|.*AttributeValue|FloatVectorValueReadOnly|AttributeGroup.*|BezierSplinePoint|SplinePoint|ShapeKeyPoint|ShapeKeyBezierPoint|ShapeKeyCurvePoint|LatticePoint|Particle|ParticleKey|ChildParticle|ParticleHairKey|CurvePoint|CurveSlice|.*Stroke.*|GreasePencilFrame|GreasePencilDrawing|Depsgraph.*|ViewLayerEEVEE|UIList|Region.*|Area.*|Screen.*|KeyMap.*|Window.*)$/;
 
 const safe = (fn) => { try { return fn(); } catch { return undefined; } };
+// An ID, not a struct sharing its ID's data (an Object's display settings): the ID it belongs to is of its own type.
+const isID = (v, pointer) => pointer[1] === pointer[2] && pointerOf(v.id_data)?.[0] === pointer[0];
+const named = (item) => typeof item?.bl_rna === 'object' && [...item.bl_rna.properties].some((p) => p.identifier === 'name');
 
 // Whether a value is its property's RNA default, which the IR leaves out.
 function isDefault(prop, v) {
@@ -52,7 +59,7 @@ function walker(onReference) {
     }
     const pointer = pointerOf(v);
     if (!pointer) return safe(() => [...v]) ?? null;
-    if (pointer[1] === pointer[2]) {
+    if (isID(v, pointer)) {
       const to = idKey(v);
       onReference(owner, path, v);
       return { id: to };
@@ -75,7 +82,7 @@ function walker(onReference) {
       if (v === undefined || isDefault(prop, v)) continue;
       const at = path ? `${path}.${name}` : name;
       if (prop.type === 'COLLECTION') {
-        out[name] = safe(() => [...v].map((item, i) => value(owner, `${at}[${item.name !== undefined ? key(item.name) : i}]`, item, depth))) ?? [];
+        out[name] = safe(() => [...v].map((item, i) => value(owner, `${at}${named(item) ? key(item.name) : `[${i}]`}`, item, depth))) ?? [];
       } else out[name] = value(owner, at, v, depth);
     }
     return out;
@@ -108,3 +115,63 @@ export function pathID(path) {
 
 // The scene's own IDs: every scene with its collections, view layers, world and compositor, and the objects drawn.
 export const rootIDs = (objects) => [...blendData().scenes, ...objects.map(idStruct)];
+
+// An unlinked socket's value as the property that sets it, where there is one: a vector's by component.
+const socketProperty = (properties, base) => (socket, node) => {
+  const index = [...node.inputs].findIndex((s) => s.identifier === socket.identifier), path = `${base}.nodes${key(node.name)}.inputs[${index}].default_value`;
+  if (properties[path]) return { property: path };
+  if (!properties[`${path}[0]`]) return undefined;
+  return [...socket.default_value].map((v, i) => (properties[`${path}[${i}]`] ? { property: `${path}[${i}]` } : v));
+};
+
+// The node trees of the carried materials and worlds and the scenes' compositors, as graphs by key.
+function idGraphs(ids, properties, graphs) {
+  const data = blendData();
+  for (const [k, id] of Object.entries(ids)) {
+    const collection = COLLECTION_OF.get(k.split(':')[0]), struct = (collection === 'materials' || collection === 'worlds' || collection === 'scenes') && data[collection].get(id.name);
+    const tree = struct && (collection === 'scenes' ? safe(() => struct.compositing_node_group ?? struct.node_tree) : struct.node_tree);
+    if (tree) writeGraph(tree, `${k}/${collection === 'scenes' ? 'compositing' : 'node_tree'}`, graphs, { value: socketProperty(properties, `${id.path}.node_tree`) });
+  }
+}
+
+// Each F-Curve of the carried IDs' actions, in the slot each ID uses: what Babylon's animation plays on the property it
+// lands on.
+function animationEntities(ids, properties, time) {
+  const data = blendData(), entities = {};
+  for (const [k, id] of Object.entries(ids)) {
+    const collection = COLLECTION_OF.get(k.split(':')[0]), animation = collection && safe(() => data[collection].get(id.name)?.animation_data);
+    const action = animation?.action;
+    if (!action) continue;
+    [...action.layers].forEach((layer, l) => [...layer.strips].forEach((strip, s) => [...strip.channelbags].forEach((bag, b) => {
+      if (animation.action_slot && bag.slot?.handle !== animation.action_slot.handle) return;
+      [...bag.fcurves].forEach((fc, f) => {
+        const target = `${id.path}${fc.data_path.startsWith('[') ? '' : '.'}${fc.data_path}[${fc.array_index}]`, bound = !!properties[target];
+        entities[`${k}/animation/${fc.data_path}[${fc.array_index}]`] = { type: 'animation:FCURVE', id: k,
+          inputs: { fcurve: { data: [idKey(action), `layers[${l}].strips[${s}].channelbags[${b}].fcurves[${f}]`] }, ...(time && { frame: { property: time } }) },
+          outputs: { value: bound ? { property: target } : null }, ...(bound && { implementation: 'animation' }) };
+      });
+    })));
+  }
+  return entities;
+}
+
+// The package's IR (docs/ir.md): `controls` (controls-export.js) as its properties, with what the `live` stacks and,
+// with `blender`, the Geometry Nodes modifiers add; the carried IDs, their node trees, and the computed entities.
+export function exportIR(world, { controls, live, bin, blender = false }) {
+  const sync = world.mainSync, objects = world.objects.map((node) => [node, sync?.objectOf(node)]).filter(([, pointer]) => pointer);
+  const { ids, references } = sync ? exportIDs(rootIDs(objects.map(([, pointer]) => pointer))) : { ids: {}, references: [] };
+  for (const [node, pointer] of objects) if (ids[idKey(idStruct(pointer))]) ids[idKey(idStruct(pointer))].node = node.id;
+  const graphs = {};
+  const entities = sync ? { ...modifierEntities(world, live, controls, bin), ...(blender && geometryNodesEntities(world, controls, bin, (tree) => {
+    writeGraph(tree, idKey(tree), graphs);
+    return idKey(tree);
+  })) } : {};
+  const properties = Object.fromEntries(controls.map(({ path, bind, ...property }) => [path, { id: pathID(path), ...property, ...(bind && { bind }) }]));
+  if (sync) {
+    idGraphs(ids, properties, graphs);
+    Object.assign(entities, driverEntities(properties), animationEntities(ids, properties, Object.keys(properties).find((p) => p.endsWith('.frame_current'))));
+  }
+  // What the page computes from is offered to authors.
+  for (const entity of Object.values(entities)) if (entity.implementation) for (const [ref] of referencesIn(entity.inputs)) if ('property' in ref) properties[ref.property].suggested = true;
+  return { schema: IR_SCHEMA, version: IR_VERSION, ids, references, properties, graphs, entities, order: entityOrder(entities) };
+}

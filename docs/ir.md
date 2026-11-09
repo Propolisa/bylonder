@@ -6,9 +6,10 @@ renderer of it. The page's scheduler walks it and runs each computed entity thro
 (`docs/licence-free-live.md`). The schema is Bylonder's design and is MIT OR Apache-2.0. It uses Blender's identifiers
 (RNA paths, property, node and modifier type names) only as names; it holds no Blender code and needs none to be read.
 
-A package ships it as data, `scene.ir.json` beside `scene.js`, which reads it. Its JSON Schema is
-`src/io_scene_babylon/runtime/ir.schema.json` and its types `runtime/ir.d.ts` (from the JSDoc in `runtime/ir.js`).
-Version 1.
+A package ships it as data, `scene.ir.json` beside `scene.js`, which reads it. The schema is defined once, in Zod
+(`zod/mini`) in `src/io_scene_babylon/runtime/ir.js`; its JSON Schema `runtime/ir.schema.json` is generated from it
+(`node scripts/ir-runtime.mjs`), and its types (`IR`, `Entity`, `Mesh` and the rest) are inferred from it into
+`runtime/ir.d.ts`. Packages carry Zod's bundled copy, `bylonder/zod.js` (MIT). Version 1.
 
 ```json
 {
@@ -27,7 +28,8 @@ Version 1.
   "graphs": {},
   "entities": {
     "OB:Cube/modifier/Bevel": { "type": "modifier:BEVEL", "id": "OB:Cube", "implementation": "modifiers",
-      "inputs": { "mesh": { "vert_positions": { "buffer": 4 }, "edges": { "buffer": 5 }, "...": "..." }, "width": { "property": "objects[\"Cube\"].modifiers[\"Bevel\"].width" } },
+      "inputs": { "mesh": { "vert_positions": { "buffer": 4 }, "edges": { "buffer": 5 }, "...": "..." }, "width": { "property": "objects[\"Cube\"].modifiers[\"Bevel\"].width" },
+        "kernel": { "type": 17, "layouts": { "...": "..." } } },
       "outputs": { "mesh": { "draw": "Cube" } } }
   },
   "order": ["OB:Cube/modifier/Bevel"]
@@ -80,9 +82,13 @@ a unit sees numbers, strings, arrays and IR geometry only.
 
 An IR mesh is `{ vert_positions, edges, face_offsets, corner_verts, corner_edges, uvs?, attributes? }`: flat typed
 arrays in Blender's axes (Z up), `face_offsets` with one more entry than there are faces, `uvs` per corner, and
-`attributes` as `{ name: { domain: 'POINT' | 'EDGE' | 'FACE' | 'CORNER', type, data } }`. Geometry in general is
-`{ mesh?, points?, curves?, instances? }`, `instances` being `{ references, transforms, attributes }`, transforms 4x4
-by columns; points and curves take the same attribute form.
+`attributes` as `{ name: { domain: 'POINT' | 'EDGE' | 'FACE' | 'CORNER' | 'INSTANCE', type, data } }`. Geometry in
+general is `{ mesh?, points?, instances? }`: points are `{ positions, attributes }`, a radius being the attribute
+`radius`; instances are `{ references, reference_indices, transforms, attributes }`, each reference an ID
+(`{ "id": "OB:Tree" }`) or a geometry (`{ "geometry": ... }`), and per instance the index of its reference and its 4x4
+transform by columns. Curves are not defined yet. `runtime/mesh.js` draws any of them in Babylon: a mesh as draw
+buffers (the modifier kernel's draw step where the package ships it, else a fan of each face), instances as thin
+instances of their references' meshes, points as a point cloud.
 
 ## Graphs
 
@@ -103,10 +109,33 @@ Nodes modifier (`modifier:NODES`, its graph an input), a material (`material:NOD
 read it) and `implementation`: what the package ships for it (`driver`, `modifiers`, `animation` for Babylon's
 AnimationGroup), or none when only its baked result ships. `order` lists the keys so each runs after what it reads.
 
+What each kind of entity reads and gives:
+
+| Type | Inputs | Outputs |
+|---|---|---|
+| `driver:<type>` | `driver` (type, expression, variables, a single property's target as `{ value }`), `curve`, `objects` (transform properties and static parts), `frame` when the expression reads it | `value` |
+| `modifier:<TYPE>` | `mesh` (the base mesh's buffers, or the previous modifier's output), its settings by name (a vector as an array), `kernel` (the module's type and layouts) | `mesh` |
+| `modifier:NODES` | `graph`, `geometry` (`{ mesh }` of the base mesh, or the previous modifier's output), the interface's inputs by identifier | `geometry` |
+| `animation:FCURVE` | `fcurve` (`{ data }` of its action), `frame` | `value` |
+
+Each frame, the scheduler runs again what reads `frame_current` and is not Babylon's own.
+
 ## Units
 
-A unit is `{ run(inputs, { frame }) }` returning its outputs by name, or a Promise of them (a kernel in WebAssembly or a
-worker). The scheduler awaits it, keeps entities in order, and `settled()` resolves once all have run.
+A unit is `{ inputs?, run(inputs, { frame }) }` returning its outputs by name, or a Promise of them (a kernel in
+WebAssembly or a worker), registered by type key (`runtime/units.js` `register`). With `inputs`, a Zod schema, the
+scheduler parses the resolved inputs with it first, so a unit's author gets typed inputs with defaults filled, and an
+entity it cannot take is reported by path. An entity runs on the unit registered for its type, else on the
+implementation its package ships, else stays baked. The scheduler awaits each result before what reads it, and
+`settled()` resolves once all have run.
+
+## Reading
+
+`readIR` (`runtime/ir.js`) reads a file kindly: an older version is migrated by its step (`MIGRATIONS`), omitted fields
+take their defaults, and what can be solved is repaired with a warning: a property without a type takes its default's,
+a reference to a property, entity, graph or ID the IR lacks is dropped, an implementation the runtime does not ship
+leaves its entity baked, and `order` is remade when it does not list the entities. What cannot be read throws, naming
+the path, what was expected and what is there (`ir.entities["OB:Cube/modifier/Bevel"].type: expected string, got 5`).
 
 ## Versioning
 

@@ -533,19 +533,31 @@ var extractionMesh = () => {
 };
 function createEvaluator(exports) {
   const { evaluateModifiers } = moduleMesh(exports, extractionMesh);
-  return (base, stack) => {
+  return ({ mesh: ir, modifier, draw }) => {
     const mesh = {
-      ...base,
-      verts_num: base.vert_positions.length / 3,
-      edges_num: base.edges.length / 2,
-      faces_num: base.face_offsets.length - 1,
-      attribute: (name) => name === "UVMap" ? base.uvs : void 0
+      ...ir,
+      verts_num: ir.vert_positions.length / 3,
+      edges_num: ir.edges.length / 2,
+      faces_num: ir.face_offsets.length - 1,
+      attribute: (name) => name === "UVMap" ? ir.uvs : void 0
     };
-    const modifiers = stack.map(({ type, layouts, values }) => ({ type, write: (view, address) => writeValues(view, address, layouts, values) }));
+    const modifiers = modifier ? [{ type: modifier.type, write: (view, address) => writeValues(view, address, modifier.layouts, modifier.values) }] : [];
     const { mesh: result, errors } = evaluateModifiers(mesh, modifiers);
     const error = errors.find(Boolean);
     if (error) throw new Error(error);
-    const { positions, normals, indices, uvs } = mesh_batch_cache_vertex_buffers(result);
+    const uvs = result.attribute("UVMap");
+    if (!draw) {
+      const copy = (name) => result[name].slice();
+      return {
+        vert_positions: copy("vert_positions"),
+        edges: copy("edges"),
+        face_offsets: copy("face_offsets"),
+        corner_verts: copy("corner_verts"),
+        corner_edges: copy("corner_edges"),
+        ...uvs && { uvs: uvs.slice() }
+      };
+    }
+    const { positions, normals, indices } = mesh_batch_cache_vertex_buffers(result);
     return { positions, normals, indices: indices.slice(), ...uvs && { uvs: uvs.slice() } };
   };
 }
@@ -558,7 +570,7 @@ async function handle(data) {
     return null;
   }
   try {
-    return { id: data.id, buffers: (await evaluator)(data.base, data.stack) };
+    return { id: data.id, result: (await evaluator)(data) };
   } catch (error) {
     return { id: data.id, error: error.message };
   }
@@ -566,7 +578,7 @@ async function handle(data) {
 if (typeof WorkerGlobalScope !== "undefined") {
   onmessage = async ({ data }) => {
     const reply = await handle(data);
-    if (reply) postMessage(reply, Object.values(reply.buffers ?? {}).map((array) => array.buffer));
+    if (reply) postMessage(reply, Object.values(reply.result ?? {}).map((array) => array.buffer));
   };
 }
 export {

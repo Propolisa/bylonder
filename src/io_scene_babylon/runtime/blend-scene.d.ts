@@ -19,20 +19,19 @@ export function loadBlendScene(engine: import("@babylonjs/core").AbstractEngine,
 export class BlendScene<Controls extends Record<string, Value> = Record<string, Value>> {
     /**
      * @param {import('@babylonjs/core').Scene} scene
-     * @param {Knob[]} knobs
+     * @param {any} ir the scene's IR (scene.ir.json), read with readIR
      * @param {{ root?: string, world?: { set(color: number[]): void }, compositor?: import('@babylonjs/core').NodeRenderGraph,
-     *   table?: import('./scheduler.js').Table | null, buffers?: ArrayBufferView[] }} [options]
+     *   buffers?: ArrayBufferView[] }} [options]
      * the package's URL, which relative image URLs resolve against, the world of one color its background controls set
-     * (world.js), the compositor its pass controls set (bylonder-blocks.js), the dependency table whose operations
-     * propagate a set control (scheduler.js), and scene.bin's buffers, which its evaluators read
+     * (world.js), the compositor its pass controls set (bylonder-blocks.js), and scene.bin's buffers, which its entities
+     * read
      */
-    constructor(scene: import("@babylonjs/core").Scene, knobs: Knob[], { root, world, compositor, table, buffers }?: {
+    constructor(scene: import("@babylonjs/core").Scene, ir: any, { root, world, compositor, buffers }?: {
         root?: string;
         world?: {
             set(color: number[]): void;
         };
         compositor?: import("@babylonjs/core").NodeRenderGraph;
-        table?: import("./scheduler.js").Table | null;
         buffers?: ArrayBufferView[];
     });
     /** Told of each control's new value. @type {Observable<Change>} */
@@ -41,6 +40,58 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
     scene: import("@babylonjs/core").Scene;
     /** The compositor, a NodeRenderGraph of the blocks library's passes, when the scene composites. */
     compositor: import("@babylonjs/core").NodeRenderGraph | undefined;
+    /** The scene's IR, as this runtime reads it. */
+    ir: {
+        schema: "bylonder-ir";
+        version: 1;
+        ids: Record<string, {
+            type: string;
+            name: string;
+            path: string | null;
+            data: Record<string, any> | null;
+            node?: string | undefined;
+        }>;
+        references: {
+            from: string;
+            path: string;
+            to: string;
+        }[];
+        properties: Record<string, {
+            id: string | null;
+            type: "FLOAT" | "INT" | "BOOLEAN" | "STRING";
+            default: string | number | boolean;
+            soft_min?: number | undefined;
+            soft_max?: number | undefined;
+            subtype?: string | undefined;
+            unit?: string | undefined;
+            suggested?: boolean | undefined;
+            bind?: Record<string, any> | undefined;
+        }>;
+        graphs: Record<string, {
+            type: "SHADER" | "GEOMETRY" | "COMPOSITOR";
+            nodes: {
+                [x: string]: unknown;
+                name: string;
+                type: string;
+                settings: Record<string, any>;
+                inputs: Record<string, any>;
+            }[];
+            links: [string, string, string, string][];
+            interface: Record<string, any>[];
+        }>;
+        entities: Record<string, {
+            type: string;
+            id: string;
+            inputs: Record<string, any>;
+            outputs: Record<string, {
+                property: string;
+            } | {
+                draw: string;
+            } | null>;
+            implementation?: string | undefined;
+        }>;
+        order: string[];
+    };
     /**
      * A control's value.
      * @template {keyof Controls & string} P
@@ -49,7 +100,7 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
      */
     get<P extends keyof Controls & string>(path: P): Controls[P];
     /**
-     * Sets a control and what it binds to, and runs the operations that read it (its drivers).
+     * Sets a control and what it binds to, and runs the entities that read it (its drivers, modifiers).
      * @template {keyof Controls & string} P
      * @param {P} path
      * @param {Controls[P]} value

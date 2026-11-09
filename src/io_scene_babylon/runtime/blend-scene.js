@@ -1,9 +1,10 @@
 // @ts-check
 // SPDX-License-Identifier: MIT OR Apache-2.0
-// A scene exported from Bylonder, with its controls: each a Blender RNA path from bpy.data
-// (`objects["Cube"].location[0]`) whose value the page sets, and which lands on the Babylon objects it binds to.
+// A scene exported from Bylonder, with its controls: the IR's properties (docs/ir.md), each a Blender RNA path from
+// bpy.data (`objects["Cube"].location[0]`) whose value the page sets, and which lands on the Babylon objects it binds to.
 import { Matrix, Observable, Quaternion, Texture, Vector3 } from '@babylonjs/core';
-import { createScheduler } from './scheduler.js';
+import { createScheduler, EVALUATORS, NATIVE } from './scheduler.js';
+import { readIR } from './ir.js';
 
 /** @typedef {number | boolean | string} Value */
 
@@ -124,30 +125,33 @@ export class BlendScene {
 
   /**
    * @param {import('@babylonjs/core').Scene} scene
-   * @param {Knob[]} knobs
+   * @param {any} ir the scene's IR (scene.ir.json), read with readIR
    * @param {{ root?: string, world?: { set(color: number[]): void }, compositor?: import('@babylonjs/core').NodeRenderGraph,
-   *   table?: import('./scheduler.js').Table | null, buffers?: ArrayBufferView[] }} [options]
+   *   buffers?: ArrayBufferView[] }} [options]
    * the package's URL, which relative image URLs resolve against, the world of one color its background controls set
-   * (world.js), the compositor its pass controls set (bylonder-blocks.js), the dependency table whose operations
-   * propagate a set control (scheduler.js), and scene.bin's buffers, which its evaluators read
+   * (world.js), the compositor its pass controls set (bylonder-blocks.js), and scene.bin's buffers, which its entities
+   * read
    */
-  constructor(scene, knobs, { root = '', world, compositor, table = null, buffers = [] } = {}) {
+  constructor(scene, ir, { root = '', world, compositor, buffers = [] } = {}) {
     /** Babylon's scene. */
     this.scene = scene;
     this.#root = root;
     this.#world = world;
     /** The compositor, a NodeRenderGraph of the blocks library's passes, when the scene composites. */
     this.compositor = compositor;
+    /** The scene's IR, as this runtime reads it. */
+    this.ir = readIR(ir, { implementations: [...Object.keys(EVALUATORS), ...NATIVE] });
+    const knobs = Object.entries(this.ir.properties).map(([path, { id, ...property }]) => /** @type {Knob} */ ({ path, ...property }));
     this.#knobs = new Map(knobs.map((knob) => [knob.path, knob]));
     this.#values = new Map(knobs.map((knob) => [knob.path, knob.default]));
-    this.#scheduler = table && createScheduler(table, { scene, root, buffers, controls: {
+    this.#scheduler = Object.keys(this.ir.entities).length ? createScheduler(this.ir, { scene, root, buffers, controls: {
       paths: knobs.map((knob) => knob.path),
       defaults: knobs.map((knob) => knob.default),
       get: (path) => this.#values.get(path),
       write: (path, value) => this.#write(path, value),
       // The animation's frame while it plays, else the frame control's.
       frame: () => scene.animationGroups[0]?.animatables[0]?.masterFrame ?? /** @type {number} */ ([...this.#values].find(([p]) => p.endsWith('.frame_current'))?.[1] ?? 1),
-    } });
+    } }) : null;
     this.#channels(knobs);
   }
 
@@ -166,7 +170,7 @@ export class BlendScene {
   }
 
   /**
-   * Sets a control and what it binds to, and runs the operations that read it (its drivers).
+   * Sets a control and what it binds to, and runs the entities that read it (its drivers, modifiers).
    * @template {keyof Controls & string} P
    * @param {P} path
    * @param {Controls[P]} value

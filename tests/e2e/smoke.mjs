@@ -157,11 +157,11 @@ const checks = {
     const scenePackage = unzipSync(await exported("JavaScript (.zip)"));
     assert.match(strFromU8(scenePackage["scene.js"]), /export async function load\(engine\)/);
     assert.ok(scenePackage["scene.bin"].length > 0 && scenePackage["bylonder/blend-scene.js"], "the package holds scene.bin and the runtime");
-    // Live Modifiers: the module, whose subdivided cube keeps its stack as a `modifiers` operation on its settings, its
-    // evaluator, and modifiers.wasm with its worker beside them.
+    // Live Modifiers: the IR, whose subdivided cube keeps its stack as `modifiers` entities on its settings, their
+    // implementation, and modifiers.wasm with its worker beside them.
     const zip = unzipSync(await exported("JavaScript, Live Modifiers (.zip)"));
-    const module = strFromU8(zip["scene.js"]);
-    assert.match(module, /"evaluator":"modifiers"/);
+    const module = strFromU8(zip["scene.ir.json"]);
+    assert.match(module, /"implementation":"modifiers"/);
     assert.match(module, /\.modifiers\[\\"[^\\]+\\"\]\.levels/, "the Subdivision's levels as a control by its Blender path");
     assert.match(strFromU8(zip["bylonder/modifiers-evaluator.js"]), /export async function load/);
     assert.ok(zip["bylonder-modifiers/modifiers-worker.js"].length > 0 && zip["bylonder-modifiers/COPYING"]);

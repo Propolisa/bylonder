@@ -7,7 +7,7 @@ import { exportModule } from '../src/io_scene_babylon/js-export.js';
 const { world, sync } = openExample('arrays');
 sync.view();
 const files = await exportModule(world, { live: true });
-const controls = JSON.parse(/const CONTROLS = (.*);/.exec(files['scene.js'])[1]);
+const controls = Object.entries(JSON.parse(files["scene.ir.json"]).properties).map(([path, p]) => ({ path, ...p }));
 assert.deepEqual(controls.filter((c) => /^objects\["(Step|Handrail)"\]\.modifiers/.test(c.path)), [], "the stair's modifiers are applied, not controls");
 console.log('Live modifiers: a stack offset by another object stays applied');
 process.exit(0);

@@ -1,12 +1,12 @@
-// The package's dependency table (docs/controllable-exports.md): the operations that propagate a control's change, as
-// plain data. Each driver of an exported ID whose inputs are controls becomes a `driver` operation: its expression,
-// variables and F-Curve as Blender's RNA holds them, the controls it reads and the one it writes, run in the page by the
-// clean-room driver units (runtime/drivers/). Its baked samples play until a control it reads is set. A driver the page
-// cannot run (Python, an F-Curve modifier, an input that is no control) stays baked.
+// The scene's drivers as IR entities (docs/ir.md): each driver of an exported ID whose inputs are properties becomes a
+// `driver:<type>` entity: its expression, variables and F-Curve as Blender's RNA holds them, the properties it reads and
+// the one it writes, run in the page by the clean-room driver units (runtime/drivers/). Its baked samples play until a
+// property it reads is set. A driver the page cannot run (Python, an F-Curve modifier, an input that is no property)
+// stays baked.
 import { compile, PYTHON_ONLY } from './runtime/drivers/expression.js';
 import { evaluateFCurve, prepareFCurve } from './runtime/drivers/fcurve.js';
 import { blendData } from '../python/bpy_rna.js';
-import { GEOMETRY_NODES_INPUT } from './controls-export.js';
+import { idKey } from './ir-export.js';
 
 const key = (name) => `["${name.replace(/["\\]/g, (c) => '\\' + c)}"]`;
 // The bpy.data collection of each ID type a driver target names.
@@ -19,7 +19,7 @@ const transformsOf = (ob) => ['location', ROTATIONS[ob.rotation_mode] ?? 'rotati
 const STATIC = ['delta_location', 'delta_rotation_euler', 'delta_rotation_quaternion', 'delta_scale'];
 const rows = (matrix) => [0, 1, 2, 3].map((r) => [0, 1, 2, 3].map((c) => matrix[c][r]));
 
-// An object as the driver units read it (driver.js ObjectData): its transform's controls by path, its static parts as
+// An object as the driver units read it (driver.js ObjectData): its transform as properties, its static parts as
 // values, and its parent's, recursively.
 function objectData(ob, objects, reads) {
   if (objects[ob.name]) return;
@@ -27,7 +27,7 @@ function objectData(ob, objects, reads) {
   for (const name of transformsOf(ob)) transforms[name] = [...ob[name]].map((_, i) => `${base}.${name}[${i}]`);
   reads.push(...Object.values(transforms).flat());
   objects[ob.name] = {
-    controls: transforms, rotation_mode: ob.rotation_mode,
+    ...Object.fromEntries(Object.entries(transforms).map(([name, paths]) => [name, paths.map((property) => ({ property }))])), rotation_mode: ob.rotation_mode,
     ...Object.fromEntries(STATIC.map((name) => [name, [...ob[name]]])),
     ...(ob.parent && { parent: ob.parent.name, matrix_parent_inverse: rows(ob.matrix_parent_inverse) }),
   };
@@ -64,11 +64,11 @@ function curveInput(fc) {
   };
 }
 
-// One driver as an operation on the controls (`index` gives a control's position by path), or null when it stays baked.
-function driverOperation(collection, id, fc, index) {
-  const written = pathOf(collection, id.name, `${fc.data_path}[${fc.array_index}]`), write = index.get(written) ?? index.get(pathOf(collection, id.name, fc.data_path));
+// One driver as an IR entity reading and writing `properties`, or null when it stays baked.
+function driverEntity(collection, id, fc, properties, time) {
+  const exact = pathOf(collection, id.name, `${fc.data_path}[${fc.array_index}]`), written = [exact, pathOf(collection, id.name, fc.data_path)].find((p) => properties[p]);
   const { driver } = fc, curve = driverCurve(fc);
-  if (write === undefined || curve === undefined || driver.use_self) return null;
+  if (!written || curve === undefined || driver.use_self) return null;
   const variables = [], objects = {}, reads = [];
   for (const variable of driver.variables) {
     const targets = [...variable.targets].slice(0, variable.type === 'SINGLE_PROP' || variable.type === 'TRANSFORMS' ? 1 : 2);
@@ -77,55 +77,29 @@ function driverOperation(collection, id, fc, index) {
       if (variable.type === 'SINGLE_PROP') {
         const path = COLLECTIONS[t.id_type] && pathOf(COLLECTIONS[t.id_type], t.id.name, t.data_path);
         reads.push(path);
-        return { control: index.get(path) };
+        return { value: { property: path } };
       }
       objectData(t.id, objects, reads);
       return { object: t.id.name, transform_type: t.transform_type, transform_space: t.transform_space, rotation_mode: t.rotation_mode };
     }) });
   }
   if (driver.type === 'SCRIPTED' && compile(driver.expression, variables.map((v) => v.name)) === PYTHON_ONLY) return null;
-  const indices = reads.map((path) => index.get(path));
-  if (indices.some((i) => i === undefined)) return null;
-  for (const o of Object.values(objects)) o.controls = Object.fromEntries(Object.entries(o.controls).map(([name, paths]) => [name, paths.map((p) => index.get(p))]));
-  return { evaluator: 'driver', reads: [...new Set(indices)], writes: [write], baked: written,
-    data: { driver: { type: driver.type, expression: driver.expression, variables }, curve, objects } };
+  if (reads.some((path) => !properties[path])) return null;
+  // The scene's time, which an expression reads as `frame`.
+  const frame = driver.type === 'SCRIPTED' && /frame/.test(driver.expression) && time;
+  return [`${idKey(id)}/driver/${fc.data_path}[${fc.array_index}]`, { type: `driver:${driver.type}`, id: idKey(id), implementation: 'driver',
+    inputs: { driver: { type: driver.type, expression: driver.expression, variables }, curve, objects, ...(frame && { frame: { property: frame } }) },
+    outputs: { value: { property: written } } }];
 }
 
-// Operations in an order where each runs after those that write what it reads.
-function topological(operations) {
-  const writers = new Map(operations.flatMap((op, i) => op.writes.map((w) => [w, i]))), order = [], state = new Map();
-  const visit = (i) => {
-    if (state.get(i) === 'done') return;
-    if (state.get(i) === 'visiting') throw Error('drivers depend on each other in a cycle');
-    state.set(i, 'visiting');
-    for (const r of operations[i].reads) if (writers.has(r)) visit(writers.get(r));
-    state.set(i, 'done');
-    order.push(i);
-  };
-  operations.forEach((_, i) => visit(i));
-  return order;
-}
-
-// One `blender` operation per Geometry Nodes modifier with controls, which reads its inputs: the page's Blender fallback
-// sets the changed controls in Main by path and draws what it evaluates (runtime/blender-evaluator.js).
-function blenderOperations(controls) {
-  const modifiers = Map.groupBy(controls.flatMap((c, i) => (GEOMETRY_NODES_INPUT.test(c.path) ? [i] : [])), (i) => GEOMETRY_NODES_INPUT.exec(controls[i].path)[1]);
-  return [...modifiers.values()].map((reads) => ({ evaluator: 'blender', reads, writes: [], data: null }));
-}
-
-// The table for `controls` (the package's CONTROLS, which the drivers' inputs are marked suggested in) with the
-// `operations` made with them (modifiers-export.js), or null.
-export function exportDependencies(world, controls, made = []) {
-  if (!world.mainSync) return null;
-  const index = new Map(controls.map((c, i) => [c.path, i])), operations = [], data = blendData();
+// The drivers of every ID that the page can run on `properties`, as IR entities by key.
+export function driverEntities(properties) {
+  const data = blendData(), entities = {}, time = Object.keys(properties).find((path) => path.endsWith('.frame_current'));
   for (const collection of Object.values(COLLECTIONS)) for (const id of data[collection] ?? []) {
     for (const fc of id.animation_data?.drivers ?? []) {
-      const op = driverOperation(collection, id, fc, index);
-      if (op) operations.push(op);
+      const entry = driverEntity(collection, id, fc, properties, time);
+      if (entry) entities[entry[0]] = entry[1];
     }
   }
-  operations.push(...made, ...blenderOperations(controls));
-  if (!operations.length) return null;
-  for (const op of operations) for (const r of op.reads) controls[r].suggested = true;
-  return { version: 1, operations, order: topological(operations) };
+  return entities;
 }

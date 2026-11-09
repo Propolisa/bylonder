@@ -172,29 +172,9 @@ writes those entries as data. A knob without a binding is consumed by an operati
 
 ### Dependency table
 
-Plain data, no code: knobs, operations, and their order, as Blender's depsgraph orders them for the exposed knobs.
-
-```json
-{
-  "version": 1,
-  "knobs": [
-    { "path": "objects[\"Flywheel\"].rotation_euler[1]", "type": "FLOAT", "default": 0, "unit": "ROTATION",
-      "bind": { "target": "Flywheel", "property": "rotation", "axis": 1, "scale": -1 } },
-    { "path": "objects[\"Crosshead\"].location[0]", "type": "FLOAT", "default": 1.95, "unit": "LENGTH",
-      "bind": { "target": "Crosshead", "property": "position", "axis": 0 } }
-  ],
-  "operations": [
-    { "evaluator": "driver", "reads": [0], "writes": [1], "baked": "Crosshead location",
-      "data": { "expression": "0.45 * cos(a) + sqrt(1.5 ** 2 - (0.45 * sin(a)) ** 2)",
-                "variables": [{ "name": "a", "type": "SINGLE_PROP", "knob": 0 }] } }
-  ],
-  "order": [0]
-}
-```
-
-`reads` and `writes` index `knobs`; `order` is a topological order of `operations` made at export time from Main's
-relations (`DEG` relations of the exposed IDs, read in the module). An operation's `evaluator` names the evaluator that
-runs it and `data` is that evaluator's input.
+Replaced by the IR (`docs/ir.md`): the knobs are its `properties`, the operations its `entities`, each reading
+properties and other entities' outputs by reference, and `order` a topological order of entity keys. A package ships it
+as `scene.ir.json`.
 
 ### Scheduler
 
@@ -258,7 +238,7 @@ only those; the interface does not change. Threads are used when the page is cro
 Built (step 6): the export option Include Source .blend (`sourceBlend`, off by default) writes `scene.blend` with
 Blender's writer and lists each Geometry Nodes modifier's float, integer and boolean inputs as suggested controls
 (`objects["Planet"].modifiers["Planet"].properties.inputs.Socket_2.value`, Blender 5.2's path for them), with one
-`blender` operation per modifier reading them. The scheduler loads an evaluator for the page's scene, the package's URL
+`modifier:NODES` entity per modifier reading them, on the `blender` implementation. The scheduler loads an evaluator for the page's scene, the package's URL
 and its controls. The `blender` evaluator (`runtime/blender-evaluator.js`, MIT OR Apache-2.0) fetches `scene.blend` and
 imports `bylonder-blender/blender.js`, the Blender fallback (`blender-fallback.js`, bundled with the code it uses by
 `scripts/blender-fallback.mjs`), which instantiates the module beside it. Each run sets in Main, by RNA path, every

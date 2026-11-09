@@ -49,18 +49,7 @@ function transformBinding(node, ob, rotation, parentInverse) {
   return { node: node.id, transform: { mode, ...parent, ...(offset && { offset }) } };
 }
 
-// A Geometry Nodes modifier's inputs of a value (its interface's float, integer and boolean sockets), which only Blender
-// evaluates: suggested, set through the page's Blender fallback (dependency-export.js).
-const SOCKETS = { NodeSocketFloat: 'FLOAT', NodeSocketInt: 'INT', NodeSocketBool: 'BOOLEAN' };
-export const GEOMETRY_NODES_INPUT = /^(.*\.modifiers\["(?:[^"\\]|\\.)*"\])\.properties\.inputs\.\w+\.value$/;
-function geometryNodesControls(ob, base) {
-  return [...ob.modifiers].filter((m) => m.type === 'NODES' && m.node_group).flatMap((m) => [...m.node_group.interface.items_tree]
-    .filter((item) => item.item_type === 'SOCKET' && item.in_out === 'INPUT' && SOCKETS[item.socket_type])
-    .map((item) => knob(`${base}.modifiers${key(m.name)}.properties.inputs.${item.identifier}.value`, m.properties.inputs[item.identifier].value,
-      { type: SOCKETS[item.socket_type], ...(item.min_value !== undefined && { soft_min: item.min_value, soft_max: item.max_value }), suggested: true })));
-}
-
-function objectControls(node, ob, parentInverse, blender) {
+function objectControls(node, ob, parentInverse) {
   const base = `objects${key(ob.name)}`, list = [];
   const [property, meta] = { QUATERNION: ['rotation_quaternion', { type: 'FLOAT', subtype: 'QUATERNION' }], AXIS_ANGLE: ['rotation_axis_angle', { type: 'FLOAT', subtype: 'AXISANGLE' }] }[ob.rotation_mode]
     ?? ['rotation_euler', { type: 'FLOAT', subtype: 'EULER', unit: 'ROTATION' }];
@@ -69,7 +58,7 @@ function objectControls(node, ob, parentInverse, blender) {
   [...ob[property]].forEach((v, i) => list.push(knob(`${base}.${property}[${i}]`, v, meta, bind)));
   [...ob.scale].forEach((v, i) => list.push(knob(`${base}.scale[${i}]`, v, { type: 'FLOAT', subtype: 'XYZ' }, bind)));
   for (const hide of ['viewport', 'render']) list.push(knob(`${base}.hide_${hide}`, !!ob[`hide_${hide}`], {}, { node: node.id, hide }));
-  return [...list, ...customProperties(ob, base), ...(blender ? geometryNodesControls(ob, base) : [])];
+  return [...list, ...customProperties(ob, base)];
 }
 
 function lightControls(node, light) {
@@ -149,9 +138,8 @@ function sdkControls(world, scene) {
     .map(([ref, channel]) => knob(base + world.animation.dataPath(ref), channel.get(), { suggested: true }));
 }
 
-// The controls of the serialized scene `data`, as the package's CONTROLS: none without Main. With `blender` (the package
-// ships its source .blend), what only Blender evaluates too.
-export function exportControls(world, data, { blender = false } = {}) {
+// The controls of the serialized scene `data`, the IR's properties (ir-export.js): none without Main.
+export function exportControls(world, data) {
   const sync = world.mainSync;
   if (!sync) return [];
   const { scene } = world, byUniqueId = new Map([...scene.meshes, ...scene.transformNodes, ...scene.lights, ...scene.cameras].map((n) => [n.uniqueId, n]));
@@ -162,7 +150,7 @@ export function exportControls(world, data, { blender = false } = {}) {
     const pointer = sync.objectOf(node);
     if (!pointer) continue;
     const ob = idStruct(pointer);
-    list.push(...objectControls(node, ob, sync.blender.transform(pointer).matrix_parent_inverse, blender));
+    list.push(...objectControls(node, ob, sync.blender.transform(pointer).matrix_parent_inverse));
     if (ob.type === 'LIGHT') list.push(...lightControls(node, ob.data));
     if (ob.type === 'CAMERA') list.push(...cameraControls(node, ob.data));
   }

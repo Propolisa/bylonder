@@ -57,7 +57,7 @@ await world.modifiers.settled();
 // The package as the Live Modifiers zip has it, bylonder-modifiers/ included.
 const files = await exportModule(world, { live: true });
 const written = writePackage(files);
-const controls = JSON.parse(/const CONTROLS = (.*);/.exec(files['scene.js'])[1]);
+const controls = Object.entries(JSON.parse(files["scene.ir.json"]).properties).map(([path, p]) => ({ path, ...p }));
 const thicknessPath = 'objects["Solidify"].modifiers["Solidify"].thickness';
 assert.ok(['objects["Subdivision"].modifiers["Subdivision"].levels', 'objects["Array"].modifiers["Array"].relative_offset_displace[0]', thicknessPath]
   .every((path) => controls.some((c) => c.path === path)), 'modifier settings are controls by their Blender paths');

@@ -1,4 +1,4 @@
-// The dependency table and the scheduler on the Steam Engine example (docs/features/drivers-and-graph-editor.md): its
+// Driver entities of the IR and the scheduler on the Steam Engine example (docs/features/drivers-and-graph-editor.md): its
 // drivers read the flywheel's rotation; set by its Blender path in the exported page, it moves the crosshead, the
 // connecting and piston rods and the governor as Main moves them, by the clean-room driver units (runtime/drivers/), at
 // many angles. A driver that reads an object's transform channel runs too, and the scheduler stays under 200 lines.
@@ -22,14 +22,15 @@ fc.driver.expression = '0.1 * r + 0.8';
 sync.view();
 
 const files = await exportModule(world);
-const table = JSON.parse(/const DEPENDENCIES = (.*);/.exec(files['scene.js'])[1]);
-const controls = JSON.parse(/const CONTROLS = (.*);/.exec(files['scene.js'])[1]);
+const ir = JSON.parse(files['scene.ir.json']);
+const drivers = Object.entries(ir.entities).filter(([, e]) => e.implementation === 'driver');
 const driven = ['Crosshead', 'Connecting Rod', 'Piston Rod', 'Governor Arm', 'Governor Arm.001', 'Governor Spindle', 'Steam Cylinder'];
-assert.deepEqual(table.operations.map((op) => controls[op.writes[0]].path.replace(/^objects\["(.*)"\].*$/, '$1')).filter((n, i, a) => a.indexOf(n) === i).sort(), [...driven].sort(),
-  'each driver is an operation writing what it drives');
+assert.deepEqual([...new Set(drivers.map(([, e]) => e.outputs.value.property.replace(/^objects\["(.*)"\].*$/, '$1')))].sort(), [...driven].sort(),
+  'each driver is an entity writing what it drives');
+assert.ok(drivers.every(([key, e]) => key === `${e.id}/driver/${/\.([^.]+)$/.exec(e.outputs.value.property)[1]}`), 'keyed by its ID and the path it drives');
 const flywheel = 'objects["Flywheel"].rotation_euler[1]';
-assert.equal(controls.find((c) => c.path === flywheel).suggested, true, 'what a driver reads is a suggested control');
-assert.ok(files['scene.js'].includes('"evaluator":"driver"'));
+assert.equal(ir.properties[flywheel].suggested, true, 'what a driver reads is a suggested property');
+assert.ok(ir.order.indexOf('OB:Flywheel/animation/rotation_euler[1]') < ir.order.indexOf(drivers[0][0]), "the flywheel's animation comes before the drivers reading it");
 
 const written = writePackage(files);
 const blend = await (await import(written.url)).load(new NullEngine());
@@ -52,4 +53,4 @@ written.remove();
 
 const lines = readFileSync(new URL('../src/io_scene_babylon/runtime/scheduler.js', import.meta.url), 'utf8').split('\n').length;
 assert.ok(lines < 200, `the scheduler is ${lines} lines`);
-console.log(`Export drivers: ${table.operations.length} drivers run in the page by the clean-room units as Main evaluates them, at 40 flywheel angles; the scheduler is ${lines} lines`);
+console.log(`Export drivers: ${drivers.length} drivers run in the page by the clean-room units as Main evaluates them, at 40 flywheel angles; the scheduler is ${lines} lines`);

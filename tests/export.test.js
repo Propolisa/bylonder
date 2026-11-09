@@ -97,7 +97,7 @@ const files = await exportModule(world);
 const source = files['scene.js'];
 assert.match(source, /export async function createScene\(engine, canvas\)/);
 assert.doesNotMatch(source, /__grid|__editorCamera|loose edges|wbCreation/);
-assert.deepEqual(Object.keys(files).sort(), ['package.json', 'scene.bin', 'scene.d.ts', 'scene.js']);
+assert.deepEqual(Object.keys(files).sort(), ['package.json', 'scene.bin', 'scene.d.ts', 'scene.ir.json', 'scene.js']);
 const written = writePackage(files);
 const module = await import(written.url);
 await check(await module.createScene(new NullEngine(), null), '.js');

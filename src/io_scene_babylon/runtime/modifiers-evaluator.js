@@ -1,23 +1,28 @@
 // @ts-check
 // SPDX-License-Identifier: MIT OR Apache-2.0
-// The `modifiers` evaluator of the dependency table: an object's Blender mesh modifiers, run by modifiers.wasm in a
-// worker (bylonder-modifiers/: the module and its worker, GPL, shipped with Live Modifiers). Loaded on the first set of
-// a modifier setting; each operation is one object's stack on its base Mesh in scene.bin, and its result replaces the
-// object's geometry, the newest settings winning while one evaluates.
-
-/** The worker's draw buffers by Babylon's vertex kinds. */
-const KINDS = { positions: 'position', normals: 'normal', uvs: 'uv' };
+// The `modifiers` implementation of `modifier:*` entities: one Blender mesh modifier on an IR mesh, run by
+// modifiers.wasm in a worker (bylonder-modifiers/: the module and its worker, GPL, shipped with Live Modifiers), loaded
+// on the first set of a modifier setting. It gives an IR mesh, or the draw buffers when its mesh is drawn, and draws an
+// IR mesh another unit gives as Blender draws it.
 
 /**
  * A setting as Blender takes it: an integer one rounded, as Blender's animation of it rounds.
  * @param {Record<string, any>} layouts
- * @param {string} path
+ * @param {string} name
  * @param {any} value
  */
-function setting(layouts, path, value) {
-  const layout = layouts[/** @type {string} */ (/^\w+/.exec(path)?.[0])];
+function setting(layouts, name, value) {
+  const layout = layouts[name];
   return typeof value === 'number' && layout && layout.kind !== 'float' && !layout.boolean ? Math.round(value) : value;
 }
+
+/**
+ * A modifier's settings by the paths the module writes them at: a vector's components as `name[i]`.
+ * @param {Record<string, any>} settings
+ * @param {Record<string, any>} layouts
+ */
+const values = (settings, layouts) => Object.fromEntries(Object.entries(settings).flatMap(([name, value]) => (Array.isArray(value)
+  ? value.map((v, i) => [`${name}[${i}]`, setting(layouts, name, v)]) : [[name, setting(layouts, name, value)]])));
 
 /**
  * The polyfill's message handler: its worker, or the worker's module run in this thread where there are no workers
@@ -45,46 +50,20 @@ async function connect(url) {
 }
 
 /** @param {import('./scheduler.js').Page} page @returns {Promise<import('./scheduler.js').Evaluator>} */
-export async function load({ scene, root, buffers }) {
+export async function load({ root }) {
   const handle = await connect(new URL('bylonder-modifiers/modifiers-worker.js', root));
   await handle({ wasm: new URL('bylonder-modifiers/modifiers.wasm', root).href });
-  /** @param {any} base @param {any[]} stack @returns {Promise<Record<string, any>>} */
-  const evaluate = async (base, stack) => {
-    const reply = await handle({ base, stack });
+  /** @param {any} message */
+  const evaluate = async (message) => {
+    const reply = await handle(message);
     if (reply.error) throw new Error(reply.error);
-    return reply.buffers;
+    return reply.result;
   };
-
-  /** Each operation's evaluation going, and the settings to evaluate after it. */
-  const running = new Map(), queued = new Map();
-  /** @param {import('./scheduler.js').Operation} operation */
-  const start = (operation) => {
-    const { node, base, stack } = operation.data, settings = queued.get(operation);
-    queued.delete(operation);
-    const arrays = Object.fromEntries(Object.entries(base).map(([name, index]) => [name, buffers[/** @type {number} */ (index)]]));
-    running.set(operation, evaluate(arrays, settings).then((result) => {
-      const mesh = /** @type {import('@babylonjs/core').Mesh | null} */ (scene.getMeshById(node));
-      if (!mesh || mesh.isDisposed()) return;
-      mesh.makeGeometryUnique();
-      for (const [name, kind] of Object.entries(KINDS)) if (result[name]) mesh.setVerticesData(kind, result[name], false);
-      mesh.setIndices(result.indices);
-      mesh.refreshBoundingInfo();
-    }, (error) => console.warn(`${node}: ${error.message}`)).finally(() => {
-      running.delete(operation);
-      if (queued.has(operation)) start(operation);
-    }));
-  };
-
   return {
-    run(operation, read) {
-      queued.set(operation, operation.data.stack.map((/** @type {any} */ { type, layouts, values }) => ({
-        type, layouts, values: Object.fromEntries(Object.entries(values).map(([path, index]) => [path, setting(layouts, path, read(/** @type {number} */ (index)))])),
-      })));
-      if (!running.has(operation)) start(operation);
-      return [];
+    async run({ mesh, kernel: { type, layouts }, ...settings }, context, entity) {
+      const draw = Object.values(entity.outputs).some((output) => output && 'draw' in output);
+      return { mesh: await evaluate({ mesh, modifier: { type, layouts, values: values(settings, layouts) }, draw }) };
     },
-    async settled() {
-      while (running.size) await Promise.all(running.values());
-    },
+    draw: (mesh) => evaluate({ mesh, modifier: null, draw: true }),
   };
 }

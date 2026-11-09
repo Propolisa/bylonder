@@ -1,7 +1,11 @@
 /**
- * Runs a driver operation: its value, through its F-Curve when it has keys.
- * @param {import('./scheduler.js').Operation} operation
- * @param {(index: number) => any} read
- * @param {number} frame
+ * A driver's value, through its F-Curve when it has keys.
+ * @param {Record<string, any>} inputs
+ * @param {{ frame: number }} context
+ * @param {object} entity
  */
-export function run(operation: import("./scheduler.js").Operation, read: (index: number) => any, frame: number): number[];
+export function run({ driver, curve, objects, frame }: Record<string, any>, context: {
+    frame: number;
+}, entity: object): {
+    value: number;
+};

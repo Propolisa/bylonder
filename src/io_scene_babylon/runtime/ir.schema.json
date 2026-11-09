@@ -1,105 +1,329 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://bylonder.dev/ir/1/schema.json",
-  "title": "Bylonder IR, version 1 (docs/ir.md)",
   "type": "object",
-  "required": ["schema", "version", "ids", "references", "properties", "graphs", "entities", "order"],
-  "additionalProperties": false,
   "properties": {
-    "schema": { "const": "bylonder-ir" },
-    "version": { "const": 1 },
+    "schema": {
+      "type": "string",
+      "const": "bylonder-ir"
+    },
+    "version": {
+      "type": "number",
+      "const": 1
+    },
     "ids": {
+      "default": {},
       "type": "object",
-      "propertyNames": { "pattern": "^[A-Z]{2,3}:" },
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[A-Z]{2,3}:"
+      },
       "additionalProperties": {
         "type": "object",
-        "required": ["type", "name", "path", "data"],
         "properties": {
-          "type": { "type": "string" },
-          "name": { "type": "string" },
-          "path": { "type": ["string", "null"] },
-          "node": { "type": "string" },
-          "data": { "type": ["object", "null"] }
-        }
+          "type": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "path": {
+            "default": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "node": {
+            "type": "string"
+          },
+          "data": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "name"
+        ]
       }
     },
     "references": {
+      "default": [],
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["from", "path", "to"],
-        "additionalProperties": false,
-        "properties": { "from": { "type": "string" }, "path": { "type": "string" }, "to": { "type": "string" } }
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "from",
+          "path",
+          "to"
+        ]
       }
     },
     "properties": {
+      "default": {},
       "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
       "additionalProperties": {
         "type": "object",
-        "required": ["id", "type", "default"],
         "properties": {
-          "id": { "type": ["string", "null"] },
-          "type": { "enum": ["FLOAT", "INT", "BOOLEAN", "STRING"] },
-          "default": { "type": ["number", "boolean", "string"] },
-          "soft_min": { "type": "number" },
-          "soft_max": { "type": "number" },
-          "subtype": { "type": "string" },
-          "unit": { "type": "string" },
-          "suggested": { "type": "boolean" },
-          "bind": { "type": "object" }
-        }
+          "id": {
+            "default": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "FLOAT",
+              "INT",
+              "BOOLEAN",
+              "STRING"
+            ]
+          },
+          "default": {
+            "type": [
+              "number",
+              "boolean",
+              "string"
+            ]
+          },
+          "soft_min": {
+            "type": "number"
+          },
+          "soft_max": {
+            "type": "number"
+          },
+          "subtype": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "suggested": {
+            "type": "boolean"
+          },
+          "bind": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          }
+        },
+        "required": [
+          "type",
+          "default"
+        ]
       }
     },
     "graphs": {
+      "default": {},
       "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
       "additionalProperties": {
         "type": "object",
-        "required": ["type", "nodes", "links"],
         "properties": {
-          "type": { "enum": ["SHADER", "GEOMETRY", "COMPOSITOR"] },
+          "type": {
+            "type": "string",
+            "enum": [
+              "SHADER",
+              "GEOMETRY",
+              "COMPOSITOR"
+            ]
+          },
           "nodes": {
+            "default": [],
             "type": "array",
             "items": {
               "type": "object",
-              "required": ["name", "type"],
               "properties": {
-                "name": { "type": "string" },
-                "type": { "type": "string", "pattern": "^node:" },
-                "settings": { "type": "object" },
-                "inputs": { "type": "object" }
-              }
+                "name": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "pattern": "^node:"
+                },
+                "settings": {
+                  "default": {},
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {}
+                },
+                "inputs": {
+                  "default": {},
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {}
+                }
+              },
+              "required": [
+                "name",
+                "type"
+              ],
+              "additionalProperties": {}
             }
           },
-          "links": { "type": "array", "items": { "type": "array", "items": { "type": "string" }, "minItems": 4, "maxItems": 4 } },
-          "interface": { "type": "array" }
-        }
+          "links": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "string"
+                }
+              ],
+              "items": false,
+              "minItems": 4,
+              "maxItems": 4
+            }
+          },
+          "interface": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            }
+          }
+        },
+        "required": [
+          "type"
+        ]
       }
     },
     "entities": {
+      "default": {},
       "type": "object",
-      "propertyNames": { "pattern": "^[A-Z]{2,3}:.+/[a-z_]+/.+$" },
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[A-Z]{2,3}:.+\\/[a-z_]+\\/.+$"
+      },
       "additionalProperties": {
         "type": "object",
-        "required": ["type", "id", "inputs", "outputs"],
-        "additionalProperties": false,
         "properties": {
-          "type": { "type": "string", "pattern": "^[a-z_]+:" },
-          "id": { "type": "string" },
-          "inputs": { "type": "object" },
-          "outputs": {
+          "type": {
+            "type": "string",
+            "pattern": "^[a-z_]+:"
+          },
+          "id": {
+            "type": "string"
+          },
+          "inputs": {
+            "default": {},
             "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          },
+          "outputs": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
             "additionalProperties": {
-              "oneOf": [
-                { "type": "null" },
-                { "type": "object", "required": ["property"], "properties": { "property": { "type": "string" } } },
-                { "type": "object", "required": ["draw"], "properties": { "draw": { "type": "string" } } }
+              "anyOf": [
+                {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "property": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "property"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "draw": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "draw"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "null"
+                }
               ]
             }
           },
-          "implementation": { "type": "string" }
-        }
+          "implementation": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ]
       }
     },
-    "order": { "type": "array", "items": { "type": "string" } }
-  }
+    "order": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "schema",
+    "version"
+  ],
+  "$id": "https://bylonder.dev/ir/1/schema.json",
+  "title": "Bylonder IR, version 1 (docs/ir.md)"
 }
