@@ -3,8 +3,16 @@
 // animation sets through a channel of its node (runtime/blend-scene.js); the stack is one `modifiers` operation on the
 // object's base Mesh, written to scene.bin, run in the page by modifiers.wasm (runtime/modifiers-evaluator.js) when a
 // setting changes. Until then the page draws the applied geometry.
-import { idStruct } from '../python/bpy_rna.js';
+import { idStruct, pointerOf } from '../python/bpy_rna.js';
 import { knob, key } from './controls-export.js';
+
+// Whether an object's modifiers read another ID (an Array's offset object, a Displace's texture), which the page's
+// polyfill, given the mesh alone, lacks: such a stack stays applied.
+export const readsOtherIDs = (world, node) => [...idStruct(world.mainSync.objectOf(node)).modifiers].some((modifier) =>
+  [...modifier.bl_rna.properties].some(({ type, identifier }) => {
+    const pointer = type === 'POINTER' && pointerOf(modifier[identifier]);
+    return pointer && pointer[1] === pointer[2];
+  }));
 
 // The channel an animated setting of the stack's `index`th modifier lands in (blend-scene.js Binding.channel).
 export const channelKey = (index, path) => `${index}:${path}`;

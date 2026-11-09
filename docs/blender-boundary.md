@@ -448,7 +448,7 @@ Decided 2026-10-28. Exports apply modifiers; File > Export > JavaScript, Live Mo
   operation reading them, with its base Mesh as the module takes it (positions, edges, face offsets, corner verts and
   edges, UVs) in `scene.bin` and its stack (ModifierType and the DNA layouts of its settings, so the page needs neither
   RNA nor DNA tables) (`io_scene_babylon/modifiers-export.js`). Objects with Bylonder's own modifiers (Array as
-  Geometry Nodes) stay applied.
+  Geometry Nodes), or whose modifiers read another ID (an Array's offset object, a Displace's texture), stay applied.
 - **Animation.** A keyed modifier setting is sampled into the scene's animation group at a channel of its node,
   `metadata.bylonderChannels["<modifier index>:<path>"]`, which the page's controller turns into its control: a frame
   that changes it marks the stack's operation, which runs again in the worker, the newest settings winning; integers

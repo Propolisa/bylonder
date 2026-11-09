@@ -14,7 +14,7 @@ import { createSceneBin } from './scene-bin.js';
 import { imageFiles } from './image-files.js';
 import { exportCompositor } from './compositor-export.js';
 import { exportDependencies } from './dependency-export.js';
-import { channels, modifierOperations } from './modifiers-export.js';
+import { channels, modifierOperations, readsOtherIDs } from './modifiers-export.js';
 import { gplFolders } from './runtime-files.js';
 import { idStruct } from '../python/bpy_rna.js';
 import { displayExponent } from '../render/view-settings.js';
@@ -138,7 +138,7 @@ async function displaySettings(world, bin, composites) {
 // `sourceBlend`, the scene's .blend too, as scene.blend, and the controls only Blender evaluates, which the page's
 // Blender fallback runs on it.
 export async function exportModule(world, { live: keepLive = false, parity = false, hostCompression = false, sourceBlend = false } = {}) {
-  const live = new Map(keepLive ? world.objects.map((node) => [node, world.modifiers.live(node)]).filter(([, stack]) => stack && !stack.modifiers.some(needsOpenVDB)) : []);
+  const live = new Map(keepLive ? world.objects.map((node) => [node, world.modifiers.live(node)]).filter(([node, stack]) => stack && !stack.modifiers.some(needsOpenVDB) && !readsOtherIDs(world, node)) : []);
   await world.modifiers.settled();
   // The mapped meshes' geometry is read below: their mapping holds until the module is written.
   const mapped = exportRuntimes(world);
