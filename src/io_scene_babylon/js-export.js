@@ -88,6 +88,19 @@ const liveStack = ({ mesh, modifiers }) => ({
 
 const indent = (lines, by = '    ') => lines.map((l) => by + l).join('\n');
 
+// Node materials' custom block code, each body once: the blocks name its index in the module's CODE.
+function sharedCode(materials) {
+  const bodies = new Map();
+  for (const entry of materials) for (const block of entry.blocks ?? []) {
+    const body = block.options?.code;
+    if (!Array.isArray(body)) continue;
+    const key = JSON.stringify(body);
+    if (!bodies.has(key)) bodies.set(key, bodies.size);
+    block.options.code = bodies.get(key);
+  }
+  return [...bodies.keys()].map((key) => JSON.parse(key));
+}
+
 // The package's files but the runtime's: scene.js, scene.d.ts, scene.bin and images/. With `live`, objects whose
 // modifiers are all Blender's keep them live through the modifier kernels polyfill, which createScene loads from
 // `bylonder-modifiers/` next to the module (or its `modifiers` option).
@@ -113,7 +126,7 @@ async function moduleSource(world, live, mapped, parity, hostCompression) {
     geometries.set(mesh.geometry, `geometries[${geometries.size}]`);
     geometryLines.push(`  ${geometryCode(mesh, bin)},`);
   }
-  const controls = exportControls(world, data);
+  const controls = exportControls(world, data), code = sharedCode(data.materials);
   const parented = [...data.transformNodes, ...data.meshes, ...data.lights, ...data.cameras].filter((e) => e.parentId !== undefined);
   const parse = (name, list, code) => (list?.length ? `  for (const entry of ${name}) ${code};\n` : '');
   const settings = {
@@ -145,6 +158,7 @@ function geometry(scene, vertices, indices) {
 
 const SCENE = ${json(settings)};
 const IMAGE_PROCESSING = ${json(data.imageProcessingConfiguration)};
+const CODE = ${json(code)};
 const MATERIALS = ${json(data.materials)};
 const MULTI_MATERIALS = ${json(data.multiMaterials)};
 const SKELETONS = ${json(data.skeletons)};
@@ -186,6 +200,8 @@ export async function createScene(engine, canvas${live.size ? ", { modifiers = n
   const buffers = await readBuffers(new URL('scene.bin', ROOT), BUFFERS, ${!hostCompression});
 
   const materials = {};
+  // A custom block's code is written once for every material that shares it.
+  for (const entry of MATERIALS) for (const block of entry.blocks ?? []) if (typeof block.options?.code === 'number') block.options.code = CODE[block.options.code];
   for (const entry of MATERIALS) materials[entry.uniqueId] = Material.Parse(entry, scene, ROOT);
   for (const entry of MULTI_MATERIALS) materials[entry.uniqueId] = MultiMaterial.ParseMultiMaterial(entry, scene);
   for (const entry of SKELETONS) Skeleton.Parse(entry, scene);

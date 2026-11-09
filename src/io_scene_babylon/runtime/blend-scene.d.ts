@@ -75,10 +75,14 @@ export type Transform = {
 };
 /**
  * Where a control's value lands: a property of a node (by id) or of the scene, scaled by `factor`; the node's place
- * (`transform`); visibility (`hide`); or a focal length as a field of view (`lens`: half the sensor's fitted size).
+ * (`transform`); visibility (`hide`); a focal length as a field of view (`lens`: half the sensor's fitted size); or a
+ * node material's InputBlock (`material` and `block`, and the `component` of a vector).
  */
 export type Binding = {
     node?: string | undefined;
+    material?: string | undefined;
+    block?: string | undefined;
+    component?: number | undefined;
     property?: string | undefined;
     factor?: number | undefined;
     transform?: Transform | undefined;

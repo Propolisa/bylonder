@@ -77,6 +77,16 @@ function cameraControls(node, camera) {
   ];
 }
 
+// A node material's tunable values: its InputBlocks named by their RNA path from the material (node-material-export.js),
+// a number or each component of a vector.
+function nodeMaterialControls(entry) {
+  if (entry.customType !== 'BABYLON.NodeMaterial') return [];
+  const base = `materials${key(entry.name)}`;
+  return entry.blocks.filter((b) => b.customType === 'BABYLON.InputBlock' && b.name.startsWith('node_tree.')).flatMap((b) => (Array.isArray(b.value)
+    ? b.value.map((v, i) => knob(`${base}.${b.name}[${i}]`, v, { type: 'FLOAT' }, { material: entry.id, block: b.name, component: i }))
+    : [knob(`${base}.${b.name}`, b.value, { type: 'FLOAT' }, { material: entry.id, block: b.name })]));
+}
+
 // The project's SDK controls (sdk.controls), as Main holds them: custom properties of the Scene.
 function sdkControls(world, scene) {
   const base = `scenes${key(scene.name)}`;
@@ -100,6 +110,7 @@ export function exportControls(world, data) {
     if (ob.type === 'LIGHT') list.push(...lightControls(node, ob.data));
     if (ob.type === 'CAMERA') list.push(...cameraControls(node, ob.data));
   }
+  list.push(...data.materials.flatMap(nodeMaterialControls));
   list.push(...customProperties(mainScene, `scenes${key(mainScene.name)}`), ...sdkControls(world, mainScene));
   return [...new Map(list.map((k) => [k.path, k])).values()];
 }

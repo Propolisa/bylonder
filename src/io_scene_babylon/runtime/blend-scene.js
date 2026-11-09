@@ -34,9 +34,13 @@ import { Matrix, Observable, Quaternion, Vector3 } from '@babylonjs/core';
 
 /**
  * Where a control's value lands: a property of a node (by id) or of the scene, scaled by `factor`; the node's place
- * (`transform`); visibility (`hide`); or a focal length as a field of view (`lens`: half the sensor's fitted size).
+ * (`transform`); visibility (`hide`); a focal length as a field of view (`lens`: half the sensor's fitted size); or a
+ * node material's InputBlock (`material` and `block`, and the `component` of a vector).
  * @typedef {object} Binding
  * @property {string} [node]
+ * @property {string} [material]
+ * @property {string} [block]
+ * @property {number} [component]
  * @property {string} [property]
  * @property {number} [factor]
  * @property {Transform} [transform]
@@ -182,6 +186,12 @@ export class BlendScene {
    * @param {Value} value
    */
   #apply(bind, path, value) {
+    if (bind.material !== undefined) {
+      const material = /** @type {any} */ (this.scene.getMaterialById(bind.material)), block = material?.getBlockByName(bind.block);
+      if (block && bind.component === undefined) block.value = value;
+      else if (block) block.value['xyzw'[bind.component ?? 0]] = value;
+      return;
+    }
     const node = /** @type {any} */ (bind.node === undefined ? this.scene : this.scene.getNodeById(bind.node));
     if (!node) return;
     if (bind.transform) {

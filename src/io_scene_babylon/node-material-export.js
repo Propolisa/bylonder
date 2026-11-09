@@ -14,7 +14,7 @@ import {
   ShaderNodeOutputMaterial, STAND_INS,
 } from '../nodes/blender/shader-nodes.js';
 import { CurvesGeometryBlock, CurvesNormalBlock } from '../draw/curves.js';
-import { glslType, glslValue, LUMINANCE } from '../nodes/blender/sockets.js';
+import { glslValue, LUMINANCE } from '../nodes/blender/sockets.js';
 import { straightImageData } from '../imbuf/image-textures.js';
 
 const GLSL = { [T.Float]: 'float', [T.Vector2]: 'vec2', [T.Vector3]: 'vec3', [T.Vector4]: 'vec4', [T.Color3]: 'vec3', [T.Color4]: 'vec4', [T.Matrix]: 'mat4' };
@@ -50,11 +50,22 @@ const MATRICES = {
   $viewinv: `inverse(${F} * bl_view * ${S})`, $winmat: `bl_projection * ${F}`,
 };
 
+// A node's unlinked input as the export's tunable value: a Babylon InputBlock named by the input's RNA path from its
+// material (`node_tree.nodes["Noise Texture"].inputs[2].default_value`), which the package's controls set.
+const uniformType = (kind) => ({ float: T.Float, vec3: T.Vector3 })[kind] ?? T.Vector4;
+const socketPath = (node, id) => `node_tree.nodes["${node.name.replace(/["\\]/g, (c) => '\\' + c)}"].inputs[${node.declaration.inputs.findIndex((s) => s.identifier === id)}].default_value`;
+function valueBlock({ kind, value, path }) {
+  const type = uniformType(kind), block = new InputBlock(path, undefined, type);
+  block.value = type === T.Float ? Number(value) : type === T.Vector3 ? Vector3.FromArray(value) : Vector4.FromArray(value);
+  return block;
+}
+
 const literal = (value) => (Array.isArray(value) ? `vec${value.length}(${value.map((v) => glslValue(v, 'float')).join(', ')})` : glslValue(value, 'float'));
 
 // The material as Babylon's NodeMaterial serialization of Babylon's blocks, or null for one not of Blender's nodes.
 export async function exportNodeMaterial(material, { parity = false } = {}) {
-  if (!blenderOutput(material) || !material._sharedData) return null;
+  if (!blenderOutput(material)) return null;
+  await built(material);
   const scene = material.getScene();
   const out = new NodeMaterial(material.name, scene);
   try {
@@ -70,6 +81,18 @@ export async function exportNodeMaterial(material, { parity = false } = {}) {
     return Object.assign(json, { name: material.name, id: material.id, uniqueId: material.uniqueId });
   } finally {
     out.dispose();
+  }
+}
+
+// The material built, its Blender nodes' code written (a material no view has drawn yet builds for the export; a build
+// waits for its nodes' code).
+async function built(material) {
+  const current = () => material.attachedBlocks.some((b) => isBlenderShader(b) && b.built?.shared === material._sharedData);
+  // A build may queue another as it ends (shader-nodes.js buildMaterial): waited for until one is current.
+  for (let builds = 0; builds < 8 && (material._buildIsInProgress || !current()); builds++) {
+    if (!material._buildIsInProgress) material.build();
+    if (material._buildIsInProgress) await new Promise((resolve) => { material.onBuildObservable.addOnce(resolve); material.onBuildErrorObservable.addOnce(resolve); });
+    await new Promise((resolve) => setTimeout(resolve));
   }
 }
 
@@ -188,7 +211,7 @@ function customBlock(name, functionName, inputs, outputs, code) {
 function blenderNodes(material, { closure, merge, scene, textures, systemValue }) {
   const built = material.attachedBlocks.filter((b) => isBlenderShader(b) && b.built?.shared === material._sharedData).sort((a, b) => a.built.order - b.built.order);
   const functions = new Map([['bl_closure', STAND_INS.bl_closure]]);
-  const params = new Map(), samplers = [], locals = [], outputs = new Map();
+  const params = new Map(), samplers = [], locals = [], uniforms = [], outputs = new Map();
   let matrices = false;
   const mesh = material.getScene().meshes.find((m) => m.material === material) ?? null;
   for (const node of built) {
@@ -196,7 +219,7 @@ function blenderNodes(material, { closure, merge, scene, textures, systemValue }
     for (const [input, name] of node.built.inputs) {
       if (!isBlenderShader(input.connectedPoint.ownerBlock) && !params.has(name)) params.set(name, input.connectedPoint);
     }
-    for (const [name, id, kind] of node._uniforms ?? []) locals.push(`${glslType(kind)} ${name} = ${glslValue(node.values[id], kind)};`);
+    for (const [name, id, kind] of node._uniforms ?? []) uniforms.push({ name, kind, value: node.values[id], path: socketPath(node, id) });
     for (const [name, texture] of node._textures ?? []) samplers.push([name, texture]);
     for (const [name, id] of node._meshUniforms ?? []) {
       if (MATRICES[id]) { matrices = true; locals.push(`mat4 ${name} = ${MATRICES[id]};`); continue; }
@@ -212,7 +235,8 @@ function blenderNodes(material, { closure, merge, scene, textures, systemValue }
     }
   }
   const c = closure ? closure.associatedVariableName : 'bl_closure_empty()';
-  const inputs = [...params].map(([name, point], i) => [`in${i}`, typeName(point.type), name]);
+  const inputs = [...params].map(([name, point], i) => [`in${i}`, typeName(point.type), name])
+    .concat(uniforms.map(({ name, kind }, i) => [`value${i}`, typeName(uniformType(kind)), name]));
   if (matrices) inputs.push(['world', 'Matrix', 'bl_world'], ['view', 'Matrix', 'bl_view'], ['projection', 'Matrix', 'bl_projection']);
   const sampled = samplers.map(([name], i) => [`image${i}`, 'sampler2D', name]);
   const outParameters = [...CLOSURE_OUTPUTS.map(([name, type]) => [name, typeName(type)]), ...[...outputs].map(([point, name]) => [name, typeName(point.type)])];
@@ -227,6 +251,7 @@ function blenderNodes(material, { closure, merge, scene, textures, systemValue }
     output: (point) => block.getOutputByName(outputs.get(point)),
     connect(source) {
       [...params.values()].forEach((point, i) => source(point).connectTo(block.getInputByName(`in${i}`)));
+      uniforms.forEach((uniform, i) => valueBlock(uniform).output.connectTo(block.getInputByName(`value${i}`)));
       if (matrices) for (const [name, value] of [['world', System.World], ['view', System.View], ['projection', System.Projection]]) systemValue(value).output.connectTo(block.getInputByName(name));
       samplers.forEach(([, texture], i) => {
         const image = new ImageSourceBlock(`blender:image${i}`);

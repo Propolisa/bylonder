@@ -17,6 +17,10 @@ async function check(id) {
   const { world, scene, sync } = openExample(id);
   sync.view();
   const files = await exportModule(world);
+  // Materials of one node structure share one code body; their values are tunable inputs.
+  const code = JSON.parse(/const CODE = (.*);/.exec(files['scene.js'])[1]), materials = JSON.parse(/const MATERIALS = (.*);/.exec(files['scene.js'])[1]).filter((m) => m.customType === 'BABYLON.NodeMaterial');
+  assert.ok(code.length <= materials.length, `${id}: ${code.length} code bodies for ${materials.length} node materials`);
+  assert.ok(materials.every((m) => !m.blocks.some((b) => /^BABYLON\.(Blender|ShaderNode)/.test(b.customType))), `${id}: node materials hold only Babylon's blocks`);
   const written = writePackage(files);
   const blend = await (await import(written.url)).load(new NullEngine());
   const page = blend.scene, group = page.animationGroups[0];
