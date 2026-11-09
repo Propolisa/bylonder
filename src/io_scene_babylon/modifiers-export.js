@@ -115,6 +115,13 @@ function chain(ob, node, modifiers, base) {
   return entities;
 }
 
+// A modifier's settings' UI ranges by name, as Blender's RNA gives them: what a page's slider spans and an author keeps to.
+function uiRanges(modifier) {
+  const finite = (p) => Number.isFinite(p.soft_min) && Number.isFinite(p.soft_max) && p.soft_max - p.soft_min < 3.4e38;
+  return Object.fromEntries([...modifier.bl_rna.properties].filter((p) => p.type === 'FLOAT' || p.type === 'INT').filter(finite)
+    .map((p) => [p.identifier, { soft_min: p.soft_min, soft_max: p.soft_max }]));
+}
+
 // The data paths an object's F-Curves and drivers set (`modifiers["Bend"].angle`).
 function animatedPaths(ob) {
   const animation = ob.animation_data, action = animation?.action;
@@ -129,13 +136,13 @@ export function modifierEntities(world, live, properties, bin) {
     const ob = idStruct(world.mainSync.objectOf(node)), shown = [...ob.modifiers].filter((m) => m.show_viewport), names = shown.map((m) => m.name);
     const animated = animatedPaths(ob);
     const modifiers = stack.modifiers.map(({ kind, type, layouts, values }, i) => {
-      const named = nameSettings(shown[i]), prefix = `modifiers${key(names[i])}.`;
+      const named = nameSettings(shown[i]), ranges = uiRanges(shown[i]), prefix = `modifiers${key(names[i])}.`;
       const own = new Set([...animated].filter((path) => path.startsWith(prefix)).map((path) => path.slice(prefix.length)));
       return {
         name: names[i], type: kind, implementation: 'modifiers', output: 'mesh',
         inputs: { ...settingInputs(ownFields(values, layouts, own).map(([path, value]) => {
-          const float = typeof value === 'number' && layouts[/^\w+/.exec(path)[0]]?.kind === 'float', property = `objects${key(ob.name)}.modifiers${key(names[i])}.${path}`;
-          properties.push(knob(property, value, float ? { type: 'FLOAT' } : {}, { node: node.id, channel: channelKey(i, path) }));
+          const name = /^\w+/.exec(path)[0], float = typeof value === 'number' && layouts[name]?.kind === 'float', property = `objects${key(ob.name)}.modifiers${key(names[i])}.${path}`;
+          properties.push(knob(property, value, { ...(float && { type: 'FLOAT' }), ...ranges[name] }, { node: node.id, channel: channelKey(i, path) }));
           return [path, { property }];
         })), ...named.values, kernel: { type, layouts: { ...layouts, ...named.layouts } } },
       };
