@@ -20,9 +20,9 @@ test('docs and unit tests run the core only; an area adds its checks; an unknown
   assert.ok(sequencer.checks.some((n) => /Video Sequencer/.test(n)) && !sequencer.full);
   assert.ok(!sequencer.checks.some((n) => /Grease Pencil/.test(n)));
   assert.ok(selectChecks(['src/blenkernel/main-sync.js'], smoke).checks.length < names.length / 2);
-  const unknown = selectChecks(['vite.config.js'], smoke);
+  const unknown = selectChecks(['eslint.config.js'], smoke);
   assert.ok(unknown.full && unknown.checks.length === names.length);
-  assert.match(unknown.reasons[0], /vite\.config\.js/);
+  assert.match(unknown.reasons[0], /eslint\.config\.js/);
 });
 
 test('an edit of smoke.mjs runs the checks it touches, or everything when it touches a helper', () => {

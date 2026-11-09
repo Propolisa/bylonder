@@ -1,4 +1,4 @@
-// The smoke checks a change needs (node scripts/gates.mjs --fast): the core that guards the render loop, plus the
+// The smoke checks a change needs (node scripts/gates.mjs): the core that guards the render loop, plus the
 // checks whose names match the areas of the changed files. A changed file in no listed area runs every check.
 import { readFileSync } from 'node:fs';
 
@@ -34,6 +34,8 @@ export const AREAS = [
   [/^src\/editors\/(space_topbar|space_info|undo)\//, /menu|splash|Reset|Ctrl Z|undo/],
   [/^src\/workspace\//, /example|splash|demo|reload|ZIP|Reset/],
   [/^examples\//, /example/],
+  // The pages, their static files and the dev server's setup: what loads the app.
+  [/^((index|viewport|render)\.html|vite\.config\.js)$|^public\//, /app boots|example|reload|splash|demo|Render Image shows a/],
 ];
 
 // tests/e2e/smoke.mjs's checks as { name, line } (its `checks` entries sit at two spaces' indent), and the line that

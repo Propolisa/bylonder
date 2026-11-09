@@ -15,8 +15,13 @@ export function resolveImport(from, spec) {
   return [path, `${path}.js`, `${path}.ts`, join(path, 'index.js')].find(isFile) ?? null;
 }
 
-// A module's relative import specifiers.
+// A module's relative import specifiers (parsed once per process).
+const parsed = new Map();
 export function imports(file) {
+  if (!parsed.has(file)) parsed.set(file, parseImports(file));
+  return parsed.get(file);
+}
+function parseImports(file) {
   if (!/\.(js|mjs|vue)$/.test(file)) return [];
   const specs = [];
   const visit = (node) => {

@@ -2170,7 +2170,7 @@ const CHECK_TIMEOUT = 300000;
 const timeout = (ms, what) => new Promise((_, reject) => setTimeout(() => reject(new Error(`${what} took over ${ms / 1000} s`)), ms).unref());
 // SHARD=i/n runs every n-th check from the i-th (scripts/gates.mjs runs shards in parallel).
 const [shard, shards] = (process.env.SHARD ?? "0/1").split("/").map(Number);
-// SMOKE_CHECKS: the names of the checks to run, one a line (scripts/gates.mjs --fast).
+// SMOKE_CHECKS: the names of the checks to run, one a line (scripts/gates.mjs).
 const only = process.env.SMOKE_CHECKS && new Set(process.env.SMOKE_CHECKS.split("\n"));
 const server = await startServer();
 const browser = await chromium.launch();

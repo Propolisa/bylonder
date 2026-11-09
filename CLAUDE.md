@@ -12,9 +12,10 @@ this checkout as CI does and installs it: on Linux directly, on Windows in a WSL
 
 Commit subjects are the app's changelog (Splash Screen > Changelog): one commit per user-visible change, its subject
 saying what a user gets. No WIP commits reach `main`; branches merge with `git merge --squash`. Before pushing to
-`main`: `node scripts/gates.mjs --fast` passes (`npm test`, `npm run build`, `npm run test:prod`, the smoke checks the
-change touches and the perf guard); a batch of several commits runs the full `node scripts/gates.mjs` instead (the Pages
-deploy runs the build and the production check).
+`main`: `node scripts/gates.mjs` passes. It runs the build and the production check, and of the rest only what the
+change can reach: the unit tests whose imports reach a changed file, the smoke checks of its areas, the workflows when
+every check is needed, the perf guard when drawing, rendering or evaluation changed (`--list` shows the selection,
+`--full` runs everything). The Pages deploy runs every unit test, the build and the production check.
 
 ## Roadmap
 
