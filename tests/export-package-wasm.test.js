@@ -53,6 +53,7 @@ const keyLight = objects.find((n) => n.name === 'Key Light'), slide = animation.
 animation.insert([slide], 1, keyLight.position.x);
 animation.insert([slide], 30, keyLight.position.x + 2);
 const files = await exportModule(world);
+assert.doesNotMatch(files['scene.js'], /bylonder-blocks|bylonder-view-transform/, 'a scene without a compositor or a view transform ships no blocks library');
 assert.ok(files['scene.d.ts'].includes(`'objects["Flywheel"].location[0]': number;`), 'scene.d.ts types the controls');
 const written = writePackage(files);
 const blend = await (await import(written.url)).load(new NullEngine());

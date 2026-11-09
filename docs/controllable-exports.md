@@ -233,7 +233,22 @@ Babylon's `RegisterClass`:
   the view transform LUT (`render/display-lut.js`), and later ones as they land.
 
 A scene that uses none of them ships none of them. Shader and world materials need no class: they are plain
-NodeMaterials. All code is GLSL through Babylon's own path, so a page renders on WebGL 2 and on WebGPU (Babylon
+NodeMaterials.
+
+Built (step 4): `runtime/blocks.js` ships as `bylonder-blocks.js` with `BylonderPassBlock`, one class for every Blender
+compositor node. The export (`compositor-export.js`) builds the app's graph from Main's compositing node group and
+writes each node as that block with its pass made there: a pixel node's fragment shader from Blender's GPU node
+function with its values as uniforms, or an operation's plan recorded by Blender's GPU compositor at the scene's render
+size. Render Layers is Babylon's own external texture input. Which values bind is measured at export: an input is a
+control without a rebuild when nudging it changes exactly one uniform, or one uploaded float of the plan, by the same
+amount; any other value (a Blur's Size, which changes the plan) needs Blender's evaluator (step 6). The page runs the
+graph on the camera's render before the display transform and copies the composite back, as the app does. The view
+transform is an extension of its own, `runtime/view-transform.js` shipped as `bylonder-view-transform.js`: scene linear
+materials, then exposure, Blender's display processor as a lattice computed at export into `scene.bin` (none for
+Standard without a look, which is sRGB's encoding) and the gamma. Each ships only when `scene.js` imports it
+(`runtime-files.js` `packageRuntime`). The app's own compositor tasks and display shader are these same classes. Not
+yet in the library: volumes, area light shadows, EEVEE Parity's lobes and the film's accumulation; a page draws
+without them. All code is GLSL through Babylon's own path, so a page renders on WebGL 2 and on WebGPU (Babylon
 converts the GLSL with glslang and twgsl there, `webgpu.md`).
 
 ### The package
@@ -245,7 +260,8 @@ package.json          an ES module package needing only @babylonjs/core
 scene.bin             vertex, index, thin instance and key buffers as raw typed arrays, gzipped (lossless)
 images/               one file per image
 bylonder/             the page runtime: blend-scene.js, buffers.js, their .d.ts, LICENSE.md (MIT OR Apache-2.0)
-bylonder-blocks.js    only if the scene needs a block or extension
+bylonder-blocks.js    only if the scene composites
+bylonder-<extension>.js  each only if the scene uses it (bylonder-view-transform.js)
 drivers.js            only if a knob feeds a driver
 modifiers/            modifiers.wasm, its worker and modifiers.js, only if a knob feeds a mesh-only stack
 scene.blend           only with Include Source .blend (Live)

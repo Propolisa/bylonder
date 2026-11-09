@@ -1,4 +1,4 @@
-// The page runtime (src/io_scene_babylon/runtime/), which every JavaScript package carries: MIT OR Apache-2.0, so it holds
+// The page runtime (src/io_scene_babylon/runtime/), which JavaScript packages carry: MIT OR Apache-2.0, so it holds
 // no code derived from Blender and imports only Babylon and its own files; its JSDoc types check, its committed .d.ts
 // files are what tsc writes from them, and a package's scene.d.ts makes `set` and `get` take only the scene's paths and
 // their value types.
@@ -9,7 +9,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { controlTypes } from '../src/io_scene_babylon/controls-export.js';
-import { RUNTIME_FILES } from '../src/io_scene_babylon/runtime-files.js';
+import { BLOCK_FILES, RUNTIME_FILES } from '../src/io_scene_babylon/runtime-files.js';
 
 const runtime = fileURLToPath(new URL('../src/io_scene_babylon/runtime/', import.meta.url));
 const tsc = (args) => execFileSync(process.execPath, [fileURLToPath(new URL('../node_modules/typescript/bin/tsc', import.meta.url)), ...args], { encoding: 'utf8' });
@@ -23,7 +23,10 @@ for (const name of sources) {
     assert.ok(specifier === '@babylonjs/core' || specifier === 'node:fs/promises' || specifier.startsWith('./'), `${name} imports ${specifier}`);
   }
 }
-assert.deepEqual(readdirSync(runtime).filter((name) => name !== 'tsconfig.json').sort(), [...RUNTIME_FILES].sort(), 'every file of runtime/ ships');
+// Every file ships: the runtime with each package, the blocks library and extensions when its scene.js imports them
+// (their .d.ts files are checked below).
+const blocks = Object.values(BLOCK_FILES).flatMap((name) => [name, name.replace(/\.js$/, '.d.ts')]);
+assert.deepEqual(readdirSync(runtime).filter((name) => name !== 'tsconfig.json').sort(), [...RUNTIME_FILES, ...blocks].sort(), 'every file of runtime/ ships');
 
 // Types: the JSDoc checks, and the declarations are current.
 tsc(['-p', join(runtime, 'tsconfig.json'), '--noEmit']);

@@ -2,7 +2,7 @@
 // NodeRenderGraph. Blender runs a pixel node's GPU code on each pixel (its compositor's pixel operations); here the
 // block is a post process whose fragment shader is that code as Blender's own C++ builds it (gpu-graph.js), on the
 // texels of the images linked into its inputs. A muted node passes its image through, as Babylon's disabled task does.
-import { Constants, EffectWrapper, FrameGraphPostProcessTask, Matrix, NodeRenderGraphBlock, NodeRenderGraphBlockConnectionPointTypes as T, RegisterClass } from '@babylonjs/core';
+import { Constants, EffectWrapper, NodeRenderGraphBlock, NodeRenderGraphBlockConnectionPointTypes as T, RegisterClass } from '@babylonjs/core';
 import { availability, declaration, declarations, defaults } from './declarations.js';
 import { glslIdentifier, kindOfSocket, muteLinks } from './node-code.js';
 import { convert, glslType, glslValue, socketType } from './sockets.js';
@@ -10,6 +10,7 @@ import { engineGLSL } from './glsl.js';
 import { graphCode, nodeGraph, nodeTypeHasGpu } from './gpu-graph.js';
 import { rampTexture } from './shader-nodes.js';
 import { BlenderReplayTask, nodeRecording, nodeTypeHasOperation } from '../../compositor/compositor-replay.js';
+import { ImagesPostProcessTask, setUniform } from '../../io_scene_babylon/runtime/blocks.js';
 import '../graph-roots.js';
 
 // The block's sampler of an image linked into an input (Blender's compositor declares one per linked output, named as
@@ -22,21 +23,6 @@ class BlenderEffect extends EffectWrapper {
     const effect = this.drawWrapper.effect, values = this.block._uniformValues();
     this.uniformList.forEach(([name, kind], i) => setUniform(effect, name, kind, values[i]));
     this.bandList.forEach(([name, pixels]) => effect.setTexture(name, rampTexture(pixels, this.block._scene)));
-  }
-}
-const setUniform = (effect, name, kind, v) => (kind === 'float' ? effect.setFloat(name, v[0]) : kind === 'vec2' ? effect.setFloat2(name, v[0], v[1])
-  : kind === 'vec3' ? effect.setFloat3(name, v[0], v[1], v[2]) : kind === 'mat4' ? effect.setMatrix(name, Matrix.FromArray(v)) : effect.setFloat4(name, v[0], v[1], v[2], v[3]));
-
-// A compositor node's task: Babylon's post process task, which samples the node's image input, also binding the images
-// linked into its other inputs, as Babylon's own multi-input tasks do (FrameGraphBloomMergeTask).
-class BlenderCompositorTask extends FrameGraphPostProcessTask {
-  inputTextures = new Map(); // sampler -> texture handle
-  record(skipCreationOfDisabledPasses = false) {
-    const pass = super.record(skipCreationOfDisabledPasses, undefined, (context) => {
-      for (const [sampler, texture] of this.inputTextures) context.bindTextureHandle(this._postProcessDrawWrapper.effect, sampler, texture);
-    });
-    for (const texture of this.inputTextures.values()) pass.addDependencies(texture);
-    return pass;
   }
 }
 
@@ -70,7 +56,7 @@ export class BlenderCompositorBlock extends NodeRenderGraphBlock {
     // A node that runs as an operation of its own replays it as Blender's GPU compositor records it.
     this.replays = nodeTypeHasOperation(idname);
     this._frameGraphTask = this.replays ? new BlenderReplayTask(this.name, frameGraph, outputs.map((s) => s.identifier))
-      : new BlenderCompositorTask(this.name, frameGraph, this._effect());
+      : new ImagesPostProcessTask(this.name, frameGraph, this._effect());
   }
 
   // The output the node's image is: the one set (`output`), else one that is linked, else its first available one.

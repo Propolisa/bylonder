@@ -43,6 +43,7 @@ function transformBinding(node, ob, rotation, parentInverse) {
   const parent = inverse.some((v, i) => Math.abs(v - IDENTITY[i]) > 1e-7) ? { parent_inverse: inverse } : {};
   // An area light turns by its rig (area-lights.js); another light turns its direction, Blender's -Z, Babylon's -Y.
   if (node.getClassName() === 'RectAreaLight') return { node: rigId(node.id), transform: { mode, ...parent, offset: AREA_OFFSET } };
+  if (node.getClassName() === 'PointLight') return { node: node.id, transform: { mode, ...parent, direction: null } };
   if (node.getClassName().endsWith('Light')) return { node: node.id, transform: { mode, ...parent, direction: [0, -1, 0] } };
   const offset = rotationOffset(node, mode, rotation);
   return { node: node.id, transform: { mode, ...parent, ...(offset && { offset }) } };
@@ -90,6 +91,37 @@ function nodeMaterialControls(entry) {
     : [knob(`${base}.${b.name}`, b.value, { type: 'FLOAT' }, { material: entry.id, block: b.name })])));
 }
 
+// A material of one Principled BSDF, exported as Babylon's PBRMaterial: the inputs it maps to the material's own
+// properties (rna-bylonder.js principledInputs), each scaled by the factor measured between the two.
+const PRINCIPLED = [['Base Color', 'albedoColor', 'COLOR'], ['Metallic', 'metallic'], ['Roughness', 'roughness'], ['Alpha', 'alpha'],
+  ['Emission Color', 'emissiveColor', 'COLOR'], ['Emission Strength', 'emissiveIntensity']];
+function principledControls(entry, scene, sync) {
+  const material = scene.getMaterialByUniqueId(entry.uniqueId), ma = material?.getClassName() === 'PBRMaterial' && sync.materialOf(material);
+  const tree = ma && idStruct(ma).node_tree;
+  const node = tree && [...tree.nodes].find((n) => n.bl_idname === 'ShaderNodeBsdfPrincipled');
+  if (!node) return [];
+  const inputs = [...node.inputs], base = `materials${key(entry.name)}.node_tree.nodes${key(node.name)}.inputs`;
+  return PRINCIPLED.flatMap(([name, property, subtype]) => {
+    const index = inputs.findIndex((i) => i.name === name);
+    if (index < 0 || inputs[index].is_linked) return [];
+    const blender = inputs[index].default_value, babylon = material[property];
+    const bound = (value, own, path) => {
+      if (Math.abs(value) < 1e-6) return Math.abs(own) < 1e-6 ? { property: path } : null;
+      return Math.abs(own / value - 1) < 1e-6 ? { property: path } : { property: path, factor: own / value };
+    };
+    const knobs = subtype ? [0, 1, 2].map((c) => [`${base}[${index}].default_value[${c}]`, blender[c], bound(blender[c], babylon['rgb'[c]], `${property}.${'rgb'[c]}`)])
+      : [[`${base}[${index}].default_value`, blender, bound(blender, babylon, property)]];
+    return knobs.filter(([, , bind]) => bind).map(([path, value, bind]) => knob(path, value, { type: 'FLOAT', ...(subtype && { subtype, soft_min: 0, soft_max: 1 }), suggested: true },
+      { material: entry.id, ...bind }));
+  });
+}
+
+// The scene's frame: what the animation shows, from its first frame to its last.
+function frameControl(world, scene) {
+  const { frameStart, frameEnd } = world.animation.time.state;
+  return knob(`scenes${key(scene.name)}.frame_current`, scene.frame_current, { type: 'INT', soft_min: frameStart, soft_max: frameEnd, suggested: true }, { frame: true });
+}
+
 // A world of one color: its Background node's Color and Strength, which light the page's scene (runtime/world.js).
 function worldControls(scene) {
   const background = scene.world?.node_tree?.nodes && [...scene.world.node_tree.nodes].find((node) => node.bl_idname === 'ShaderNodeBackground');
@@ -122,9 +154,9 @@ export function exportControls(world, data) {
     if (ob.type === 'LIGHT') list.push(...lightControls(node, ob.data));
     if (ob.type === 'CAMERA') list.push(...cameraControls(node, ob.data));
   }
-  list.push(...data.materials.flatMap(nodeMaterialControls));
+  list.push(...data.materials.flatMap(nodeMaterialControls), ...data.materials.flatMap((entry) => principledControls(entry, scene, sync)));
   if (!data.materials.some((m) => m.name?.startsWith('__world '))) list.push(...worldControls(mainScene));
-  list.push(...customProperties(mainScene, `scenes${key(mainScene.name)}`), ...sdkControls(world, mainScene));
+  list.push(frameControl(world, mainScene), ...customProperties(mainScene, `scenes${key(mainScene.name)}`), ...sdkControls(world, mainScene));
   return [...new Map(list.map((k) => [k.path, k])).values()];
 }
 

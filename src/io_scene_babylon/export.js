@@ -1,10 +1,10 @@
 // File > Export > Babylon (.babylon) and JavaScript (.zip), run in the scene window. JavaScript is a package: scene.js
-// with its types, scene.bin, images/ and the page runtime in bylonder/ (runtime/, MIT OR Apache-2.0); with Live
-// Modifiers, the modifier kernels polyfill in bylonder-modifiers/ too.
+// with its types, scene.bin, images/, the page runtime in bylonder/ and the blocks library files it imports (runtime/,
+// MIT OR Apache-2.0); with Live Modifiers, the modifier kernels polyfill in bylonder-modifiers/ too.
 import { zipSync, strToU8 } from 'fflate';
 import { serializeScene } from './babylon-export.js';
 import { exportModule } from './js-export.js';
-import { RUNTIME_FILES } from './runtime-files.js';
+import { packageRuntime } from './runtime-files.js';
 
 const runtime = import.meta.glob('./runtime/*', { query: '?raw', import: 'default', eager: true });
 
@@ -19,7 +19,7 @@ async function polyfill() {
 // The package's files as the zip holds them.
 async function scenePackage(world, options) {
   const files = await exportModule(world, options);
-  for (const name of RUNTIME_FILES) files['bylonder/' + name] = runtime['./runtime/' + name];
+  for (const [path, name] of packageRuntime(files['scene.js'])) files[path] = runtime['./runtime/' + name];
   return Object.fromEntries(Object.entries(files).map(([path, data]) => [path, typeof data === 'string' ? strToU8(data) : data]));
 }
 

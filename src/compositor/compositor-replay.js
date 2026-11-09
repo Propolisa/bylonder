@@ -5,13 +5,15 @@
 // it is found from how the shader's imageStore addresses the image (imageStores), and the shader's main runs for it,
 // its stores to other texels or images dropped. Shaders whose writes cannot be found that way, or that share memory
 // between invocations, are not replayed (the node passes its image through).
-import { Constants, EffectWrapper, FrameGraphTask, Matrix, RawTexture } from '@babylonjs/core';
 import { compute } from './compositor-shaders.js';
 import { blenderMain, blenderModule } from '../bmesh/bmesh-wasm.js';
 import { withScratchNode } from '../nodes/blender/gpu-graph.js';
 import { glsl as libraries } from '../nodes/blender/gpu-library.js';
 import { engineGLSL, glslShader } from '../nodes/blender/glsl.js';
 import { implicitConversions } from '../nodes/blender/glsl-conversions.js';
+import { ReplayTask, formatChannels, uploadFloats } from '../io_scene_babylon/runtime/blocks.js';
+
+export { formatChannels, uploadFloats };
 
 const { exports: x, withString, withArrays, cString } = blenderModule;
 const SOURCES = { ...libraries, ...compute };
@@ -189,22 +191,6 @@ export function replayPlan(recording) {
   return reasons.length ? { reasons } : { textures: recording.textures, steps, inputs: recording.inputs, outputs: recording.outputs };
 }
 
-// The bytes of an upload as RGBA floats, as a texture of its format holds them.
-export function uploadFloats(bytes, format, extent, channels) {
-  const count = extent[0] * Math.max(1, extent[1]) * Math.max(1, extent[2]);
-  const values = format === 'float' ? new Float32Array(bytes.buffer, bytes.byteOffset, count * channels)
-    : format === 'int' ? Float32Array.from(new Int32Array(bytes.buffer, bytes.byteOffset, count * channels))
-      : format === 'uint' ? Float32Array.from(new Uint32Array(bytes.buffer, bytes.byteOffset, count * channels))
-        : format === 'ubyte' ? Float32Array.from(bytes.subarray(0, count * channels), (v) => v / 255) : null;
-  if (!values) throw Error(`an upload of ${format} data is not replayed`);
-  const rgba = new Float32Array(count * 4);
-  for (let i = 0; i < count; i++) for (let c = 0; c < 4; c++) rgba[i * 4 + c] = c < channels ? values[i * channels + c] : c === 3 ? 1 : 0;
-  return rgba;
-}
-
-// The channels of a texture of a GPU format Blender names (GPU_texture_format_name).
-export const formatChannels = (format) => (/^RGBA/.test(format) ? 4 : /^RGB/.test(format) ? 3 : /^RG/.test(format) ? 2 : 1);
-
 // Whether a node type runs as an operation of its own, which views replay (not GPU code, compositor-nodes.js).
 const operations = new Map();
 export const nodeTypeHasOperation = (idname) => {
@@ -234,176 +220,7 @@ export function nodeRecording(idname, { properties = {}, values = {}, linked = [
   return recordings.get(key);
 }
 
-// Babylon's texture type for a GPU format Blender names.
-const textureType = (format) => (/32F/.test(format) ? Constants.TEXTURETYPE_FLOAT : Constants.TEXTURETYPE_HALF_FLOAT);
-const EXTEND = { extend: Constants.TEXTURE_CLAMP_ADDRESSMODE, repeat: Constants.TEXTURE_WRAP_ADDRESSMODE,
-  mirrored_repeat: Constants.TEXTURE_MIRROR_ADDRESSMODE, clamp_to_border: Constants.TEXTURE_CLAMP_ADDRESSMODE };
-
-// A push constant set on the effect, as its create info types it.
-function setPushConstant(effect, { name, type, array, value = [] }) {
-  const v = [value].flat();
-  if (array > 0) {
-    if (/^int/.test(type)) effect.setIntArray(name, v);
-    else effect.setFloatArray(name, v);
-    return;
-  }
-  switch (type) {
-    case 'float': return effect.setFloat(name, v[0]);
-    case 'float2': return effect.setFloat2(name, v[0], v[1]);
-    case 'float3': return effect.setFloat3(name, v[0], v[1], v[2]);
-    case 'float4': return effect.setFloat4(name, v[0], v[1], v[2], v[3]);
-    case 'int': case 'uint': case 'bool': return effect.setInt(name, v[0]);
-    case 'int2': return effect.setInt2(name, v[0], v[1]);
-    case 'int3': return effect.setInt3(name, v[0], v[1], v[2]);
-    case 'int4': return effect.setInt4(name, v[0], v[1], v[2], v[3]);
-    case 'float4x4': return effect.setMatrix(name, Matrix.FromArray(v));
-    case 'float3x3': return effect.setMatrix3x3(name, new Float32Array(v));
-    default: throw Error(`a ${type} push constant is not replayed`);
-  }
-}
-
-// A node's recorded operation as a frame graph task: its passes in order, each writing a new version of the texture it
-// writes (a pass samples the version before it), on its linked images (`inputTextures`, by input identifier), giving
-// `outputTextures` (by output identifier). Disabled, or with a plan that cannot be replayed, it passes `sourceTexture`
-// through.
-export class BlenderReplayTask extends FrameGraphTask {
-  // The recording for an image size (nodeRecording's), the size the task last recorded at, and that recording's plan
-  // and uploads.
-  recorder = () => null;
-  size = null;
-  plan = null;
-  data = null;
-  inputTextures = new Map();
-  sourceTexture = undefined;
-  outputTextures = new Map();
-  #effects = new Map();
-  #raw = [];
-
-  constructor(name, frameGraph, outputs) {
-    super(name, frameGraph);
-    for (const id of outputs) this.outputTextures.set(id, frameGraph.textureManager.createDanglingHandle());
-  }
-
-  isReady() { return [...this.#effects.values()].every((e) => e.isReady()); }
-
-  #effect(code, step) {
-    let wrapper = this.#effects.get(code);
-    if (!wrapper) {
-      wrapper = new EffectWrapper({ name: this.name, engine: this._frameGraph.engine, fragmentShader: engineGLSL(this._frameGraph.engine, code), useAsPostProcess: true,
-        uniforms: ['bl_domain', ...step.pushConstants.map((c) => c.name)], samplers: [...step.samplers.map((s) => s.name), ...step.before.map((b) => b.name)] });
-      this.#effects.set(code, wrapper);
-    }
-    return wrapper;
-  }
-
-  record() {
-    const manager = this._frameGraph.textureManager, engine = this._frameGraph.engine;
-    for (const raw of this.#raw.splice(0)) raw.dispose();
-    const source = this.sourceTexture !== undefined ? manager.getTextureDescription(this.sourceTexture).size : manager.getAbsoluteDimensions({ width: 100, height: 100 });
-    this.size = [source.width, source.height];
-    ({ plan: this.plan = null, data: this.data = null } = this.recorder(this.size) ?? {});
-    const plan = this.plan?.steps ? this.plan : null;
-    if (!plan) return this.#passThrough(false);
-    const specs = new Map(plan.textures.map((t) => [t.id, t]));
-    const current = new Map(Object.entries(plan.inputs).map(([id, texture]) => [texture, this.inputTextures.get(id)]));
-    let versions = 0;
-    const version = (id) => manager.createRenderTargetTexture(`${this.name} ${id}.${versions++}`, {
-      size: { width: specs.get(id).size[0], height: specs.get(id).size[1] }, sizeIsPercentage: false, isHistoryTexture: false,
-      options: { createMipMaps: false, types: [textureType(specs.get(id).format)], formats: [Constants.TEXTUREFORMAT_RGBA], samples: 1, useSRGBBuffers: [false] } });
-    // Uploaded textures hold their data from the start (Blender uploads weights and single values before its passes).
-    const uploads = new Map();
-    for (const step of plan.steps.filter((s) => s.op === 'update')) {
-      const spec = specs.get(step.texture), [w, h] = spec.size;
-      const pixels = uploads.get(step.texture) ?? new Float32Array(w * h * 4);
-      const floats = uploadFloats(this.data.subarray(step.data, step.data + step.bytes), step.format, step.extent, formatChannels(spec.format));
-      for (let y = 0; y < Math.max(1, step.extent[1]); y++) pixels.set(floats.subarray(y * step.extent[0] * 4, (y + 1) * step.extent[0] * 4), ((step.offset[1] + y) * w + step.offset[0]) * 4);
-      uploads.set(step.texture, pixels);
-    }
-    for (const [id, pixels] of uploads) {
-      const [w, h] = specs.get(id).size;
-      const raw = RawTexture.CreateRGBATexture(pixels, w, h, this._frameGraph.scene, false, false, Constants.TEXTURE_NEAREST_SAMPLINGMODE, Constants.TEXTURETYPE_FLOAT);
-      this.#raw.push(raw);
-      current.set(id, manager.importTexture(`${this.name} upload ${id}`, raw.getInternalTexture()));
-    }
-    const read = (id) => {
-      if (!current.has(id)) {
-        const cleared = version(id);
-        const pass = this._frameGraph.addRenderPass(`${this.name} new ${id}`);
-        pass.setRenderTarget(cleared);
-        pass.setExecuteFunc((context) => context.clear({ r: 0, g: 0, b: 0, a: 0 }, true, false, false));
-        current.set(id, cleared);
-      }
-      return current.get(id);
-    };
-    plan.steps.forEach((step, i) => {
-      if (step.op === 'update') return;
-      const target = step.op === 'clear' ? step.texture : step.op === 'copy' ? step.to : step.target;
-      const output = version(target), pass = this._frameGraph.addRenderPass(`${this.name} ${i}`);
-      pass.setRenderTarget(output);
-      if (step.op === 'clear') {
-        const [r, g, b, a] = step.value;
-        pass.setExecuteFunc((context) => context.clear({ r, g, b, a }, true, false, false));
-      } else if (step.op === 'copy') {
-        const from = read(step.from);
-        pass.addDependencies(from);
-        pass.setExecuteFunc((context) => context.copyTexture(from));
-      } else {
-        const wrapper = this.#effect(step.code, step);
-        const samplers = step.samplers.map((s) => ({ ...s, handle: read(s.texture) })), before = step.before.map((b) => ({ ...b, handle: read(b.texture) }));
-        pass.addDependencies([...samplers, ...before].map((s) => s.handle));
-        pass.setExecuteFunc((context) => {
-          for (const s of samplers) {
-            context.setTextureSamplingMode(s.handle, s.linear ? Constants.TEXTURE_BILINEAR_SAMPLINGMODE : Constants.TEXTURE_NEAREST_SAMPLINGMODE);
-            const texture = manager.getTextureFromHandle(s.handle);
-            if (texture) engine.updateTextureWrappingMode(texture, EXTEND[s.extend[0]], EXTEND[s.extend[1]]);
-          }
-          context.applyFullScreenEffect(wrapper.drawWrapper, () => {
-            const effect = wrapper.drawWrapper.effect;
-            effect.setInt3('bl_domain', step.domain[0], step.domain[1], step.domain[2]);
-            step.pushConstants.forEach((c) => setPushConstant(effect, c));
-            for (const s of [...samplers, ...before]) context.bindTextureHandle(effect, s.name, s.handle);
-          });
-        });
-      }
-      current.set(target, output);
-    });
-    for (const [id, handle] of this.outputTextures) {
-      const output = plan.outputs[id];
-      if (output?.texture !== undefined) manager.resolveDanglingHandle(handle, read(output.texture));
-      else {
-        // A single value (or nothing) as an image of the render's size.
-        const [r, g, b, a] = output?.value ?? [0, 0, 0, 0], size = Object.values(plan.inputs).map((t) => specs.get(t)?.size).find(Boolean);
-        const image = manager.createRenderTargetTexture(`${this.name} ${id}`, { size: size ? { width: size[0], height: size[1] } : { width: 100, height: 100 },
-          sizeIsPercentage: !size, isHistoryTexture: false, options: { createMipMaps: false, types: [Constants.TEXTURETYPE_HALF_FLOAT], formats: [Constants.TEXTUREFORMAT_RGBA], samples: 1, useSRGBBuffers: [false] } });
-        const pass = this._frameGraph.addRenderPass(`${this.name} ${id}`);
-        pass.setRenderTarget(image);
-        pass.setExecuteFunc((context) => context.clear({ r, g, b, a }, true, false, false));
-        manager.resolveDanglingHandle(handle, image);
-      }
-    }
-    // The frame graph checks that a task ends on the same target enabled as disabled: its first output.
-    const last = this._frameGraph.addRenderPass(`${this.name} output`);
-    last.setRenderTarget([...this.outputTextures.values()][0]);
-    last.setExecuteFunc(() => {});
-    this.#passThrough(true);
-  }
-
-  // The disabled pass (or, `disabledOnly` false, the pass) giving the source as each output.
-  #passThrough(disabledOnly) {
-    const manager = this._frameGraph.textureManager;
-    const outputs = [...this.outputTextures.values()];
-    if (!disabledOnly) for (const handle of outputs) manager.resolveDanglingHandle(handle, this.sourceTexture);
-    if (disabledOnly) {
-      const pass = this._frameGraph.addRenderPass(this.name + '_disabled', true);
-      pass.addDependencies(this.sourceTexture);
-      pass.setRenderTarget(outputs[0]);
-      pass.setExecuteFunc((context) => this.sourceTexture !== undefined && context.copyTexture(this.sourceTexture));
-    }
-  }
-
-  dispose() {
-    for (const wrapper of this.#effects.values()) wrapper.dispose();
-    for (const raw of this.#raw) raw.dispose();
-    super.dispose();
-  }
+// The app's replay task: its passes' GLSL specialized for the engine (WebGPU's samplers).
+export class BlenderReplayTask extends ReplayTask {
+  shaderCode(code) { return engineGLSL(this._frameGraph.engine, code); }
 }

@@ -11,6 +11,12 @@ import { exportNodeMaterial } from './node-material-export.js';
 import { worldNodes } from '../blenkernel/scene/world-babylon.js';
 import { createSceneBin } from './scene-bin.js';
 import { imageFiles } from './image-files.js';
+import { exportCompositor } from './compositor-export.js';
+import { idStruct } from '../python/bpy_rna.js';
+import { displayExponent } from '../render/view-settings.js';
+import { LOG_SIZE, STOPS } from '../render/display-lut.js';
+import { colorManagementFiles } from '../imbuf/colormanagement.js';
+import { halfFloats } from '../blenkernel/colorband.js';
 
 const CDN = `https://cdn.jsdelivr.net/npm/@babylonjs/core@${AbstractEngine.Version}/+esm`;
 const json = (value) => JSON.stringify(value);
@@ -109,6 +115,24 @@ function sharedCode(materials) {
   return [...bodies.keys()].map((key) => JSON.parse(key));
 }
 
+const PIPELINE_EFFECTS = ['bloomEnabled', 'depthOfFieldEnabled', 'fxaaEnabled', 'sharpenEnabled', 'chromaticAberrationEnabled', 'grainEnabled', 'glowLayerEnabled'];
+// A rendered view's display transform (runtime/view-transform.js) as Main's view settings give it, or null when the page
+// can display as its materials do (Standard, no look, exposure or gamma) and nothing composites in scene linear: its
+// lattice of Blender's display processor goes to scene.bin, but for Standard without a look, which is sRGB's encoding.
+async function displaySettings(world, bin, composites) {
+  const sync = world.mainSync, view = sync && idStruct(sync.blender.scene).view_settings;
+  if (!view) return null;
+  const standard = view.view_transform === 'Standard' && view.look === 'None';
+  if (standard && !composites && view.exposure === 0 && view.gamma === 1) return null;
+  let lattice = null;
+  if (!standard) {
+    await colorManagementFiles();
+    const made = sync.blender.displayLut(LOG_SIZE, STOPS);
+    if (made) lattice = { size: LOG_SIZE, stops: STOPS, range: made.range, texels: bin.add(halfFloats(made.rgba)) };
+  }
+  return { exposure: 2 ** view.exposure, exponent: displayExponent(view.gamma), lattice };
+}
+
 // The package's files but the runtime's: scene.js, scene.d.ts, scene.bin and images/. With `live`, objects whose
 // modifiers are all Blender's keep them live through the modifier kernels polyfill, which createScene loads from
 // `bylonder-modifiers/` next to the module (or its `modifiers` option).
@@ -136,7 +160,13 @@ async function moduleSource(world, live, mapped, parity, hostCompression) {
     geometries.set(mesh.geometry, `geometries[${geometries.size}]`);
     geometryLines.push(`  ${geometryCode(mesh, bin)},`);
   }
-  const controls = exportControls(world, data), code = sharedCode(data.materials);
+  const composited = data.cameras.length ? exportCompositor(world) : null;
+  const display = await displaySettings(world, bin, !!composited);
+  // Bylonder's own pipeline of a rendered view (render-babylon.js SceneLinearPipeline) turns the scene's image processing
+  // off, so materials would encode to display themselves: with the view transform, which displays instead, it stays out
+  // unless one of its effects is on.
+  if (display) data.renderingPipelines = data.renderingPipelines.filter((p) => !(p._name?.startsWith('__display:') && !PIPELINE_EFFECTS.some((e) => p[e])));
+  const controls = [...exportControls(world, data), ...(composited?.knobs ?? [])], code = sharedCode(data.materials);
   const parented = [...data.transformNodes, ...data.meshes, ...data.lights, ...data.cameras].filter((e) => e.parentId !== undefined);
   const parse = (name, list, code) => (list?.length ? `  for (const entry of ${name}) ${code};\n` : '');
   const settings = {
@@ -154,7 +184,9 @@ async function moduleSource(world, live, mapped, parity, hostCompression) {
 // <script type="importmap">{ "imports": { "@babylonjs/core": "${CDN}" } }</script>
 import { readBuffers } from './bylonder/buffers.js';
 import { worldColor, worldNodes } from './bylonder/world.js';
-import { BlendScene } from './bylonder/blend-scene.js';
+import { BlendScene } from './bylonder/blend-scene.js';${display ? `
+import { viewTransform } from './bylonder-view-transform.js';` : ''}${composited ? `
+import { compositor } from './bylonder-blocks.js';` : ''}
 import { Animation, AnimationGroup, CascadedShadowGenerator, Color3, Color4, CubeTexture, EffectLayer, Geometry, HDRCubeTexture, Light, LinesMesh, Material, Matrix, Mesh, MorphTargetManager, MultiMaterial, PostProcess, Quaternion, ReflectionProbe, Scene, SerializationHelper, ShadowGenerator, Skeleton, SubMesh, TransformNode, Vector3, Camera, ParticleSystem } from '@babylonjs/core';
 import * as BABYLON from '@babylonjs/core';
 
@@ -185,13 +217,22 @@ const ANIMATION_GROUPS = ${json(data.animationGroups)};
 const RENDERING_PIPELINES = ${json(data.renderingPipelines)};
 const POST_PROCESSES = ${json(data.postProcesses)};
 const BUFFERS = ${json(bin.views)};
-const CONTROLS = ${json(controls)};
+const CONTROLS = ${json(controls)};${display ? `
+const DISPLAY = ${json(display)};` : ''}${composited ? `
+const COMPOSITOR = ${json(composited.compositor)};` : ''}
 
-// Each built scene's world, which load gives its controls.
-const WORLDS = new WeakMap();
+// Babylon's screen-space pipelines draw from its geometry buffer in half floats, as Bylonder's rendered views have them:
+// their own Parse takes its prepass, which turns the scene's image processing back into the materials, and 8-bit targets.
+const SCREEN_SPACE = {
+  SSRRenderingPipeline: (entry, scene) => new BABYLON.SSRRenderingPipeline(entry._name, scene, undefined, true, BABYLON.Constants.TEXTURETYPE_HALF_FLOAT),
+  SSAO2RenderingPipeline: (entry, scene) => new BABYLON.SSAO2RenderingPipeline(entry._name, scene, entry._ratio, undefined, true, BABYLON.Constants.TEXTURETYPE_HALF_FLOAT),
+};
+
+// Each built scene's world and compositor, which load gives their controls.
+const WORLDS = new WeakMap(), COMPOSITORS = new WeakMap();
 export async function load(engine) {
   const scene = await createScene(engine, engine.getRenderingCanvas());
-  return new BlendScene(scene, CONTROLS, { root: ROOT, world: WORLDS.get(scene) });
+  return new BlendScene(scene, CONTROLS, { root: ROOT, world: WORLDS.get(scene), compositor: COMPOSITORS.get(scene) });
 }
 
 export async function createScene(engine, canvas${live.size ? ", { modifiers = new URL('./bylonder-modifiers/', import.meta.url) } = {}" : ''}) {
@@ -232,13 +273,30 @@ ${geometryLines.join('\n')}
   const nodes = {};
 ${objectLines}
 ${parse('LIGHTS', data.lights, 'nodes[entry.uniqueId] = Light.Parse(entry, scene)')}${parse('CAMERAS', data.cameras, 'nodes[entry.uniqueId] = Camera.Parse(entry, scene)')}
-${parented.map((e) => `  nodes[${e.uniqueId}].parent = nodes[${e.parentId}] ?? null;`).join('\n')}
+${parented.map((e) => `  nodes[${e.uniqueId}].parent = nodes[${e.parentId}] ?? null;`).join('\n')}${data.lights.some((l) => l.excludedMeshesIds?.length || l.includedOnlyMeshesIds?.length) ? `
+  // The meshes each light leaves out or lights alone, by id, as Babylon's loader resolves them once the meshes exist.
+  const meshes = (ids) => ids.map((id) => scene.getMeshById(id)).filter(Boolean);
+  for (const entry of LIGHTS) {
+    const light = nodes[entry.uniqueId];
+    if (entry.excludedMeshesIds?.length) light.excludedMeshes = meshes(entry.excludedMeshesIds);
+    if (entry.includedOnlyMeshesIds?.length) light.includedOnlyMeshes = meshes(entry.includedOnlyMeshesIds);
+  }` : ''}
 
 ${parse('REFLECTION_PROBES', data.reflectionProbes, "ReflectionProbe.Parse(entry, scene, ROOT)")}${parse('SHADOW_GENERATORS', data.shadowGenerators, "(entry.className === 'CascadedShadowGenerator' ? CascadedShadowGenerator : ShadowGenerator).Parse(entry, scene)")}${parse('EFFECT_LAYERS', data.effectLayers, "EffectLayer.Parse(entry, scene, ROOT)")}${parse('PARTICLE_SYSTEMS', data.particleSystems, "ParticleSystem.Parse(entry, scene, ROOT)")}  if (SCENE.environmentProbe) scene.environmentTexture = scene.reflectionProbes.find((p) => p.name === SCENE.environmentProbe)?.cubeTexture ?? scene.environmentTexture;
   scene.activeCamera = scene.getCameraById(${json(data.activeCameraID ?? null)}) ?? scene.cameras[0] ?? null;
-  for (const entry of RENDERING_PIPELINES) BABYLON[entry.customType]?.Parse(entry, scene, ROOT);
+  for (const entry of RENDERING_PIPELINES) {
+    const make = SCREEN_SPACE[entry.customType];
+    if (make) SerializationHelper.Parse(() => make(entry, scene), entry, scene, ROOT);
+    else BABYLON[entry.customType]?.Parse(entry, scene, ROOT);
+  }
   for (const entry of POST_PROCESSES) PostProcess.Parse(entry, scene, ROOT);
-  for (const entry of ANIMATION_GROUPS) AnimationGroup.Parse(entry, scene).play(entry.loopAnimation);
+  for (const entry of ANIMATION_GROUPS) AnimationGroup.Parse(entry, scene).play(entry.loopAnimation);${display ? `
+  // Displayed as Blender's rendered view: scene linear, ${composited ? 'composited, ' : ''}then the view transform.
+  const camera = scene.activeCamera;
+  if (camera) {
+    const display = viewTransform(camera, { ...DISPLAY, lattice: DISPLAY.lattice && { ...DISPLAY.lattice, texels: buffers[DISPLAY.lattice.texels] } });${composited ? `
+    COMPOSITORS.set(scene, (await compositor(scene, camera, COMPOSITOR, display)).graph);` : ''}
+  }` : ''}
   if (canvas) scene.activeCamera?.attachControl(canvas, true);${live.size ? `
   // Blender's modifiers stay live: the polyfill evaluates them in a worker and again when an animated setting changes.
   try {

@@ -24,19 +24,21 @@ import { Matrix, Observable, Quaternion, Texture, Vector3 } from '@babylonjs/cor
  * How an object's location, rotation and scale place its node: Blender's rotation mode; the parent inverse matrix
  * (Babylon's axes) when not the identity; a turn (x, y, z, w) before the object's own, a camera's to look along +Z or an
  * area light's rig's to hold its rectangle in its XY plane; for a light, the local direction the rotation turns into its
- * `direction`.
+ * `direction` (null for a point light, which has none).
  * @typedef {object} Transform
  * @property {string} mode
  * @property {number[]} [parent_inverse]
  * @property {number[]} [offset]
- * @property {number[]} [direction]
+ * @property {number[] | null} [direction]
  */
 
 /**
  * Where a control's value lands: a property of a node (by id) or of the scene, scaled by `factor`; the node's place
  * (`transform`); visibility (`hide`); a focal length as a field of view (`lens`: half the sensor's fitted size); or a
  * node material's InputBlock (`material` and `block`, and the `component` of a vector) or ImageSourceBlock (`image`: the
- * value is the image's URL, relative to the package).
+ * value is the image's URL, relative to the package) or a material's own `property`; the scene's animation at a frame
+ * (`frame`); or a compositor pass (`compositor`, the block's name): one of its
+ * uniforms (`uniform`, `component`) or a float its plan uploads (`upload`, its offset in the plan's data).
  * @typedef {object} Binding
  * @property {string} [node]
  * @property {string} [material]
@@ -44,6 +46,10 @@ import { Matrix, Observable, Quaternion, Texture, Vector3 } from '@babylonjs/cor
  * @property {number} [component]
  * @property {boolean} [image]
  * @property {boolean} [world] the world's Background color or strength (world.js)
+ * @property {boolean} [frame]
+ * @property {string} [compositor]
+ * @property {number} [uniform]
+ * @property {number} [upload]
  * @property {string} [property]
  * @property {number} [factor]
  * @property {Transform} [transform]
@@ -113,17 +119,21 @@ export class BlendScene {
   /** @type {{ set(color: number[]): void } | undefined} */
   #world;
 
+
   /**
    * @param {import('@babylonjs/core').Scene} scene
    * @param {Knob[]} knobs
-   * @param {{ root?: string, world?: { set(color: number[]): void } }} [options] the package's URL, which relative image
-   * URLs resolve against, and the world of one color its background controls set (world.js)
+   * @param {{ root?: string, world?: { set(color: number[]): void }, compositor?: import('@babylonjs/core').NodeRenderGraph }} [options]
+   * the package's URL, which relative image URLs resolve against, the world of one color its background controls set
+   * (world.js), and the compositor its pass controls set (bylonder-blocks.js)
    */
-  constructor(scene, knobs, { root = '', world } = {}) {
+  constructor(scene, knobs, { root = '', world, compositor } = {}) {
     /** Babylon's scene. */
     this.scene = scene;
     this.#root = root;
     this.#world = world;
+    /** The compositor, a NodeRenderGraph of the blocks library's passes, when the scene composites. */
+    this.compositor = compositor;
     this.#knobs = new Map(knobs.map((knob) => [knob.path, knob]));
     this.#values = new Map(knobs.map((knob) => [knob.path, knob.default]));
   }
@@ -197,8 +207,8 @@ export class BlendScene {
       matrix.decompose(scaling, rotation, position);
     }
     if (node.position) node.position.copyFrom(position);
-    if (direction) {
-      node.direction = Vector3.FromArray(direction).applyRotationQuaternion(rotation);
+    if (direction !== undefined) {
+      if (direction) node.direction = Vector3.FromArray(direction).applyRotationQuaternion(rotation);
       return;
     }
     node.rotationQuaternion = rotation;
@@ -216,6 +226,21 @@ export class BlendScene {
       const inputs = path.slice(0, path.lastIndexOf('.inputs[') + '.inputs'.length);
       const strength = /** @type {number} */ (this.#values.get(`${inputs}[1].default_value`) ?? 1);
       this.#world?.set([0, 1, 2].map((i) => /** @type {number} */ (this.#values.get(`${inputs}[0].default_value[${i}]`)) * strength));
+      return;
+    }
+    if (bind.compositor !== undefined) {
+      const pass = /** @type {any} */ (this.compositor?.attachedBlocks.find((b) => b.name === bind.compositor));
+      if (bind.upload !== undefined) pass?.setUpload(bind.upload, value);
+      else pass?.setUniform(bind.uniform, value, bind.component);
+      return;
+    }
+    if (bind.frame) {
+      for (const group of this.scene.animationGroups) group.goToFrame(/** @type {number} */ (value));
+      return;
+    }
+    if (bind.material !== undefined && bind.property) {
+      const material = this.scene.getMaterialById(bind.material);
+      if (material) assign(material, bind.property, /** @type {number} */ (value) * (bind.factor ?? 1));
       return;
     }
     if (bind.material !== undefined) {

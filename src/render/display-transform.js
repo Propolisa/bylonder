@@ -6,31 +6,10 @@
 import { Constants, Effect, EffectWrapper, PostProcess, RawTexture3D } from '@babylonjs/core';
 import { displayExponent } from './view-settings.js';
 import { LOG_SIZE, STOPS } from './display-lut.js';
+import { DISPLAY_UNIFORMS, displayTransformShader } from '../io_scene_babylon/runtime/view-transform.js';
 
-const SHADER = 'bylonderDisplayTransform', UNIFORMS = ['exposure', 'range', 'exponent', 'latticed', 'background'], SAMPLERS = ['lattice'];
-Effect.ShadersStore[`${SHADER}FragmentShader`] = `precision highp float;
-precision highp sampler3D;
-varying vec2 vUV;
-uniform sampler2D textureSampler;
-uniform sampler3D lattice;
-uniform float exposure;
-uniform float range;
-uniform float exponent;
-uniform float latticed;
-// A view's own background (a display color, alpha 1) where its film's coverage leaves it, or none (alpha 0).
-uniform vec4 background;
-vec3 srgb(vec3 c) { return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(0.0031308, c)); }
-void main(void) {
-  vec4 color = texture2D(textureSampler, vUV);
-  float coverage = background.a > 0.5 ? clamp(color.a, 0.0, 1.0) : 1.0;
-  vec3 linear = max(color.rgb / max(coverage, 1e-4) * exposure, 0.0), display;
-  if (latticed > 0.5) {
-    vec3 u = clamp(log2(max(linear / range, 1e-30)) / ${STOPS.toFixed(1)} + 1.0, 0.0, 1.0);
-    display = texture(lattice, u * ${((LOG_SIZE - 1) / LOG_SIZE).toFixed(8)} + ${(0.5 / LOG_SIZE).toFixed(8)}).rgb;
-  } else display = srgb(clamp(linear, 0.0, 1.0));
-  display = pow(max(display, 0.0), vec3(exponent));
-  gl_FragColor = background.a > 0.5 ? vec4(mix(background.rgb, display, coverage), 1.0) : vec4(display, 1.0);
-}`;
+const SHADER = 'bylonderDisplayTransform', UNIFORMS = DISPLAY_UNIFORMS, SAMPLERS = ['lattice'];
+Effect.ShadersStore[`${SHADER}FragmentShader`] = displayTransformShader(LOG_SIZE, STOPS);
 
 // The scene's display settings: () => { exposure (stops), gamma, lut (display-lut.js's log lattice, or null) }.
 const settingsOf = new WeakMap();

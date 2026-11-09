@@ -275,10 +275,23 @@ export async function serializeScene(world, { geometry = true, live = null, mapp
   }
 }
 
+// Bylonder's shadow generators (light-shadows.js), which Babylon's serializer does not reach from the lights it writes,
+// each on its exported light by name; null without them.
+function shadowsOf(world, content) {
+  const generators = world.shadows?.generators;
+  if (!generators?.length) return null;
+  const lights = new Map([...content.nodes].filter((n) => n.getClassName().endsWith('Light')).map((l) => [l.name, l]));
+  // Without Bylonder's shadow map shader (its own include remapping), which the page does not carry: Babylon's.
+  return generators.filter((g) => lights.has(g.getLight().name)).map((g) => ({ ...g.serialize(), lightId: lights.get(g.getLight().name).id, customShaderOptions: undefined }));
+}
+
 async function serializeMapped(world, { geometry, live, mapped, parity }) {
   const { scene } = world;
   const camera = world.sceneSettings.camera() ?? scene.activeCamera;
   const content = exportedContent(scene);
+  // Shadows as a rendered view draws them: each light's casters and every receiver (light-shadows.js setActive), while
+  // the lights' metadata, which it reads, is theirs; the views set them back as they next draw.
+  world.shadows?.setActive(true, world.renderSettings.state.eevee.shadowRayCount);
   const effects = camera ? cameraEffects(world, scene, camera) : { renderingPipelines: [], postProcesses: [] };
   const all = [...scene.meshes, ...scene.transformNodes, ...scene.lights, ...scene.cameras];
   const straight = new Map(scene.textures.filter((t) => t instanceof Texture).map((t) => [t, straightImageData(t)]).filter(([, data]) => data));
@@ -305,21 +318,24 @@ async function serializeMapped(world, { geometry, live, mapped, parity }) {
     setFor([scene], 'metadata', () => null),
     uniqueIds(content.nodes),
   ];
-  let pending, animationGroups, activeCameraID;
+  let pending, animationGroups, activeCameraID, shadowGenerators;
   try {
     // The serializer reads the scene synchronously; only texture readbacks finish later.
     pending = SceneSerializer.SerializeAsync(scene);
+    shadowGenerators = shadowsOf(world, content);
     animationGroups = bakeAnimations(world, sampled, content, liveIds, mapped, evaluated.transforms, keys);
     activeCameraID = camera?.id;
   } finally {
     restores.forEach((restore) => restore());
   }
   const json = await pending;
+  if (shadowGenerators) json.shadowGenerators = shadowGenerators;
   rigAreaLights(json, transforms);
   for (const entry of [...json.meshes, ...(json.transformNodes ?? []), ...json.lights, ...json.cameras]) {
     const transform = transforms.get(entry.uniqueId);
     if (!transform || entry.type === AREA_LIGHT) continue;
-    for (const [key, value] of Object.entries(transform)) entry[key] = value.asArray();
+    // A point light has no direction: with one, Babylon draws its shadow as a spot's, not in a cube.
+    for (const [key, value] of Object.entries(transform)) if (!(key === 'direction' && entry.type === Light.LIGHTTYPEID_POINTLIGHT)) entry[key] = value.asArray();
     if (transform.rotationQuaternion) entry.rotation = [0, 0, 0];
   }
   // Babylon's camera parser reads no rotationQuaternion: a camera keeps its rotation as Euler angles, Babylon's yaw,
