@@ -53,7 +53,17 @@ const SCENARIOS = {
     assert.notEqual(block.texture, before, 'set swaps the texture');
     assert.equal(block.texture.url, 'https://example.com/poster.png');
     assert.equal(blend.get(image.path), 'https://example.com/poster.png');
-    console.log(`framed-print: ${inputs.filter((c) => c.path.endsWith('.image')).length} images are controls, swapped by URL`);
+    // Its world of one color lights the page as in the app (a cube of the color, with its spherical harmonics), and its
+    // Background node's Color and Strength are controls.
+    const environment = blend.scene.environmentTexture, [, wo] = /^worlds\["(.+?)"\]/.exec(blend.controls().find((c) => c.path.startsWith('worlds[')).path);
+    const background = [...blendData().worlds.get(wo).node_tree.nodes].find((n) => n.bl_idname === 'ShaderNodeBackground');
+    // NullEngine makes no GPU texture to hold the spherical harmonics: the world's cube is the scene's environment.
+    assert.equal(environment?.name, 'world', 'the world lights the scene');
+    const base = `worlds["${wo}"].node_tree.nodes["${background.name}"].inputs`, color = [...background.inputs[0].default_value];
+    assert.deepEqual([0, 1, 2].map((i) => blend.get(`${base}[0].default_value[${i}]`)), color.slice(0, 3), 'the Background color is a control');
+    blend.set(`${base}[1].default_value`, 2);
+    assert.ok(Math.abs(environment.clearColor.r - 2 * color[0]) < 1e-6, 'its Strength relights the scene');
+    console.log(`framed-print: ${inputs.filter((c) => c.path.endsWith('.image')).length} images are controls, swapped by URL; the world's Background lights and is tunable`);
     blend.dispose();
     written.remove();
   },

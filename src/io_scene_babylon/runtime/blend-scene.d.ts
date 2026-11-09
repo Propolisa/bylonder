@@ -20,9 +20,15 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
     /**
      * @param {import('@babylonjs/core').Scene} scene
      * @param {Knob[]} knobs
-     * @param {string} [root] the package's URL, which relative image URLs resolve against
+     * @param {{ root?: string, world?: { set(color: number[]): void } }} [options] the package's URL, which relative image
+     * URLs resolve against, and the world of one color its background controls set (world.js)
      */
-    constructor(scene: import("@babylonjs/core").Scene, knobs: Knob[], root?: string);
+    constructor(scene: import("@babylonjs/core").Scene, knobs: Knob[], { root, world }?: {
+        root?: string;
+        world?: {
+            set(color: number[]): void;
+        };
+    });
     /** Told of each control's new value. @type {Observable<Change>} */
     onChanged: Observable<Change>;
     /** Babylon's scene. */
@@ -86,6 +92,10 @@ export type Binding = {
     block?: string | undefined;
     component?: number | undefined;
     image?: boolean | undefined;
+    /**
+     * the world's Background color or strength (world.js)
+     */
+    world?: boolean | undefined;
     property?: string | undefined;
     factor?: number | undefined;
     transform?: Transform | undefined;

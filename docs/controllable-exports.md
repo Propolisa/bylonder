@@ -538,8 +538,10 @@ Each step lands on its own, with its tests, and leaves exports working.
    or the `.blend` (counted fetches in a Node test).
 7. **`modifiers.wasm` under the evaluator interface.** Checks: `tests/export-live.test.js` on RNA paths, with the same
    results.
-8. **Headless SDK.** The controller in Node without a page. Checks: a script sets paths and reads the evaluated mesh and
-   transforms, matching the app.
+8. **Headless SDK.** The controller in Node without a page. Exporting headless needs image pixels Node has no GPU for:
+   the exporter asks the module, which decodes images with Blender's own readers (`tests/images-wasm.test.js`); today a
+   Node-side export writes an Image Texture's name, not its file. Checks: a script sets paths and reads the evaluated
+   mesh and transforms, matching the app; a headless export of the Framed Print writes its images.
 9. **Blender add-on.** A thin desktop add-on, File > Export > Bylonder Package, that saves the `.blend` and runs the
    same exporter headless through the headless SDK (Node and the module). One exporter, a native entry for Blender
    users, and no second mapping in Python. Checks: the add-on's package of an example equals the app's.

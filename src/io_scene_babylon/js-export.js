@@ -7,6 +7,8 @@ import { AbstractEngine } from '@babylonjs/core';
 import { serializeScene } from './babylon-export.js';
 import { exportRuntimes } from '../runtimes/runtimes.js';
 import { exportControls, controlTypes } from './controls-export.js';
+import { exportNodeMaterial } from './node-material-export.js';
+import { worldNodes } from '../blenkernel/scene/world-babylon.js';
 import { createSceneBin } from './scene-bin.js';
 import { imageFiles } from './image-files.js';
 
@@ -88,6 +90,12 @@ const liveStack = ({ mesh, modifiers }) => ({
 
 const indent = (lines, by = '    ') => lines.map((l) => by + l).join('\n');
 
+// The world's node material, as the export writes a material's, or null for a world of one color.
+async function worldMaterial(scene, parity) {
+  const material = worldNodes.get(scene);
+  return material ? exportNodeMaterial(material, { parity }) : null;
+}
+
 // Node materials' custom block code, each body once: the blocks name its index in the module's CODE.
 function sharedCode(materials) {
   const bodies = new Map();
@@ -119,6 +127,8 @@ export async function exportModule(world, { live: keepLive = false, parity = fal
 async function moduleSource(world, live, mapped, parity, hostCompression) {
   const data = await serializeScene(world, { geometry: false, live, mapped, parity });
   const { scene } = world;
+  const worldEntry = await worldMaterial(scene, parity);
+  if (worldEntry) data.materials.push(worldEntry);
   const bin = createSceneBin({ gzip: !hostCompression }), images = imageFiles(data);
   const geometries = new Map(), geometryLines = [];
   const objects = [...data.transformNodes.map((entry) => ({ entry })), ...data.meshes.map((entry) => ({ entry, mesh: scene.getMeshByUniqueId(entry.uniqueId) }))];
@@ -133,6 +143,7 @@ async function moduleSource(world, live, mapped, parity, hostCompression) {
     clearColor: data.clearColor, ambientColor: data.ambientColor, gravity: data.gravity, autoClear: data.autoClear, collisionsEnabled: data.collisionsEnabled,
     fog: data.fogMode ? { fogMode: data.fogMode, fogColor: data.fogColor, fogStart: data.fogStart, fogEnd: data.fogEnd, fogDensity: data.fogDensity } : null,
     environment: data.environmentTexture ? { url: data.environmentTexture, rotationY: data.environmentTextureRotationY ?? 0, hdr: data.environmentTextureType === 'BABYLON.HDRCubeTexture', size: data.environmentTextureSize, extension: data.environmentTextureForcedExtension, skybox: !!data.createDefaultSkybox } : null,
+    world: !data.environmentTexture && scene.metadata?.wbWorld ? { color: scene.metadata.wbWorld.color.map((v) => v * (scene.metadata.wbWorld.strength ?? 1)), material: worldEntry?.uniqueId ?? null } : null,
     environmentProbe: data.environmentProbe ?? null, environmentIntensity: data.environmentIntensity, iblIntensity: data.iblIntensity, useRightHandedSystem: data.useRightHandedSystem,
   };
   // Written before the module's tables: they add thin instance buffers to scene.bin.
@@ -142,6 +153,7 @@ async function moduleSource(world, live, mapped, parity, hostCompression) {
 // alone, with Babylon.js ${AbstractEngine.Version}. In a page, map @babylonjs/core to the same version:
 // <script type="importmap">{ "imports": { "@babylonjs/core": "${CDN}" } }</script>
 import { readBuffers } from './bylonder/buffers.js';
+import { worldColor, worldNodes } from './bylonder/world.js';
 import { BlendScene } from './bylonder/blend-scene.js';
 import { Animation, AnimationGroup, CascadedShadowGenerator, Color3, Color4, CubeTexture, EffectLayer, Geometry, HDRCubeTexture, Light, LinesMesh, Material, Matrix, Mesh, MorphTargetManager, MultiMaterial, PostProcess, Quaternion, ReflectionProbe, Scene, SerializationHelper, ShadowGenerator, Skeleton, SubMesh, TransformNode, Vector3, Camera, ParticleSystem } from '@babylonjs/core';
 import * as BABYLON from '@babylonjs/core';
@@ -175,8 +187,11 @@ const POST_PROCESSES = ${json(data.postProcesses)};
 const BUFFERS = ${json(bin.views)};
 const CONTROLS = ${json(controls)};
 
+// Each built scene's world, which load gives its controls.
+const WORLDS = new WeakMap();
 export async function load(engine) {
-  return new BlendScene(await createScene(engine, engine.getRenderingCanvas()), CONTROLS, ROOT);
+  const scene = await createScene(engine, engine.getRenderingCanvas());
+  return new BlendScene(scene, CONTROLS, { root: ROOT, world: WORLDS.get(scene) });
 }
 
 export async function createScene(engine, canvas${live.size ? ", { modifiers = new URL('./bylonder-modifiers/', import.meta.url) } = {}" : ''}) {
@@ -204,6 +219,9 @@ export async function createScene(engine, canvas${live.size ? ", { modifiers = n
   for (const entry of MATERIALS) for (const block of entry.blocks ?? []) if (typeof block.options?.code === 'number') block.options.code = CODE[block.options.code];
   for (const entry of MATERIALS) materials[entry.uniqueId] = Material.Parse(entry, scene, ROOT);
   for (const entry of MULTI_MATERIALS) materials[entry.uniqueId] = MultiMaterial.ParseMultiMaterial(entry, scene);
+  // The world lights the scene: its color, or its nodes baked once their shader is ready.
+  const world = SCENE.world;
+  if (world) WORLDS.set(scene, world.material !== null ? worldNodes(scene, materials[world.material]) : worldColor(scene, world.color));
   for (const entry of SKELETONS) Skeleton.Parse(entry, scene);
   const morphTargets = {};
   for (const entry of MORPH_TARGETS) morphTargets[entry.id] = MorphTargetManager.Parse(entry, scene);

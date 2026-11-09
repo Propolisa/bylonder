@@ -79,14 +79,24 @@ function cameraControls(node, camera) {
 
 // A node material's tunable values: its InputBlocks named by their RNA path from the material (node-material-export.js),
 // a number or each component of a vector, and its images, a URL relative to the package.
+// A world's material is named `__world <name>` (main-view.js adoptWorld): its paths are the World's.
 function nodeMaterialControls(entry) {
   if (entry.customType !== 'BABYLON.NodeMaterial') return [];
-  const base = `materials${key(entry.name)}`, named = entry.blocks.filter((b) => b.name.startsWith('node_tree.'));
+  const world = /^__world (.*)$/.exec(entry.name), base = world ? `worlds${key(world[1])}` : `materials${key(entry.name)}`, named = entry.blocks.filter((b) => b.name.startsWith('node_tree.'));
   const images = named.filter((b) => b.customType === 'BABYLON.ImageSourceBlock' && b.texture?.name)
     .map((b) => knob(`${base}.${b.name}`, b.texture.name, { type: 'STRING', suggested: true }, { material: entry.id, block: b.name, image: true }));
   return images.concat(named.filter((b) => b.customType === 'BABYLON.InputBlock').flatMap((b) => (Array.isArray(b.value)
     ? b.value.map((v, i) => knob(`${base}.${b.name}[${i}]`, v, { type: 'FLOAT' }, { material: entry.id, block: b.name, component: i }))
     : [knob(`${base}.${b.name}`, b.value, { type: 'FLOAT' }, { material: entry.id, block: b.name })])));
+}
+
+// A world of one color: its Background node's Color and Strength, which light the page's scene (runtime/world.js).
+function worldControls(scene) {
+  const background = scene.world?.node_tree?.nodes && [...scene.world.node_tree.nodes].find((node) => node.bl_idname === 'ShaderNodeBackground');
+  if (!background) return [];
+  const inputs = `worlds${key(scene.world.name)}.node_tree.nodes${key(background.name)}.inputs`, color = [...background.inputs[0].default_value];
+  return [...color.slice(0, 3).map((v, i) => knob(`${inputs}[0].default_value[${i}]`, v, { type: 'FLOAT', subtype: 'COLOR', soft_min: 0, soft_max: 1, suggested: true }, { world: true })),
+    knob(`${inputs}[1].default_value`, background.inputs[1].default_value, { type: 'FLOAT', soft_min: 0, suggested: true }, { world: true })];
 }
 
 // The project's SDK controls (sdk.controls), as Main holds them: custom properties of the Scene.
@@ -113,6 +123,7 @@ export function exportControls(world, data) {
     if (ob.type === 'CAMERA') list.push(...cameraControls(node, ob.data));
   }
   list.push(...data.materials.flatMap(nodeMaterialControls));
+  if (!data.materials.some((m) => m.name?.startsWith('__world '))) list.push(...worldControls(mainScene));
   list.push(...customProperties(mainScene, `scenes${key(mainScene.name)}`), ...sdkControls(world, mainScene));
   return [...new Map(list.map((k) => [k.path, k])).values()];
 }

@@ -43,6 +43,7 @@ import { Matrix, Observable, Quaternion, Texture, Vector3 } from '@babylonjs/cor
  * @property {string} [block]
  * @property {number} [component]
  * @property {boolean} [image]
+ * @property {boolean} [world] the world's Background color or strength (world.js)
  * @property {string} [property]
  * @property {number} [factor]
  * @property {Transform} [transform]
@@ -109,15 +110,20 @@ export class BlendScene {
   /** @type {string} */
   #root;
 
+  /** @type {{ set(color: number[]): void } | undefined} */
+  #world;
+
   /**
    * @param {import('@babylonjs/core').Scene} scene
    * @param {Knob[]} knobs
-   * @param {string} [root] the package's URL, which relative image URLs resolve against
+   * @param {{ root?: string, world?: { set(color: number[]): void } }} [options] the package's URL, which relative image
+   * URLs resolve against, and the world of one color its background controls set (world.js)
    */
-  constructor(scene, knobs, root = '') {
+  constructor(scene, knobs, { root = '', world } = {}) {
     /** Babylon's scene. */
     this.scene = scene;
     this.#root = root;
+    this.#world = world;
     this.#knobs = new Map(knobs.map((knob) => [knob.path, knob]));
     this.#values = new Map(knobs.map((knob) => [knob.path, knob.default]));
   }
@@ -205,6 +211,13 @@ export class BlendScene {
    * @param {Value} value
    */
   #apply(bind, path, value) {
+    if (bind.world) {
+      // The Background node's Color (input 0) times its Strength (input 1).
+      const inputs = path.slice(0, path.lastIndexOf('.inputs[') + '.inputs'.length);
+      const strength = /** @type {number} */ (this.#values.get(`${inputs}[1].default_value`) ?? 1);
+      this.#world?.set([0, 1, 2].map((i) => /** @type {number} */ (this.#values.get(`${inputs}[0].default_value[${i}]`)) * strength));
+      return;
+    }
     if (bind.material !== undefined) {
       const material = /** @type {any} */ (this.scene.getMaterialById(bind.material)), block = material?.getBlockByName(bind.block);
       if (block && bind.image) block.texture = this.#image(block.texture, /** @type {string} */ (value));
