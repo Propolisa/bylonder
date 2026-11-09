@@ -7,9 +7,9 @@
 // (tests/export-parity/matrix.mjs) on the examples the changes reach: its Node checks beside the unit tests, its browser
 // checks on the build after the production check. --full runs everything; --list only lists.
 import { spawn, execFileSync } from 'node:child_process';
-import { readdirSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { selectChecks } from './smoke-select.mjs';
-import { reachable } from './import-graph.mjs';
+import { selectUnits } from './unit-select.mjs';
 
 const run = (name, command, args, env = {}) => new Promise((resolve) => {
   const start = performance.now(), child = spawn(command, args, { env: { ...process.env, ...env }, stdio: ['ignore', 'pipe', 'pipe'], shell: process.platform === 'win32' && command === 'npm' });
@@ -34,18 +34,6 @@ function changes() {
   return { files: files.filter((f) => appPackages || !/^package(-lock)?\.json$/.test(f)), smokeDiff: git('diff', '-U0', base, '--', 'tests/e2e/smoke.mjs') };
 }
 
-// Changes every unit test may depend on without importing them: the module, the test runner, the app's packages.
-const ALL_UNITS = /^(tools\/blender-port\/|src\/bmesh\/.*\.(wasm|zip)$|scripts\/run-tests\.mjs$|package(-lock)?\.json$)/;
-// The unit tests a change reaches: changed tests, those whose imports reach a changed file, those whose source names it
-// (fixtures, examples); null for all.
-function selectUnits(files) {
-  if (files.some((f) => ALL_UNITS.test(f))) return null;
-  const changed = new Set(files);
-  const named = files.map((f) => f.replace(/^(examples|tests\/fixtures)\/([^/]+).*/, '$1/$2'));
-  return readdirSync('tests').filter((f) => f.endsWith('.test.js')).map((f) => `tests/${f}`).filter((test) =>
-    changed.has(test) || named.some((n) => readFileSync(test, 'utf8').includes(n))
-    || [...reachable([test])].some((m) => changed.has(m.replaceAll('\\', '/'))));
-}
 // Changes that can move frame counts or idle times.
 const PERF = /^(src\/(draw|render|runtime|runtimes|blenkernel|nodes|compositor|bmesh|modifiers|editors\/space_view3d)\/|src\/main\.js$|tools\/(blender-port|blender-nodes)\/|package-lock\.json$)/;
 
