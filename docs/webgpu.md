@@ -49,6 +49,15 @@ Bylonder's shaders are GLSL only, on both backends; Babylon converts them on Web
 so its WebGPU compiles shaders with FXC, which fails some that Chrome compiles; `E2E_CHROME` (the path of an installed
 Chrome) runs them on it instead, in a temporary profile.
 
+## Compute shaders
+
+Where Blender runs a compute shader (EEVEE's volumes, light probe bake, shadows and Fast GI, the GPU compositor's
+passes), Bylonder's WebGPU path runs Blender's own through Babylon's `ComputeShader`, translated from their GLSL by the
+compilers Babylon already uses for WebGPU (glslang to SPIR-V, twgsl to WGSL), with as little glue as possible and no
+hand-written WGSL copies. Elsewhere a compute path is added only when a measured gain clearly justifies it. WebGL 2 has
+no compute shaders and keeps fragment-pass versions of the same steps. None of these compute paths exists yet: every
+feature still runs its WebGL 2 version on WebGPU.
+
 ## Limits
 
 - A Principled BSDF with the Dithered render method is alpha tested, not hashed: Blender's hash is GLSL.
