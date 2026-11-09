@@ -94,7 +94,11 @@ transform by columns. A Grease Pencil layer's drawing, `grease_pencil`, is `{ la
 layer's index and blend mode, its matrix in its object's space (Babylon's axes and layout) and scale, and `drawing`
 `{ curves, points, triangles }` as Main draws it (5 ints per curve: first point, points, flags, material index, hash;
 14 floats per point: position in Babylon's axes, radius, stroke and fill colors in display sRGB, selection, weight; the
-fills' triangles by point), or null. Curves are not defined yet. `runtime/mesh.js` draws any of them in Babylon: a mesh as draw
+fills' triangles by point), or null. Curves, `curves`, are what Main draws of a Curves object or a particle system's hair:
+`{ pos_rad, indirection, time, length, object_to_world, faces, material, name }`, each evaluated point's position (object
+space, Blender's axes) and radius, Blender's indirection from the drawn segments to their curves, each point's time
+along its curve, each curve's length, the object's matrix (Blender's), the faces round each segment (the scene's Hair
+shape), the material's id and a name unique within the object. `runtime/mesh.js` draws any of them in Babylon: a mesh as draw
 buffers (the modifier kernel's draw step where the package ships it, else a fan of each face), instances as thin
 instances of their references' meshes, points as a point cloud.
 
@@ -113,7 +117,7 @@ resolves each node's type key through the registry as the scheduler resolves an 
 `modifier:BEVEL`), a driver (`OB:Crosshead/driver/location[0]`, `driver:SCRIPTED`), an F-Curve
 (`OB:Flywheel/animation/rotation_euler[1]`, `animation:FCURVE`, reading the frame and writing a property), a Geometry
 Nodes modifier (`modifier:NODES`, its graph an input), a material (`material:NODES`), a Grease Pencil layer
-(`OB:Ball/grease_pencil/Ball`, `grease_pencil:LAYER`). Each has its `type`, `id`,
+(`OB:Ball/grease_pencil/Ball`, `grease_pencil:LAYER`), curves (`OB:Hill/curves/Grass`, `curves:CURVES`). Each has its `type`, `id`,
 `inputs`, `outputs` (where each lands: `{ "property": path }`, `{ "draw": node }`, or nowhere when only other entities
 read it) and `implementation`: what the package ships for it (`driver`, `modifiers`, `geometry-nodes`, `animation`
 for Babylon's AnimationGroup), or none when only its baked result ships. `order` lists the keys so each runs after what it reads.
@@ -126,9 +130,11 @@ What each kind of entity reads and gives:
 | `modifier:<TYPE>` | `mesh` (the base mesh's buffers, or the previous modifier's output), its settings by name (a vector as an array), `kernel` (the module's type and layouts) | `mesh` |
 | `modifier:NODES` | `graph`, `geometry` (`{ mesh }` of the base mesh with its attributes, or the previous modifier's output), the interface's inputs by identifier, `frame` when the graph reads the scene's time (Scene Time) | `geometry` |
 | `grease_pencil:LAYER` | `layer`, `blend`, `matrix`, `scale`, `frames` (the layer's keyed frames) and `drawings` (each key's drawing, its arrays buffers, or null), `frame` | `geometry` (the drawing shown at the frame: its last key's at or before it) |
+| `curves:CURVES` | Main's curves draw at export (Geometry) | `geometry` (`{ curves }`, drawn once by Blender's curve shape functions in `bylonder-curves/`, GPL) |
 | `animation:FCURVE` | its action's RNA path, `data_path` and `array_index` as names, `animation` (the Babylon AnimationGroup and target node that play it, `native`) or `curve` (`extrapolation`, `auto_smoothing`, `cycles`, and `keyframes` as a buffer of 13 floats per key: co, handles, interpolation, easing, handle types, back, amplitude, period; `fcurve`), `frame` | `value` |
 
-Each frame, the scheduler runs again what reads `frame_current` and is not Babylon's own. An F-Curve's keys are not
+Each frame, the scheduler runs again what reads `frame_current` and is not Babylon's own. What reads no property or
+entity (curves) runs once, at load. An F-Curve's keys are not
 copied into the IR: Babylon's animation that plays it exactly (`native`) holds them, or, for an object's transform
 Babylon cannot play exactly (an Euler rotation, an easing, another extrapolation), they are a buffer of `scene.bin` and
 the clean-room F-Curve unit runs it (`fcurve`), writing its property after Babylon's animation, from which blend-scene.js

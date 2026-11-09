@@ -539,11 +539,13 @@
   ],
   "tests": [
    "tests/hair-dynamics.test.js",
+   "tests/export-curves-wasm.test.js",
    "tests/geometry-node-editor.test.js"
   ],
   "limits": [
    "The Shader Editor does not show a Curves object's material; the Hair material is read from the .blend and drawn.",
-   "Simulating to a far frame plays every frame from the start, which takes a moment on slow devices."
+   "Simulating to a far frame plays every frame from the start, which takes a moment on slow devices.",
+   "In exported pages (File > Export > JavaScript) hair shows its strands as they were at export: simulated or animated strands stay still."
   ],
   "page": "docs/features/hair-dynamics.md",
   "open": "https://propolisa.github.io/bylonder/#example=hair-dynamics",
@@ -1218,7 +1220,8 @@
   ],
   "limits": [
    "Hair's UV and color attributes are not drawn.",
-   "Overlays of hair have no selection ids, clipping or Blender's line anti-aliasing."
+   "Overlays of hair have no selection ids, clipping or Blender's line anti-aliasing.",
+   "In exported pages (File > Export > JavaScript) hair shows its strands as they were at export: simulated or animated strands stay still."
   ],
   "page": "docs/features/particle-hair.md",
   "open": "https://propolisa.github.io/bylonder/#example=particle-hair",

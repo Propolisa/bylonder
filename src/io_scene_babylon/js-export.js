@@ -18,6 +18,7 @@ import { exportCompositor } from './compositor-export.js';
 import { exportIR, idKey } from './ir-export.js';
 import { channels, readsOtherIDs } from './modifiers-export.js';
 import { gplFolders, NODE_KERNELS } from './runtime-files.js';
+import { CURVES_GLSL_FILE, curvesGlslFile } from './curves-export.js';
 import { idStruct } from '../python/bpy_rna.js';
 import { displayExponent } from '../render/view-settings.js';
 import { LOG_SIZE, STOPS } from '../render/display-lut.js';
@@ -216,6 +217,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   sampledGaps(data, ir);
   greasePencilClock(world, ir, data.animationGroups);
   const kernels = await irMaterials(data.materials, graphs, ir, parity), code = sharedCode(data.materials);
+  const curves = Object.values(ir.entities).some((e) => e.implementation === 'curves');
   parentInstances(objects);
   const parented = [...data.transformNodes, ...data.meshes, ...data.lights, ...data.cameras].filter((e) => e.parentId !== undefined);
   const parse = (name, list, code) => (list?.length ? `  for (const entry of ${name}) ${code};\n` : '');
@@ -241,7 +243,9 @@ import { derivativeUniformity } from './bylonder/overrides/webgpu/derivative-uni
 import { reservedNames } from './bylonder/overrides/webgpu/reserved-names.js';
 import { webgpuSamplers } from './bylonder/overrides/webgpu/samplers.js';${kernels ? `
 import { fillMaterials } from './bylonder/materials.js';
-import kernels from './${NODE_KERNELS}';` : ''}${display ? `
+import kernels from './${NODE_KERNELS}';` : ''}${curves ? `
+// The curves blocks the materials drawing curves use, before they are parsed.
+import './${CURVES_GLSL_FILE}';` : ''}${display ? `
 import { viewTransform } from './bylonder-view-transform.js';` : ''}${composited ? `
 import { compositor } from './bylonder-blocks.js';` : ''}
 import { Animation, AnimationGroup, CascadedShadowGenerator, Color3, Color4, CubeTexture, EffectLayer, Geometry, HDRCubeTexture, Light, LinesMesh, Material, Matrix, Mesh, MorphTargetManager, MultiMaterial, PostProcess, Quaternion, ReflectionProbe, Scene, SerializationHelper, ShadowGenerator, Skeleton, SubMesh, TransformNode, Vector3, Camera, ParticleSystem } from '@babylonjs/core';
@@ -374,5 +378,5 @@ ${data.animationGroups.some((g) => g.targetedAnimations.some((t) => t.animation.
 `;
   // An ES module package in Node too (the headless SDK), needing only Babylon.
   const manifest = { name: name.toLowerCase().replace(/[^a-z0-9-]+/g, '-'), type: 'module', main: 'scene.js', types: 'scene.d.ts', peerDependencies: { '@babylonjs/core': AbstractEngine.Version } };
-  return { 'scene.js': source, 'scene.d.ts': controlTypes(Object.entries(ir.properties).map(([path, { type }]) => ({ path, type }))), 'scene.ir.json': irJson, ...(kernels && { [NODE_KERNELS]: kernels }), 'scene.bin': bin.bytes(), 'package.json': `${JSON.stringify(manifest, null, 2)}\n`, ...images };
+  return { 'scene.js': source, 'scene.d.ts': controlTypes(Object.entries(ir.properties).map(([path, { type }]) => ({ path, type }))), 'scene.ir.json': irJson, ...(kernels && { [NODE_KERNELS]: kernels }), ...(curves && { [CURVES_GLSL_FILE]: curvesGlslFile() }), 'scene.bin': bin.bytes(), 'package.json': `${JSON.stringify(manifest, null, 2)}\n`, ...images };
 }

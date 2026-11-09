@@ -29,6 +29,7 @@ export const EVALUATORS = {
   modifiers: (page) => import('./modifiers-evaluator.js').then((module) => module.load(page)),
   'geometry-nodes': (page) => import('./geometry-nodes-evaluator.js').then((module) => module.load(page)),
   grease_pencil: () => import('./grease-pencil.js').then(({ run }) => ({ run })),
+  curves: (page) => import('./curves.js').then((module) => module.load(page)),
 };
 /** What Babylon runs itself (`native`: an F-Curve its AnimationGroup plays), which the scheduler leaves to it unless a unit takes over. */
 export const NATIVE = ['native'];
@@ -58,6 +59,9 @@ export function createScheduler(ir, page) {
   }
   if (Object.values(entities).some((e) => e.implementation === 'grease_pencil')) {
     drawing.greasePencil = (node, layer) => import('./grease-pencil.js').then((module) => module.drawLayer(scene, node, layer));
+  }
+  if (Object.values(entities).some((e) => e.implementation === 'curves')) {
+    drawing.curves = async (node, curves) => /** @type {any} */ (await evaluator('curves')).drawCurves(node, curves);
   }
   /** @type {Promise<void> | null} */
   let pending = null, frame = NaN;
@@ -160,6 +164,9 @@ export function createScheduler(ir, page) {
 
   // What reads the frame loads its implementation now, so it runs as the first frame draws.
   timedLive().forEach(implementation);
+  // What reads no property or entity (curves at export) runs once: nothing runs it later and the package bakes none of it.
+  Object.keys(entities).filter((key) => ![...referencesIn(entities[key].inputs)].some(([ref]) => 'property' in ref || 'entity' in ref)).forEach(mark);
+  run();
 
   return {
     /** A property was set. @param {string} path */

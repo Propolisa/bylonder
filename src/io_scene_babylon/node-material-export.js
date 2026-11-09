@@ -115,16 +115,18 @@ function exportGraph(material, out, { parity, textures, graph }) {
   const lobes = parity && material.attachedBlocks.some((b) => b instanceof BlenderSurfaceBlock && b.lobe && b.closure.connectedPoint === closureOutput);
   const nodes = blenderNodes(material, { closure: closureOutput, merge: !parity, scene, textures, systemValue, graph });
   let surface = null;
+  const drawsCurves = scene.meshes.some((m) => m.material === material && m.metadata?.curves);
 
   // The export's output for one of the material's outputs.
   function source(point) {
     const owner = point.ownerBlock;
     if (isBlenderShader(owner) && !(owner instanceof ShaderNodeOutputMaterial)) return nodes.output(point);
-    if (owner instanceof CurvesGeometryBlock) {
+    // A material drawing curves keeps its curves blocks, which the package ships (curves-export.js); others draw meshes alone.
+    if (owner instanceof CurvesGeometryBlock && !drawsCurves) {
       const mesh = { position: 'meshPosition', normal: 'meshNormal' }[point.name];
       return mesh ? source(owner.getInputByName(mesh).connectedPoint) : zero(point.type).output;
     }
-    if (owner instanceof CurvesNormalBlock) return source(owner.getInputByName('normal').connectedPoint);
+    if (owner instanceof CurvesNormalBlock && !drawsCurves) return source(owner.getInputByName('normal').connectedPoint);
     if (owner instanceof BlenderViewEyeBlock) return parity ? viewEye(owner) : source(owner.eye.connectedPoint);
     if (owner instanceof BlenderWorldProbeClampBlock) return probeClamp(owner);
     if (owner instanceof BlenderFarPlaneBlock) return farPlane(owner);

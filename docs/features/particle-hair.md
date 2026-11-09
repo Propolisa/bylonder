@@ -35,6 +35,7 @@ tests:
 limits:
   - Hair's UV and color attributes are not drawn.
   - Overlays of hair have no selection ids, clipping or Blender's line anti-aliasing.
+  - In exported pages (File > Export > JavaScript) hair shows its strands as they were at export: simulated or animated strands stay still.
 ---
 # Particle Hair
 

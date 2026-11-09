@@ -56,7 +56,9 @@ function withoutGeometry(geometries) {
 function exportedContent(scene) {
   const nodes = [...scene.meshes, ...scene.transformNodes, ...scene.lights, ...scene.cameras].filter((n) => !excluded(n)).map(evaluatedMesh);
   const meshes = nodes.filter((n) => n.geometry !== undefined);
-  const materials = new Set(meshes.flatMap((m) => (m.material ? [m.material, ...(m.material.subMaterials ?? [])] : [])).filter(Boolean));
+  // Curves are drawn by the page (curves-export.js) in the materials the app draws them in.
+  const curves = scene.meshes.filter((m) => m.metadata?.curves && !m.metadata.overlay && m.isEnabled());
+  const materials = new Set([...meshes, ...curves].flatMap((m) => (m.material ? [m.material, ...(m.material.subMaterials ?? [])] : [])).filter(Boolean));
   return { nodes: new Set(nodes), meshes, materials };
 }
 

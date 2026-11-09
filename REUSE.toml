@@ -60,6 +60,7 @@ path = [
   "src/blenkernel/scene/world-babylon.js",
   "src/blenkernel/scene/world-sun.js",
   "src/draw/curves.js",
+  "src/draw/curves-blocks.js",
   "src/draw/draw-view.js",
   "src/draw/grease-pencil.js",
   "src/draw/light-probe-pbr.js",

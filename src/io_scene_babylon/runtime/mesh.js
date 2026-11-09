@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // Drawing IR geometry in Babylon, for every entity that gives it (a modifier, Geometry Nodes): a mesh as draw buffers,
 // one vertex per face corner in Babylon's axes, on the node's mesh, a submesh per material; instances as thin instances
-// of their references' meshes; points as a point cloud; a Grease Pencil layer's drawing under its object's node. Where no kernel draws a mesh, each face is a fan of triangles,
-// a smooth face with its vertices' normals (its faces' normals weighted by their corner angles), a sharp one
-// (`sharp_face`) with its own.
+// of their references' meshes; points as a point cloud; a Grease Pencil layer's drawing and curves under their object's
+// node. Where no kernel draws a mesh, each face is a fan of triangles, a smooth face with its vertices' normals (its
+// faces' normals weighted by their corner angles), a sharp one (`sharp_face`) with its own.
 import { Matrix, Mesh, SubMesh } from '@babylonjs/core';
 
 /**
@@ -13,9 +13,9 @@ import { Matrix, Mesh, SubMesh } from '@babylonjs/core';
  */
 /**
  * How geometry is drawn: a mesh's draw buffers (a kernel's, else `triangulate`), and the Babylon node an ID draws as.
- * A Grease Pencil layer's drawing, under its object's node (grease-pencil.js draw).
+ * A Grease Pencil layer's drawing and curves, under their object's node (grease-pencil.js drawLayer, curves.js drawCurves).
  * @typedef {{ meshBuffers?(mesh: import('./ir.js').Mesh): DrawBuffers | Promise<DrawBuffers>, nodeOf?(id: string): string | undefined,
- *   greasePencil?(node: string, layer: any): Promise<void> }} Drawing
+ *   greasePencil?(node: string, layer: any): Promise<void>, curves?(node: string, curves: any): Promise<void> }} Drawing
  */
 
 /** @param {ArrayLike<number>} p @param {number} a @param {number} b */
@@ -114,8 +114,9 @@ const SWAP = Matrix.FromArray([1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1]);
  * @param {any} value
  * @param {Drawing} [drawing]
  */
-export async function drawGeometry(scene, node, value, { meshBuffers = triangulate, nodeOf = () => undefined, greasePencil } = {}) {
+export async function drawGeometry(scene, node, value, { meshBuffers = triangulate, nodeOf = () => undefined, greasePencil, curves } = {}) {
   if (value.grease_pencil) return greasePencil?.(node, value.grease_pencil);
+  if (value.curves) return curves?.(node, value.curves);
   const target = /** @type {Mesh | null} */ (scene.getMeshById(node));
   if (!target || target.isDisposed()) return;
   if (value.positions) return setBuffers(target, value);

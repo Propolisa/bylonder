@@ -35,10 +35,12 @@ code:
   - tools/blender-port/wasm/modifier-api.cc
 tests:
   - tests/hair-dynamics.test.js
+  - tests/export-curves-wasm.test.js
   - tests/geometry-node-editor.test.js
 limits:
   - The Shader Editor does not show a Curves object's material; the Hair material is read from the .blend and drawn.
   - Simulating to a far frame plays every frame from the start, which takes a moment on slow devices.
+  - In exported pages (File > Export > JavaScript) hair shows its strands as they were at export: simulated or animated strands stay still.
 ---
 # Hair Dynamics
 
