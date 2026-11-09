@@ -28,7 +28,9 @@ Bylonder's shaders are GLSL only, on both backends; Babylon converts them on Web
   names).
 - WebGPU's GLSL takes no sampler as a function argument. On WebGPU, each of Blender's functions called with an image
   runs as a copy for that image (`src/nodes/blender/glsl.js` `specializeSamplers`). Babylon's own inliner
-  (`#define inline`) does not fit Blender's functions: it matches by name only and cannot keep early returns.
+  (`#define inline`) does not fit Blender's functions: it matches by name only and cannot keep early returns. Babylon's
+  own functions it marks are left to it, and its PBR's area light function, which it leaves unmarked, is marked for it,
+  so area lights light node materials.
 - An environment Babylon prefilters on load (Material Preview's studio light, an EXR world) is ready for materials
   only once filtered, so no WebGPU bind group keeps the texture it replaces.
 - Points are drawn as quads on both backends (`src/draw/point-sprites.js`): WebGPU has no point size.
@@ -50,5 +52,3 @@ Chrome) runs them on it instead, in a temporary profile.
 - Rendered shading of large scenes (gaku, bike_ride) does not settle: a light's uniform buffer goes unbound ("Can't find
   buffer Light0"); Material Preview runs at about half WebGL 2's frame rate.
 - Render Image's compositor output differs from the render (smoke check: 118 of 255 on average).
-- A Blender node material lit by an area light does not compile: Babylon's GLSL area light code passes samplers as
-  arguments, which WebGPU's GLSL refuses.

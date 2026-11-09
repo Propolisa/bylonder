@@ -23,3 +23,11 @@ assert.match(shader, /node_tex_image_linear_bl_image_3\(vec3\(0\.0\), c, a\);/);
 assert.doesNotMatch(shader, /\bsampler2D (s|ima)\b/);
 assert.ok(shader.indexOf('texture_load_bl_image_3(ivec2 t)') < shader.indexOf('node_tex_image_linear_bl_image_3(vec3 co'), 'a copy precedes its callers');
 console.log('GLSL samplers: functions taking samplers run as copies for the uniforms they are called with');
+
+// A function Babylon marks for its inliner keeps its sampler parameters: Babylon inlines it on WebGPU.
+const inlined = specializeSamplers(`uniform sampler2D ltc;
+#define inline
+vec4 area(sampler2D s, vec2 uv) { return texture(s, uv); }
+`);
+assert.match(inlined, /#define inline\nvec4 area\(sampler2D s, vec2 uv\)/);
+console.log('GLSL samplers: functions Babylon inlines are left to it');

@@ -379,10 +379,12 @@ export function glslFunction(name) {
 // function's copy for those samplers, which samples the uniforms themselves: WebGPU's GLSL (Vulkan's) takes a sampler
 // only where it samples it, never as an argument. engineGLSL applies it for an engine that needs it.
 const SAMPLER_PARAMETER = /^(?:(?:const|in|highp|mediump|lowp)\s+)*([iu]?sampler\w+)\s+(\w+)$/;
+// Babylon inlines the functions marked so (ShaderCodeInliner on WebGPU), sampler arguments and all.
+const INLINED = /#define inline\s*$/;
 const samplerFunctions = (text) => [...text.matchAll(/^([^\S\n]*\w+\s+)(\w+)\s*\(([^)]*)\)\s*\{/gm)].map((m) => {
   const params = m[3].split(',').map((p) => p.trim()).filter(Boolean);
   return { at: m.index, type: m[1], name: m[2], header: m[0], params, samplers: params.map((p) => SAMPLER_PARAMETER.exec(p)) };
-}).filter((f) => f.samplers.some(Boolean));
+}).filter((f) => f.samplers.some(Boolean) && !INLINED.test(text.slice(0, f.at)));
 const bodyEnd = (text, open) => {
   for (let i = open, depth = 0; i < text.length; i++) if (text[i] === '{') depth++; else if (text[i] === '}' && --depth === 0) return i + 1;
   return text.length;
