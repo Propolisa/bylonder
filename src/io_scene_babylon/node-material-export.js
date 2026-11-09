@@ -67,15 +67,17 @@ function valueBlock({ kind, value, path }) {
 const literal = (value) => (Array.isArray(value) ? `vec${value.length}(${value.map((v) => glslValue(v, 'float')).join(', ')})` : glslValue(value, 'float'));
 
 // The material as Babylon's NodeMaterial serialization of Babylon's blocks, or null for one not of Blender's nodes.
-export async function exportNodeMaterial(material, { parity = false } = {}) {
+// With `graph`, the IR graph key of its node tree: the nodes' block names what each of its parameters carries
+// (runtime/materials.js fillMaterials) and ships no code, which the page makes from the IR.
+export async function exportNodeMaterial(material, { parity = false, graph = null } = {}) {
   if (!blenderOutput(material)) return null;
   await built(material);
   const scene = material.getScene();
   const out = new NodeMaterial(material.name, scene);
   try {
     const textures = new Map();
-    const graph = exportGraph(material, out, { parity, textures });
-    for (const node of [...material._vertexOutputNodes, ...material._fragmentOutputNodes]) out.addOutputNode(graph.block(node));
+    const exported = exportGraph(material, out, { parity, textures, graph });
+    for (const node of [...material._vertexOutputNodes, ...material._fragmentOutputNodes]) out.addOutputNode(exported.block(node));
     for (const key of MATERIAL_SETTINGS) if (key in material) out[key] = material[key];
     const json = out.serialize();
     for (const entry of json.blocks) {
@@ -103,7 +105,7 @@ async function built(material) {
 // The Material Output the material draws from (the one EEVEE uses, shader-nodes.js eeveeOutput).
 const blenderOutput = (material) => material._fragmentOutputNodes?.find((block) => block instanceof ShaderNodeOutputMaterial) ?? null;
 
-function exportGraph(material, out, { parity, textures }) {
+function exportGraph(material, out, { parity, textures, graph }) {
   const blocks = new Map(), scene = material.getScene();
   const system = new Map();
   const systemValue = (value) => system.get(value) ?? system.set(value, Object.assign(new InputBlock(`blender:${System[value]}`, undefined, T.Matrix), { systemValue: value })).get(value);
@@ -111,7 +113,7 @@ function exportGraph(material, out, { parity, textures }) {
   const wire = (from, to) => from.connectTo(to);
   const closureOutput = blenderOutput(material).getInputByName('Surface').connectedPoint ?? null;
   const lobes = parity && material.attachedBlocks.some((b) => b instanceof BlenderSurfaceBlock && b.lobe && b.closure.connectedPoint === closureOutput);
-  const nodes = blenderNodes(material, { closure: closureOutput, merge: !parity, scene, textures, systemValue });
+  const nodes = blenderNodes(material, { closure: closureOutput, merge: !parity, scene, textures, systemValue, graph });
   let surface = null;
 
   // The export's output for one of the material's outputs.
@@ -242,19 +244,23 @@ function customBlock(name, functionName, inputs, outputs, code, target = 'Fragme
 // The material's Blender nodes as one CustomBlock: their functions, then one function of the values they read from
 // other blocks (the variables their code read) and the images they sample, running their code and giving the closure's
 // values and the outputs other blocks read.
-function blenderNodes(material, { closure, merge, scene, textures, systemValue }) {
-  const built = material.attachedBlocks.filter((b) => isBlenderShader(b) && b.built?.shared === material._sharedData).sort((a, b) => a.built.order - b.built.order);
+function blenderNodes(material, { closure, merge, scene, textures, systemValue, graph }) {
+  const built = builtNodes(material);
   const functions = new Map([['bl_closure', STAND_INS.bl_closure]]);
-  const params = new Map(), samplers = [], locals = [], uniforms = [], outputs = new Map();
+  const params = new Map(), samplers = [], locals = [], uniforms = [], outputs = new Map(), sources = new Map();
   let matrices = false;
   const mesh = material.getScene().meshes.find((m) => m.material === material) ?? null;
   for (const node of built) {
     for (const [key, code] of node.built.functions) if (!functions.has(key)) functions.set(key, code);
     for (const [input, name] of node.built.inputs) {
-      if (!isBlenderShader(input.connectedPoint.ownerBlock) && !params.has(name)) params.set(name, input.connectedPoint);
+      if (isBlenderShader(input.connectedPoint.ownerBlock) || params.has(name)) continue;
+      params.set(name, input.connectedPoint);
+      sources.set(name, input.name.startsWith('__') ? `geometry:${input.name}` : null);
     }
-    for (const [name, id, kind] of node._uniforms ?? []) uniforms.push({ name, kind, value: node.values[id], path: socketPath(node, id) });
-    for (const [name, texture] of node._textures ?? []) samplers.push([name, texture, IMAGE_NODES.has(node.idname) && !texture.metadata?.table ? imagePath(node) : null]);
+    for (const [name, id, kind] of node._uniforms ?? []) uniforms.push({ name, kind, value: node.values[id], path: socketPath(node, id), source: `value:${node.name}:${id}` });
+    for (const [k, [name, texture]] of (node._textures ?? []).entries()) {
+      samplers.push([name, texture, IMAGE_NODES.has(node.idname) && !texture.metadata?.table ? imagePath(node) : null, `texture:${node.name}:${k}`]);
+    }
     for (const [name, id] of node._meshUniforms ?? []) {
       if (MATRICES[id]) { matrices = true; locals.push(`mat4 ${name} = ${MATRICES[id]};`); continue; }
       const [type, value] = meshValue(id);
@@ -283,6 +289,11 @@ function blenderNodes(material, { closure, merge, scene, textures, systemValue }
     `BlClosure c = ${merge ? `bl_closure_merge_lobes(${c})` : c};`, `BlLobe l = bl_lobe_add((${c}).lobe1, (${c}).lobe2);`,
     ...CLOSURE_OUTPUTS.map(([name, , value]) => `${name} = ${value};`), ...[...outputs].map(([point, name]) => `${name} = ${point.associatedVariableName};`), '}'];
   const block = customBlock('blender:nodes', 'bl_nodes', [...inputs, ...sampled], outParameters, code.join('\n').split('\n'));
+  // In the IR's form, what each parameter carries; none when one is not a graph's (a Babylon block's other than the
+  // geometry, a data output read by Babylon's blocks).
+  const carried = [...[...params.keys()].map((name) => sources.get(name)), ...uniforms.map((u) => u.source),
+    ...(matrices ? ['system:world', 'system:view', 'system:projection'] : []), ...samplers.map(([, , , source]) => source)];
+  if (graph && !outputs.size && carried.every(Boolean)) Object.assign(block.options, { code: [], blender: { graph, inputs: carried } });
   return {
     closure: (name) => block.getOutputByName(name),
     output: (point) => block.getOutputByName(outputs.get(point)),
@@ -297,6 +308,108 @@ function blenderNodes(material, { closure, merge, scene, textures, systemValue }
       });
     },
   };
+}
+
+// The material's Blender nodes as its build wrote them, in build order.
+const builtNodes = (material) => material.attachedBlocks.filter((b) => isBlenderShader(b) && b.built?.shared === material._sharedData).sort((a, b) => a.built.order - b.built.order);
+
+// FNV-1a of a string, as hex: a node function's name from its code.
+const hash = (text) => {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 0x01000193);
+  return (h >>> 0).toString(16).padStart(8, '0');
+};
+// A GLSL body with whole identifiers renamed.
+const renamed = (code, names) => (names.size ? code.replace(/(?<![.\w])[A-Za-z_]\w*/g, (name) => names.get(name) ?? name) : code);
+const DECLARED = /\b(?:float|int|bool|vec[234]|mat[34]|BlClosure|BlLobe)\s+([A-Za-z_]\w*)\s*=/g;
+const isShaderOutput = (point) => point.ownerBlock.declaration?.outputs.find((s) => s.identifier === point.name)?.type === 'SHADER';
+const glslOf = (point) => (isShaderOutput(point) ? 'BlClosure' : GLSL[point.type]);
+
+// A node's code as a function of the IR's kernels, named by its hash; its parameters and locals named alike, so nodes of
+// the same code share it across materials.
+function nodeFunction(functions, params, variables, code, outputs, into) {
+  const names = new Map(variables.map((v, i) => [v, `bl_p${i}`]));
+  for (const [, local] of code.matchAll(DECLARED)) if (!names.has(local)) names.set(local, `bl_l${names.size}`);
+  const signature = [...params.map((p, i) => `${p.type} bl_p${i}`), ...outputs.map(([, type], k) => `out ${type} bl_o${k}`)].join(', ');
+  const body = `${renamed(code, names)}${outputs.map(([variable], k) => `bl_o${k} = ${names.get(variable) ?? variable};\n`).join('')}`;
+  const text = `void NAME(${signature}) {\n${body}}\n`, name = `bl_node_${hash(text + functions.join())}`;
+  into.pieces[name] = { functions, code: text.replace('NAME', name), params: [...params, ...outputs.map(([, type, output]) => ({ output, type }))] };
+  return name;
+}
+
+// The output node's piece: the closure as the values Babylon's blocks take, its lobes merged unless EEVEE Parity lights
+// them on their own.
+function outputFunction(parity, into) {
+  const values = CLOSURE_OUTPUTS.map(([name, type, value]) => [name, GLSL[type], value]);
+  const code = [`BlClosure c = ${parity ? 's' : 'bl_closure_merge_lobes(s)'};`, 'BlLobe l = bl_lobe_add(s.lobe1, s.lobe2);', ...values.map(([name, , value]) => `${name} = ${value};`)];
+  const text = `void NAME(BlClosure s, ${values.map(([name, type]) => `out ${type} ${name}`).join(', ')}) {\n${code.join('\n')}\n}\n`, name = `bl_output_${hash(text)}`;
+  into.pieces[name] = { functions: ['bl_closure'], code: text.replace('NAME', name),
+    params: [{ input: 'Surface', type: 'BlClosure', fallback: 'bl_closure_empty()' }, ...values.map(([output, type]) => ({ output, type }))] };
+  return name;
+}
+
+/**
+ * The material's Blender nodes as the IR's per-node kernels (runtime/materials.js Kernels) for its graph `key`, added
+ * to `into`: each node's code from its build as one function of its inputs by socket, its geometry, per-mesh values and
+ * textures, giving its outputs by socket, and the output node's giving the closure's values. Made from Blender's GLSL,
+ * so GPL: the package ships them as their own file. Null for a material this form does not carry yet (a node linked to
+ * a Babylon block other than its geometry, or sampling the scene's depth or the sky).
+ */
+export async function exportNodeKernels(material, key, { parity = false, into = { functions: {}, pieces: {}, graphs: {} } } = {}) {
+  const output = blenderOutput(material);
+  if (!output) return null;
+  await built(material);
+  const scene = material.getScene(), mesh = scene.meshes.find((m) => m.material === material) ?? null;
+  const nodes = {}, functions = new Map([['bl_closure', STAND_INS.bl_closure]]);
+  for (const node of builtNodes(material)) {
+    const params = [], variables = [], instance = {};
+    const param = (variable, p) => { if (!variables.includes(variable)) { variables.push(variable); params.push(p); } };
+    for (const [input, variable] of node.built.inputs) {
+      const from = input.connectedPoint;
+      if (isBlenderShader(from.ownerBlock)) param(variable, { input: input.name, type: glslOf(from) });
+      else if (input.name.startsWith('__')) param(variable, { geometry: input.name, type: GLSL[from.type] });
+      else return null;
+    }
+    for (const [variable, id, kind] of node._uniforms ?? []) param(variable, { input: id, type: GLSL[uniformType(kind)] });
+    for (const [variable, id] of node._meshUniforms ?? []) {
+      const [type, value] = meshValue(id);
+      param(variable, { mesh: id, type: MATRICES[id] ? 'mat4' : GLSL[type] });
+      if (!MATRICES[id]) (instance.mesh ??= {})[id] = mesh ? [value(mesh, scene)].flat().map(Number) : [];
+    }
+    for (const [k, [variable, texture]] of (node._textures ?? []).entries()) {
+      const table = texture.metadata?.table;
+      if (typeof texture === 'function' || (!table && !IMAGE_NODES.has(node.idname))) return null;
+      param(variable, { texture: k, type: 'sampler2D' });
+      (instance.textures ??= [])[k] = table ? { table: Array.from(table) } : { image: node.properties.image };
+    }
+    const outputs = node.outputs.filter((point) => point.hasEndpoints && node.declared(point.name)).map((point) => [point.associatedVariableName, glslOf(point), point.name]);
+    for (const [k, code] of node.built.functions) functions.set(k, code);
+    const keys = [...new Set(node.built.functions.map(([k]) => k))];
+    nodes[node.name] = { piece: nodeFunction(keys, params, variables, node.built.code, outputs, into), ...instance };
+  }
+  nodes[output.name] = { piece: outputFunction(parity, into) };
+  for (const [k, f] of functions) into.functions[k] ??= f;
+  // Whether a face is drawn reversed: the export draws faces once, never reversed.
+  if (Object.values(into.functions).some((f) => f.includes('bl_reversed_faces'))) {
+    into.functions = { bl_reversed_faces: 'const float bl_reversed_faces = 0.0;', ...into.functions };
+    for (const piece of Object.values(into.pieces)) if (!piece.functions.includes('bl_reversed_faces')) piece.functions.unshift('bl_reversed_faces');
+  }
+  into.graphs[key] = { output: output.name, nodes };
+  return into;
+}
+
+/**
+ * A package's per-node kernels as their file (runtime-files.js NODE_KERNELS, GPL beside its notice), for its materials
+ * and worlds of Blender's nodes, each `[material, IR graph key]`; null when none has any.
+ */
+export async function materialKernels(entries, { parity = false } = {}) {
+  const into = { functions: {}, pieces: {}, graphs: {} };
+  for (const [material, key] of entries) await exportNodeKernels(material, key, { parity, into });
+  if (!Object.keys(into.graphs).length) return null;
+  return `// SPDX-License-Identifier: GPL-3.0-or-later
+// Blender's shader nodes as one GLSL function per node, made by Bylonder's export from Blender's GLSL (LICENSE.md).
+export default ${JSON.stringify(into)};
+`;
 }
 
 // A texture as Babylon's serialization of one: an image's file (imageFile), a color ramp's table as an 8 bit PNG.

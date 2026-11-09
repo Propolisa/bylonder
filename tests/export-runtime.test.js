@@ -9,7 +9,7 @@ import { tmpdir } from 'node:os';
 import { join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { controlTypes } from '../src/io_scene_babylon/controls-export.js';
-import { BLOCK_FILES, EVALUATOR_FILES, OVERRIDE_FILES, RUNTIME_FILES } from '../src/io_scene_babylon/runtime-files.js';
+import { BLOCK_FILES, EVALUATOR_FILES, MATERIAL_FILES, OVERRIDE_FILES, RUNTIME_FILES } from '../src/io_scene_babylon/runtime-files.js';
 
 const runtime = fileURLToPath(new URL('../src/io_scene_babylon/runtime/', import.meta.url));
 const tsc = (args) => execFileSync(process.execPath, [fileURLToPath(new URL('../node_modules/typescript/bin/tsc', import.meta.url)), ...args], { encoding: 'utf8' });
@@ -31,11 +31,11 @@ for (const name of readdirSync(join(runtime, 'drivers')).filter((n) => n.endsWit
   assert.match(text, /SPDX-License-Identifier: MIT OR Apache-2.0/, `drivers/${name} carries its license`);
   for (const [, specifier] of text.matchAll(/(?:import|from)\s*\(?\s*'([^']+)'/g)) assert.ok(specifier.startsWith('./'), `drivers/${name} imports ${specifier}`);
 }
-// Every file ships: the runtime with each package, the blocks library and extensions when its scene.js imports them
+// Every file ships: the runtime with each package, the blocks library, extensions and material builder when its scene.js imports them
 // (their .d.ts files are checked below).
 const blocks = Object.values(BLOCK_FILES).flatMap((name) => [name, name.replace(/\.js$/, '.d.ts')]);
 const files = readdirSync(runtime, { recursive: true }).map((name) => String(name).split(sep).join('/')).filter((name) => name !== 'tsconfig.json' && name !== 'drivers');
-assert.deepEqual(files.sort(), [...RUNTIME_FILES, ...blocks, ...Object.values(EVALUATOR_FILES).flatMap((e) => e.runtime)].sort(), 'every file of runtime/ ships');
+assert.deepEqual(files.sort(), [...RUNTIME_FILES, ...blocks, ...MATERIAL_FILES, ...Object.values(EVALUATOR_FILES).flatMap((e) => e.runtime)].sort(), 'every file of runtime/ ships');
 
 // The overrides every package carries (src/overrides/): licensed as the runtime, importing only Babylon.
 for (const name of OVERRIDE_FILES.filter((n) => n.endsWith('.js'))) {
