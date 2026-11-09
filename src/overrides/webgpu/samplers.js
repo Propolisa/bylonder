@@ -37,6 +37,19 @@ const bodyEnd = (text, open) => {
   for (let i = open, depth = 0; i < text.length; i++) if (text[i] === '{') depth++; else if (text[i] === '}' && --depth === 0) return i + 1;
   return text.length;
 };
+// The preprocessor branches open at `at`: each chain's directives up to the branch taken, so code elsewhere written
+// inside them is compiled when that place is.
+/** @param {string} text @param {number} at */
+const openBranches = (text, at) => {
+  /** @type {string[][]} */
+  const chains = [];
+  for (const [line, directive] of text.slice(0, at).matchAll(/^[^\S\n]*#\s*(if|ifdef|ifndef|elif|else|endif)\b.*$/gm)) {
+    if (directive.startsWith('if')) chains.push([line.trim()]);
+    else if (directive === 'endif') chains.pop();
+    else chains.at(-1)?.push(line.trim());
+  }
+  return chains;
+};
 /** @param {string} source */
 export function specializeSamplers(source) {
   const uniforms = new Map([...source.matchAll(/\buniform\s+(?:(?:highp|mediump|lowp)\s+)?([iu]?sampler\w+)\s+(\w+)\s*;/g)].map(([, type, name]) => [name, type]));
@@ -53,7 +66,9 @@ export function specializeSamplers(source) {
     const copy = () => {
       const body = text.slice(f.at + f.header.length - 1, bodyEnd(text, f.at + f.header.length - 1));
       const sampled = f.samplers.reduce((b, s, i) => (s ? b.replace(new RegExp(`(?<![\\w.])${s[2]}\\b`, 'g'), args[i]) : b), body);
-      return `${f.type}${name}(${f.params.filter((_, i) => !f.samplers[i]).join(', ')}) ${sampled}\n`;
+      // Under the call's preprocessor branches: the images it samples may be declared only there.
+      const chains = openBranches(text, m.index), open = chains.flat().map((line) => `${line}\n`).join('');
+      return `${open}${f.type}${name}(${f.params.filter((_, i) => !f.samplers[i]).join(', ')}) ${sampled}\n${'#endif\n'.repeat(chains.length)}`;
     };
     const defined = new RegExp(`^[^\\S\\n]*\\w+\\s+${name}\\s*\\(`, 'm').test(text);
     text = text.slice(0, m.index) + `${name}(${args.filter((_, i) => !f.samplers[i]).join(', ')})` + text.slice(end);

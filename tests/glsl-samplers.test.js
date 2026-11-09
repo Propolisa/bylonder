@@ -31,3 +31,18 @@ vec4 area(sampler2D s, vec2 uv) { return texture(s, uv); }
 `);
 assert.match(inlined, /#define inline\nvec4 area\(sampler2D s, vec2 uv\)/);
 console.log('GLSL samplers: functions Babylon inlines are left to it');
+
+// A copy for an image declared only under a preprocessor branch is written under the branches its call is in, so a
+// shader built without that branch (a volume probe's atlas on a mesh no probe lights) has no copy naming it.
+const guarded = specializeSamplers(`vec4 fetch(sampler3D s, ivec3 t) { return texelFetch(s, t, 0); }
+#ifdef PROBES
+uniform highp sampler3D atlas;
+#if defined(REFLECTION)
+#else
+void main() { vec4 v = fetch(atlas, ivec3(0)); }
+#endif
+#endif
+`);
+assert.match(guarded, /^#ifdef PROBES\n#if defined\(REFLECTION\)\n#else\nvec4 fetch_atlas\(ivec3 t\) \{ return texelFetch\(atlas, t, 0\); \}\n#endif\n#endif\n/);
+assert.doesNotMatch(guarded, /sampler3D s\b/);
+console.log("GLSL samplers: a copy is compiled under its call's preprocessor branches");
