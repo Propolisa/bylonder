@@ -168,22 +168,22 @@ async function displaySettings(world, bin, composites) {
 // The package's files but the runtime's: scene.js, scene.d.ts, scene.ir.json, scene.bin and images/. With `live`, objects whose
 // modifiers are all Blender's keep them live (modifiers-export.js), run by modifiers.wasm in bylonder-modifiers/. With
 // `sourceBlend`, the scene's .blend too, as scene.blend, and the controls only Blender evaluates, which the page's
-// Blender fallback runs on it.
-export async function exportModule(world, { live: keepLive = false, parity = false, hostCompression = false, sourceBlend = false } = {}) {
+// Blender fallback runs on it. With `bakeAnimation`, what Babylon cannot play as its F-Curve is sampled per frame.
+export async function exportModule(world, { live: keepLive = false, parity = false, hostCompression = false, sourceBlend = false, bakeAnimation = false } = {}) {
   const live = new Map(keepLive ? world.objects.map((node) => [node, world.modifiers.live(node)]).filter(([node, stack]) => stack && !stack.modifiers.some(needsOpenVDB) && !readsOtherIDs(world, node)) : []);
   await world.modifiers.settled();
   // The mapped meshes' geometry is read below: their mapping holds until the module is written.
   const mapped = exportRuntimes(world);
   try {
-    return await moduleSource(world, live, mapped, { parity, hostCompression, sourceBlend });
+    return await moduleSource(world, live, mapped, { parity, hostCompression, sourceBlend, bakeAnimation });
   } finally {
     mapped.restore();
   }
 }
 
-async function moduleSource(world, live, mapped, { parity, hostCompression, sourceBlend }) {
+async function moduleSource(world, live, mapped, { parity, hostCompression, sourceBlend, bakeAnimation }) {
   const graphs = [], graphOf = materialGraphs(world, graphs);
-  const data = await serializeScene(world, { geometry: false, live, mapped, parity, graphOf });
+  const data = await serializeScene(world, { geometry: false, live, mapped, parity, graphOf, bake: bakeAnimation });
   const { scene } = world;
   const worldEntry = await worldMaterial(scene, parity, graphOf);
   if (worldEntry) data.materials.push(worldEntry);

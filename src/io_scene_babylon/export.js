@@ -41,11 +41,12 @@ const FORMATS = {
 
 // `options` (topbar.js asks for them): { eeveeParity }, materials with Bylonder's EEVEE extensions, as Babylon's blocks;
 // { hostCompression }, a package's scene.bin uncompressed for a host that compresses it; { sourceBlend }, a package's
-// scene.blend and the Blender fallback that tunes what only Blender evaluates.
-export async function exportScene(world, { format, eeveeParity = false, hostCompression = false, sourceBlend = false }) {
+// scene.blend and the Blender fallback that tunes what only Blender evaluates; { bakeAnimation }, a package's animation
+// sampled per frame where Babylon cannot play its F-Curves, instead of run as F-Curves in the page.
+export async function exportScene(world, { format, eeveeParity = false, hostCompression = false, sourceBlend = false, bakeAnimation = false }) {
   const { extension, type, build } = FORMATS[format];
   const name = world.sceneSettings.state.name || 'scene';
-  const blob = new Blob([await build(world, name, { parity: eeveeParity, hostCompression, sourceBlend })], { type });
+  const blob = new Blob([await build(world, name, { parity: eeveeParity, hostCompression, sourceBlend, bakeAnimation })], { type });
   const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `${name}.${extension}` });
   document.body.append(a);
   a.click();
