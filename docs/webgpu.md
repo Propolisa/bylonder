@@ -47,3 +47,8 @@ Chrome) runs them on it instead, in a temporary profile.
 - Hair and curves with a Principled material draw no strands in Material Preview and Rendered, and point clouds draw
   each point as a square: their shaders are GLSL plugins on Babylon's PBR material.
 - Grease Pencil's Fill tool renders on a WebGL 2 engine of its own beside WebGPU.
+- Rendered shading of large scenes (gaku, bike_ride) does not settle: a light's uniform buffer goes unbound ("Can't find
+  buffer Light0"); Material Preview runs at about half WebGL 2's frame rate.
+- Render Image's compositor output differs from the render (smoke check: 118 of 255 on average).
+- A Blender node material lit by an area light does not compile: Babylon's GLSL area light code passes samplers as
+  arguments, which WebGPU's GLSL refuses.
