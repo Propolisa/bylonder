@@ -88,4 +88,26 @@ const event = (type, value, region, modifier = 0) => ({ type, value, region, mod
   assert.equal(main.collectionChildren(main.masterCollection).length, 2, 'C adds a collection');
 }
 
+{
+  // Scrolling by pixels (view2d.pan), and the scroll-bar fading in as the mouse nears it, as Blender's scroll zones do.
+  const main = new BlenderMain();
+  for (let i = 0; i < 40; i++) main.add('MESH', `Cube ${String(i).padStart(2, '0')}`);
+  const area = new OutlinerArea(main);
+  area.resize(340, HEIGHT);
+  const y = (name) => rows(area).find((r) => r.text === name)?.y;
+  const before = y('Cube 05');
+  area.pan(0, 37);
+  assert.equal(y('Cube 05'), before + 37, 'scrolling 37 px down moves the rows 37 px up');
+  assert.equal(rows(area).some((r) => r.text === 'Scene Collection'), false, 'rows scrolled past are not drawn');
+  // The scroll-bar's thumb, as [width, opacity]: Blender keeps a thin faint one while the mouse is away.
+  const bar = () => area.draw().draw.filter((c) => c.op === 'roundbox' && c.rect[0] > 320).map((c) => [c.rect[2] - c.rect[0], c.inner[3]]).at(-1);
+  area.hoverScrollers(100, 150);
+  const away = bar();
+  assert.ok(away[0] <= 6 && away[1] <= 0.5, `the scroll-bar is thin and faint while the mouse is away: ${away}`);
+  area.hoverScrollers(335, 150);
+  assert.ok(bar()[0] > away[0] && bar()[1] > 0.8, 'and widens and shows as it comes near');
+  area.hoverScrollers(-1, -1);
+  assert.deepEqual(bar(), away, 'and goes back once it left');
+}
+
 console.log('outliner tests passed');

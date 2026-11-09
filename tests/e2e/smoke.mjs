@@ -592,6 +592,45 @@ const checks = {
     assert.deepEqual(await app.bylonder((b) => b.editor.selection.nodes.map((n) => n.name)), [], "a click on the Cube selects nothing");
   },
 
+  // Rows below the Outliner's fold: the wheel scrolls to them and a click picks them, Ctrl click adds and Shift click
+  // selects the range, as outliner.item_activate does; the scroll-bar shows only as the mouse nears it.
+  async "Outliner: the wheel scrolls to rows below the fold, and clicks pick a light and a camera there"() {
+    await app.bylonder((b) => { for (let i = 0; i < 20; i++) b.runOperator("object.empty_add"); });
+    await app.until((b) => b.world.objects.filter((n) => n.name.startsWith("Empty") && !n.metadata?.wbDeleted).length === 20);
+    const region = app.frame().locator(".bl-outliner-region");
+    const box = await region.boundingBox();
+    const drawn = () => app.bylonder((b) => b.world.outliner.area.draw().draw);
+    const row = async (name) => {
+      const text = (await drawn()).find((c) => c.op === "text" && c.text === name);
+      return text && text.at[1] > 4 && text.at[1] < box.height - 4 && [box.x + text.at[0] + 5, box.y + box.height - text.at[1] - 4];
+    };
+    assert.equal(await row("Light"), undefined, "Light is below the fold");
+    await app.page.mouse.move(box.x + box.width / 3, box.y + box.height / 2);
+    // The scroll-bar's thumb opacity: Blender keeps it faint while the mouse is away.
+    const bar = async () => (await drawn()).filter((c) => c.op === "roundbox" && c.rect[0] > box.width - 16).map((c) => c.inner[3]).at(-1);
+    assert.ok(await bar() <= 0.5, "the scroll-bar is faint while the mouse is away from it");
+    for (let i = 0; i < 20 && !(await row("Light")); i++) await app.page.mouse.wheel(0, 100);
+    await app.page.waitForTimeout(500);
+    await app.page.mouse.click(...(await row("Light")));
+    await app.until((b) => b.editor.selection.nodes.map((n) => n.name).join() === "Light");
+    await app.page.waitForTimeout(400);
+    for (let i = 0; i < 20; i++) await app.page.mouse.wheel(0, -100);
+    await app.page.waitForTimeout(500);
+    await app.page.keyboard.down("Control");
+    await app.page.mouse.click(...(await row("Camera")));
+    await app.page.keyboard.up("Control");
+    await app.until((b) => b.editor.selection.nodes.map((n) => n.name).sort().join() === "Camera,Light");
+    await app.page.waitForTimeout(400);
+    await app.page.mouse.click(...(await row("Camera")));
+    await app.page.waitForTimeout(400);
+    await app.page.keyboard.down("Shift");
+    await app.page.mouse.click(...(await row("Empty")));
+    await app.page.keyboard.up("Shift");
+    await app.until((b) => b.editor.selection.nodes.map((n) => n.name).sort().join() === "Camera,Cube,Empty");
+    await app.page.mouse.move(box.x + box.width - 6, box.y + box.height / 2);
+    assert.ok(await bar() > 0.8, "the scroll-bar shows under the mouse");
+  },
+
   async "Edit Mode: Tab, select all, extrude and confirm"() {
     await app.click();
     await app.page.keyboard.press("Tab");

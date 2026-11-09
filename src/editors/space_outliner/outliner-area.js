@@ -46,6 +46,12 @@ export class OutlinerArea {
   // The selection changed elsewhere: the Outliner syncs its own from the view layer's when it next draws.
   selectionChanged() { x.outliner_select_sync_from_objects(this.pointer); }
 
+  // The view scrolled by pixels (view2d.pan's exec, as Blender's trackpad pan runs it): positive dy shows rows further down.
+  pan(dx, dy) { if (dx || dy) this.run('view2d.pan', { deltax: dx, deltay: -dy }); }
+  // The mouse at (x, y) in region pixels, outside it once it left: the scroll-bars fade in as it nears them, as
+  // Blender's scroll action zones show them. Returns whether they changed.
+  hoverScrollers(px, py) { return !!x.region_scrollers_hover?.(x.outliner_region(this.pointer), Math.round(px), Math.round(py)); }
+
   // The header region's size in pixels.
   layoutHeader(width, height) { x.anim_region_layout(this.main.C, x.anim_area_region(this.pointer, RGN_TYPE_HEADER), 0, 0, width, height); }
 

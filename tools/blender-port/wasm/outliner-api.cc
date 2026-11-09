@@ -8,6 +8,7 @@
 #include "BKE_lib_remap.hh"
 #include "BKE_screen.hh"
 #include "BLI_listbase.h"
+#include "BLI_rect.h"
 #include "DEG_depsgraph.hh"
 #include "DNA_layer_types.h"
 #include "DNA_screen_types.h"
@@ -85,8 +86,42 @@ EXPORT(outliner_region_size) void outliner_region_size(ScrArea *area, int x, int
   region->v2d.keeptot = V2D_KEEPTOT_STRICT;
   region->v2d.minzoom = region->v2d.maxzoom = 1.0f;
   ui::view2d_region_reinit(&region->v2d, ui::V2D_COMMONVIEW_LIST, region->winx, region->winy);
+  /* As region_azones_scrollbars_init: the scroll-bars are hidden until the mouse comes near. */
+  region->v2d.alpha_vert = region->v2d.alpha_hor = 0;
   WM_event_add_dropbox_handler(&region->runtime->handlers,
                                WM_dropboxmap_find("Outliner", SPACE_OUTLINER, RGN_TYPE_WINDOW));
+}
+
+/* A region's scroll-bars fade in as the mouse nears them, and show fully over them. blender-port: screen_ops.cc
+ * area_actionzone_get_rect and area_actionzone_refresh_xy for the region's AZONE_REGION_SCROLL zones, which Bylonder's
+ * areas do not have. (x, y): the mouse in region pixels, outside the region once it left. Returns whether they changed. */
+EXPORT(region_scrollers_hover) bool region_scrollers_hover(ARegion *region, int x, int y)
+{
+  View2D *v2d = &region->v2d;
+  const char before[2] = {v2d->alpha_vert, v2d->alpha_hor};
+  const int xy[2] = {region->winrct.xmin + x, region->winrct.ymin + y};
+  int scroll_flag = 0;
+  const char isect = ui::view2d_mouse_in_scrollers_ex(region, v2d, xy, &scroll_flag);
+  const int edge_padding = int(-3.0f * UI_SCALE_FAC);
+  const auto alpha = [&](const rcti &bar, const bool vertical) {
+    const bool is_right = vertical && (v2d->scroll & V2D_SCROLL_RIGHT), is_left = vertical && (v2d->scroll & V2D_SCROLL_LEFT);
+    const bool is_top = !vertical && (v2d->scroll & V2D_SCROLL_TOP), is_bottom = !vertical && (v2d->scroll & V2D_SCROLL_BOTTOM);
+    const rcti zone = {bar.xmin - (is_right ? int(V2D_SCROLL_HIDE_HEIGHT) : edge_padding),
+                       bar.xmax + (is_left ? int(V2D_SCROLL_HIDE_HEIGHT) : edge_padding),
+                       bar.ymin - (is_top ? int(V2D_SCROLL_HIDE_WIDTH) : edge_padding),
+                       bar.ymax + (is_bottom ? int(V2D_SCROLL_HIDE_WIDTH) : edge_padding)};
+    if (!BLI_rcti_isect_pt(&zone, x, y)) {
+      return char(0);
+    }
+    if (isect == (vertical ? 'v' : 'h')) {
+      return char(255);
+    }
+    const float dist_fac = vertical ? BLI_rcti_length_x(&bar, x) / V2D_SCROLL_HIDE_HEIGHT : BLI_rcti_length_y(&bar, y) / V2D_SCROLL_HIDE_WIDTH;
+    return char((1.0f - std::clamp(dist_fac, 0.0f, 1.0f)) * 255);
+  };
+  v2d->alpha_vert = (scroll_flag & V2D_SCROLL_VERTICAL) ? alpha(v2d->vert, true) : 0;
+  v2d->alpha_hor = (scroll_flag & V2D_SCROLL_HORIZONTAL) ? alpha(v2d->hor, false) : 0;
+  return before[0] != v2d->alpha_vert || before[1] != v2d->alpha_hor;
 }
 
 /* Marks the Outliner for a sync of its selection from the view layer's, as the editors that change the selection do

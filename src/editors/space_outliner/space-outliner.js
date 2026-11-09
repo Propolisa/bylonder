@@ -8,6 +8,7 @@ import { blenderModule, operatorNames, pollOperator } from '../../bmesh/bmesh-wa
 import { keymapHandler, blenderKeys } from '../../windowmanager/keyconfig.js';
 import { keyType } from '../../windowmanager/input/keymap.js';
 import { inArea, invokeOperator, registerOperator } from '../../windowmanager/wm-operators.js';
+import { trackpadGesture } from '../../windowmanager/wm-event-system.js';
 import { startGestureBox } from '../../windowmanager/wm-gesture-box.js';
 import { openMenu } from '../interface/menu.js';
 import { buttonAt, drawRecording } from '../interface/region-draw.js';
@@ -17,6 +18,7 @@ import { regionHeader, menuTree, menuLabel } from '../interface/ui-tree.js';
 import { createApp, h, reactive, markRaw } from 'vue';
 import '../interface/layout-view.css';
 import { hidden } from '../object/identity.js';
+import { createSmoothScroll } from './outliner-scroll.js';
 import { OutlinerArea, modifierOf, OPERATOR_FINISHED, OPERATOR_CANCELLED, OPERATOR_PASS_THROUGH, RGN_TYPE_HEADER } from './outliner-area.js';
 import './space-outliner.css';
 
@@ -25,8 +27,8 @@ const { exports: x, cString } = blenderModule;
 const KEYMAPS = ['Outliner', 'View2D Buttons List', 'Screen', 'Window'];
 // U.dbl_click_time in milliseconds, U.drag_threshold_mouse in pixels.
 const DOUBLE_CLICK_TIME = 350, DRAG_THRESHOLD = 3;
-// HEADERY: a header region's height in pixels at 1x scale.
-const HEADER_HEIGHT = 26;
+// HEADERY: a header region's height in pixels at 1x scale; UI_UNIT_Y, a row's.
+const HEADER_HEIGHT = 26, ROW_HEIGHT = 20;
 const BUTTONS = ['LEFTMOUSE', 'MIDDLEMOUSE', 'RIGHTMOUSE', 'BUTTON4MOUSE', 'BUTTON5MOUSE'];
 // The ui::ButtonType values of the buttons the Outliner defines.
 const BUT_TEXT = 3, BUT_LABEL = 21, BUT_DRAG_LOCK = 1 << 12;
@@ -142,6 +144,7 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
     view.setPointerCapture(e.pointerId);
     pointer = regionAt(e);
     lastClient = e;
+    scroll.stop();
     if (textField) return finishTextEdit(true);
     const button = e.button === 0 && buttonAt(recording, ...pointer);
     if (button && ![BUT_LABEL, BUT_TEXT].includes(button.type)) return pressButton(button, e);
@@ -150,7 +153,7 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
       Math.hypot(e.clientX - lastPress.x, e.clientY - lastPress.y) < DRAG_THRESHOLD;
     // An unhandled double click goes on as a press, as wm_event_system.cc sends it again.
     const used = (double && dispatch(wmEvent(e, type, 'DOUBLE_CLICK'))) || dispatch(wmEvent(e, type, 'PRESS'));
-    press = { type, x: e.clientX, y: e.clientY, e, double, used, dragged: false };
+    press = { type, x: e.clientX, y: e.clientY, e, double, used, dragged: false, touch: e.pointerType === 'touch' };
     lastPress = double ? null : { type, x: e.clientX, y: e.clientY, time: e.timeStamp };
   });
   view.addEventListener('pointermove', (e) => {
@@ -162,18 +165,31 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
       return;
     }
     if (area.dragging) return moveDrag(e);
+    if (press?.scrolling) return scroll.drag(e.clientX, e.clientY, e.timeStamp);
     if (press && !press.dragged && !press.used && Math.hypot(e.clientX - press.x, e.clientY - press.y) >= DRAG_THRESHOLD) {
       press.dragged = true;
+      // A finger dragging scrolls the rows, as on the web; a mouse drag is Blender's.
+      if (press.touch) {
+        press.scrolling = true;
+        scroll.drag(press.x, press.y, press.e.timeStamp);
+        return scroll.drag(e.clientX, e.clientY, e.timeStamp);
+      }
       dispatch(wmEvent(press.e, press.type, 'CLICK_DRAG', { region: regionAt(press.e) }));
       if (area.dragging) moveDrag(e);
       return;
     }
-    if (!press) dispatch(wmEvent(e, 'MOUSEMOVE', 'NOTHING'));
+    if (press) return;
+    if (area.hoverScrollers(...pointer)) draw();
+    dispatch(wmEvent(e, 'MOUSEMOVE', 'NOTHING'));
   });
   view.addEventListener('pointerup', (e) => {
     pointer = regionAt(e);
     if (world.wm.modal) return;
     if (dragToggle) { dragToggle = null; return; }
+    if (press?.scrolling) {
+      press = null;
+      return scroll.release(e.timeStamp);
+    }
     const type = BUTTONS[e.button];
     if (area.dragging) {
       press = null;
@@ -184,14 +200,27 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
     if (press && !press.used && !press.dragged && !press.double) dispatch(wmEvent(press.e, type, 'CLICK'));
     press = null;
   });
+  // The wheel scrolls by the pixels the browser gives, a trackpad's at once and a mouse wheel's notches gliding; with
+  // keys held it is Blender's wheel event, for its keymaps (and never zooms the page).
+  const scroll = createSmoothScroll((dx, dy) => {
+    area.pan(dx, dy);
+    draw();
+  });
   view.addEventListener('wheel', (e) => {
     handled(e);
     pointer = regionAt(e);
-    dispatch(wmEvent(e, e.deltaY < 0 ? 'WHEELUPMOUSE' : 'WHEELDOWNMOUSE', 'PRESS'));
+    if (e.ctrlKey || e.shiftKey || e.altKey || e.metaKey) return dispatch(wmEvent(e, e.deltaY < 0 ? 'WHEELUPMOUSE' : 'WHEELDOWNMOUSE', 'PRESS'));
+    const unit = [1, ROW_HEIGHT, region.clientHeight][e.deltaMode];
+    if (trackpadGesture(e)) scroll.by(e.deltaX * unit, e.deltaY * unit);
+    else scroll.glide(e.deltaX * unit, e.deltaY * unit);
   }, { passive: false });
   view.addEventListener('contextmenu', (e) => e.preventDefault());
   view.addEventListener('pointerenter', () => view.focus({ preventScroll: true }));
-  view.addEventListener('pointerleave', () => { if (!press) dispatch({ type: 'mousemove', value: 'NOTHING', region: [-1, -1] }); });
+  view.addEventListener('pointerleave', () => {
+    if (press) return;
+    if (area.hoverScrollers(-1, -1)) draw();
+    dispatch({ type: 'mousemove', value: 'NOTHING', region: [-1, -1] });
+  });
   view.addEventListener('keydown', (e) => {
     if (world.wm.modal || (e.repeat && !/arrow|page/.test(keyType(e)))) return;
     if (area.dragging && e.key === 'Escape') return handled(e), endDrag(null);
@@ -318,5 +347,5 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
   const unsubscribe = world.collections.subscribe(() => refresh());
   draw();
 
-  return { refresh, draw, area, dispose() { resized.disconnect(); unsubscribe(); area.cancel(); dragTip.remove(); headerApp.unmount(); } };
+  return { refresh, draw, area, dispose() { scroll.stop(); resized.disconnect(); unsubscribe(); area.cancel(); dragTip.remove(); headerApp.unmount(); } };
 }
