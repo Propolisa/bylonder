@@ -1,0 +1,11 @@
+--- a/include/oneapi/tbb/detail/_export.h
++++ b/include/oneapi/tbb/detail/_export.h
+@@ -21,7 +21,7 @@
+     #define __TBB_EXPORT __declspec(dllexport)
+ #elif defined(_WIN32) // Use .def files for these
+     #define __TBB_EXPORT
+-#elif defined(__unix__) || defined(__APPLE__) // Use .def files for these
++#elif defined(__unix__) || defined(__APPLE__) || defined(__wasi__) // Use .def files for these
+     #define __TBB_EXPORT __attribute__ ((visibility ("default")))
+ #else
+     #error "Unknown platform/compiler"

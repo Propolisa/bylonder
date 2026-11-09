@@ -382,6 +382,7 @@
   ],
   "limits": [
    "Volumes are evaluated but not drawn; curves draw as the hair curves do.",
+   "Evaluation runs on all cores where the page is cross-origin isolated; in Safari, and in a page that embeds the app without isolation, it runs on one thread.",
    "Instances draw where their geometry is a mesh, an object or a point cloud; instanced curves and volumes do not.",
    "Instance attributes (a color per instance) do not reach the material yet: an instance draws in its mesh's first material.",
    "Points are spheres in their material in every shading mode; Solid does not give them Workbench's studio light yet.",
@@ -1190,7 +1191,8 @@
    "tests/modifiers-wasm.test.js"
   ],
   "limits": [
-   "Modifier panels lay out Blender's properties in a narrow column, so long labels are cut short."
+   "Modifier panels lay out Blender's properties in a narrow column, so long labels are cut short.",
+   "Evaluation runs on all cores where the page is cross-origin isolated; in Safari, and in a page that embeds the app without isolation, it runs on one thread."
   ],
   "page": "docs/features/modifiers.md",
   "open": "https://propolisa.github.io/bylonder/#example=arrays",

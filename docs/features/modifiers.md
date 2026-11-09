@@ -33,6 +33,7 @@ tests:
   - tests/modifiers-wasm.test.js
 limits:
   - Modifier panels lay out Blender's properties in a narrow column, so long labels are cut short.
+  - Evaluation runs on all cores where the page is cross-origin isolated; in Safari, and in a page that embeds the app without isolation, it runs on one thread.
 ---
 # Modifiers
 

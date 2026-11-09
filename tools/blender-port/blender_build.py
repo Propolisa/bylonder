@@ -1,5 +1,5 @@
 """Blender built as Blender builds itself, for wasm32: the compile commands of Blender's own CMake configure (a host
-build directory configured with CMAKE_EXPORT_COMPILE_COMMANDS), each retargeted to wasm32-wasi with the module's
+build directory configured with CMAKE_EXPORT_COMPILE_COMMANDS), each retargeted to wasm32-wasi-threads with the module's
 compatibility headers, grouped by the CMake library they belong to. Libraries on the far side of Bylonder's seams
 (docs/blender-boundary.md: window system, GPU and drawing, Python's gpu module, Cycles, audio) are left out. Python is
 the manifest's CPython and numpy, built for wasm32 (deps/), and its files ship beside the module (python_files).
@@ -24,19 +24,19 @@ import zlib
 import wasm_module
 import wasm_snapshot
 import wasm_weaken
-from wasm_module import WASM, demangle
+from wasm_module import SHARED_MEMORY, TARGET, WASM, demangle
 
 # CMake targets on the far side of the seams, and Blender's generators and tests, matched against target names.
 SEAMS = re.compile(r'^(bf_intern_ghost|bf_gpu|bf_draw|bf_python_gpu|bf_intern_cycles|cycles_|bf_intern_audaspace|audaspace'
                    r'|bf_intern_libmv|extern_glog|extern_ceres|bf_intern_mantaflow|bf_blendthumb|blender$|makesdna|makesrna|datatoc'
                    r'|msgfmt|.*_test|.*_tests|gtest|bf_intern_wayland|bf_intern_sky_gpu|.*_cpp_shaders_.*|shader_tool)')
 # Host flags that have no meaning for wasm32 or name host paths.
-DROP = re.compile(r'^(-DFMT_SHARED|-DWITH_TBB$|-DWITH_TBB=|-DEIGEN_HAS_TBB|-DWITH_OPENVDB_BLOSC|-DHAVE_EXECINFO_H|-DHAVE_MALLOC_STATS_H|-I/usr/|-isystem/usr/|-march=|-mtune=|-msse|-mavx|-mfpmath|-m64|-fPIC|-fopenmp|-pthread|-O\d|-g\d?$|-W|-pedantic|-fno-strict-overflow'
+DROP = re.compile(r'^(-DFMT_SHARED|-DEIGEN_HAS_TBB|-DWITH_OPENVDB_BLOSC|-DHAVE_EXECINFO_H|-DHAVE_MALLOC_STATS_H|-I/usr/|-isystem/usr/|-march=|-mtune=|-msse|-mavx|-mfpmath|-m64|-fPIC|-fopenmp|-O\d|-g\d?$|-W|-pedantic|-fno-strict-overflow'
                   r'|-fmacro-prefix-map|-ffile-prefix-map|-fdiagnostics|-fcolor-diagnostics|-ffp-contract|-fno-trapping-math)')
 # Sources built as a Blender with a window draws them, though the configure is headless: the interface, whose drawing
 # the API records (its icons are registered only then, icons_init).
 HEADED = re.compile(r'source/blender/editors/interface/')
-FLAGS = ['--target=wasm32-wasi', '-O2', '-DNDEBUG', '-DFMT_HEADER_ONLY', '-fignore-exceptions', '-D_WASI_EMULATED_PROCESS_CLOCKS',
+FLAGS = [*TARGET, '-O2', '-DNDEBUG', '-DFMT_HEADER_ONLY', '-fignore-exceptions', '-D_WASI_EMULATED_PROCESS_CLOCKS',
          '-Wno-everything', '-isystem', os.path.join(WASM, 'include'), '-I' + os.path.join(WASM, 'fstream'), '-I' + os.path.join(WASM, 'storage'),
          '-I' + os.path.join(WASM, 'process'), '-include', os.path.join(WASM, 'compat.h'),
          # Before any source includes it inside a namespace (makesrna.cc), where WASI's unistd.h declarations then clash.
@@ -174,7 +174,7 @@ def compile_one(objects, entry, extra):
 
 WASI_RUN = ("const { WASI } = require('node:wasi'); const fs = require('node:fs');"
             "const wasi = new WASI({ version: 'preview1', args: process.argv.slice(1), env: process.env, preopens: { '/': '/' }, returnOnExit: true });"
-            "const instance = new WebAssembly.Instance(new WebAssembly.Module(fs.readFileSync(process.argv[1])), { wasi_snapshot_preview1: wasi.wasiImport,"
+            "const instance = new WebAssembly.Instance(new WebAssembly.Module(fs.readFileSync(process.argv[1])), { wasi_snapshot_preview1: wasi.wasiImport, wasi: { 'thread-spawn': () => -6 },"
             " env: new Proxy({}, { get: (_, name) => () => { throw new Error(name); } }) });"
             "process.exitCode = wasi.start(instance);")
 
@@ -204,7 +204,8 @@ def wasm_tool(host, out, name, libraries, by_any, extra, link=True):
     tree, spec, includes = module_inputs(host, out)
     subprocess.run(['clang++', *includes, *wasm_module.flags(tree, spec), '-c', os.path.join(WASM, 'platform.cc'), '-o', platform], check=True)
     tool = os.path.join(out, name + '.wasm')
-    subprocess.run(['clang++', '--target=wasm32-wasi', *built, platform, '-lwasi-emulated-process-clocks', '-lwasi-emulated-mman', '-Wl,--allow-undefined', '-o', tool], check=True)
+    subprocess.run(['clang++', *TARGET, *built, platform, '-lwasi-emulated-process-clocks', '-lwasi-emulated-mman', '-Wl,--shared-memory',
+                    '-Wl,--max-memory=4294967296', '-Wl,--allow-undefined', '-o', tool], check=True)
     return tool
 
 
@@ -363,7 +364,7 @@ def main():
     module_libraries = module_archives(host, out)
     archives += module_libraries
     # Everything linked as one reactor with every symbol kept, so each library's unresolved symbols show.
-    link = ['clang++', '--target=wasm32-wasi', '-mexec-model=reactor', '-Wl,--whole-archive', *archives, '-Wl,--no-whole-archive',
+    link = ['clang++', *TARGET, '-mexec-model=reactor', *SHARED_MEMORY, '-Wl,--whole-archive', *archives, '-Wl,--no-whole-archive',
             '-lwasi-emulated-process-clocks', '-lwasi-emulated-mman', '-lwasi-emulated-signal', '-Wl,--error-limit=0', '-Wl,--warn-unresolved-symbols', '-Wl,--allow-undefined',
             '-o', os.path.join(out, 'blender-all.wasm')]
     result = subprocess.run(link, capture_output=True, text=True)
@@ -391,8 +392,8 @@ def main():
 
 
 def wrapped(objects):
-    """Blender's functions the module's API wraps: each one an API file defines as __wrap_<symbol> (ui-tree.cc's layout
-    resolve, platform.cc's thread pool, python.cc's calls into Python before it starts)."""
+    """Blender's and libc's functions the module's API wraps: each one an API file defines as __wrap_<symbol> (ui-tree.cc's
+    layout resolve, platform.cc's thread pool, threads.cc's futex wait, python.cc's calls into Python before it starts)."""
     nm = shutil.which('llvm-nm') or shutil.which('llvm-nm-18')
     names = subprocess.run([nm, '--defined-only', '--just-symbol-name', *objects], capture_output=True, text=True, check=True).stdout
     return sorted({name.removeprefix('__wrap_') for name in names.split() if name.startswith('__wrap_')})
@@ -430,8 +431,8 @@ def link_module(host, out, entries, extra, archives, module_libraries):
     renamed = [c for c in copies if os.path.basename(c).startswith('renamed_')]
     replaced = {'blender': {}, 'api': {}}
     while True:
-        link = ['clang++', '--target=wasm32-wasi', '-O2', '-mexec-model=reactor', '-Wl,--gc-sections', '-Wl,--error-limit=0',
-                '-Wl,-z,stack-size=8388608', '-Wl,--stack-first', '-Wl,--export=malloc', '-Wl,--export=free',
+        link = ['clang++', *TARGET, '-O2', '-mexec-model=reactor', '-Wl,--gc-sections', '-Wl,--error-limit=0',
+                '-Wl,-z,stack-size=8388608', '-Wl,--stack-first', *SHARED_MEMORY, '-Wl,--export=malloc', '-Wl,--export=free',
                 *(f'-Wl,--wrap={w}' for w in wrapped(api)), *api, '-Wl,--whole-archive', *renamed, '-Wl,--no-whole-archive', *copies, *copies, *dependencies, '-lwasi-emulated-process-clocks', '-lwasi-emulated-mman',
                 '-lwasi-emulated-signal', '-lwasi-emulated-getpid', *dependency_flags,
                 # Undefined functions are imports, which throw when called; undefined data fails the link, as it would read

@@ -1,5 +1,5 @@
 /* What Blender's code needs from the platform in a WebAssembly build: allocation without the exception runtime, memory
- * that grows in large steps, and the thread count of one thread. */
+ * that grows in large steps, and window manager jobs on the page's thread. */
 #include "BLI_mmap.h"
 #include <cerrno>
 #include <cstddef>
@@ -44,7 +44,7 @@ void operator delete[](void *p, std::size_t, std::align_val_t) noexcept { std::f
 extern "C" void *__cxa_allocate_exception(std::size_t) { std::abort(); }
 extern "C" void __cxa_throw(void *, void *, void (*)(void *)) { std::abort(); }
 
-/* thread_local destructors: a reactor module never exits its one thread. */
+/* thread_local destructors: the module's threads live as long as the page. */
 extern "C" int __cxa_thread_atexit(void (*)(void *), void *, void *) { return 0; }
 /* port-override: WASI has no users: one user, without a passwd entry (Blender then uses $HOME or its defaults). */
 extern "C" __attribute__((weak)) unsigned getuid() { return 0; }
@@ -77,24 +77,11 @@ extern "C" void *sbrk(intptr_t increment)
   return old;
 }
 
-/* Weak: where Blender's own threads.cc builds (over wasm/include/pthread.h) it gives the same one-thread answers. */
-#define WEAK __attribute__((weak))
 namespace blender {
-/* port-override: WASI has no threads; Blender's own task_range.cc runs ranges serially without TBB. */
-WEAK int BLI_system_thread_count() { return 1; }
-WEAK int BLI_thread_is_main() { return 1; }
-/* port-override: one thread holds every lock. */
-WEAK void BLI_spin_init(SpinLock * /*spin*/) {}
-WEAK void BLI_spin_lock(SpinLock * /*spin*/) {}
-WEAK void BLI_spin_unlock(SpinLock * /*spin*/) {}
-WEAK void BLI_spin_end(SpinLock * /*spin*/) {}
-WEAK void BLI_rw_mutex_init(ThreadRWMutex * /*mutex*/) {}
-WEAK void BLI_rw_mutex_end(ThreadRWMutex * /*mutex*/) {}
-WEAK void BLI_rw_mutex_lock(ThreadRWMutex * /*mutex*/, int /*mode*/) {}
-WEAK void BLI_rw_mutex_unlock(ThreadRWMutex * /*mutex*/) {}
-/* port-override: WASI has no threads: a thread pool's work (a window manager job's: a point cache bake, a background
- * task pool's queue) runs where it is inserted, to its end, which frees its slot for the next; the window then ends a
- * job (wm_jobs_handle_finished, wm-api.cc wm_window_handle). Linked with --wrap (wasm_module.PLATFORM_WRAPPED). */
+/* port-override: a thread pool's work (a window manager job's: a point cache bake, a background task pool's queue)
+ * reaches Blender's data the page draws from, so it runs where it is inserted, on the page's thread, to its end, which
+ * frees its slot for the next; the window then ends a job (wm_jobs_handle_finished, wm-api.cc wm_window_handle). Linked
+ * with --wrap (wasm_module.PLATFORM_WRAPPED). */
 struct ThreadSlot {
   ThreadSlot *next, *prev;
   void *(*do_thread)(void *);
@@ -103,7 +90,6 @@ struct ThreadSlot {
   int avail;
 };
 }  // namespace blender
-#undef WEAK
 
 namespace blender {
 /* port-override: WASI has no memory mapping, nor the signals BLI_mmap.cc handles a mapped file's read errors with: a
@@ -162,8 +148,8 @@ extern "C" void WRAP(__wrap_, THREADPOOL_INSERT)(blender::ListBaseT<blender::Thr
   }
 }
 extern "C" void *WRAP(__real_, QUEUE_POP)(blender::ThreadQueue *queue);
-/* port-override: with one thread nothing else can add work to a queue being waited on, so an empty queue gives no work
- * (a background task pool's worker then ends) instead of waiting forever. */
+/* port-override: with the pool's work run where it is inserted, nothing else adds work to a queue being waited on, so an
+ * empty queue gives no work (a background task pool's worker then ends) instead of waiting forever. */
 extern "C" void *WRAP(__wrap_, QUEUE_POP)(blender::ThreadQueue *queue)
 {
   return blender::BLI_thread_queue_is_empty(queue) ? nullptr : WRAP(__real_, QUEUE_POP)(queue);

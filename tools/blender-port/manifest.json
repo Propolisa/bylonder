@@ -41,7 +41,7 @@
   ],
   "modules": {
     "bmesh/bmesh.wasm": {
-      "api": ["bmesh-api.cc", "operator-properties.cc", "editor-context.cc", "main-api.cc", "anim-api.cc", "modifier-api.cc", "ui-tree.cc", "rna-fcurve.cc", "rna-space.cc", "outliner-api.cc", "region-draw.cc", "drag-drop.cc", "curve-api.cc", "grease-pencil-api.cc", "grease-pencil-render.cc", "armature-api.cc", "armature-draw.cc", "relations-draw.cc", "draw-mesh.cc", "view3d-api.cc", "gesture-api.cc", "modifier-object-main.cc", "texture-api.cc", "wm-api.cc", "ghost-window.cc", "wm-gesture.cc", "undo-api.cc", "rna-bridge.cc", "rna-operator.cc", "view-api.cc", "gpu-select.cc", "edit-api.cc", "clipboard.cc", "reports.cc", "python.cc", "movie-api.cc", "image-api.cc", "fileselect.cc", "shader-node-api.cc", "gpu-material-api.cc", "compositor-api.cc", "fftw-threads.cc", "gpu-record.cc", "lightprobe-api.cc", "geometry-nodes-api.cc", "deg-relations.cc"],
+      "api": ["bmesh-api.cc", "operator-properties.cc", "editor-context.cc", "main-api.cc", "anim-api.cc", "modifier-api.cc", "ui-tree.cc", "rna-fcurve.cc", "rna-space.cc", "outliner-api.cc", "region-draw.cc", "drag-drop.cc", "curve-api.cc", "grease-pencil-api.cc", "grease-pencil-render.cc", "armature-api.cc", "armature-draw.cc", "relations-draw.cc", "draw-mesh.cc", "view3d-api.cc", "gesture-api.cc", "modifier-object-main.cc", "texture-api.cc", "wm-api.cc", "ghost-window.cc", "wm-gesture.cc", "undo-api.cc", "rna-bridge.cc", "rna-operator.cc", "view-api.cc", "gpu-select.cc", "edit-api.cc", "clipboard.cc", "reports.cc", "python.cc", "movie-api.cc", "image-api.cc", "fileselect.cc", "shader-node-api.cc", "gpu-material-api.cc", "compositor-api.cc", "fftw-threads.cc", "gpu-record.cc", "lightprobe-api.cc", "geometry-nodes-api.cc", "deg-relations.cc", "threads.cc"],
       "seam_sources": ["draw/intern/attribute_convert.cc", "draw/intern/draw_cache_extract_mesh.cc", "draw/intern/draw_cache_extract_mesh_render_data.cc", "draw/intern/draw_attributes.cc", "draw/intern/mesh_extractors/", "gpu/intern/gpu_vertex_buffer.cc", "gpu/intern/gpu_index_buffer.cc", "gpu/intern/gpu_vertex_format.cc", "gpu/intern/gpu_vertex_format_normals.cc", "gpu/intern/gpu_capabilities.cc", "gpu/intern/gpu_platform.cc", "gpu/intern/gpu_immediate_util.cc", "gpu/intern/gpu_node_graph.cc", "gpu/intern/gpu_shader.cc", "gpu/intern/gpu_shader_create_info.cc", "gpu/intern/gpu_shader_interface.cc", "gpu/intern/gpu_texture.cc", "gpu/intern/gpu_texture_pool.cc", "gpu/intern/gpu_compute.cc", "gpu/intern/gpu_debug.cc", "gpu/intern/gpu_uniform_buffer.cc", "gpu/intern/gpu_storage_buffer.cc"],
       "check": "tools/blender-port/check-bmesh.mjs",
       "fetch": ["release/datafiles/userdef/userdef_default_theme.c"],
@@ -52,6 +52,7 @@
       "datatoc": ["release/datafiles/bfont.pfb"],
       "dependencies": {
         "fmt": {"url": "https://github.com/fmtlib/fmt.git", "tag": "12.1.0", "include": "include"},
+        "tbb": {"url": "https://github.com/uxlfoundation/oneTBB.git", "tag": "v2022.3.0", "include": "include", "patches": ["onetbb-wasi.patch"]},
         "eigen": {"url": "https://gitlab.com/libeigen/eigen/-/archive/8a1083e9bf41b91fdea6546681f806154efdc25a/eigen-8a1083e9bf41b91fdea6546681f806154efdc25a.tar.gz",
                   "tag": "8a1083e9", "sha256": "cc28a84fdec496c6777596350ea805519bf10f717d21044ae6ba3dd562183a26"},
         "opensubdiv": {"url": "https://github.com/PixarAnimationStudios/OpenSubdiv.git", "tag": "v3_7_0"},
@@ -67,13 +68,12 @@
         "cpython": {"url": "https://www.python.org/ftp/python/3.13.13/Python-3.13.13.tar.xz", "tag": "3.13.13",
                     "sha256": "2ab91ff401783ccca64f75d10c882e957bdfd60e2bf5a72f8421793729b78a71", "include": "prefix/include/python3.13",
                     "private": true, "host_include": "PYTHON_INCLUDE_DIR",
-                    "patches": ["cpython-pthread-stubs-cxx.patch"],
                     "build": {"script": "deps/cpython.sh", "uses": ["zlib", "expat"], "archives": ["libpython3.13.a",
                               "Modules/_decimal/libmpdec/libmpdec.a", "Modules/_hacl/libHacl_Hash_SHA2.a"]}},
         "numpy": {"url": "https://files.pythonhosted.org/packages/source/n/numpy/numpy-2.3.4.tar.gz", "tag": "2.3.4",
                   "sha256": "a7d018bfedb375a8d979ac758b120ba846a7fe764911a64465fd87b8729f4a6a", "private": true,
                   "patches": ["numpy-wasm.patch"],
-                  "build": {"script": "deps/numpy.sh", "uses": ["cpython"], "inputs": ["wasm_weaken.py", "wasm/include/shared_mutex"],
+                  "build": {"script": "deps/numpy.sh", "uses": ["cpython"], "inputs": ["wasm_weaken.py"],
                             "archives": ["libnumpy.a"], "link": ["-lc-printscan-long-double"]}},
         "libjpeg-turbo": {"url": "https://github.com/libjpeg-turbo/libjpeg-turbo.git", "tag": "2.1.3", "private": true,
                           "configure": {"jconfig.h": {"JPEG_LIB_VERSION": 62, "VERSION": "2.1.3", "LIBJPEG_TURBO_VERSION_NUMBER": 2001003, "BITS_IN_JSAMPLE": 8,
@@ -146,6 +146,7 @@
         "bf_blenlib": {"uses": ["fftw3"], "defines": ["WITH_FFTW3"]}
       },
       "libraries": [
+        {"dependency": "tbb", "path": "src/tbb", "defines": ["__TBB_BUILD", "__unix__", "__TBB_DYNAMIC_LOAD_ENABLED=0", "__TBB_RESUMABLE_TASKS_USE_THREADS=1"]},
         {"dependency": "libjpeg-turbo", "path": "",
          "sources": ["jcapimin.c", "jcapistd.c", "jccoefct.c", "jccolor.c", "jcdctmgr.c", "jchuff.c", "jcicc.c", "jcinit.c", "jcmainct.c", "jcmarker.c", "jcmaster.c", "jcomapi.c", "jcparam.c", "jcphuff.c", "jcprepct.c", "jcsample.c", "jctrans.c", "jdapimin.c", "jdapistd.c", "jdatadst.c", "jdatasrc.c", "jdcoefct.c", "jdcolor.c", "jddctmgr.c", "jdhuff.c", "jdicc.c", "jdinput.c", "jdmainct.c", "jdmarker.c", "jdmaster.c", "jdmerge.c", "jdphuff.c", "jdpostct.c", "jdsample.c", "jdtrans.c", "jerror.c", "jfdctflt.c", "jfdctfst.c", "jfdctint.c", "jidctflt.c", "jidctfst.c", "jidctint.c", "jidctred.c", "jquant1.c", "jquant2.c", "jutils.c", "jmemmgr.c", "jmemnobs.c", "jaricom.c", "jcarith.c", "jdarith.c", "jsimd_none.c"]},
         {"dependency": "libdeflate", "path": "lib"},

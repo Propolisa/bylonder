@@ -45,7 +45,7 @@ function withText(texts, fn) {
 const cString = (pointer) => {
   if (!pointer) return null;
   const bytes = new Uint8Array(x.memory.buffer, pointer >>> 0);
-  return decoder.decode(bytes.subarray(0, bytes.indexOf(0)));
+  return decoder.decode(bytes.slice(0, bytes.indexOf(0)));
 };
 let numbersCapacity = 64, numbersPointer = x.malloc(8 * numbersCapacity) >>> 0;
 const numbers = () => new Float64Array(x.memory.buffer, numbersPointer >>> 0, numbersCapacity);

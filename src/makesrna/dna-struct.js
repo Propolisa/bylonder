@@ -59,7 +59,7 @@ export function dnaGet(struct, pointer, name) {
   const prop = dnaProperty(struct, name), dv = view(), at = pointer + prop.offset;
   if (dnaIsText(prop)) {
     const bytes = new Uint8Array(x.memory.buffer, at >>> 0, prop.length ?? prop.size);
-    return decoder.decode(bytes.subarray(0, Math.max(0, bytes.indexOf(0))));
+    return decoder.decode(bytes.slice(0, Math.max(0, bytes.indexOf(0))));
   }
   if (prop.length) return Array.from({ length: prop.length }, (_, i) => readValue(dv, at + i * prop.size, prop));
   return readValue(dv, at, prop);

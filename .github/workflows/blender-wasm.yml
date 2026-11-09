@@ -31,7 +31,7 @@ jobs:
         with:
           python-version: '3.13'
       - name: Tools
-        run: sudo apt-get update -q && sudo apt-get install -y -q clang-18 lld-18 llvm-18 wasi-libc libclang-rt-18-dev-wasm32 libc++-18-dev-wasm32 libc++abi-18-dev-wasm32 ninja-build git-lfs && pip install libclang==18.1.1
+        run: sudo apt-get update -q && sudo apt-get install -y -q clang-18 lld-18 llvm-18 wasi-libc libclang-rt-18-dev-wasm32 libc++-18-dev-wasm32 libc++abi-18-dev-wasm32 ninja-build git-lfs && pip install libclang==18.1.1 && sudo bash tools/blender-port/wasi-sysroot.sh
       - uses: actions/cache@v4
         with:
           path: work/wasm-build
@@ -65,7 +65,7 @@ jobs:
         with:
           python-version: '3.13'
       - name: Tools
-        run: sudo apt-get update -q && sudo apt-get install -y -q clang-18 lld-18 llvm-18 wasi-libc libclang-rt-18-dev-wasm32 libc++-18-dev-wasm32 libc++abi-18-dev-wasm32 ninja-build git-lfs && pip install libclang==18.1.1
+        run: sudo apt-get update -q && sudo apt-get install -y -q clang-18 lld-18 llvm-18 wasi-libc libclang-rt-18-dev-wasm32 libc++-18-dev-wasm32 libc++abi-18-dev-wasm32 ninja-build git-lfs && pip install libclang==18.1.1 && sudo bash tools/blender-port/wasi-sysroot.sh
       # Blender's source at the manifest's tag with its LFS datafiles, kept between runs: its LFS server times out at times.
       - uses: actions/cache@v4
         with:
