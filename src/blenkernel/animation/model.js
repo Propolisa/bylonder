@@ -177,6 +177,13 @@ export function createAnimationModel(onChange = () => {}, { time = createSceneTi
     track(ref) { const t = trackFor(ref); return t && { id: t.id, path: t.path, keys: keysOf(t) }; },
     // A channel's RNA path from its owner's ID (`["name"]` for a custom property), as Copy Data Path gives it.
     dataPath: (ref) => placeOf(ref).rna_path,
+    // The Main ID holding a channel's value, and the value as Main evaluated it for the frame (its custom property's,
+    // whatever animates it: an action, NLA strips, drivers), or undefined for an object's transform, the view's.
+    ownerOf: (ref) => placeOf(ref).owner,
+    evaluated(ref) {
+      const { owner, property } = placeOf(ref), value = property === undefined ? undefined : customProperty(owner, property);
+      return value === undefined ? undefined : fromCurve(ref, value, 1, channels.get(ref)?.get());
+    },
     state(ref) {
       const channel = channels.get(ref), track = trackFor(ref);
       if (!channel?.available()) return 'unavailable';

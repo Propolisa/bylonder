@@ -10,13 +10,14 @@ import { serializeScene } from '../src/io_scene_babylon/babylon-export.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
 import { writePackage } from './export-package.js';
 import { sceneMain } from './scene-main.js';
+import { idStruct } from '../src/python/bpy_rna.js';
 
 // A Default Cube with Subdivision Surface, a PBR material whose color is keyed, a point light and the scene camera,
 // next to Bylonder's helpers: an overlay mesh, an editor camera and the cube's loose-edge line child.
 const engine = new NullEngine(), scene = new Scene(engine);
 const cube = MeshBuilder.CreateBox('Cube', { size: 2 }, scene);
 cube.metadata = { wbId: 'cube', wbCreation: { operator: 'mesh.primitive_cube_add', options: {} }, author: 'kept' };
-const paint = cube.material = new PBRMaterial('Material', scene);
+const paint = cube.material = Object.assign(new PBRMaterial('Material', scene), { metallic: 0 });
 const camera = new FreeCamera('Camera', new Vector3(7.36, 4.96, -6.93), scene);
 camera.setTarget(Vector3.Zero());
 const light = new PointLight('Light', new Vector3(4, 6, 1), scene);
@@ -37,7 +38,7 @@ world.modifiers = createModifierSystem(world, { notify: (message) => { throw Err
 // Blender's modifiers evaluate in Main.
 sceneMain(world);
 registerObjects(animation, objects);
-const material = bindProperties(animation, paint, { id: 'material', properties: { albedoColor: {} } });
+const material = bindProperties(animation, paint, { id: 'material', properties: { albedoColor: {}, metallic: {} } });
 // A project's SDK control (sdk.controls), a value of a store.
 registerStore(animation, 'look', 'Look', { schema: { glow: {} }, values: { glow: 0.5 }, set() {} });
 animation.time.configure({ frameStart: 1, frameEnd: 20 });
@@ -45,6 +46,11 @@ animation.insert([animation.ref('object:cube', 'position.x')], 1, 0);
 animation.insert([animation.ref('object:cube', 'position.x')], 20, 3);
 animation.insert([material.ref('albedoColor.g')], 1, 0);
 animation.insert([material.ref('albedoColor.g')], 20, 1);
+// The material's metallic keyed at 0 and driven by the frame, which overrides its F-curve: exported as Main evaluates it.
+const metallic = material.ref('metallic'), owner = animation.ownerOf(metallic);
+animation.insert([metallic], 1, 0);
+animation.anim.addDriver(owner, animation.dataPath(metallic), -1, 0);
+Object.assign(idStruct(owner).animation_data.drivers[0].driver, { type: 'SCRIPTED', expression: 'frame / 20' });
 animation.seek(1);
 world.modifiers.add(cube, 'SUBSURF', { levels: 2 });
 assert.equal(cube.getTotalIndices(), 96 * 2 * 3, 'the cube draws its evaluated mesh');
@@ -59,7 +65,9 @@ assert.deepEqual(json.materials.map((m) => m.name), ['Material']);
 assert.deepEqual(json.meshes[0].metadata, { author: 'kept' }, "Bylonder's metadata stays out");
 assert.equal(json.geometries.vertexData.length, 1);
 assert.deepEqual(json.geometries.vertexData[0].indices.length, cube.getTotalIndices());
-assert.deepEqual(json.animationGroups[0].targetedAnimations.map((t) => t.targetId + ' ' + t.animation.property).sort(), ['Cube material.albedoColor', 'Cube position']);
+// Keyed with Blender's Auto Clamped handles: each animated component is its F-curve exactly, as Babylon's Hermite keys.
+assert.deepEqual(json.animationGroups[0].targetedAnimations.map((t) => t.targetId + ' ' + t.animation.property).sort(), ['Cube material.albedoColor.g', 'Cube material.metallic', 'Cube position.x']);
+assert.equal(json.animationGroups[0].targetedAnimations.find((t) => t.animation.property === 'position.x').animation.keys.length, 2, 'two keys, not a sample per frame');
 assert.equal(scene.activeCamera, editorCamera, 'the scene is left as it was');
 assert.equal(grid.doNotSerialize, true);
 assert.equal(cube.metadata.wbId, 'cube');
@@ -78,6 +86,7 @@ async function check(loaded, label) {
   group.start(false); group.pause(); group.goToFrame(20);
   assert.ok(Math.abs(mesh.position.x - 3) < 1e-4, label + ': animated position');
   assert.ok(Math.abs(mesh.material.albedoColor.g - 1) < 1e-4, label + ': animated material');
+  assert.ok(Math.abs(mesh.material.metallic - 1) < 1e-4, label + ': driven material');
 }
 const reloaded = new Scene(new NullEngine());
 await AppendSceneAsync('data:' + JSON.stringify(json), reloaded);

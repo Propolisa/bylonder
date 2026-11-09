@@ -1,51 +1,15 @@
 // Exports of what Blender evaluates (babylon-export.js, js-export.js), from the examples opened as a project opens
 // them: Geometry Nodes' instances, a driven object, NLA strips and a constraint come out as Blender shows them.
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { NullEngine, Quaternion, Scene, Vector3 } from '@babylonjs/core';
-import { blenderMain } from '../src/bmesh/bmesh-wasm.js';
-import '../src/python/bpy_interface.js';
-import { idStruct, setContextPointer } from '../src/python/bpy_rna.js';
-import { createBlenderIDs } from '../src/blenkernel/blender-ids.js';
-import { createAnimationModel } from '../src/blenkernel/animation/model.js';
-import { registerObjects } from '../src/blenkernel/animation/bindings.js';
-import { createSceneSettings } from '../src/blenkernel/scene/settings.js';
-import { createRenderSettings } from '../src/blenkernel/scene/render.js';
-import { createCollections } from '../src/blenkernel/scene/collections.js';
-import { createMaterialLibrary } from '../src/blenkernel/material/library.js';
-import { createWorlds } from '../src/blenkernel/scene/world.js';
-import { createModifierSystem } from '../src/modifiers/stack.js';
-import { createCurveObjects } from '../src/editors/curve/curve-objects.js';
-import { createSelection } from '../src/editors/object/selection.js';
-import { createRNA } from '../src/makesrna/rna-bylonder.js';
-import { createMainSync } from '../src/blenkernel/main-sync.js';
+import { Quaternion, Vector3 } from '@babylonjs/core';
+import { idStruct } from '../src/python/bpy_rna.js';
+import { openExample } from './open-example.js';
 import { serializeScene } from '../src/io_scene_babylon/babylon-export.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
 
-// An example opened as a project opens it (sdk.openBlend), in a world with the slices the view reads.
-function open(id) {
-  // NullEngine has no GL to upload an image's pixels to.
-  const engine = Object.assign(new NullEngine(), { updateTextureData() {} }), scene = new Scene(engine);
-  const animation = createAnimationModel(() => {}, { ids: createBlenderIDs(blenderMain()) });
-  const objects = Object.assign([], { scene });
-  const world = { scene, objects, animation };
-  const opening = createMainSync({ rna: createRNA({ world: { scene, objects: [] } }), ids: animation.ids });
-  objects.push(...opening.readBlend(readFileSync(new URL(`../examples/${id}/${id}.blend`, import.meta.url)), scene).nodes);
-  let camera = scene.activeCamera;
-  world.sceneSettings = createSceneSettings(world, { cameras: { list: () => scene.cameras, get: () => camera, set: (c) => { camera = c; } } });
-  world.renderSettings = createRenderSettings(world);
-  world.collections = createCollections(world);
-  world.materials = createMaterialLibrary(world);
-  world.worlds = createWorlds(world);
-  world.modifiers = createModifierSystem(world, { notify: (message) => { throw Error(message); } });
-  world.curves = createCurveObjects(world);
-  registerObjects(animation, objects);
-  const sync = createMainSync({ rna: createRNA({ world, selection: createSelection(scene, objects) }), ids: animation.ids });
-  setContextPointer(sync.blender.C);
-  return { world, scene, sync, node: (name) => objects.find((n) => n.name === name) };
-}
+const open = openExample;
 const animated = (json, name, property) => json.animationGroups.flatMap((g) => g.targetedAnimations).find((t) => t.targetId === name && t.animation.property === property);
 const range = (keys, i) => { const values = keys.map((k) => k.values[i]); return Math.max(...values) - Math.min(...values); };
 
