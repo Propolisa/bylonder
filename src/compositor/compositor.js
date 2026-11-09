@@ -54,6 +54,7 @@ export function createCompositor(world, { commit = () => {}, notify = console.wa
   const listeners = new Set();
   const emit = () => listeners.forEach(fn => fn());
   const mainScene = () => world.mainSync && idStruct(world.mainSync.blender.scene);
+  const composites = () => mainScene()?.render.use_compositing ?? true;
   const cameraBlocks = () => (graph?.attachedBlocks || []).filter(b => b.getClassName() === 'NodeRenderGraphInputBlock' && b.isCamera?.());
   // The graph's Render Layers: a graph of Blender's composites the view's render (composite below); one of Babylon's own
   // is the scene's frame graph, which renders the scene itself.
@@ -155,8 +156,10 @@ export function createCompositor(world, { commit = () => {}, notify = console.wa
     // Main's compositing node group, as Blender's RNA reads it.
     get group() { return shown ? mainScene().compositing_node_group : null; },
     // Whether final renders composite on Blender's CPU path (compositor-cpu.js), on Main's compositing node group; the
-    // views composite on the GPU.
-    get onCPU() { return enabled && !!shown; },
+    // views composite on the GPU. Render Properties > Post Processing > Compositing turns it off for final renders.
+    get onCPU() { return enabled && !!shown && composites(); },
+    // Whether final renders composite on the GPU instead: a graph of Babylon's own.
+    get finalOnGPU() { return enabled && !shown && composites(); },
     finalFrame: (camera) => api.onCPU && compositeFinalFrame(world, camera),
     // Whether the scene's frame graph draws the view (a graph of Babylon's own), not the view's render and its view
     // transform.

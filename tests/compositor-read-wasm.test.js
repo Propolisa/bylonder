@@ -77,6 +77,10 @@ const c = edited.compositor, group = idStruct(editedSync.blender.scene).composit
 assert.ok(c.main, "the graph is Main's compositing node group, the tree final renders composite");
 // A NullEngine cannot build the views' frame graph: the scene still composites its tree in final renders.
 assert.ok(c.onCPU, "final renders composite Main's group though the views cannot draw it");
+// Render Properties > Post Processing > Compositing off: final renders skip it, read when they render.
+idStruct(editedSync.blender.scene).render.use_compositing = false;
+assert.ok(!c.onCPU && !c.finalOnGPU, "final renders do not composite with Compositing off");
+idStruct(editedSync.blender.scene).render.use_compositing = true;
 const before = c.graph;
 group.nodes.get('Color Balance').inputs.get('Fac').default_value = 0.75;
 await c.edit();
