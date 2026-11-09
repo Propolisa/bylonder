@@ -36,10 +36,18 @@ for (const name of readdirSync(join(runtime, 'drivers')).filter((n) => n.endsWit
   assert.match(text, /SPDX-License-Identifier: MIT OR Apache-2.0/, `drivers/${name} carries its license`);
   for (const [, specifier] of text.matchAll(/(?:import|from)\s*\(?\s*'([^']+)'/g)) assert.ok(specifier.startsWith('./'), `drivers/${name} imports ${specifier}`);
 }
+// Bylonder's Geometry Nodes evaluator (geometry-nodes/): MIT OR Apache-2.0, importing only the runtime's files; Blender's
+// kernels it calls are a module of their own.
+for (const name of readdirSync(join(runtime, 'geometry-nodes')).filter((n) => n.endsWith('.js'))) {
+  const text = readFileSync(join(runtime, 'geometry-nodes', name), 'utf8');
+  assert.doesNotMatch(text, /blender-port|port-override/i, `geometry-nodes/${name} holds no code derived from Blender`);
+  assert.match(text, /SPDX-License-Identifier: MIT OR Apache-2.0/, `geometry-nodes/${name} carries its license`);
+  for (const [, specifier] of text.matchAll(/(?:import|from)\s*\(?\s*'([^']+)'/g)) assert.ok(/^\.\.?\//.test(specifier), `geometry-nodes/${name} imports ${specifier}`);
+}
 // Every file ships: the runtime with each package, the blocks library, extensions and material builder when its scene.js imports them
 // (their .d.ts files are checked below).
 const blocks = Object.values(BLOCK_FILES).flatMap((name) => [name, name.replace(/\.js$/, '.d.ts')]);
-const files = readdirSync(runtime, { recursive: true }).map((name) => String(name).split(sep).join('/')).filter((name) => name !== 'tsconfig.json' && name !== 'drivers');
+const files = readdirSync(runtime, { recursive: true }).map((name) => String(name).split(sep).join('/')).filter((name) => name !== 'tsconfig.json' && name !== 'drivers' && name !== 'geometry-nodes');
 assert.deepEqual(files.sort(), [...new Set([...RUNTIME_FILES, ...blocks, ...MATERIAL_FILES, ...Object.values(EVALUATOR_FILES).flatMap((e) => e.runtime)])].sort(), 'every file of runtime/ ships');
 
 // The overrides every package carries (src/overrides/): licensed as the runtime, importing only Babylon.
@@ -53,7 +61,7 @@ for (const name of OVERRIDE_FILES.filter((n) => n.endsWith('.js'))) {
 tsc(['-p', join(runtime, 'tsconfig.json'), '--noEmit']);
 const out = mkdtempSync(join(tmpdir(), 'bylonder-runtime-types-'));
 tsc(['-p', join(runtime, 'tsconfig.json'), '--outDir', out]);
-for (const name of readdirSync(out)) {
+for (const name of readdirSync(out, { recursive: true }).map(String).filter((n) => n.endsWith('.d.ts'))) {
   assert.equal(readFileSync(join(out, name), 'utf8'), readFileSync(join(runtime, name), 'utf8'), `${name} is out of date: run npx tsc -p src/io_scene_babylon/runtime/tsconfig.json`);
 }
 rmSync(out, { recursive: true });

@@ -10,6 +10,7 @@ export const EVALUATOR_FILES = {
   fcurve: { runtime: [...declared('fcurve-evaluator'), ...declared('drivers/fcurve')] },
   modifiers: { runtime: declared('modifiers-evaluator'), folder: 'bylonder-modifiers',
     files: { 'modifiers-worker.js': 'io_scene_babylon/polyfill/modifiers-worker.bundle.js', 'modifiers.wasm': 'modifiers/modifiers.wasm' } },
+  'geometry-nodes': { runtime: ['index', 'evaluator', 'geometry', 'convert', 'kernels'].flatMap((n) => declared(`geometry-nodes/${n}`)) },
   blender: { runtime: declared('blender-evaluator'), folder: 'bylonder-blender',
     files: { 'blender.js': 'io_scene_babylon/blender-fallback.bundle.js', 'bmesh.wasm': 'bmesh/bmesh.wasm', 'mesh-tessellate.wasm': 'blenkernel/mesh/mesh-tessellate.wasm' } },
 };
