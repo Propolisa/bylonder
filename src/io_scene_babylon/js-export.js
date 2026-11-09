@@ -18,9 +18,10 @@ function base64(view) {
   return btoa(text);
 }
 
-// Vertex buffers by Babylon kind, with their sizes, and the indices: one entry per geometry, shared by its meshes.
+// Vertex buffers by Babylon kind, with their sizes, and the indices: one entry per geometry, shared by its meshes. A
+// thin instance buffer (world0 to world3, per instance) is the mesh's thinInstances, written with its node.
 function geometryCode(mesh) {
-  const buffers = mesh.getVerticesDataKinds().map((kind) => {
+  const buffers = mesh.getVerticesDataKinds().filter((kind) => !mesh.getVertexBuffer(kind).getIsInstanced()).map((kind) => {
     const data = Float32Array.from(mesh.getVerticesData(kind, false, false));
     return `${json(kind)}: [${mesh.getVertexBuffer(kind).getSize()}, ${json(base64(data))}]`;
   });
