@@ -10,6 +10,8 @@ import { blenderModule } from '../bmesh/bmesh-wasm.js';
 import { modifierStack } from '../modifiers/stack.js';
 import { mesh_batch_cache_corner_buffers, mesh_batch_cache_flat } from '../draw/mesh-batch-buffers.js';
 import { registerRuntime, runtimeOf, APPROXIMATION, FALLBACK } from './runtimes.js';
+import { exactAnimation } from '../io_scene_babylon/exact-keys.js';
+import { actionFCurves } from '../io_scene_babylon/ir-export.js';
 
 const address = (struct) => pointerOf(struct)?.[2] ?? 0;
 // A key block's coordinates in the module's memory (KeyBlock.data, contiguous float[3] per vertex).
@@ -209,11 +211,17 @@ function exportShapeKeys(world) {
     },
   };
 }
+// An F-Curve's keys as exact-keys.js reads them, or null.
+const curveKeys = (fc) => fc && [...fc.keyframe_points].map((k) => ({ frame: k.co[0], value: k.co[1], interpolation: k.interpolation,
+  handle_left: [k.handle_left[0], k.handle_left[1]], handle_right: [k.handle_right[0], k.handle_right[1]] }));
+
 function influenceAnimations(world, mapped) {
   const animated = mapped.filter(({ key }) => key.animation_data);
   const sync = world.mainSync, { fps, frameStart, frameEnd } = world.animation.time.state, current = world.animation.time.frame;
   if (!animated.length || frameEnd <= frameStart) return [];
   const keys = new Map();
+  // Each target's own F-Curve, which Babylon plays where its keys are the influence exactly (exact-keys.js).
+  const curves = new Map();
   for (let frame = frameStart; frame <= frameEnd; frame++) {
     sync.frameChanged(frame);
     for (const { ob, key, state } of animated) {
@@ -221,11 +229,14 @@ function influenceAnimations(world, mapped) {
         const target = state.manager.getTarget(i);
         if (!keys.has(target)) keys.set(target, []);
         keys.get(target).push({ frame, value });
+        if (!curves.has(target)) curves.set(target, actionFCurves(key.animation_data).find((fc) => fc.data_path === `key_blocks["${target.name}"].value`));
       });
     }
   }
   sync.frameChanged(current);
   return [...keys].map(([target, list]) => {
+    const exact = exactAnimation(`${target.name} influence`, 'influence', curveKeys(curves.get(target)), list.map((k) => k.value), { frameStart, fps });
+    if (exact) return { animation: exact, target };
     const animation = new Animation(`${target.name} influence`, 'influence', fps, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CYCLE);
     animation.setKeys(list);
     return { animation, target };
