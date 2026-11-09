@@ -1,7 +1,7 @@
 # WebGPU
 
 Bylonder draws with Babylon's WebGL 2 engine by default. Preferences > System > Bylonder > GPU Backend switches to
-Babylon's WebGPU engine (`WebGPUEngine`) from the next start. WebGPU is a preview until it draws as WebGL 2 does.
+Babylon's WebGPU engine (`WebGPUEngine`) from the next start; it draws as WebGL 2 does, apart from the limits below.
 
 ## How it starts
 
@@ -76,4 +76,5 @@ feature still runs its WebGL 2 version on WebGPU.
 ## Limits
 
 - Grease Pencil's Fill tool renders on a WebGL 2 engine of its own beside WebGPU.
-- Material Preview runs at about half WebGL 2's frame rate.
+- A file's first open converts its shaders from GLSL to WGSL on the main thread, so a file of many node materials
+  takes longer to settle than on WebGL 2 (Gaku: about three minutes in Rendered).

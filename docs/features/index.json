@@ -1219,7 +1219,7 @@
    "Theme colors that no design token stands for are greyed out. Reset to Default Theme gives Blender Dark; the theme presets menu (Blender Light) does not load its XML yet.",
    "Add-ons lists every add-on Blender 5.2 ships; only Bylonder's own and the Pose Library run in the app, the others are greyed out as not included. Installing add-ons from disk or online is greyed out.",
    "The Keymap lists operators Bylonder runs its own way as unavailable, as Blender lists an operator it lacks; their keys still work.",
-   "GPU Backend's WebGPU is a preview (docs/webgpu.md lists what differs); it takes effect at the next start, and a browser without WebGPU draws with WebGL 2.",
+   "GPU Backend takes effect at the next start, and a browser without WebGPU draws with WebGL 2; docs/webgpu.md lists what differs on WebGPU.",
    "The Mouse panel's labels are cut short at the window's default width.",
    "File Paths are greyed out: projects and their files live in the browser."
   ],
@@ -1382,7 +1382,7 @@
    "Glass refracts the world behind it, not the objects; a Transparent BSDF mixed in lets the objects through.",
    "Khronos PBR Neutral's darkest tones (its toe) can differ from Blender's by up to three 8-bit steps; other view transforms and looks are within one in Rendered shading and Render Image, and within two or three in Solid and Material Preview.",
    "The 3D Viewport's camera view frames tighter than the camera when the viewport's aspect differs from the render's; Render Image frames as Blender does.",
-   "WebGPU (Preferences > System > Bylonder > GPU Backend) is a preview: Solid, Material Preview, node materials and Render Image draw (docs/webgpu.md lists what differs)."
+   "On WebGPU (Preferences > System > Bylonder > GPU Backend), a file's first open takes longer to settle than on WebGL 2 while its shaders convert (docs/webgpu.md lists what differs)."
   ],
   "page": "docs/features/rendering.md",
   "open": "https://propolisa.github.io/bylonder/#example=rendering",

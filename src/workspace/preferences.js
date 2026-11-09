@@ -28,7 +28,7 @@ export function registerBylonderPreferences(icon) {
     __annotations__: {
       ...Object.fromEntries(SETTINGS.map(([name, label, description, value]) => [name, props().BoolProperty(kw({ name: label, description, default: value }))])),
       gpu_backend: props().EnumProperty(kw({ name: 'GPU Backend', description: 'The graphics API the views draw with, used from the next start',
-        items: [['WEBGL2', 'WebGL 2', "Babylon's WebGL 2 engine"], ['WEBGPU', 'WebGPU (Preview)', "Babylon's WebGPU engine, where the browser has it; WebGL 2 otherwise"]], default: 'WEBGL2' })),
+        items: [['WEBGL2', 'WebGL 2', "Babylon's WebGL 2 engine"], ['WEBGPU', 'WebGPU', "Babylon's WebGPU engine, where the browser has it; WebGL 2 otherwise"]], default: 'WEBGL2' })),
     },
     draw(context) { drawSettings(this.layout, this); },
   }));
