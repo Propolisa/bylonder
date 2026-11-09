@@ -26,6 +26,8 @@ const FIXES = [
   ['alpha_threshold', 'float one_x = (1 - x);', 'float one_x = (1.0 - x);', INT_TO_FLOAT],
   ['curves_point_get', 'vec3(uintBitsToFloat(0x7FC00000u))', 'vec3(uintBitsToFloat(floatBitsToUint(pos_rad.w) & 0u | 0x7FC00000u))',
     'WGSL has no NaN constant: the NaN that restarts a strip is made at run time'],
+  ['line_unit_sphere_intersect_dist', 'dot(line_origin, line_origin) - 1;', 'dot(line_origin, line_origin) - 1.0;', INT_TO_FLOAT],
+  ['line_unit_sphere_intersect_dist', 'determinant >= 0)', 'determinant >= 0.0)', INT_TO_FLOAT],
 ];
 
 const PREFIX = 'bl_';
@@ -357,6 +359,14 @@ function withoutOneDimensional(source) {
   }
   return out;
 }
+
+// Definitions ([key, GLSL], as glslFunction gives them) that several codes injected into one shader can each bring
+// (Babylon material plugins' custom code, which no build state dedupes): each kept once, by its key, by the
+// preprocessor.
+export const guardedDefinitions = (definitions) => definitions.map(([key, glsl]) => {
+  const guard = `BL_DEFINED_${key.replace(/\W/g, '_')}`;
+  return `#ifndef ${guard}\n#define ${guard}\n${glsl}\n#endif\n`;
+}).join('');
 
 // GLSL ES reserves names with two underscores in a row.
 export const glslName = (name) => (PREFIX + name).replace(/_{2,}/g, '_');

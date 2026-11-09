@@ -14,8 +14,13 @@ import { Viewport } from '@babylonjs/core';
 // settle(): whether the views draw one more frame when they would go idle.
 export function createViews({ engine, scene, live = () => false, settle = () => false }) {
   const views = new Map(); // canvas -> { view, engineView }
-  let anchor = null, workSize = [0, 0], lastWake = 0, inputView = null, focused = null, layoutDirty = true, idle = false, held = false;
+  let anchor = null, workSize = [0, 0], lastWake = 0, inputView = null, focused = null, layoutDirty = true, idle = false, held = false, frozen = null; // canvas -> its image while frozen
   const scaling = () => engine.getHardwareScalingLevel();
+  const copyOf = (canvas) => {
+    const copy = new OffscreenCanvas(canvas.width, canvas.height);
+    copy.getContext('2d').drawImage(canvas, 0, 0);
+    return copy;
+  };
   // Each canvas's CSS size as the last resize observed it: read every frame, a layout read there would force a layout
   // after the page's style changes.
   const sizes = new WeakMap();
@@ -57,7 +62,11 @@ export function createViews({ engine, scene, live = () => false, settle = () => 
     if (view.region) view.camera.viewport = view.region;
     view.beforeRender?.();
   });
-  const after = engine.onAfterViewRenderObservable.add(engineView => views.get(engineView.target)?.view.afterRender?.());
+  const after = engine.onAfterViewRenderObservable.add(engineView => {
+    views.get(engineView.target)?.view.afterRender?.();
+    const image = frozen?.get(engineView.target);
+    if (image) engineView.target.getContext('2d').drawImage(image, 0, 0, engineView.target.width, engineView.target.height);
+  });
   // Decide, once per frame, which views render.
   const frame = engine.onBeginFrameObservable.add(() => {
     if (held) return;
@@ -65,7 +74,7 @@ export function createViews({ engine, scene, live = () => false, settle = () => 
     // Busy while anything changes, and while a material compiles (a mesh is not drawn until its shader is ready) and a
     // moment after, to draw what it compiled.
     if (!scene.isReady(false)) api.wake();
-    const busy = live() || performance.now() - lastWake < 500 || scene.getWaitingItemsCount() > 0 || settle();
+    const busy = !!frozen || live() || performance.now() - lastWake < 500 || scene.getWaitingItemsCount() > 0 || settle();
     idle = !busy;
     for (const { view, engineView } of views.values()) {
       engineView.enabled = busy && visible(view);
@@ -136,6 +145,12 @@ export function createViews({ engine, scene, live = () => false, settle = () => 
     relayout() { layoutDirty = true; api.wake(); },
     // A render in the live scene holds the engine: the views leave its size and camera alone until it lets go.
     hold(on) { held = on; if (!on) api.relayout(); },
+    // While frozen (a light cache baking) the views keep drawing, each frame setting the scene up for them as for any
+    // frame, but show the image they had.
+    freeze(on) {
+      frozen = on ? new Map([...views.keys()].map((canvas) => [canvas, copyOf(canvas)])) : null;
+      if (!on) api.wake();
+    },
     // Converts client coordinates to the coordinates scene.pick expects for this view.
     pickPoint(view, clientX, clientY) {
       const rect = view.canvas.getBoundingClientRect(), k = (view.scale ?? 1);

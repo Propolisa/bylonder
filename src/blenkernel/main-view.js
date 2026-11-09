@@ -28,6 +28,7 @@ import { materialType } from './material/schema.js';
 import { attributesWanted, nodeMaterialFromTree, nodeProperties, outputValues } from '../nodes/blender/shader-nodes.js';
 import { pullEeveeParity } from '../draw/eevee-parity.js';
 import { pullRenderExtensions } from '../draw/render-extension.js';
+import { syncVolumeProbes } from '../draw/light-probes.js';
 import { idStruct, pointerStruct, structFind } from '../python/bpy_rna.js';
 import { createEditMeshOverlay } from '../draw/overlay-edit-mesh.js';
 import { createGreasePencilDraw, BLENDER_LOOK } from '../draw/grease-pencil.js';
@@ -369,7 +370,11 @@ export function createMainView(state) {
   // stand-in of it).
   function drawShading(record, owner, struct, warnings = []) {
     pull(record, owner);
-    if (struct === 'Material') owner.metadata = { ...owner.metadata, wbViewportDisplay: viewportDisplay(record.ptr) };
+    if (struct === 'Material') {
+      owner.metadata = { ...owner.metadata, wbViewportDisplay: viewportDisplay(record.ptr) };
+      // What EEVEE's volume probes see of its back faces (draw/light-probes.js).
+      owner.blenderProbeBackfaceCulling = dnaGet('Material', record.ptr, 'use_backface_culling_lightprobe_volume');
+    }
     // By the material's class: a saved project opens its .blend before the world has its material library.
     const type = struct === 'Material' ? materialType(owner) : null;
     if (type === 'node') return;
@@ -518,7 +523,7 @@ export function createMainView(state) {
         pullEeveeParity(world.scene, blender.scene);
         pullRenderExtensions(world.scene, blender.scene);
       }
-      if (updates.size) { drawInstances(); drawCurves(); drawGreasePencil(); particleEdit = particleEditOverlay(world.scene, blender.particleEdit(), particleEdit); }
+      if (updates.size) { drawInstances(); drawCurves(); drawGreasePencil(); drawLightProbes(); particleEdit = particleEditOverlay(world.scene, blender.particleEdit(), particleEdit); }
     } finally {
       state.applying = was;
     }
@@ -528,6 +533,12 @@ export function createMainView(state) {
       world.shadows?.changed();
       state.evaluated();
     }
+  }
+  // The light probes EEVEE lights with (draw/light-probes.js): each Light Probe object's matrix and settings.
+  function drawLightProbes() {
+    const probes = [...objects.values()].filter((entry) => entry.type === 'LIGHT_PROBE')
+      .map(({ ob, node }) => ({ ob, name: node.name, matrix: blender.transform(ob).matrix_world, data: idStruct(ob).data }));
+    syncVolumeProbes(world.scene, probes);
   }
   // What objects draw as instances (main-api.cc main_instances), as Blender's draw engines draw them, each group as
   // thin instances on a mesh of the view's own sharing its shape's geometry: an instanced object's at their world

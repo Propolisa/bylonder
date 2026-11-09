@@ -24,7 +24,7 @@ const visit = (block) => {
 };
 [...material._vertexOutputNodes, ...material._fragmentOutputNodes].forEach(visit);
 const classes = new Set([...built].map((block) => block.getClassName()));
-for (const name of ['MorphTargetsBlock', 'BonesBlock', 'InstancesBlock', 'ClipPlanesBlock', 'FogBlock', 'ReflectionBlock', 'BlenderSurfaceBlock', 'BlenderDisplayBlock'])
+for (const name of ['MorphTargetsBlock', 'BonesBlock', 'InstancesBlock', 'ClipPlanesBlock', 'FogBlock', 'BlenderReflectionBlock', 'BlenderSurfaceBlock', 'BlenderDisplayBlock'])
   assert.ok(classes.has(name), `the graph has Babylon's ${name}`);
 const { _vertexSourceCode: vertex, _fragmentSourceCode: fragment } = mesh.subMeshes[0].effect;
 for (const define of ['MORPHTARGETS', 'NUM_BONE_INFLUENCERS', 'INSTANCES', 'CLIPPLANE']) assert.match(vertex, new RegExp(`#if(def|) ?\\(?(defined\\()?${define}`), `the vertex shader keeps Babylon's ${define} path`);

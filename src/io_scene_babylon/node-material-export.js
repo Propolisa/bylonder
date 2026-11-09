@@ -5,12 +5,12 @@
 // option), the view's direction is EEVEE's and a material's reflection lobes light as Babylon's clearcoat; without
 // it, the lobes merge into the base, as Bylonder draws with EEVEE Parity off.
 import {
-  AddBlock, ClampBlock, ClearCoatBlock, ColorMergerBlock, ColorSplitterBlock, CustomBlock, DivideBlock, LerpBlock, MaxBlock, MultiplyBlock, FragmentOutputBlock, ImageProcessingBlock, ImageSourceBlock, InputBlock, NodeMaterial, PBRMetallicRoughnessBlock, ScaleBlock, SubtractBlock,
+  AddBlock, ClampBlock, ClearCoatBlock, ColorMergerBlock, ColorSplitterBlock, CustomBlock, DivideBlock, LerpBlock, MaxBlock, MultiplyBlock, FragmentOutputBlock, ImageProcessingBlock, ImageSourceBlock, InputBlock, NodeMaterial, PBRMetallicRoughnessBlock, ReflectionBlock, ScaleBlock, SubtractBlock,
   NodeMaterialBlockConnectionPointTypes as T, NodeMaterialSystemValues as System, Vector3, Vector4,
 } from '@babylonjs/core';
 import { zlibSync } from 'fflate';
 import {
-  BlenderClosureNormalBlock, BlenderDisplayBlock, BlenderFarPlaneBlock, BlenderWorldProbeClampBlock, BlenderSurfaceBlock, BlenderUnlitSurfaceBlock, BlenderViewEyeBlock, isBlenderShader, meshValue,
+  BlenderClosureNormalBlock, BlenderDisplayBlock, BlenderReflectionBlock, BlenderFarPlaneBlock, BlenderWorldProbeClampBlock, BlenderSurfaceBlock, BlenderUnlitSurfaceBlock, BlenderViewEyeBlock, isBlenderShader, meshValue,
   ShaderNodeOutputMaterial, STAND_INS,
 } from '../nodes/blender/shader-nodes.js';
 import { CurvesGeometryBlock, CurvesNormalBlock } from '../draw/curves.js';
@@ -138,7 +138,9 @@ function exportGraph(material, out, { parity, textures }) {
     if (blocks.has(original)) return blocks.get(original);
     const copy = original instanceof ShaderNodeOutputMaterial ? new FragmentOutputBlock(original.name)
       : original instanceof BlenderDisplayBlock ? Object.assign(new ImageProcessingBlock(original.name), { convertInputToLinearSpace: false })
-        : original instanceof BlenderSurfaceBlock ? pbr(original) : original.clone(scene);
+        : original instanceof BlenderSurfaceBlock ? pbr(original)
+          // Babylon's own reflection: a Babylon file has no light probes' bake.
+          : original instanceof BlenderReflectionBlock ? new ReflectionBlock(original.name) : original.clone(scene);
     blocks.set(original, copy);
     for (const input of original.inputs) {
       const target = copy.getInputByName(input.name);

@@ -93,6 +93,8 @@ ROOTS = [
     'gpu_shader_material_volume_absorption.glsl',
     # Curves drawing (particle hair, Curves objects): the curve shape library and the hash its strands vary by.
     'draw_curves_lib.glsl',
+    # A sphere light probe's parallax (eevee_lightprobe_sphere.bsl.hh parallax_eval).
+    'draw_math_geom_lib.glsl',
     'gpu_shader_common_hash.glsl',
     'gpu_shader_utildefines_lib.glsl',
 ]
@@ -105,7 +107,11 @@ BSL = [('workbench_hair.glsl', 'source/blender/draw/engines/workbench/shaders/wo
        # EEVEE's Dithered transparency: the hashed alpha threshold of its surfaces and the random one of its shadows.
        ('eevee_transparency.glsl', 'source/blender/draw/engines/eevee/shaders/eevee_transparency.bsl.hh',
         ['float hash(', 'float hash_3d(', 'float alpha_threshold(']),
-       ('eevee_sampling.glsl', 'source/blender/draw/engines/eevee/shaders/eevee_sampling_lib.bsl.hh', ['float4 pcg4d('])]
+       ('eevee_sampling.glsl', 'source/blender/draw/engines/eevee/shaders/eevee_sampling_lib.bsl.hh', ['float4 pcg4d(']),
+       # EEVEE's volume light probes: where a point falls in a grid, and the trilinear weights its sampling biases.
+       ('eevee_lightprobe_volume.glsl', 'source/blender/draw/engines/eevee/shaders/eevee_lightprobe_volume.bsl.hh',
+        ['bool grid_local_coord(', 'int grid_brick_index_get(', 'int3 grid_cell_corner(', 'int3 grid_brick_coord(',
+         'float3 grid_brick_local_coord(', 'float3 grid_bias_sample_coord('])]
 # Draw engines' shaders the view runs whole (src/draw/overlay-particle.js, overlay-armature.js), by file.
 DRAW = ['overlay_particle_vert.glsl', 'overlay_particle_frag.glsl', 'overlay_particle_shape_vert.glsl', 'overlay_particle_shape_frag.glsl',
         'overlay_particle_hair_vert.glsl', 'overlay_edit_particle_strand_vert.glsl', 'overlay_varying_color.glsl',

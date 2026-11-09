@@ -1112,6 +1112,44 @@ const checks = {
     assert.ok(mean < 3, `the composite differs from the render by ${mean.toFixed(1)} on average`);
   } },
   // The Volumes example's light shafts draw in Rendered: its volume passes compile and fill the film (on WebGPU too).
+  // Light Probe > Bake Light Cache: the Irradiance Volume bakes the sun's bounce, which lights the ceiling no sun
+  // reaches (EEVEE's volume probes, draw/light-probes.js).
+  "a baked Irradiance Volume brightens a ceiling in shadow": { open: { link: "light-probes", node: "Room Volume" }, async run() {
+    await app.bylonder((b) => b.views.input.setShading("rendered"));
+    await app.hover();
+    await app.page.keyboard.press("Numpad0");
+    await app.until((b) => b.world.scene.isReady() && b.world.renderSettings.converged(), null, 90000);
+    const ceiling = async () => {
+      const [x, y] = await screenOf([0.3, 0.6, 2.98]);
+      const shot = await app.page.screenshot({ clip: { x: x - 8, y: y - 8, width: 16, height: 16 } });
+      return app.page.evaluate(async (png) => {
+        const image = await createImageBitmap(await (await fetch(`data:image/png;base64,${png}`)).blob());
+        const ctx = new OffscreenCanvas(image.width, image.height).getContext("2d");
+        ctx.drawImage(image, 0, 0);
+        const data = ctx.getImageData(0, 0, image.width, image.height).data;
+        return data.reduce((sum, value, i) => sum + (i % 4 === 3 ? 0 : value), 0) / (data.length * 0.75);
+      }, shot.toString("base64"));
+    };
+    const before = await ceiling();
+    await app.bylonder((b) => b.runOperator("object.lightprobe_cache_bake", { subset: "ALL" }));
+    await app.settled();
+    await app.until((b) => b.world.renderSettings.converged(), null, 90000);
+    const after = await ceiling();
+    assert.ok(after > before + 8, `the ceiling's mean value before the bake ${before}, after ${after}`);
+  } },
+
+  // The bake's capture sees what is around each sample: inside a closed box (tests/fixtures/lightprobe-box.blend) no
+  // direction meets the sky, so no sample keeps any visibility of it, and every sample sees front faces (valid).
+  "an Irradiance Volume baked in a closed box sees no sky": { open: { example: null, node: null }, async run() {
+    await openFile(fileURLToPath(new URL("../fixtures/lightprobe-box.blend", import.meta.url)));
+    await app.until((b) => b.lightProbeCaches("Volume").length === 1, null, 60000);
+    await app.bylonder((b) => b.runOperator("object.lightprobe_cache_bake", { subset: "ALL" }));
+    await app.settled();
+    const [cache] = await app.bylonder((b) => b.lightProbeCaches("Volume").map((c) => ({ visibility: Array.from(c.visibility[0]), validity: Array.from(c.validity) })));
+    assert.ok(cache.visibility.every((v) => Math.abs(v) < 0.05), `visibility of the sky per sample: ${cache.visibility.map((v) => v.toFixed(2))}`);
+    assert.ok(cache.validity.every((v) => v > 250), `validity per sample: ${cache.validity}`);
+  } },
+
   "Volumes draw in Rendered shading": { open: { link: "volumes", node: null }, async run() {
     await app.bylonder((b) => b.views.input.setShading("rendered"));
     await app.until((b) => b.world.scene.isReady() && b.world.renderSettings.converged(), null, 90000);
@@ -2085,6 +2123,16 @@ async function editMeshTool(tool, { group, label } = {}) {
   await app.page.mouse.up();
   await item.click();
   await app.until((b, name) => b.world.toolsystem.active("EDIT_MESH").idname === name, tool);
+}
+
+// File > Open of a .blend, waiting until its 3D Viewport (a new frame for a large file) is ready.
+async function openFile(path) {
+  const chooser = app.page.waitForEvent("filechooser");
+  await app.page.click('[data-blender="TOPBAR_MT_file"]');
+  await app.page.getByRole("menuitem", { name: "Open..." }).click();
+  await (await chooser).setFiles(path);
+  await app.page.waitForTimeout(3000);
+  await app.page.waitForFunction(() => !!document.querySelector('iframe[src*="viewport.html"]')?.contentWindow?.__bylonder?.views, null, { timeout: 180000 });
 }
 
 // A point of the scene in Blender's axes, in page coordinates of the 3D Viewport.

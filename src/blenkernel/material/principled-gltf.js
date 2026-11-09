@@ -9,6 +9,7 @@
 // whole each time: what an absent extension would leave is a new PBRMaterial's value.
 import { Color3, Constants, PBRMaterial } from '@babylonjs/core';
 import { blenderAreaSpecular } from '../light/area-specular.js';
+import { blenderLightProbes } from '../../draw/light-probe-pbr.js';
 import { blenderDitheredPBR } from './dithered-pbr.js';
 
 // io/com/constants.py
@@ -129,6 +130,7 @@ export function applyPBR(material, values) {
     o[key] = Array.isArray(value) ? Color3.FromArray(value) : value;
   }
   blenderDitheredPBR(material);
+  blenderLightProbes(material);
 }
 // The properties that differ, as messages.
 export const differencesPBR = (material, values) => values.filter(([path, value]) => !same(value, read(material, path)))

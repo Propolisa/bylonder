@@ -58,6 +58,7 @@ import { createEditModes } from "./editors/object/edit-modes.js";
 import { createEditCurve, registerCurveAddOperators } from "./editors/curve/editcurve.js";
 import { createCurveObjects } from "./editors/curve/curve-objects.js";
 import { registerObjectOperators, openModulePopup, runBlenderOperator } from "./editors/object/object-operators.js";
+import { lightProbesSettled, registerLightProbeOperators, volumeProbeCaches } from "./draw/light-probes.js";
 import { createMainModes } from "./editors/object/main-modes.js";
 import { registerAddOperators } from "./editors/object/add-operators.js";
 import { openMenu } from "./editors/interface/menu.js";
@@ -306,11 +307,14 @@ let topbarArea = null;
 // a drawn frame), so a test acts next without polling or waiting. Nothing runs unless something awaits it.
 const settled = async () => {
   await world.modifiers.settled();
+  await lightProbesSettled();
   await nextTick();
   await new Promise((done) => requestAnimationFrame(() => done()));
   await world.modifiers.settled();
 };
 window.__bylonder ={ world, renderHost, runOperator, settled, bylonderPreferences, dock: viewportDock,
+  // The volume probes' baked caches, by object name.
+  lightProbeCaches: (name) => volumeProbeCaches(world.scene, name),
   // The Preferences and the key configurations, for tests.
   userdef: { preferences, changed: preferencesChanged, save: savePreferences, keyconfigs: () => bpyRna.contextStruct(blenderMain().C).window_manager.keyconfigs },
   // The Top Bar's menus, laid out here for the app page's topbar.
@@ -556,6 +560,7 @@ const objectOperatorHost = { transaction: commands.transaction, notify, keying: 
   pointer: () => editor.pointer, view: () => activeView() };
 registerObjectOperators(world.objectActions, { sync: world.mainSync, ...objectOperatorHost });
 registerCurveAddOperators({ sync: world.mainSync, host: objectOperatorHost, editCurve });
+registerLightProbeOperators(world, () => commit());
 registerPythonOperators((idname, props, event) => runBlenderOperator(world.mainSync, idname, props, { ...objectOperatorHost, event }), () => world.mainSync.flush());
 // The runtimes' properties and panels (docs/runtimes.md), as an add-on registers its classes.
 registerRuntimeTypes(bylonderIcon());

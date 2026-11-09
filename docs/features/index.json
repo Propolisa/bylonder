@@ -801,6 +801,88 @@
   }
  },
  {
+  "id": "light-probes",
+  "title": "Light Probes",
+  "summary": "Light a room with the light that bounces off its floor, walls and furniture, baked into an Irradiance Volume, and reflect it in glossy surfaces through a Sphere probe, as EEVEE does.",
+  "expect": "Irradiance Volumes bake with Bake Light Cache and light every surface inside them with the bounced light and the sky they see, sampled, blended at their borders and biased as EEVEE samples them, so a sunlit room fills with warm light where EEVEE's does; the bake itself gathers the same light by drawing the scene around each sample instead of EEVEE's surfels, measured against EEVEE's own bake of the same room it gives the same validity and visibility and close irradiance, and it saves in the .blend, where a file EEVEE baked opens with its bake. Sphere probes reflect the room in glossy surfaces with EEVEE's parallax and are drawn again as the scene changes; each object takes one probe, where EEVEE picks per pixel.",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/render/eevee/light_probes/introduction.html",
+   "https://docs.blender.org/manual/en/5.2/render/eevee/light_probes/volume.html",
+   "https://docs.blender.org/manual/en/5.2/render/eevee/light_probes/sphere.html",
+   "https://docs.blender.org/manual/en/5.2/render/eevee/render_settings/light_probes.html"
+  ],
+  "example": "light-probes",
+  "thumbnail": "light-probes/thumbnail.png",
+  "media": [
+   "light-probes/shading.gif",
+   "light-probes/volume.png",
+   "light-probes/bake.gif",
+   "light-probes/sphere.png",
+   "light-probes/delete.gif",
+   "light-probes/render-image.png"
+  ],
+  "ui": [
+   "VIEW_3D",
+   "PROPERTIES",
+   "VIEW3D_MT_lightprobe_add",
+   "DATA_PT_context_lightprobe",
+   "DATA_PT_lightprobe_eevee",
+   "DATA_PT_lightprobe_capture",
+   "DATA_PT_lightprobe_bake*",
+   "DATA_PT_lightprobe_parallax",
+   "DATA_PT_lightprobe_display_eevee",
+   "SCENE_PT_eevee_light_probes"
+  ],
+  "operators": [
+   "object.lightprobe_add",
+   "object.lightprobe_cache_bake",
+   "object.lightprobe_cache_free",
+   "view3d.view_camera",
+   "render.render"
+  ],
+  "code": [
+   "src/draw/light-probes.js",
+   "src/draw/light-probe-cache.js",
+   "src/draw/light-probe-pbr.js",
+   "src/draw/volume-probe-atlas.js",
+   "src/draw/volume-probe-shader.js",
+   "src/draw/spherical-harmonics.js",
+   "src/nodes/blender/shader-nodes.js",
+   "tools/blender-port/wasm/lightprobe-api.cc"
+  ],
+  "tests": [
+   "tests/light-probe-sh.test.js",
+   "tests/light-probe-pbr.test.js",
+   "tests/light-probe-cache-wasm.test.js",
+   "tests/e2e/smoke.mjs"
+  ],
+  "limits": [
+   "The bake draws the scene in a small cube around each grid sample and gathers three bounces of light, where EEVEE traces rays between surfels until its samples run out; Bake Samples, Surfel Resolution and the Offset settings (Surface Bias, Escape Bias) are not used.",
+   "A bake draws one grid sample a frame, so a grid of a few hundred samples takes several seconds; the views keep drawing meanwhile.",
+   "Surfaces outside the grid add no bounced light during a bake (EEVEE's surfels there still bounce light), so a grid that stops short of the walls lights the room a little less.",
+   "Capture Emission is always on, and a capture's shadows are the lights' shadow maps as the views have them.",
+   "Plane probes reflect nothing yet; glossy surfaces near one take the Sphere probe's or the world's reflection.",
+   "Each object reflects one Sphere probe, the one whose influence holds its center, where EEVEE picks a probe per pixel; Sphere probes are drawn at 256 pixels a side whatever the scene's Sphere Resolution.",
+   "Light probes have no Babylon runtime: Babylon's own reflection probes have no irradiance volumes, and an export to Babylon leaves the bake out."
+  ],
+  "page": "docs/features/light-probes.md",
+  "open": "https://propolisa.github.io/bylonder/#example=light-probes",
+  "example_title": "Reading Corner",
+  "coverage": {
+   "operators": {
+    "supported": 8,
+    "partial": 0,
+    "total": 8
+   },
+   "ui": {
+    "supported": 12,
+    "partial": 0,
+    "total": 12
+   }
+  }
+ },
+ {
   "id": "link-append",
   "title": "Link and Append",
   "summary": "Bring collections, objects, materials and any other data-block in from another .blend with File > Link and File > Append, browsing inside the file in Blender's own File Browser, and make linked data editable with library overrides.",

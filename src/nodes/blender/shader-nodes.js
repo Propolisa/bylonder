@@ -17,7 +17,7 @@ import {
 import { attributeKind, requestedAttributes, TANGENT_KIND } from './attributes.js';
 import { BlenderRepeatWriteBlock, repeatZoneBlocks } from './repeat-zone.js';
 import { functions } from './gpu-library.js';
-import { engineGLSL } from './glsl.js';
+import { engineGLSL, glslFunction } from './glsl.js';
 import { BABYLON_TYPES, convert, converts, glslType, glslValue, kindOf, LUMINANCE, socketType } from './sockets.js';
 import { availability, declaration, defaults } from './declarations.js';
 import { compileSteps, glslIdentifier, kindOfSocket, menuValue, muteLinks, setUniforms, socketOf, stack } from './node-code.js';
@@ -33,6 +33,8 @@ import { DITHER_FUNCTIONS, ditherOffset } from '../../render/dither.js';
 import { readsSceneDepth, sceneDepth } from '../../render/scene-depth.js';
 import { FROXEL_JITTER } from '../../draw/volume-shaders.js';
 import { AREA_PRE_LIGHTING, AREA_SPECULAR, LIGHT_SPECULAR, usesAreaLights } from '../../blenkernel/light/area-specular.js';
+import { probeAmbient, probeCapture, sphereProbeAt, volumeProbeTextures } from '../../draw/light-probes.js';
+import { ATLAS, CAPTURE, DEFINE as VOLUME_PROBES, GRIDS, SAMPLERS as PROBE_SAMPLERS, volumeProbeFunctions, volumeProbeLambert, volumeProbeSample } from '../../draw/volume-probe-shader.js';
 import '../graph-roots.js';
 import { SharedShadowDepthWrapper } from '../../draw/shadow-depth-wrapper.js';
 
@@ -1171,6 +1173,96 @@ function environmentOf(material) {
   return () => material[ENVIRONMENT].texture;
 }
 
+// Babylon's reflection block lighting diffusely with EEVEE's volume light probes where the scene has them
+// (draw/light-probes.js): the irradiance at the shaded point replaces the environment's, as EEVEE's
+// LightprobeRenderData::load gives every closure its volume sample. While a probe is captured (BL_PROBE_CAPTURE) it reads
+// the capture's own atlas, light and visibility of the bounce before.
+const PROBE_OFFSET = 'blProbeOffset', PROBE_CLAMP = 'blProbeClamp', PROBE_AMBIENT = 'blProbeAmbient', PROBE_EYE = 'blProbeEye', PROBE_SINGLE_SIDED = 'BL_PROBE_SINGLE_SIDED';
+const SPHERE_PARALLAX = 'BL_SPHERE_PARALLAX', SPHERE_TO_PROBE = 'blSphereToProbe', SPHERE_LOCATION = 'blSphereLocation', SPHERE_SHAPE = 'blSphereParallax';
+const CAPTURE_GLOBALS = 'float bl_probe_capture_visibility = 0.0;\nfloat bl_probe_capture_alpha = 0.0;\nbool bl_probe_capture_front = true;\n';
+// blender-port: eevee_lightprobe_sphere.bsl.hh parallax_eval: a reflection ray from P turned toward where it meets the
+// probe's parallax volume, seen from the probe.
+const SPHERE_PARALLAX_GLSL = `vec3 bl_sphere_parallax(vec3 P, vec3 L) {
+  vec3 lP = (${SPHERE_TO_PROBE} * vec4(P, 1.0)).xyz;
+  vec3 lL = mat3(${SPHERE_TO_PROBE}) * L / ${SPHERE_SHAPE}.x;
+  float dist = ${SPHERE_SHAPE}.y > 0.5 ? bl_line_unit_box_intersect_dist(lP, lL) : bl_line_unit_sphere_intersect_dist(lP, lL);
+  return P + L * dist - ${SPHERE_LOCATION};
+}
+`;
+export class BlenderReflectionBlock extends ReflectionBlock {
+  getClassName() { return 'BlenderReflectionBlock'; }
+  // The scene's environment, or the Sphere probe whose influence holds the drawn mesh (draw/light-probes.js).
+  _getTexture() { return this._sphere?.texture ?? this._environment?.() ?? super._getTexture(); }
+  _sphereFor(mesh) { return mesh?.getBoundingInfo ? sphereProbeAt(this._scene, mesh.getBoundingInfo().boundingSphere.centerWorld) : null; }
+  prepareDefines(defines, nodeMaterial, mesh) {
+    this._sphere = this._sphereFor(mesh);
+    super.prepareDefines(defines, nodeMaterial, mesh);
+    defines.setValue(SPHERE_PARALLAX, !!this._sphere, true);
+    const capture = probeCapture(this._scene);
+    defines.setValue(CAPTURE, !!capture, true);
+    defines.setValue(VOLUME_PROBES, !!volumeProbeTextures(this._scene, capture), true);
+  }
+  bind(effect, nodeMaterial, mesh, subMesh) {
+    const sphere = this._sphere = this._sphereFor(mesh);
+    super.bind(effect, nodeMaterial, mesh, subMesh);
+    if (sphere) {
+      effect.setMatrix(SPHERE_TO_PROBE, sphere.toProbe);
+      effect.setVector3(SPHERE_LOCATION, sphere.location);
+      effect.setFloat2(SPHERE_SHAPE, sphere.parallaxDistance, sphere.parallaxBox ? 1 : 0);
+    }
+    const capture = probeCapture(this._scene), textures = volumeProbeTextures(this._scene, capture);
+    if (!textures) return;
+    effect.setTexture(ATLAS, textures.atlas);
+    effect.setTexture(GRIDS, textures.grids);
+    effect.setFloat(PROBE_OFFSET, ditherOffset(this._scene));
+    effect.setFloat(PROBE_AMBIENT, probeAmbient(this._scene, this._getTexture()));
+    if (capture) { effect.setFloat2(PROBE_CLAMP, capture.clampDirect, capture.clampIndirect); effect.setVector3(PROBE_EYE, capture.eye); }
+  }
+  handleFragmentSideCodeReflectionCoords(state, worldNormalVarName, worldPos, onlyReflectionVector, doNotEmitInvertZ) {
+    const code = super.handleFragmentSideCodeReflectionCoords(state, worldNormalVarName, worldPos, onlyReflectionVector, doNotEmitInvertZ);
+    if (!worldPos) return code;
+    for (const [symbol, glsl] of [...glslFunction('line_unit_sphere_intersect_dist'), ...glslFunction('line_unit_box_intersect_dist')]) {
+      state._emitFunction(symbol, glsl, '');
+    }
+    state._emitUniformFromString(SPHERE_TO_PROBE, T.Matrix);
+    state._emitUniformFromString(SPHERE_LOCATION, T.Vector3);
+    state._emitUniformFromString(SPHERE_SHAPE, T.Vector2);
+    state._emitFunction('bl_sphere_parallax', `#ifdef ${SPHERE_PARALLAX}\n${SPHERE_PARALLAX_GLSL}#endif\n`, '');
+    return `${code}#ifdef ${SPHERE_PARALLAX}\n${this._reflectionVectorName} = bl_sphere_parallax(${worldPos}.xyz, ${this._reflectionVectorName});\n#endif\n`;
+  }
+  getCode(state, normalVarName) {
+    // Bound for every mesh drawn: each may be in another Sphere probe's influence.
+    const { bindableBlocks, forcedBindableBlocks } = state.sharedData;
+    if (bindableBlocks.includes(this)) bindableBlocks.splice(bindableBlocks.indexOf(this), 1);
+    if (!forcedBindableBlocks.includes(this)) forcedBindableBlocks.push(this);
+    let code = super.getCode(state, normalVarName);
+    if (!state.samplers.includes(ATLAS)) {
+      state._samplerDeclaration += `#ifdef ${VOLUME_PROBES}\n${PROBE_SAMPLERS}#endif\n`;
+      state.samplers.push(ATLAS, GRIDS);
+    }
+    state._emitUniformFromString(PROBE_OFFSET, T.Float);
+    state._emitUniformFromString(PROBE_CLAMP, T.Vector2);
+    state._emitUniformFromString(PROBE_EYE, T.Vector3);
+    state._emitUniformFromString(PROBE_AMBIENT, T.Float);
+    for (const [key, glsl] of volumeProbeFunctions()) state._emitFunction(key, glsl, '');
+    state._emitFunction('blProbeCapture', CAPTURE_GLOBALS, '');
+    const position = `${this.generateOnlyFragmentCode ? this._worldPositionNameInFragmentOnlyMode : 'v_' + this.worldPosition.associatedVariableName}.xyz`;
+    const sh = state._getFreeVariableName('volumeProbeSH'), probe = state._getFreeVariableName('volumeProbe');
+    code += `#if defined(REFLECTION) && defined(${VOLUME_PROBES})
+BlProbeSH ${sh} = ${volumeProbeSample(position, normalVarName, 'viewDirectionW', PROBE_OFFSET)};
+vec4 ${probe} = ${volumeProbeLambert(sh, normalVarName)};
+reflectionOut.environmentIrradiance = ${probe}.rgb * ${this.reflectionColor};
+reflectionOut.environmentRadiance.rgb *= bl_probe_normalization(${sh}, ${PROBE_AMBIENT});
+#ifdef ${CAPTURE}
+bl_probe_capture_visibility = ${probe}.a;
+#endif
+#endif
+`;
+    return code;
+  }
+}
+RegisterClass('BABYLON.BlenderReflectionBlock', BlenderReflectionBlock);
+
 // A material's surface closure lit once by Babylon's PBR block, as EEVEE lights the closures a material gathers: the
 // block's inputs are the closure's colors and parameters in proportion to their weights, its reflection Babylon's
 // environment, and a transmission Babylon's refraction of that environment. Its radiance is what the lit part reflects
@@ -1261,8 +1353,8 @@ export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
       wire(eye.output, this.cameraPosition);
     }
     // A reflection block of its own: Babylon's names the uniforms it binds anew for each PBR block that reads it.
-    const reflection = helper(material, this.lobe ? `__reflection lobe ${this.lobe}` : this.scoped ? `__reflection ${this.uniqueId}` : '__reflection', (name) => new ReflectionBlock(name));
-    reflection._getTexture = environmentOf(material);
+    const reflection = helper(material, this.lobe ? `__reflection lobe ${this.lobe}` : this.scoped ? `__reflection ${this.uniqueId}` : '__reflection', (name) => new BlenderReflectionBlock(name));
+    reflection._environment = environmentOf(material);
     wire(position.output, reflection.position);
     wire(world.output, reflection.world);
     wire(reflection.reflection, this.reflection);
@@ -1302,15 +1394,47 @@ export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
         lit = state._getFreeVariableName('closureLit');
         state.compilationString += `vec3 ${lit};\n`;
         this._scoped(state, build, `${lit} = finalColor.rgb;\n`);
-      } else build();
+      } else {
+        build();
+        lit = this._probeCaptureLit(state);
+      }
       state.compilationString += `${state._declareOutput(this.radiance)} = bl_closure_radiance(${closure}, ${lit});\n`;
       return this._areaSpecular(state);
     }
     const lit = state._getFreeVariableName('lobeLit');
     state.compilationString += `vec3 ${lit};\n`;
     this._scoped(state, () => super._buildBlock(state), `${lit} = finalColor.rgb;\n`);
+    // A probe's capture sees the diffuse light alone, not the reflections the lobes add.
+    state.compilationString += `#ifdef ${CAPTURE}\n${lit} = vec3(0.0);\n#endif\n`;
     state.compilationString += `${state._declareOutput(this.radiance)} = ${this.under.associatedVariableName} + vec4(${lit} * bl_closure_lobe(${closure}, ${this.lobe}).weight, 0.0);\n`;
     return this._areaSpecular(state);
+  }
+
+  // blender-port: eevee_surfel_light.bsl.hh, eevee_surfel_ray.bsl.hh radiance_transfer, eevee_lightprobe_volume_bake.bsl.hh
+  // irradiance_capture_surfel: what a volume probe's capture sees of the surface (draw/light-probes.js), as a surfel
+  // holds it: diffuse alone, the lights' (clamped by Clamp Direct) and the bounce before's (by Clamp Indirect), and in
+  // alpha the visibility of distant light the bounce carries, over the albedo.
+  _probeCaptureLit(state) {
+    const lit = state._getFreeVariableName('surfaceLit');
+    // An input's value in the fragment stage, as Babylon's PBR block reads its world position and normal.
+    const fragment = (point) => (this.generateOnlyFragmentCode ? '' : 'v_') + point.associatedVariableName;
+    state._emitFunction('blProbeCapture', CAPTURE_GLOBALS, '');
+    state._emitFunction('bl_probe_clamp', `vec3 bl_probe_clamp(vec3 radiance, float limit) {
+  float luma = max(1e-8, max(radiance.r, max(radiance.g, radiance.b)));
+  return radiance * (1.0 - max(0.0, luma - limit) / luma);
+}
+`, '');
+    state.compilationString += `vec3 ${lit} = finalColor.rgb;
+#ifdef ${CAPTURE}
+${lit} = bl_probe_clamp(finalDiffuse, ${PROBE_CLAMP}.x);
+#ifdef REFLECTION
+${lit} += bl_probe_clamp(finalIrradiance, ${PROBE_CLAMP}.y);
+#endif
+bl_probe_capture_alpha = dot(surfaceAlbedo.rgb, vec3(1.0 / 3.0)) * bl_probe_capture_visibility;
+bl_probe_capture_front = dot(${fragment(this.worldNormal)}.xyz, ${PROBE_EYE} - ${fragment(this.worldPosition)}.xyz) >= 0.0;
+#endif
+`;
+    return lit;
   }
 
   // The light specular of the lighting Babylon's block emitted, as EEVEE's
@@ -1601,6 +1725,25 @@ export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock)
   prepareDefines(defines, nodeMaterial, ...rest) {
     super.prepareDefines(defines, nodeMaterial, ...rest);
     defines.setValue(DITHERED, nodeMaterial.transparencyMode == null, true);
+    defines.setValue(CAPTURE, !!probeCapture(nodeMaterial.getScene()), true);
+    defines.setValue(PROBE_SINGLE_SIDED, nodeMaterial.blenderProbeBackfaceCulling ?? true, true);
+  }
+
+  // A volume probe's capture (draw/light-probes.js) reads the surface's scene linear radiance and, in alpha, the
+  // visibility it carries. With the Material's Light Probe Volume backface culling (eevee_surf_capture.bsl.hh
+  // is_double_sided), a back face is a surfel's back side: dark, carrying nothing, and -1, which a probe sample counts
+  // as invalid (eevee_lightprobe_volume_bake.bsl.hh validity_capture_surfel).
+  _probeCaptureOutput(state) {
+    const display = (this.rgb.connectedPoint ?? this.rgba.connectedPoint)?.ownerBlock, color = display?.getInputByName?.('color');
+    if (!color?.isConnected) return;
+    state._emitFunction('blProbeCapture', CAPTURE_GLOBALS, '');
+    state.compilationString += `#ifdef ${CAPTURE}
+gl_FragColor = vec4(${color.associatedVariableName}.rgb, bl_probe_capture_alpha);
+#ifdef ${PROBE_SINGLE_SIDED}
+if (!bl_probe_capture_front) gl_FragColor = vec4(0.0, 0.0, 0.0, -1.0);
+#endif
+#endif
+`;
   }
 
   _buildBlock(state) {
@@ -1618,6 +1761,7 @@ gl_FragColor = vec4(gl_FragColor.rgb / ${rgba}.a, 1.0);
 `;
     }
     if (this._noSurface) state.compilationString += 'discard;\n';
+    this._probeCaptureOutput(state);
     return this;
   }
 }

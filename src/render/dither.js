@@ -1,4 +1,4 @@
-import { glslFunction } from '../nodes/blender/glsl.js';
+import { glslFunction, guardedDefinitions } from '../nodes/blender/glsl.js';
 
 // The noise offset of hashed transparency (EEVEE's Dithered render method) for the sample a scene's view is drawing:
 // one of a low-discrepancy sequence for each sample a film accumulates, so the samples average the coverage as EEVEE's
@@ -17,4 +17,4 @@ export const DITHER_FUNCTIONS = [...glslFunction('alpha_threshold'), ...glslFunc
 #endif
 }
 `]];
-export const DITHER_NOISE = DITHER_FUNCTIONS.map(([, glsl]) => glsl).join('\n');
+export const DITHER_NOISE = guardedDefinitions(DITHER_FUNCTIONS);
