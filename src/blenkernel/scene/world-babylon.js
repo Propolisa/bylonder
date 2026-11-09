@@ -1,7 +1,7 @@
-import { Color3, Color4, Constants, Vector3, CubeMapToSphericalPolynomialTools, CubeTexture, EXRCubeTexture, HDRCubeTexture, HDRFiltering, Matrix, MeshBuilder, BaseTexture, Texture, ReflectionProbe, RenderTargetTexture, Scene } from '@babylonjs/core';
+import { Color3, Color4, Constants, Vector3, CubeMapToSphericalPolynomialTools, CubeTexture, HDRCubeTexture, HDRFiltering, Matrix, MeshBuilder, BaseTexture, Texture, ReflectionProbe, RenderTargetTexture, Scene } from '@babylonjs/core';
 import { RAY_TYPE, setRayType } from '../../nodes/blender/shader-nodes.js';
 import { createLight, deriveBabylonLight, lightRecord } from '../light/light-home.js';
-import { StudioLightTexture, firstBand } from './world-sun.js';
+import { PrefilteredEXRCubeTexture, StudioLightTexture, firstBand } from './world-sun.js';
 
 // Babylon adapter for a World datablock. Babylon has no World object, so a world is pushed into
 // scene.clearColor, environmentTexture/environmentIntensity, a skybox and fog. Nothing else touches these.
@@ -44,7 +44,7 @@ export function createWorldRenderer(scene, { asset = path => path, studioLight }
       const url = /^(https?|file):/.test(key) ? key : asset(key);
       const tex = key === studioLight && /\.exr$/i.test(key) ? new StudioLightTexture(url, scene, 256, LOOKDEV.threshold)
         : /\.hdr$/i.test(key) ? new HDRCubeTexture(url, scene, 256)
-        : /\.exr$/i.test(key) ? new EXRCubeTexture(url, scene, 256, false, true, false, true)
+        : /\.exr$/i.test(key) ? new PrefilteredEXRCubeTexture(url, scene, 256)
         : CubeTexture.CreateFromPrefilteredData(url, scene);
       tex.name = key;
       textures.set(key, tex);

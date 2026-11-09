@@ -33,10 +33,21 @@ export function extractSun(data, width, height, threshold) {
   return sum[0] + sum[1] + sum[2] > 0 ? { color: Color3.FromArray(sum), direction: mean.normalize() } : null;
 }
 
-// A studio light's image with its sun taken out (`sun`, once loaded), as EEVEE's lookdev world holds it.
-export class StudioLightTexture extends EXRCubeTexture {
-  constructor(url, scene, size, threshold) {
+// An EXR environment prefiltered on load, ready for materials once filtered: Babylon swaps the filtered texture into
+// the one it uploaded first, which a WebGPU bind group made in between would keep.
+export class PrefilteredEXRCubeTexture extends EXRCubeTexture {
+  #filtered = false;
+  constructor(url, scene, size) {
     super(url, scene, size, false, true, false, true);
+    this.onLoadObservable.addOnce(() => { this.#filtered = true; });
+  }
+  isReady() { return this.#filtered && super.isReady(); }
+}
+
+// A studio light's image with its sun taken out (`sun`, once loaded), as EEVEE's lookdev world holds it.
+export class StudioLightTexture extends PrefilteredEXRCubeTexture {
+  constructor(url, scene, size, threshold) {
+    super(url, scene, size);
     this.threshold = threshold;
     this.sun = null;
   }
