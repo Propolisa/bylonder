@@ -633,7 +633,8 @@ void bl_ambient_occlusion(sampler2D depth, mat4 viewmat, mat4 winmat, float offs
         float time = 1.0 + pow((float(j) + noise.y) / float(samples), 2.0) * max_time + (reversed ? 1.0 : 0.0);
         vec2 at = uv + step * time;
         if (any(lessThan(at, vec2(0.0))) || any(greaterThan(at, vec2(1.0)))) break;
-        float z = texture(depth, at).r;
+        // Level 0, as EEVEE reads its depth: a sample in a loop that breaks per pixel has no derivatives (FXC, WGSL).
+        float z = textureLod(depth, at, 0.0).r;
         // ScreenThicknessEstimator: a sample is a segment from the one before, unless the slope breaks.
         float slope = (z - prev_z) / (time - prev_time), thickness = abs(z - prev_z);
         if (any(greaterThan(abs(prev_slope - slope), abs(prev_slope)))) thickness = 0.0;
