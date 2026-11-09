@@ -1,0 +1,532 @@
+# Controllable exports
+
+An exported page that shows the whole Blender scene, loads fast, and keeps its controls live: any knob the scene
+exposes can be set from JavaScript by its Blender path, and what depends on it follows as it does in Blender. No Blender
+module runs unless a change needs Blender's own evaluator; then it loads, once. A headless SDK (Blender's logic
+without its UI, driven from JavaScript) is the same runtime packaged without a page.
+
+Written 2026-11-09 from a review of the export code and Node-side runs of real exports. The decisions below were
+approved by the coordinator or decided by the owner.
+
+## What an export carries today
+
+Checked on `origin/main` at `ea4f1eb0`, by reading the code and by exporting examples in Node (NullEngine, the CI
+module, one process per example, as `tests/runtimes-armature-wasm.test.js` opens a project). `tests/export.test.js`,
+`tests/export-live.test.js` and `tests/export-node-material.test.js` pass.
+
+### Control inputs
+
+| Input | Exported as | Tunable after export |
+|---|---|---|
+| Transforms | Babylon node position, rotation, scaling | Yes, as Babylon properties (not by Blender path) |
+| Visibility | `isEnabled`, `isVisible` | Yes, as Babylon properties |
+| Lights, camera | Babylon's `Light.serialize`, `Camera.serialize` | Babylon's settings only |
+| World | An environment image URL with a default skybox, else the clear color (`babylon-export.js:75`); a World node tree is not exported (its skybox is `doNotSerialize`) | No |
+| Shader node inputs | Folded into one `CustomBlock` per material with each value a GLSL constant (`node-material-export.js:199`). Lava: 38 blocks, one CustomBlock of 74 lines, 0 tunable InputBlocks | No |
+| Materials of one Principled BSDF | `PBRMaterial` (all 7 of the Steam Engine's) | Babylon's settings |
+| Custom properties | Not exported; only a node's own Babylon metadata, minus Bylonder's (`babylon-export.js`, `authoredMetadata`) | No |
+| SDK controls (`sdk.controls`, `store:` channels) | Not exported (`babylon-export.js:112`) | No |
+| Geometry Nodes inputs | Not exported; the evaluated mesh is | No |
+| Modifier settings | Applied; with Live Modifiers, mesh-only stacks keep their settings under `metadata.bylonderModifiers` | Yes, through the polyfill, by a Babylon metadata path |
+| Rig controls | Pose bones sampled into `_matrix` keys | No |
+| Time | One AnimationGroup | Yes (`goToFrame`) |
+| Attributes | Vertex buffers of the evaluated mesh | No |
+
+### Propagation
+
+- **Animation** is sampled at every frame of the scene range (`babylon-export.js:130`) from the raw F-curves
+  (`model.js:276`, `fcurve.sample`), with no tangents: the compositor example's 43 tracks are 10,320 keys.
+- **Drivers, constraints and NLA are lost on objects and materials**, because those samples are the F-curve's own
+  values, not Main's. The Steam Engine's driven Crosshead moves from 1.95 to 1.12 over frames 1 to 30 in Main; the
+  export has no track for it and holds it where it was at the current frame. The NLA example (three NLA tracks, no
+  active action) exports no animation at all.
+- **Armature poses and shape key influences are evaluated through Main** at each frame (`sync.frameChanged`,
+  `armature.js:321`, `shape-keys.js:211`), so drivers, constraints and IK on them are baked correctly.
+- **In the app, driven values do reach Babylon objects**: Main's depsgraph evaluates drivers (`main-sync.js`
+  `frameChanged`) and `main-view.js` `drawEvaluated` sets each node's world matrix from Main's `matrix_world`. Only the
+  export misses them.
+- **Python handlers** are not carried.
+
+### Evaluators
+
+- **Shader nodes**: a node's GLSL is made by Blender's GPU node function in the module (`gpu-graph.js:69`,
+  `node_gpu_graph`) or by its link steps (`node-code.js`); in the app unlinked inputs are uniforms
+  (`shader-nodes.js:968`), so values change without a rebuild. The exporter keeps the code and inlines the values.
+- **Compositor**: not exported (no post-process, no render graph in any export). In the app it is a Babylon
+  `NodeRenderGraph` with a block class per Blender node (`compositor-nodes.js`), and operations Blender's GPU
+  compositor records in the module replayed on Babylon's frame graph (`compositor-replay.js`).
+- **Mesh modifiers**: applied; with Live Modifiers, `modifiers.wasm` (6.3 MB, 1.6 MB gz, 1.3 MB br, 10 ms to compile)
+  evaluates mesh-only stacks in a worker.
+- **Geometry Nodes**: evaluated mesh only. Instances are dropped: the view draws them as `__instances ...` meshes
+  (`main-view.js:568`), which the exporter skips as helpers (`babylon-export.js:13`); the Geometry Nodes example
+  exports its planet without its trees.
+- **Skinning and shape keys**: native (`Skeleton`, `MorphTargetManager`) through the runtimes registry.
+- **Particles and simulation**: Babylon particle systems serialize; Blender's are not exported.
+
+### Size and load
+
+| Example | .babylon | of which geometry | .js |
+|---|---|---|---|
+| Steam Engine | 3.96 MB | | 1.28 MB |
+| Geometry Nodes | 12.7 MB | 12.6 MB | fails |
+| Compositor | 35.9 MB | 33.7 MB | fails |
+
+The compositor example's geometry is 33.7 MB as JSON (3.9 MB gzipped, 205 ms to `JSON.parse` the file), 9.7 MB as raw
+f32 and u32 arrays (2.3 MB gzipped, 1.2 MB brotli). Everything else is 2.2 MB (0.18 MB gzipped), 1.2 MB of it materials
+that repeat Blender's GLSL library per material. Its `.blend` is 2.6 MB.
+
+### Bugs found
+
+Handed to the `export-fixes` branch: File > Export > JavaScript throws on any scene with thin instances
+(`js-export.js:24` reads the `world0` to `world3` instance buffers as vertex data); instances are dropped from
+`.babylon`; the NLA example exports no animation; a constrained or driven object exports at its unconstrained
+transform.
+
+## The model
+
+An export has three parts:
+
+1. **The snapshot**: the evaluated scene as Babylon objects, which draws with plain `@babylonjs/core` and nothing else.
+2. **The control table**: plain data naming the scene's knobs by Blender path, what each binds to in Babylon, and the
+   operations that propagate a change (the dependency table).
+3. **Evaluators**: the code that runs those operations, each loaded only when a table entry needs it.
+
+**Live or baked.** Anything a knob can change stays live. A driver, constraint or NLA strip whose inputs are only
+animation is baked into the AnimationGroup for playback; one that reads a knob runs through the scheduler (natively,
+compiled, or in the lazy evaluator) and its baked samples are used only while nothing it reads has been set. Baking per
+frame is the playback fallback, not the model.
+
+**Structure or value.** A value change (a socket's default, a modifier's setting, a transform) goes to the fastest
+evaluator that covers it. A structural change (a link, a node's enum that changes its code, a modifier added) goes to
+Blender's evaluator.
+
+## Modules and interfaces
+
+Five modules, each with one concern. Today's pieces map onto them below.
+
+### Controller and property paths
+
+```js
+const blend = await loadBlendScene(engine, url);
+blend.scene;                                     // Babylon's Scene
+blend.get('objects["Flywheel"].rotation_euler[1]');
+blend.set('materials["Lava"].node_tree.nodes["Noise Texture"].inputs["Scale"].default_value', 4);
+blend.onChanged.add(({ path, value }) => {});     // a Babylon Observable
+blend.controls();                                // suggested controls, with type, default, range and unit
+```
+
+- Paths are Blender RNA paths from `bpy.data`, Blender's identifiers. In the app the same path goes to the module's
+  `rna_set`, so the fallback evaluator needs no translation.
+- Every RNA path is settable; there is no hidden whitelist. A path with a binding or an operation in the table runs on
+  its fast path; any other goes to the Blender fallback.
+- The export lists suggested controls for authors and UIs: custom properties, exposed node group and Geometry Nodes
+  inputs, the SDK store controls, and every property a driver reads. An author can trim the list in the export options.
+- The controller is returned by the loader, not hung on Babylon's Scene. The page and the headless SDK get the same
+  object.
+- SDK store controls are Scene custom properties in Main already (`blender-boundary.md`, Animation:
+  `scenes["Scene"]["<owner> <path>"]`), so they are knobs like any other.
+- Interop: a pair of FlowGraph blocks (Get and Set Bylonder Property) calls `get` and `set`, so a user's own FlowGraph
+  or glTF interactivity drives the same knobs. Nothing else is FlowGraph's.
+
+### Bindings
+
+Each knob's binding says where its value lands in Babylon: a target (node, light, camera, material InputBlock, morph
+target, bone, render graph block), a property, and a conversion (Blender's axes and units to Babylon's). Its seed is the
+animation model's channel registry (`blenkernel/animation/bindings.js` `register`: id, path, get, set, target, property,
+the Euler order and axis conversions), which already maps every animated value to Babylon for the app; the export
+writes those entries as data. A knob without a binding is consumed by an operation instead.
+
+### Dependency table
+
+Plain data, no code: knobs, operations, and their order, as Blender's depsgraph orders them for the exposed knobs.
+
+```json
+{
+  "version": 1,
+  "knobs": [
+    { "path": "objects[\"Flywheel\"].rotation_euler[1]", "type": "FLOAT", "default": 0, "unit": "ROTATION",
+      "bind": { "target": "Flywheel", "property": "rotation", "axis": 1, "scale": -1 } },
+    { "path": "objects[\"Crosshead\"].location[0]", "type": "FLOAT", "default": 1.95, "unit": "LENGTH",
+      "bind": { "target": "Crosshead", "property": "position", "axis": 0 } }
+  ],
+  "operations": [
+    { "evaluator": "driver", "reads": [0], "writes": [1], "baked": "Crosshead location",
+      "data": { "expression": "0.45 * cos(a) + sqrt(1.5 ** 2 - (0.45 * sin(a)) ** 2)",
+                "variables": [{ "name": "a", "type": "SINGLE_PROP", "knob": 0 }] } }
+  ],
+  "order": [0]
+}
+```
+
+`reads` and `writes` index `knobs`; `order` is a topological order of `operations` made at export time from Main's
+relations (`DEG` relations of the exposed IDs, read in the module). An operation's `evaluator` names the evaluator that
+runs it and `data` is that evaluator's input.
+
+### Scheduler
+
+One module, well under 200 lines. On `scene.onBeforeAnimationsObservable` it takes the knobs set since the last tick,
+marks the operations that read them (transitively), and runs the marked ones in `order`, each through its evaluator;
+written knobs are applied through their bindings. Babylon's own systems are the leaves: AnimationGroup for time,
+Skeleton, MorphTargetManager, NodeMaterial InputBlocks, NodeRenderGraph blocks. An operation whose evaluator is not
+loaded yet is queued, and the evaluator loader is asked for it.
+
+### Evaluators
+
+An evaluator is the runtimes model (`runtimes.md`) applied to an export: Babylon native or mapped where Babylon has the
+class, Blender where only Blender's code can do it.
+
+```js
+// One per kind; registered with the loader.
+{
+  id: 'driver',
+  runtime: 'MAPPED',                // 'NATIVE' | 'MAPPED' | 'BLENDER'
+  load: () => import('./drivers.js'),
+  run(operation, knobs) {},         // reads knobs[operation.reads], returns values for operation.writes
+}
+```
+
+| Evaluator | Runtime | Runs | Loaded |
+|---|---|---|---|
+| `animation` | Native | AnimationGroup at the scene's time | With the page |
+| `material` | Native | NodeMaterial InputBlock values and textures | With the page (bindings only) |
+| `skin`, `morph` | Native | Bone local matrices, target influences from pose and Key values without constraints | With the page |
+| `driver` | Mapped | Driver expressions, variables and the driver's F-curve, as auto-ported units | On the first set of a knob a driver reads |
+| `modifiers` | Blender | Mesh-only stacks in `modifiers.wasm`'s worker | On the first set of a modifier setting |
+| `blender` | Blender | Anything else: constraints and IK on a set knob, Geometry Nodes, structure, Python | On the first set that needs it |
+
+`runtimes.js` features gain an `exportOperations(world)` beside `export(world)`, writing their table entries; no other
+code changes for a feature to join.
+
+### Evaluator loader
+
+`load(evaluator)` imports an evaluator's module and its WebAssembly once, and resolves queued operations. The `blender`
+evaluator is the headless module on the scene's `.blend`, fetched as a sidecar file only then: set becomes `rna_set`,
+Main is evaluated, and what it updated (`main_updates`) is pulled into the page's Babylon objects by the same mapping the
+app uses (`main-view.js`), split into a module that loads only with this evaluator. With dynamic linking, an evaluator
+names the capability groups it needs (`core`, `geometry-nodes`, `booleans`, `volumes`, `python`) and the loader fetches
+only those; the interface does not change. Threads are used when the page is cross-origin isolated
+(`crossOriginIsolated`), else one thread, as Safari gets.
+
+**Cost, stated plainly.** Until dynamic linking lands, the first change that needs the `blender` evaluator downloads the
+whole module: 86.7 MB, 24.5 MB gzipped, 19.0 MB brotli, measured on `module-84c8dc9b`. In Node, importing it and
+starting Main takes 2.6 s and reading the compositor example's `.blend` and building its view 0.49 s. That is why the
+fast paths matter: native leaves, ported driver math, and `modifiers.wasm` for mesh-only stacks cover the common knobs
+without it.
+
+### Blocks library
+
+One small ES module, `bylonder-blocks.js`, beside the export when the scene needs it, registering its classes with
+Babylon's `RegisterClass`:
+
+- the compositor's pass block: a post-process with code made at export and its values as uniforms, and the replay of a
+  recorded operation's pass plan;
+- Bylonder's extensions of Babylon toward EEVEE (`draw/render-extension.js`), each its own module, imported only when
+  the scene uses it and on as in the app: volumes, area light shadows, EEVEE Parity's lobes, the film's accumulation,
+  the view transform LUT (`render/display-lut.js`), and later ones as they land.
+
+A scene that uses none of them ships none of them. Shader and world materials need no class: they are plain
+NodeMaterials. All code is GLSL through Babylon's own path, so a page renders on WebGL 2 and on WebGPU (Babylon
+converts the GLSL with glslang and twgsl there, `webgpu.md`).
+
+### The package
+
+```
+scene.js              createScene(engine, canvas) and loadBlendScene(engine, url): structure, settings, control table
+scene.bin             vertex, index, thin instance and key buffers, meshopt encoded (lossless)
+meshopt_decoder.js    Babylon's MeshoptCompression decoder, self-hosted instead of Babylon's CDN
+images/               one file per image
+bylonder-blocks.js    only if the scene needs a block or extension
+drivers.js            only if a knob feeds a driver
+modifiers/            modifiers.wasm, its worker and modifiers.js, only if a knob feeds a mesh-only stack
+scene.blend           only with Include Source .blend (Live)
+```
+
+The `.babylon` export stays as it is, the snapshot alone.
+
+## Export levels
+
+Every feature can reach the page in more than one form: evaluated or live, keyed or driven, Blender's code or
+Babylon's own, or baked into data. The export dialog keeps this to one choice with sensible defaults, one switch, and
+overrides for the few who need them. The owner's order of priority decides the defaults: the full range of
+functionality first, then performance, then load time.
+
+### One choice: the level
+
+`export_level`, an enum property of the export operator:
+
+| Level | What the page holds | Stays tunable after export |
+|---|---|---|
+| **Static** | The snapshot: evaluated geometry and instances, animation as exact or sampled keys with drivers, constraints and NLA baked, node materials as CustomBlocks with their values as constants, the compositor as a frame graph. No controller | Babylon's own properties; time |
+| **Tunable** | Static, plus the controller, the control table, the scheduler, ported driver math, material and compositor inputs as uniforms, and `modifiers.wasm` only when a suggested control feeds a mesh-only stack. No `.blend` | Every bound path and suggested control: transforms, visibility, light, camera and world values, node inputs, custom properties, SDK controls, drivers that read them |
+| **Live** | Tunable, plus the `.blend` and the Blender fallback | Every RNA path, structure included; the first change without a fast path downloads the module |
+
+The default is Tunable (owner, 2026-11-09). The `.blend` is a choice of its own in the dialog, Include Source .blend
+(`use_source_blend`), off by default, with a plain note that it makes the source scene downloadable. Choosing Live turns
+it on and shows the note. Off by default because publishing a source file cannot be undone; the full range of
+functionality is still one click away.
+
+### Overrides by feature
+
+Operator properties, as Blender's exporters have them (the glTF exporter's `export_animation_mode`), in a collapsed
+sub-panel of the file browser's sidebar. The level sets them all; changing one shows the level as Custom.
+
+| Property | Items | Static | Tunable | Live |
+|---|---|---|---|---|
+| `export_geometry` | `EVALUATED`, `LIVE` | `EVALUATED` | `EVALUATED` | `LIVE` |
+| `export_animation` | `KEYS` (exact or sampled, drivers baked), `LIVE` (drivers and constraints that read a knob run) | `KEYS` | `LIVE` | `LIVE` |
+| `export_materials` | `NODES_FUSED` (Blender's GLSL, one block per material), `NODES_PER_NODE` (one block per Blender node), `NATIVE` (PBRMaterial or StandardMaterial through the runtimes' mapping), `BAKED` (textures) | `NODES_FUSED` | `NODES_FUSED` | `NODES_PER_NODE` |
+| `export_world` | `NODES_FUSED`, `NODES_PER_NODE`, `NATIVE` (an environment image), `BAKED` (a cube map) | `NODES_FUSED` | `NODES_FUSED` | `NODES_PER_NODE` |
+| `export_compositor` | `GRAPH` (Blender's nodes on the frame graph), `NATIVE` (Babylon's post-processes), `NONE` | `GRAPH` | `GRAPH` | `GRAPH` |
+| `export_lighting` | `LIVE` (lights and shadows), `PROBES` (reflection probes) | `LIVE` | `LIVE` | `LIVE` |
+| `export_simulation` | `CACHE` (per frame in `scene.bin`) | `CACHE` | `CACHE` | `CACHE` |
+| `use_source_blend` | Boolean: the `.blend` beside the page | Off | Off | On |
+| `use_license_free` | Boolean | Off | Off | Off |
+
+Items appear only when they exist: `BAKED` materials and worlds, and baked lightmaps, wait for their bakers.
+
+### Node graph granularity
+
+Materials and worlds of Blender's nodes export in one of two forms. The compositor needs no such choice: its graph is
+already one block per Blender node, of one generic class.
+
+- **`NODES_FUSED`**: one CustomBlock per material holding all its nodes' code, each unlinked input an InputBlock. The
+  smallest form, and what the exporter writes today (with constants for values).
+- **`NODES_PER_NODE`**: one CustomBlock per Blender node, its GLSL function made at export by Blender's GPU node
+  function, linked as in Blender, its unlinked inputs InputBlocks. The graph reads as Blender's in Babylon's Node
+  Material Editor and can be rewired there without Blender. Helpers that several nodes call would be defined twice,
+  since Babylon emits a CustomBlock's code once per function name (`nodeMaterialBuildState.js` `_emitFunction`): each
+  helper is wrapped in a preprocessor guard named by its hash. If Babylon's shader processor does not keep such guards
+  on WebGL 2 and WebGPU (checked in step 3), a generic block class in the blocks library emits each helper once by name;
+  that graph opens in Bylonder's editor, not Babylon's public one.
+
+Cost, estimated: a node block serializes to about 0.8 KB besides its code (measured, a Noise Texture block with 9
+inputs and 2 outputs), so `NODES_PER_NODE` adds about 1 KB per node uncompressed and a fraction of that gzipped; the
+code itself is the same functions in both forms. The shader does the same arithmetic in both: the same functions are
+called in the same order and the same uniforms are read, and GLSL compilers inline small functions, so the frame cost
+is the same; compiling takes a little longer for the extra function boundaries. The difference is size and
+readability, not speed.
+
+### What the dialog states
+
+For each level, estimated from scene statistics (vertex buffers, image bytes, code bodies, key counts) times measured
+ratios (meshopt and gzip), so no trial export is needed to open the dialog:
+
+- the package size, compressed;
+- the load time at a stated bandwidth;
+- for Live, the download on the first change that needs Blender (the module's size);
+- one line of what stays tunable;
+- the license: license-free, or the GPL terms that apply and the elements that bring them.
+
+The export's report in the Info editor gives the real numbers after.
+
+## License-free pages
+
+Babylon.js is Apache-2.0 and Blender is GPL-2.0-or-later. Bylonder's own code is MIT OR Apache-2.0, and GPL only where
+the law requires it: code derived from Blender (owner, 2026-11-09). The repository's `LICENSE` and `package.json` still
+say GPL-3.0-or-later and need to follow that intent (Doc fixes found).
+
+A page carries the GPL when it ships Blender-derived code: Blender's GLSL (node CustomBlocks, the compositor's pass
+block), ported units, the module, or a Bylonder file marked `blender-port` (22 in `src`, among them `render/film.js`,
+`draw/volumes.js`, `draw/volume-shaders.js`, `blenkernel/light/light-shadows.js`, `blenkernel/light/area-specular.js`,
+`draw/curves.js`, `draw/grease-pencil.js` and the view eye block of `node-material-export.js`). The dialog and the docs
+say so (decided). The page runtime (controller, scheduler, loader, the `createScene` template the JavaScript export
+writes) is MIT OR Apache-2.0 as long as it stays free of Blender-derived code: it lives in a directory of its own, and a
+test fails if anything there is marked `blender-port` or imports something that is. Data that GPL code computes at
+export time (an evaluated mesh, sampled keys, a light's converted power, a baked texture) is output, not code, and does
+not carry the license.
+
+So:
+
+- **License-free Static** is the JavaScript export without Blender's GLSL, ported units or module, or glTF: written by
+  Babylon's own glTF serializer (`@babylonjs/serializers`, Apache-2.0) from the snapshot after each feature takes its
+  native or baked route, compressed with `EXT_meshopt_compression`, and loaded by Babylon's own loader, so other engines
+  read it too. Babylon's serializer writes node, skin and morph animation, lights (`KHR_lights_punctual`), instancing
+  (`EXT_mesh_gpu_instancing`) and native PBR (`KHR_materials_*`). Other property animation needs
+  `KHR_animation_pointer`, which Babylon's loader reads but its serializer does not write yet; until it does, the glTF
+  form lists those tracks as left out.
+- **License-free Tunable** is the page runtime with native or baked features: knobs on transforms, visibility, lights,
+  camera, native material values, custom properties and SDK controls stay tunable. Live drivers and live modifiers are
+  not, as they need ported units or the module; they are baked instead.
+- **License-free Live cannot exist**: it is Blender's module.
+
+With `use_license_free` on, each feature takes its license-free route, and the dialog names what has none and what it
+does instead: native, baked, or left out.
+
+### Audit by feature
+
+| Feature | License-free route | Today |
+|---|---|---|
+| Meshes, curves and text as meshes, applied modifiers, Geometry Nodes results | Evaluated geometry | Yes |
+| Instances | Thin instances, or `EXT_mesh_gpu_instancing` in glTF | Yes, once the export-fixes branch lands |
+| Armature deform | Babylon `Skeleton` and skinning (the runtimes' mapping) | Yes |
+| Shape keys | `MorphTargetManager`, glTF morph targets | Yes |
+| Keyed animation, with drivers, constraints and NLA baked into it | Keys and samples (data) | Yes |
+| Live drivers and constraints | None: ported units or the module | No; baked instead |
+| Live modifiers and Geometry Nodes | None: the module | No; evaluated instead |
+| Principled BSDF materials | `PBRMaterial` (`mainPBR`), glTF PBR | Yes |
+| Other node materials | `NATIVE` where the runtimes map it, else `BAKED` textures | Could: needs a texture baker |
+| World as an image | Environment texture | Yes |
+| World of nodes | `BAKED` cube map | Could: render the world into a cube map |
+| Lights, shadows, probes | Babylon's lights, shadow generators and reflection probes | Yes |
+| Area light shadows (Bylonder's extension) | Babylon's area light without it | Yes, as an approximation |
+| Volumes | None in Babylon | No; left out |
+| EEVEE Parity lobes | Babylon's clearcoat without the view eye block | Yes, as with Parity off |
+| Film accumulation | Babylon's `TAARenderingPipeline` | Could |
+| View transform (AgX, Filmic) | Babylon's tone mapping, an approximation; or the LUT as data if the license of Blender's color management files allows it | Could, once that license is checked |
+| Compositor | `NATIVE`: Babylon's post-processes where one matches a node (Blur, bloom for Glare, lens distortion) | Could, for a subset; the rest left out |
+| Hair curves | Tube meshes | Could |
+| Grease Pencil | Strokes baked to meshes | Could |
+| Particles and simulations | Per-frame cache (data), played by Babylon's own animation | Yes |
+| Babylon render pipelines (DefaultRenderingPipeline, SSAO2) | Babylon's own | Yes |
+| Project SDK code | The project's own license | The author's call |
+
+## Decisions
+
+1. **A small scheduler, not FlowGraph.** Propagation needs Blender's depsgraph order once per tick; FlowGraph is
+   push execution with pulled data and KHR_interactivity math, so drivers would need an expression-to-blocks compiler
+   and custom blocks for variable types: more glue than it removes. The table is plain data and the scheduler stays
+   under 200 lines; FlowGraph interoperates through the property API.
+2. **Blender RNA paths for the property API**, on a controller the loader returns (`blend.set`, `get`, `onChanged`,
+   `blend.scene`). Blender's identifiers, and the fallback takes them as they are. The animation channel registry seeds
+   the bindings; SDK store controls are Scene custom properties.
+3. **Animation in three exact tiers.** Bezier segments whose handles sit at 1/3 and 2/3 of the key spacing become
+   Babylon Hermite keys (`inTangent`, `outTangent`), which Babylon serializes; measured, all 237 Bezier segments of the
+   compositor example (Auto Clamped) are such. Other Bezier segments become a per-key `BezierCurveEase`, Babylon's 2D
+   cubic Bezier in normalized time, set after `Animation.Parse` because Babylon does not serialize per-key easing (an
+   upstream change to Babylon would remove those lines). The rest, and any segment that misses a tolerance against
+   Blender's `evaluate_fcurve` at export, are sampled per frame. Never approximated.
+4. **Shader and world nodes**: one CustomBlock per material with its code made at export, every unlinked input a named
+   InputBlock (its RNA path), so values change without a rebuild in plain Babylon. Image Texture nodes are texture
+   inputs, swappable by path. Data Blender's GLSL reads as data (a Color Ramp's stops, a curve's table) is a uniform or
+   a small data texture, as the exporter already writes a ramp; a setting that changes code (a Noise type) is
+   structural. Materials whose trees share a structure share one code body, deduplicated by its hash. The graph's
+   granularity is an option (Node graph granularity): fused by default for Static and Tunable, one block per node for
+   Live (owner, 2026-11-09).
+5. **Compositor as a NodeRenderGraph** with one generic Blender pass block and recorded plans, in the blocks library. A
+   plan that depends on a value (a blur size that changes the pass count) goes to the fallback.
+6. **Fast loads**: the JavaScript module plus `scene.bin` (meshopt, decoded by Babylon's `MeshoptCompression`, its
+   decoder shipped beside it), images as files. Not glTF: it animates any property through
+   KHR_animation_pointer, but it cannot hold NodeMaterial or NodeRenderGraph without private extensions, so it would need
+   side data anyway, while Babylon's own format plus `scene.bin` keeps one format. glTF stays a possible secondary export
+   for other engines, not the controllable one. Lossless; quantization only if measured invisible.
+7. **One fallback evaluator, Blender itself**, headless on the `.blend` sidecar, which is also the headless SDK.
+   `modifiers.wasm` stays as a fast path for mesh-only stacks and folds into the core capability group with dynamic
+   linking; no new standalone kernel modules, as each duplicates the core.
+8. **Driver math ported automatically**: `expr_pylike_eval.cc` (simple expressions), the variable math of
+   `fcurve_driver.cc` for `SINGLE_PROP`, `TRANSFORMS`, `LOC_DIFF` and `ROTATION_DIFF` (values and world matrices read
+   through the controller, as shims) and `fcurve.cc`'s keyframe and F-modifier evaluation for a driver's own curve, by
+   `tools/blender-port/port.py`, each unit fuzz-tested against the module. A driver that needs Python goes to the
+   fallback. The owner approved shipping such ports (Decision 16).
+9. **Geometry Nodes are never mapped to NodeGeometry.** Babylon's NodeGeometry has no face, edge or corner domains and
+   no fields over them, so a mapping would approximate. They ship evaluated (instances as thin instances) and are tuned
+   through the fallback, with the `geometry-nodes` group once dynamic linking lands. Bylonder's own Array (Nodes)
+   already is NodeGeometry and stays so. A future exact mapping, or an auto-ported subset, needs a fuzz-tested proof
+   against the module, not a rule against it.
+10. **Particles, simulations and Python handlers are baked** for playback (simulation and particle positions per frame
+    in `scene.bin`) and tunable only through the fallback, which starts Python only when one needs it.
+11. **Every path is settable; the export suggests controls.** No whitelist: `set` takes any RNA path. The export lists
+    suggested controls (custom properties, exposed node group and Geometry Nodes inputs, SDK store controls, every
+    property a driver reads), which an author can trim. Reason: the API stays Blender's whole data model, while UIs and
+    the table stay small.
+12. **Three export levels**, Static, Tunable and Live, one enum that sets every feature (Export levels). Tunable is the
+    default; Include Source .blend is its own option, off by default and on with Live, with a note that it makes the
+    source scene downloadable (owner, 2026-11-09).
+13. **Overrides as export operator properties**, Blender's exporter idiom, in a collapsed sub-panel; changing one shows
+    the level as Custom. `export_materials` and `export_world` include the node graph granularity
+    (`NODES_FUSED`, `NODES_PER_NODE`).
+14. **Estimates in the dialog** from scene statistics and measured ratios, per level; the report gives the real numbers.
+15. **A license-free switch** that routes each feature to its native or baked form and names what has none.
+    License-free Static and Tunable exist; Live cannot.
+16. **Generated ports may ship in exported pages** (owner, 2026-11-09), with the owner's order of priority: the full
+    range of functionality first, then performance, then load time. The rule for CLAUDE.md, to be added with the first
+    unit: "A generated port may ship in an exported page when it is a pure unit from `port.py` (shims only for data
+    access) and has a fuzz test against the module; the app's own list of ports still only shrinks." First units:
+    driver expressions, driver variables, F-curve evaluation (Decision 8).
+17. **GPL terms are stated** in the export dialog and the docs (owner, 2026-11-09): a page that ships Blender-derived
+    code carries the GPL, and the dialog names the elements that bring it.
+18. **Bylonder's own code is MIT OR Apache-2.0**, GPL only where Blender-derived (owner, 2026-11-09), so the page
+    runtime is permissive while it stays free of Blender-derived code, which a test checks.
+
+## How today's pieces fit
+
+| Piece | Becomes | Reshaping |
+|---|---|---|
+| `serializeScene`, `exportModule` | The snapshot writer | Geometry, instances and keys to `scene.bin`; JSON keeps structure |
+| `bakeAnimations` | The `animation` evaluator's data | Three tiers; Main-evaluated samples for drivers, constraints, NLA |
+| `exportNodeMaterial` | Material snapshot and bindings | Uniforms as InputBlocks instead of constants; code dedup; worlds |
+| `animatable` channels, `bindings.js` | The bindings | Written as data; the Babylon metadata paths of `liveModifiers` give way to RNA paths |
+| `runtimes.js` and its features | The evaluator kinds | `exportOperations(world)` beside `export(world)` |
+| `liveModifiers`, `modifiers.wasm`, its worker | The `modifiers` evaluator | Keyed by RNA path; its per-frame JSON comparison of every stack (`modifiers.js:50`) is replaced by the scheduler's dirty set |
+| Shader node block classes | Stay in the app | Not shipped; their code is made at export |
+| Compositor block classes | The app's; one generic pass block ships | Code and plans made at export |
+| `main-view.js` mapping | Loaded with the `blender` evaluator | Split from the editor's overlays and draw code it imports today |
+| `sdk.js` controls | Knobs | Already Scene custom properties; nothing new |
+| Generated ports (`*.gen.js`) | Driver units in pages | Only with the rule change |
+
+What not to reuse: the `metadata.bylonderModifiers.stack.<i>.values.<path>` addressing (a second, Babylon-side path
+scheme), the polyfill's per-frame stringify of every stack, base64 geometry in source text, and inlined GLSL constants.
+
+## Work order
+
+Each step lands on its own, with its tests, and leaves exports working.
+
+1. **Package and controller.** `scene.bin` with meshopt and the shipped decoder, images as files, `loadBlendScene`
+   returning a controller with `get`, `set`, `onChanged` and `controls` for bound knobs (transforms, visibility, light,
+   camera and world values, custom properties, SDK controls).
+   Checks: the compositor example's package size and load time in Node; geometry equal to the app's to the bit; `set`
+   of a transform path moves the Babylon node as Main's `matrix_world` would; the page runtime's directory carries its
+   MIT OR Apache-2.0 notice and a test that nothing in it is Blender-derived.
+2. **Animation tiers and Main-evaluated baking.** Checks: every frame of the Steam Engine, NLA and compositor examples
+   within 1e-5 of Main for each exported track; the compositor example's key count drops; per-key easing restored after
+   Parse.
+3. **Node graphs.** Material and world InputBlocks by path, textures by path, data textures, code dedup, both
+   granularities. Checks: `set` changes a uniform without a new effect; a scene of many variants of one tree ships one
+   code body; a `NODES_PER_NODE` export opens in Babylon's Node Material Editor with Blender's nodes and links and builds
+   (helper guards kept on both engines); a browser check of Lava in both forms against the app on WebGL 2 and WebGPU
+   (the coordinator's GPU slot).
+4. **Compositor and blocks library.** Checks: the compositor example's graph parses with `@babylonjs/core` and
+   `bylonder-blocks.js` alone; a simple scene ships no blocks library; a browser comparison with the app.
+5. **Dependency table, scheduler and driver units.** Checks: Steam Engine: setting the flywheel's rotation moves the
+   crosshead as Main does, at many values; fuzz tests per ported unit against the module; the scheduler under 200 lines.
+6. **Evaluator loader and the Blender fallback.** Checks: the Geometry Nodes example: setting a modifier input by path
+   loads the module once and the mesh equals the app's; a page whose knobs are all on fast paths never fetches the module
+   or the `.blend` (counted fetches in a Node test).
+7. **`modifiers.wasm` under the evaluator interface.** Checks: `tests/export-live.test.js` on RNA paths, with the same
+   results.
+8. **Headless SDK.** The controller in Node without a page. Checks: a script sets paths and reads the evaluated mesh and
+   transforms, matching the app.
+9. **Capability groups and threads**, when dynamic linking and isolation land. Checks: a Geometry Nodes tune fetches
+   `core` and `geometry-nodes` only; a threaded evaluation in an isolated page matches the single-threaded one.
+
+The export levels land with the steps they need: `export_level` and the overrides with step 1 (Static and Tunable as
+far as built), Live with step 6, and each feature's items as their routes exist.
+
+10. **License-free Static as glTF.** `use_license_free`, the native routes, Babylon's glTF serializer and
+    `EXT_meshopt_compression`, and the dialog's license line. Checks: the exported glTF of each example loads with
+    Babylon's loader alone; a scan of the written files finds no Blender GLSL and no Bylonder code; the dialog names each
+    element left out or approximated.
+11. **Estimates in the dialog.** Checks: each level's estimate within 25% of the size the export then reports, on the
+    examples.
+
+## Risks
+
+- **Mapping split.** `main-view.js` imports overlays and editor drawing; separating the part that pulls Main's results
+  into Babylon objects is the largest reshaping, and it must not change the app.
+- **Export-time order.** The dependency table is Main's order for the exposed knobs only; a relation through an
+  unexposed ID must still be followed when the table is made.
+- **Ported unit drift.** Ports must be regenerated with each Blender update; the fuzz tests are what keep them honest.
+- **First-tune latency.** Seconds and about 20 MB until dynamic linking; pages should say so while it loads.
+- **WebGPU.** CustomBlock GLSL depends on Babylon's GLSL to WGSL conversion; each step's browser check covers both.
+
+## Doc fixes found
+
+- `blender-boundary.md`, Animation: "Driver values do not reach Babylon's objects yet" is stale; they reach them through
+  Main's evaluated matrices (`main-view.js` `drawEvaluated`). Exports are what miss them.
+- `blender-boundary.md`, Modifier kernels polyfill: `bmesh.wasm` is 86.7 MB, 24.5 MB gzipped now, not 59.2 MB and
+  16.5 MB.
+- `LICENSE` and `package.json` say GPL-3.0-or-later; the owner's intent is MIT OR Apache-2.0 for Bylonder's own code,
+  GPL only where Blender-derived.
+
+## Open questions
+
+None: the owner has decided each one (decisions 12, 16, 17 and 18).
