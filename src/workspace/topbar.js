@@ -13,7 +13,7 @@ const sourceBlendNote = async () => {
   const module = bytes ? ` (${(bytes / 1e6).toFixed(1)} MB as this site serves it)` : '';
   return `Ships the scene's .blend, which makes the source scene downloadable, and Blender's module${module} for controls only Blender evaluates (Geometry Nodes inputs), loaded on their first change. The module's folder is GPL-3.0-or-later. Off: those controls are left out.`;
 };
-const EXPORT_BAKE_NOTE = "Samples every animated value the page cannot play as its F-Curve at each frame, as Babylon keys. Off: F-Curves Babylon plays exactly stay its keys, and the others run as F-Curves in the page.";
+const EXPORT_BAKE_NOTE = "Samples every animated value the page cannot play as its F-Curve at each frame, as Babylon keys. Off: F-Curves Babylon plays exactly stay its keys and the others run as F-Curves in the page; what the page cannot run yet is still sampled, each named in the Info editor.";
 const EXPORT_HOST_NOTE = "scene.bin uncompressed, for a host that serves it with Brotli (most CDNs): about half the size there, about four times it elsewhere. Off: gzipped in the file, the same size on any host.";
 
 export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, newProject, recentProjects, openProject, openBlend, resetApp }) {

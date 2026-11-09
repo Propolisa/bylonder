@@ -9,6 +9,7 @@ import { imageFile } from '../imbuf/image-textures.js';
 import { exportNodeMaterial } from './node-material-export.js';
 import { exactAnimation } from './exact-keys.js';
 import { liveTransform } from './live-curves.js';
+import { report } from '../windowmanager/wm-reports.js';
 import { channelKey } from './modifiers-export.js';
 import { AREA_LIGHT, rigAreaLights, rigId, rigTransform } from './area-lights.js';
 
@@ -153,8 +154,8 @@ const TRANSFORM_PATHS = ['position', 'scaling'].flatMap((key) => ['x', 'y', 'z']
 const transformKeys = (world, nodes) => new Map(nodes.map((node) => [node, Object.fromEntries(TRANSFORM_PATHS.map((path) => [path, world.animation.track(world.animation.ref('object:' + nodeId(node), path))?.keys]))]));
 // The animations of the transforms that change over the range: a position or scale whose changing components are their
 // F-curves exactly (exact-keys.js) as one float animation each; else, with `runs` (live-curves.js), F-Curves the page
-// runs, added to `curves`; else every transform sampled at each frame.
-function transformAnimations(node, keys, frames, { frameStart, fps }, runs, curves) {
+// runs, added to `curves`; else every transform sampled at each frame, named in `gaps` when the page could have run it.
+function transformAnimations(node, keys, frames, { frameStart, fps }, runs, curves, gaps) {
   const changes = (key) => frames.some((t) => !t[key].equalsWithEpsilon(frames[0][key], 1e-6));
   return Object.keys(frames[0]).filter(changes).flatMap((key) => {
     if (key === 'position' || key === 'scaling') {
@@ -167,6 +168,7 @@ function transformAnimations(node, keys, frames, { frameStart, fps }, runs, curv
       curves.push(...run);
       return [];
     }
+    if (runs) gaps.push(`${node.name} ${key}: its F-Curves are not all that moves it (NLA, drivers, constraints, F-modifiers but Cycles) or the unit misses Main`);
     const animation = new Animation(node.name + ' ' + key, key, fps, ANIMATION_TYPES[frames[0][key].getClassName()], Animation.ANIMATIONLOOPMODE_CYCLE);
     animation.setKeys(frames.map((t, i) => ({ frame: frameStart + i, value: t[key] })));
     return [animation];
@@ -197,8 +199,9 @@ function animationTarget(channel, content, live) {
 
 // Each animated channel with a place in the file (animationTarget), sampled at every frame of the scene range, and the
 // runtimes' animations (`mapped`, a skeleton's bones). Channels without one (stores, modifier settings unless they are
-// live, depthOfField) stay out. With `curves`, an object's transform F-Curves the page runs go there instead.
-function bakeAnimations(world, samples, content, live, mapped, transforms, keys, curves) {
+// live, depthOfField) stay out. With `curves`, an object's transform F-Curves the page runs go there instead, and what
+// is still sampled goes in `gaps`.
+function bakeAnimations(world, samples, content, live, mapped, transforms, keys, curves, gaps) {
   const { fps, frameStart, frameEnd } = world.animation.time.state;
   const tracks = new Map();
   for (const { channel, start, values } of samples) {
@@ -214,7 +217,7 @@ function bakeAnimations(world, samples, content, live, mapped, transforms, keys,
   const targetedAnimations = mapped.map(({ animation, target }) => ({ animation: animation.serialize(), targetId: target.id }));
   for (const [node, frames] of transforms ?? []) {
     const runs = curves && liveTransform(world.mainSync, node);
-    for (const animation of transformAnimations(node, keys.get(node), frames, { frameStart, fps }, runs, curves)) targetedAnimations.push({ animation: animation.serialize(), targetId: node instanceof RectAreaLight ? rigId(node.id) : node.id });
+    for (const animation of transformAnimations(node, keys.get(node), frames, { frameStart, fps }, runs, curves, gaps))targetedAnimations.push({ animation: animation.serialize(), targetId: node instanceof RectAreaLight ? rigId(node.id) : node.id });
   }
   for (const { owner, path, value, components, step } of tracks.values()) {
     if (typeof value !== 'number' && !ANIMATION_TYPES[value?.getClassName?.()]) continue;
@@ -226,6 +229,7 @@ function bakeAnimations(world, samples, content, live, mapped, transforms, keys,
       continue;
     }
     const quaternion = path.join('.') === 'rotation' && owner.rotationQuaternion;
+    gaps?.push(`${owner.name} ${path.join('.')}: the page runs no F-Curve of a channel other than an object's transform yet`);
     const frames = Array.from({ length: frameEnd - frameStart + 1 }, (_, i) => {
       const frame = frameStart + i;
       let sample = typeof value === 'number' ? value : value.clone();
@@ -352,12 +356,12 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
     uniqueIds(content.nodes),
   ];
   let pending, animationGroups, activeCameraID, shadowGenerators;
-  const curves = bake || !world.mainSync ? null : [];
+  const curves = bake || !world.mainSync ? null : [], gaps = curves && [];
   try {
     // The serializer reads the scene synchronously; only texture readbacks finish later.
     pending = SceneSerializer.SerializeAsync(scene);
     shadowGenerators = shadowsOf(world, content);
-    animationGroups = bakeAnimations(world, sampled, content, liveIds, mapped, evaluated.transforms, keys, curves);
+    animationGroups = bakeAnimations(world, sampled, content, liveIds, mapped, evaluated.transforms, keys, curves, gaps);
     activeCameraID = camera?.id;
   } finally {
     restores.forEach((restore) => restore());
@@ -391,7 +395,9 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
   Object.assign(json, { animationGroups, activeCameraID, renderingPipelines: effects.renderingPipelines, imageProcessingConfiguration: scene.imageProcessingConfiguration.serialize(), producer: { name: 'Bylonder', file: 'scene.babylon' } });
   json.postProcesses.push(...effects.postProcesses);
   await environment(json, scene);
-  // The F-Curves the page runs (live-curves.js), for the package's IR; not part of the file.
-  Object.defineProperty(json, 'liveCurves', { value: curves ?? [] });
+  // The F-Curves the page runs (live-curves.js), for the package's IR, and what it still plays as samples, each reported
+  // as a gap to close: neither is part of the file.
+  for (const gap of gaps ?? []) report('WARNING', `Export: ${gap}, so it is sampled per frame`);
+  Object.defineProperties(json, { liveCurves: { value: curves ?? [] }, sampledAnimation: { value: gaps ?? [] } });
   return json;
 }
