@@ -48,8 +48,10 @@ void main() { if (vColor.a <= 0.0) discard; gl_FragColor = vec4(sceneLinear > 0.
 class SceneLinearStrokePlugin extends MaterialPluginBase {
   constructor(material) { super(material, 'BlenderSceneLinearStroke', 300, {}, true, true); }
   getClassName() { return 'BlenderSceneLinearStrokePlugin'; }
-  getCustomCode(shaderType) {
-    return shaderType === 'fragment' ? { CUSTOM_FRAGMENT_BEFORE_FRAGCOLOR: '#ifdef IMAGEPROCESSINGPOSTPROCESS\ncolor.rgb = toLinearSpace(color.rgb);\n#endif\n' } : null;
+  isCompatible() { return true; }
+  getCustomCode(shaderType, shaderLanguage = 0) {
+    const linear = shaderLanguage === 0 ? 'color.rgb = toLinearSpace(color.rgb);' : 'color = vec4f(toLinearSpaceVec3(color.rgb), color.a);';
+    return shaderType === 'fragment' ? { CUSTOM_FRAGMENT_BEFORE_FRAGCOLOR: `#ifdef IMAGEPROCESSINGPOSTPROCESS\n${linear}\n#endif\n` } : null;
   }
 }
 

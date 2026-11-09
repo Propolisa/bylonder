@@ -28,12 +28,13 @@ class BlenderDitheredPBRPlugin extends MaterialPluginBase {
     this._enable(true);
   }
   getClassName() { return `${NAME}Plugin`; }
-  isCompatible(shaderLanguage) { return shaderLanguage === 0; }
+  // WebGPU's WGSL keeps Babylon's alpha test: Blender's hash is GLSL (docs/webgpu.md).
+  isCompatible() { return true; }
   prepareDefines(defines, scene, mesh) { defines[DEFINE] = isDithered(this._material); }
   // Its own uniform, bound at every draw: Babylon's material cache skips a rebind between a frame's draws.
-  getUniforms() { return { externalUniforms: [OFFSET] }; }
-  hardBindForSubMesh(uniformBuffer, scene, engine, subMesh) { subMesh.effect?.setFloat(OFFSET, ditherOffset(scene)); }
-  getCustomCode(shaderType) { return shaderType === 'fragment' ? CODE : null; }
+  getUniforms(shaderLanguage = 0) { return shaderLanguage === 0 ? { externalUniforms: [OFFSET] } : {}; }
+  hardBindForSubMesh(uniformBuffer, scene, engine, subMesh) { if (this._material.shaderLanguage === 0) subMesh.effect?.setFloat(OFFSET, ditherOffset(scene)); }
+  getCustomCode(shaderType, shaderLanguage = 0) { return shaderType === 'fragment' && shaderLanguage === 0 ? CODE : null; }
 }
 
 const isDithered = (material) => !!material.blenderDithered && material.transparencyMode === Material.MATERIAL_ALPHATEST;

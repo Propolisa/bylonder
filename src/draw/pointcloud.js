@@ -48,7 +48,8 @@ export class PointCloudPlugin extends MaterialPluginBase {
     super(material, 'BlenderPointCloud', 310, { POINTCLOUD: false });
     this._enable(true);
   }
-  static of(material) { return material.pluginManager?.getPlugin('BlenderPointCloud') ?? new PointCloudPlugin(material); }
+  // GLSL only: on WebGPU, Babylon's materials are WGSL and draw a point as its square (docs/webgpu.md).
+  static of(material) { return material.pluginManager?.getPlugin('BlenderPointCloud') ?? (material.shaderLanguage === 0 ? new PointCloudPlugin(material) : null); }
   getClassName() { return 'PointCloudPlugin'; }
   prepareDefines(defines, scene, mesh) { defines.POINTCLOUD = !!mesh.metadata?.pointcloud; }
   getAttributes(attributes, scene, mesh) { if (mesh.metadata?.pointcloud) attributes.push(ATTRIBUTE); }

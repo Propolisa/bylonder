@@ -19,11 +19,18 @@ Babylon's WebGPU engine (`WebGPUEngine`) from the next start. WebGPU is a previe
 
 Bylonder's shaders are GLSL only, on both backends; Babylon converts them on WebGPU.
 
-- Babylon's Standard and PBR materials, its shadow generator and GreasedLine's material draw from Babylon's GLSL on
-  WebGPU too (their `ForceGLSL` switches), so Bylonder's material plugins and its shadow map edit apply unchanged.
+- Babylon's own materials (Standard, PBR, GreasedLine) and its shadow generator draw with Babylon's WGSL on WebGPU, as
+  Babylon tests them. Bylonder's plugins on them carry their edits in WGSL too (`getCustomCode` per shader language):
+  the area light specular, the view's eye, Grease Pencil's scene linear strokes, and the shadow map's lit-side bias.
+  The rest stay GLSL and do not apply on WebGPU (see Limits).
 - GLSL that does not convert is rewritten into a form that does: one declaration per line (Babylon's GLSL processor
   does not split `uniform float a, b;`), and no names WGSL reserves (Blender's `type`, `ref` and `target` take other
   names).
+- WebGPU's GLSL takes no sampler as a function argument. On WebGPU, each of Blender's functions called with an image
+  runs as a copy for that image (`src/nodes/blender/glsl.js` `specializeSamplers`). Babylon's own inliner
+  (`#define inline`) does not fit Blender's functions: it matches by name only and cannot keep early returns.
+- An environment Babylon prefilters on load (Material Preview's studio light, an EXR world) is ready for materials
+  only once filtered, so no WebGPU bind group keeps the texture it replaces.
 - Points are drawn as quads on both backends (`src/draw/point-sprites.js`): WebGPU has no point size.
 - Reading a texture back is asynchronous on WebGPU. The CPU compositor awaits it on both backends; Grease Pencil's Fill
   tool, which Blender's code reads synchronously, renders on a small WebGL 2 engine of its own.
@@ -35,3 +42,8 @@ so its WebGPU compiles shaders with FXC, which fails some that Chrome compiles; 
 Chrome) runs them on it instead, in a temporary profile.
 
 ## Limits
+
+- A Principled BSDF with the Dithered render method is alpha tested, not hashed: Blender's hash is GLSL.
+- Hair and curves with a Principled material draw no strands in Material Preview and Rendered, and point clouds draw
+  each point as a square: their shaders are GLSL plugins on Babylon's PBR material.
+- Grease Pencil's Fill tool renders on a WebGL 2 engine of its own beside WebGPU.

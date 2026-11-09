@@ -5,6 +5,8 @@
 import { CascadedShadowGenerator, Constants, LinesMesh, Matrix, RenderTargetTexture, ShaderStore, ShadowGenerator, Texture, Vector3 } from '@babylonjs/core';
 import { shadowMapVertexShader } from '@babylonjs/core/Shaders/shadowMap.vertex.js';
 import { shadowMapPixelShader } from '@babylonjs/core/Shaders/shadowMap.fragment.js';
+import { shadowMapVertexShaderWGSL } from '@babylonjs/core/ShadersWGSL/shadowMap.vertex.js';
+import { shadowMapPixelShaderWGSL } from '@babylonjs/core/ShadersWGSL/shadowMap.fragment.js';
 import { influenceRadius, isBlenderLight, lightRecord } from './light-home.js';
 import { areaLightShadows } from './area-light.js';
 import { createLightReach, lightsMeshes } from './light-reach.js';
@@ -46,11 +48,14 @@ const casts = (mesh) => shadedObject(mesh) && !(mesh instanceof LinesMesh) && me
 // Babylon's normal bias moves every caster along -N, so a face turned away from the light moves toward it and shadows
 // itself, though EEVEE lights it from behind (its offset is the receiver's, along the normal facing the viewer). Babylon's
 // include remapping, #include<name>(from,to), moves such a face away from the light instead, by less the more it is
-// edge-on to the light so that a closed object's shadow keeps its outline.
-const LIT_SIDE_NORMAL_BIAS = ['sinNLSM;worldPos', '(0.0<ndlSM?sinNLSM:ndlSM);worldPos'];
+// edge-on to the light so that a closed object's shadow keeps its outline. WebGPU draws it from Babylon's WGSL shadow
+// map, where the remapping's arguments hold no commas (so no select()).
 const SHADOW_MAP = 'blenderShadowMap';
-ShaderStore.ShadersStore[`${SHADOW_MAP}VertexShader`] ??= shadowMapVertexShader.shader.replace('#include<shadowMapVertexNormalBias>', `#include<shadowMapVertexNormalBias>(${LIT_SIDE_NORMAL_BIAS})`);
+const litSide = (vertex, bias) => vertex.shader.replace('#include<shadowMapVertexNormalBias>', `#include<shadowMapVertexNormalBias>(sinNLSM;worldPos,${bias};worldPos)`);
+ShaderStore.ShadersStore[`${SHADOW_MAP}VertexShader`] ??= litSide(shadowMapVertexShader, '(0.0<ndlSM?sinNLSM:ndlSM)');
 ShaderStore.ShadersStore[`${SHADOW_MAP}PixelShader`] ??= shadowMapPixelShader.shader;
+ShaderStore.ShadersStoreWGSL[`${SHADOW_MAP}VertexShader`] ??= litSide(shadowMapVertexShaderWGSL, '(f32(0.0<ndlSM)*(sinNLSM-ndlSM)+ndlSM)');
+ShaderStore.ShadersStoreWGSL[`${SHADOW_MAP}PixelShader`] ??= shadowMapPixelShaderWGSL.shader;
 
 // A sun whose map spans its casters, not the view (light.metadata.shadowFitsCasters: Material Preview's studio sun), so
 // that moving the view draws no map: one map, as large as the cascades together.

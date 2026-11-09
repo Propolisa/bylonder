@@ -19,7 +19,13 @@ export const LIGHT_SPECULAR = {
   search: /(info\.(?:specular|clearCoat)=compute(?:Anisotropic)?(?:Specular|ClearCoat)Lighting\([^;]*,)diffuse(\d+|\{X\})\.rgb\);/g,
   replace: '$1light$2.vLightSpecular.rgb);',
 };
-const FORMULA = { [`!${AREA_SPECULAR.search.source}`]: AREA_SPECULAR.replace, [`!${LIGHT_SPECULAR.search.source}`]: LIGHT_SPECULAR.replace };
+// Babylon's WGSL (WebGPU) writes the area formula as its own expression; the light's specular as its GLSL does.
+const AREA_SPECULAR_WGSL = {
+  search: /var fresnel:vec3f =reflectance0\*specularColor\*info\.areaLightFresnel\.x\+\( vec3f\( 1\.0 \)-specularColor \)\*info\.areaLightFresnel\.y\*reflectance90;/,
+  replace: 'var fresnel:vec3f=reflectance0*info.areaLightFresnel.x+(reflectance90-reflectance0)*info.areaLightFresnel.y;',
+};
+const formula = (area) => ({ [`!${area.search.source}`]: area.replace, [`!${LIGHT_SPECULAR.search.source}`]: LIGHT_SPECULAR.replace });
+const FORMULA = [formula(AREA_SPECULAR), formula(AREA_SPECULAR_WGSL)];
 
 class BlenderAreaSpecularPlugin extends MaterialPluginBase {
   constructor(material) {
@@ -28,8 +34,8 @@ class BlenderAreaSpecularPlugin extends MaterialPluginBase {
     this.doNotSerialize = true;
   }
   getClassName() { return `${NAME}Plugin`; }
-  isCompatible(shaderLanguage) { return shaderLanguage === 0; }
-  getCustomCode(shaderType) { return shaderType === 'fragment' ? FORMULA : null; }
+  isCompatible() { return true; }
+  getCustomCode(shaderType, shaderLanguage = 0) { return shaderType === 'fragment' ? FORMULA[shaderLanguage] : null; }
 }
 
 // Gives a material of Blender's data EEVEE's light specular (once).
