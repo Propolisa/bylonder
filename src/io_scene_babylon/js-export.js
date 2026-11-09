@@ -215,6 +215,9 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   const display = await displaySettings(world, bin);
   // Area lights as Bylonder's (runtime/area-light.js): lit once parsed, and casting shadows as its Area Light Shadows
   // extension has them.
+  // Cameras their animation turns by quaternion (babylon-export.js transformAnimations), which Babylon's parser leaves out.
+  const turning = new Set((data.animationGroups ?? []).flatMap((g) => g.targetedAnimations).filter((t) => t.animation.property === 'rotationQuaternion').map((t) => t.targetId));
+  const turnedCameras = data.cameras.filter((c) => turning.has(c.id)).map((c) => c.uniqueId);
   const areaLights = data.lights.some((l) => l.type === AREA_LIGHT), areaSpecular = data.materials.some((m) => m.customType === 'BABYLON.PBRMaterial');
   // Bylonder's own pipeline of a rendered view (render-babylon.js SceneLinearPipeline) turns the scene's image processing
   // off, so materials would encode to display themselves: with the view transform, which displays instead, it stays out
@@ -362,7 +365,8 @@ ${geometryLines.join('\n')}
 
   const nodes = {};
 ${objectLines}
-${parse('LIGHTS', data.lights, `nodes[entry.uniqueId] = ${areaLights ? 'parseLight' : 'Light.Parse'}(entry, scene)`)}${parse('CAMERAS', data.cameras, 'nodes[entry.uniqueId] = Camera.Parse(entry, scene)')}
+${parse('LIGHTS', data.lights, `nodes[entry.uniqueId] = ${areaLights ? 'parseLight' : 'Light.Parse'}(entry, scene)`)}${parse('CAMERAS', data.cameras, 'nodes[entry.uniqueId] = Camera.Parse(entry, scene)')}${turnedCameras.length ? `  for (const id of ${json(turnedCameras)}) nodes[id].rotationQuaternion = Quaternion.FromEulerVector(nodes[id].rotation);
+` : ''}
 ${parented.map((e) => `  nodes[${e.uniqueId}].parent = nodes[${e.parentId}] ?? null;`).join('\n')}${data.lights.some((l) => l.excludedMeshesIds?.length || l.includedOnlyMeshesIds?.length) ? `
   // The meshes each light leaves out or lights alone, by id, as Babylon's loader resolves them once the meshes exist.
   const meshes = (ids) => ids.map((id) => scene.getMeshById(id)).filter(Boolean);
