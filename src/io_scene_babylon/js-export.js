@@ -191,7 +191,8 @@ import { readBuffers } from './bylonder/buffers.js';
 import { worldColor, worldNodes } from './bylonder/world.js';
 import { BlendScene } from './bylonder/blend-scene.js';
 import { derivativeUniformity } from './bylonder/overrides/webgpu/derivative-uniformity.js';
-import { reservedNames } from './bylonder/overrides/webgpu/reserved-names.js';${display ? `
+import { reservedNames } from './bylonder/overrides/webgpu/reserved-names.js';
+import { webgpuSamplers } from './bylonder/overrides/webgpu/samplers.js';${display ? `
 import { viewTransform } from './bylonder-view-transform.js';` : ''}${composited ? `
 import { compositor } from './bylonder-blocks.js';` : ''}
 import { Animation, AnimationGroup, CascadedShadowGenerator, Color3, Color4, CubeTexture, EffectLayer, Geometry, HDRCubeTexture, Light, LinesMesh, Material, Matrix, Mesh, MorphTargetManager, MultiMaterial, PostProcess, Quaternion, ReflectionProbe, Scene, SerializationHelper, ShadowGenerator, Skeleton, SubMesh, TransformNode, Vector3, Camera, ParticleSystem } from '@babylonjs/core';
@@ -270,6 +271,8 @@ export async function createScene(engine, canvas) {
   // A custom block's code is written once for every material that shares it.
   for (const entry of MATERIALS) for (const block of entry.blocks ?? []) if (typeof block.options?.code === 'number') block.options.code = CODE[block.options.code];
   for (const entry of MATERIALS) materials[entry.uniqueId] = Material.Parse(entry, scene, ROOT);
+  // Node materials' images as WebGPU takes them.
+  for (const material of Object.values(materials)) if (material.getClassName() === 'NodeMaterial') webgpuSamplers(material);
   // A multi-material's slots by the exported materials' unique ids, as Babylon's loader resolves them after parsing.
   for (const entry of MULTI_MATERIALS) {
     const multi = materials[entry.uniqueId] = MultiMaterial.ParseMultiMaterial(entry, scene);

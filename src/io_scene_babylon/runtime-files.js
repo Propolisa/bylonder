@@ -20,7 +20,7 @@ export const gplFiles = (sceneSource) => evaluatorsOf(sceneSource).filter((e) =>
   .flatMap(({ folder, files }) => Object.entries({ ...files, ...NOTICE }).map(([name, from]) => [`${folder}/${name}`, from]));
 // Bylonder's overrides of Babylon and WebGPU (src/overrides/), which every package carries in bylonder/overrides/, and
 // how a runtime file imports one there.
-export const OVERRIDE_FILES = ['webgpu/float-world-cube', 'webgpu/derivative-uniformity', 'webgpu/reserved-names'].flatMap((name) => [`${name}.js`, `${name}.d.ts`]);
+export const OVERRIDE_FILES = ['webgpu/float-world-cube', 'webgpu/derivative-uniformity', 'webgpu/reserved-names', 'webgpu/samplers'].flatMap((name) => [`${name}.js`, `${name}.d.ts`]);
 export const packageOverrides = () => OVERRIDE_FILES.map((name) => [`bylonder/overrides/${name}`, `overrides/${name}`]);
 export const packagedRuntime = (text) => text.replaceAll("'../../overrides/", "'./overrides/");
 // The blocks library and Bylonder's extensions of Babylon, by package path: runtime/ files a package ships beside its

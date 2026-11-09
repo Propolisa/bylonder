@@ -1,14 +1,16 @@
 // Materials of Blender's shader nodes exported as Babylon's own blocks (io_scene_babylon/node-material-export.js): a
 // scene of them loads in another process that has only @babylonjs/core, and each material builds there, with
-// Babylon's clearcoat for a second lobe when EEVEE Parity is on.
+// Babylon's clearcoat for a second lobe when EEVEE Parity is on, and compiles to WGSL on WebGPU.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { MeshBuilder, NullEngine, Scene, SceneSerializer } from '@babylonjs/core';
+import { FreeCamera, MeshBuilder, NodeMaterial, NullEngine, Scene, SceneSerializer, Vector3 } from '@babylonjs/core';
 import { nodeMaterialFromTree } from '../src/nodes/blender/shader-nodes.js';
 import { exportNodeMaterial } from '../src/io_scene_babylon/node-material-export.js';
+import { webgpuSamplers } from '../src/overrides/webgpu/samplers.js';
+import { compilersPresent, createCompilers, WebGPUShaderEngine } from './webgpu-shaders.js';
 
 const engine = new NullEngine(), scene = new Scene(engine);
 const TREES = {
@@ -63,4 +65,19 @@ console.log(JSON.stringify({ results, meshes: scene.meshes.map((m) => m.material
   assert.deepEqual(results.map(([name, ok]) => [name, ok]), Object.keys(TREES).map((name) => [name, true]), `every material builds in plain Babylon (parity ${parity})`);
   assert.deepEqual(meshes, Object.keys(TREES).map(() => 'NodeMaterial'));
 }
-console.log('Export node materials: Blender shader nodes load and build in plain Babylon, a second lobe as its clearcoat with EEVEE Parity');
+// On WebGPU, with the page's sampler specialization: a color ramp's table passed to Blender's functions compiles to WGSL.
+if (compilersPresent()) {
+  const gpu = new WebGPUShaderEngine(await createCompilers()), view = new Scene(gpu);
+  new FreeCamera('camera', new Vector3(0, 0, -5), view);
+  const createRawTexture = gpu.createRawTexture.bind(gpu);
+  gpu.createRawTexture = (...args) => Object.assign(createRawTexture(...args), { isReady: true });
+  for (const entry of (await exported(false)).materials) {
+    const material = webgpuSamplers(NodeMaterial.Parse(entry, view)), mesh = Object.assign(MeshBuilder.CreateSphere(entry.name, {}, view), { material });
+    const from = gpu.results.length;
+    let drawn = false;
+    for (let i = 0; i < 300 && !drawn; i++) { drawn = material.isReadyForSubMesh(mesh, mesh.subMeshes[0]); await new Promise((resolve) => setTimeout(resolve, 10)); }
+    assert.ok(drawn, `${entry.name} compiles on WebGPU`);
+    for (const { errors } of gpu.results.slice(from)) assert.deepEqual(errors, [], entry.name);
+  }
+}
+console.log('Export node materials: Blender shader nodes load and build in plain Babylon, a second lobe as its clearcoat with EEVEE Parity, and compile to WGSL');
