@@ -154,10 +154,12 @@ const checks = {
     assert.deepEqual(json.meshes.map((m) => m.name), ["Cube"]);
     assert.equal(json.activeCameraID, "Camera");
     assert.equal(json.geometries.vertexData[0].indices.length, 96 * 2 * 3, "the subdivided cube");
-    assert.match(String(await exported("JavaScript (.js)")), /export async function createScene\(engine, canvas\)/);
+    const scenePackage = unzipSync(await exported("JavaScript (.zip)"));
+    assert.match(strFromU8(scenePackage["scene.js"]), /export async function load\(engine\)/);
+    assert.ok(scenePackage["scene.bin"].length > 0 && scenePackage["bylonder/blend-scene.js"], "the package holds scene.bin and the runtime");
     // Live Modifiers: the module, whose subdivided cube keeps its stack, and the polyfill next to it.
     const zip = unzipSync(await exported("JavaScript, Live Modifiers (.zip)"));
-    const module = strFromU8(Object.entries(zip).find(([name]) => name.endsWith(".js") && !name.includes("/"))[1]);
+    const module = strFromU8(zip["scene.js"]);
     assert.match(module, /bylonderModifiers/);
     assert.match(module, /liveModifiers/);
     assert.match(strFromU8(zip["bylonder-modifiers/modifiers.js"]), /export async function liveModifiers/);

@@ -6,6 +6,7 @@ import { propsDialog } from '../editors/interface/props-dialog.js';
 import { listedDemoFiles, openDemoFile, openFromUrl } from './demo-files.js';
 
 const EXPORT_PARITY_NOTE = "Lights materials as Blender's EEVEE does (view vector, second reflection as clearcoat). Off: Babylon's own lighting; Blender's texture nodes still export as one custom block.";
+const EXPORT_HOST_NOTE = "scene.bin uncompressed, for a host that serves it with Brotli (most CDNs): about half the size there, about four times it elsewhere. Off: gzipped in the file, the same size on any host.";
 
 export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, newProject, recentProjects, openProject, openBlend, resetApp }) {
   const $ = id => document.getElementById(id);
@@ -49,10 +50,13 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
   const blenderDocs = 'https://docs.blender.org/';
   const URL_PRESETS = { MANUAL: blenderDocs + 'manual/en/latest/', API: blenderDocs + 'api/current/', RELEASE_NOTES: 'https://developer.blender.org/docs/release_notes/' };
   const ids = () => workspaces.map((w) => w.id);
-  // File > Export's options, asked before it writes; EEVEE Parity is off unless chosen for this export.
+  // File > Export's options, asked before it writes; EEVEE Parity is off unless chosen for this export. A JavaScript
+  // package's geometry is gzipped in the file unless the host compresses it.
   const exportAs = async (format, title) => {
-    const options = await propsDialog({ title, confirm: 'Export', fields: [{ name: 'eeveeParity', label: 'EEVEE Parity', value: false, note: EXPORT_PARITY_NOTE }] });
-    if (options) send('export', { format, eeveeParity: options.eeveeParity });
+    const fields = [{ name: 'eeveeParity', label: 'EEVEE Parity', value: false, note: EXPORT_PARITY_NOTE }];
+    if (format !== 'babylon') fields.push({ name: 'hostCompression', label: 'Host Compresses Geometry', value: false, note: EXPORT_HOST_NOTE });
+    const options = await propsDialog({ title, confirm: 'Export', fields });
+    if (options) send('export', { format, eeveeParity: options.eeveeParity, hostCompression: !!options.hostCompression });
   };
   const operators = {
     'wm.read_homefile': { keys: () => 'Ctrl N', run: ({ app_template: name = '' }) => (name ? openExample(examples.find((e) => e.title === name)) : click('new-project')()) },
@@ -105,7 +109,7 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
     // Open Recent lists Bylonder's recent projects.
     ['TOPBAR_MT_file_open_recent', 'append', ({ layout }) => { for (const project of recent) op(layout, 'wm.open_mainfile', project.name, 'FILE_BLEND').filepath = project.id; }],
     ['TOPBAR_MT_file_import', 'append', ({ layout }) => op(layout, 'bylonder.project_import', 'Project ZIP (.zip)')],
-    ['TOPBAR_MT_file_export', 'append', ({ layout }) => { op(layout, 'bylonder.export_babylon', 'Babylon (.babylon)'); op(layout, 'bylonder.export_js', 'JavaScript (.js)'); op(layout, 'bylonder.export_js_live', 'JavaScript, Live Modifiers (.zip)'); op(layout, 'bylonder.project_export', 'Project ZIP (.zip)'); }],
+    ['TOPBAR_MT_file_export', 'append', ({ layout }) => { op(layout, 'bylonder.export_babylon', 'Babylon (.babylon)'); op(layout, 'bylonder.export_js', 'JavaScript (.zip)'); op(layout, 'bylonder.export_js_live', 'JavaScript, Live Modifiers (.zip)'); op(layout, 'bylonder.project_export', 'Project ZIP (.zip)'); }],
     ['TOPBAR_MT_edit', 'append', ({ layout }) => { layout.separator(); check(layout, 'bylonder.scene_edits_remember', 'Remember Scene Edits', $('remember').checked); op(layout, 'bylonder.scene_edits_clear', 'Clear Scene Edits'); }],
     ['TOPBAR_MT_render', 'prepend', ({ layout }) => { op(layout, 'bylonder.run', 'Run'); op(layout, 'bylonder.stop', 'Stop'); check(layout, 'bylonder.auto_run_toggle', 'Auto-run', autoRun.checked); layout.separator(); }],
     ['TOPBAR_MT_render', 'append', ({ layout }) => { layout.separator(); op(layout, 'bylonder.render_settings', 'Viewport Resolution...'); }],

@@ -1,0 +1,211 @@
+// @ts-check
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// A scene exported from Bylonder, with its controls: each a Blender RNA path from bpy.data
+// (`objects["Cube"].location[0]`) whose value the page sets, and which lands on the Babylon objects it binds to.
+import { Matrix, Observable, Quaternion, Vector3 } from '@babylonjs/core';
+
+/** @typedef {number | boolean | string} Value */
+
+/**
+ * A control as Blender's RNA describes its property: its type, default and UI range, subtype and unit, and whether the
+ * export suggests it to authors and UIs.
+ * @typedef {object} Control
+ * @property {string} path
+ * @property {'FLOAT' | 'INT' | 'BOOLEAN' | 'STRING'} type
+ * @property {Value} default
+ * @property {number} [soft_min]
+ * @property {number} [soft_max]
+ * @property {string} [subtype]
+ * @property {string} [unit]
+ * @property {boolean} [suggested]
+ */
+
+/**
+ * How an object's location, rotation and scale place its node: Blender's rotation mode; the parent inverse matrix
+ * (Babylon's axes) when not the identity; a turn (x, y, z, w) before the object's own, a camera's to look along +Z or an
+ * area light's rig's to hold its rectangle in its XY plane; for a light, the local direction the rotation turns into its
+ * `direction`.
+ * @typedef {object} Transform
+ * @property {string} mode
+ * @property {number[]} [parent_inverse]
+ * @property {number[]} [offset]
+ * @property {number[]} [direction]
+ */
+
+/**
+ * Where a control's value lands: a property of a node (by id) or of the scene, scaled by `factor`; the node's place
+ * (`transform`); visibility (`hide`); or a focal length as a field of view (`lens`: half the sensor's fitted size).
+ * @typedef {object} Binding
+ * @property {string} [node]
+ * @property {string} [property]
+ * @property {number} [factor]
+ * @property {Transform} [transform]
+ * @property {'viewport' | 'render'} [hide]
+ * @property {number} [lens]
+ */
+
+/** @typedef {Control & { bind?: Binding }} Knob */
+
+/** @typedef {{ path: string, value: Value }} Change */
+
+/**
+ * Blender's rotation of a mode as a quaternion (w, x, y, z): an Euler mode turns about its first axis first.
+ * @param {string} mode
+ * @param {number[]} values
+ */
+function blenderQuaternion(mode, values) {
+  if (mode === 'QUATERNION') return values;
+  /** @type {number[]} */
+  let q = [1, 0, 0, 0];
+  for (const letter of mode) {
+    const axis = 'XYZ'.indexOf(letter), half = values[axis] / 2, turn = [Math.cos(half), 0, 0, 0];
+    turn[axis + 1] = Math.sin(half);
+    const [w, x, y, z] = q, [tw, tx, ty, tz] = turn;
+    q = [tw * w - tx * x - ty * y - tz * z, tw * x + tx * w + ty * z - tz * y, tw * y - tx * z + ty * w + tz * x, tw * z + tx * y - ty * x + tz * w];
+  }
+  return q;
+}
+
+/**
+ * Blender's rotation of a mode as Babylon's quaternion: Babylon's (x, y, z) is Blender's (x, z, y), its rotations
+ * turning the other way.
+ * @param {string} mode
+ * @param {number[]} values
+ */
+export function babylonRotation(mode, values) {
+  const [w, x, y, z] = blenderQuaternion(mode, values);
+  return new Quaternion(-x, -z, -y, w);
+}
+
+/**
+ * Sets the dotted `path` of `owner` to `value`.
+ * @param {any} owner
+ * @param {string} path
+ * @param {Value} value
+ */
+function assign(owner, path, value) {
+  const keys = path.split('.'), last = /** @type {string} */ (keys.pop());
+  keys.reduce((o, key) => o[key], owner)[last] = value;
+}
+
+/**
+ * The exported scene and its controls.
+ * @template {Record<string, Value>} [Controls=Record<string, Value>]
+ */
+export class BlendScene {
+  /** Told of each control's new value. @type {Observable<Change>} */
+  onChanged = new Observable();
+  /** @type {Map<string, Knob>} */
+  #knobs;
+  /** @type {Map<string, Value>} */
+  #values;
+
+  /**
+   * @param {import('@babylonjs/core').Scene} scene
+   * @param {Knob[]} knobs
+   */
+  constructor(scene, knobs) {
+    /** Babylon's scene. */
+    this.scene = scene;
+    this.#knobs = new Map(knobs.map((knob) => [knob.path, knob]));
+    this.#values = new Map(knobs.map((knob) => [knob.path, knob.default]));
+  }
+
+  /**
+   * A control's value.
+   * @template {keyof Controls & string} P
+   * @param {P} path
+   * @returns {Controls[P]}
+   */
+  get(path) {
+    if (!this.#values.has(path)) throw new Error(`No control ${path}`);
+    return /** @type {Controls[P]} */ (this.#values.get(path));
+  }
+
+  /**
+   * Sets a control, and what it binds to.
+   * @template {keyof Controls & string} P
+   * @param {P} path
+   * @param {Controls[P]} value
+   */
+  set(path, value) {
+    const knob = this.#knobs.get(path);
+    if (!knob) throw new Error(`No control ${path}`);
+    if (typeof value !== typeof knob.default) throw new TypeError(`${path} takes a ${typeof knob.default}, not ${typeof value}`);
+    this.#values.set(path, value);
+    if (knob.bind) this.#apply(knob.bind, path, value);
+    this.onChanged.notifyObservers({ path, value });
+  }
+
+  /** The controls, as Blender's RNA describes them. @returns {Control[]} */
+  controls() {
+    return [...this.#knobs.values()].map(({ bind, ...control }) => control);
+  }
+
+  /** Disposes of the scene. */
+  dispose() {
+    this.onChanged.clear();
+    this.scene.dispose();
+  }
+
+  /**
+   * Places a node by its object's location, rotation and scale (`base`: the object's path), as Blender's matrix_world
+   * of an object without constraints: the parent's, its parent inverse, then its own.
+   * @param {any} node
+   * @param {string} base
+   * @param {Transform} transform
+   */
+  #place(node, base, { mode, parent_inverse, offset, direction }) {
+    /** @param {string} name @param {number} count */
+    const vector = (name, count) => Array.from({ length: count }, (_, i) => /** @type {number} */ (this.#values.get(`${base}.${name}[${i}]`) ?? 1));
+    const [x, y, z] = vector('location', 3), [sx, sy, sz] = vector('scale', 3);
+    const position = new Vector3(x, z, y), scaling = new Vector3(sx, sz, sy);
+    const rotation = babylonRotation(mode, vector(mode === 'QUATERNION' ? 'rotation_quaternion' : 'rotation_euler', mode === 'QUATERNION' ? 4 : 3));
+    if (offset || parent_inverse) {
+      let matrix = Matrix.Compose(scaling, rotation, position);
+      if (offset) matrix = Quaternion.FromArray(offset).toRotationMatrix(new Matrix()).multiply(matrix);
+      if (parent_inverse) matrix = matrix.multiply(Matrix.FromArray(parent_inverse));
+      matrix.decompose(scaling, rotation, position);
+    }
+    if (node.position) node.position.copyFrom(position);
+    if (direction) {
+      node.direction = Vector3.FromArray(direction).applyRotationQuaternion(rotation);
+      return;
+    }
+    node.rotationQuaternion = rotation;
+    node.scaling?.copyFrom(scaling);
+  }
+
+  /**
+   * @param {Binding} bind
+   * @param {string} path
+   * @param {Value} value
+   */
+  #apply(bind, path, value) {
+    const node = /** @type {any} */ (bind.node === undefined ? this.scene : this.scene.getNodeById(bind.node));
+    if (!node) return;
+    if (bind.transform) {
+      this.#place(node, path.slice(0, path.lastIndexOf('.')), bind.transform);
+    } else if (bind.hide) {
+      const base = path.slice(0, path.lastIndexOf('.'));
+      const hidden = ['viewport', 'render'].some((kind) => this.#values.get(`${base}.hide_${kind}`) === true);
+      if ('isVisible' in node) node.isVisible = !hidden;
+      else node.setEnabled(!hidden);
+    } else if (bind.lens !== undefined) {
+      node.fov = 2 * Math.atan(bind.lens / /** @type {number} */ (value));
+    } else if (bind.property) {
+      assign(node, bind.property, typeof value === 'number' ? value * (bind.factor ?? 1) : value);
+    }
+  }
+}
+
+/**
+ * A scene exported from Bylonder, loaded: `url` is its scene.js.
+ * @param {import('@babylonjs/core').AbstractEngine} engine
+ * @param {string | URL} url
+ * @returns {Promise<BlendScene>}
+ */
+export async function loadBlendScene(engine, url) {
+  const { load } = await import(new URL(url, globalThis.location?.href).href);
+  return load(engine);
+}

@@ -1,10 +1,15 @@
-// File > Export > JavaScript (.js): an ES module whose createScene(engine, canvas) builds the exported scene with
-// Babylon's API. Objects (meshes, empties) are written as their initialization code, with geometry as base64 typed
-// arrays read straight from the evaluated meshes; materials, lights, cameras, shadows, animation and effects are
-// Babylon's own serialization, passed to their Parse functions as Babylon's .babylon loader does.
+// File > Export > JavaScript: a package whose scene.js builds the exported scene with Babylon's API. Objects (meshes,
+// empties) are written as their initialization code, with geometry read straight from the evaluated meshes into
+// scene.bin (scene-bin.js); materials, lights, cameras, shadows, animation and effects are Babylon's own serialization,
+// passed to their Parse functions as Babylon's .babylon loader does, with images as files beside it. `load(engine)`
+// gives the scene with its controls (runtime/blend-scene.js), `createScene(engine, canvas)` the scene alone.
 import { AbstractEngine } from '@babylonjs/core';
 import { serializeScene } from './babylon-export.js';
 import { exportRuntimes } from '../runtimes/runtimes.js';
+import { exportControls, controlTypes } from './controls-export.js';
+import { createSceneBin } from './scene-bin.js';
+import { imageFiles } from './image-files.js';
+import { areaRigs } from './area-lights.js';
 
 const CDN = `https://cdn.jsdelivr.net/npm/@babylonjs/core@${AbstractEngine.Version}/+esm`;
 const json = (value) => JSON.stringify(value);
@@ -18,16 +23,18 @@ function base64(view) {
   return btoa(text);
 }
 
-// Vertex buffers by Babylon kind, with their sizes, and the indices: one entry per geometry, shared by its meshes. A
-// thin instance buffer (world0 to world3, per instance) is the mesh's thinInstances, written with its node.
-function geometryCode(mesh) {
-  const buffers = mesh.getVerticesDataKinds().filter((kind) => !mesh.getVertexBuffer(kind).getIsInstanced()).map((kind) => {
-    const data = Float32Array.from(mesh.getVerticesData(kind, false, false));
-    return `${json(kind)}: [${mesh.getVertexBuffer(kind).getSize()}, ${json(base64(data))}]`;
+// Vertex buffers by Babylon kind, with their sizes, and the indices, as buffers of scene.bin: one entry per geometry,
+// shared by its meshes. A thin instance buffer (world0 to world3, per instance) is the mesh's thinInstances, written
+// with its node.
+function geometryCode(mesh, bin) {
+  const kinds = mesh.getVerticesDataKinds().filter((kind) => !mesh.getVertexBuffer(kind).getIsInstanced());
+  const buffers = kinds.map((kind) => {
+    const size = mesh.getVertexBuffer(kind).getSize();
+    return `${json(kind)}: [${size}, buffers[${bin.add(Float32Array.from(mesh.getVerticesData(kind, false, false)))}]]`;
   });
   const indices = mesh.getIndices();
   const wide = mesh.getTotalVertices() > 65535;
-  const index = indices?.length ? `, ${json(base64(wide ? Uint32Array.from(indices) : Uint16Array.from(indices)))}, ${wide}` : '';
+  const index = indices?.length ? `, buffers[${bin.add(wide ? Uint32Array.from(indices) : Uint16Array.from(indices))}]` : '';
   return `geometry(scene, { ${buffers.join(', ')} }${index})`;
 }
 
@@ -35,7 +42,7 @@ const DEFAULTS = { isVisible: true, visibility: 1, receiveShadows: false, pickab
 const PROPERTIES = { pickable: 'isPickable' };
 
 // One node's initialization code, from its serialization (`entry`) and, for a mesh, its Babylon mesh.
-function nodeCode(entry, mesh, geometries, live) {
+function nodeCode(entry, mesh, geometries, live, bin) {
   const lines = [];
   const v = (name) => `node.${name}`;
   if (mesh) {
@@ -57,7 +64,7 @@ function nodeCode(entry, mesh, geometries, live) {
   if (mesh && entry.subMeshes?.length > 1) lines.push(`node.subMeshes = [];`, ...entry.subMeshes.map((s) => `new SubMesh(${s.materialIndex}, ${s.verticesStart}, ${s.verticesCount}, ${s.indexStart}, ${s.indexCount}, node);`));
   if (entry.skeletonId !== undefined) lines.push(`node.skeleton = scene.getSkeletonById(${json(entry.skeletonId)});`, `node.numBoneInfluencers = ${entry.numBoneInfluencers};`);
   if (entry.morphTargetManagerId !== undefined) lines.push(`node.morphTargetManager = morphTargets[${json(entry.morphTargetManagerId)}];`);
-  if (entry.thinInstances?.instancesCount) lines.push(`node.thinInstanceSetBuffer('matrix', new Float32Array(${json(entry.thinInstances.matrixData.slice(0, entry.thinInstances.instancesCount * 16).map(number))}), 16, true);`);
+  if (entry.thinInstances?.instancesCount) lines.push(`node.thinInstanceSetBuffer('matrix', buffers[${bin.add(Float32Array.from(entry.thinInstances.matrixData.slice(0, entry.thinInstances.instancesCount * 16)))}], 16, true);`);
   for (const instance of entry.instances ?? []) {
     lines.push(`{ const instance = node.createInstance(${json(instance.name)}); instance.position.set(${vector(instance.position)}); ${instance.rotationQuaternion ? `instance.rotationQuaternion = new Quaternion(${vector(instance.rotationQuaternion)});` : `instance.rotation.set(${vector(instance.rotation)});`} instance.scaling.set(${vector(instance.scaling)}); }`);
   }
@@ -82,29 +89,32 @@ const liveStack = ({ mesh, modifiers }) => ({
 
 const indent = (lines, by = '    ') => lines.map((l) => by + l).join('\n');
 
-// The module's source. With `live`, objects whose modifiers are all Blender's keep them live through the modifier
-// kernels polyfill, which createScene loads from `bylonder-modifiers/` next to the module (or its `modifiers` option).
-export async function exportModule(world, { live: keepLive = false, parity = false } = {}) {
+// The package's files but the runtime's: scene.js, scene.d.ts, scene.bin and images/. With `live`, objects whose
+// modifiers are all Blender's keep them live through the modifier kernels polyfill, which createScene loads from
+// `bylonder-modifiers/` next to the module (or its `modifiers` option).
+export async function exportModule(world, { live: keepLive = false, parity = false, hostCompression = false } = {}) {
   const live = new Map(keepLive ? world.objects.map((node) => [node, world.modifiers.live(node)]).filter(([, stack]) => stack && !stack.modifiers.some(needsOpenVDB)) : []);
   await world.modifiers.settled();
   // The mapped meshes' geometry is read below: their mapping holds until the module is written.
   const mapped = exportRuntimes(world);
   try {
-    return await moduleSource(world, live, mapped, parity);
+    return await moduleSource(world, live, mapped, parity, hostCompression);
   } finally {
     mapped.restore();
   }
 }
 
-async function moduleSource(world, live, mapped, parity) {
+async function moduleSource(world, live, mapped, parity, hostCompression) {
   const data = await serializeScene(world, { geometry: false, live, mapped, parity });
   const { scene } = world;
+  const bin = createSceneBin({ gzip: !hostCompression }), images = imageFiles(data);
   const geometries = new Map(), geometryLines = [];
   const objects = [...data.transformNodes.map((entry) => ({ entry })), ...data.meshes.map((entry) => ({ entry, mesh: scene.getMeshByUniqueId(entry.uniqueId) }))];
   for (const { mesh } of objects) if (mesh?.geometry && !geometries.has(mesh.geometry)) {
     geometries.set(mesh.geometry, `geometries[${geometries.size}]`);
-    geometryLines.push(`  ${geometryCode(mesh)},`);
+    geometryLines.push(`  ${geometryCode(mesh, bin)},`);
   }
+  const controls = exportControls(world, data), rigs = areaRigs(world, data);
   const parented = [...data.transformNodes, ...data.meshes, ...data.lights, ...data.cameras].filter((e) => e.parentId !== undefined);
   const parse = (name, list, code) => (list?.length ? `  for (const entry of ${name}) ${code};\n` : '');
   const settings = {
@@ -114,18 +124,21 @@ async function moduleSource(world, live, mapped, parity) {
     environmentProbe: data.environmentProbe ?? null, environmentIntensity: data.environmentIntensity, iblIntensity: data.iblIntensity, useRightHandedSystem: data.useRightHandedSystem,
   };
   const name = world.sceneSettings.state.name || 'Scene';
-  return `// ${name}, exported from Bylonder: createScene(engine, canvas) builds it with Babylon.js ${AbstractEngine.Version}.
-// In a page, map @babylonjs/core to the same version:
+  const source = `// ${name}, exported from Bylonder: load(engine) gives it with its controls, createScene(engine, canvas) builds it
+// alone, with Babylon.js ${AbstractEngine.Version}. In a page, map @babylonjs/core to the same version:
 // <script type="importmap">{ "imports": { "@babylonjs/core": "${CDN}" } }</script>
+import { readBuffers } from './bylonder/buffers.js';
+import { BlendScene } from './bylonder/blend-scene.js';
 import { Animation, AnimationGroup, CascadedShadowGenerator, Color3, Color4, CubeTexture, EffectLayer, Geometry, HDRCubeTexture, Light, LinesMesh, Material, Matrix, Mesh, MorphTargetManager, MultiMaterial, PostProcess, Quaternion, ReflectionProbe, Scene, SerializationHelper, ShadowGenerator, Skeleton, SubMesh, TransformNode, Vector3, Camera, ParticleSystem } from '@babylonjs/core';
 import * as BABYLON from '@babylonjs/core';
 
-const bytes = (text) => Uint8Array.from(atob(text), (c) => c.charCodeAt(0)).buffer;
+// Images and scene.bin sit beside this module.
+const ROOT = new URL('./', import.meta.url).href;
 let geometryCount = 0;
-function geometry(scene, buffers, indices, wide) {
+function geometry(scene, vertices, indices) {
   const result = new Geometry('geometry' + geometryCount++, scene);
-  for (const [kind, [size, data]] of Object.entries(buffers)) result.setVerticesData(kind, new Float32Array(bytes(data)), false, size);
-  if (indices) result.setIndices(wide ? new Uint32Array(bytes(indices)) : new Uint16Array(bytes(indices)));
+  for (const [kind, [size, data]] of Object.entries(vertices)) result.setVerticesData(kind, data, false, size);
+  if (indices) result.setIndices(indices);
   return result;
 }
 
@@ -144,6 +157,13 @@ const PARTICLE_SYSTEMS = ${json(data.particleSystems)};
 const ANIMATION_GROUPS = ${json(data.animationGroups)};
 const RENDERING_PIPELINES = ${json(data.renderingPipelines)};
 const POST_PROCESSES = ${json(data.postProcesses)};
+const BUFFERS = ${json(bin.views)};
+const CONTROLS = ${json(controls)};
+const AREA_RIGS = ${json(rigs)};
+
+export async function load(engine) {
+  return new BlendScene(await createScene(engine, engine.getRenderingCanvas()), CONTROLS);
+}
 
 export async function createScene(engine, canvas${live.size ? ", { modifiers = new URL('./bylonder-modifiers/', import.meta.url) } = {}" : ''}) {
   const scene = new Scene(engine);
@@ -157,15 +177,16 @@ export async function createScene(engine, canvas${live.size ? ", { modifiers = n
   SerializationHelper.Parse(() => scene.imageProcessingConfiguration, IMAGE_PROCESSING, scene);
   const env = SCENE.environment;
   if (env) {
-    scene.environmentTexture = env.hdr ? new HDRCubeTexture(env.url, scene, env.size ?? 128) : CubeTexture.CreateFromPrefilteredData(env.url, scene, env.extension);
+    scene.environmentTexture = env.hdr ? new HDRCubeTexture(new URL(env.url, ROOT).href, scene, env.size ?? 128) : CubeTexture.CreateFromPrefilteredData(new URL(env.url, ROOT).href, scene, env.extension);
     scene.environmentTexture.rotationY = env.rotationY;
     if (env.skybox) scene.createDefaultSkybox(scene.environmentTexture, true, 1000, 0);
   }
   scene.environmentIntensity = SCENE.environmentIntensity;
   scene.iblIntensity = SCENE.iblIntensity ?? 1;
+  const buffers = await readBuffers(new URL('scene.bin', ROOT), BUFFERS, ${!hostCompression});
 
   const materials = {};
-  for (const entry of MATERIALS) materials[entry.uniqueId] = Material.Parse(entry, scene, '');
+  for (const entry of MATERIALS) materials[entry.uniqueId] = Material.Parse(entry, scene, ROOT);
   for (const entry of MULTI_MATERIALS) materials[entry.uniqueId] = MultiMaterial.ParseMultiMaterial(entry, scene);
   for (const entry of SKELETONS) Skeleton.Parse(entry, scene);
   const morphTargets = {};
@@ -175,14 +196,23 @@ ${geometryLines.join('\n')}
   ];
 
   const nodes = {};
-${objects.map(({ entry, mesh }) => `  // ${entry.name}\n  {\n${indent(nodeCode(entry, mesh, geometries, live.get(mesh)))}\n  }`).join('\n')}
+${objects.map(({ entry, mesh }) => `  // ${entry.name}\n  {\n${indent(nodeCode(entry, mesh, geometries, live.get(mesh), bin))}\n  }`).join('\n')}
 ${parse('LIGHTS', data.lights, 'nodes[entry.uniqueId] = Light.Parse(entry, scene)')}${parse('CAMERAS', data.cameras, 'nodes[entry.uniqueId] = Camera.Parse(entry, scene)')}
 ${parented.map((e) => `  nodes[${e.uniqueId}].parent = nodes[${e.parentId}] ?? null;`).join('\n')}
+  // An area light turns by its parent: a rig placed as its object.
+  for (const rig of AREA_RIGS) {
+    const light = nodes[rig.light], node = new TransformNode(rig.id, scene);
+    node.rotationQuaternion = new Quaternion();
+    Matrix.FromArray(rig.matrix).decompose(node.scaling, node.rotationQuaternion, node.position);
+    node.parent = light.parent;
+    light.parent = node;
+    light.position.setAll(0);
+  }
 
-${parse('REFLECTION_PROBES', data.reflectionProbes, "ReflectionProbe.Parse(entry, scene, '')")}${parse('SHADOW_GENERATORS', data.shadowGenerators, "(entry.className === 'CascadedShadowGenerator' ? CascadedShadowGenerator : ShadowGenerator).Parse(entry, scene)")}${parse('EFFECT_LAYERS', data.effectLayers, "EffectLayer.Parse(entry, scene, '')")}${parse('PARTICLE_SYSTEMS', data.particleSystems, "ParticleSystem.Parse(entry, scene, '')")}  if (SCENE.environmentProbe) scene.environmentTexture = scene.reflectionProbes.find((p) => p.name === SCENE.environmentProbe)?.cubeTexture ?? scene.environmentTexture;
+${parse('REFLECTION_PROBES', data.reflectionProbes, "ReflectionProbe.Parse(entry, scene, ROOT)")}${parse('SHADOW_GENERATORS', data.shadowGenerators, "(entry.className === 'CascadedShadowGenerator' ? CascadedShadowGenerator : ShadowGenerator).Parse(entry, scene)")}${parse('EFFECT_LAYERS', data.effectLayers, "EffectLayer.Parse(entry, scene, ROOT)")}${parse('PARTICLE_SYSTEMS', data.particleSystems, "ParticleSystem.Parse(entry, scene, ROOT)")}  if (SCENE.environmentProbe) scene.environmentTexture = scene.reflectionProbes.find((p) => p.name === SCENE.environmentProbe)?.cubeTexture ?? scene.environmentTexture;
   scene.activeCamera = scene.getCameraById(${json(data.activeCameraID ?? null)}) ?? scene.cameras[0] ?? null;
-  for (const entry of RENDERING_PIPELINES) BABYLON[entry.customType]?.Parse(entry, scene, '');
-  for (const entry of POST_PROCESSES) PostProcess.Parse(entry, scene, '');
+  for (const entry of RENDERING_PIPELINES) BABYLON[entry.customType]?.Parse(entry, scene, ROOT);
+  for (const entry of POST_PROCESSES) PostProcess.Parse(entry, scene, ROOT);
   for (const entry of ANIMATION_GROUPS) AnimationGroup.Parse(entry, scene).play(entry.loopAnimation);
   if (canvas) scene.activeCamera?.attachControl(canvas, true);${live.size ? `
   // Blender's modifiers stay live: the polyfill evaluates them in a worker and again when an animated setting changes.
@@ -195,4 +225,7 @@ ${parse('REFLECTION_PROBES', data.reflectionProbes, "ReflectionProbe.Parse(entry
   return scene;
 }
 `;
+  // An ES module package in Node too (the headless SDK), needing only Babylon.
+  const manifest = { name: name.toLowerCase().replace(/[^a-z0-9-]+/g, '-'), type: 'module', main: 'scene.js', types: 'scene.d.ts', peerDependencies: { '@babylonjs/core': AbstractEngine.Version } };
+  return { 'scene.js': source, 'scene.d.ts': controlTypes(controls), 'scene.bin': bin.bytes(), 'package.json': `${JSON.stringify(manifest, null, 2)}\n`, ...images };
 }

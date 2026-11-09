@@ -361,7 +361,7 @@ Decided 2026-10-29 (docs/model.md, principle 5). Blender's window manager runs t
 
 ### Export for Babylon
 
-Decided 2026-10-28. File > Export (`TOPBAR_MT_file_export`, Blender's menu) gets Babylon (.babylon) and JavaScript (.js),
+Decided 2026-10-28. File > Export (`TOPBAR_MT_file_export`, Blender's menu) gets Babylon (.babylon) and JavaScript (.zip),
 operators `bylonder.export_babylon` and `bylonder.export_js` (`workspace/topbar.js`), which the scene window runs
 (`src/io_scene_babylon`), and JavaScript with Live Modifiers (below).
 
@@ -394,7 +394,9 @@ operators `bylonder.export_babylon` and `bylonder.export_js` (`workspace/topbar.
 - **JavaScript.** `createScene(engine, canvas)` builds each mesh and empty as code (geometry, transform, parent,
   material, flags, thin instances), and parses materials, lights, cameras, shadows, effect layers, probes, particles,
   pipelines and animation with Babylon's `Parse` functions, as the loader does. It imports `@babylonjs/core`, mapped
-  in a page to `cdn.jsdelivr.net/npm/@babylonjs/core@<the app's version>/+esm` (the header names the URL).
+  in a page to `cdn.jsdelivr.net/npm/@babylonjs/core@<the app's version>/+esm` (the header names the URL). The export
+  is a package (`controllable-exports.md`): `scene.js` with its geometry in `scene.bin` and its images as files, and
+  `load(engine)`, the scene with its controls by Blender RNA path, from the page runtime in `bylonder/`.
 - **Checked.** `tests/export.test.js` (NullEngine: serialize, reload with Babylon's loader and import the module,
   compare geometry, material, camera and animation), `tests/runtimes-armature-wasm.test.js` (the Rigged Character's
   skeleton reloaded and skinned as Main deforms it at each frame) and `tests/e2e/smoke.mjs` (File > Export in the app).

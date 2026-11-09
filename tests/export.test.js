@@ -1,17 +1,14 @@
 import assert from 'node:assert/strict';
-import { writeFileSync, mkdtempSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { pathToFileURL } from 'node:url';
 import { NullEngine, Scene, MeshBuilder, FreeCamera, ArcRotateCamera, PointLight, PBRMaterial, StandardMaterial, Vector3, AppendSceneAsync, VertexBuffer } from '@babylonjs/core';
 import { createModifierSystem } from '../src/modifiers/stack.js';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
-import { registerObjects, bindProperties } from '../src/blenkernel/animation/bindings.js';
+import { registerObjects, bindProperties, registerStore } from '../src/blenkernel/animation/bindings.js';
 import { createRenderSettings } from '../src/blenkernel/scene/render.js';
 import { createSceneSettings } from '../src/blenkernel/scene/settings.js';
 import { asObject } from '../src/runtime/object-transform.js';
 import { serializeScene } from '../src/io_scene_babylon/babylon-export.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
+import { writePackage } from './export-package.js';
 import { sceneMain } from './scene-main.js';
 
 // A Default Cube with Subdivision Surface, a PBR material whose color is keyed, a point light and the scene camera,
@@ -41,6 +38,8 @@ world.modifiers = createModifierSystem(world, { notify: (message) => { throw Err
 sceneMain(world);
 registerObjects(animation, objects);
 const material = bindProperties(animation, paint, { id: 'material', properties: { albedoColor: {} } });
+// A project's SDK control (sdk.controls), a value of a store.
+registerStore(animation, 'look', 'Look', { schema: { glow: {} }, values: { glow: 0.5 }, set() {} });
 animation.time.configure({ frameStart: 1, frameEnd: 20 });
 animation.insert([animation.ref('object:cube', 'position.x')], 1, 0);
 animation.insert([animation.ref('object:cube', 'position.x')], 20, 3);
@@ -85,13 +84,26 @@ await AppendSceneAsync('data:' + JSON.stringify(json), reloaded);
 await check(reloaded, '.babylon');
 
 // .js: a module that builds the same scene; its import of @babylonjs/core resolves here to the installed package.
-const source = await exportModule(world);
+const files = await exportModule(world);
+const source = files['scene.js'];
 assert.match(source, /export async function createScene\(engine, canvas\)/);
 assert.doesNotMatch(source, /__grid|__editorCamera|loose edges|wbCreation/);
-const dir = mkdtempSync(join(tmpdir(), 'bylonder-export-'));
-const file = join(dir, 'scene.mjs');
-writeFileSync(file, source.replaceAll("'@babylonjs/core'", JSON.stringify(import.meta.resolve('@babylonjs/core'))));
-const built = await (await import(pathToFileURL(file).href)).createScene(new NullEngine(), null);
-rmSync(dir, { recursive: true });
-await check(built, '.js');
+assert.deepEqual(Object.keys(files).sort(), ['package.json', 'scene.bin', 'scene.d.ts', 'scene.js']);
+const written = writePackage(files);
+const module = await import(written.url);
+await check(await module.createScene(new NullEngine(), null), '.js');
+// load(): the same scene with its controls, among them the SDK control, a Scene custom property.
+const blend = await module.load(new NullEngine());
+await check(blend.scene, 'load');
+const glow = blend.controls().find((c) => c.path.endsWith('["store:look glow"]'));
+assert.ok(glow?.path.startsWith('scenes["') && glow.default === 0.5 && glow.suggested, `the SDK control: ${JSON.stringify(glow)}`);
+blend.set('objects["Cube"].location[0]', 2);
+assert.equal(blend.scene.getMeshByName('Cube').position.x, 2);
+written.remove();
+// For a host that compresses it, scene.bin is the arrays as they are.
+const hosted = await exportModule(world, { hostCompression: true });
+assert.ok(hosted['scene.bin'].length > files['scene.bin'].length, 'scene.bin uncompressed');
+const writtenHosted = writePackage(hosted);
+await check(await (await import(writtenHosted.url)).createScene(new NullEngine(), null), 'host compression');
+writtenHosted.remove();
 console.log('Export: .babylon and .js reload the evaluated mesh, material, light, camera and animation, without helpers');

@@ -1,8 +1,7 @@
 import assert from 'node:assert/strict';
-import { writeFileSync, mkdtempSync, mkdirSync, copyFileSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, copyFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { pathToFileURL, fileURLToPath } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { NullEngine, Scene, FreeCamera, Vector3, VertexBuffer } from '@babylonjs/core';
 import { createPrimitive, shadeSmooth } from '../src/editors/object/mesh-catalog.js';
@@ -14,6 +13,7 @@ import { createSceneSettings } from '../src/blenkernel/scene/settings.js';
 import { sceneMain } from './scene-main.js';
 import { asObject } from '../src/runtime/object-transform.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
+import { writePackage } from './export-package.js';
 import { bundleWorker } from '../scripts/modifiers-polyfill.mjs';
 
 // The modifier kernels polyfill (modifiers.wasm, a worker, modifiers.js) keeps an exported scene's modifiers live:
@@ -55,16 +55,17 @@ animation.insert([thickness], 20, 0.5);
 animation.seek(1);
 await world.modifiers.settled();
 
-// The module and the polyfill laid out as the Live Modifiers zip has them.
-const dir = mkdtempSync(join(tmpdir(), 'bylonder-live-'));
+// The package and the polyfill laid out as the Live Modifiers zip has them.
+const written = writePackage(await exportModule(world, { live: true }));
+const dir = written.dir;
 mkdirSync(join(dir, 'bylonder-modifiers'));
 copyFileSync(new URL('../src/io_scene_babylon/polyfill/modifiers.js', import.meta.url), join(dir, 'bylonder-modifiers/modifiers.js'));
 copyFileSync(new URL('../src/io_scene_babylon/polyfill/modifiers-worker.bundle.js', import.meta.url), join(dir, 'bylonder-modifiers/modifiers-worker.js'));
 copyFileSync(new URL('../src/modifiers/modifiers.wasm', import.meta.url), join(dir, 'bylonder-modifiers/modifiers.wasm'));
-const source = await exportModule(world, { live: true });
-writeFileSync(join(dir, 'scene.mjs'), source.replaceAll("'@babylonjs/core'", JSON.stringify(import.meta.resolve('@babylonjs/core'))));
 
-// A module worker in this realm, as Node has no Web Worker: the bundled worker sets the global onmessage.
+// A module worker in this realm, as Node has no Web Worker: the bundled worker sets the global onmessage, which a
+// worker's global scope has.
+globalThis.onmessage = null;
 globalThis.Worker = class {
   constructor(url) {
     this.loaded = import(url.href);
@@ -80,7 +81,7 @@ const geometry = (mesh) => ['position', 'normal'].map((kind) => Array.from(mesh.
 const TOLERANCE = [1e-5, 1 / 32767, 0];
 const same = (a, b) => a.length === b.length && a.every((array, i) => array.length === b[i].length && array.every((v, j) => Math.abs(v - b[i][j]) <= TOLERANCE[i] + 1e-6));
 
-const built = await (await import(pathToFileURL(join(dir, 'scene.mjs')).href)).createScene(new NullEngine(), null);
+const built = await (await import(written.url)).createScene(new NullEngine(), null);
 const live = built.metadata.liveModifiers;
 assert.deepEqual(live.meshes.map((m) => m.name), STACKS.map(([name]) => name), 'every stack is live');
 for (const cube of cubes) {
@@ -100,5 +101,5 @@ const solidify = built.getMeshByName('Solidify');
 assert.equal(solidify.metadata.bylonderModifiers.stack[0].values.thickness.toFixed(3), '0.500');
 assert.ok(same(geometry(solidify), geometry(cubes[4])), 'Solidify at frame 20: the live result is the applied geometry');
 live.dispose();
-rmSync(dir, { recursive: true });
+written.remove();
 console.log('Live modifiers: Subdivision, Array, Bevel, Mirror and Solidify, and an animated Solidify thickness, match the applied export');

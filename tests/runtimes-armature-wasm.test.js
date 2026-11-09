@@ -32,10 +32,7 @@ import { bylonderIcon, BYLONDER_ICON } from '../src/python/bpy_icons.js';
 import { serializeScene } from '../src/io_scene_babylon/babylon-export.js';
 import { BlenderAnimation } from '../src/blenkernel/animation/anim-blender.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
-import { writeFileSync, mkdtempSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { writePackage } from './export-package.js';
 
 if (!hasArmatures) {
   console.log('Armature runtimes: skipped, this module has no armature-api.cc');
@@ -227,10 +224,9 @@ for (const frame of [1, 6, 16, 21]) assert.ok(loadedError(loaded, frame) < PRECI
 // Its Area light's loader keeps a reloaded scene alive in Node (no XMLHttpRequest for its LTC textures).
 loaded.getEngine().dispose();
 // The JavaScript export builds the same skeleton, skin and animation.
-const dir = mkdtempSync(join(tmpdir(), 'bylonder-runtimes-'));
-writeFileSync(join(dir, 'scene.mjs'), (await exportModule(world)).replaceAll("'@babylonjs/core'", JSON.stringify(import.meta.resolve('@babylonjs/core'))));
-const built = await (await import(pathToFileURL(join(dir, 'scene.mjs')).href)).createScene(new NullEngine(), null);
-rmSync(dir, { recursive: true });
+const written = writePackage(await exportModule(world));
+const built = await (await import(written.url)).createScene(new NullEngine(), null);
+written.remove();
 assert.equal(built.getMeshByName('Body').skeleton.name, 'Rig');
 built.animationGroups[0].pause();
 for (const frame of [6, 16]) assert.ok(loadedError(built, frame) < PRECISION, `the .js export at frame ${frame} skins as Main deforms (${loadedError(built, frame)})`);
