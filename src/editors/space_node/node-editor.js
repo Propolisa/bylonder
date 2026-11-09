@@ -3,6 +3,7 @@ import { menuButton } from '../interface/menu.js';
 import './node-editor.css';
 import { installEditorTheme } from './editor-theme.js';
 import { registerNodeTree } from '../../python/bpy_interface.js';
+import { show } from '../../overrides/babylon/node-editor-alert.js';
 
 const pick = (module, name) => module[name] || module.default?.[name] || module.default;
 export const treeTypes = {
@@ -15,11 +16,6 @@ export const treeTypes = {
 // Bylonder's own node trees are node tree types, as an add-on registers them, so Blender's editor type menu lists them.
 for (const { idname, label, icon } of Object.values(treeTypes)) if (idname) registerNodeTree(idname, label, icon.toUpperCase());
 
-async function show(Editor, options) {
-  const alert = window.alert;
-  window.alert = () => {};
-  try { Editor.Show(options); } finally { window.alert = alert; }
-}
 
 const overlapping = root => {
   const rects = [...root.querySelectorAll('[data-bl-category]')].map(n => n.getBoundingClientRect()).filter(r => r.width && r.height);

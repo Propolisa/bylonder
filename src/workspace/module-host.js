@@ -1,16 +1,8 @@
 import { activeScene, sceneRecords } from "./scenes.js";
 import { hash } from "./opfs.js";
+import { installFailure } from "../overrides/browser/service-worker-install.js";
 export const RUN_CACHE = "babylon-workspace-runs-v1";
 export const APP_BASE = new URL(import.meta.env.BASE_URL, location.href).pathname;
-// Rejects when the module host's worker fails to install (becomes redundant), which navigator.serviceWorker.ready
-// never reports.
-const installFailure = (registration) => new Promise((resolve, reject) => {
-  const watch = (worker) => worker?.addEventListener("statechange", () => {
-    if (worker.state === "redundant") reject(Error("The module host could not install. Reload this page once."));
-  });
-  watch(registration.installing ?? registration.waiting);
-  registration.addEventListener("updatefound", () => watch(registration.installing));
-});
 export async function ensureModuleHost() {
   if (!("serviceWorker" in navigator))
     throw Error(

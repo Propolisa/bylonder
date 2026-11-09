@@ -1,7 +1,7 @@
 // Blender's functions that take samplers run as copies that sample the uniforms they are called with (WebGPU's GLSL
 // takes no sampler arguments): overloads by sampler type, nested calls, and the originals gone.
 import assert from 'node:assert/strict';
-import { specializeSamplers } from '../src/nodes/blender/glsl.js';
+import { specializeSamplers } from '../src/overrides/webgpu/samplers.js';
 
 const shader = specializeSamplers(`uniform highp sampler2D bl_image_3;
 uniform isampler2D ids;

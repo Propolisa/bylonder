@@ -1,5 +1,7 @@
-import { Camera, Constants, DefaultRenderingPipeline, DepthOfFieldEffectBlurLevel, ImageProcessingConfiguration, SSAO2RenderingPipeline, SSRRenderingPipeline } from '@babylonjs/core';
-import { seededRandom } from '../../render/clock.js';
+import { Camera, Constants, DepthOfFieldEffectBlurLevel, ImageProcessingConfiguration, SSAO2RenderingPipeline, SSRRenderingPipeline } from '@babylonjs/core';
+import { withSeededRandom } from '../../overrides/babylon/seeded-random.js';
+import { markImageProcessingDirty } from '../../overrides/babylon/image-processing-dirty.js';
+import { SceneLinearPipeline } from '../../overrides/babylon/scene-linear-pipeline.js';
 import { createFilm } from '../../render/film.js';
 import { cameraVolumes } from '../../draw/volumes.js';
 import { createDisplayTransform, setDisplaySettings } from '../../render/display-transform.js';
@@ -35,35 +37,10 @@ export function readAuthoredRender(scene) {
   return { viewTransform, look, exposure: +Math.log2(Math.max(ip.exposure, 1e-6)).toFixed(6) };
 }
 
-// Babylon draws Fast GI's sample kernel and noise from Math.random; a fixed seed gives every view and every render
-// the same pattern, so rendered images match the rendered viewport.
-const withSeededRandom = create => {
-  const random = Math.random;
-  Math.random = seededRandom(1);
-  try { return create(); } finally { Math.random = random; }
-};
-
 // The widest blur of Babylon's depth of field (its High level's kernel), in pixels.
 const DOF_KERNEL = 51;
 // The scene linear image between effects: in 8 bits the darks band.
 const HALF_FLOAT = Constants.TEXTURETYPE_HALF_FLOAT;
-
-// Each camera draws its meshes' materials in a render pass of its own (draw/workbench.js), with defines of its own,
-// and a change of the scene's image processing marks only those of the pass current as it changes: a render's camera
-// after a Solid view kept the Solid view's encoding. Every pass's are marked.
-function markImageProcessingDirty(scene) {
-  for (const mesh of scene.meshes) for (const subMesh of mesh.subMeshes ?? []) for (const wrapper of subMesh._drawWrappers) wrapper?.defines?.markAsImageProcessingDirty?.();
-}
-
-// Babylon's default pipeline without its image processing post process, which the display transform replaces. Its own
-// switch would turn the scene's image processing off for every material: a PBR material then encodes its color to
-// display itself, where a rendered view's materials must keep scene linear (applyByPostProcess).
-class SceneLinearPipeline extends DefaultRenderingPipeline {
-  _buildPipeline() {
-    this._imageProcessingEnabled = false;
-    super._buildPipeline();
-  }
-}
 
 // dof(camera): its depth of field as Blender's camera has it ({ focusDistance in meters, fStop, lens in millimeters }), or null.
 // displayTransform(): Blender's display transform of the scene as a color grading lattice (render/display-lut.js), or null

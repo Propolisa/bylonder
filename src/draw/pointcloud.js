@@ -48,7 +48,7 @@ export class PointCloudPlugin extends MaterialPluginBase {
     super(material, 'BlenderPointCloud', 310, { POINTCLOUD: false });
     this._enable(true);
   }
-  // GLSL only: a WGSL material draws a point as its square (on WebGPU Bylonder's are GLSL, gpu-engine.js materialsFromGLSL).
+  // GLSL only: a WGSL material draws a point as its square (on WebGPU Bylonder's are GLSL, overrides/webgpu/pbr-from-glsl.js).
   static of(material) { return material.pluginManager?.getPlugin('BlenderPointCloud') ?? (material.shaderLanguage === 0 ? new PointCloudPlugin(material) : null); }
   getClassName() { return 'PointCloudPlugin'; }
   prepareDefines(defines, scene, mesh) { defines.POINTCLOUD = !!mesh.metadata?.pointcloud; }

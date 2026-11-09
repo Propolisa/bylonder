@@ -21,22 +21,23 @@ Babylon's WebGPU engine (`WebGPUEngine`) from the next start; it draws as WebGL 
 Bylonder's shaders are GLSL only, on both backends; Babylon converts them on WebGPU.
 
 - Babylon's PBR materials and Bylonder's Standard materials compile from Babylon's GLSL on WebGPU too
-  (`src/render/gpu-engine.js` `materialsFromGLSL`), so Bylonder's GLSL plugins on them apply on both backends: curves
+  (`src/overrides/webgpu/pbr-from-glsl.js`), so Bylonder's GLSL plugins on them apply on both backends: curves
   strands, point clouds and the Dithered render method among them. Babylon's shadow generator and GreasedLine's
   materials draw with Babylon's WGSL; Bylonder's edits to them carry WGSL too (`getCustomCode` per shader language):
   the shadow map's lit-side bias and Grease Pencil's scene linear strokes.
 - GLSL that does not convert is rewritten into a form that does: one declaration per line (Babylon's GLSL processor
   does not split `uniform float a, b;`). Any GLSL, Bylonder's, Blender's, an example's or a user's, keeps GLSL's rules
-  once converted: the engine renames the identifiers WGSL reserves (`from`, `let`, `type`...; `src/overrides/webgpu/`, which exported pages apply too)
-  after Babylon has bound every input by name, and turns WGSL's derivative uniformity analysis off (Babylon's own
-  switch), as GLSL takes derivatives and samples in any control flow.
+  once converted: the engine renames the identifiers WGSL reserves (`from`, `let`, `type`...;
+  `src/overrides/webgpu/`, which exported pages apply too) after Babylon has bound every input by name, and turns
+  WGSL's derivative uniformity analysis off (Babylon's own switch), as GLSL takes derivatives and samples in any
+  control flow.
 - Babylon's GLSL to WGSL conversion (Tint) writes WGSL that WebGPU rejects for a NaN constant and, in a shader that
   uses `isnan` or `isinf`, for its uniform arrays; Bylonder's shaders use neither (Blender's curves code makes its
   strip-restarting NaN at run time). FXC (D3D12) fails an implicit-derivative sample in a loop it cannot unroll, so a
   pass that samples per pixel in such a loop reads an explicit level. `tests/webgpu-shaders.test.js` converts
   Bylonder's shaders with the app's glslang and Tint builds and fails on a conversion error or on WGSL WebGPU rejects.
 - WebGPU's GLSL takes no sampler as a function argument. On WebGPU, each of Blender's functions called with an image
-  runs as a copy for that image (`src/nodes/blender/glsl.js` `specializeSamplers`), as do the volume passes' atlas
+  runs as a copy for that image (`src/overrides/webgpu/samplers.js`), as do the volume passes' atlas
   samples. Babylon's own inliner (`#define inline`) does not fit Blender's functions: it matches by name only and
   cannot keep early returns. Babylon's own functions it marks are left to it, and its PBR's area light function, which
   it leaves unmarked, is marked for it, so area lights light node materials.
@@ -52,8 +53,9 @@ Bylonder's shaders are GLSL only, on both backends; Babylon converts them on Web
   objects using it are skipped and reported once instead of invalidating the frame, which would draw nothing.
 - WebGPU passes at most 28 values between a shader's stages and, unlike WebGL 2, packs no floats together. Babylon
   passes each shadow's depth metric beside its light-space position (one value per shadow, four per sun with cascades);
-  on WebGPU the engine derives it in the fragment stage from that position instead (`src/render/depth-metric-varyings.js`,
-  its test checks Babylon's own include text). An upstream candidate: Babylon could derive it there on WebGPU itself.
+  on WebGPU the engine derives it in the fragment stage from that position instead
+  (`src/overrides/webgpu/depth-metric-varyings.js`, its test checks Babylon's own include text). An upstream candidate:
+  Babylon could derive it there on WebGPU itself.
 - Points are drawn as quads on both backends (`src/draw/point-sprites.js`): WebGPU has no point size.
 - Reading a texture back is asynchronous on WebGPU. The CPU compositor awaits it on both backends; Grease Pencil's Fill
   tool, which Blender's code reads synchronously, renders on a small WebGL 2 engine of its own.

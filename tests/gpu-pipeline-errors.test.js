@@ -1,12 +1,12 @@
 // WebGPU: a pipeline the GPU rejects (FXC failing a shader on D3D12) fails its effect as a compile error, once, so its
 // meshes are skipped instead of the invalid pipeline invalidating every frame's command buffer.
 import assert from 'node:assert/strict';
-import { failRejectedPipelines } from '../src/render/gpu-engine.js';
+import { rejectedPipelines } from '../src/overrides/webgpu/rejected-pipelines.js';
 
 const scopes = [], errors = [];
 const device = { pushErrorScope: (filter) => scopes.push(filter), popErrorScope: async () => { scopes.pop(); return errors.shift() ?? null; } };
 const cache = { _createRenderPipeline: (effect) => ({ effect }) };
-failRejectedPipelines(cache, device);
+rejectedPipelines({ _cacheRenderPipeline: cache, _device: device });
 
 const effect = (name) => {
   const context = { stages: {} };

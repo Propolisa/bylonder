@@ -15,7 +15,7 @@ import { Mesh } from '@babylonjs/core/Meshes/mesh.js';
 import { view_3d as theme } from '../editors/interface/userdef-default-theme.js';
 import { mesh_batch_cache_edge_detection } from './mesh-batch-cache.js';
 import { createFullscreenPass } from './fullscreen-pass.js';
-import { setRenderList } from './render-list.js';
+import { setRenderList } from '../overrides/babylon/render-list.js';
 
 // Replaces the top 2 bits (of 16) by the color id, leaving 16K ids to outline objects against each other.
 const outline_id_pack = (outline_id, object_id) => (outline_id << 14) | (object_id & 0x3fff);
@@ -589,7 +589,6 @@ export function createOutlineOverlay(scene, { outlined, isActive, isTransform = 
     lines.setVerticesData('position', position, false, 3);
     corners.forEach((data, k) => lines.setVerticesData('adjacency' + k, data, false, 3));
     Object.assign(lines, { isUnIndexed: true, isPickable: false, doNotSerialize: true, layerMask: PREPASS_ONLY });
-    lines._getRenderingFillMode = (fillMode) => fillMode;
     lines.metadata = { overlay: true, positions, instances: null };
     prepassTarget.setMaterialForRendering(lines, wire);
     return lines;

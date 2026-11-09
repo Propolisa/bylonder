@@ -1,7 +1,8 @@
 import { Color3, Color4, Constants, Vector3, CubeMapToSphericalPolynomialTools, CubeTexture, HDRCubeTexture, HDRFiltering, Matrix, MeshBuilder, BaseTexture, Texture, ReflectionProbe, RenderTargetTexture, Scene } from '@babylonjs/core';
 import { RAY_TYPE, setRayType } from '../../nodes/blender/shader-nodes.js';
 import { createLight, deriveBabylonLight, lightRecord } from '../light/light-home.js';
-import { PrefilteredEXRCubeTexture, StudioLightTexture, firstBand } from './world-sun.js';
+import { StudioLightTexture, firstBand } from './world-sun.js';
+import { PrefilteredEXRCubeTexture } from '../../overrides/webgpu/prefiltered-ready.js';
 import { WORLD_CUBE_TYPE } from '../../overrides/webgpu/float-world-cube.js';
 
 // Babylon adapter for a World datablock. Babylon has no World object, so a world is pushed into

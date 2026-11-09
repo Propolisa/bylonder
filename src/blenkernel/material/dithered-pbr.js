@@ -4,7 +4,7 @@
 // material plugin's code replacement, and the shadow draws with the material's own shader (Babylon's
 // ShadowDepthWrapper), so its samples average a shadow as dense as its coverage.
 import { Material, MaterialPluginBase } from '@babylonjs/core';
-import { SharedShadowDepthWrapper } from '../../draw/shadow-depth-wrapper.js';
+import { SharedShadowDepthWrapper } from '../../overrides/babylon/shared-shadow-depth.js';
 import { DITHER_NOISE, ditherOffset } from '../../render/dither.js';
 
 const NAME = 'BlenderDitheredPBR', DEFINE = 'BL_DITHERED_PBR', OFFSET = 'bl_dither_offset';
@@ -28,7 +28,7 @@ class BlenderDitheredPBRPlugin extends MaterialPluginBase {
     this._enable(true);
   }
   getClassName() { return `${NAME}Plugin`; }
-  // A WGSL material keeps Babylon's alpha test: Blender's hash is GLSL (gpu-engine.js materialsFromGLSL).
+  // A WGSL material keeps Babylon's alpha test: Blender's hash is GLSL (overrides/webgpu/pbr-from-glsl.js).
   isCompatible() { return true; }
   prepareDefines(defines, scene, mesh) { defines[DEFINE] = isDithered(this._material); }
   // Its own uniform, bound at every draw: Babylon's material cache skips a rebind between a frame's draws.

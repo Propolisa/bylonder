@@ -83,7 +83,7 @@ export function createCursorOverlay(scene, cursor) {
     mesh.setVerticesData('position', new Float32Array(positions), false, 3);
     mesh.setVerticesData('color', new Float32Array(colors), false, 4);
     Object.assign(mesh, { isUnIndexed: true, isPickable: false, alwaysSelectAsActiveMesh: true, doNotSerialize: true, material, renderingGroupId: 1 });
-    mesh._getRenderingFillMode = () => Material.LineListDrawMode;
+    mesh.overrideRenderingFillMode = Material.LineListDrawMode;
     mesh.metadata = { editable: false, overlay: true, screenSpace };
     return mesh;
   };

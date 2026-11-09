@@ -67,7 +67,7 @@ class BlenderViewPlugin extends MaterialPluginBase {
     return shaderLanguage === 0 ? { ubo, fragment: `uniform vec4 ${VIEW_FORWARD};` } : { ubo };
   }
   bindForSubMesh(ubo, scene) { ubo.updateVector4(VIEW_FORWARD, viewForward(scene.activeCamera, eeveeParity(scene))); }
-  // GLSL: Bylonder's PBR materials compile from it on WebGPU too (gpu-engine.js materialsFromGLSL).
+  // GLSL: Bylonder's PBR materials compile from it on WebGPU too (overrides/webgpu/pbr-from-glsl.js).
   getCustomCode(shaderType, shaderLanguage = 0) { return shaderType === 'fragment' && shaderLanguage === 0 ? VIEW_CODE : null; }
 }
 RegisterMaterialPlugin('BlenderView', (material) => (material instanceof PBRBaseMaterial ? new BlenderViewPlugin(material) : null));

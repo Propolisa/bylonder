@@ -11,7 +11,7 @@ import { graphCode, nodeGraph, nodeTypeHasGpu } from './gpu-graph.js';
 import { rampTexture } from './shader-nodes.js';
 import { BlenderReplayTask, nodeRecording, nodeTypeHasOperation } from '../../compositor/compositor-replay.js';
 import { ImagesPostProcessTask, setUniform } from '../../io_scene_babylon/runtime/blocks.js';
-import '../graph-roots.js';
+import '../../overrides/babylon/graph-roots.js';
 
 // The block's sampler of an image linked into an input (Blender's compositor declares one per linked output, named as
 // the operation's input; the node's image is Babylon's post process source).

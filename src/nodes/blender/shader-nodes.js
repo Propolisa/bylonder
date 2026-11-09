@@ -32,11 +32,13 @@ import { eeveeParity, eeveeParityChanged } from '../../draw/eevee-parity.js';
 import { DITHER_FUNCTIONS, ditherOffset } from '../../render/dither.js';
 import { readsSceneDepth, sceneDepth } from '../../render/scene-depth.js';
 import { FROXEL_JITTER } from '../../draw/volume-shaders.js';
-import { AREA_PRE_LIGHTING, AREA_SPECULAR, LIGHT_SPECULAR, usesAreaLights } from '../../blenkernel/light/area-specular.js';
+import { AREA_SPECULAR, LIGHT_SPECULAR } from '../../blenkernel/light/area-specular.js';
+import { usesAreaLights } from '../../overrides/babylon/area-light-used.js';
+import { AREA_PRE_LIGHTING } from '../../overrides/webgpu/area-light-inline.js';
+import '../../overrides/babylon/graph-roots.js';
+import { SharedShadowDepthWrapper } from '../../overrides/babylon/shared-shadow-depth.js';
 import { probeAmbient, probeCapture, sphereProbeAt, volumeProbeTextures } from '../../draw/light-probes.js';
 import { ATLAS, CAPTURE, DEFINE as VOLUME_PROBES, GRIDS, SAMPLERS as PROBE_SAMPLERS, volumeProbeFunctions, volumeProbeLambert, volumeProbeSample } from '../../draw/volume-probe-shader.js';
-import '../graph-roots.js';
-import { SharedShadowDepthWrapper } from '../../draw/shadow-depth-wrapper.js';
 
 // A NodeMaterial of Blender's nodes. Babylon's walks a block's inputs again for each path that reaches the block as it
 // prepares a build, which is exponential in a chain of shared values (an unrolled repeat zone's): this one prepares each
@@ -52,7 +54,7 @@ export class BlenderNodeMaterial extends NodeMaterial {
   }
   _initializeBlock(node, state, ...rest) { if (BlenderNodeMaterial.#first(this.#initialized, state, node)) super._initializeBlock(node, state, ...rest); }
   _resetDualBlocks(node, id) { if (BlenderNodeMaterial.#first(this.#reset, this._fragmentCompilationState, node)) super._resetDualBlocks(node, id); }
-  // On WebGPU, Blender's functions sample the images they are given in copies of their own (glsl.js specializeSamplers).
+  // On WebGPU, Blender's functions sample the images they are given in copies of their own (overrides/webgpu/samplers.js).
   constructor(...args) {
     super(...args);
     this.onBuildObservable.add(() => {
@@ -1305,7 +1307,7 @@ export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
   }
   // A reset of the material's defines clears the area light support NodeMaterialDefines starts with, while the lights'
   // own defines come back: their code then calls area light functions its includes left out. So does a light turned into
-  // an area light without AREALIGHTUSED (light/area-specular.js BlenderAreaLightsPlugin).
+  // an area light without AREALIGHTUSED (overrides/babylon/area-light-used.js).
   prepareDefines(defines, nodeMaterial, mesh) {
     super.prepareDefines(defines, nodeMaterial, mesh);
     defines.setValue('AREALIGHTSUPPORTED', true, true);

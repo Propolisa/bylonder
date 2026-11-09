@@ -191,7 +191,6 @@ const theme = defaultTheme.view_3d;
 function editPoints(scene, name, draw, matrix, kept) {
   if (!draw.pointsShown || !draw.points.length) { kept?.dispose(); return null; }
   const mesh = kept ?? Object.assign(new Mesh(name, scene), { isPickable: false, alwaysSelectAsActiveMesh: true, doNotSerialize: true, renderingGroupId: 1 });
-  mesh._getRenderingFillMode = (fillMode) => fillMode;
   if (!mesh.material) pointSprites(Object.assign(mesh, { material: overlayMaterial(scene, name, { fillMode: Material.PointListDrawMode, pointSize: theme.gp_vertex_size * 2 }) }));
   const count = draw.points.length / POINT_FLOATS, positions = new Float32Array(count * 3), colors = new Float32Array(count * 4);
   for (let p = 0; p < count; p++) {

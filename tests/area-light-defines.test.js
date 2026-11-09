@@ -4,7 +4,7 @@
 // bound for it.
 import assert from 'node:assert/strict';
 import { NullEngine, Scene, PBRMaterial, StandardMaterial, MeshBuilder, PointLight, RectAreaLight, Vector3, FreeCamera, Material } from '@babylonjs/core';
-import '../src/blenkernel/light/area-specular.js';
+import '../src/overrides/babylon/area-light-used.js';
 
 const scene = () => {
   const made = new Scene(new NullEngine());

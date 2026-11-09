@@ -19,7 +19,6 @@ export function createEditCurveOverlay(owner) {
     mesh.parent = owner;
     mesh.isPickable = false;
     mesh.alwaysSelectAsActiveMesh = true;
-    mesh._getRenderingFillMode = (fillMode) => fillMode;
     mesh.material = overlayMaterial(scene, `${owner.name} ${name}`, options);
     // An overlay draws itself: Solid's Workbench leaves it its own material (workbench.js).
     mesh.metadata = { overlay: true };

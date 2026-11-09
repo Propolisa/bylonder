@@ -277,7 +277,6 @@ function passMesh(scene, name, shape, pass, transparent, { data, count }) {
   new SubMesh(0, 0, vertices, 0, vertices, mesh);
   mesh.material = passMaterial(scene, pass, transparent);
   mesh.material.fillMode = shape.mode;
-  mesh._getRenderingFillMode = (fillMode) => fillMode;
   return mesh;
 }
 // A shape with the texture of the points it reads, if any.

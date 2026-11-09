@@ -1,6 +1,5 @@
-// Babylon's graphs restore links walking down from blocks without inputs, so a block whose inputs are all unlinked
-// (a Blender node with its values on the node, as Blender's Math node usually is) loads with its outputs unlinked.
-// Restoring from every block whose saved inputs are all unlinked too keeps those links.
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// Override of Babylon's node graph loading (NodeMaterial, NodeRenderGraph _restoreConnections, patched on their prototypes): links restored from every block whose saved inputs are all unlinked too, as Babylon walks down only from blocks without inputs and loses the outputs of a block whose inputs are all unlinked; goes when Babylon restores those links.
 import { NodeMaterial, NodeRenderGraph } from '@babylonjs/core';
 
 for (const Graph of [NodeMaterial, NodeRenderGraph]) {

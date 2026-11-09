@@ -9,7 +9,7 @@ import { BlenderCompositorBlock } from '../nodes/blender/compositor-nodes.js';
 import { BlenderGroupOutputBlock, BlenderRenderLayersBlock } from '../nodes/blender/compositor-io.js';
 import { nodeGraph } from '../nodes/blender/gpu-graph.js';
 import { nodeRecording } from '../compositor/compositor-replay.js';
-import { specializeSamplers } from '../nodes/blender/glsl.js';
+import { specializeSamplers } from '../overrides/webgpu/samplers.js';
 import { socketType } from '../nodes/blender/sockets.js';
 import { idStruct } from '../python/bpy_rna.js';
 

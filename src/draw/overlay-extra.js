@@ -210,7 +210,7 @@ export function createExtrasOverlay(scene, { objects, instances = () => [], colo
     const mesh = new Mesh('__extra ' + shape, scene);
     sources.get(shape).geometry.applyToMesh(mesh);
     const fill = SOLID.has(shape) ? Material.TriangleFillMode : Material.LineListDrawMode;
-    mesh._getRenderingFillMode = () => fill;
+    mesh.overrideRenderingFillMode = fill;
     mesh.isUnIndexed = true;
     mesh.material = shape === 'ground_line' ? material('GroundLine', GROUND_VERTEX, { blend: true }) : material('Extra', EXTRA_VERTEX, { solid: SOLID.has(shape) });
     Object.assign(mesh, { isPickable: false, alwaysSelectAsActiveMesh: true, doNotSerialize: true });
@@ -222,7 +222,7 @@ export function createExtrasOverlay(scene, { objects, instances = () => [], colo
     const positions = latticeLines(node.metadata.lattice), mesh = new Mesh('__extra lattice', scene);
     mesh.setVerticesData('position', positions, false, 3);
     mesh.setVerticesData('vclass', new Float32Array(positions.length / 3), false, 1);
-    mesh._getRenderingFillMode = () => Material.LineListDrawMode;
+    mesh.overrideRenderingFillMode = Material.LineListDrawMode;
     mesh.isUnIndexed = true;
     mesh.material = material('Extra', EXTRA_VERTEX);
     Object.assign(mesh, { isPickable: false, alwaysSelectAsActiveMesh: true, doNotSerialize: true });

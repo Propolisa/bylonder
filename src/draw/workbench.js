@@ -411,7 +411,7 @@ export function createWorkbench(scene, { wireColor = () => theme.wire, paintText
     }), false);
     lines.setIndices(mesh_batch_cache_wire_indices(mesh), mesh.getTotalVertices());
     Object.assign(lines, { parent: mesh, material: wire, isPickable: false, alwaysSelectAsActiveMesh: true, doNotSerialize: true });
-    lines._getRenderingFillMode = () => Material.LineListDrawMode;
+    lines.overrideRenderingFillMode = Material.LineListDrawMode;
     lines.metadata = { overlay: true, wireOwner: mesh, positions, instances: null };
     wires.set(mesh, lines);
     return instancedAs(mesh, lines);

@@ -4,7 +4,7 @@
 // being dragged, the knife of links_cut and add_reroute). Input goes to the controller (node-editor-controller.js).
 import { computed, ref } from "vue";
 import NodeView from "./NodeView.vue";
-import { focusUnlessInside } from "@/editors/interface/block-view.js";
+import { focusUnlessInside } from "@/overrides/browser/region-focus.js";
 import { HEADER, ROW, U, linkPath, socketColor } from "./node-layout.js";
 
 const props = defineProps({ editor: { type: Object, required: true }, onKey: { type: Function, required: true } });

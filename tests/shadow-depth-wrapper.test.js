@@ -2,7 +2,7 @@
 // shader, not one per submesh (Babylon's ShadowDepthWrapper gives each a token of its own: gaku compiled hundreds).
 import assert from 'node:assert/strict';
 import { DirectionalLight, FreeCamera, MeshBuilder, NullEngine, Scene, ShadowGenerator, StandardMaterial, Vector3 } from '@babylonjs/core';
-import { SharedShadowDepthWrapper } from '../src/draw/shadow-depth-wrapper.js';
+import { SharedShadowDepthWrapper } from '../src/overrides/babylon/shared-shadow-depth.js';
 
 const engine = new NullEngine(), scene = new Scene(engine);
 new FreeCamera('Camera', new Vector3(0, 0, -5), scene);

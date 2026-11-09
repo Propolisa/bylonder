@@ -3,7 +3,8 @@
 // light's image is read as Babylon's EXRCubeTexture reads it; its texels are clamped before Babylon lays them on the
 // cube, so its reflections and its spherical harmonics are the clamped world's as in EEVEE's probe, and what the clamp
 // took is summed into the sun.
-import { Color3, EXRCubeTexture, PanoramaToCubeMapTools, ReadExrDataAsync, SphericalHarmonics, SphericalPolynomial, Vector3 } from '@babylonjs/core';
+import { Color3, PanoramaToCubeMapTools, ReadExrDataAsync, SphericalHarmonics, SphericalPolynomial, Vector3 } from '@babylonjs/core';
+import { PrefilteredEXRCubeTexture } from '../../overrides/webgpu/prefiltered-ready.js';
 
 // blender-port: eevee_colorspace_lib.bsl.hh brightness_clamp_max: a texel scaled down to `limit` at its brightest
 // channel, in place, what it took into `taken`.
@@ -31,17 +32,6 @@ export function extractSun(data, width, height, threshold) {
     }
   }
   return sum[0] + sum[1] + sum[2] > 0 ? { color: Color3.FromArray(sum), direction: mean.normalize() } : null;
-}
-
-// An EXR environment prefiltered on load, ready for materials once filtered: Babylon swaps the filtered texture into
-// the one it uploaded first, which a WebGPU bind group made in between would keep.
-export class PrefilteredEXRCubeTexture extends EXRCubeTexture {
-  #filtered = false;
-  constructor(url, scene, size) {
-    super(url, scene, size, false, true, false, true);
-    this.onLoadObservable.addOnce(() => { this.#filtered = true; });
-  }
-  isReady() { return this.#filtered && super.isReady(); }
 }
 
 // A studio light's image with its sun taken out (`sun`, once loaded), as EEVEE's lookdev world holds it.

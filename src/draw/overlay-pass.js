@@ -9,7 +9,7 @@ import { RenderTargetTexture } from '@babylonjs/core/Materials/Textures/renderTa
 import { Constants } from '@babylonjs/core/Engines/constants.js';
 import { Color4 } from '@babylonjs/core/Maths/math.color.js';
 import { createFullscreenPass } from './fullscreen-pass.js';
-import { setRenderList } from './render-list.js';
+import { setRenderList } from '../overrides/babylon/render-list.js';
 
 const SCENE_LAYERS = 0x0fffffff;
 export const OVERLAY_LAYER = 0x20000000;

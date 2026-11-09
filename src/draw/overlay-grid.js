@@ -223,7 +223,7 @@ export function createGridOverlay(scene) {
     mesh.setVerticesData(VertexBuffer.PositionKind, Float32Array.from({ length: count * 3 }, (_, i) => (i % 3 ? 0 : i / 3)), false);
     Object.assign(mesh, { isUnIndexed: true, isPickable: false, alwaysSelectAsActiveMesh: true, doNotSerialize: true, material });
     mesh.metadata = { editable: false, overlay: true, gridFlags: flags, gridIter: 0 };
-    mesh._getRenderingFillMode = () => Material.LineListDrawMode;
+    mesh.overrideRenderingFillMode = Material.LineListDrawMode;
     return mesh;
   };
   const grid = part('__grid', 4 * STEPS_DRAW * LINES.ortho, 'grid'), axes = part('__gridAxes', 6, 'axes');
@@ -233,7 +233,7 @@ export function createGridOverlay(scene) {
     for (const first of [grid, axes]) {
       const mesh = Object.assign(first.clone(`${first.name} ${iter}`), { isUnIndexed: true, isPickable: false, alwaysSelectAsActiveMesh: true, doNotSerialize: true, alphaIndex: iter, material });
       mesh.metadata = { ...first.metadata, gridIter: iter };
-      mesh._getRenderingFillMode = first._getRenderingFillMode;
+      mesh.overrideRenderingFillMode = first.overrideRenderingFillMode;
       iterations.push(mesh);
     }
   }

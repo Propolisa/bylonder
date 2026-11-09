@@ -2,7 +2,7 @@
 // strands, point clouds and the Dithered render method draw there as on WebGL 2.
 import assert from 'node:assert/strict';
 import { NullEngine, Scene, PBRMaterial, StandardMaterial } from '@babylonjs/core';
-import { materialsFromGLSL } from '../src/render/gpu-engine.js';
+import { pbrFromGLSL } from '../src/overrides/webgpu/pbr-from-glsl.js';
 import { CurvesPlugin } from '../src/draw/curves.js';
 import { PointCloudPlugin } from '../src/draw/pointcloud.js';
 
@@ -12,7 +12,7 @@ const scene = new Scene(engine);
 assert.equal(new PBRMaterial('native', scene).shaderLanguage, 1, "Babylon's default on WebGPU: WGSL");
 assert.equal(CurvesPlugin.of(new PBRMaterial('native curves', scene)), null, 'no GLSL plugin on a WGSL material');
 
-materialsFromGLSL();
+pbrFromGLSL();
 for (const material of [new PBRMaterial('pbr', scene), new StandardMaterial('standard', scene, true)]) {
   assert.equal(material.shaderLanguage, 0, `${material.getClassName()} compiles from GLSL`);
   assert.ok(CurvesPlugin.draws(material), `${material.getClassName()} draws curves`);

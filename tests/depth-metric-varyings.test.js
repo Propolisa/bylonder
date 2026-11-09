@@ -7,7 +7,7 @@ import '@babylonjs/core/Shaders/ShadersInclude/lightVxUboDeclaration.js';
 import '@babylonjs/core/Shaders/ShadersInclude/lightUboDeclaration.js';
 import '@babylonjs/core/Shaders/ShadersInclude/shadowsVertex.js';
 import '@babylonjs/core/Shaders/ShadersInclude/lightFragment.js';
-import { deriveDepthMetrics } from '../src/render/depth-metric-varyings.js';
+import { deriveDepthMetrics } from '../src/overrides/webgpu/depth-metric-varyings.js';
 
 const store = ShaderStore.IncludesShadersStore;
 const lights = (...names) => [0, 1].map((x) => names.map((name) => store[name]).join('\n').replaceAll('{X}', x)).join('\n');

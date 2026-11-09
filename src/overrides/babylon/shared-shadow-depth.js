@@ -1,8 +1,5 @@
-// A material's shadow drawn with its own shader (Babylon's ShadowDepthWrapper), compiled once per shader it draws with.
-// Babylon gives each submesh's depth program a token of its own, so submeshes sharing a material each compiled the same
-// program (gaku: hundreds, half a minute after a sun appears). Here the token is the material's shader's: submeshes
-// that draw with one shader and one set of depth defines share one depth program (Babylon's effect cache counts its
-// users).
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// Override of Babylon's ShadowDepthWrapper (its _makeEffect): submeshes that draw with one shader and one set of depth defines share one depth program, as Babylon compiles one per submesh (gaku: hundreds, half a minute after a sun appears); goes when Babylon shares them.
 import { DrawWrapper, ShadowDepthWrapper } from '@babylonjs/core';
 
 export class SharedShadowDepthWrapper extends ShadowDepthWrapper {

@@ -242,7 +242,6 @@ function editPart(scene, name, kind) {
   material.setArray4('theme_colors', EDIT_THEME.flatMap((key) => theme[key].slice(0, 4)));
   material.setTexture('weight_tx', weightRampTexture(scene));
   mesh.material = material;
-  mesh._getRenderingFillMode = (fillMode) => fillMode;
   mesh.onDisposeObservable.add(() => material.dispose());
   if (EDIT[kind].sprites) pointSprites(mesh);
   return mesh;

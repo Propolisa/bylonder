@@ -136,7 +136,7 @@ export function curvesMesh(scene, name, data, faces, mesh = null) {
   mesh.subMeshes = [];
   new SubMesh(0, 0, count, 0, count, mesh);
   mesh.metadata.curves = { ...mesh.metadata.curves, data, faces };
-  mesh._getRenderingFillMode = () => (faces === 0 ? Material.LineStripDrawMode : Material.TriangleStripDrawMode);
+  mesh.overrideRenderingFillMode = faces === 0 ? Material.LineStripDrawMode : Material.TriangleStripDrawMode;
   return mesh;
 }
 
@@ -146,7 +146,7 @@ export class CurvesPlugin extends MaterialPluginBase {
     super(material, 'BlenderCurves', 300, { CURVES: false, CURVES_FACES: 0, CURVES_VERTEX_PER_SEGMENT: 1 });
     this._enable(true);
   }
-  // GLSL only: a WGSL material draws no curves (on WebGPU Bylonder's are GLSL, gpu-engine.js materialsFromGLSL).
+  // GLSL only: a WGSL material draws no curves (on WebGPU Bylonder's are GLSL, overrides/webgpu/pbr-from-glsl.js).
   static of(material) { return material.pluginManager?.getPlugin('BlenderCurves') ?? (material.shaderLanguage === 0 ? new CurvesPlugin(material) : null); }
   // Whether a material draws curves: a node material by its geometry block, the others with the plugin.
   static draws(material) { return material.getClassName() === 'NodeMaterial' ? material.attachedBlocks.some((b) => b instanceof CurvesGeometryBlock) : !!CurvesPlugin.of(material); }

@@ -10,11 +10,13 @@ import { compilersPresent, createCompilers, WebGPUShaderEngine } from './webgpu-
 import { createGridOverlay } from '../src/draw/overlay-grid.js';
 import { INTEGRATION, RESOLVE, scatterShader } from '../src/draw/volume-shaders.js';
 import { engineGLSL } from '../src/nodes/blender/glsl.js';
-import { materialsFromGLSL, ReportingWebGPUEngine } from '../src/render/gpu-engine.js';
+import { pbrFromGLSL } from '../src/overrides/webgpu/pbr-from-glsl.js';
+import { shortEffectNames } from '../src/overrides/webgpu/short-effect-names.js';
 import { derivativeUniformity } from '../src/overrides/webgpu/derivative-uniformity.js';
 import { CurvesPlugin } from '../src/draw/curves.js';
 import { BlenderNodeMaterial, blenderDefaultTree, buildMaterial } from '../src/nodes/blender/shader-nodes.js';
-import '../src/blenkernel/light/area-specular.js';
+import '../src/overrides/babylon/area-light-used.js';
+import '../src/overrides/webgpu/area-light-inline.js';
 
 if (!compilersPresent()) {
   console.log('WebGPU shaders: skipped, no public/webgpu compilers (npm run dev or npm run build fetches them)');
@@ -50,7 +52,7 @@ const hair = (material) => () => {
   const mesh = Object.assign(MeshBuilder.CreateBox(material.name, {}, scene), { material, metadata: { curves: { faces: 1 } } });
   return () => material.isReadyForSubMesh(mesh, mesh.subMeshes[0]);
 };
-materialsFromGLSL();
+pbrFromGLSL();
 const principled = new PBRMaterial('Principled hair', scene);
 assert.ok(CurvesPlugin.draws(principled), 'the Principled material draws curves');
 await compiled('Principled hair', hair(principled));
@@ -89,7 +91,7 @@ assert.ok(effect?.getSamplers().includes('ref') && effect.getAttributesNames().i
 assert.ok(engine.results.every(({ wgsl: { vertex, fragment } }) => [vertex, fragment].every((code) => code.startsWith('diagnostic(off, derivative_uniformity);'))), 'uniformity off');
 // An effect built from source names its pipeline context (and so its GPU uniform buffer's label) by a hash of its key,
 // not the key's whole GLSL; a short name stays.
-const context = ReportingWebGPUEngine.prototype.createPipelineContext.call(engine, engine._getShaderProcessingContext(0, false));
+const context = shortEffectNames(Object.create(engine)).createPipelineContext(engine._getShaderProcessingContext(0, false));
 context._name = `${'precision highp float;'.repeat(400)}+fragment`;
 assert.match(context._name, /^effect-[0-9a-f]{8}$/, 'a hash of a long key');
 context._name = 'pbr';

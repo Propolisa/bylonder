@@ -2,19 +2,16 @@
 // sun's cascaded as EEVEE's sun shadow is (directional clipmaps), and every object whose Visibility > Shadow is on casts
 // into it. Materials receive them through Babylon's own light code. Shadow maps are drawn for the views that show the
 // scene's lights (Rendered shading, Render Image); other views draw them empty, which changes no material.
-import { CascadedShadowGenerator, Constants, LinesMesh, Matrix, RenderTargetTexture, ShaderStore, ShadowGenerator, Texture, Vector3 } from '@babylonjs/core';
+import { CascadedShadowGenerator, Constants, LinesMesh, Matrix, RenderTargetTexture, ShadowGenerator, Texture, Vector3 } from '@babylonjs/core';
 import { drawAgainUntilComplete } from '../../overrides/babylon/shadow-map-complete.js';
-import { shadowMapVertexShader } from '@babylonjs/core/Shaders/shadowMap.vertex.js';
-import { shadowMapPixelShader } from '@babylonjs/core/Shaders/shadowMap.fragment.js';
-import { shadowMapVertexShaderWGSL } from '@babylonjs/core/ShadersWGSL/shadowMap.vertex.js';
-import { shadowMapPixelShaderWGSL } from '@babylonjs/core/ShadersWGSL/shadowMap.fragment.js';
 import { influenceRadius, isBlenderLight, lightRecord } from './light-home.js';
 import { areaLightShadows } from './area-light.js';
 import { createLightReach, lightsMeshes } from './light-reach.js';
 import { filmSample } from '../../render/film.js';
 import { halton } from '../../render/sampling.js';
 import { evaluatedMatrix, setEvaluatedMatrix } from '../../runtime/object-transform.js';
-import { setRenderList } from '../../draw/render-list.js';
+import { setRenderList } from '../../overrides/babylon/render-list.js';
+import { SHADOW_MAP } from '../../overrides/babylon/lit-side-normal-bias.js';
 
 const MAP_SIZE = 2048;
 // A soft sun's filter samples by the scene's shadow Rays: 1, 2, 3 or more.
@@ -45,18 +42,6 @@ export const shadedObject = (mesh) => !mesh.name.startsWith('__') && !mesh.metad
 // A material without a surface (a Volume alone) casts no surface shadow; a light that lights no mesh draws no shadow.
 // Lines (loose edges) have no surface to cast with.
 const casts = (mesh) => shadedObject(mesh) && !(mesh instanceof LinesMesh) && mesh.metadata?.wbVisibleShadow !== false && mesh.isEnabled() && mesh.isVisible && !mesh.material?.blenderNoSurface;
-
-// Babylon's normal bias moves every caster along -N, so a face turned away from the light moves toward it and shadows
-// itself, though EEVEE lights it from behind (its offset is the receiver's, along the normal facing the viewer). Babylon's
-// include remapping, #include<name>(from,to), moves such a face away from the light instead, by less the more it is
-// edge-on to the light so that a closed object's shadow keeps its outline. WebGPU draws it from Babylon's WGSL shadow
-// map, where the remapping's arguments hold no commas (so no select()).
-const SHADOW_MAP = 'blenderShadowMap';
-const litSide = (vertex, bias) => vertex.shader.replace('#include<shadowMapVertexNormalBias>', `#include<shadowMapVertexNormalBias>(sinNLSM;worldPos,${bias};worldPos)`);
-ShaderStore.ShadersStore[`${SHADOW_MAP}VertexShader`] ??= litSide(shadowMapVertexShader, '(0.0<ndlSM?sinNLSM:ndlSM)');
-ShaderStore.ShadersStore[`${SHADOW_MAP}PixelShader`] ??= shadowMapPixelShader.shader;
-ShaderStore.ShadersStoreWGSL[`${SHADOW_MAP}VertexShader`] ??= litSide(shadowMapVertexShaderWGSL, '(f32(0.0<ndlSM)*(sinNLSM-ndlSM)+ndlSM)');
-ShaderStore.ShadersStoreWGSL[`${SHADOW_MAP}PixelShader`] ??= shadowMapPixelShaderWGSL.shader;
 
 // A sun whose map spans its casters, not the view (light.metadata.shadowFitsCasters: Material Preview's studio sun), so
 // that moving the view draws no map: one map, as large as the cascades together.
