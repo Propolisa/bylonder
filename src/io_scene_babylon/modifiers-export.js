@@ -49,6 +49,17 @@ function settingInputs(paths) {
   return inputs;
 }
 
+// A modifier's settings, one per DNA field: a property that is another's field in other units (Bevel's `width_pct`,
+// its `width`) is left out, as the page, setting the one, would have the other write its stale value back.
+function ownFields(values, layouts) {
+  const fields = new Set();
+  return Object.entries(values).filter(([path]) => {
+    const [, prop, index] = /^(\w+)(?:\[(\d+)\])?$/.exec(path), layout = layouts[prop];
+    const field = layout && `${layout.offset}:${layout.bit}:${index}`;
+    return !field || (!fields.has(field) && fields.add(field));
+  });
+}
+
 // A stack's entities by key, each modifier reading the mesh the one before gives, the last one's drawn on `node`.
 function chain(ob, node, modifiers, base) {
   const entities = {};
@@ -69,7 +80,7 @@ export function modifierEntities(world, live, properties, bin) {
     const ob = idStruct(world.mainSync.objectOf(node)), names = [...ob.modifiers].filter((m) => m.show_viewport).map((m) => m.name);
     const modifiers = stack.modifiers.map(({ kind, type, layouts, values }, i) => ({
       name: names[i], type: kind, implementation: 'modifiers', output: 'mesh',
-      inputs: { ...settingInputs(Object.entries(values).map(([path, value]) => {
+      inputs: { ...settingInputs(ownFields(values, layouts).map(([path, value]) => {
         const float = typeof value === 'number' && layouts[/^\w+/.exec(path)[0]]?.kind === 'float', property = `objects${key(ob.name)}.modifiers${key(names[i])}.${path}`;
         properties.push(knob(property, value, float ? { type: 'FLOAT' } : {}, { node: node.id, channel: channelKey(i, path) }));
         return [path, { property }];
