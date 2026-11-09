@@ -59,7 +59,6 @@ export const KNOWN = {
   'bouncing-ball look-webgpu': 'Grease Pencil strokes are not exported (fixed on export-grease-pencil), and the view transform',
   'chess look-webgl2': 'the page does not load: this._light.needCube is not a function (a shadow generator on a light of another class)',
   'chess look-webgpu': 'the page does not load: this._light.needCube is not a function',
-  'drivers-and-graph-editor look-webgl2': 'the page does not load: this._light.needCube is not a function',
   'drivers-and-graph-editor look-webgpu': 'the page does not load: this._light.needCube is not a function',
   'coast look-webgl2': 'the page does not load: an animation targets rotationQuaternion on a node without one, and effects fail to compile',
   "coast look-webgpu": "the app itself fails: the Sky material's shader does not compile on WebGPU",

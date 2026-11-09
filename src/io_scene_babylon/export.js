@@ -20,6 +20,7 @@ const SOURCES = {
   'io_scene_babylon/polyfill/geometry-nodes-kernels.bundle.js': text(() => import('./polyfill/geometry-nodes-kernels.bundle.js?raw')),
   'draw/curves-blocks.js': text(() => import('../draw/curves-blocks.js?raw')),
   'io_scene_babylon/polyfill/volumes.bundle.js': text(() => import('./polyfill/volumes.bundle.js?raw')),
+  'blenkernel/light/area-specular.js': text(() => import('../blenkernel/light/area-specular.js?raw')),
   'io_scene_babylon/blender-code.LICENSE.md': text(() => import('./blender-code.LICENSE.md?raw')),
   '../LICENSES/GPL-3.0-or-later.txt': text(() => import('../../LICENSES/GPL-3.0-or-later.txt?raw')),
   ...Object.fromEntries(Object.entries(MODULES).map(([path, url]) => [path, bytes(url)])),

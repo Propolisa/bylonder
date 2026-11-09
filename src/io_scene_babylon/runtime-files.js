@@ -26,6 +26,8 @@ export const noticeFiles = (folder) => Object.entries(NOTICE).map(([name, from])
 export const NODE_KERNELS = 'bylonder-nodes/nodes.js';
 // EEVEE's volume passes and blocks, the app's (polyfill/volumes.js), for a package that draws volumes (volumes-export.js).
 const VOLUMES = { folder: 'bylonder-volumes', files: { 'volumes.js': 'io_scene_babylon/polyfill/volumes.bundle.js' } };
+// EEVEE's light specular for the page's PBR materials, as the app gives its own (blenkernel/light/area-specular.js).
+export const AREA_SPECULAR = 'bylonder-area-specular/area-specular.js';
 // A package's files (scene.js, scene.ir.json) as text, or the IR's alone.
 const text = (files) => (typeof files === 'string' ? files : `${files['scene.ir.json'] ?? ''}${files['scene.js'] ?? ''}`);
 const evaluatorsOf = (files) => Object.entries(EVALUATOR_FILES).filter(([name]) => text(files).includes(`"implementation":"${name}"`)).map(([, e]) => e);
@@ -34,7 +36,8 @@ const withFolders = (files) => [...evaluatorsOf(files), ...(text(files).includes
 export const gplFolders = (files) => withFolders(files).filter((e) => e.folder).map((e) => e.folder);
 export const gplFiles = (files) => withFolders(files).filter((e) => e.folder)
   .flatMap(({ folder, files: own }) => [...Object.entries(own).map(([name, from]) => [`${folder}/${name}`, from]), ...noticeFiles(folder)])
-  .concat(text(files).includes(NODE_KERNELS) ? noticeFiles(NODE_KERNELS.split('/')[0]) : []);
+  .concat(text(files).includes(NODE_KERNELS) ? noticeFiles(NODE_KERNELS.split('/')[0]) : [])
+  .concat(text(files).includes(AREA_SPECULAR) ? [[AREA_SPECULAR, 'blenkernel/light/area-specular.js'], ...noticeFiles(AREA_SPECULAR.split('/')[0])] : []);
 // Bylonder's overrides of Babylon and WebGPU (src/overrides/), which every package carries in bylonder/overrides/, and
 // how a runtime file imports one there.
 export const OVERRIDE_FILES = ['webgpu/float-world-cube', 'webgpu/derivative-uniformity', 'webgpu/reserved-names', 'webgpu/samplers'].flatMap((name) => [`${name}.js`, `${name}.d.ts`]);

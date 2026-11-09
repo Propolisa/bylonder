@@ -17,7 +17,7 @@ import { imageFiles } from './image-files.js';
 import { exportCompositor } from './compositor-export.js';
 import { exportIR, idKey } from './ir-export.js';
 import { channels, readsOtherIDs } from './modifiers-export.js';
-import { gplFolders, NODE_KERNELS } from './runtime-files.js';
+import { AREA_SPECULAR, gplFolders, NODE_KERNELS } from './runtime-files.js';
 import { CURVES_GLSL_FILE, curvesGlslFile } from './curves-export.js';
 import { exportVolumes, VOLUMES_FILE } from './volumes-export.js';
 import { idStruct } from '../python/bpy_rna.js';
@@ -215,7 +215,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   const display = await displaySettings(world, bin);
   // Area lights as Bylonder's (runtime/area-light.js): lit once parsed, and casting shadows as its Area Light Shadows
   // extension has them.
-  const areaLights = data.lights.some((l) => l.type === AREA_LIGHT);
+  const areaLights = data.lights.some((l) => l.type === AREA_LIGHT), areaSpecular = data.materials.some((m) => m.customType === 'BABYLON.PBRMaterial');
   // Bylonder's own pipeline of a rendered view (render-babylon.js SceneLinearPipeline) turns the scene's image processing
   // off, so materials would encode to display themselves: with the view transform, which displays instead, it stays out
   // unless one of its effects is on.
@@ -244,7 +244,8 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
 // alone, with Babylon.js ${AbstractEngine.Version}. In a page, map @babylonjs/core to the same version:
 // <script type="importmap">{ "imports": { "@babylonjs/core": "${CDN}" } }</script>${[...gplFolders(irJson), ...(kernels ? [NODE_KERNELS.split('/')[0]] : []), ...(volumes ? [VOLUMES_FILE.split('/')[0]] : [])].map((folder) => `
 // Includes GPL code: ${folder}/, Blender's code (GPL-3.0-or-later, ${folder}/LICENSE.md), loaded only when a control
-// that needs it is set.`).join('')}
+// that needs it is set.`).join('')}${areaSpecular ? `
+// Includes GPL code: ${AREA_SPECULAR}, Blender's light specular (GPL-3.0-or-later, ${AREA_SPECULAR.split('/')[0]}/LICENSE.md).` : ''}
 import { readBuffers, readBytes } from './bylonder/buffers.js';
 import { worldColor, worldNodes } from './bylonder/world.js';
 import { BlendScene } from './bylonder/blend-scene.js';
@@ -259,7 +260,8 @@ import './${CURVES_GLSL_FILE}';` : ''}${volumes ? `
 import { sceneVolumes } from './${VOLUMES_FILE}';` : ''}${display ? `
 import { viewTransform } from './bylonder-view-transform.js';` : ''}${areaLights ? `
 import { parseLight } from './bylonder-area-light.js';` : ''}${composited ? `
-import { compositor } from './bylonder-blocks.js';` : ''}
+import { compositor } from './bylonder-blocks.js';` : ''}${areaSpecular ? `
+import { blenderAreaSpecular } from './${AREA_SPECULAR}';` : ''}
 import { Animation, AnimationGroup, CascadedShadowGenerator, Color3, Color4, CubeTexture, EffectLayer, Geometry, HDRCubeTexture, Light, LinesMesh, Material, Matrix, Mesh, MorphTargetManager, MultiMaterial, PostProcess, Quaternion, ReflectionProbe, Scene, SerializationHelper, ShadowGenerator, Skeleton, SubMesh, TransformNode, Vector3, Camera, ParticleSystem } from '@babylonjs/core';
 import * as BABYLON from '@babylonjs/core';
 
@@ -340,7 +342,9 @@ ${kernels ? `  // Blender's nodes of each material and world, made from the IR's
   fillMaterials(MATERIALS, ir, kernels);
 ` : ''}  for (const entry of MATERIALS) materials[entry.uniqueId] = Material.Parse(entry, scene, ROOT);
   // Node materials' samplers as WebGPU binds them.
-  for (const material of Object.values(materials)) if (material.getClassName() === 'NodeMaterial') webgpuSamplers(material);
+  for (const material of Object.values(materials)) if (material.getClassName() === 'NodeMaterial') webgpuSamplers(material);${areaSpecular ? `
+  // Lights' specular as EEVEE's, as the app's PBR materials have it.
+  for (const material of Object.values(materials)) if (material.getClassName() === 'PBRMaterial') blenderAreaSpecular(material);` : ''}
   // A multi-material's slots by the exported materials' unique ids, as Babylon's loader resolves them after parsing.
   for (const entry of MULTI_MATERIALS) {
     const multi = materials[entry.uniqueId] = MultiMaterial.ParseMultiMaterial(entry, scene);
