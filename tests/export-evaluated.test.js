@@ -84,6 +84,17 @@ const SCENARIOS = {
     const moves = animated(json, 'Box', 'position');
     assert.ok(moves && Math.max(range(moves.animation.keys, 0), range(moves.animation.keys, 1), range(moves.animation.keys, 2)) > 0.5, 'the strips move the box');
   },
+  async constraint() {
+  // A constrained object is written where its constraint puts it, not at its own location.
+    const { world, sync, node } = open('nla');
+    const box = idStruct(sync.objectOf(node('Box'))), camera = idStruct(sync.objectOf(node('Camera')));
+    const constraint = box.constraints.new('COPY_LOCATION');
+    constraint.target = camera;
+    sync.sceneChanged();
+    const json = await serializeScene(world);
+    const at = Vector3.FromArray(json.meshes.find((m) => m.name === 'Box').position), expected = sync.worldMatrix(node('Camera')).getTranslation();
+    assert.ok(Vector3.Distance(at, expected) < 1e-3, `the box is at the camera's location: ${at} vs ${expected}`);
+  },
 };
 
 const scenario = process.argv[2];

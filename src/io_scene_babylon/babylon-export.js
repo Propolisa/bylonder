@@ -249,6 +249,7 @@ async function serializeMapped(world, { geometry, live, mapped, parity }) {
   const samples = world.animation.sample(), liveIds = live && new Map([...live].map(([node, stack]) => [nodeId(node), [node, stack]]));
   // Objects' evaluated transforms too, while their metadata, which evaluating a frame reads, is theirs.
   const objects = placed(world, content.nodes), frames = objects.length ? transformsByFrame(world, objects) : null;
+  const transforms = new Map(objects.map((node) => [node.uniqueId, evaluatedTransform(world.mainSync, node)]));
   const restores = [
     setFor(all, 'doNotSerialize', (n) => !content.nodes.has(n)),
     setFor(scene.materials, 'doNotSerialize', (m) => !content.materials.has(m)),
@@ -272,6 +273,11 @@ async function serializeMapped(world, { geometry, live, mapped, parity }) {
     restores.forEach((restore) => restore());
   }
   const json = await pending;
+  for (const entry of [...json.meshes, ...(json.transformNodes ?? [])]) {
+    const transform = transforms.get(entry.uniqueId);
+    if (!transform) continue;
+    Object.assign(entry, { position: transform.position.asArray(), rotationQuaternion: transform.rotationQuaternion.asArray(), rotation: [0, 0, 0], scaling: transform.scaling.asArray() });
+  }
   json.materials = await Promise.all(json.materials.map(async (entry) => {
     const material = scene.materials.find((m) => m.uniqueId === entry.uniqueId);
     return (material && await exportNodeMaterial(material, { parity })) ?? entry;
