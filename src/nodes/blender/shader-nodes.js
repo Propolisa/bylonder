@@ -31,7 +31,7 @@ import { VIEW_FORWARD, viewEye, viewForward } from '../../draw/draw-view.js';
 import { eeveeParity, eeveeParityChanged } from '../../draw/eevee-parity.js';
 import { DITHER_FUNCTIONS, ditherOffset } from '../../render/dither.js';
 import { readsSceneDepth, sceneDepth } from '../../render/scene-depth.js';
-import { FROXEL_JITTER } from '../../draw/volume-shaders.js';
+import { BlenderFroxelPositionBlock, bindVolumeBounds, FROXEL_CLIP, FROXEL_CORNER, FROXEL_SLICE, VOLUME_BOUNDS, VOLUME_MATERIAL, VOLUME_TARGETS, volumeWrite } from '../../draw/volume-blocks.js';
 import { AREA_SPECULAR, LIGHT_SPECULAR } from '../../blenkernel/light/area-specular.js';
 import { usesAreaLights } from '../../overrides/babylon/area-light-used.js';
 import { AREA_PRE_LIGHTING } from '../../overrides/webgpu/area-light-inline.js';
@@ -1852,58 +1852,7 @@ export class ShaderNodeOutputWorld extends ShaderNodeOutputMaterial {
   }
 }
 
-// A material's Volume as EEVEE stores it in its froxels (eevee_surf_volume.bsl.hh SurfVolume::write_froxel), drawn by
-// draw/volumes.js: the mesh it draws is a slab of the view's froxel slices in its domain's object space, each slice at its
-// tile of the froxel atlas (`blFroxelClip`), so the nodes read each froxel's point as they read a surface's. It writes
-// the four property textures additively: scattering, extinction, emission, and the phase (anisotropy, weight). A point
-// outside the domain's bounds (`blVolumeBounds` of the mesh, in its local space) holds nothing.
-export const FROXEL_CLIP = 'blFroxelClip', FROXEL_SLICE = 'blFroxelSlice', FROXEL_CORNER = 'blFroxelCorner';
-// Each froxel's point, found per fragment from the slab's fixed geometry (each vertex its slice, `blFroxelSlice`, and
-// its corner of the grid in volume uv, `blFroxelCorner`) and the view's state as uniforms (the mesh's `blFroxel`
-// metadata: the view's inverse projection, the view to the mesh's space, the depth distribution, the grid's width,
-// height, slices and the sample's noise offset, its coordinate scale), so the slab never changes and its material never
-// prepares again; moved along its view ray within its slice by the sample's noise, as EEVEE's eval_froxel jitters it.
-class BlenderFroxelPositionBlock extends NodeMaterialBlock {
-  constructor(name) {
-    super(name, Targets.Fragment);
-    this.registerInput('corner', T.Vector2);
-    this.registerInput('slice', T.Float);
-    this.registerOutput('output', T.Vector3);
-  }
-  getClassName() { return 'BlenderFroxelPositionBlock'; }
-  bind(effect, nodeMaterial, mesh) {
-    const froxel = mesh?.metadata?.blFroxel;
-    if (!froxel) return;
-    effect.setMatrix('bl_froxel_inverse_projection', froxel.inverseProjection);
-    effect.setMatrix('bl_froxel_to_local', froxel.toLocal);
-    effect.setFloat4('bl_froxel_depth', ...froxel.depth, froxel.perspective ? 1 : 0);
-    effect.setFloat4('bl_froxel_grid', ...froxel.grid);
-    effect.setFloat2('bl_froxel_scale', ...froxel.coordScale);
-  }
-  _buildBlock(state) {
-    super._buildBlock(state);
-    if (!state.sharedData.bindableBlocks.includes(this)) state.sharedData.bindableBlocks.push(this);
-    for (const [name, type] of [['bl_froxel_inverse_projection', T.Matrix], ['bl_froxel_to_local', T.Matrix], ['bl_froxel_depth', T.Vector4],
-      ['bl_froxel_grid', T.Vector4], ['bl_froxel_scale', T.Vector2]]) state._emitUniformFromString(name, type);
-    state._emitFunction('bl_froxel_jitter', FROXEL_JITTER, '');
-    const [corner, slice] = this._inputs.map((input) => input.associatedVariableName), out = this._outputs[0];
-    // As volume-shaders.js volume_view_point finds a froxel's point in the view, then in the mesh's space.
-    state.compilationString += `${state._declareOutput(out)};
-{
-  float jitter = bl_froxel_jitter(mod(floor(gl_FragCoord.xy), bl_froxel_grid.xy), bl_froxel_grid.w);
-  float view_z = bl_volume_z_to_view_z(bl_froxel_depth.xyz, bl_froxel_depth.w, (floor(${slice} + 0.5) + 0.5 - jitter) / bl_froxel_grid.z);
-  vec2 ndc = ${corner} / bl_froxel_scale * 2.0 - 1.0;
-  vec4 a = bl_froxel_inverse_projection * vec4(ndc, 0.0, 1.0), b = bl_froxel_inverse_projection * vec4(ndc, 0.5, 1.0);
-  vec3 view_point = mix(a.xyz / a.w, b.xyz / b.w, (-view_z - a.z / a.w) / (b.z / b.w - a.z / a.w));
-  ${out.associatedVariableName} = (bl_froxel_to_local * vec4(view_point, 1.0)).xyz;
-}
-`;
-    return this;
-  }
-}
-const VOLUME_TARGETS = `#extension GL_EXT_draw_buffers : require
-layout(location = 0) out highp vec4 glFragData[4];
-highp vec4 gl_FragColor;`;
+// A material's Volume as EEVEE stores it in its froxels, drawn by draw/volumes.js (draw/volume-blocks.js).
 export class ShaderNodeOutputVolume extends ShaderNodeOutputMaterial {
   constructor(name) {
     super(name);
@@ -1927,8 +1876,7 @@ export class ShaderNodeOutputVolume extends ShaderNodeOutputMaterial {
 
   initialize(state) {
     FragmentOutputBlock.prototype.initialize.call(this, state);
-    Object.assign(state.sharedData.nodeMaterial, { alphaMode: Constants.ALPHA_ONEONE, forceAlphaBlending: true, backFaceCulling: false,
-      disableDepthWrite: true, depthFunction: Constants.ALWAYS, separateCullingPass: false });
+    Object.assign(state.sharedData.nodeMaterial, VOLUME_MATERIAL);
     wire(geometryBlock(state.sharedData.nodeMaterial, '__position').output, this.getInputByName('blLocal'));
   }
 
@@ -1936,9 +1884,7 @@ export class ShaderNodeOutputVolume extends ShaderNodeOutputMaterial {
 
   bind(effect, nodeMaterial, mesh) {
     super.bind(effect, nodeMaterial, mesh);
-    const [min, max] = mesh?.metadata?.blVolumeBounds ?? [[0, 0, 0], [0, 0, 0]];
-    effect.setFloat3('bl_volume_min', ...min);
-    effect.setFloat3('bl_volume_max', ...max);
+    bindVolumeBounds(effect, mesh);
   }
 
   _buildBlock(state) {
@@ -1947,17 +1893,10 @@ export class ShaderNodeOutputVolume extends ShaderNodeOutputMaterial {
     if (state.target !== Targets.Fragment) return this;
     state._emitExtension('bl_volume_targets', VOLUME_TARGETS);
     state._emitFunction('bl_closure', STAND_INS.bl_closure, '');
-    for (const name of ['bl_volume_min', 'bl_volume_max']) state._emitUniformFromString(name, T.Vector3);
+    for (const name of VOLUME_BOUNDS) state._emitUniformFromString(name, T.Vector3);
     const volume = this.getInputByName('Volume'), local = this.getInputByName('blLocal').associatedVariableName;
-    state.compilationString += `if (any(lessThan(${local}, bl_volume_min)) || any(greaterThan(${local}, bl_volume_max))) discard;
-BlClosure bl_volume = ${volume.isConnected ? volume.associatedVariableName : 'bl_closure_empty()'};
-vec3 bl_scattering = max(bl_volume.volume_scattering, 0.0);
-float bl_phase_weight = any(greaterThan(bl_scattering, vec3(0.0))) ? 1.0 : 0.0;
-glFragData[0] = vec4(bl_scattering, 0.0);
-glFragData[1] = vec4(bl_scattering + max(bl_volume.volume_absorption, 0.0), 0.0);
-glFragData[2] = vec4(max(bl_volume.emission, 0.0), 0.0);
-glFragData[3] = vec4(bl_volume.volume_anisotropy * bl_phase_weight, bl_phase_weight, 0.0, 0.0);
-`;
+    state.compilationString += `BlClosure bl_volume = ${volume.isConnected ? volume.associatedVariableName : 'bl_closure_empty()'};
+${volumeWrite(local, 'bl_volume.volume_scattering', 'bl_volume.volume_absorption', 'bl_volume.emission', 'bl_volume.volume_anisotropy')}`;
     return this;
   }
 }

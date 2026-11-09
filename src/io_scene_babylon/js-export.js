@@ -19,6 +19,7 @@ import { exportIR, idKey } from './ir-export.js';
 import { channels, readsOtherIDs } from './modifiers-export.js';
 import { gplFolders, NODE_KERNELS } from './runtime-files.js';
 import { CURVES_GLSL_FILE, curvesGlslFile } from './curves-export.js';
+import { exportVolumes, VOLUMES_FILE } from './volumes-export.js';
 import { idStruct } from '../python/bpy_rna.js';
 import { displayExponent } from '../render/view-settings.js';
 import { AREA_LIGHT } from './area-lights.js';
@@ -125,14 +126,16 @@ async function irMaterials(materials, graphs, ir, parity) {
 }
 
 // The IR graph key of each material and world of Blender's nodes (ir-export.js idGraphs), which the page builds them
-// from (runtime/materials.js fillMaterials); `graphs` collects them, for their kernels.
+// from (runtime/materials.js fillMaterials); `graphs` collects them, for their kernels. With `volume`, its volume
+// material (volumes-export.js) and the mesh it draws in, whose kernels are the graph's `<key>/volume`.
 function materialGraphs(world, graphs) {
   const sync = world.mainSync, mainWorld = sync && idStruct(sync.blender.scene).world;
-  return (material) => {
+  return (material, volume = null) => {
     const ma = sync?.materialOf(material), id = ma ? idStruct(ma) : material === worldNodes.get(world.scene) ? mainWorld : null;
     if (!id?.node_tree) return null;
-    graphs.push([material, `${idKey(id)}/node_tree`]);
-    return graphs.at(-1)[1];
+    const key = `${idKey(id)}/node_tree`;
+    graphs.push(volume ? [volume.material, key, { kernel: `${key}/volume`, mesh: volume.mesh }] : [material, key]);
+    return key;
   };
 }
 
@@ -199,6 +202,8 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   const { scene } = world;
   const worldEntry = await worldMaterial(scene, parity, graphOf);
   if (worldEntry) data.materials.push(worldEntry);
+  const volumes = await exportVolumes(scene, { parity, graphOf, meshes: new Set(data.meshes.map((m) => m.id)), lights: new Set(data.lights.map((l) => l.id)) });
+  if (volumes) data.materials.push(...volumes.materials);
   const bin = createSceneBin({ gzip: !hostCompression }), images = imageFiles(data);
   const geometries = new Map(), geometryLines = [];
   const objects = [...data.transformNodes.map((entry) => ({ entry })), ...data.meshes.map((entry) => ({ entry, mesh: scene.getMeshByUniqueId(entry.uniqueId) }))];
@@ -221,6 +226,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   greasePencilClock(world, ir, data.animationGroups);
   const kernels = await irMaterials(data.materials, graphs, ir, parity), code = sharedCode(data.materials);
   const curves = Object.values(ir.entities).some((e) => e.implementation === 'curves');
+  volumes?.dispose();
   parentInstances(objects);
   const parented = [...data.transformNodes, ...data.meshes, ...data.lights, ...data.cameras].filter((e) => e.parentId !== undefined);
   const parse = (name, list, code) => (list?.length ? `  for (const entry of ${name}) ${code};\n` : '');
@@ -236,7 +242,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   const name = world.sceneSettings.state.name || 'Scene';
   const source = `// ${name}, exported from Bylonder: load(engine) gives it with its controls, createScene(engine, canvas) builds it
 // alone, with Babylon.js ${AbstractEngine.Version}. In a page, map @babylonjs/core to the same version:
-// <script type="importmap">{ "imports": { "@babylonjs/core": "${CDN}" } }</script>${[...gplFolders(irJson), ...(kernels ? [NODE_KERNELS.split('/')[0]] : [])].map((folder) => `
+// <script type="importmap">{ "imports": { "@babylonjs/core": "${CDN}" } }</script>${[...gplFolders(irJson), ...(kernels ? [NODE_KERNELS.split('/')[0]] : []), ...(volumes ? [VOLUMES_FILE.split('/')[0]] : [])].map((folder) => `
 // Includes GPL code: ${folder}/, Blender's code (GPL-3.0-or-later, ${folder}/LICENSE.md), loaded only when a control
 // that needs it is set.`).join('')}
 import { readBuffers, readBytes } from './bylonder/buffers.js';
@@ -248,7 +254,9 @@ import { webgpuSamplers } from './bylonder/overrides/webgpu/samplers.js';${kerne
 import { fillMaterials } from './bylonder/materials.js';
 import kernels from './${NODE_KERNELS}';` : ''}${curves ? `
 // The curves blocks the materials drawing curves use, before they are parsed.
-import './${CURVES_GLSL_FILE}';` : ''}${display ? `
+import './${CURVES_GLSL_FILE}';` : ''}${volumes ? `
+// The volume passes, whose blocks the volume materials use, before they are parsed.
+import { sceneVolumes } from './${VOLUMES_FILE}';` : ''}${display ? `
 import { viewTransform } from './bylonder-view-transform.js';` : ''}${areaLights ? `
 import { parseLight } from './bylonder-area-light.js';` : ''}${composited ? `
 import { compositor } from './bylonder-blocks.js';` : ''}
@@ -281,7 +289,8 @@ const PARTICLE_SYSTEMS = ${json(data.particleSystems)};
 const ANIMATION_GROUPS = ${json(data.animationGroups)};
 const RENDERING_PIPELINES = ${json(data.renderingPipelines)};
 const POST_PROCESSES = ${json(data.postProcesses)};
-const BUFFERS = ${json(bin.views)};${display ? `
+const BUFFERS = ${json(bin.views)};${volumes ? `
+const VOLUMES = ${json(volumes.config)};` : ''}${display ? `
 const DISPLAY = ${json(display)};` : ''}${composited ? `
 const COMPOSITOR = ${json(composited.compositor)};` : ''}
 
@@ -366,7 +375,9 @@ ${parse('REFLECTION_PROBES', data.reflectionProbes, "ReflectionProbe.Parse(entry
     if (make) SerializationHelper.Parse(() => make(entry, scene), entry, scene, ROOT);
     else BABYLON[entry.customType]?.Parse(entry, scene, ROOT);
   }
-  for (const entry of POST_PROCESSES) PostProcess.Parse(entry, scene, ROOT);
+  for (const entry of POST_PROCESSES) PostProcess.Parse(entry, scene, ROOT);${volumes ? `
+  // EEVEE's volumes, resolved over each camera's render before its other post-processes.
+  sceneVolumes(scene, VOLUMES, materials, WORLDS.get(scene)?.box ?? null);` : ''}
 ${data.animationGroups.some((g) => g.targetedAnimations.some((t) => t.animation.property === CLOCK)) ? `  // The frame Babylon's animation keeps where the page's F-Curves are all that moves.
   for (const entry of ANIMATION_GROUPS) for (const { animation, targetId } of entry.targetedAnimations) if (animation.property === '${CLOCK}') scene.getNodeById(targetId).${CLOCK} = entry.from;
 ` : ''}  for (const entry of ANIMATION_GROUPS) AnimationGroup.Parse(entry, scene).play(entry.loopAnimation);${display ? `

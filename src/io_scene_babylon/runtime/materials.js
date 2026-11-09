@@ -123,15 +123,16 @@ const MATRICES = {
  * the output node's outputs: the code of its helper and node functions, then the body.
  * @param {IR} ir
  * @param {string} key the graph's key in `ir.graphs`
- * @param {{ kernels?: Kernels, sources: Sources, outputs?: string[] }} options `outputs`: the output node's outputs the
- * body gives, by socket identifier (all by default)
+ * @param {{ kernels?: Kernels, sources: Sources, outputs?: string[], kernel?: string }} options `outputs`: the output
+ * node's outputs the body gives, by socket identifier (all by default); `kernel`: the kernels' graph the nodes are
+ * made from, by default the graph's own (a volume's is `<key>/volume`)
  */
-export function fuse(ir, key, { kernels, sources, outputs: wanted }) {
+export function fuse(ir, key, { kernels, sources, outputs: wanted, kernel = key }) {
   const graph = ir.graphs[key];
   if (graph?.type !== 'SHADER') throw Error(`${key} is not a shader graph`);
   const nodes = new Map(graph.nodes.map((n) => [n.name, n]));
   const into = new Map(graph.links.map(([from, output, to, input]) => [`${to}\0${input}`, [from, output]]));
-  const output = kernels?.graphs[key]?.output ? nodes.get(kernels.graphs[key].output) : outputNode(graph);
+  const output = kernels?.graphs[kernel]?.output ? nodes.get(kernels.graphs[kernel].output) : outputNode(graph);
   if (!output) throw Error(`${key} has no output node`);
   const helpers = new Map(), calls = new Map(), lines = /** @type {string[]} */ ([]);
   /** @type {Map<string, Map<string, [string, string]>>} each node's outputs by socket: their variable and GLSL type */
@@ -144,7 +145,7 @@ export function fuse(ir, key, { kernels, sources, outputs: wanted }) {
     if (emitted) return emitted;
     const outs = /** @type {Map<string, [string, string]>} */ (new Map()), n = done.size;
     done.set(node.name, outs);
-    const piece = pieceFor(node, key, kernels), args = [];
+    const piece = pieceFor(node, kernel, kernels), args = [];
     for (const [name, code] of Object.entries(piece.functions)) if (!helpers.has(name)) helpers.set(name, code);
     calls.set(piece.call, piece.code);
     for (const param of piece.params) {
@@ -226,10 +227,10 @@ export function fillMaterials(materials, ir, kernels) {
   for (const entry of materials) for (const block of entry.blocks ?? []) {
     const graph = block.options?.blender?.graph;
     if (!graph) continue;
-    const { inputs } = block.options.blender, params = block.options.inParameters;
+    const { inputs, kernel } = block.options.blender, params = block.options.inParameters;
     const byKey = new Map(params.map((/** @type {any} */ p, /** @type {number} */ i) => [inputs[i], `bl_in${i}`]));
     const outputs = block.options.outParameters.map((/** @type {any} */ p) => p.name);
-    const { code } = fuse(ir, graph, { kernels, sources: (key) => byKey.get(key) ?? null, outputs });
+    const { code } = fuse(ir, graph, { kernels, sources: (key) => byKey.get(key) ?? null, outputs, kernel });
     block.options.code = code(params.map((/** @type {any} */ p, /** @type {number} */ i) => [`bl_in${i}`, glslOf(p.type)]));
   }
   return materials;

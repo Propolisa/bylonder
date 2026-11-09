@@ -26,13 +26,15 @@ export function outputNode(graph: Graph): {
  * the output node's outputs: the code of its helper and node functions, then the body.
  * @param {IR} ir
  * @param {string} key the graph's key in `ir.graphs`
- * @param {{ kernels?: Kernels, sources: Sources, outputs?: string[] }} options `outputs`: the output node's outputs the
- * body gives, by socket identifier (all by default)
+ * @param {{ kernels?: Kernels, sources: Sources, outputs?: string[], kernel?: string }} options `outputs`: the output
+ * node's outputs the body gives, by socket identifier (all by default); `kernel`: the kernels' graph the nodes are
+ * made from, by default the graph's own (a volume's is `<key>/volume`)
  */
-export function fuse(ir: IR, key: string, { kernels, sources, outputs: wanted }: {
+export function fuse(ir: IR, key: string, { kernels, sources, outputs: wanted, kernel }: {
     kernels?: Kernels;
     sources: Sources;
     outputs?: string[];
+    kernel?: string;
 }): {
     outputs: string[][];
     /** @param {[string, string][]} inputs the body's parameters, GLSL name and type, in order */

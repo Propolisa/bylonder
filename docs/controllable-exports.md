@@ -269,9 +269,12 @@ graph on the camera's render before the display transform and copies the composi
 transform is an extension of its own, `runtime/view-transform.js` shipped as `bylonder-view-transform.js`: scene linear
 materials, then exposure, Blender's display processor as a lattice computed at export into `scene.bin` (none for
 Standard without a look, which is sRGB's encoding) and the gamma. Each ships only when `scene.js` imports it
-(`runtime-files.js` `packageRuntime`). The app's own compositor tasks and display shader are these same classes. Not
-yet in the library: volumes, area light shadows, EEVEE Parity's lobes and the film's accumulation; a page draws
-without them. All code is GLSL through Babylon's own path, so a page renders on WebGL 2 and on WebGPU (Babylon
+(`runtime-files.js` `packageRuntime`). The app's own compositor tasks and display shader are these same classes.
+Volumes ship as the app's volume passes (`draw/volume-passes.js` and `draw/volume-blocks.js`, GPL, bundled into
+`bylonder-volumes/volumes.js`): each domain's volume material is the app's (its tree drawn with its Volume, the nodes
+made from the IR's graph by the kernels' `<graph>/volume`), drawn over the world and the meshes the export lists in
+`scene.js` (`volumes-export.js`) with the scene's Volumes settings and the lights' Blender settings. Not yet in the
+library: area light shadows, EEVEE Parity's lobes and the film's accumulation; a page draws without them. All code is GLSL through Babylon's own path, so a page renders on WebGL 2 and on WebGPU (Babylon
 converts the GLSL with glslang and twgsl there, `webgpu.md`).
 
 ### The package

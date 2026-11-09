@@ -1,8 +1,8 @@
 // File > Export > Babylon (.babylon) and JavaScript (.zip), run in the scene window. JavaScript is a package: scene.js
 // with its types, scene.bin, images/, the page runtime in bylonder/ and the blocks library files it imports (runtime/,
 // MIT OR Apache-2.0); with Live Modifiers, modifiers.wasm in bylonder-modifiers/, and with Geometry Nodes, Blender's
-// Geometry Nodes kernels in bylonder-geometry-nodes/, and with curves their blocks in bylonder-curves/ (GPL,
-// runtime-files.js gplFiles).
+// Geometry Nodes kernels in bylonder-geometry-nodes/, with curves their blocks in bylonder-curves/ and with volumes the
+// volume passes in bylonder-volumes/ (GPL, runtime-files.js gplFiles).
 import { zipSync, strToU8 } from 'fflate';
 import { serializeScene } from './babylon-export.js';
 import { exportModule } from './js-export.js';
@@ -19,6 +19,7 @@ const SOURCES = {
   'io_scene_babylon/polyfill/modifiers-worker.bundle.js': text(() => import('./polyfill/modifiers-worker.bundle.js?raw')),
   'io_scene_babylon/polyfill/geometry-nodes-kernels.bundle.js': text(() => import('./polyfill/geometry-nodes-kernels.bundle.js?raw')),
   'draw/curves-blocks.js': text(() => import('../draw/curves-blocks.js?raw')),
+  'io_scene_babylon/polyfill/volumes.bundle.js': text(() => import('./polyfill/volumes.bundle.js?raw')),
   'io_scene_babylon/blender-code.LICENSE.md': text(() => import('./blender-code.LICENSE.md?raw')),
   '../LICENSES/GPL-3.0-or-later.txt': text(() => import('../../LICENSES/GPL-3.0-or-later.txt?raw')),
   ...Object.fromEntries(Object.entries(MODULES).map(([path, url]) => [path, bytes(url)])),
