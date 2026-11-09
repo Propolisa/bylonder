@@ -58,9 +58,14 @@ export function createRenderHost({ world, live, sceneAudio, sequencer, name = ()
     const settings = world.renderSettings.state, time = world.animation.time.state;
     let spec;
     const scene = world.mainSync.blender.scene;
-    try { spec = outputSpec(pointerStruct(structFind('Scene'), scene, scene).render); } catch (error) { last = null; sync(); show(); setStatus('Render failed: ' + error.message); return; }
-    // A still is shown first and saved on request; video formats save stills as PNG, as Blender's Save As does.
-    if (kind === 'image' && spec.kind === 'video') spec = { kind: 'image', ...fileFormats.PNG, quality: 1 };
+    // A still is shown first and saved on request, so Render Image renders whatever the output format; a format the
+    // browser cannot write (OpenEXR) or a video one saves the still as PNG, as Blender's Save As offers.
+    let note = '';
+    try { spec = outputSpec(pointerStruct(structFind('Scene'), scene, scene).render); } catch (error) {
+      if (kind !== 'image') { last = null; sync(); show(); setStatus('Render failed: ' + error.message); return; }
+      note = `saved as PNG: ${error.message.replace(/^The browser/, 'the browser')}`;
+    }
+    if (kind === 'image' && (!spec || spec.kind === 'video')) spec = { kind: 'image', ...fileFormats.PNG, quality: 1 };
     const size = encodeSize(outputSize(settings.render), spec.kind === 'video');
     const frames = [];
     if (kind === 'image') frames.push(Math.round(world.animation.time.frame));
@@ -105,7 +110,7 @@ export function createRenderHost({ world, live, sceneAudio, sequencer, name = ()
       if (audio) await writer.addAudio(audio);
       last = await writer.finish();
       writer = null;
-      setStatus(`Finished ${frames.length === 1 ? 'frame ' + frames[0] : frames.length + ' frames'} in ${clock(started)} | ${last.filename}${source.warnings?.length ? ' | ' + source.warnings.join(' | ') : ''}`);
+      setStatus(`Finished ${frames.length === 1 ? 'frame ' + frames[0] : frames.length + ' frames'} in ${clock(started)} | ${last.filename}${[note, ...(source.warnings ?? [])].filter(Boolean).map((w) => ' | ' + w).join('')}`);
       if (kind === 'animation') download(last);
     } catch (error) {
       await writer?.cancel();

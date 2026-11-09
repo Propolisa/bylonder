@@ -1033,6 +1033,18 @@ const checks = {
     await app.page.keyboard.press("Control+z");
     assert.ok(mean < 4, `one sample differs from four by ${mean.toFixed(1)} on average`);
   },
+  // Render Image renders whatever the output format, as Blender's does: one the browser cannot write (OpenEXR) saves
+  // the still as PNG and says so.
+  async "Render Image of a scene set to OpenEXR renders and saves a PNG"() {
+    await app.bylonder((b) => { b.mainScene.render.image_settings.file_format = "OPEN_EXR"; b.world.renderSettings.set("render.resolutionX", 160); b.world.renderSettings.set("render.resolutionY", 90); });
+    await app.page.click('[data-blender="TOPBAR_MT_render"]');
+    await app.page.getByRole("menuitem", { name: "Render Image" }).click();
+    await rendered();
+    const status = await app.frame().evaluate((selector) => document.querySelector(selector).textContent, renderStatus);
+    await app.frame().locator(".render-result [data-close]").click();
+    await app.bylonder((b) => { b.mainScene.render.image_settings.file_format = "PNG"; });
+    assert.match(status, /^Finished .*\.png.*saved as PNG: the browser cannot write OPEN_EXR files/);
+  },
   // Render Image composites on Blender's CPU compositor and shows the composite at the render's size: Render Layers
   // straight into the Group Output gives the render as it is (a composite written at another size shows as stripes).
   // A material whose shader does not compile fails the render, named in the render window and Info, instead of
