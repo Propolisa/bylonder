@@ -282,7 +282,7 @@ export function createEvaluator(graphs, { unit = unitFor, resolve = () => null }
       /** @type {{ field: Field, name: string, type: string }[]} */
       const external = [];
       const named = (/** @type {string} */ name, /** @type {string} */ type) => {
-        const key = ` named ${name}`;
+        const key = `bylonder:named ${name}`;
         parts.set(key, { name: key, type: 'node:GeometryNodeInputNamedAttribute', settings: { data_type: ATTRIBUTE_TYPES[type] ?? 'FLOAT' }, inputs: { Name: name } });
         return [key, 'Attribute'];
       };
@@ -308,9 +308,9 @@ export function createEvaluator(graphs, { unit = unitFor, resolve = () => null }
         const part = { name: m.key, type: m.type, settings: m.settings ?? {}, inputs: { ...m.inputs }, sockets: m.sockets };
         parts.set(m.key, part);
         for (const [id, type] of Object.entries(m.sockets?.inputs ?? {})) {
-          const list = links.get(`${m.key} ${id}`);
+          const list = links.get(`${m.key}\0${id}`);
           // Unlinked, or read implicitly (a Set Position's Position): the node's own value or Blender's default.
-          if (!list?.length || list[0][0].includes(' ')) continue;
+          if (!list?.length || list[0][0].includes('\0')) continue;
           delete /** @type {any} */ (part.inputs)[id];
           const value = await input(m, id, at);
           for (const each of m.multi_input?.includes(id) ? value : [value]) edges.push([...await source(each, type), m.key, id]);

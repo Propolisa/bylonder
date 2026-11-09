@@ -4,6 +4,7 @@
  * evaluation, on IR geometry marshalled in and out. Requests and results are JSON; bulk arrays stay in module memory,
  * named by their address. The IDs a fragment reads (materials, objects with their geometry, collections) are defined
  * first by their IR keys (gn_id_define). */
+#include <cstdio>
 #include <map>
 #include <memory>
 #include <sstream>
@@ -32,6 +33,7 @@
 #include "BLI_math_rotation.hh"
 #include "BLI_serialize.hh"
 #include "BLI_listbase.h"
+#include "BLI_multi_value_map.hh"
 #include "BLI_string.h"
 #include "DNA_collection_types.h"
 #include "DNA_color_types.h"
@@ -71,6 +73,11 @@ struct IDs {
 IDs &ids()
 {
   static IDs table;
+  if (!table.self.runtime) {
+    table.self.runtime = MEM_new<bke::ObjectRuntime>(__func__);
+    table.self.runtime->object_to_world = float4x4::identity();
+    table.self.runtime->world_to_object = float4x4::identity();
+  }
   return table;
 }
 
@@ -498,6 +505,7 @@ bNodeTree *fragment_tree(const DictionaryValue &fragment)
     }
     return bke::node_find_socket(*node, side, UString(identifier));
   };
+  MultiValueMap<bNodeSocket *, bNodeLink *> multi_inputs;
   if (const ArrayValue *links = fragment.lookup_array("links")) {
     for (const std::shared_ptr<Value> &item : links->elements()) {
       const Span<std::shared_ptr<Value>> link = item->as_array_value()->elements();
@@ -508,8 +516,15 @@ bNodeTree *fragment_tree(const DictionaryValue &fragment)
       }
       bNodeSocket *out = socket(from->second, SOCK_OUT, text(1)), *in = socket(to->second, SOCK_IN, text(3));
       if (out && in) {
-        bke::node_add_link(*tree, *from->second, *out, *to->second, *in);
+        multi_inputs.add(in, &bke::node_add_link(*tree, *from->second, *out, *to->second, *in));
       }
+    }
+  }
+  /* A multi-input socket (Join Geometry) takes its links in the request's order: Blender takes the highest sort id
+   * first, and gives each new link the next one. */
+  for (const auto &[socket, socket_links] : multi_inputs.items()) {
+    for (const int i : socket_links.index_range()) {
+      socket_links[i]->multi_input_sort_id = int(socket_links.size()) - 1 - i;
     }
   }
   BKE_ntree_update_without_main(*tree);
@@ -548,6 +563,14 @@ bke::SocketValueVariant input_value(const std::string &type, const Value &value)
   return {};
 }
 
+/* A float as JSON, with the digits that give it back exactly. */
+std::string real(const float value)
+{
+  char text[32];
+  snprintf(text, sizeof(text), "%.9g", double(value));
+  return text;
+}
+
 std::string output_value(const std::string &type, bke::SocketValueVariant &value)
 {
   if (type == "GEOMETRY") {
@@ -557,10 +580,10 @@ std::string output_value(const std::string &type, bke::SocketValueVariant &value
   value.convert_to_single();
   auto numbers = [](const float *v, int n) {
     std::string out = "[";
-    for (int i = 0; i < n; i++) out += (i ? "," : "") + std::to_string(v[i]);
+    for (int i = 0; i < n; i++) out += (i ? "," : "") + real(v[i]);
     return out + "]";
   };
-  if (type == "VALUE") return std::to_string(value.get<float>());
+  if (type == "VALUE") return real(value.get<float>());
   if (type == "INT") return std::to_string(value.get<int>());
   if (type == "BOOLEAN") return value.get<bool>() ? "true" : "false";
   if (type == "VECTOR") return numbers(value.get<float3>(), 3);
@@ -580,7 +603,12 @@ std::string output_value(const std::string &type, bke::SocketValueVariant &value
 std::string execute(const bNodeTree &tree, const DictionaryValue &request)
 {
   using namespace nodes;
-  const GeometryNodesLazyFunctionGraphInfo &info = *ensure_geometry_nodes_lazy_function_graph(tree);
+  tree.ensure_interface_cache();
+  const std::shared_ptr<const GeometryNodesLazyFunctionGraphInfo> graph_info = ensure_geometry_nodes_lazy_function_graph(tree);
+  if (!graph_info) {
+    return "{\"error\":\"the fragment does not evaluate\"}";
+  }
+  const GeometryNodesLazyFunctionGraphInfo &info = *graph_info;
   const GeometryNodesGroupFunction &function = info.function;
   const fn::lazy_function::LazyFunction &lazy_function = *function.function;
   const int inputs_num = lazy_function.inputs().size(), outputs_num = lazy_function.outputs().size();

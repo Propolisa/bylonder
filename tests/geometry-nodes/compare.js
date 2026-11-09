@@ -8,6 +8,7 @@ import { blendData } from '../../src/python/bpy_rna.js';
 import { writeGraph, idKey } from '../../src/io_scene_babylon/ir-graphs.js';
 import { geometryNodesUnit } from '../../src/io_scene_babylon/runtime/geometry-nodes/index.js';
 import { createKernels } from '../../src/io_scene_babylon/runtime/geometry-nodes/kernels.js';
+import { ID_OB } from '../../src/blenkernel/main-evaluated.js';
 
 // Blender's 4x4 (column-major) from Babylon's layout and back: the same swap of Y and Z.
 const AXIS = [0, 2, 1, 3];
@@ -17,12 +18,14 @@ const multiply = (a, b) => Array.from({ length: 16 }, (_, i) => [0, 1, 2, 3].red
 /**
  * @param {string} id the example
  * @param {Record<string, any>[]} cases modifier inputs by interface identifier, set in turn
+ * @param {object} [exports] the module's exports the kernels call
  */
-export async function compareExample(id, cases) {
-  const { sync, node } = openExample(id);
+export async function compareExample(id, cases, exports = blenderModule.exports) {
+  const { sync } = openExample(id);
   const { blender } = sync, data = blendData();
   sync.view();
-  const objectOf = (name) => sync.objectOf(node(name));
+  // Main's objects by name, those outside the view layer too (the trees a collection instances).
+  const objectOf = (name) => blender.ids(ID_OB).find((ob) => blender.name(ob) === name);
   const irMesh = (mesh) => ({
     vert_positions: Float32Array.from(mesh.vert_positions), edges: Int32Array.from(mesh.edges), face_offsets: Int32Array.from(mesh.face_offsets),
     corner_verts: Int32Array.from(mesh.corner_verts), corner_edges: Int32Array.from(mesh.corner_edges),
@@ -39,8 +42,9 @@ export async function compareExample(id, cases) {
     }
     return null;
   };
-  const kernels = createKernels(blenderModule.exports, resolve);
+  const kernels = createKernels(exports, resolve);
 
+  const times = [];
   const modified = [...data.objects].filter((ob) => [...ob.modifiers].some((m) => m.type === 'NODES'));
   for (const values of cases) {
     for (const ob of modified) {
@@ -51,7 +55,9 @@ export async function compareExample(id, cases) {
         .filter((s) => s.in_out === 'INPUT' && s.socket_type !== 'NodeSocketGeometry').map((s) => [s.identifier, modifier.properties.inputs[s.identifier].value]));
       const base = { mesh: irMesh(blender.mesh(pointer)) };
       const unit = geometryNodesUnit(graphs, { kernels: kernels.unit, resolve });
+      const start = performance.now();
       const { geometry } = await unit.run({ graph: idKey(modifier.node_group), geometry: base, ...inputs }, { frame: 1 });
+      times.push(performance.now() - start);
 
       const evaluated = blender.evaluatedMesh(pointer), at = `${ob.name} at ${JSON.stringify(values)}`;
       assert.deepEqual(Array.from(geometry.mesh?.vert_positions ?? []), Array.from(evaluated?.vert_positions ?? []), `${at}: the mesh's points are the app's`);
@@ -69,5 +75,5 @@ export async function compareExample(id, cases) {
       });
     }
   }
-  return modified.map((ob) => ob.name);
+  return { objects: modified.map((ob) => ob.name), milliseconds: Math.round(times.reduce((a, b) => a + b, 0) / times.length) };
 }

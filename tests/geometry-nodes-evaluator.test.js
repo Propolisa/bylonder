@@ -147,7 +147,7 @@ assert.deepEqual(zs((await atomic.evaluate('NT:Chain', { Geometry: { mesh }, Soc
 const geometryNodes = (f) => f.graph.nodes.filter((n) => Object.values(n.sockets?.inputs ?? {}).concat(Object.values(n.sockets?.outputs ?? {})).includes('GEOMETRY'));
 assert.deepEqual(fragments.map((f) => geometryNodes(f).map((n) => n.name)), [['Move'], ['Set Position']], 'one geometry node per kernel call');
 const [, setPosition] = fragments;
-assert.deepEqual(setPosition.graph.nodes.map((n) => n.name).sort(), [' named .bylonder_in_0', 'Set Position', 'Times', 'Up'], 'with the field nodes feeding it, Index read from its attribute');
+assert.deepEqual(setPosition.graph.nodes.map((n) => n.name).sort(), ['Set Position', 'Times', 'Up', 'bylonder:named .bylonder_in_0'], 'with the field nodes feeding it, Index read from its attribute');
 assert.deepEqual(setPosition.graph.inputs, ['GEOMETRY', 'VALUE'], 'its geometry and the single value a field reads are its inputs');
 assert.equal(setPosition.external.length, 1, 'a field input implemented in JS is read from an attribute the caller stores');
 

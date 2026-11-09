@@ -23,6 +23,7 @@ import { ATTRIBUTE_TYPES, LAYOUTS, POINT_DOMAIN, domainSize } from './geometry.j
  */
 export function createKernels(x, resolve) {
   const defined = new Set();
+  let captured = 0;
   /** @type {number[]} */
   let allocations = [];
 
@@ -114,8 +115,16 @@ export function createKernels(x, resolve) {
     try {
       const request = { graph, values: values.map((value, i) => (graph.inputs[i] === 'GEOMETRY' ? geometryIn(value ?? {}) : value)) };
       const results = withText(JSON.stringify(request), (pointer) => JSON.parse(text(x.gn_eval(pointer))));
-      return results.map((/** @type {any} */ value, /** @type {number} */ i) => (graph.outputs[i] === 'GEOMETRY' ? geometryOut(value)
-        : value?.attribute ? new AttributeField(value.attribute, graph.outputs[i]) : value));
+      // A field output's attribute gets a name of its own, so another kernel's on the same geometry keeps its own.
+      const names = new Map(results.filter((/** @type {any} */ value) => value?.attribute).map((/** @type {any} */ value) => [value.attribute, `.bylonder_${captured++}`]));
+      const rename = (/** @type {any} */ g) => {
+        for (const component of [g.mesh, g.points, g.instances]) {
+          if (component) component.attributes = Object.fromEntries(Object.entries(component.attributes).map(([name, a]) => [names.get(name) ?? name, a]));
+        }
+        return g;
+      };
+      return results.map((/** @type {any} */ value, /** @type {number} */ i) => (graph.outputs[i] === 'GEOMETRY' ? rename(geometryOut(value))
+        : value?.attribute ? new AttributeField(/** @type {string} */ (names.get(value.attribute)), graph.outputs[i]) : value));
     } finally {
       allocations.forEach((pointer) => x.free(pointer));
       allocations = [];
