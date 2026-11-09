@@ -24,7 +24,7 @@ const MODIFIER_KEYS = { shift: { code: 'ShiftLeft', key: 'Shift' }, ctrl: { code
 export function mountTouch(win, { scale, hint, keys, modal = () => null, mode = () => 'OBJECT' }) {
   const doc = win.document;
   const state = reactive({ hold: null, tip: null, modifiers: { shift: 'off', ctrl: 'off', alt: 'off' }, drag: null,
-    bar: false, button: 0, point: { x: win.innerWidth / 2, y: win.innerHeight / 2 }, bubbles: [], pie: null, keyboard: false });
+    bar: !!keys && !!win.matchMedia?.('(pointer: coarse)').matches, button: 0, point: { x: win.innerWidth / 2, y: win.innerHeight / 2 }, bubbles: [], pie: null, keyboard: false });
   const flags = () => ({ shiftKey: state.modifiers.shift !== 'off', ctrlKey: state.modifiers.ctrl !== 'off', altKey: state.modifiers.alt !== 'off' });
   // A modifier is its key held down from its first state to off ('once', 'locked' or 'held').
   const setModifier = (name, next) => {
@@ -62,7 +62,8 @@ export function mountTouch(win, { scale, hint, keys, modal = () => null, mode = 
     state.pie && h(KeysPie, { center: state.pie, slots: pieSlots(mode()), onPress: (slot) => { state.pie = null; press(slot); }, onClose: () => { state.pie = null; } }),
   ] });
   app.mount(host);
-  // The bar is the window's last row, under its areas.
+  // The bar is the window's last row, under its areas: there from the start on a touch screen, so the layout does not
+  // shift under the first tap; on a device with a mouse, from the first touch.
   const bar = keys && doc.body.appendChild(doc.createElement('div'));
   const barApp = bar && createApp({ render: () => state.bar && [
     state.keyboard && h(KeyboardSheet, { onPress: (type) => press({ type }), onClose: () => { state.keyboard = false; } }),

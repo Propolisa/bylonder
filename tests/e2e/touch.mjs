@@ -115,9 +115,14 @@ const checks = {
     }
   },
 
-  // The strip toggles its drawer from a tap anywhere on it, its empty end too.
-  async "a tap anywhere on a strip toggles its drawer"() {
+  // The strip toggles its drawer from a tap anywhere on it, its empty end too, the first tap of a first visit included:
+  // the touch bar is there from the start, so the layout does not shift under that tap.
+  async "a tap anywhere on a strip toggles its drawer, the first tap of a first visit too"() {
     if (!(await app.locator(".dock-fold").count())) return;
+    await app.page.evaluate(() => localStorage.removeItem("bylonder:touch-hint"));
+    await app.page.reload();
+    await app.page.waitForFunction(() => document.querySelector('iframe[src*="viewport.html"]')?.contentWindow?.__bylonder?.editor, null, { timeout: 180000 });
+    await app.page.waitForTimeout(1000);
     const fold = app.locator(".dock-fold").first(), drawer = app.locator(".dock-drawer");
     const strip = await fold.boundingBox(), empty = [strip.x + strip.width / 2, strip.y + strip.height - strip.width];
     await touch.tap(empty);
