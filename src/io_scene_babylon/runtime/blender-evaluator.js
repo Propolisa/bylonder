@@ -13,12 +13,10 @@ import { readBytes } from './buffers.js';
  */
 
 /**
- * @param {import('@babylonjs/core').Scene} scene
- * @param {string} root the package's URL
- * @param {{ paths: string[], defaults: any[] }} controls the package's controls, as Main holds them in scene.blend
+ * @param {import('./scheduler.js').Page} page its controls' defaults are what Main holds in scene.blend
  * @returns {Promise<import('./scheduler.js').Evaluator>}
  */
-export async function load(scene, root, { paths, defaults }) {
+export async function load({ scene, root, controls: { paths, defaults } }) {
   const [fallback, bytes] = await Promise.all([import(new URL('bylonder-blender/blender.js', root).href), readBytes(new URL('scene.blend', root))]);
   /** @type {Blend} */
   const blend = await fallback.openBlend(scene, bytes);

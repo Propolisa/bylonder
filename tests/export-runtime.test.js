@@ -9,7 +9,7 @@ import { tmpdir } from 'node:os';
 import { join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { controlTypes } from '../src/io_scene_babylon/controls-export.js';
-import { BLENDER_FILES, BLOCK_FILES, DRIVER_FILES, RUNTIME_FILES } from '../src/io_scene_babylon/runtime-files.js';
+import { BLOCK_FILES, EVALUATOR_FILES, RUNTIME_FILES } from '../src/io_scene_babylon/runtime-files.js';
 
 const runtime = fileURLToPath(new URL('../src/io_scene_babylon/runtime/', import.meta.url));
 const tsc = (args) => execFileSync(process.execPath, [fileURLToPath(new URL('../node_modules/typescript/bin/tsc', import.meta.url)), ...args], { encoding: 'utf8' });
@@ -35,7 +35,7 @@ for (const name of readdirSync(join(runtime, 'drivers')).filter((n) => n.endsWit
 // (their .d.ts files are checked below).
 const blocks = Object.values(BLOCK_FILES).flatMap((name) => [name, name.replace(/\.js$/, '.d.ts')]);
 const files = readdirSync(runtime, { recursive: true }).map((name) => String(name).split(sep).join('/')).filter((name) => name !== 'tsconfig.json' && name !== 'drivers');
-assert.deepEqual(files.sort(), [...RUNTIME_FILES, ...blocks, ...DRIVER_FILES, ...BLENDER_FILES].sort(), 'every file of runtime/ ships');
+assert.deepEqual(files.sort(), [...RUNTIME_FILES, ...blocks, ...Object.values(EVALUATOR_FILES).flatMap((e) => e.runtime)].sort(), 'every file of runtime/ ships');
 
 // Types: the JSDoc checks, and the declarations are current.
 tsc(['-p', join(runtime, 'tsconfig.json'), '--noEmit']);

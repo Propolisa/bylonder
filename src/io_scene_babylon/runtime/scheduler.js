@@ -10,26 +10,26 @@
  * and that evaluator's data.
  * @typedef {{ evaluator: string, reads: number[], writes: number[], baked?: string, data: any }} Operation
  * @typedef {{ version: number, operations: Operation[], order: number[] }} Table
- * @typedef {{ run(operation: Operation, read: (index: number) => any, frame: number): any[] }} Evaluator
+ * An evaluator runs an operation and gives what it writes; one that finishes later (in a worker) resolves `settled`.
+ * @typedef {{ run(operation: Operation, read: (index: number) => any, frame: number): any[], settled?(): Promise<void> }} Evaluator
  * @typedef {{ paths: string[], defaults: any[], get(path: string): any, write(path: string, value: any): void, frame(): number }} Controls
+ * What an evaluator loads for: the page's scene, the package's URL, scene.bin's buffers and the controls.
+ * @typedef {{ scene: import('@babylonjs/core').Scene, root: string, buffers: ArrayBufferView[], controls: Controls }} Page
  */
 
-/**
- * The evaluators by name, each loaded on first use for the page's scene, the package's URL and its controls.
- * @type {Record<string, (scene: import('@babylonjs/core').Scene, root: string, controls: Controls) => Promise<Evaluator>>}
- */
+/** The evaluators by name, each loaded on first use. @type {Record<string, (page: Page) => Promise<Evaluator>>} */
 export const EVALUATORS = {
   driver: () => import('./driver-evaluator.js'),
-  blender: (scene, root, controls) => import('./blender-evaluator.js').then((module) => module.load(scene, root, controls)),
+  modifiers: (page) => import('./modifiers-evaluator.js').then((module) => module.load(page)),
+  blender: (page) => import('./blender-evaluator.js').then((module) => module.load(page)),
 };
 
 /**
- * @param {import('@babylonjs/core').Scene} scene
  * @param {Table} table
- * @param {Controls} controls
- * @param {string} root the package's URL, which evaluators load their files from
+ * @param {Page} page
  */
-export function createScheduler(scene, table, controls, root) {
+export function createScheduler(table, page) {
+  const { scene, controls } = page;
   const readers = new Map(), marked = new Set(), live = new Map(), loaded = new Map();
   table.operations.forEach((op, i) => op.reads.forEach((r) => readers.set(r, [...(readers.get(r) ?? []), i])));
   /** @type {Promise<void> | null} */
@@ -46,7 +46,7 @@ export function createScheduler(scene, table, controls, root) {
 
   /** @param {string} name */
   const evaluator = (name) => {
-    if (!loaded.has(name)) loaded.set(name, EVALUATORS[name](scene, root, controls).then((module) => loaded.set(name, module)));
+    if (!loaded.has(name)) loaded.set(name, EVALUATORS[name](page).then((module) => loaded.set(name, module)));
     const value = loaded.get(name);
     return value instanceof Promise ? null : value;
   };
@@ -80,7 +80,10 @@ export function createScheduler(scene, table, controls, root) {
       if (marked.size) run();
     },
     /** Resolves once every operation set going has run. */
-    settled: async () => { while (pending) await pending; },
+    async settled() {
+      while (pending) await pending;
+      await Promise.all([...loaded.values()].map((module) => module.settled?.()));
+    },
     /** Whether a control is written by an operation of the table. @param {string} path */
     writes: (path) => table.operations.some((op) => op.writes.some((w) => controls.paths[w] === path)),
     dispose: () => scene.onAfterAnimationsObservable.remove(replay),

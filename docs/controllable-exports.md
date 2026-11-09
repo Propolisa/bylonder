@@ -584,6 +584,11 @@ Each step lands on its own, with its tests, and leaves exports working.
    draw the app's planet and tree instances bit for bit).
 7. **`modifiers.wasm` under the evaluator interface.** Checks: `tests/export-live.test.js` on RNA paths, with the same
    results.
+   Done: modifier settings are controls by RNA path with one `modifiers` operation per live object
+   (`modifiers-export.js`), its base Mesh in `scene.bin`; `runtime/modifiers-evaluator.js` runs it in the worker when a
+   setting is set, and the animation sets keyed settings through channels of their node (`metadata.bylonderChannels`),
+   so a frame marks a stack only when a value changes. The per-frame comparison, `metadata.bylonderModifiers` and the
+   base64 geometry are gone.
 8. **Headless SDK.** The controller in Node without a page. Exporting headless needs image pixels Node has no GPU for:
    the exporter asks the module, which decodes images with Blender's own readers (`tests/images-wasm.test.js`); today a
    Node-side export writes an Image Texture's name, not its file. Checks: a script sets paths and reads the evaluated

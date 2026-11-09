@@ -14,7 +14,8 @@ import { createSceneBin } from './scene-bin.js';
 import { imageFiles } from './image-files.js';
 import { exportCompositor } from './compositor-export.js';
 import { exportDependencies } from './dependency-export.js';
-import { usesBlender } from './runtime-files.js';
+import { channels, modifierOperations } from './modifiers-export.js';
+import { gplFolders } from './runtime-files.js';
 import { idStruct } from '../python/bpy_rna.js';
 import { displayExponent } from '../render/view-settings.js';
 import { LOG_SIZE, STOPS } from '../render/display-lut.js';
@@ -25,13 +26,6 @@ const CDN = `https://cdn.jsdelivr.net/npm/@babylonjs/core@${AbstractEngine.Versi
 const json = (value) => JSON.stringify(value);
 const number = (v) => +v.toFixed(7);
 const vector = (values) => values.map(number).join(', ');
-
-function base64(view) {
-  const bytes = new Uint8Array(view.buffer, view.byteOffset, view.byteLength);
-  let text = '';
-  for (let i = 0; i < bytes.length; i += 0x8000) text += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
-  return btoa(text);
-}
 
 // Vertex buffers by Babylon kind, with their sizes, and the indices, as buffers of scene.bin: one entry per geometry,
 // shared by its meshes. A thin instance buffer (world0 to world3, per instance) is the mesh's thinInstances, written
@@ -79,23 +73,13 @@ function nodeCode(entry, mesh, geometries, live, bin) {
     lines.push(`{ const instance = node.createInstance(${json(instance.name)}); instance.position.set(${vector(instance.position)}); ${instance.rotationQuaternion ? `instance.rotationQuaternion = new Quaternion(${vector(instance.rotationQuaternion)});` : `instance.rotation.set(${vector(instance.rotation)});`} instance.scaling.set(${vector(instance.scaling)}); }`);
   }
   if (entry.animations?.length) lines.push(`node.animations = ${json(entry.animations)}.map((a) => Animation.Parse(a));`);
-  if (live) lines.push(`node.metadata = ${json({ bylonderModifiers: liveStack(live) })};`);
+  if (live) lines.push(`node.metadata = ${json({ bylonderChannels: channels(live) })};`);
   lines.push(`nodes[${entry.uniqueId}] = node;`);
   return lines.filter(Boolean);
 }
 
 // Remesh's Voxel mode needs OpenVDB, which the kernels module is built without: such a stack stays applied.
 const needsOpenVDB = (modifier) => modifier.kind === 'REMESH' && modifier.values.mode === 'VOXEL';
-
-// An object's live stack as the polyfill takes it: the base Mesh's arrays as base64, and each modifier's settings with
-// their DNA layouts.
-const liveStack = ({ mesh, modifiers }) => ({
-  base: Object.fromEntries(Object.entries({
-    vert_positions: Float32Array.from(mesh.vert_positions), edges: Int32Array.from(mesh.edges), face_offsets: Int32Array.from(mesh.face_offsets),
-    corner_verts: Int32Array.from(mesh.corner_verts), corner_edges: Int32Array.from(mesh.corner_edges), uvs: mesh.attribute('UVMap') && Float32Array.from(mesh.attribute('UVMap')),
-  }).filter(([, array]) => array).map(([name, array]) => [name, base64(array)])),
-  stack: modifiers.map(({ type, layouts, values }) => ({ type, layouts, values })),
-});
 
 // The thin instances of one instancer (main-view.js drawInstances) become its child's, in its space: they follow it when
 // it moves, as Blender's instances do. Instances of several instancers stay in world space.
@@ -150,9 +134,9 @@ async function displaySettings(world, bin, composites) {
 }
 
 // The package's files but the runtime's: scene.js, scene.d.ts, scene.bin and images/. With `live`, objects whose
-// modifiers are all Blender's keep them live through the modifier kernels polyfill, which createScene loads from
-// `bylonder-modifiers/` next to the module (or its `modifiers` option). With `sourceBlend`, the scene's .blend too, as
-// scene.blend, and the controls only Blender evaluates, which the page's Blender fallback runs on it.
+// modifiers are all Blender's keep them live (modifiers-export.js), run by modifiers.wasm in bylonder-modifiers/. With
+// `sourceBlend`, the scene's .blend too, as scene.blend, and the controls only Blender evaluates, which the page's
+// Blender fallback runs on it.
 export async function exportModule(world, { live: keepLive = false, parity = false, hostCompression = false, sourceBlend = false } = {}) {
   const live = new Map(keepLive ? world.objects.map((node) => [node, world.modifiers.live(node)]).filter(([, stack]) => stack && !stack.modifiers.some(needsOpenVDB)) : []);
   await world.modifiers.settled();
@@ -184,7 +168,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, sour
   // unless one of its effects is on.
   if (display) data.renderingPipelines = data.renderingPipelines.filter((p) => !(p._name?.startsWith('__display:') && !PIPELINE_EFFECTS.some((e) => p[e])));
   const controls = [...exportControls(world, data, { blender: sourceBlend }), ...(composited?.knobs ?? [])], code = sharedCode(data.materials);
-  const dependencies = exportDependencies(world, controls);
+  const dependencies = exportDependencies(world, controls, modifierOperations(world, live, controls, bin));
   parentInstances(objects);
   const parented = [...data.transformNodes, ...data.meshes, ...data.lights, ...data.cameras].filter((e) => e.parentId !== undefined);
   const parse = (name, list, code) => (list?.length ? `  for (const entry of ${name}) ${code};\n` : '');
@@ -200,9 +184,9 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, sour
   const name = world.sceneSettings.state.name || 'Scene';
   const source = `// ${name}, exported from Bylonder: load(engine) gives it with its controls, createScene(engine, canvas) builds it
 // alone, with Babylon.js ${AbstractEngine.Version}. In a page, map @babylonjs/core to the same version:
-// <script type="importmap">{ "imports": { "@babylonjs/core": "${CDN}" } }</script>${usesBlender(json(dependencies)) ? `
-// Includes GPL code: its Blender fallback, bylonder-blender/ (Blender's module, GPL-3.0-or-later, bylonder-blender/
-// LICENSE.md), which loads only when a control only Blender evaluates is set.` : ''}
+// <script type="importmap">{ "imports": { "@babylonjs/core": "${CDN}" } }</script>${gplFolders(json(dependencies)).map((folder) => `
+// Includes GPL code: ${folder}/, Blender's code (GPL-3.0-or-later, ${folder}/LICENSE.md), loaded only when a control
+// that needs it is set.`).join('')}
 import { readBuffers } from './bylonder/buffers.js';
 import { worldColor, worldNodes } from './bylonder/world.js';
 import { BlendScene } from './bylonder/blend-scene.js';${display ? `
@@ -251,13 +235,14 @@ const SCREEN_SPACE = {
 };
 
 // Each built scene's world and compositor, which load gives their controls.
-const WORLDS = new WeakMap(), COMPOSITORS = new WeakMap();
+// Each built scene's world, compositor and scene.bin buffers, which load gives its controls.
+const WORLDS = new WeakMap(), COMPOSITORS = new WeakMap(), SCENE_BUFFERS = new WeakMap();
 export async function load(engine) {
   const scene = await createScene(engine, engine.getRenderingCanvas());
-  return new BlendScene(scene, CONTROLS, { root: ROOT, world: WORLDS.get(scene), compositor: COMPOSITORS.get(scene), table: DEPENDENCIES });
+  return new BlendScene(scene, CONTROLS, { root: ROOT, world: WORLDS.get(scene), compositor: COMPOSITORS.get(scene), table: DEPENDENCIES, buffers: SCENE_BUFFERS.get(scene) });
 }
 
-export async function createScene(engine, canvas${live.size ? ", { modifiers = new URL('./bylonder-modifiers/', import.meta.url) } = {}" : ''}) {
+export async function createScene(engine, canvas) {
   const scene = new Scene(engine);
   scene.useRightHandedSystem = SCENE.useRightHandedSystem;
   scene.autoClear = SCENE.autoClear;
@@ -276,6 +261,7 @@ export async function createScene(engine, canvas${live.size ? ", { modifiers = n
   scene.environmentIntensity = SCENE.environmentIntensity;
   scene.iblIntensity = SCENE.iblIntensity ?? 1;
   const buffers = await readBuffers(new URL('scene.bin', ROOT), BUFFERS, ${!hostCompression});
+  SCENE_BUFFERS.set(scene, buffers);
 
   const materials = {};
   // A custom block's code is written once for every material that shares it.
@@ -323,14 +309,7 @@ ${parse('REFLECTION_PROBES', data.reflectionProbes, "ReflectionProbe.Parse(entry
     const display = viewTransform(camera, { ...DISPLAY, lattice: DISPLAY.lattice && { ...DISPLAY.lattice, texels: buffers[DISPLAY.lattice.texels] } });${composited ? `
     COMPOSITORS.set(scene, (await compositor(scene, camera, COMPOSITOR, display)).graph);` : ''}
   }` : ''}
-  if (canvas) scene.activeCamera?.attachControl(canvas, true);${live.size ? `
-  // Blender's modifiers stay live: the polyfill evaluates them in a worker and again when an animated setting changes.
-  try {
-    const { liveModifiers } = await import(new URL('modifiers.js', modifiers).href);
-    scene.metadata = { ...scene.metadata, liveModifiers: await liveModifiers(scene, { url: modifiers }) };
-  } catch (error) {
-    console.warn('Live modifiers unavailable, drawn applied:', error.message);
-  }` : ''}
+  if (canvas) scene.activeCamera?.attachControl(canvas, true);
   return scene;
 }
 `;

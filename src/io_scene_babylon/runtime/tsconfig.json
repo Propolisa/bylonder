@@ -13,5 +13,5 @@
     "emitDeclarationOnly": true,
     "outDir": "."
   },
-  "files": ["blend-scene.js", "buffers.js", "world.js", "blocks.js", "view-transform.js", "scheduler.js", "driver-evaluator.js", "blender-evaluator.js"]
+  "files": ["blend-scene.js", "buffers.js", "world.js", "blocks.js", "view-transform.js", "scheduler.js", "driver-evaluator.js", "blender-evaluator.js", "modifiers-evaluator.js"]
 }

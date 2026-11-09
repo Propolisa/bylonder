@@ -21,18 +21,19 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
      * @param {import('@babylonjs/core').Scene} scene
      * @param {Knob[]} knobs
      * @param {{ root?: string, world?: { set(color: number[]): void }, compositor?: import('@babylonjs/core').NodeRenderGraph,
-     *   table?: import('./scheduler.js').Table | null }} [options]
+     *   table?: import('./scheduler.js').Table | null, buffers?: ArrayBufferView[] }} [options]
      * the package's URL, which relative image URLs resolve against, the world of one color its background controls set
-     * (world.js), the compositor its pass controls set (bylonder-blocks.js), and the dependency table whose operations
-     * propagate a set control (scheduler.js)
+     * (world.js), the compositor its pass controls set (bylonder-blocks.js), the dependency table whose operations
+     * propagate a set control (scheduler.js), and scene.bin's buffers, which its evaluators read
      */
-    constructor(scene: import("@babylonjs/core").Scene, knobs: Knob[], { root, world, compositor, table }?: {
+    constructor(scene: import("@babylonjs/core").Scene, knobs: Knob[], { root, world, compositor, table, buffers }?: {
         root?: string;
         world?: {
             set(color: number[]): void;
         };
         compositor?: import("@babylonjs/core").NodeRenderGraph;
         table?: import("./scheduler.js").Table | null;
+        buffers?: ArrayBufferView[];
     });
     /** Told of each control's new value. @type {Observable<Change>} */
     onChanged: Observable<Change>;
@@ -116,6 +117,10 @@ export type Binding = {
     transform?: Transform | undefined;
     hide?: "viewport" | "render" | undefined;
     lens?: number | undefined;
+    /**
+     * the key in its node's `metadata.bylonderChannels` the scene's animation sets it through
+     */
+    channel?: string | undefined;
 };
 export type Knob = Control & {
     bind?: Binding;

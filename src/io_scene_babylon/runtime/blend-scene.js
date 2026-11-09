@@ -56,6 +56,7 @@ import { createScheduler } from './scheduler.js';
  * @property {Transform} [transform]
  * @property {'viewport' | 'render'} [hide]
  * @property {number} [lens]
+ * @property {string} [channel] the key in its node's `metadata.bylonderChannels` the scene's animation sets it through
  */
 
 /** @typedef {Control & { bind?: Binding }} Knob */
@@ -125,12 +126,12 @@ export class BlendScene {
    * @param {import('@babylonjs/core').Scene} scene
    * @param {Knob[]} knobs
    * @param {{ root?: string, world?: { set(color: number[]): void }, compositor?: import('@babylonjs/core').NodeRenderGraph,
-   *   table?: import('./scheduler.js').Table | null }} [options]
+   *   table?: import('./scheduler.js').Table | null, buffers?: ArrayBufferView[] }} [options]
    * the package's URL, which relative image URLs resolve against, the world of one color its background controls set
-   * (world.js), the compositor its pass controls set (bylonder-blocks.js), and the dependency table whose operations
-   * propagate a set control (scheduler.js)
+   * (world.js), the compositor its pass controls set (bylonder-blocks.js), the dependency table whose operations
+   * propagate a set control (scheduler.js), and scene.bin's buffers, which its evaluators read
    */
-  constructor(scene, knobs, { root = '', world, compositor, table = null } = {}) {
+  constructor(scene, knobs, { root = '', world, compositor, table = null, buffers = [] } = {}) {
     /** Babylon's scene. */
     this.scene = scene;
     this.#root = root;
@@ -139,14 +140,15 @@ export class BlendScene {
     this.compositor = compositor;
     this.#knobs = new Map(knobs.map((knob) => [knob.path, knob]));
     this.#values = new Map(knobs.map((knob) => [knob.path, knob.default]));
-    this.#scheduler = table && createScheduler(scene, table, {
+    this.#scheduler = table && createScheduler(table, { scene, root, buffers, controls: {
       paths: knobs.map((knob) => knob.path),
       defaults: knobs.map((knob) => knob.default),
       get: (path) => this.#values.get(path),
       write: (path, value) => this.#write(path, value),
       // The animation's frame while it plays, else the frame control's.
       frame: () => scene.animationGroups[0]?.animatables[0]?.masterFrame ?? /** @type {number} */ ([...this.#values].find(([p]) => p.endsWith('.frame_current'))?.[1] ?? 1),
-    }, root);
+    } });
+    this.#channels(knobs);
   }
 
   /** @type {ReturnType<typeof createScheduler> | null} */
@@ -175,6 +177,25 @@ export class BlendScene {
     if (typeof value !== typeof knob.default) throw new TypeError(`${path} takes a ${typeof knob.default}, not ${typeof value}`);
     this.#write(path, value);
     this.#scheduler?.changed(path);
+  }
+
+  /**
+   * Controls the scene's animation sets: each a property of its node's `metadata.bylonderChannels`, which Babylon's
+   * animation holds and sets every frame, and which sets the control when its value changes.
+   * @param {Knob[]} knobs
+   */
+  #channels(knobs) {
+    for (const { path, default: initial, bind } of knobs) {
+      const holder = bind?.channel !== undefined && /** @type {any} */ (this.scene.getNodeById(bind.node ?? ''))?.metadata?.bylonderChannels;
+      if (!holder) continue;
+      Object.defineProperty(holder, /** @type {string} */ (bind?.channel), {
+        get: () => this.#values.get(path),
+        set: (value) => {
+          const typed = typeof initial === 'boolean' ? !!value : value;
+          if (typed !== this.#values.get(path)) this.set(path, typed);
+        },
+      });
+    }
   }
 
   /** Resolves once what the last changes set going has run (an evaluator's first load). */

@@ -6,7 +6,7 @@
 
 /**
  * One buffer of scene.bin: where its bytes start once inflated, how many values it has, and their type.
- * @typedef {[byteOffset: number, length: number, type: 'f32' | 'u16' | 'u32']} BufferView
+ * @typedef {[byteOffset: number, length: number, type: 'f32' | 'u16' | 'u32' | 'i32']} BufferView
  */
 
 /**
@@ -37,11 +37,11 @@ export async function readBytes(url) {
  * @param {URL} url
  * @param {BufferView[]} views
  * @param {boolean} [gzip]
- * @returns {Promise<(Float32Array | Uint16Array | Uint32Array)[]>}
+ * @returns {Promise<(Float32Array | Uint16Array | Uint32Array | Int32Array)[]>}
  */
 export async function readBuffers(url, views, gzip = true) {
   const body = await bodyOf(url);
   const inflated = await new Response(gzip ? body.pipeThrough(new DecompressionStream('gzip')) : body).arrayBuffer();
   return views.map(([offset, length, type]) => (type === 'f32' ? new Float32Array(inflated, offset, length)
-    : type === 'u16' ? new Uint16Array(inflated, offset, length) : new Uint32Array(inflated, offset, length)));
+    : type === 'u16' ? new Uint16Array(inflated, offset, length) : type === 'i32' ? new Int32Array(inflated, offset, length) : new Uint32Array(inflated, offset, length)));
 }

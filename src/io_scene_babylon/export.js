@@ -1,47 +1,40 @@
 // File > Export > Babylon (.babylon) and JavaScript (.zip), run in the scene window. JavaScript is a package: scene.js
 // with its types, scene.bin, images/, the page runtime in bylonder/ and the blocks library files it imports (runtime/,
-// MIT OR Apache-2.0); with Live Modifiers, the modifier kernels polyfill in bylonder-modifiers/ too; with Include Source
-// .blend, scene.blend and the Blender fallback in bylonder-blender/ (GPL-3.0-or-later).
+// MIT OR Apache-2.0); with Live Modifiers, modifiers.wasm in bylonder-modifiers/, and with Include Source .blend,
+// scene.blend and the Blender fallback in bylonder-blender/ (GPL-3.0-or-later, runtime-files.js gplFiles).
 import { zipSync, strToU8 } from 'fflate';
 import { serializeScene } from './babylon-export.js';
 import { exportModule } from './js-export.js';
-import { packageRuntime, usesBlender } from './runtime-files.js';
+import { gplFiles, packageRuntime } from './runtime-files.js';
 import { BMESH_WASM } from '../bmesh/bmesh-module.js';
 
 const runtime = import.meta.glob('./runtime/**/*', { query: '?raw', import: 'default', eager: true });
 
-// The polyfill's files as an export ships them.
-async function polyfill() {
-  const [{ default: main }, { default: worker }, { default: wasm }] = await Promise.all([
-    import('./polyfill/modifiers.js?raw'), import('./polyfill/modifiers-worker.bundle.js?raw'), import('../modifiers/modifiers.wasm?url'),
-  ]);
-  return { 'modifiers.js': strToU8(main), 'modifiers-worker.js': strToU8(worker), 'modifiers.wasm': new Uint8Array(await (await fetch(wasm)).arrayBuffer()) };
-}
-
-// The Blender fallback (runtime-files.js FALLBACK_FILES) as the app serves it.
-async function blenderFallback() {
-  const bytes = async (url) => new Uint8Array(await (await fetch(url)).arrayBuffer());
-  const [{ default: blender }, { default: license }, { default: copying }, { default: tessellate }] = await Promise.all([import('./blender-fallback.bundle.js?raw'),
-    import('./blender-fallback.LICENSE.md?raw'), import('../../LICENSES/GPL-3.0-or-later.txt?raw'), import('../blenkernel/mesh/mesh-tessellate.wasm?url')]);
-  return { 'bylonder-blender/blender.js': blender, 'bylonder-blender/LICENSE.md': license, 'bylonder-blender/COPYING': copying,
-    'bylonder-blender/bmesh.wasm': await bytes(BMESH_WASM), 'bylonder-blender/mesh-tessellate.wasm': await bytes(tessellate) };
-}
+// The files of gplFiles as the app serves them, by src/ path: text, or a module's bytes.
+const bytes = (url) => async () => new Uint8Array(await (await fetch(await url())).arrayBuffer());
+const text = (load) => async () => (await load()).default;
+const SOURCES = {
+  'io_scene_babylon/polyfill/modifiers-worker.bundle.js': text(() => import('./polyfill/modifiers-worker.bundle.js?raw')),
+  'io_scene_babylon/blender-fallback.bundle.js': text(() => import('./blender-fallback.bundle.js?raw')),
+  'io_scene_babylon/blender-code.LICENSE.md': text(() => import('./blender-code.LICENSE.md?raw')),
+  '../LICENSES/GPL-3.0-or-later.txt': text(() => import('../../LICENSES/GPL-3.0-or-later.txt?raw')),
+  'modifiers/modifiers.wasm': bytes(async () => (await import('../modifiers/modifiers.wasm?url')).default),
+  'bmesh/bmesh.wasm': bytes(async () => BMESH_WASM),
+  'blenkernel/mesh/mesh-tessellate.wasm': bytes(async () => (await import('../blenkernel/mesh/mesh-tessellate.wasm?url')).default),
+};
 
 // The package's files as the zip holds them.
 async function scenePackage(world, options) {
   const files = await exportModule(world, options);
   for (const [path, name] of packageRuntime(files['scene.js'])) files[path] = runtime['./runtime/' + name];
-  if (usesBlender(files['scene.js'])) Object.assign(files, await blenderFallback());
+  for (const [path, from] of gplFiles(files['scene.js'])) files[path] = await SOURCES[from]();
   return Object.fromEntries(Object.entries(files).map(([path, data]) => [path, typeof data === 'string' ? strToU8(data) : data]));
 }
 
 const FORMATS = {
   babylon: { extension: 'babylon', type: 'application/json', build: async (world, name, { parity }) => JSON.stringify(await serializeScene(world, { parity })) },
   js: { extension: 'zip', type: 'application/zip', build: async (world, name, options) => zipSync(await scenePackage(world, options)) },
-  'js-live': {
-    extension: 'zip', type: 'application/zip',
-    build: async (world, name, options) => zipSync({ ...(await scenePackage(world, { ...options, live: true })), 'bylonder-modifiers': await polyfill() }),
-  },
+  'js-live': { extension: 'zip', type: 'application/zip', build: async (world, name, options) => zipSync(await scenePackage(world, { ...options, live: true })) },
 };
 
 // `options` (topbar.js asks for them): { eeveeParity }, materials with Bylonder's EEVEE extensions, as Babylon's blocks;

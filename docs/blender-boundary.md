@@ -430,7 +430,7 @@ Decided 2026-10-28. Exports apply modifiers; File > Export > JavaScript, Live Mo
   run on the given build through `BYLONDER_BMESH_WASM`, about 8 s a run. `tests/export-live.test.js` runs the
   modifiers check on the committed module.
 - **Size.** Measured: `modifiers.wasm` is 6.3 MB, 1.6 MB gzipped (`bmesh.wasm`, all of Blender's libraries but those past the seams: 59.2 MB, 16.5 MB gzipped), with
-  `modifiers.js` (4 KB) and the worker (13 KB). Built with OpenVDB's headers and every modifier type it was 11.4 MB,
+  the worker (13 KB). Built with OpenVDB's headers and every modifier type it was 11.4 MB,
   3.1 MB gzipped: OpenVDB's templates alone were a third of its code. What remains is mostly what `BKE_idtype_init`
   and `BKE_modifier_init` reach (every ID type's code) and RNA's static definitions; narrowing those to Mesh and
   Object is the next cut.
@@ -439,23 +439,23 @@ Decided 2026-10-28. Exports apply modifiers; File > Export > JavaScript, Live Mo
   and `draw/mesh-batch-buffers.js` (a Mesh's draw buffers, without Babylon). So a live result is the applied export's
   geometry exactly. Two RNA properties can be one DNA field in two units (Bevel's `width` and `width_pct`): the
   writer writes defaults first, so the setting changed from its default is the field's value.
-- **The polyfill.** Three files the zip puts in `bylonder-modifiers/` next to the module: `modifiers.js` (no imports:
-  `liveModifiers(scene, { url })`), `modifiers-worker.js` (`polyfill/worker.js` bundled by
-  `scripts/modifiers-polyfill.mjs` into `modifiers-worker.bundle.js`, which a test keeps current) and `modifiers.wasm`.
-  `createScene(engine, canvas, { modifiers })` imports it from that folder, or from the URL given, after building the
-  scene; if it cannot load, the applied geometry stays.
-- **What a live object carries.** An object whose shown modifiers are all Blender's (`modifiers.live(node)`) gets
-  `metadata.bylonderModifiers`: its base Mesh as the module takes it (positions, edges, face offsets, corner verts and
-  edges, UVs, base64) and its stack (ModifierType, settings by RNA path, and the DNA layouts of those settings, so the
-  polyfill needs neither RNA nor DNA tables). Its applied geometry is written too and shows until the first evaluation.
-  Objects with Bylonder's own modifiers (Array as Geometry Nodes) stay applied.
-- **Animation.** A keyed modifier setting is sampled into the scene's animation group at
-  `metadata.bylonderModifiers.stack.<index>.values.<path>`; booleans hold from key to key. The polyfill compares each
-  stack's settings before every frame and evaluates again in its worker when they changed, the newest settings winning;
-  integers round as Bylonder's channels do.
-- **Checked.** `tests/export-live.test.js` evaluates Subdivision Surface, Array, Bevel, Mirror and Solidify, and a keyed
-  Solidify thickness at another frame, through the exported module and the polyfill (its worker run in Node), and
-  compares them with the applied geometry; `tests/e2e/smoke.mjs` checks the zip.
+- **In the page.** The `modifiers` evaluator of the package's dependency table (`docs/controllable-exports.md`):
+  `runtime/modifiers-evaluator.js` starts `bylonder-modifiers/modifiers-worker.js` (`polyfill/worker.js` bundled by
+  `scripts/modifiers-polyfill.mjs` into `modifiers-worker.bundle.js`, which a test keeps current) with `modifiers.wasm`
+  on the first set of a modifier setting; until then the applied geometry shows.
+- **What a live object carries.** An object whose shown modifiers are all Blender's (`modifiers.live(node)`) has each
+  setting as a control by its RNA path (`objects["Cube"].modifiers["Subdivision"].levels`) and one `modifiers`
+  operation reading them, with its base Mesh as the module takes it (positions, edges, face offsets, corner verts and
+  edges, UVs) in `scene.bin` and its stack (ModifierType and the DNA layouts of its settings, so the page needs neither
+  RNA nor DNA tables) (`io_scene_babylon/modifiers-export.js`). Objects with Bylonder's own modifiers (Array as
+  Geometry Nodes) stay applied.
+- **Animation.** A keyed modifier setting is sampled into the scene's animation group at a channel of its node,
+  `metadata.bylonderChannels["<modifier index>:<path>"]`, which the page's controller turns into its control: a frame
+  that changes it marks the stack's operation, which runs again in the worker, the newest settings winning; integers
+  round as Bylonder's channels do. Nothing is compared per frame.
+- **Checked.** `tests/export-live.test.js` runs Subdivision Surface, Array, Bevel, Mirror and Solidify set by path, and
+  a keyed Solidify thickness at another frame, through the exported package (its worker run in Node), and compares
+  them with the applied geometry; `tests/e2e/smoke.mjs` checks the zip.
 
 ## Shared foundations
 

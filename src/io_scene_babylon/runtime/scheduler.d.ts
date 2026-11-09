@@ -1,14 +1,12 @@
 /**
- * @param {import('@babylonjs/core').Scene} scene
  * @param {Table} table
- * @param {Controls} controls
- * @param {string} root the package's URL, which evaluators load their files from
+ * @param {Page} page
  */
-export function createScheduler(scene: import("@babylonjs/core").Scene, table: Table, controls: Controls, root: string): {
+export function createScheduler(table: Table, page: Page): {
     /** A control was set. @param {string} path */
     changed(path: string): void;
     /** Resolves once every operation set going has run. */
-    settled: () => Promise<void>;
+    settled(): Promise<void>;
     /** Whether a control is written by an operation of the table. @param {string} path */
     writes: (path: string) => boolean;
     dispose: () => boolean;
@@ -18,14 +16,14 @@ export function createScheduler(scene: import("@babylonjs/core").Scene, table: T
  * and that evaluator's data.
  * @typedef {{ evaluator: string, reads: number[], writes: number[], baked?: string, data: any }} Operation
  * @typedef {{ version: number, operations: Operation[], order: number[] }} Table
- * @typedef {{ run(operation: Operation, read: (index: number) => any, frame: number): any[] }} Evaluator
+ * An evaluator runs an operation and gives what it writes; one that finishes later (in a worker) resolves `settled`.
+ * @typedef {{ run(operation: Operation, read: (index: number) => any, frame: number): any[], settled?(): Promise<void> }} Evaluator
  * @typedef {{ paths: string[], defaults: any[], get(path: string): any, write(path: string, value: any): void, frame(): number }} Controls
+ * What an evaluator loads for: the page's scene, the package's URL, scene.bin's buffers and the controls.
+ * @typedef {{ scene: import('@babylonjs/core').Scene, root: string, buffers: ArrayBufferView[], controls: Controls }} Page
  */
-/**
- * The evaluators by name, each loaded on first use for the page's scene, the package's URL and its controls.
- * @type {Record<string, (scene: import('@babylonjs/core').Scene, root: string, controls: Controls) => Promise<Evaluator>>}
- */
-export const EVALUATORS: Record<string, (scene: import("@babylonjs/core").Scene, root: string, controls: Controls) => Promise<Evaluator>>;
+/** The evaluators by name, each loaded on first use. @type {Record<string, (page: Page) => Promise<Evaluator>>} */
+export const EVALUATORS: Record<string, (page: Page) => Promise<Evaluator>>;
 /**
  * An operation of the table: what it reads and writes (indices of the package's controls), the evaluator that runs it
  * and that evaluator's data.
@@ -38,8 +36,7 @@ export type Operation = {
     data: any;
 };
 /**
- * An operation of the table: what it reads and writes (indices of the package's controls), the evaluator that runs it
- * and that evaluator's data.
+ * An evaluator runs an operation and gives what it writes; one that finishes later (in a worker) resolves `settled`.
  */
 export type Table = {
     version: number;
@@ -52,10 +49,10 @@ export type Table = {
  */
 export type Evaluator = {
     run(operation: Operation, read: (index: number) => any, frame: number): any[];
+    settled?(): Promise<void>;
 };
 /**
- * An operation of the table: what it reads and writes (indices of the package's controls), the evaluator that runs it
- * and that evaluator's data.
+ * What an evaluator loads for: the page's scene, the package's URL, scene.bin's buffers and the controls.
  */
 export type Controls = {
     paths: string[];
@@ -63,4 +60,14 @@ export type Controls = {
     get(path: string): any;
     write(path: string, value: any): void;
     frame(): number;
+};
+/**
+ * An operation of the table: what it reads and writes (indices of the package's controls), the evaluator that runs it
+ * and that evaluator's data.
+ */
+export type Page = {
+    scene: import("@babylonjs/core").Scene;
+    root: string;
+    buffers: ArrayBufferView[];
+    controls: Controls;
 };

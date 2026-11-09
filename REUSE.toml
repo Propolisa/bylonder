@@ -138,7 +138,7 @@ SPDX-License-Identifier = "GPL-3.0-or-later"
 # An exported page's Blender fallback, bundled with Blender's ported and compiled code: shipped with the module in a
 # package's bylonder-blender/, under the module's license.
 [[annotations]]
-path = ["src/io_scene_babylon/blender-fallback.bundle.js", "src/io_scene_babylon/blender-fallback.LICENSE.md"]
+path = ["src/io_scene_babylon/blender-fallback.bundle.js", "src/io_scene_babylon/blender-code.LICENSE.md"]
 precedence = "override"
 SPDX-FileCopyrightText = ["Blender Authors", "Jacques de Hooge and the Transcrypt contributors", "2026 Chris Stanley"]
 SPDX-License-Identifier = "GPL-3.0-or-later"

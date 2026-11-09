@@ -113,8 +113,9 @@ function blenderOperations(controls) {
   return [...modifiers.values()].map((reads) => ({ evaluator: 'blender', reads, writes: [], data: null }));
 }
 
-// The table for `controls` (the package's CONTROLS, which the drivers' inputs are marked suggested in), or null.
-export function exportDependencies(world, controls) {
+// The table for `controls` (the package's CONTROLS, which the drivers' inputs are marked suggested in) with the
+// `operations` made with them (modifiers-export.js), or null.
+export function exportDependencies(world, controls, made = []) {
   if (!world.mainSync) return null;
   const index = new Map(controls.map((c, i) => [c.path, i])), operations = [], data = blendData();
   for (const collection of Object.values(COLLECTIONS)) for (const id of data[collection] ?? []) {
@@ -123,7 +124,7 @@ export function exportDependencies(world, controls) {
       if (op) operations.push(op);
     }
   }
-  operations.push(...blenderOperations(controls));
+  operations.push(...made, ...blenderOperations(controls));
   if (!operations.length) return null;
   for (const op of operations) for (const r of op.reads) controls[r].suggested = true;
   return { version: 1, operations, order: topological(operations) };

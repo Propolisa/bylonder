@@ -13,9 +13,9 @@ import { AREA_OFFSET, rigId } from './area-lights.js';
 // Blender's own (Bylonder's ID properties, add-ons' groups) stay out of an ID's custom properties.
 const OWN = /^(bylonder|_RNA_UI$|cycles)/;
 
-const key = (name) => `["${name.replace(/["\\]/g, (c) => '\\' + c)}"]`;
+export const key = (name) => `["${name.replace(/["\\]/g, (c) => '\\' + c)}"]`;
 const typeOf = (value) => (typeof value === 'boolean' ? 'BOOLEAN' : typeof value === 'string' ? 'STRING' : Number.isInteger(value) ? 'INT' : 'FLOAT');
-const knob = (path, value, meta = {}, bind) => ({ path, type: typeOf(value), default: value, ...meta, ...(bind && { bind }) });
+export const knob = (path, value, meta = {}, bind) => ({ path, type: typeOf(value), default: value, ...meta, ...(bind && { bind }) });
 
 // An ID's custom properties: numbers, booleans and strings, suggested to authors.
 function customProperties(id, base) {

@@ -8,6 +8,7 @@ import { exportRuntimes } from '../runtimes/runtimes.js';
 import { straightImageData } from '../imbuf/image-textures.js';
 import { exportNodeMaterial } from './node-material-export.js';
 import { exactAnimation } from './exact-keys.js';
+import { channelKey } from './modifiers-export.js';
 import { AREA_LIGHT, rigAreaLights, rigId, rigTransform } from './area-lights.js';
 
 // The World's skybox is Bylonder's (world-babylon.js) but is what a render shows; the loader rebuilds it.
@@ -170,7 +171,7 @@ const read = (object, path) => path.reduce((value, key) => value?.[key], object)
 
 // Where a channel lands in the file, as its owner node, the property path on it, the value there and the component the
 // channel sets: its Babylon target's property, a material's through a mesh using it ('material.diffuseColor'), or with
-// live modifiers a modifier setting in the stack the polyfill evaluates ('metadata.bylonderModifiers.stack.0.values.levels').
+// live modifiers a modifier setting, by its node's channel (modifiers-export.js: 'metadata.bylonderChannels.0:levels').
 function animationTarget(channel, content, live) {
   const { target, property } = channel;
   const modifier = live && /^modifier:(.*):([^:]+)$/.exec(channel.id);
@@ -178,7 +179,7 @@ function animationTarget(channel, content, live) {
     const [node, stack] = live.get(modifier[1]) ?? [];
     const index = stack?.modifiers.findIndex((m) => m.id === modifier[2]) ?? -1;
     if (index < 0) return null;
-    return { owner: node, path: ['metadata', 'bylonderModifiers', 'stack', String(index), 'values', channel.path], value: +stack.modifiers[index].values[channel.path], component: null };
+    return { owner: node, path: ['metadata', 'bylonderChannels', channelKey(index, channel.path)], value: +stack.modifiers[index].values[channel.path], component: null };
   }
   const owner = content.nodes.has(target) ? target : content.meshes.find((m) => target && m.material === target);
   if (!owner || !property) return null;

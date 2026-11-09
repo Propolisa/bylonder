@@ -157,13 +157,14 @@ const checks = {
     const scenePackage = unzipSync(await exported("JavaScript (.zip)"));
     assert.match(strFromU8(scenePackage["scene.js"]), /export async function load\(engine\)/);
     assert.ok(scenePackage["scene.bin"].length > 0 && scenePackage["bylonder/blend-scene.js"], "the package holds scene.bin and the runtime");
-    // Live Modifiers: the module, whose subdivided cube keeps its stack, and the polyfill next to it.
+    // Live Modifiers: the module, whose subdivided cube keeps its stack as a `modifiers` operation on its settings, its
+    // evaluator, and modifiers.wasm with its worker beside them.
     const zip = unzipSync(await exported("JavaScript, Live Modifiers (.zip)"));
     const module = strFromU8(zip["scene.js"]);
-    assert.match(module, /bylonderModifiers/);
-    assert.match(module, /liveModifiers/);
-    assert.match(strFromU8(zip["bylonder-modifiers/modifiers.js"]), /export async function liveModifiers/);
-    assert.ok(zip["bylonder-modifiers/modifiers-worker.js"].length > 0);
+    assert.match(module, /"evaluator":"modifiers"/);
+    assert.match(module, /\.modifiers\[\\"[^\\]+\\"\]\.levels/, "the Subdivision's levels as a control by its Blender path");
+    assert.match(strFromU8(zip["bylonder/modifiers-evaluator.js"]), /export async function load/);
+    assert.ok(zip["bylonder-modifiers/modifiers-worker.js"].length > 0 && zip["bylonder-modifiers/COPYING"]);
     assert.deepEqual(Array.from(zip["bylonder-modifiers/modifiers.wasm"].subarray(0, 4)), [0, 0x61, 0x73, 0x6d], "a WebAssembly module");
   },
 
