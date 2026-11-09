@@ -168,7 +168,7 @@ function transformAnimations(node, keys, frames, { frameStart, fps }, runs, curv
       curves.push(...run);
       return [];
     }
-    if (runs) gaps.push(`${node.name} ${key}: its F-Curves are not all that moves it (NLA, drivers, constraints, F-modifiers but Cycles) or the unit misses Main`);
+    if (runs) gaps.push({ message: `${node.name} ${key}: its F-Curves are not all that moves it (NLA, drivers, constraints, F-modifiers but Cycles) or the unit misses Main` });
     const animation = new Animation(node.name + ' ' + key, key, fps, ANIMATION_TYPES[frames[0][key].getClassName()], Animation.ANIMATIONLOOPMODE_CYCLE);
     animation.setKeys(frames.map((t, i) => ({ frame: frameStart + i, value: t[key] })));
     return [animation];
@@ -229,7 +229,6 @@ function bakeAnimations(world, samples, content, live, mapped, transforms, keys,
       continue;
     }
     const quaternion = path.join('.') === 'rotation' && owner.rotationQuaternion;
-    gaps?.push(`${owner.name} ${path.join('.')}: the page runs no F-Curve of a channel other than an object's transform yet`);
     const frames = Array.from({ length: frameEnd - frameStart + 1 }, (_, i) => {
       const frame = frameStart + i;
       let sample = typeof value === 'number' ? value : value.clone();
@@ -245,6 +244,7 @@ function bakeAnimations(world, samples, content, live, mapped, transforms, keys,
     const animation = new Animation(owner.name + ' ' + property, property, fps, type, Animation.ANIMATIONLOOPMODE_CYCLE);
     animation.setKeys(frames);
     targetedAnimations.push({ animation: animation.serialize(), targetId: owner.id });
+    gaps?.push({ message: `${owner.name} ${property}: no F-Curve the page runs sets it`, sampled: targetedAnimations.at(-1) });
   }
   // Babylon's animation keeps the page's time where F-Curves the page runs are all that moves.
   if (!targetedAnimations.length && curves?.length) targetedAnimations.push({ animation: clock(frameStart, frameEnd, fps).serialize(), targetId: curves[0].node });
@@ -259,6 +259,22 @@ function clock(frameStart, frameEnd, fps) {
   const animation = new Animation('Frame', CLOCK, fps, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CYCLE);
   animation.setKeys([{ frame: frameStart, value: frameStart }, { frame: frameEnd, value: frameEnd }]);
   return animation;
+}
+
+// The samples a package's page also runs an F-Curve for (an IR `fcurve` entity writing a property bound to the same
+// node property) leave its animation groups; each other one is reported as a gap to close.
+export function sampledGaps(json, ir) {
+  const run = new Set(Object.values(ir.entities).filter((e) => e.implementation === 'fcurve').map((e) => ir.properties[e.outputs.value?.property]?.bind)
+    .filter((bind) => bind?.node !== undefined && bind.property).map((bind) => `${bind.node}:${bind.property}`));
+  for (const { message, sampled } of json.sampledAnimation) {
+    if (!sampled || !run.has(`${sampled.targetId}:${sampled.animation.property}`)) {
+      report('WARNING', `Export: ${message}, so it is sampled per frame`);
+      continue;
+    }
+    const group = json.animationGroups.find((g) => g.targetedAnimations.includes(sampled));
+    group.targetedAnimations.splice(group.targetedAnimations.indexOf(sampled), 1);
+    if (!group.targetedAnimations.length) group.targetedAnimations.push({ animation: clock(group.from, group.to, sampled.animation.framePerSecond).serialize(), targetId: sampled.targetId });
+  }
 }
 
 // Babylon's serializer writes a skinned geometry's first four bone influences and its loader reads the extra four only
@@ -395,9 +411,8 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
   Object.assign(json, { animationGroups, activeCameraID, renderingPipelines: effects.renderingPipelines, imageProcessingConfiguration: scene.imageProcessingConfiguration.serialize(), producer: { name: 'Bylonder', file: 'scene.babylon' } });
   json.postProcesses.push(...effects.postProcesses);
   await environment(json, scene);
-  // The F-Curves the page runs (live-curves.js), for the package's IR, and what it still plays as samples, each reported
-  // as a gap to close: neither is part of the file.
-  for (const gap of gaps ?? []) report('WARNING', `Export: ${gap}, so it is sampled per frame`);
+  // The F-Curves the page runs (live-curves.js), for the package's IR, and what it still plays as samples (sampledGaps):
+  // neither is part of the file.
   Object.defineProperties(json, { liveCurves: { value: curves ?? [] }, sampledAnimation: { value: gaps ?? [] } });
   return json;
 }

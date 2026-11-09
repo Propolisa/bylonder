@@ -158,10 +158,14 @@ function curveTarget(id, fc, properties) {
   return [`${path}[${fc.array_index}]`, path, socket && `${id.path}.${socket[1]}.properties.inputs.${socket[2]}.value`].find((p) => p && properties[p]) ?? null;
 }
 
-// A FLOAT property no Babylon binding sets (a custom property, a Geometry Nodes input), whose F-Curve the unit runs
-// as Blender evaluates it and nothing else animates: its F-Curve as the `fcurve` implementation runs it, else null.
-function propertyCurve(animation, fc, property) {
-  if (property?.bind || property?.type !== 'FLOAT' || animation.nla_tracks.length || [...animation.drivers].some((d) => d.data_path === fc.data_path)) return null;
+// An object's transform, whose F-Curves run live only where Main's samples confirm them (live-curves.js).
+const TRANSFORM = /^objects\[.*\]\.(location|rotation_euler|rotation_quaternion|scale)\[\d\]$/;
+
+// A FLOAT property (a light's power, a material's input, a modifier's setting, a custom property, a Geometry Nodes
+// input) whose F-Curve the unit runs as Blender evaluates it and nothing else animates: its F-Curve as the `fcurve`
+// implementation runs it, else null. Written after Babylon's animation, it holds over any samples of the same value.
+function propertyCurve(animation, fc, target, property) {
+  if (TRANSFORM.test(target) || property?.type !== 'FLOAT' || animation.nla_tracks.length || [...animation.drivers].some((d) => d.data_path === fc.data_path)) return null;
   const input = driverCurve(fc);
   if (!input) return null;
   const { keyframes, ...settings } = input;
@@ -176,10 +180,12 @@ function animationEntities(ids, properties, time, animationGroups, curves, bin) 
   const groupOf = (node) => animationGroups.find((group) => group.targetedAnimations?.some((t) => t.targetId === node))?.name;
   const live = new Map(curves.map((c) => [`${idKey(c.id)}/animation/${c.fc.data_path}[${c.fc.array_index}]`, c]));
   for (const [k, id] of Object.entries(ids)) {
-    const collection = COLLECTION_OF.get(k.split(':')[0]), animation = collection && safe(() => data[collection].get(id.name)?.animation_data);
-    for (const fc of actionFCurves(animation)) {
-      const name = `${k}/animation/${fc.data_path}[${fc.array_index}]`, target = curveTarget(id, fc, properties);
-      const run = target && time && !fc.mute && (live.get(name) ?? propertyCurve(animation, fc, properties[target]));
+    const collection = COLLECTION_OF.get(k.split(':')[0]), struct = collection && safe(() => data[collection].get(id.name));
+    // A material's or world's node tree animates its inputs with its own action, from the tree's path.
+    const owners = [[struct?.animation_data, id, ''], [safe(() => struct?.node_tree?.animation_data), { ...id, path: `${id.path}.node_tree` }, 'node_tree.']];
+    for (const [animation, owner, prefix] of owners) for (const fc of actionFCurves(animation)) {
+      const name = `${k}/animation/${prefix}${fc.data_path}[${fc.array_index}]`, target = curveTarget(owner, fc, properties);
+      const run = target && time && !fc.mute && (live.get(name) ?? propertyCurve(animation, fc, target, properties[target]));
       const group = id.node && groupOf(id.node), native = !run && group !== undefined && !!target;
       entities[name] = { type: 'animation:FCURVE', id: k,
         inputs: { action: `actions${key(animation.action.name)}`, data_path: fc.data_path, array_index: fc.array_index, ...(native && { animation: { group, target: id.node } }),

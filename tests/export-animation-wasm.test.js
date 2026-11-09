@@ -35,6 +35,8 @@ async function check(id, { bake = false, elastic = false } = {}) {
   const files = await exportModule(world, { bakeAnimation: bake });
   const ir = JSON.parse(files['scene.ir.json']), live = Object.entries(ir.entities).filter(([, e]) => e.implementation === 'fcurve');
   if (bake) assert.equal(live.length, 0, `${id}: with Bake Animation, no F-Curve runs in the page`);
+  // Material inputs the Compositor example animates (an ad's mapping, lights' emission) run on the unit too.
+  if (id === 'compositor' && !bake) assert.ok(live.filter(([, e]) => e.outputs.value.property.startsWith('materials[')).length >= 3, `${id}: material inputs run live`);
   if (eased) assert.ok(live.some(([key, e]) => key === eased && 'buffer' in e.inputs.curve.keyframes), `${eased}: the Elastic curve runs live, its keys in scene.bin`);
   // Materials of one node structure share one code body; their values are tunable inputs.
   const code = JSON.parse(/const CODE = (.*);/.exec(files['scene.js'])[1]), materials = JSON.parse(/const MATERIALS = (.*);/.exec(files['scene.js'])[1]).filter((m) => m.customType === 'BABYLON.NodeMaterial');

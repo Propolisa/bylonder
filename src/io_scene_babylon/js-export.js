@@ -6,7 +6,7 @@
 // (docs/ir.md), its properties and computed entities among it, is scene.ir.json beside it.
 import { AbstractEngine, Matrix } from '@babylonjs/core';
 import { objectMatrix } from '../runtime/object-transform.js';
-import { CLOCK, serializeScene } from './babylon-export.js';
+import { CLOCK, sampledGaps, serializeScene } from './babylon-export.js';
 import { exportRuntimes } from '../runtimes/runtimes.js';
 import { exportControls, controlTypes } from './controls-export.js';
 import { exportNodeMaterial, materialKernels } from './node-material-export.js';
@@ -201,6 +201,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   if (display) data.renderingPipelines = data.renderingPipelines.filter((p) => !(p._name?.startsWith('__display:') && !PIPELINE_EFFECTS.some((e) => p[e])));
   const controls = [...exportControls(world, data), ...(composited?.knobs ?? [])];
   const ir = exportIR(world, { controls, live, bin, animationGroups: data.animationGroups, curves: data.liveCurves }), irJson = json(ir);
+  sampledGaps(data, ir);
   const kernels = await irMaterials(data.materials, graphs, ir, parity), code = sharedCode(data.materials);
   parentInstances(objects);
   const parented = [...data.transformNodes, ...data.meshes, ...data.lights, ...data.cameras].filter((e) => e.parentId !== undefined);
