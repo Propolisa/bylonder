@@ -41,7 +41,7 @@ vec3 volume_view_point(mat4 wininv, vec2 uv, float view_z) {
 vec3 volume_view_point(vec2 uv, float view_z) { return volume_view_point(inverseProjection, uv, view_z); }
 vec3 tile_sample(sampler2D atlas, vec2 xy, float slice) {
   vec2 tile = vec2(mod(slice, atlasColumns), floor(slice / atlasColumns));
-  return texture2D(atlas, (tile * volumeSize.xy + xy) / (vec2(textureSize(atlas, 0)))).rgb;
+  return textureLod(atlas, (tile * volumeSize.xy + xy) / (vec2(textureSize(atlas, 0))), 0.0).rgb;
 }
 // A 3D texture's linear sample, clamped to its edge, of the atlas.
 vec3 atlas_sample(sampler2D atlas, vec3 coord) {
@@ -170,20 +170,27 @@ vec3 shadow_uvz(mat4 matrix, vec3 P) {
 }
 float shadow_spot(highp sampler2DShadow map, mat4 matrix, vec3 P) {
   vec3 uvz = shadow_uvz(matrix, P);
-  return uvz.z < 0.0 ? 1.0 : texture(map, uvz);
+  float lit = textureLod(map, uvz, 0.0);
+  return uvz.z < 0.0 ? 1.0 : lit;
 }
 // A sun's cascade picked by the point's view depth as Babylon's shadowsFragmentFunctions picks it (its splits,
 // viewFrustumZ), its depth clamped to the cascade's range as computeShadowWithCSMPCF1 clamps it.
 float shadow_sun(highp sampler2DArrayShadow map, mat4 cascades[4], vec4 splits, float count, vec3 P) {
   float depth = (viewMatrix * vec4(P, 1.0)).z;
+  // The first cascade that holds the point, picked without branching: WebGPU samples only where every froxel does.
+  float cascade = -1.0;
+  vec3 uvz = vec3(0.0);
   for (int i = 0; i < 4; i++) {
-    if (float(i) >= count) break;
-    if (depth > splits[i] && float(i) < count - 1.0) continue;
     vec4 clip = cascades[i] * vec4(P, 1.0);
-    vec3 ndc = clip.xyz / clip.w, uvz = vec3(ndc.xy * 0.5 + 0.5, ndcHalfZ > 0.5 ? ndc.z : ndc.z * 0.5 + 0.5);
-    if (all(greaterThanEqual(uvz.xy, vec2(0.0))) && all(lessThanEqual(uvz.xy, vec2(1.0)))) return texture(map, vec4(uvz.xy, float(i), clamp(uvz.z, 0.0, 0.99999994)));
+    vec3 ndc = clip.xyz / clip.w, cascade_uvz = vec3(ndc.xy * 0.5 + 0.5, ndcHalfZ > 0.5 ? ndc.z : ndc.z * 0.5 + 0.5);
+    bool holds = float(i) < count && (depth <= splits[i] || float(i) >= count - 1.0)
+      && all(greaterThanEqual(cascade_uvz.xy, vec2(0.0))) && all(lessThanEqual(cascade_uvz.xy, vec2(1.0)));
+    bool first = holds && cascade < 0.0;
+    cascade = first ? float(i) : cascade;
+    uvz = first ? cascade_uvz : uvz;
   }
-  return 1.0;
+  float lit = texture(map, vec4(uvz.xy, max(cascade, 0.0), clamp(uvz.z, 0.0, 0.99999994)));
+  return cascade < 0.0 ? 1.0 : lit;
 }
 // Babylon's computeShadowCube: the distance to the light against the cube's, both over its depth range.
 float shadow_cube(samplerCube map, vec2 depthValues, vec3 P, vec3 lightP) {
@@ -191,13 +198,13 @@ float shadow_cube(samplerCube map, vec2 depthValues, vec3 P, vec3 lightP) {
   float depth = clamp((length(d) + depthValues.x) / depthValues.y, 0.0, 1.0);
   d = normalize(d);
   d.y = -d.y;
-  return depth > texture(map, d).x ? 0.0 : 1.0;
+  return depth > textureLod(map, d, 0.0).x ? 0.0 : 1.0;
 }
 float light_shadow(float slot, vec3 P, vec3 lightP) {
 ${shadows.map((kind, j) => `  if (slot == ${j}.0) return ${shadowCall(kind, j)};`).join('\n')}
   return 1.0;
 }
-vec3 light_eval(int i, vec3 P, vec3 V, float anisotropy) {
+vec3 light_eval(int i, vec3 P, vec3 V, float anisotropy, float shadow) {
   float type = lightPosition[i].w;
   vec3 L = lightAxis[i].xyz;
   float dist = 1.0, attenuation = 1.0, power = 1.0;
@@ -214,7 +221,7 @@ vec3 light_eval(int i, vec3 P, vec3 V, float anisotropy) {
     power = 2.0 / (d_sqr + r_sqr + dist * sqrt(d_sqr + r_sqr));
   }
   float visibility = attenuation;
-  if (visibility < 1e-6 || light_shadow(lightSpot[i].w, P, lightPosition[i].xyz) < 0.5) return vec3(0.0);
+  if (visibility < 1e-6 || shadow < 0.5) return vec3(0.0);
   visibility *= volume_phase_function(-V, L, anisotropy);
   if (visibility < 1e-6) return vec3(0.0);
   vec3 Li = lightColor[i].rgb * power * visibility;
@@ -232,11 +239,17 @@ void main(void) {
   vec3 uvw = (vec3(froxel) + vec3(0.5, 0.5, 0.5 - bl_froxel_jitter(vec2(froxel.xy), jitterOffset))) / volumeSize;
   vec3 P = (inverseView * vec4(volume_view_point(uvw.xy, volume_z_to_view_z(uvw.z)), 1.0)).xyz;
   vec3 V = cameraPosition.w > 0.5 ? normalize(cameraPosition.xyz - P) : -cameraPosition.xyz;
+  // The lights' shadow maps, sampled where every froxel samples them (WebGPU's uniform control flow).
+  float shadows[${MAX_LIGHTS}];
+  for (int i = 0; i < ${MAX_LIGHTS}; i++) {
+    vec4 spot = lightSpot[i], position = lightPosition[i];
+    shadows[i] = light_shadow(float(i) < lightCount ? spot.w : -1.0, P, position.xyz);
+  }
   vec3 direct = vec3(0.0);
   if (reduce_max(s_scattering) > 0.0) {
     for (int i = 0; i < ${MAX_LIGHTS}; i++) {
       if (float(i) >= lightCount) break;
-      direct += light_eval(i, P, V, s_anisotropy);
+      direct += light_eval(i, P, V, s_anisotropy, shadows[i]);
     }
   }
   vec3 indirect = worldRadiance;
@@ -251,7 +264,9 @@ void main(void) {
       extinction = mix(extinction, atlas_sample(extinctionHistory, last), historyOpacity);
     }
   }
-  if (any(isnan(scattering)) || any(isnan(extinction))) { scattering = vec3(0.0); extinction = vec3(0.0); }
+  // Not isnan: WebGPU's GLSL to WGSL conversion (Tint) then writes uniform arrays WGSL no longer accepts. A NaN fails
+  // every comparison, so it is the values not within float range.
+  if (!all(lessThanEqual(abs(scattering), vec3(3.4e38))) || !all(lessThanEqual(abs(extinction), vec3(3.4e38)))) { scattering = vec3(0.0); extinction = vec3(0.0); }
   glFragData[0] = vec4(scattering, 1.0);
   glFragData[1] = vec4(extinction, 1.0);
   // The same as the next frame's history, in half floats.
@@ -346,7 +361,7 @@ void main(void) {
   if (integrated < 0.5 || any(lessThan(uv, vec2(0.0))) || any(greaterThan(uv, vec2(1.0)))) { gl_FragColor = color; return; }
   // The scene's own depth, through the projection it was drawn with; where nothing was drawn (or an infinite
   // projection's far plane), just in front of the far plane.
-  float depth = texture2D(depthSampler, vUV).r, ndc_z = min(ndcHalfZ > 0.5 ? depth : depth * 2.0 - 1.0, 0.99999);
+  float depth = textureLod(depthSampler, vUV, 0.0).r, ndc_z = min(ndcHalfZ > 0.5 ? depth : depth * 2.0 - 1.0, 0.99999);
   vec4 viewP = renderInverseProjection * vec4(uv * 2.0 - 1.0, ndc_z, 1.0);
   vec3 P = (renderInverseView * vec4(viewP.xyz / viewP.w, 1.0)).xyz;
   vec3 vP = (gridView * vec4(P, 1.0)).xyz;

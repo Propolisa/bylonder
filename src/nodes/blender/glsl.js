@@ -24,6 +24,8 @@ const FIXES = [
   ['curves_segment_get', 'drw_curves.vertex_per_segment - 1)', 'drw_curves.vertex_per_segment - 1u)', 'GLSL ES has no implicit int to uint conversion'],
   ['alpha_threshold', '1.0 / (2 * a * one_a)', '1.0 / (2.0 * a * one_a)', INT_TO_FLOAT],
   ['alpha_threshold', 'float one_x = (1 - x);', 'float one_x = (1.0 - x);', INT_TO_FLOAT],
+  ['curves_point_get', 'vec3(uintBitsToFloat(0x7FC00000u))', 'vec3(uintBitsToFloat(floatBitsToUint(pos_rad.w) & 0u | 0x7FC00000u))',
+    'WGSL has no NaN constant: the NaN that restarts a strip is made at run time'],
 ];
 
 const PREFIX = 'bl_';

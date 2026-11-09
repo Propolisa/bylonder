@@ -26,6 +26,11 @@ Bylonder's shaders are GLSL only, on both backends; Babylon converts them on Web
 - GLSL that does not convert is rewritten into a form that does: one declaration per line (Babylon's GLSL processor
   does not split `uniform float a, b;`), and no names WGSL reserves (Blender's `type`, `ref` and `target` take other
   names).
+- Babylon's GLSL to WGSL conversion (Tint) writes WGSL that WebGPU rejects for a NaN constant and, in a shader that
+  uses `isnan` or `isinf`, for its uniform arrays; Bylonder's shaders use neither (Blender's curves code makes its
+  strip-restarting NaN at run time). WGSL samples with derivatives only in uniform control flow, so a pass that samples
+  per pixel in a loop or branch reads an explicit level. `tests/webgpu-shaders.test.js` converts Bylonder's shaders with
+  the app's glslang and Tint builds and fails on any of these.
 - WebGPU's GLSL takes no sampler as a function argument. On WebGPU, each of Blender's functions called with an image
   runs as a copy for that image (`src/nodes/blender/glsl.js` `specializeSamplers`), as do the volume passes' atlas
   samples. Babylon's own inliner (`#define inline`) does not fit Blender's functions: it matches by name only and
