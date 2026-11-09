@@ -5,12 +5,12 @@
 // option), the view's direction is EEVEE's and a material's reflection lobes light as Babylon's clearcoat; without
 // it, the lobes merge into the base, as Bylonder draws with EEVEE Parity off.
 import {
-  AddBlock, ClearCoatBlock, ColorMergerBlock, ColorSplitterBlock, CustomBlock, FragmentOutputBlock, ImageProcessingBlock, ImageSourceBlock, InputBlock, NodeMaterial, PBRMetallicRoughnessBlock, ScaleBlock, SubtractBlock,
+  AddBlock, ClampBlock, ClearCoatBlock, ColorMergerBlock, ColorSplitterBlock, CustomBlock, DivideBlock, LerpBlock, MaxBlock, MultiplyBlock, FragmentOutputBlock, ImageProcessingBlock, ImageSourceBlock, InputBlock, NodeMaterial, PBRMetallicRoughnessBlock, ScaleBlock, SubtractBlock,
   NodeMaterialBlockConnectionPointTypes as T, NodeMaterialSystemValues as System, Vector3, Vector4,
 } from '@babylonjs/core';
 import { zlibSync } from 'fflate';
 import {
-  BlenderClosureNormalBlock, BlenderDisplayBlock, BlenderSurfaceBlock, BlenderUnlitSurfaceBlock, BlenderViewEyeBlock, isBlenderShader, meshValue,
+  BlenderClosureNormalBlock, BlenderDisplayBlock, BlenderFarPlaneBlock, BlenderWorldProbeClampBlock, BlenderSurfaceBlock, BlenderUnlitSurfaceBlock, BlenderViewEyeBlock, isBlenderShader, meshValue,
   ShaderNodeOutputMaterial, STAND_INS,
 } from '../nodes/blender/shader-nodes.js';
 import { CurvesGeometryBlock, CurvesNormalBlock } from '../draw/curves.js';
@@ -124,6 +124,8 @@ function exportGraph(material, out, { parity, textures }) {
     }
     if (owner instanceof CurvesNormalBlock) return source(owner.getInputByName('normal').connectedPoint);
     if (owner instanceof BlenderViewEyeBlock) return parity ? viewEye(owner) : source(owner.eye.connectedPoint);
+    if (owner instanceof BlenderWorldProbeClampBlock) return probeClamp(owner);
+    if (owner instanceof BlenderFarPlaneBlock) return farPlane(owner);
     if (owner instanceof BlenderClosureNormalBlock) return nodes.closure('normal');
     if (owner instanceof BlenderUnlitSurfaceBlock) return nodes.closure('emission');
     if (owner instanceof BlenderSurfaceBlock) return radiance();
@@ -198,13 +200,39 @@ function exportGraph(material, out, { parity, textures }) {
     return eye.output;
   }
 
+  // A world's light as its probe takes it, in Babylon's math blocks: as Blender's manual describes the Sun Threshold and
+  // the indirect clamp (the most the world contributes to its light probe), its color scaled down until its brightest
+  // component is at most each (the material's blenderProbeClamp; 0 is none), while `world:probe` is 1 (runtime/world.js
+  // sets it as it bakes); the view sees it unclamped.
+  function probeClamp(original) {
+    const radiance = source(original.radiance.connectedPoint), [sun = 0, indirect = 0] = material.blenderProbeClamp ?? [];
+    const constant = (name, value) => Object.assign(new InputBlock(`blender:${name}`, undefined, T.Float), { value: value > 0 ? value : 1e20, isConstant: true }).output;
+    const split = math(ColorSplitterBlock, { rgba: radiance }), floor = constant('epsilon', 1e-8);
+    const brightest = math(MaxBlock, { left: math(MaxBlock, { left: split.r, right: split.g }).output, right: split.b }).output;
+    const factor = (limit, value) => math(ClampBlock, { value: math(DivideBlock, { left: limit, right: math(MaxBlock, { left: value, right: floor }).output }).output }).output;
+    const sunFactor = factor(constant('sunThreshold', sun), brightest);
+    const indirectFactor = factor(constant('indirectClamp', indirect), math(MultiplyBlock, { left: brightest, right: sunFactor }).output);
+    const scaled = math(ScaleBlock, { input: split.rgbOut, factor: math(MultiplyBlock, { left: sunFactor, right: indirectFactor }).output }).output;
+    const clamped = math(ColorMergerBlock, { 'rgb ': scaled, a: split.a }).getOutputByName('rgba');
+    const probe = Object.assign(new InputBlock('world:probe', undefined, T.Float), { value: 0 }).output;
+    return math(LerpBlock, { left: radiance, right: clamped, gradient: probe }).output;
+  }
+
+  // A world's box drawn on the far plane, behind everything else.
+  function farPlane(original) {
+    const far = customBlock('blender:farPlane', 'bl_far_plane', [['vector', 'Vector4']], [['output', 'Vector4']],
+      ['void bl_far_plane(vec4 v, out vec4 result) {', '  result = vec4(v.xy, v.w * 0.99999, v.w);', '}'], 'Vertex');
+    wire(source(original.vector.connectedPoint), far.vector);
+    return far.output;
+  }
+
   nodes.connect(source);
   return { block };
 }
 
-function customBlock(name, functionName, inputs, outputs, code) {
+function customBlock(name, functionName, inputs, outputs, code, target = 'Fragment') {
   const block = new CustomBlock(name);
-  block.options = { name, target: 'Fragment', functionName, code,
+  block.options = { name, target, functionName, code,
     inParameters: inputs.map(([input, type]) => ({ name: input, type })), outParameters: outputs.map(([output, type]) => ({ name: output, type })) };
   return block;
 }

@@ -9,6 +9,7 @@ import { blendData } from '../src/python/bpy_rna.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
 import { openExample } from './open-example.js';
 import { writePackage } from './export-package.js';
+import { nodeWorld } from './node-world.js';
 
 async function load(id) {
   const { world, sync } = openExample(id);
@@ -64,6 +65,25 @@ const SCENARIOS = {
     blend.set(`${base}[1].default_value`, 2);
     assert.ok(Math.abs(environment.clearColor.r - 2 * color[0]) < 1e-6, 'its Strength relights the scene');
     console.log(`framed-print: ${inputs.filter((c) => c.path.endsWith('.image')).length} images are controls, swapped by URL; the world's Background lights and is tunable`);
+    blend.dispose();
+    written.remove();
+  },
+  // A world of nodes (node-world.js): exported as a material of Babylon's blocks, drawn on the page's world box, which
+  // bakes it into the scene's light once its shader is ready, and its inputs are controls at the World's paths.
+  async 'node-world'() {
+    const { world, sync, scene } = openExample('lava');
+    sync.view();
+    nodeWorld(scene);
+    const files = await exportModule(world), written = writePackage(files);
+    const materials = JSON.parse(/const MATERIALS = (.*);/.exec(files['scene.js'])[1]), entry = materials.find((m) => m.name === '__world World');
+    assert.ok(entry && entry.blocks.every((b) => !/^BABYLON\.(Blender|ShaderNode)/.test(b.customType)), "the world is a material of Babylon's blocks");
+    const blend = await (await import(written.url)).load(new NullEngine());
+    assert.ok(entry.blocks.some((b) => b.name === 'world:probe') && entry.blocks.some((b) => b.customType === 'BABYLON.ClampBlock'), "its probe clamp (Sun Threshold) is Babylon's math blocks");
+    const box = blend.scene.getMeshByName('world');
+    assert.ok(box?.infiniteDistance && box.material?.name === '__world World', 'the world draws on a box around the eye');
+    const strength = blend.controls().find((c) => c.path === 'worlds["World"].node_tree.nodes["Background"].inputs[1].default_value');
+    assert.equal(strength?.default, 1.5, 'its Strength is a control');
+    console.log("node-world: drawn on the world box with Babylon's blocks, its inputs controls at the World's paths");
     blend.dispose();
     written.remove();
   },

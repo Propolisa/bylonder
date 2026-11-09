@@ -48,7 +48,11 @@ export function worldNodes(scene, material) {
     Object.assign(drawn, { gammaSpace: false, refreshRate: RenderTargetTexture.REFRESHRATE_RENDER_ONCE });
     probe.renderList?.push(box);
     if (scene.activeCamera) probe.position.copyFrom(scene.activeCamera.globalPosition);
+    // The probe takes the world clamped (its Sun Threshold), as the export's `world:probe` input says.
+    const clamp = /** @type {any} */ (material).getBlockByName?.('world:probe');
+    if (clamp) clamp.value = 1;
     drawn.render();
+    if (clamp) clamp.value = 0;
     const polynomial = await CubeMapToSphericalPolynomialTools.ConvertCubeMapTextureToSphericalPolynomial(drawn);
     await new HDRFiltering(scene.getEngine()).prefilter(drawn);
     drawn.sphericalPolynomial = polynomial;

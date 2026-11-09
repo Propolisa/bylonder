@@ -68,6 +68,9 @@
       { "implementation": "Bylonder's area light shadows extension", "license": "GPL-2.0-or-later", "fidelity": "exact", "status": "planned" },
       { "implementation": "Babylon's area light without shadows", "license": "Apache-2.0", "fidelity": "approximate" }
     ],
+    "world:probe_clamp": [
+      { "implementation": "Babylon's math blocks in the exported world material: the color scaled until its largest component is at most the Sun Threshold, then the indirect clamp, as Blender's manual describes them (https://docs.blender.org/manual/en/5.2/render/eevee/world_settings.html, Sun Threshold; https://docs.blender.org/manual/en/5.2/render/eevee/render_settings/light_paths.html, Clamping); the brightness measure is pending the clean-room oracle's confirmation", "license": "MIT", "fidelity": "exact" }
+    ],
     "volume": [
       { "implementation": "Bylonder's volumes extension", "license": "GPL-2.0-or-later", "fidelity": "exact", "status": "planned" }
     ],
