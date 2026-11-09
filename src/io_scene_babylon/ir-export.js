@@ -1,0 +1,110 @@
+// The package's IR (docs/ir.md): the carried IDs with their RNA data and the references between them, the properties,
+// the node graphs and the computed entities, as plain data for scene.ir.json.
+import { blendData, idStruct, pointerOf } from '../python/bpy_rna.js';
+
+// Blender's two-letter ID codes, by the bpy.data collection of each ID type.
+const CODES = { objects: 'OB', meshes: 'ME', materials: 'MA', node_groups: 'NT', scenes: 'SC', actions: 'AC', collections: 'GR', worlds: 'WO',
+  cameras: 'CA', lights: 'LA', curves: 'CU', textures: 'TE', images: 'IM', shape_keys: 'KE', armatures: 'AR', lattices: 'LT', grease_pencils: 'GP',
+  hair_curves: 'CV', pointclouds: 'PT', volumes: 'VO', fonts: 'VF', libraries: 'LI', particles: 'PA', palettes: 'PL', brushes: 'BR' };
+const COLLECTION_OF = new Map(Object.entries(CODES).map(([collection, code]) => [code, collection]));
+// RNA's struct for each ID type, by its identifier's base name.
+const TYPE_CODES = { Object: 'OB', Mesh: 'ME', Material: 'MA', Scene: 'SC', Action: 'AC', Collection: 'GR', World: 'WO', Camera: 'CA', Text: 'TX',
+  Curve: 'CU', TextCurve: 'CU', SurfaceCurve: 'CU', Image: 'IM', Key: 'KE', Armature: 'AR', Lattice: 'LT', GreasePencil: 'GP', GreasePencilv3: 'GP',
+  Curves: 'CV', PointCloud: 'PT', Volume: 'VO', VectorFont: 'VF', Library: 'LI', ParticleSettings: 'PA', Palette: 'PL', Brush: 'BR', Speaker: 'SK',
+  LightProbe: 'LP', Mask: 'MSK', MovieClip: 'MC', Sound: 'SO', WindowManager: 'WM', Screen: 'SR', WorkSpace: 'WS' };
+const codeOf = (id) => {
+  const name = id.rna_type.identifier;
+  return TYPE_CODES[name] ?? (name.endsWith('NodeTree') ? 'NT' : name.endsWith('Light') ? 'LA' : name.endsWith('Texture') ? 'TE' : name.slice(0, 2).toUpperCase());
+};
+const key = (name) => `["${name.replace(/["\\]/g, (c) => '\\' + c)}"]`;
+export const idKey = (id) => `${codeOf(id)}:${id.name}${id.library ? '@' + id.library.name : ''}`;
+
+// What the walk leaves out: RNA's own description, runtime and UI state, and each element of a mesh's or a curve's
+// bulk data (a mesh's geometry is in scene.bin).
+const SKIP = new Set(['rna_type', 'bl_rna', 'original', 'id_data', 'users_collection', 'users_scene', 'session_uid', 'is_evaluated', 'preview',
+  'is_runtime_data', 'tag', 'is_missing', 'override_library', 'asset_data', 'bound_box', 'library_weak_reference', 'matrix_world', 'matrix_local',
+  'matrix_basis', 'dimensions', 'name_full', 'is_editable', 'id_type', 'location_absolute', 'width', 'height', 'select', 'hide_select', 'is_active_output', 'users', 'is_editmode']);
+// UI-only state: what a panel or a node shows expanded, selected or active.
+const UI = /^(show_expanded|.*_expanded|is_active|ui_.*|bl_.*|select_.*|use_custom_color|color_tag)$/;
+// A node's place in its editor, which only the editor reads.
+const LAYOUT = new Set(['location', 'color']);
+const BULK = /^(MeshNormalValue|ReadOnlyInteger|Mesh(Vertex|Edge|Polygon|Loop|LoopTriangle|LoopColor|UVLoop|VertColor|Normal)|.*Attribute|.*AttributeValue|FloatVectorValueReadOnly|AttributeGroup.*|BezierSplinePoint|SplinePoint|ShapeKeyPoint|ShapeKeyBezierPoint|ShapeKeyCurvePoint|LatticePoint|Particle|ParticleKey|ChildParticle|ParticleHairKey|CurvePoint|CurveSlice|.*Stroke.*|GreasePencilFrame|GreasePencilDrawing|Depsgraph.*|ViewLayerEEVEE|UIList|Region.*|Area.*|Screen.*|KeyMap.*|Window.*)$/;
+
+const safe = (fn) => { try { return fn(); } catch { return undefined; } };
+
+// Whether a value is its property's RNA default, which the IR leaves out.
+function isDefault(prop, v) {
+  if (prop.type === 'POINTER') return v === null;
+  if (prop.type === 'COLLECTION') return !v.length;
+  const fallback = safe(() => (prop.array_length > 0 ? [...prop.default_array] : prop.default));
+  if (fallback === undefined) return false;
+  if (Array.isArray(fallback)) return safe(() => [...v].every((x, i) => (typeof x === 'object' ? false : x === fallback[i] || Math.fround(x) === Math.fround(fallback[i])))) ?? false;
+  return v === fallback || (typeof v === 'number' && Math.fround(v) === Math.fround(fallback)) || (v instanceof Set && !v.size);
+}
+
+// An RNA value as IR data: IDs by key (recording the reference), nested structs walked to `depth`.
+function walker(onReference) {
+  const value = (owner, path, v, depth) => {
+    if (v === null || v === undefined || typeof v !== 'object') return v ?? null;
+    if (typeof v.length === 'number' && !pointerOf(v) && typeof v[Symbol.iterator] === 'function' && !v.bl_rna) {
+      const items = [...v];
+      return items.every((x) => typeof x !== 'object') ? items : items.map((x, i) => value(owner, `${path}[${i}]`, x, depth));
+    }
+    const pointer = pointerOf(v);
+    if (!pointer) return safe(() => [...v]) ?? null;
+    if (pointer[1] === pointer[2]) {
+      const to = idKey(v);
+      onReference(owner, path, v);
+      return { id: to };
+    }
+    // A struct met again (a link's node, a socket's node) is named by where it was first written.
+    const at = `${pointer[0]}:${pointer[2]}`;
+    if (seen.has(at)) return { struct: seen.get(at) };
+    seen.set(at, path);
+    return depth > 0 ? struct(owner, path, v, depth - 1) : null;
+  };
+  const seen = new Map();
+  const struct = (owner, path, s, depth) => {
+    if (BULK.test(s.rna_type.identifier)) return null;
+    const out = {};
+    for (const prop of s.bl_rna.properties) {
+      const name = prop.identifier;
+      if (SKIP.has(name) || UI.test(name) || LAYOUT.has(name) && /Node/.test(s.rna_type.identifier)) continue;
+      if (prop.type === 'COLLECTION' && BULK.test(safe(() => prop.fixed_type.identifier) ?? '')) continue;
+      const v = safe(() => s[name]);
+      if (v === undefined || isDefault(prop, v)) continue;
+      const at = path ? `${path}.${name}` : name;
+      if (prop.type === 'COLLECTION') {
+        out[name] = safe(() => [...v].map((item, i) => value(owner, `${at}[${item.name !== undefined ? key(item.name) : i}]`, item, depth))) ?? [];
+      } else out[name] = value(owner, at, v, depth);
+    }
+    return out;
+  };
+  return struct;
+}
+
+// The IDs reachable from `roots` (RNA ID structs), each with its data, and the references between them.
+export function exportIDs(roots, depth = 6) {
+  const ids = {}, references = [], queue = [...roots];
+  const struct = walker((owner, path, to) => {
+    references.push({ from: idKey(owner), path, to: idKey(to) });
+    queue.push(to);
+  });
+  while (queue.length) {
+    const id = queue.shift(), k = idKey(id);
+    if (ids[k]) continue;
+    const code = codeOf(id), collection = COLLECTION_OF.get(code);
+    ids[k] = { type: id.rna_type.identifier.toUpperCase(), name: id.name, path: collection ? `${collection}${key(id.name)}` : null, data: null };
+    ids[k].data = struct(id, '', id, depth);
+  }
+  return { ids, references };
+}
+
+// The ID key of the ID an RNA path starts at (`objects["Cube"].location[0]`).
+export function pathID(path) {
+  const match = /^(\w+)\["((?:[^"\\]|\\.)*)"\]/.exec(path);
+  return match && CODES[match[1]] ? `${CODES[match[1]]}:${match[2].replace(/\\(.)/g, '$1')}` : null;
+}
+
+// The scene's own IDs: every scene with its collections, view layers, world and compositor, and the objects drawn.
+export const rootIDs = (objects) => [...blendData().scenes, ...objects.map(idStruct)];

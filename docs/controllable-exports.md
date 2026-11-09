@@ -244,6 +244,9 @@ code changes for a feature to join.
 
 ### Evaluator loader
 
+Interim (Decision 7): the `blender` evaluator below and its `scene.blend` sidecar go once Geometry Nodes run on the IR;
+nothing new builds on them.
+
 `load(evaluator)` imports an evaluator's module and its WebAssembly once, and resolves queued operations. The `blender`
 evaluator is the headless module on the scene's `.blend`, fetched as a sidecar file only then: set becomes `rna_set`,
 Main is evaluated, and what it updated (`main_updates`) is pulled into the page's Babylon objects by the same mapping the
@@ -338,7 +341,8 @@ functionality first, then performance, then load time.
 | **Tunable** | Static, plus the controller, the control table, the scheduler, clean-room driver units, material and compositor inputs as uniforms, and `modifiers.wasm` only when a suggested control feeds a mesh-only stack. No `.blend` | Every bound path and suggested control: transforms, visibility, light, camera and world values, node inputs, custom properties, SDK controls, drivers that read them |
 | **Live** | Tunable, plus the `.blend` and the Blender fallback | Every RNA path, structure included; the first change without a fast path downloads the module |
 
-The default is Tunable (owner, 2026-11-09). The `.blend` is a choice of its own in the dialog, Include Source .blend
+The default is Tunable (owner, 2026-11-09). Live as written here is interim (Decision 7): it becomes Tunable with every
+entity on the IR, and the `.blend` option goes. The `.blend` is a choice of its own in the dialog, Include Source .blend
 (`use_source_blend`), off by default, with a plain note that it makes the source scene downloadable. Choosing Live turns
 it on and shows the note. Off by default because publishing a source file cannot be undone; the full range of
 functionality is still one click away.
@@ -519,9 +523,13 @@ does instead: native, baked, or left out.
    KHR_animation_pointer, but it cannot hold NodeMaterial or NodeRenderGraph without private extensions, so it would need
    side data anyway, while Babylon's own format plus `scene.bin` keeps one format. glTF stays a possible secondary export
    for other engines, not the controllable one. Lossless; quantization only if measured invisible.
-7. **One fallback evaluator, Blender itself**, headless on the `.blend` sidecar, which is also the headless SDK.
-   `modifiers.wasm` stays as a fast path for mesh-only stacks and folds into the core capability group with dynamic
-   linking; no new standalone kernel modules, as each duplicates the core.
+7. **Bylonder's IR drives the page; Blender's code only as atomic kernels** (owner, 2026-11-09; replaces "one fallback
+   evaluator, Blender itself"). The scene is described by Bylonder's own IR (`docs/ir.md`) and the page's scheduler
+   walks it, resolving each computed entity by type key: a clean unit, else Babylon-native, else a Blender atomic kernel
+   (compiled shader code in a graph block, `modifiers.wasm` for one modifier, a Geometry Nodes node kernel), else baked
+   (`docs/licence-free-live.md`). Nothing structural comes from Blender at run time. The `blender` evaluator on the
+   `scene.blend` sidecar and the Include Source .blend option are interim: they are removed once Geometry Nodes run on
+   the IR, and nothing new builds on them.
 8. **Driver math as clean-room units (MIT)** (owner, 2026-11-09): simple expressions, the variables `SINGLE_PROP`,
    `TRANSFORMS`, `LOC_DIFF` and `ROTATION_DIFF` (values and world matrices read through the controller), and a driver's
    own F-curve with its F-modifiers. A separate track builds them: an oracle that records the module's behavior, a spec
@@ -531,7 +539,7 @@ does instead: native, baked, or left out.
    fall short on robustness.
 9. **Geometry Nodes are never mapped to NodeGeometry.** Babylon's NodeGeometry has no face, edge or corner domains and
    no fields over them, so a mapping would approximate. They ship evaluated (instances as thin instances) and are tuned
-   through the fallback, with the `geometry-nodes` group once dynamic linking lands. Bylonder's own Array (Nodes)
+   through Bylonder's Geometry Nodes evaluator on the IR, its nodes Blender's kernels until units replace them (Decision 7). Bylonder's own Array (Nodes)
    already is NodeGeometry and stays so. A future exact mapping, or an auto-ported subset, needs a fuzz-tested proof
    against the module, not a rule against it.
 10. **Particles, simulations and Python handlers are baked** for playback (simulation and particle positions per frame
@@ -603,7 +611,7 @@ Each step lands on its own, with its tests, and leaves exports working.
    crosshead as Main does, at many values; fuzz tests per ported unit against the module; the scheduler under 200 lines.
    Done: `tests/export-drivers-wasm.test.js` (every driven part and an added transform-channel driver at 40 angles, the
    scheduler at 83 lines); the units' fuzz runs against the oracle are in `docs/clean-room/impl/`.
-6. **Evaluator loader and the Blender fallback.** Checks: the Geometry Nodes example: setting a modifier input by path
+6. **Evaluator loader and the Blender fallback** (interim, Decision 7). Checks: the Geometry Nodes example: setting a modifier input by path
    loads the module once and the mesh equals the app's; a page whose knobs are all on fast paths never fetches the module
    or the `.blend` (counted fetches in a Node test).
    Done: `tests/export-blender-wasm.test.js` (fast-path controls read neither file; three input sets read each once and

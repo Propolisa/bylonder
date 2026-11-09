@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bylonder.dev/ir/1/schema.json",
+  "title": "Bylonder IR, version 1 (docs/ir.md)",
+  "type": "object",
+  "required": ["schema", "version", "ids", "references", "properties", "graphs", "entities", "order"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "const": "bylonder-ir" },
+    "version": { "const": 1 },
+    "ids": {
+      "type": "object",
+      "propertyNames": { "pattern": "^[A-Z]{2,3}:" },
+      "additionalProperties": {
+        "type": "object",
+        "required": ["type", "name", "path", "data"],
+        "properties": {
+          "type": { "type": "string" },
+          "name": { "type": "string" },
+          "path": { "type": ["string", "null"] },
+          "node": { "type": "string" },
+          "data": { "type": ["object", "null"] }
+        }
+      }
+    },
+    "references": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "path", "to"],
+        "additionalProperties": false,
+        "properties": { "from": { "type": "string" }, "path": { "type": "string" }, "to": { "type": "string" } }
+      }
+    },
+    "properties": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["id", "type", "default"],
+        "properties": {
+          "id": { "type": ["string", "null"] },
+          "type": { "enum": ["FLOAT", "INT", "BOOLEAN", "STRING"] },
+          "default": { "type": ["number", "boolean", "string"] },
+          "soft_min": { "type": "number" },
+          "soft_max": { "type": "number" },
+          "subtype": { "type": "string" },
+          "unit": { "type": "string" },
+          "suggested": { "type": "boolean" },
+          "bind": { "type": "object" }
+        }
+      }
+    },
+    "graphs": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["type", "nodes", "links"],
+        "properties": {
+          "type": { "enum": ["SHADER", "GEOMETRY", "COMPOSITOR"] },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "type"],
+              "properties": {
+                "name": { "type": "string" },
+                "type": { "type": "string", "pattern": "^node:" },
+                "settings": { "type": "object" },
+                "inputs": { "type": "object" }
+              }
+            }
+          },
+          "links": { "type": "array", "items": { "type": "array", "items": { "type": "string" }, "minItems": 4, "maxItems": 4 } },
+          "interface": { "type": "array" }
+        }
+      }
+    },
+    "entities": {
+      "type": "object",
+      "propertyNames": { "pattern": "^[A-Z]{2,3}:.+/[a-z_]+/.+$" },
+      "additionalProperties": {
+        "type": "object",
+        "required": ["type", "id", "inputs", "outputs"],
+        "additionalProperties": false,
+        "properties": {
+          "type": { "type": "string", "pattern": "^[a-z_]+:" },
+          "id": { "type": "string" },
+          "inputs": { "type": "object" },
+          "outputs": {
+            "type": "object",
+            "additionalProperties": {
+              "oneOf": [
+                { "type": "null" },
+                { "type": "object", "required": ["property"], "properties": { "property": { "type": "string" } } },
+                { "type": "object", "required": ["draw"], "properties": { "draw": { "type": "string" } } }
+              ]
+            }
+          },
+          "implementation": { "type": "string" }
+        }
+      }
+    },
+    "order": { "type": "array", "items": { "type": "string" } }
+  }
+}
