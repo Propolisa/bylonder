@@ -10,8 +10,11 @@ export function createScheduler(ir: import("./ir.js").IR, page: Page): {
     dispose: () => boolean;
 };
 /**
- * An implementation the package ships: it runs an entity on its resolved inputs; `draw` gives an IR mesh's draw buffers.
- * @typedef {{ run(inputs: Record<string, any>, context: { frame: number }, entity: import('./ir.js').Entity): Record<string, any> | Promise<Record<string, any>>,
+ * An implementation the package ships: it runs an entity on its resolved inputs; `runChain` runs a chain of entities
+ * that each read the one before, in one call, giving the last one's outputs; `draw` gives an IR mesh's draw buffers.
+ * @typedef {Record<string, any> | Promise<Record<string, any>>} Outputs
+ * @typedef {{ run(inputs: Record<string, any>, context: { frame: number }, entity: import('./ir.js').Entity): Outputs,
+ *   runChain?(run: [Record<string, any>, import('./ir.js').Entity][], context: { frame: number }): Outputs,
  *   draw?(mesh: import('./ir.js').Mesh): Promise<import('./mesh.js').DrawBuffers>, settled?(): Promise<void> }} Evaluator
  * @typedef {{ paths: string[], defaults: any[], get(path: string): any, write(path: string, value: any): void, frame(): number }} Controls
  * What an implementation loads for: the page's scene, the package's URL, scene.bin's buffers and the properties.
@@ -19,15 +22,24 @@ export function createScheduler(ir: import("./ir.js").IR, page: Page): {
  */
 /** The implementations a package ships, by name, each loaded on first use. @type {Record<string, (page: Page) => Promise<Evaluator>>} */
 export const EVALUATORS: Record<string, (page: Page) => Promise<Evaluator>>;
-/** What Babylon runs itself (`animation`: the AnimationGroup), which the scheduler leaves to it unless a unit takes over. */
+/** What Babylon runs itself (`native`: an F-Curve its AnimationGroup plays), which the scheduler leaves to it unless a unit takes over. */
 export const NATIVE: string[];
 /**
- * An implementation the package ships: it runs an entity on its resolved inputs; `draw` gives an IR mesh's draw buffers.
+ * An implementation the package ships: it runs an entity on its resolved inputs; `runChain` runs a chain of entities
+ * that each read the one before, in one call, giving the last one's outputs; `draw` gives an IR mesh's draw buffers.
+ */
+export type Outputs = Record<string, any> | Promise<Record<string, any>>;
+/**
+ * An implementation the package ships: it runs an entity on its resolved inputs; `runChain` runs a chain of entities
+ * that each read the one before, in one call, giving the last one's outputs; `draw` gives an IR mesh's draw buffers.
  */
 export type Evaluator = {
     run(inputs: Record<string, any>, context: {
         frame: number;
-    }, entity: import("./ir.js").Entity): Record<string, any> | Promise<Record<string, any>>;
+    }, entity: import("./ir.js").Entity): Outputs;
+    runChain?(run: [Record<string, any>, import("./ir.js").Entity][], context: {
+        frame: number;
+    }): Outputs;
     draw?(mesh: import("./ir.js").Mesh): Promise<import("./mesh.js").DrawBuffers>;
     settled?(): Promise<void>;
 };
@@ -42,7 +54,8 @@ export type Controls = {
     frame(): number;
 };
 /**
- * An implementation the package ships: it runs an entity on its resolved inputs; `draw` gives an IR mesh's draw buffers.
+ * An implementation the package ships: it runs an entity on its resolved inputs; `runChain` runs a chain of entities
+ * that each read the one before, in one call, giving the last one's outputs; `draw` gives an IR mesh's draw buffers.
  */
 export type Page = {
     scene: import("@babylonjs/core").Scene;

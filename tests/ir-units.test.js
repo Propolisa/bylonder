@@ -28,7 +28,7 @@ const SCENARIOS = {
     sync.view();
     const files = await exportModule(world), { on } = irOf(files);
     assert.ok(on('driver').length >= 8 && on('driver').every(([, e]) => e.type.startsWith('driver:')), 'each driver on the clean-room driver units');
-    assert.ok(on('animation').length, 'the flywheel\'s F-Curve on Babylon\'s AnimationGroup');
+    assert.ok(on('native').some(([, e]) => e.inputs.animation?.target === 'Flywheel'),'the flywheel\'s F-Curve on Babylon\'s AnimationGroup');
     const written = writePackage(files), blend = await (await import(written.url)).load(new NullEngine());
     const crosshead = blend.scene.getNodeById('Crosshead'), before = crosshead.position.clone();
     blend.set('objects["Flywheel"].rotation_euler[1]', 1.3);
@@ -40,7 +40,7 @@ const SCENARIOS = {
   },
 
   async modifiers() {
-    const { createPrimitive } = await import('../src/editors/object/mesh-catalog.js');
+    const { createPrimitive, shadeSmooth } = await import('../src/editors/object/mesh-catalog.js');
     const { createModifierSystem } = await import('../src/modifiers/stack.js');
     const { createAnimationModel } = await import('../src/blenkernel/animation/model.js');
     const { registerObjects } = await import('../src/blenkernel/animation/bindings.js');
@@ -49,8 +49,9 @@ const SCENARIOS = {
     const { asObject } = await import('../src/runtime/object-transform.js');
     const { sceneMain } = await import('./scene-main.js');
     const engine = new NullEngine(), scene = new Scene(engine), camera = new FreeCamera('Camera', new Vector3(0, 5, -20), scene);
-    const cubes = ['Bevel', 'Solidify'].map((name, i) => {
-      const cube = createPrimitive(name, 'mesh.primitive_cube_add', { size: 2 }, scene);
+    const cubes = ['Bevel', 'Solidify', 'Stack'].map((name, i) => {
+      // Shaded smooth: the kernel takes a Mesh without its sharp faces, which Main's evaluation keeps.
+      const cube = shadeSmooth(createPrimitive(name, 'mesh.primitive_cube_add', { size: 2 }, scene));
       cube.metadata.wbId = name;
       cube.position.x = i * 4;
       return cube;
@@ -63,10 +64,19 @@ const SCENARIOS = {
     registerObjects(animation, objects);
     world.modifiers.add(cubes[0], 'BEVEL', { width: 0.2, segments: 3 });
     const solidify = world.modifiers.add(cubes[1], 'SOLIDIFY', { thickness: 0.3 });
+    // A stack whose Bevel marks its edges sharp and sets its faces' strength, which Edge Split and Weighted Normal after
+    // a Subdivision read.
+    const stacked = world.modifiers.add(cubes[2], 'BEVEL', { width: 0.2, segments: 2, mark_sharp: true, face_strength_mode: 'FSTR_ALL' });
+    world.modifiers.add(cubes[2], 'EDGE_SPLIT', { use_edge_angle: false, use_edge_sharp: true });
+    world.modifiers.add(cubes[2], 'SUBSURF', { levels: 1 });
+    world.modifiers.add(cubes[2], 'WEIGHTED_NORMAL', { mode: 'FACE_AREA', use_face_influence: true });
     await world.modifiers.settled();
 
     const files = await exportModule(world, { live: true }), { ir, on } = irOf(files);
-    assert.deepEqual(on('modifiers').map(([key, e]) => [key, e.type]), [['OB:Bevel/modifier/Bevel', 'modifier:BEVEL'], ['OB:Solidify/modifier/Solidify', 'modifier:SOLIDIFY']]);
+    assert.deepEqual(on('modifiers').map(([key, e]) => [key, e.type]), [['OB:Bevel/modifier/Bevel', 'modifier:BEVEL'], ['OB:Solidify/modifier/Solidify', 'modifier:SOLIDIFY'],
+      ['OB:Stack/modifier/Bevel', 'modifier:BEVEL'], ['OB:Stack/modifier/EdgeSplit', 'modifier:EDGE_SPLIT'],
+      ['OB:Stack/modifier/Subdivision', 'modifier:SUBSURF'], ['OB:Stack/modifier/WeightedNormal', 'modifier:WEIGHTED_NORMAL']]);
+    assert.deepEqual(ir.entities['OB:Stack/modifier/Subdivision'].inputs.mesh, { entity: 'OB:Stack/modifier/EdgeSplit', output: 'mesh' }, 'each modifier reads the one before');
     const written = writePackage(files), blend = await (await import(written.url)).load(new NullEngine());
     // On the shipped kernel: Solidify set by path gives Bylonder's own stack's result.
     blend.set('objects["Solidify"].modifiers["Solidify"].thickness', 0.5);
@@ -75,6 +85,14 @@ const SCENARIOS = {
     await world.modifiers.settled();
     const near = (a, b) => a.length === b.length && a.every((v, i) => Math.abs(v - b[i]) < 1e-5);
     assert.ok(near(positions(blend.scene.getMeshById('Solidify')), positions(cubes[1])), 'Solidify on modifiers.wasm is the app\'s');
+    // The stack runs in one kernel call: what Bevel writes reaches the modifiers after it, and the result is the app's.
+    blend.set('objects["Stack"].modifiers["Bevel"].segments', 3);
+    await blend.settled();
+    world.modifiers.set(cubes[2], stacked.id, 'segments', 3);
+    await world.modifiers.settled();
+    const normals = (mesh) => Array.from(mesh.getVerticesData('normal')), page = blend.scene.getMeshById('Stack');
+    assert.ok(near(positions(page), positions(cubes[2])) && normals(page).every((v, i) => Math.abs(v - normals(cubes[2])[i]) <= 1 / 32767 + 1e-6),
+      'the stack is the app\'s, the sharp edges and face strengths Bevel writes included');
 
     // A stand-in for Bevel, registered with the package's own registry and schema library: it scales the mesh by
     // 1 + width. Its entity runs on it with no other change, and its mesh is drawn.
@@ -95,12 +113,17 @@ const SCENARIOS = {
     const [inputs] = calls;
     assert.ok(inputs.width === 0.25 && inputs.segments === 3 && inputs.harden_normals === false && inputs.mesh.vert_positions instanceof Float32Array,
       'its inputs resolved and parsed with its schema, a default filled');
+    // The stack's Bevel is a BEVEL too: the stand-in takes it over, and the rest of the stack runs on the kernel after it.
+    blend.set('objects["Stack"].modifiers["Bevel"].width', 0.25);
+    await blend.settled();
+    assert.equal(calls.length, 2, 'the stand-in takes over the stack\'s Bevel');
+    assert.ok(positions(blend.scene.getMeshById('Stack')).length > calls[1].mesh.corner_verts.length * 3, 'and the rest of the stack runs on its mesh');
     const expected = triangulate({ ...inputs.mesh, vert_positions: inputs.mesh.vert_positions.map((v) => v * 1.25) });
     assert.ok(near(positions(blend.scene.getMeshById('Bevel')), Array.from(expected.positions)), 'the stand-in\'s mesh is drawn');
     assert.deepEqual(JSON.parse(files['scene.ir.json']), ir, 'nothing of the package changed');
     blend.dispose();
     written.remove();
-    console.log('modifiers: Solidify runs on modifiers.wasm as the app does; a stand-in unit for modifier:BEVEL takes over with no other change');
+    console.log('modifiers: Solidify, and a four-modifier stack in one call, run on modifiers.wasm as the app does; a stand-in unit for modifier:BEVEL takes over with no other change');
   },
 
   async 'geometry-nodes'() {

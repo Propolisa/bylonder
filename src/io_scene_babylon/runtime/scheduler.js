@@ -11,8 +11,11 @@ import { dataAt, isReference, referencesIn } from './ir.js';
 import { drawGeometry } from './mesh.js';
 
 /**
- * An implementation the package ships: it runs an entity on its resolved inputs; `draw` gives an IR mesh's draw buffers.
- * @typedef {{ run(inputs: Record<string, any>, context: { frame: number }, entity: import('./ir.js').Entity): Record<string, any> | Promise<Record<string, any>>,
+ * An implementation the package ships: it runs an entity on its resolved inputs; `runChain` runs a chain of entities
+ * that each read the one before, in one call, giving the last one's outputs; `draw` gives an IR mesh's draw buffers.
+ * @typedef {Record<string, any> | Promise<Record<string, any>>} Outputs
+ * @typedef {{ run(inputs: Record<string, any>, context: { frame: number }, entity: import('./ir.js').Entity): Outputs,
+ *   runChain?(run: [Record<string, any>, import('./ir.js').Entity][], context: { frame: number }): Outputs,
  *   draw?(mesh: import('./ir.js').Mesh): Promise<import('./mesh.js').DrawBuffers>, settled?(): Promise<void> }} Evaluator
  * @typedef {{ paths: string[], defaults: any[], get(path: string): any, write(path: string, value: any): void, frame(): number }} Controls
  * What an implementation loads for: the page's scene, the package's URL, scene.bin's buffers and the properties.
@@ -25,8 +28,8 @@ export const EVALUATORS = {
   modifiers: (page) => import('./modifiers-evaluator.js').then((module) => module.load(page)),
   blender: (page) => import('./blender-evaluator.js').then((module) => module.load(page)),
 };
-/** What Babylon runs itself (`animation`: the AnimationGroup), which the scheduler leaves to it unless a unit takes over. */
-export const NATIVE = ['animation'];
+/** What Babylon runs itself (`native`: an F-Curve its AnimationGroup plays), which the scheduler leaves to it unless a unit takes over. */
+export const NATIVE = ['native'];
 
 const isTime = (/** @type {string} */ path) => path.endsWith('.frame_current');
 
@@ -58,7 +61,7 @@ export function createScheduler(ir, page) {
   const mark = (key) => {
     if (dirty.has(key)) return;
     dirty.add(key);
-    for (const [ref] of referencesIn(entities[key].inputs)) if ('entity' in ref && !outputs.has(ref.entity)) mark(ref.entity);
+    for (const [ref] of referencesIn(entities[key].inputs)) if ('entity' in ref && !outputs.get(ref.entity)) mark(ref.entity);
     for (const output of Object.values(entities[key].outputs)) if (output && 'property' in output) readers.get(output.property)?.forEach(mark);
     readers.get(key)?.forEach(mark);
   };
@@ -81,7 +84,7 @@ export function createScheduler(ir, page) {
       if ('property' in value) return isTime(value.property) ? controls.frame() : controls.get(value.property);
       if ('entity' in value) return outputs.get(value.entity)?.[value.output];
       if ('buffer' in value) return page.buffers[value.buffer];
-      return 'data' in value ? dataAt(ir, value.data) : ir.graphs[value.graph];
+      return 'data' in value ? resolve(dataAt(ir, value.data)) : ir.graphs[value.graph];
     }
     if (Array.isArray(value)) return value.map(resolve);
     return value?.constructor === Object ? Object.fromEntries(Object.entries(value).map(([k, v]) => [k, resolve(v)])) : value;
@@ -100,6 +103,9 @@ export function createScheduler(ir, page) {
     return draws.length ? Promise.all(draws) : null;
   };
 
+  /** The one entity that reads an entity's outputs, if one alone does. @param {string} key */
+  const soleReader = (key) => (readers.get(key)?.length === 1 ? readers.get(key)?.[0] : undefined);
+
   /** @param {Promise<any>} promise */
   const wait = (promise) => {
     pending = promise.catch((error) => console.warn(error.message)).then(() => { pending = null; run(); });
@@ -112,14 +118,22 @@ export function createScheduler(ir, page) {
       const found = implementation(key);
       if (found instanceof Promise) return wait(found);
       dirty.delete(key);
-      const inputs = entities[key].inputs;
-      if (!found || [...referencesIn(inputs)].some(([ref]) => 'entity' in ref && !outputs.has(ref.entity))) continue;
+      if (!found || [...referencesIn(entities[key].inputs)].some(([ref]) => 'entity' in ref && !outputs.get(ref.entity))) continue;
+      // What reads it alone and runs on the same implementation runs with it, in one call: nothing passes between them.
+      const chain = [key];
+      for (let next = soleReader(key); found.runChain && next && dirty.has(next) && implementation(next) === found; next = soleReader(next)) {
+        chain.push(next);
+        dirty.delete(next);
+      }
+      const last = /** @type {string} */ (chain.pop());
+      chain.forEach((k) => outputs.set(k, null));
       try {
-        const result = found.run(resolve(inputs), { frame: controls.frame() }, entities[key]);
-        const after = result instanceof Promise ? result.then((r) => land(key, r)) : land(key, result);
+        const context = { frame: controls.frame() }, result = found.runChain && chain.length
+          ? found.runChain([...chain, last].map((k) => [resolve(entities[k].inputs), entities[k]]), context) : found.run(resolve(entities[last].inputs), context, entities[last]);
+        const after = result instanceof Promise ? result.then((r) => land(last, r)) : land(last, result);
         if (after) return wait(after);
       } catch (error) {
-        console.warn(`${key}: ${/** @type {Error} */ (error).message}`);
+        console.warn(`${last}: ${/** @type {Error} */ (error).message}`);
       }
     }
   };

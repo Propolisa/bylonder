@@ -1,9 +1,10 @@
 // @ts-check
 // SPDX-License-Identifier: MIT OR Apache-2.0
-// The `modifiers` implementation of `modifier:*` entities: one Blender mesh modifier on an IR mesh, run by
-// modifiers.wasm in a worker (bylonder-modifiers/: the module and its worker, GPL, shipped with Live Modifiers), loaded
-// on the first set of a modifier setting. It gives an IR mesh, or the draw buffers when its mesh is drawn, and draws an
-// IR mesh another unit gives as Blender draws it.
+// The `modifiers` implementation of `modifier:*` entities: Blender's mesh modifiers on an IR mesh, run by modifiers.wasm
+// in a worker (bylonder-modifiers/: the module and its worker, GPL, shipped with Live Modifiers), loaded on the first set
+// of a modifier setting. A run of a stack's modifiers on it is one call (runChain), so what each writes reaches the next.
+// It gives an IR mesh, or the draw buffers when the last one's mesh is drawn, and draws an IR mesh another unit gives as
+// Blender draws it.
 
 /**
  * A setting as Blender takes it: an integer one rounded, as Blender's animation of it rounds.
@@ -59,11 +60,15 @@ export async function load({ root }) {
     if (reply.error) throw new Error(reply.error);
     return reply.result;
   };
+  /** @type {import('./scheduler.js').Evaluator['runChain']} */
+  const runChain = async (run) => {
+    const modifiers = run.map(([{ mesh, kernel: { type, layouts }, ...settings }]) => ({ type, layouts, values: values(settings, layouts) }));
+    const draw = Object.values(run[run.length - 1][1].outputs).some((output) => output && 'draw' in output);
+    return { mesh: await evaluate({ mesh: run[0][0].mesh, modifiers, draw }) };
+  };
   return {
-    async run({ mesh, kernel: { type, layouts }, ...settings }, context, entity) {
-      const draw = Object.values(entity.outputs).some((output) => output && 'draw' in output);
-      return { mesh: await evaluate({ mesh, modifier: { type, layouts, values: values(settings, layouts) }, draw }) };
-    },
-    draw: (mesh) => evaluate({ mesh, modifier: null, draw: true }),
+    runChain,
+    run: (inputs, context, entity) => runChain([[inputs, entity]], context),
+    draw: (mesh) => evaluate({ mesh, modifiers: [], draw: true }),
   };
 }

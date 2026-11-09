@@ -21,7 +21,7 @@ for (const definition of blenderModifierDefinitions) {
   const values = definition.defaults();
   let result;
   try {
-    const buffers = evaluate({ mesh: base, modifier: { type: definition.mesh.type, layouts: definition.mesh.layouts(values), values }, draw: true });
+    const buffers = evaluate({ mesh: base, modifiers: [{ type: definition.mesh.type, layouts: definition.mesh.layouts(values), values }], draw: true });
     const hash = createHash('sha1');
     for (const array of Object.values(buffers)) hash.update(new Uint8Array(array.buffer, array.byteOffset, array.byteLength));
     result = `${buffers.positions.length / 3} ${hash.digest('hex').slice(0, 12)}`;

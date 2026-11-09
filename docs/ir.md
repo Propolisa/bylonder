@@ -116,9 +116,12 @@ What each kind of entity reads and gives:
 | `driver:<type>` | `driver` (type, expression, variables, a single property's target as `{ value }`), `curve`, `objects` (transform properties and static parts), `frame` when the expression reads it | `value` |
 | `modifier:<TYPE>` | `mesh` (the base mesh's buffers, or the previous modifier's output), its settings by name (a vector as an array), `kernel` (the module's type and layouts) | `mesh` |
 | `modifier:NODES` | `graph`, `geometry` (`{ mesh }` of the base mesh, or the previous modifier's output), the interface's inputs by identifier | `geometry` |
-| `animation:FCURVE` | `fcurve` (`{ data }` of its action), `frame` | `value` |
+| `animation:FCURVE` | its action's RNA path, `data_path` and `array_index` as names, `animation` (the Babylon AnimationGroup and target node that play it), `frame` | `value` |
 
-Each frame, the scheduler runs again what reads `frame_current` and is not Babylon's own.
+Each frame, the scheduler runs again what reads `frame_current` and is not Babylon's own. An F-Curve's keys are not in
+the IR: Babylon's animation that plays it (`native`) holds them, as the export writes them. Consecutive modifiers of a
+stack on the same shipped implementation run as one call (its `runChain`), so what one writes (sharp edges, creases,
+face strengths) reaches the next; a stack is split only where a unit takes over a modifier.
 
 ## Units
 

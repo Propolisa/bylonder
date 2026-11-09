@@ -24,15 +24,19 @@ const key = (name) => `["${name.replace(/["\\]/g, (c) => '\\' + c)}"]`;
 export const idKey = (id) => `${codeOf(id)}:${id.name}${id.library ? '@' + id.library.name : ''}`;
 
 // What the walk leaves out: RNA's own description, runtime and UI state, and each element of a mesh's or a curve's
-// bulk data (a mesh's geometry is in scene.bin).
+// bulk data (a mesh's geometry is in scene.bin, an F-Curve's keys in the Babylon animation that plays it).
 const SKIP = new Set(['rna_type', 'bl_rna', 'original', 'id_data', 'users_collection', 'users_scene', 'session_uid', 'is_evaluated', 'preview',
   'is_runtime_data', 'tag', 'is_missing', 'override_library', 'asset_data', 'bound_box', 'library_weak_reference', 'matrix_world', 'matrix_local',
   'matrix_basis', 'dimensions', 'name_full', 'is_editable', 'id_type', 'location_absolute', 'width', 'height', 'select', 'hide_select', 'is_active_output', 'users', 'is_editmode']);
 // UI-only state: what a panel or a node shows expanded, selected or active.
 const UI = /^(show_expanded|.*_expanded|is_active|ui_.*|bl_.*|select_.*|use_custom_color|color_tag)$/;
+// Views of what is written elsewhere: an F-Curve group's channels are its action's F-Curves.
+const DERIVED = new Set(['ActionGroup.channels']);
+// A node tree's nodes, links and interface, which its graph holds.
+const GRAPHED = new Set(['nodes', 'links', 'interface']);
 // A node's place in its editor, which only the editor reads.
 const LAYOUT = new Set(['location', 'color']);
-const BULK = /^(MeshNormalValue|ReadOnlyInteger|Mesh(Vertex|Edge|Polygon|Loop|LoopTriangle|LoopColor|UVLoop|VertColor|Normal)|.*Attribute|.*AttributeValue|FloatVectorValueReadOnly|AttributeGroup.*|BezierSplinePoint|SplinePoint|ShapeKeyPoint|ShapeKeyBezierPoint|ShapeKeyCurvePoint|LatticePoint|Particle|ParticleKey|ChildParticle|ParticleHairKey|CurvePoint|CurveSlice|.*Stroke.*|GreasePencilFrame|GreasePencilDrawing|Depsgraph.*|ViewLayerEEVEE|UIList|Region.*|Area.*|Screen.*|KeyMap.*|Window.*)$/;
+const BULK = /^(Keyframe|FCurveSample|MeshNormalValue|ReadOnlyInteger|Mesh(Vertex|Edge|Polygon|Loop|LoopTriangle|LoopColor|UVLoop|VertColor|Normal)|.*Attribute|.*AttributeValue|FloatVectorValueReadOnly|AttributeGroup.*|BezierSplinePoint|SplinePoint|ShapeKeyPoint|ShapeKeyBezierPoint|ShapeKeyCurvePoint|LatticePoint|Particle|ParticleKey|ChildParticle|ParticleHairKey|CurvePoint|CurveSlice|.*Stroke.*|GreasePencilFrame|GreasePencilDrawing|Depsgraph.*|ViewLayerEEVEE|UIList|Region.*|Area.*|Screen.*|KeyMap.*|Window.*)$/;
 
 const safe = (fn) => { try { return fn(); } catch { return undefined; } };
 // An ID, not a struct sharing its ID's data (an Object's display settings): the ID it belongs to is of its own type.
@@ -76,7 +80,8 @@ function walker(onReference) {
     const out = {};
     for (const prop of s.bl_rna.properties) {
       const name = prop.identifier;
-      if (SKIP.has(name) || UI.test(name) || LAYOUT.has(name) && /Node/.test(s.rna_type.identifier)) continue;
+      if (SKIP.has(name) || UI.test(name) || LAYOUT.has(name) && /Node/.test(s.rna_type.identifier) || DERIVED.has(`${s.rna_type.identifier}.${name}`)) continue;
+      if (GRAPHED.has(name) && s.rna_type.identifier.endsWith('NodeTree')) continue;
       if (prop.type === 'COLLECTION' && BULK.test(safe(() => prop.fixed_type.identifier) ?? '')) continue;
       const v = safe(() => s[name]);
       if (v === undefined || isDefault(prop, v)) continue;
@@ -124,40 +129,46 @@ const socketProperty = (properties, base) => (socket, node) => {
   return [...socket.default_value].map((v, i) => (properties[`${path}[${i}]`] ? { property: `${path}[${i}]` } : v));
 };
 
-// The node trees of the carried materials and worlds and the scenes' compositors, as graphs by key.
+// The carried node trees as graphs: a node group (Geometry Nodes, a compositor) by its own key, a material's or a
+// world's by `<its key>/node_tree`; an unlinked input set by a property refers to it.
 function idGraphs(ids, properties, graphs) {
   const data = blendData();
   for (const [k, id] of Object.entries(ids)) {
-    const collection = COLLECTION_OF.get(k.split(':')[0]), struct = (collection === 'materials' || collection === 'worlds' || collection === 'scenes') && data[collection].get(id.name);
-    const tree = struct && (collection === 'scenes' ? safe(() => struct.compositing_node_group ?? struct.node_tree) : struct.node_tree);
-    if (tree) writeGraph(tree, `${k}/${collection === 'scenes' ? 'compositing' : 'node_tree'}`, graphs, { value: socketProperty(properties, `${id.path}.node_tree`) });
+    const collection = COLLECTION_OF.get(k.split(':')[0]), struct = collection && !id.name.includes('@') && safe(() => data[collection].get(id.name));
+    if (collection === 'node_groups' && struct) writeGraph(struct, k, graphs, { value: socketProperty(properties, id.path) });
+    else if ((collection === 'materials' || collection === 'worlds') && struct?.node_tree) {
+      writeGraph(struct.node_tree, `${k}/node_tree`, graphs, { value: socketProperty(properties, `${id.path}.node_tree`) });
+    }
   }
 }
 
-// Each F-Curve of the carried IDs' actions, in the slot each ID uses: what Babylon's animation plays on the property it
-// lands on.
-function animationEntities(ids, properties, time) {
+// Each F-Curve of the carried IDs' actions, in the slot each ID uses, by name: Babylon's animation of the node it lands on
+// plays it (`native`), its keys being that animation's, else it stays baked.
+function animationEntities(ids, properties, time, animationGroups) {
   const data = blendData(), entities = {};
+  const groupOf = (node) => animationGroups.find((group) => group.targetedAnimations?.some((t) => t.targetId === node))?.name;
   for (const [k, id] of Object.entries(ids)) {
     const collection = COLLECTION_OF.get(k.split(':')[0]), animation = collection && safe(() => data[collection].get(id.name)?.animation_data);
     const action = animation?.action;
     if (!action) continue;
-    [...action.layers].forEach((layer, l) => [...layer.strips].forEach((strip, s) => [...strip.channelbags].forEach((bag, b) => {
-      if (animation.action_slot && bag.slot?.handle !== animation.action_slot.handle) return;
-      [...bag.fcurves].forEach((fc, f) => {
-        const target = `${id.path}${fc.data_path.startsWith('[') ? '' : '.'}${fc.data_path}[${fc.array_index}]`, bound = !!properties[target];
+    for (const bag of [...action.layers].flatMap((layer) => [...layer.strips].flatMap((strip) => [...strip.channelbags]))) {
+      if (animation.action_slot && bag.slot?.handle !== animation.action_slot.handle) continue;
+      for (const fc of bag.fcurves) {
+        const target = `${id.path}${fc.data_path.startsWith('[') ? '' : '.'}${fc.data_path}[${fc.array_index}]`, group = id.node && groupOf(id.node);
+        const native = group !== undefined && !!properties[target];
         entities[`${k}/animation/${fc.data_path}[${fc.array_index}]`] = { type: 'animation:FCURVE', id: k,
-          inputs: { fcurve: { data: [idKey(action), `layers[${l}].strips[${s}].channelbags[${b}].fcurves[${f}]`] }, ...(time && { frame: { property: time } }) },
-          outputs: { value: bound ? { property: target } : null }, ...(bound && { implementation: 'animation' }) };
-      });
-    })));
+          inputs: { action: `actions${key(action.name)}`, data_path: fc.data_path, array_index: fc.array_index, ...(native && { animation: { group, target: id.node } }),
+            ...(time && { frame: { property: time } }) },
+          outputs: { value: properties[target] ? { property: target } : null }, ...(native && { implementation: 'native' }) };
+      }
+    }
   }
   return entities;
 }
 
 // The package's IR (docs/ir.md): `controls` (controls-export.js) as its properties, with what the `live` stacks and,
 // with `blender`, the Geometry Nodes modifiers add; the carried IDs, their node trees, and the computed entities.
-export function exportIR(world, { controls, live, bin, blender = false }) {
+export function exportIR(world, { controls, live, bin, blender = false, animationGroups = [] }) {
   const sync = world.mainSync, objects = world.objects.map((node) => [node, sync?.objectOf(node)]).filter(([, pointer]) => pointer);
   const { ids, references } = sync ? exportIDs(rootIDs(objects.map(([, pointer]) => pointer))) : { ids: {}, references: [] };
   for (const [node, pointer] of objects) if (ids[idKey(idStruct(pointer))]) ids[idKey(idStruct(pointer))].node = node.id;
@@ -169,7 +180,7 @@ export function exportIR(world, { controls, live, bin, blender = false }) {
   const properties = Object.fromEntries(controls.map(({ path, bind, ...property }) => [path, { id: pathID(path), ...property, ...(bind && { bind }) }]));
   if (sync) {
     idGraphs(ids, properties, graphs);
-    Object.assign(entities, driverEntities(properties), animationEntities(ids, properties, Object.keys(properties).find((p) => p.endsWith('.frame_current'))));
+    Object.assign(entities, driverEntities(properties), animationEntities(ids, properties, Object.keys(properties).find((p) => p.endsWith('.frame_current')), animationGroups));
   }
   // What the page computes from is offered to authors.
   for (const entity of Object.values(entities)) if (entity.implementation) for (const [ref] of referencesIn(entity.inputs)) if ('property' in ref) properties[ref.property].suggested = true;

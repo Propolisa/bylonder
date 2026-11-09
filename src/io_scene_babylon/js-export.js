@@ -201,7 +201,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, sour
   // unless one of its effects is on.
   if (display) data.renderingPipelines = data.renderingPipelines.filter((p) => !(p._name?.startsWith('__display:') && !PIPELINE_EFFECTS.some((e) => p[e])));
   const controls = [...exportControls(world, data), ...(composited?.knobs ?? [])];
-  const ir = exportIR(world, { controls, live, bin, blender: sourceBlend }), irJson = json(ir);
+  const ir = exportIR(world, { controls, live, bin, blender: sourceBlend, animationGroups: data.animationGroups }), irJson = json(ir);
   const kernels = await irMaterials(data.materials, graphs, ir, parity), code = sharedCode(data.materials);
   parentInstances(objects);
   const parented = [...data.transformNodes, ...data.meshes, ...data.lights, ...data.cameras].filter((e) => e.parentId !== undefined);

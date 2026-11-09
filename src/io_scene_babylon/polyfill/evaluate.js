@@ -1,5 +1,5 @@
-// The modifier kernels polyfill's evaluation: one of Blender's mesh modifiers (modifier-api.cc in modifiers.wasm) on an
-// IR mesh, giving an IR mesh, or drawn as Bylonder draws it (mesh_batch_cache_vertex_buffers) so a live result is the
+// The modifier kernels polyfill's evaluation: Blender's mesh modifiers (modifier-api.cc in modifiers.wasm) on an IR
+// mesh, run as one stack so what a modifier writes (sharp edges, creases, weights) reaches the next, giving an IR mesh, or drawn as Bylonder draws it (mesh_batch_cache_vertex_buffers) so a live result is the
 // applied export's geometry.
 import { moduleMesh } from '../../bmesh/module-mesh.js';
 import { writeValues } from '../../modifiers/dna-write.js';
@@ -11,17 +11,17 @@ const extractionMesh = () => {
   return mesh;
 };
 
-// mesh: an IR mesh of typed arrays; modifier: { type, layouts, values }, or null to draw the mesh as it is. Gives an IR
+// mesh: an IR mesh of typed arrays; modifiers: [{ type, layouts, values }], none to draw the mesh as it is. Gives an IR
 // mesh, or with `draw` the draw buffers, owned by the caller.
 export function createEvaluator(exports) {
   const { evaluateModifiers } = moduleMesh(exports, extractionMesh);
-  return ({ mesh: ir, modifier, draw }) => {
+  return ({ mesh: ir, modifiers: stack, draw }) => {
     const mesh = {
       ...ir,
       verts_num: ir.vert_positions.length / 3, edges_num: ir.edges.length / 2, faces_num: ir.face_offsets.length - 1,
       attribute: (name) => (name === 'UVMap' ? ir.uvs : undefined),
     };
-    const modifiers = modifier ? [{ type: modifier.type, write: (view, address) => writeValues(view, address, modifier.layouts, modifier.values) }] : [];
+    const modifiers = stack.map(({ type, layouts, values }) => ({ type, write: (view, address) => writeValues(view, address, layouts, values) }));
     const { mesh: result, errors } = evaluateModifiers(mesh, modifiers);
     const error = errors.find(Boolean);
     if (error) throw new Error(error);

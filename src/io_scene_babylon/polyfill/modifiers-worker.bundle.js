@@ -533,7 +533,7 @@ var extractionMesh = () => {
 };
 function createEvaluator(exports) {
   const { evaluateModifiers } = moduleMesh(exports, extractionMesh);
-  return ({ mesh: ir, modifier, draw }) => {
+  return ({ mesh: ir, modifiers: stack, draw }) => {
     const mesh = {
       ...ir,
       verts_num: ir.vert_positions.length / 3,
@@ -541,7 +541,7 @@ function createEvaluator(exports) {
       faces_num: ir.face_offsets.length - 1,
       attribute: (name) => name === "UVMap" ? ir.uvs : void 0
     };
-    const modifiers = modifier ? [{ type: modifier.type, write: (view, address) => writeValues(view, address, modifier.layouts, modifier.values) }] : [];
+    const modifiers = stack.map(({ type, layouts, values }) => ({ type, write: (view, address) => writeValues(view, address, layouts, values) }));
     const { mesh: result, errors } = evaluateModifiers(mesh, modifiers);
     const error = errors.find(Boolean);
     if (error) throw new Error(error);
