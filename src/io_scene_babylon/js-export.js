@@ -189,7 +189,9 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, sour
 // that needs it is set.`).join('')}
 import { readBuffers } from './bylonder/buffers.js';
 import { worldColor, worldNodes } from './bylonder/world.js';
-import { BlendScene } from './bylonder/blend-scene.js';${display ? `
+import { BlendScene } from './bylonder/blend-scene.js';
+import { derivativeUniformity } from './bylonder/overrides/webgpu/derivative-uniformity.js';
+import { reservedNames } from './bylonder/overrides/webgpu/reserved-names.js';${display ? `
 import { viewTransform } from './bylonder-view-transform.js';` : ''}${composited ? `
 import { compositor } from './bylonder-blocks.js';` : ''}
 import { Animation, AnimationGroup, CascadedShadowGenerator, Color3, Color4, CubeTexture, EffectLayer, Geometry, HDRCubeTexture, Light, LinesMesh, Material, Matrix, Mesh, MorphTargetManager, MultiMaterial, PostProcess, Quaternion, ReflectionProbe, Scene, SerializationHelper, ShadowGenerator, Skeleton, SubMesh, TransformNode, Vector3, Camera, ParticleSystem } from '@babylonjs/core';
@@ -243,7 +245,8 @@ export async function load(engine) {
 }
 
 export async function createScene(engine, canvas) {
-  const scene = new Scene(engine);
+  // On WebGPU, GLSL converted to WGSL keeps GLSL's rules, as in the app.
+  const scene = new Scene(derivativeUniformity(reservedNames(engine)));
   scene.useRightHandedSystem = SCENE.useRightHandedSystem;
   scene.autoClear = SCENE.autoClear;
   scene.clearColor = Color4.FromArray(SCENE.clearColor);

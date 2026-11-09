@@ -27,7 +27,7 @@ Bylonder's shaders are GLSL only, on both backends; Babylon converts them on Web
   the shadow map's lit-side bias and Grease Pencil's scene linear strokes.
 - GLSL that does not convert is rewritten into a form that does: one declaration per line (Babylon's GLSL processor
   does not split `uniform float a, b;`). Any GLSL, Bylonder's, Blender's, an example's or a user's, keeps GLSL's rules
-  once converted: the engine renames the identifiers WGSL reserves (`from`, `let`, `type`...; `src/render/wgsl-names.js`)
+  once converted: the engine renames the identifiers WGSL reserves (`from`, `let`, `type`...; `src/overrides/webgpu/`, which exported pages apply too)
   after Babylon has bound every input by name, and turns WGSL's derivative uniformity analysis off (Babylon's own
   switch), as GLSL takes derivatives and samples in any control flow.
 - Babylon's GLSL to WGSL conversion (Tint) writes WGSL that WebGPU rejects for a NaN constant and, in a shader that

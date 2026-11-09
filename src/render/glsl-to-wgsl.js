@@ -1,7 +1,7 @@
 // GLSL to WGSL as WebGPU takes it, with Babylon's glslang and Tint (twgsl) builds: the GLSL's WGSL-reserved names
-// renamed (wgsl-names.js) and WGSL's derivative uniformity analysis off, as GLSL has no such rule. One stage at a time;
-// glslang's log is the error.
-import { wgslNames } from './wgsl-names.js';
+// renamed (overrides/webgpu/reserved-names.js) and WGSL's derivative uniformity analysis off, as GLSL has no such rule.
+// One stage at a time; glslang's log is the error.
+import { wgslNames } from '../overrides/webgpu/reserved-names.js';
 
 const UNIFORMITY_OFF = 'diagnostic(off, derivative_uniformity);\n';
 
