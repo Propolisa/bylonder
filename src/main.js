@@ -11,6 +11,7 @@ import { mountAnimEditor, registerAnimOperators } from './editors/animation/anim
 import { mountRuntimeLayout, IMAGE_MODES } from "./editors/screen/runtime.js";
 import { applyRenderSettings } from "./workspace/render-settings.js";
 import { createEngine, rememberBackend } from "./render/gpu-engine.js";
+import { createPipelineWarmup } from "./draw/pipeline-warmup.js";
 import { createObjectActions } from "./editors/object/object-actions";
 import { createObjectCommands } from "./editors/object/commands";
 import { createAddMesh } from "./editors/object/add-mesh";
@@ -277,7 +278,7 @@ const live = () =>
   renderObservers().some((o) => userObservers.has(o)) || engine._activeRenderLoops.length > 1 ||
   scene.animatables.length > 0 || scene.particleSystems.some((p) => p.isStarted?.() && p.isAlive?.()) ||
   scene.textures.some((t) => t.video && !t.video.paused);
-views = createViews({ engine, scene, live });
+views = createViews({ engine, scene, live, settle: createPipelineWarmup(scene, () => bylonderPreferences()?.prepare_shaders !== false) });
 onImageTexturesChanged(() => views.wake());
 syncLightDirections(scene);
 world.views = views;

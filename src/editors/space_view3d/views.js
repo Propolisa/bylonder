@@ -11,7 +11,8 @@ import { Viewport } from '@babylonjs/core';
 //
 // A view is { canvas, camera, active (bool, renders or not), wantsCompositor (bool), beforeRender(), afterRender(), input
 // (bool, default true: a 3D View taking the scene's input; an editor drawing a scene of its own takes none) }.
-export function createViews({ engine, scene, live = () => false }) {
+// settle(): whether the views draw one more frame when they would go idle.
+export function createViews({ engine, scene, live = () => false, settle = () => false }) {
   const views = new Map(); // canvas -> { view, engineView }
   let anchor = null, workSize = [0, 0], lastWake = 0, inputView = null, focused = null, layoutDirty = true, idle = false, held = false;
   const scaling = () => engine.getHardwareScalingLevel();
@@ -64,7 +65,7 @@ export function createViews({ engine, scene, live = () => false }) {
     // Busy while anything changes, and while a material compiles (a mesh is not drawn until its shader is ready) and a
     // moment after, to draw what it compiled.
     if (!scene.isReady(false)) api.wake();
-    const busy = live() || performance.now() - lastWake < 500 || scene.getWaitingItemsCount() > 0;
+    const busy = live() || performance.now() - lastWake < 500 || scene.getWaitingItemsCount() > 0 || settle();
     idle = !busy;
     for (const { view, engineView } of views.values()) {
       engineView.enabled = busy && visible(view);

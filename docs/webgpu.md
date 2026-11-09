@@ -33,6 +33,10 @@ Bylonder's shaders are GLSL only, on both backends; Babylon converts them on Web
   it leaves unmarked, is marked for it, so area lights light node materials.
 - An environment Babylon prefilters on load (Material Preview's studio light, an EXR world) is ready for materials
   only once filtered, so no WebGPU bind group keeps the texture it replaces.
+- Babylon's WebGPU engine compiles a draw's pipeline the first time it draws it, so an object coming into view stalls
+  the frame. Preferences > System > Bylonder > Prepare Shaders Ahead (on by default) draws every object once, culling
+  off, when the views settle with new shaders, and lets them settle once the GPU has compiled those pipelines
+  (`src/draw/pipeline-warmup.js`).
 - A shader that does not compile fails Render Image and Render Animation with the material's name and the error, on
   both backends; on WebGPU the engine sends Babylon's compile failure through the effect's error path.
 - Points are drawn as quads on both backends (`src/draw/point-sprites.js`): WebGPU has no point size.
