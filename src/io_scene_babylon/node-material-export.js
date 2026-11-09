@@ -274,7 +274,10 @@ function blenderNodes(material, { closure, merge, scene, textures, systemValue }
   const outParameters = [...CLOSURE_OUTPUTS.map(([name, type]) => [name, typeName(type)]), ...[...outputs].map(([point, name]) => [name, typeName(point.type)])];
   const signature = [...inputs, ...sampled].map(([, type, name]) => `${type === 'sampler2D' ? 'sampler2D' : GLSL[T[type]]} ${name}`)
     .concat(outParameters.map(([name, type]) => `out ${GLSL[T[type]]} ${name}`)).join(', ');
-  const code = [...functions.values(), `void bl_nodes(${signature}) {`, ...locals, ...built.map((node) => node.built.code),
+  // Whether a face is drawn reversed (shader-nodes.js REVERSED_FACES): a uniform of the app's separate culling pass, set
+  // between its passes; the export draws faces once, never reversed.
+  const reversed = [...functions.values()].some((f) => f.includes('bl_reversed_faces')) ? ['const float bl_reversed_faces = 0.0;'] : [];
+  const code = [...reversed, ...functions.values(), `void bl_nodes(${signature}) {`, ...locals, ...built.map((node) => node.built.code),
     `BlClosure c = ${merge ? `bl_closure_merge_lobes(${c})` : c};`, `BlLobe l = bl_lobe_add((${c}).lobe1, (${c}).lobe2);`,
     ...CLOSURE_OUTPUTS.map(([name, , value]) => `${name} = ${value};`), ...[...outputs].map(([point, name]) => `${name} = ${point.associatedVariableName};`), '}'];
   const block = customBlock('blender:nodes', 'bl_nodes', [...inputs, ...sampled], outParameters, code.join('\n').split('\n'));

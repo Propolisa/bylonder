@@ -55,6 +55,7 @@ const frames = (n) => new Promise((resolve) => { let i = 0; const o = scene.onAf
 window.check = {
   errors,
   ready: () => scene.isReady() && scene.meshes.every((m) => !m.material || m.material.isReady(m)),
+  notReady: () => scene.meshes.filter((m) => m.material && !m.material.isReady(m)).map((m) => m.name + ': ' + m.material.name),
   baked: () => scene.environmentTexture?.name === 'world' && !!scene.environmentTexture.sphericalPolynomial,
   frames,
   set: (path, value) => blend.set(path, value),
@@ -81,8 +82,14 @@ try {
     const page = await browser.newPage({ viewport: { width: 640, height: 400 } });
     const logs = [];
     page.on('console', (m) => m.type() === 'error' && logs.push(m.text()));
+    page.on('pageerror', (e) => logs.push(e.message));
     await page.goto(`http://localhost:${port}/index.html?engine=${engine}`);
-    await page.waitForFunction(() => window.check?.ready(), null, { timeout: 120000 });
+    await page.waitForFunction(() => window.check?.ready(), null, { timeout: 120000 }).catch(async (error) => {
+      const state = await Promise.race([page.evaluate(() => window.check ? { errors: window.check.errors, notReady: window.check.notReady() } : 'no check: the module did not load'),
+        new Promise((resolve) => setTimeout(() => resolve('the page does not answer'), 10000))]);
+      await page.screenshot({ path: join(shots, `export-page-${engine}-stuck.png`), timeout: 5000 }).catch(() => {});
+      throw new Error(`${engine}: not ready: ${JSON.stringify(state)} ${logs.slice(0, 5).join(' | ')}`);
+    });
     await page.waitForFunction(() => window.check.baked(), null, { timeout: 60000 }).catch(() => {});
     await page.evaluate(() => window.check.frames(10));
     const before = join(shots, `export-page-${engine}.png`), after = join(shots, `export-page-${engine}-tuned.png`);

@@ -43,7 +43,8 @@ export function worldNodes(scene, material) {
   const box = MeshBuilder.CreateBox('world', { size: 2 }, scene);
   Object.assign(box, { material, infiniteDistance: true, isPickable: false, applyFog: false, alwaysSelectAsActiveMesh: true });
   const bake = async () => {
-    if (!box.subMeshes.every((subMesh) => material.isReadyForSubMesh(box, subMesh))) return void scene.onBeforeRenderObservable.addOnce(bake);
+    // Not ready: tried again after a while (an observer added while the observable notifies would run at once).
+    if (!box.subMeshes.every((subMesh) => material.isReadyForSubMesh(box, subMesh))) return void setTimeout(bake, 16);
     const probe = new ReflectionProbe('world', 256, scene, true, true, true), drawn = probe.cubeTexture;
     Object.assign(drawn, { gammaSpace: false, refreshRate: RenderTargetTexture.REFRESHRATE_RENDER_ONCE });
     probe.renderList?.push(box);
