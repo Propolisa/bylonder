@@ -1276,10 +1276,12 @@ const checks = {
       "ShaderNodeTexNoise Fac > ShaderNodeValToRGB Fac", "ShaderNodeValToRGB Color > ShaderNodeBsdfPrincipled Emission Color"]);
     // Material Preview draws the sphere glowing: orange pixels where it is.
     const warm = await app.bylonder(async (b) => {
-      const engine = b.world.scene.getEngine();
+      // The view's canvas as the page shows it (WebGPU's readPixels gives its swap chain's BGRA bytes).
+      const { canvas } = b.views.input, context = new OffscreenCanvas(canvas.width, canvas.height).getContext("2d");
       b.views.wake();
       await new Promise((resolve) => b.world.scene.onAfterRenderObservable.addOnce(resolve));
-      const pixels = await engine.readPixels(0, 0, engine.getRenderWidth(), engine.getRenderHeight());
+      context.drawImage(await createImageBitmap(canvas), 0, 0);
+      const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
       let count = 0;
       for (let i = 0; i < pixels.length; i += 4) if (pixels[i] > 120 && pixels[i] > 2 * pixels[i + 2]) count++;
       return count;
@@ -1643,6 +1645,22 @@ const checks = {
     await confirm.getByText("MB from https://mirror.blender.org/demo/geometry-nodes/gizmo_array.blend").waitFor();
     await confirm.getByRole("button", { name: "Download and Open" }).click();
     await app.page.waitForFunction(() => !!document.querySelector('iframe[src*="viewport.html"]')?.contentWindow?.__bylonder?.world?.scene.getNodeByName("Cube"), null, { timeout: 120000 });
+  } },
+
+  // Shading switched while Dithered node materials rebuild for the new lights (point, spot, area, with shadows): their
+  // shadows and surfaces draw once rebuilt, with no shader or binding errors (on WebGPU too).
+  "Dithered node materials draw with their lights' shadows from Material Preview to Rendered": { open: { example: null, node: "sphere" }, async run() {
+    const chooser = app.page.waitForEvent("filechooser");
+    await menu("TOPBAR_MT_file", "Open...");
+    await (await chooser).setFiles(fileURLToPath(new URL("../fixtures/io/dithered-lights.blend", import.meta.url)));
+    await app.page.waitForFunction(() => !!document.querySelector('iframe[src*="viewport.html"]')?.contentWindow?.__bylonder?.world?.scene.getNodeByName("Cube.003"), null, { timeout: 120000 });
+    for (const shading of ["material", "rendered"]) {
+      await app.bylonder((b, shading) => b.views.input.setShading(shading), shading);
+      await app.until((b) => b.world.scene.isReady(), null, 60000);
+    }
+    // All the film's samples, each drawing the shadows anew.
+    await app.until((b) => b.world.renderSettings.converged(), null, 60000);
+    assert.equal(await app.bylonder((b) => b.world.scene.lights.filter((l) => l.getShadowGenerator()).length), 4, "three lights and Material Preview's sun cast shadows");
   } },
 
   // A .blend whose scene has no camera (Blender's demo files often have none) opens into a working 3D Viewport.

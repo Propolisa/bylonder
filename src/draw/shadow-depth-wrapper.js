@@ -25,4 +25,10 @@ export class SharedShadowDepthWrapper extends ShadowDepthWrapper {
     }
     return effect;
   }
+
+  // A node material binds nothing while it builds (its blocks are the next build's): its casters wait, as its surface
+  // does (NodeMaterial.isReadyForSubMesh).
+  isReadyForSubMesh(...args) {
+    return this.baseMaterial._buildWasSuccessful !== false && super.isReadyForSubMesh(...args);
+  }
 }

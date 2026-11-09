@@ -56,6 +56,9 @@ export class BlenderNodeMaterial extends NodeMaterial {
     this.onBuildObservable.add(() => {
       const fragment = this._fragmentCompilationState;
       fragment._builtCompilationString = engineGLSL(this.getScene().getEngine(), fragment._builtCompilationString);
+      // Babylon wipes the defines of the render pass current at the build only: another pass's (the shader compile
+      // probe's, draw/shader-compile.js) would keep defines of blocks the build no longer has, for code without them.
+      for (const mesh of this.getBindedMeshes()) for (const subMesh of mesh.subMeshes ?? []) for (const { defines } of subMesh._drawWrappers.filter(Boolean)) if (defines?.reset) { defines.markAllAsDirty(); defines.reset(); }
     });
   }
   // EEVEE's Dithered render method (the default): a surface that lets light through is hashed in the opaque pass,
@@ -1579,12 +1582,12 @@ export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock)
     material.blenderNoSurface = this._noSurface = !closure && !!this.blenderVolume;
     // EEVEE's transparent shadows: a Dithered surface's shadow is hashed per sample as the surface is, so its samples
     // average a shadow as dense as its coverage. Babylon's shadow maps draw it with the material's own shader.
-    // Babylon's shadow includes name the world position worldPos; the material's own shader names it as its block does,
-    // once built.
-    if (material.blenderDithered) {
-      material.shadowDepthWrapper ??= new SharedShadowDepthWrapper(material, material.getScene(), {
-        get remappedVariables() { return ['worldPos', worldPosition(material).output.associatedVariableName]; },
-      });
+    // Babylon's shadow includes name the world position worldPos; the material's own shader names it as its block did in
+    // the last build, whose shader a depth program is made from while the next build runs.
+    if (material.blenderDithered && !material.shadowDepthWrapper) {
+      let worldPos;
+      material.onBuildObservable.add(() => { worldPos = worldPosition(material).output.associatedVariableName; });
+      material.shadowDepthWrapper = new SharedShadowDepthWrapper(material, material.getScene(), { get remappedVariables() { return ['worldPos', worldPos]; } });
     }
     const [from, to, other] = material.blenderDithered ? [processing.getOutputByName('displayRgba'), this.rgba, this.rgb]
       : [processing.getOutputByName('displayRgb'), this.rgb, this.rgba];
