@@ -27,10 +27,10 @@ A small ramen bar, Menya Akari (麺屋 灯), in a narrow yokocho lane on a wet n
   keyframes repeated by an F-Curve Cycles modifier. The lanterns under the eave and the noren panels sway, the dead tube
   of 灯 stutters back to life once, the cyan tubes dip twice, the rain falls in 20-frame cycles (two stacked copies, drawn
   below 6.5 m only), ripples spread in the puddles, the airship bobs and the fog banks drift, and the camera breathes a
-  few centimeters. The woman keeps her rig: her chest rises with each breath and once a loop she lifts the cup (bone
-  parented to her hand) for a sip; the diner in the window lifts the chopsticks. Steam is particles emitted from well
-  before frame 1, so it is already rising at the start; its puffs are random, so the steam changes slightly at the
-  loop's seam.
+  few centimeters. The woman keeps her rig, hidden in the viewport as an animator leaves it: her chest rises with each
+  breath and once a loop she lifts the cup (bone parented to her hand) for a sip; the diner in the window lifts the
+  chopsticks. Steam is particles emitted from well before frame 1, so it is already rising at the start; its puffs are
+  random, so the steam changes slightly at the loop's seam.
 - **Compositor.** Render Layers, Glare (Fog Glow), Lens Distortion with a little Dispersion, a Color Balance grade and
   a vignette (an Ellipse Mask, blurred, multiplied over the image) into the Group Output; a Viewer shows the result.
 - **Render.** Render > Render Image composites the render with Blender's own compositor.

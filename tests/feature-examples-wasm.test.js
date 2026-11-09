@@ -1,6 +1,6 @@
-// The examples of docs/features/rendering.md, mesh-modeling.md, drivers-and-graph-editor.md and
-// vertex-and-weight-paint.md, opened with Blender's reader: what each page's steps rely on is in Main, and the Steam
-// Engine's drivers move its crosshead as the slider-crank does.
+// The examples of docs/features/rendering.md, mesh-modeling.md, drivers-and-graph-editor.md,
+// vertex-and-weight-paint.md and compositor.md, opened with Blender's reader: what each page's steps rely on is in Main,
+// and the Steam Engine's drivers move its crosshead as the slider-crank does.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { NullEngine, Scene } from '@babylonjs/core';
@@ -12,6 +12,7 @@ import { createAnimationModel } from '../src/blenkernel/animation/model.js';
 import { createRNA } from '../src/makesrna/rna-bylonder.js';
 import { createMainSync } from '../src/blenkernel/main-sync.js';
 import { createSelection } from '../src/editors/object/selection.js';
+import { visible } from '../src/editors/object/identity.js';
 
 // Main's objects of examples/<id>/<id>.blend by name, and the sync that read it.
 function open(id) {
@@ -21,7 +22,7 @@ function open(id) {
   const sync = createMainSync({ rna: createRNA({ world: { scene, objects }, selection }), ids: animation.ids });
   objects.push(...sync.readBlend(readFileSync(new URL(`../examples/${id}/${id}.blend`, import.meta.url)), scene).nodes);
   setContextPointer(sync.blender.C);
-  return { objects: new Map(objects.map((node) => [node.name, idStruct(sync.objectOf(node))])), sync };
+  return { objects: new Map(objects.map((node) => [node.name, idStruct(sync.objectOf(node))])), nodes: new Map(objects.map((node) => [node.name, node])), sync };
 }
 const names = (collection) => [...collection].map((item) => item.name);
 
@@ -59,5 +60,20 @@ const names = (collection) => [...collection].map((item) => item.name);
     assert.ok(names(fish.vertex_groups).includes('Tail'), `${name} has its Tail group`);
     assert.equal(fish.modifiers.get('Tail Swing').vertex_group, 'Tail');
   }
+}
+{
+  // Neon Night opens with the tea break's rig hidden (H), its bones undrawn, while her body shows and the rig still
+  // poses it.
+  const { objects, nodes, sync } = open('compositor');
+  const rig = objects.get('Tea Break Rig');
+  assert.equal(rig.hide_get(), true, 'the rig is hidden in the viewport');
+  assert.equal(visible(nodes.get('Tea Break Rig')), false, 'so its bones are not drawn');
+  assert.equal(visible(nodes.get('Tea Break')), true, 'her body shows');
+  const chest = () => [...rig.pose.bones.get('Spine2').rotation_quaternion];
+  sync.blender.frame = 1;
+  const breathing = chest();
+  sync.blender.frame = 61;
+  assert.notDeepEqual(chest(), breathing, 'she breathes: the hidden rig still plays its animation');
+  nodes.get('Tea Break').getScene().getEngine().dispose();
 }
 console.log('feature examples ok');

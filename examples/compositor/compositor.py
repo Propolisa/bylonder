@@ -1466,6 +1466,8 @@ for bone, sipping in sip.items():
     pose_bone = drinker_rig.pose.bones[bone]
     rest = pose_bone.rotation_quaternion.copy()
     looping(pose_bone, 'rotation_quaternion', [(1, rest), (150, rest), (172, sipping), (192, sipping), (214, rest), (1 + LOOP, rest)])
+# Her rig hidden in the viewport (H), as an animator leaves it: her body and cup still follow its bones.
+drinker_rig.hide_set(True)
 simple_bike('Parked Bicycle', -5.4, -0.55, 92, lamp=True)
 # Ripples in the puddles where the rain lands: each ring rises out of the water, spreads and sinks back, over and over.
 ripple = material('Ripple', (0.15, 0.16, 0.18), roughness=0.2)
