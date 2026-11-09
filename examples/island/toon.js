@@ -28,8 +28,18 @@ precision highp float;
 varying vec3 vWorld;
 varying vec3 vNormal;
 flat varying vec3 vFace;
-uniform vec3 sunDir, sunColor, moonDir, moonColor, skyLight, groundLight, cameraPosition, fireLight, fireColor, fogColor;
-uniform float fogDensity, soot;
+uniform vec3 sunDir;
+uniform vec3 sunColor;
+uniform vec3 moonDir;
+uniform vec3 moonColor;
+uniform vec3 skyLight;
+uniform vec3 groundLight;
+uniform vec3 cameraPosition;
+uniform vec3 fireLight;
+uniform vec3 fireColor;
+uniform vec3 fogColor;
+uniform float fogDensity;
+uniform float soot;
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float noise(vec2 p) {
   vec2 i = floor(p), f = fract(p);
@@ -62,7 +72,9 @@ vec3 atmosphere(vec3 color) {
 }`;
 
 const plain = `${lighting}
-uniform vec3 color, underglow, glow;
+uniform vec3 color;
+uniform vec3 underglow;
+uniform vec3 glow;
 void main() {
   vec3 n = facet();
   gl_FragColor = vec4(atmosphere(toon(color, n, 1.0) + underglow * smoothstep(0.0, -0.6, n.y)) + glow, 1.0);
@@ -77,7 +89,12 @@ void main() { gl_FragColor = vec4(color, 1.0); }`;
 // and cooling to basalt, then soil and grass spreading from the shore up the slopes. Long after, a meteor strikes the
 // slope and a fire burns a path down through the forest past the nest tree (its front at fireFront from the centre).
 const terrain = `${lighting}
-uniform float day, fireFront, fireHeat, blast, blastReach, ash;
+uniform float day;
+uniform float fireFront;
+uniform float fireHeat;
+uniform float blast;
+uniform float blastReach;
+uniform float ash;
 float fireAngle(float r) { return ${NEST.angle.toFixed(4)} + 0.12 * (sin(r * 1.9 + 1.0) - sin(${(NEST.r * 1.9 + 1).toFixed(4)})); }
 float shore(float a) { return 6.2 + 0.7 * sin(3.0 * a + 1.0) + 0.4 * sin(5.0 * a + 2.3) + 0.25 * sin(8.0 * a + 0.5); }
 float channel(float a, float r) {
@@ -155,7 +172,8 @@ const reachGlsl = `1.0${WAVE.lobes.map(([k, amount, phase]) => ` + ${amount.toFi
 // races out from each impact in a train of lumpy crests, highest downrange, with rough water behind, and the sea where
 // it struck boils white.
 const sea = `${lighting}
-uniform float day, blast;
+uniform float day;
+uniform float blast;
 float shore(float a) { return 6.2 + 0.7 * sin(3.0 * a + 1.0) + 0.4 * sin(5.0 * a + 2.3) + 0.25 * sin(8.0 * a + 0.5); }
 float landAt(vec2 q) { return 1.0 - smoothstep(0.8, 0.95, length(q) / shore(atan(q.y, q.x))); }
 float islandShadow(vec2 from, vec2 p) {
@@ -206,15 +224,30 @@ void main() {
 const skyVertex = `
 precision highp float;
 attribute vec3 position;
-uniform mat4 world, worldViewProjection;
+uniform mat4 world;
+uniform mat4 worldViewProjection;
 varying vec3 vDirection;
 // In the world's axes: the dome may be mirrored or turned (its world matrix), the sky's directions are the world's.
 void main() { vDirection = mat3(world) * position; gl_Position = worldViewProjection * vec4(position, 1.0); }`;
 const sky = `
 precision highp float;
 varying vec3 vDirection;
-uniform vec3 sunDir, moonDir, skyTop, skyHorizon, meteorHead, meteorTail, omenDir, trailHead, trailTail;
-uniform float time, meteor, stars, omen, aurora, trail, rays;
+uniform vec3 sunDir;
+uniform vec3 moonDir;
+uniform vec3 skyTop;
+uniform vec3 skyHorizon;
+uniform vec3 meteorHead;
+uniform vec3 meteorTail;
+uniform vec3 omenDir;
+uniform vec3 trailHead;
+uniform vec3 trailTail;
+uniform float time;
+uniform float meteor;
+uniform float stars;
+uniform float omen;
+uniform float aurora;
+uniform float trail;
+uniform float rays;
 float hash(vec3 p) { return fract(sin(dot(p, vec3(127.1, 311.7, 74.7))) * 43758.5453); }
 float hash1(float x) { return fract(sin(x * 91.17) * 43758.5453); }
 float noise1(float x) { float i = floor(x), f = fract(x); return mix(hash1(i), hash1(i + 1.0), f * f * (3.0 - 2.0 * f)); }
