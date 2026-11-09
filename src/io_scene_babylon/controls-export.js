@@ -78,13 +78,15 @@ function cameraControls(node, camera) {
 }
 
 // A node material's tunable values: its InputBlocks named by their RNA path from the material (node-material-export.js),
-// a number or each component of a vector.
+// a number or each component of a vector, and its images, a URL relative to the package.
 function nodeMaterialControls(entry) {
   if (entry.customType !== 'BABYLON.NodeMaterial') return [];
-  const base = `materials${key(entry.name)}`;
-  return entry.blocks.filter((b) => b.customType === 'BABYLON.InputBlock' && b.name.startsWith('node_tree.')).flatMap((b) => (Array.isArray(b.value)
+  const base = `materials${key(entry.name)}`, named = entry.blocks.filter((b) => b.name.startsWith('node_tree.'));
+  const images = named.filter((b) => b.customType === 'BABYLON.ImageSourceBlock' && b.texture?.name)
+    .map((b) => knob(`${base}.${b.name}`, b.texture.name, { type: 'STRING', suggested: true }, { material: entry.id, block: b.name, image: true }));
+  return images.concat(named.filter((b) => b.customType === 'BABYLON.InputBlock').flatMap((b) => (Array.isArray(b.value)
     ? b.value.map((v, i) => knob(`${base}.${b.name}[${i}]`, v, { type: 'FLOAT' }, { material: entry.id, block: b.name, component: i }))
-    : [knob(`${base}.${b.name}`, b.value, { type: 'FLOAT' }, { material: entry.id, block: b.name })]));
+    : [knob(`${base}.${b.name}`, b.value, { type: 'FLOAT' }, { material: entry.id, block: b.name })])));
 }
 
 // The project's SDK controls (sdk.controls), as Main holds them: custom properties of the Scene.

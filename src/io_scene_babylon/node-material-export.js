@@ -53,7 +53,11 @@ const MATRICES = {
 // A node's unlinked input as the export's tunable value: a Babylon InputBlock named by the input's RNA path from its
 // material (`node_tree.nodes["Noise Texture"].inputs[2].default_value`), which the package's controls set.
 const uniformType = (kind) => ({ float: T.Float, vec3: T.Vector3 })[kind] ?? T.Vector4;
-const socketPath = (node, id) => `node_tree.nodes["${node.name.replace(/["\\]/g, (c) => '\\' + c)}"].inputs[${node.declaration.inputs.findIndex((s) => s.identifier === id)}].default_value`;
+// An Image Texture's image as the export's swappable texture: its ImageSourceBlock named by the node's image's RNA path.
+const IMAGE_NODES = new Set(['ShaderNodeTexImage', 'ShaderNodeTexEnvironment']);
+const nodePath = (node) => `node_tree.nodes["${node.name.replace(/["\\]/g, (c) => '\\' + c)}"]`;
+const imagePath = (node) => `${nodePath(node)}.image`;
+const socketPath = (node, id) => `${nodePath(node)}.inputs[${node.declaration.inputs.findIndex((s) => s.identifier === id)}].default_value`;
 function valueBlock({ kind, value, path }) {
   const type = uniformType(kind), block = new InputBlock(path, undefined, type);
   block.value = type === T.Float ? Number(value) : type === T.Vector3 ? Vector3.FromArray(value) : Vector4.FromArray(value);
@@ -220,7 +224,7 @@ function blenderNodes(material, { closure, merge, scene, textures, systemValue }
       if (!isBlenderShader(input.connectedPoint.ownerBlock) && !params.has(name)) params.set(name, input.connectedPoint);
     }
     for (const [name, id, kind] of node._uniforms ?? []) uniforms.push({ name, kind, value: node.values[id], path: socketPath(node, id) });
-    for (const [name, texture] of node._textures ?? []) samplers.push([name, texture]);
+    for (const [name, texture] of node._textures ?? []) samplers.push([name, texture, IMAGE_NODES.has(node.idname) && !texture.metadata?.table ? imagePath(node) : null]);
     for (const [name, id] of node._meshUniforms ?? []) {
       if (MATRICES[id]) { matrices = true; locals.push(`mat4 ${name} = ${MATRICES[id]};`); continue; }
       const [type, value] = meshValue(id);
@@ -253,8 +257,8 @@ function blenderNodes(material, { closure, merge, scene, textures, systemValue }
       [...params.values()].forEach((point, i) => source(point).connectTo(block.getInputByName(`in${i}`)));
       uniforms.forEach((uniform, i) => valueBlock(uniform).output.connectTo(block.getInputByName(`value${i}`)));
       if (matrices) for (const [name, value] of [['world', System.World], ['view', System.View], ['projection', System.Projection]]) systemValue(value).output.connectTo(block.getInputByName(name));
-      samplers.forEach(([, texture], i) => {
-        const image = new ImageSourceBlock(`blender:image${i}`);
+      samplers.forEach(([, texture, path], i) => {
+        const image = new ImageSourceBlock(path ?? `blender:image${i}`);
         textures.set(image.uniqueId, texture);
         image.source.connectTo(block.getInputByName(`image${i}`));
       });

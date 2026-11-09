@@ -176,7 +176,7 @@ const BUFFERS = ${json(bin.views)};
 const CONTROLS = ${json(controls)};
 
 export async function load(engine) {
-  return new BlendScene(await createScene(engine, engine.getRenderingCanvas()), CONTROLS);
+  return new BlendScene(await createScene(engine, engine.getRenderingCanvas()), CONTROLS, ROOT);
 }
 
 export async function createScene(engine, canvas${live.size ? ", { modifiers = new URL('./bylonder-modifiers/', import.meta.url) } = {}" : ''}) {

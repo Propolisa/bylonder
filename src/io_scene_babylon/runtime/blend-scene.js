@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // A scene exported from Bylonder, with its controls: each a Blender RNA path from bpy.data
 // (`objects["Cube"].location[0]`) whose value the page sets, and which lands on the Babylon objects it binds to.
-import { Matrix, Observable, Quaternion, Vector3 } from '@babylonjs/core';
+import { Matrix, Observable, Quaternion, Texture, Vector3 } from '@babylonjs/core';
 
 /** @typedef {number | boolean | string} Value */
 
@@ -35,12 +35,14 @@ import { Matrix, Observable, Quaternion, Vector3 } from '@babylonjs/core';
 /**
  * Where a control's value lands: a property of a node (by id) or of the scene, scaled by `factor`; the node's place
  * (`transform`); visibility (`hide`); a focal length as a field of view (`lens`: half the sensor's fitted size); or a
- * node material's InputBlock (`material` and `block`, and the `component` of a vector).
+ * node material's InputBlock (`material` and `block`, and the `component` of a vector) or ImageSourceBlock (`image`: the
+ * value is the image's URL, relative to the package).
  * @typedef {object} Binding
  * @property {string} [node]
  * @property {string} [material]
  * @property {string} [block]
  * @property {number} [component]
+ * @property {boolean} [image]
  * @property {string} [property]
  * @property {number} [factor]
  * @property {Transform} [transform]
@@ -104,13 +106,18 @@ export class BlendScene {
   /** @type {Map<string, Value>} */
   #values;
 
+  /** @type {string} */
+  #root;
+
   /**
    * @param {import('@babylonjs/core').Scene} scene
    * @param {Knob[]} knobs
+   * @param {string} [root] the package's URL, which relative image URLs resolve against
    */
-  constructor(scene, knobs) {
+  constructor(scene, knobs, root = '') {
     /** Babylon's scene. */
     this.scene = scene;
+    this.#root = root;
     this.#knobs = new Map(knobs.map((knob) => [knob.path, knob]));
     this.#values = new Map(knobs.map((knob) => [knob.path, knob.default]));
   }
@@ -153,6 +160,18 @@ export class BlendScene {
   }
 
   /**
+   * A texture of the image at `url`, sampled as the one it replaces.
+   * @param {import('@babylonjs/core').Texture} old
+   * @param {string} url
+   */
+  #image(old, url) {
+    const texture = new Texture(new URL(url, this.#root || globalThis.location?.href).href, this.scene, { noMipmap: old.noMipmap, invertY: old.invertY, samplingMode: old.samplingMode });
+    Object.assign(texture, { wrapU: old.wrapU, wrapV: old.wrapV });
+    old.dispose();
+    return texture;
+  }
+
+  /**
    * Places a node by its object's location, rotation and scale (`base`: the object's path), as Blender's matrix_world
    * of an object without constraints: the parent's, its parent inverse, then its own.
    * @param {any} node
@@ -188,7 +207,8 @@ export class BlendScene {
   #apply(bind, path, value) {
     if (bind.material !== undefined) {
       const material = /** @type {any} */ (this.scene.getMaterialById(bind.material)), block = material?.getBlockByName(bind.block);
-      if (block && bind.component === undefined) block.value = value;
+      if (block && bind.image) block.texture = this.#image(block.texture, /** @type {string} */ (value));
+      else if (block && bind.component === undefined) block.value = value;
       else if (block) block.value['xyzw'[bind.component ?? 0]] = value;
       return;
     }

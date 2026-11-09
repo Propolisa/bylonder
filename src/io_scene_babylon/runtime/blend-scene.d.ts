@@ -20,8 +20,9 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
     /**
      * @param {import('@babylonjs/core').Scene} scene
      * @param {Knob[]} knobs
+     * @param {string} [root] the package's URL, which relative image URLs resolve against
      */
-    constructor(scene: import("@babylonjs/core").Scene, knobs: Knob[]);
+    constructor(scene: import("@babylonjs/core").Scene, knobs: Knob[], root?: string);
     /** Told of each control's new value. @type {Observable<Change>} */
     onChanged: Observable<Change>;
     /** Babylon's scene. */
@@ -76,13 +77,15 @@ export type Transform = {
 /**
  * Where a control's value lands: a property of a node (by id) or of the scene, scaled by `factor`; the node's place
  * (`transform`); visibility (`hide`); a focal length as a field of view (`lens`: half the sensor's fitted size); or a
- * node material's InputBlock (`material` and `block`, and the `component` of a vector).
+ * node material's InputBlock (`material` and `block`, and the `component` of a vector) or ImageSourceBlock (`image`: the
+ * value is the image's URL, relative to the package).
  */
 export type Binding = {
     node?: string | undefined;
     material?: string | undefined;
     block?: string | undefined;
     component?: number | undefined;
+    image?: boolean | undefined;
     property?: string | undefined;
     factor?: number | undefined;
     transform?: Transform | undefined;
