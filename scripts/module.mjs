@@ -14,6 +14,15 @@ const DIR = 'src/bmesh', FILES = ['bmesh.wasm', 'python313.zip', 'scripts.zip', 
 const MODULE = `${DIR}/bmesh.wasm`, MARK = `${MODULE}.key`;
 const key = () => `module-${execFileSync('git', ['rev-parse', 'HEAD:tools/blender-port'], { encoding: 'utf8' }).trim()}`;
 
+// GitHub's release downloads answer 5xx at times: retried, a missing release (404) is not.
+async function fetchRetried(url, tries = 6) {
+  for (let i = 1; ; i++) {
+    const response = await fetch(url).catch((error) => ({ ok: false, status: error.message }));
+    if (response.ok || response.status === 404 || i === tries) return response;
+    await new Promise((done) => setTimeout(done, 15000 * i));
+  }
+}
+
 async function fetchModule(force) {
   const wanted = key();
   const fetched = existsSync(MARK) && readFileSync(MARK, 'utf8');
@@ -23,7 +32,7 @@ async function fetchModule(force) {
   if (existsSync(MODULE) && !fetched && !force) return console.log(`${MODULE} is a local build; --force replaces it with ${wanted}`);
   for (const file of FILES) {
     const url = `https://github.com/${REPO}/releases/download/${wanted}/${file}`;
-    const response = await fetch(url);
+    const response = await fetchRetried(url);
     if (!response.ok) throw Error(`${url}: ${response.status}. CI publishes it when this tree reaches main (the Pages deploy builds it if missing); or build it with tools/blender-port/blender_build.py`);
     writeFileSync(`${DIR}/${file}`, Buffer.from(await response.arrayBuffer()));
   }
