@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs';
 export const CORE = /^app boots$|idle|draws no( view)? frame|converges/;
 
 // Files whose changes the build, the unit tests and the core checks cover.
-const NO_SMOKE = /^(docs|bench|scripts|\.github|tools\/(docs|dev-gallery|blender-reference))\/|^tests\/(?!e2e\/)|^tests\/e2e\/(perf-guard|prod|touch|workflows)\.mjs$|\.md$|^\.git(ignore|attributes)$/;
+const NO_SMOKE = /^(docs|bench|scripts|\.github|tools\/(docs|dev-gallery|blender-reference))\/|^tests\/(?!e2e\/)|^tests\/e2e\/(perf-guard|prod|touch|workflows)\.mjs$|\.md$|^\.git(ignore|attributes)$|^REUSE\.toml$|^LICENSE|^LICENSES\//;
 
 // Source areas and the check names that exercise them. Name a check for what it does and it is picked up here.
 // The shared foundations (Main and its sync, RNA, the window manager, Python) reach every editor: a broad sample.
