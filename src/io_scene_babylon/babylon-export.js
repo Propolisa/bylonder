@@ -1,6 +1,6 @@
 // File > Export > Babylon (.babylon): the scene as Babylon's SceneSerializer writes it, from the evaluated scene, as
 // Blender's glTF exporter exports the evaluated depsgraph (docs/blender-boundary.md, Export for Babylon).
-import { Animation, AnimationKeyInterpolation, Camera, Light, Quaternion, RectAreaLight, SceneSerializer, Texture, Vector3, VertexBuffer } from '@babylonjs/core';
+import { Animation, AnimationKeyInterpolation, Camera, GetClass, Light, Quaternion, RectAreaLight, SceneSerializer, Texture, Vector3, VertexBuffer } from '@babylonjs/core';
 import { evaluatedMatrix, BLENDER_FORWARD } from '../runtime/object-transform.js';
 import { idStruct } from '../python/bpy_rna.js';
 import { deleted, nodeId } from '../editors/object/identity.js';
@@ -25,6 +25,16 @@ const portable = (url) => /^https:/.test(url) && !url.startsWith(globalThis.loca
 
 // The mesh drawn for an object is its evaluated mesh: the modifier stack draws its result into it (modifiers/stack.js).
 const evaluatedMesh = (node) => node;
+
+// A material's serialization without Bylonder's own plugins (a point cloud's), the app's drawing: a page's Babylon has
+// no class to parse them with, only the plugins its material of that class makes itself.
+function withoutOwnPlugins(entry, scene) {
+  const Type = entry.plugins && GetClass(entry.customType);
+  if (!Type) return entry;
+  const fresh = new Type('', scene), plugins = Object.fromEntries(Object.entries(entry.plugins).filter(([, data]) => fresh.pluginManager?.getPlugin(data.name)));
+  fresh.dispose();
+  return { ...entry, plugins };
+}
 
 // Sets flags for the export and gives the function that restores them.
 function setFor(items, key, value) {
@@ -347,7 +357,7 @@ async function serializeMapped(world, { geometry, live, mapped, parity }) {
   }
   json.materials = await Promise.all(json.materials.map(async (entry) => {
     const material = scene.materials.find((m) => m.uniqueId === entry.uniqueId);
-    return (material && await exportNodeMaterial(material, { parity })) ?? entry;
+    return (material && await exportNodeMaterial(material, { parity })) ?? withoutOwnPlugins(entry, scene);
   }));
   const kept = (list, items, keep) => list.filter((_, i) => keep(items[i]));
   json.multiMaterials = kept(json.multiMaterials, scene.multiMaterials, (m) => content.materials.has(m) || content.meshes.some((mesh) => mesh.material === m));
