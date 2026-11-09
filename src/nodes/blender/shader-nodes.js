@@ -32,7 +32,7 @@ import { eeveeParity, eeveeParityChanged } from '../../draw/eevee-parity.js';
 import { DITHER_FUNCTIONS, ditherOffset } from '../../render/dither.js';
 import { readsSceneDepth, sceneDepth } from '../../render/scene-depth.js';
 import { FROXEL_JITTER } from '../../draw/volume-shaders.js';
-import { AREA_SPECULAR, LIGHT_SPECULAR } from '../../blenkernel/light/area-specular.js';
+import { AREA_SPECULAR, LIGHT_SPECULAR, usesAreaLights } from '../../blenkernel/light/area-specular.js';
 import '../graph-roots.js';
 import { SharedShadowDepthWrapper } from '../../draw/shadow-depth-wrapper.js';
 
@@ -1213,11 +1213,13 @@ export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
     for (const name of AREA_LIGHT_SAMPLERS) if (!state.samplers.includes(name)) state.samplers.push(name);
   }
   // A reset of the material's defines clears the area light support NodeMaterialDefines starts with, while the lights'
-  // own defines come back: their code then calls area light functions its includes left out.
+  // own defines come back: their code then calls area light functions its includes left out. So does a light turned into
+  // an area light without AREALIGHTUSED (light/area-specular.js BlenderAreaLightsPlugin).
   prepareDefines(defines, nodeMaterial, mesh) {
     super.prepareDefines(defines, nodeMaterial, mesh);
     defines.setValue('AREALIGHTSUPPORTED', true, true);
     defines.setValue('AREALIGHTNOROUGHTNESS', true, true);
+    defines.setValue('AREALIGHTUSED', usesAreaLights(mesh, nodeMaterial), true);
   }
   serialize() { return { ...super.serialize(), lobe: this.lobe }; }
   _deserialize(serializationObject, scene, rootUrl) { super._deserialize(serializationObject, scene, rootUrl); this.lobe = serializationObject.lobe ?? 0; }

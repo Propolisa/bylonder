@@ -4,7 +4,7 @@
 // small light) shines its intensity squared: a 365 W lamp 10 cm wide whites out a room. The formula is put right in the
 // materials of Blender's data through Babylon's own extension points: a material plugin's code replacement for a PBR
 // material, the include's replace strings for a node material's PBR block (nodes/blender/shader-nodes.js).
-import { MaterialPluginBase } from '@babylonjs/core';
+import { AreaLight, MaterialPluginBase, PBRBaseMaterial, RegisterMaterialPlugin, StandardMaterial } from '@babylonjs/core';
 
 const NAME = 'BlenderAreaSpecular';
 // blender-port: eevee_light_eval.bsl.hh light_eval_single_closure with eevee_bxdf_lut: F0 * lut.x + (F90 - F0) * lut.y.
@@ -37,6 +37,23 @@ class BlenderAreaSpecularPlugin extends MaterialPluginBase {
   isCompatible() { return true; }
   getCustomCode(shaderType, shaderLanguage = 0) { return shaderType === 'fragment' ? FORMULA[shaderLanguage] : null; }
 }
+
+// A light turned into an area light at an index a material drew before defines AREALIGHT{X} but not AREALIGHTUSED,
+// which Babylon adds only when it rebuilds the defines' keys, so the light's code calls area light functions the
+// material's includes left out and the shader does not compile. The key is there from the start here.
+// Of the lights the material draws (its first maxSimultaneousLights, none unlit), as Babylon defines and binds them.
+export const usesAreaLights = (mesh, material) => !material.disableLighting && !!mesh?.getScene().lightsEnabled
+  && !!mesh.lightSources?.slice(0, material.maxSimultaneousLights).some((light) => light instanceof AreaLight);
+class BlenderAreaLightsPlugin extends MaterialPluginBase {
+  constructor(material) {
+    super(material, 'BlenderAreaLights', 300, { AREALIGHTUSED: false }, true, true);
+    this.doNotSerialize = true;
+  }
+  getClassName() { return 'BlenderAreaLightsPlugin'; }
+  isCompatible() { return true; }
+  prepareDefines(defines, scene, mesh) { defines.AREALIGHTUSED = usesAreaLights(mesh, this._material); }
+}
+RegisterMaterialPlugin('BlenderAreaLights', (material) => (material instanceof PBRBaseMaterial || material instanceof StandardMaterial ? new BlenderAreaLightsPlugin(material) : null));
 
 // Gives a material of Blender's data EEVEE's light specular (once).
 export function blenderAreaSpecular(material) {
