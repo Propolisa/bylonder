@@ -150,14 +150,13 @@ function sharedCode(materials) {
 }
 
 const PIPELINE_EFFECTS = ['bloomEnabled', 'depthOfFieldEnabled', 'fxaaEnabled', 'sharpenEnabled', 'chromaticAberrationEnabled', 'grainEnabled', 'glowLayerEnabled'];
-// A rendered view's display transform (runtime/view-transform.js) as Main's view settings give it, or null when the page
-// can display as its materials do (Standard, no look, exposure or gamma) and nothing composites in scene linear: its
-// lattice of Blender's display processor goes to scene.bin, but for Standard without a look, which is sRGB's encoding.
-async function displaySettings(world, bin, composites) {
+// A rendered view's display transform (runtime/view-transform.js) as Main's view settings give it: its lattice of
+// Blender's display processor goes to scene.bin, but for Standard without a look, which is sRGB's encoding. Standard
+// too is a post process, as the app's: the world's clear color, which no material draws, is scene linear.
+async function displaySettings(world, bin) {
   const sync = world.mainSync, view = sync && idStruct(sync.blender.scene).view_settings;
   if (!view) return null;
   const standard = view.view_transform === 'Standard' && view.look === 'None';
-  if (standard && !composites && view.exposure === 0 && view.gamma === 1) return null;
   let lattice = null;
   if (!standard) {
     await colorManagementFiles();
@@ -208,7 +207,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
     geometryLines.push(`  ${geometryCode(mesh, bin)},`);
   }
   const composited = data.cameras.length ? exportCompositor(world) : null;
-  const display = await displaySettings(world, bin, !!composited);
+  const display = await displaySettings(world, bin);
   // Area lights that cast shadows, as Bylonder's Area Light Shadows extension has them (runtime/area-light.js).
   const areaShadows = (data.shadowGenerators ?? []).some((g) => data.lights.some((l) => l.id === g.lightId && l.type === AREA_LIGHT));
   // Bylonder's own pipeline of a rendered view (render-babylon.js SceneLinearPipeline) turns the scene's image processing
