@@ -11,6 +11,8 @@
 /* Blender's own interface fonts (datafiles/fonts): Inter for the UI, DejaVu Sans Mono for text and the console. */
 @font-face{font-family:"Inter";src:url("/fonts/Inter.woff2") format("woff2");font-weight:100 900;font-display:swap}
 @font-face{font-family:"DejaVu Sans Mono";src:url("/fonts/DejaVuSansMono.woff2") format("woff2");font-display:swap}
+/* Bylonder's wordmark on the splash: Poppins Medium, cut to the letters of "bylonder". */
+@font-face{font-family:"Poppins";src:url("/fonts/Poppins-Medium-bylonder.woff2") format("woff2");font-weight:500;font-display:block}
 :root{
   /* Preferences > Interface > Resolution Scale (PreferencesView.ui_scale), which every size token below scales, and the
      display's pixel ratio (touch.js followPixelRatio). */
@@ -25,6 +27,7 @@
   --bl-menu-sep-space:calc(round(down,calc(7*var(--bl-dpi)/72),1)*1px/var(--bl-dpr));
   --bl-font-family:"Inter","DejaVu Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--bl-font-size:calc(11px*var(--bl-ui-scale));
   --bl-font:var(--bl-font-size) var(--bl-font-family);
+  --bl-font-wordmark:500 1em "Poppins",var(--bl-font-family);
   --bl-gap:#161616;--bl-topbar:#181818;--bl-header:#303030;--bl-view3d-header:#303030b3;--bl-region:#303030;--bl-back:#282828;--bl-viewport:#3d3d3d;--bl-camera-passepartout:0 0 0;--bl-camera-border:#000;
   --bl-panel:#3d3d3d;--bl-navigation-bar:#181818;--bl-navigation-bar-overflow:#141414;--bl-panel-header:#3d3d3d;--bl-tabs:#1d1d1d;
   --bl-text:#e6e6e6;--bl-text-dim:#a6a6a6;--bl-text-off:#7a7a7a;--bl-link:#71a8ff;

@@ -159,8 +159,8 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
     return label;
   }
 
-  // Laid out like Blender's splash: Blender's artwork (public/splash.webp from release/datafiles/splash.png, with its logo and
-  // credit) and the version, New File and Recent Files, then Open and links.
+  // Laid out like Blender's splash: the art (public/splash.webp, rendered by examples/compositor/splash.py) under the logo and
+  // wordmark, and the version, New File and Recent Files, then Open and links.
   function splash() {
     const dialog = document.createElement('dialog');
     dialog.className = 'bl-splash';
@@ -178,7 +178,9 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
     };
     const banner = document.createElement('div');
     banner.className = 'bl-splash-banner';
-    banner.append(versionLabel());
+    const brand = Object.assign(document.createElement('div'), { className: 'bl-splash-brand' });
+    brand.append(Object.assign(document.createElement('span'), { className: 'bl-splash-logo' }), Object.assign(document.createElement('span'), { className: 'bl-splash-wordmark', textContent: 'bylonder' }));
+    banner.append(brand, versionLabel());
     const recent = column('Recent Files', []);
     recentProjects().then((projects) => recent.append(...projects.slice(0, 5).map((p) => item(p.name, 'file_blend', () => openProject(p.id))), item('More…', 'viewzoom', openProjects)));
     const files = Object.assign(document.createElement('div'), { className: 'bl-splash-columns' });

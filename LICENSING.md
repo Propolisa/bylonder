@@ -17,9 +17,9 @@ Blender's license, GPL-2.0-or-later:
   `src/bmesh/operators`, `src/bmesh/tools`, `src/makesdna`, and a few in `src/blenkernel`);
 - Blender's Python compiled to JS (`src/bl_py`), apart from Transcrypt's runtime and library modules (Apache-2.0);
 - Blender's GLSL, kept as JS modules (`src/nodes/blender/gpu-library.js`, `src/compositor/compositor-shaders.js`);
-- Blender's datafiles: its icons, the splash artwork, its default theme and color management files (`config.ocio`
-  names an `ocio-license.txt` that Blender's repository does not have, and the AgX and Filmic sources carry no license
-  of their own, so they stay as Blender ships them);
+- Blender's datafiles: its icons, its default theme and color management files (`config.ocio` names an
+  `ocio-license.txt` that Blender's repository does not have, and the AgX and Filmic sources carry no license of their
+  own, so they stay as Blender ships them);
 - data taken from Blender that carries its UI text (operator and property descriptions in `src/makesrna/rna-*.json`
   and `src/nodes/blender/node-types.json`);
 - patches to Blender's files (`tools/blender-port/wasm/patches`) and the seam files with `blender-port:` markers.
