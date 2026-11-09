@@ -6,10 +6,10 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { copyFileSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { controlTypes } from '../src/io_scene_babylon/controls-export.js';
-import { BLOCK_FILES, RUNTIME_FILES } from '../src/io_scene_babylon/runtime-files.js';
+import { BLOCK_FILES, DRIVER_FILES, RUNTIME_FILES } from '../src/io_scene_babylon/runtime-files.js';
 
 const runtime = fileURLToPath(new URL('../src/io_scene_babylon/runtime/', import.meta.url));
 const tsc = (args) => execFileSync(process.execPath, [fileURLToPath(new URL('../node_modules/typescript/bin/tsc', import.meta.url)), ...args], { encoding: 'utf8' });
@@ -23,10 +23,19 @@ for (const name of sources) {
     assert.ok(specifier === '@babylonjs/core' || specifier === 'node:fs/promises' || specifier.startsWith('./'), `${name} imports ${specifier}`);
   }
 }
+// The clean-room driver units (drivers/): MIT OR Apache-2.0, written from Blender's observed behavior only
+// (docs/clean-room/), and importing only each other.
+for (const name of readdirSync(join(runtime, 'drivers')).filter((n) => n.endsWith('.js'))) {
+  const text = readFileSync(join(runtime, 'drivers', name), 'utf8');
+  assert.doesNotMatch(text, /blender-port|port-override/i, `drivers/${name} holds no code derived from Blender`);
+  assert.match(text, /SPDX-License-Identifier: MIT OR Apache-2.0/, `drivers/${name} carries its license`);
+  for (const [, specifier] of text.matchAll(/(?:import|from)\s*\(?\s*'([^']+)'/g)) assert.ok(specifier.startsWith('./'), `drivers/${name} imports ${specifier}`);
+}
 // Every file ships: the runtime with each package, the blocks library and extensions when its scene.js imports them
 // (their .d.ts files are checked below).
 const blocks = Object.values(BLOCK_FILES).flatMap((name) => [name, name.replace(/\.js$/, '.d.ts')]);
-assert.deepEqual(readdirSync(runtime).filter((name) => name !== 'tsconfig.json').sort(), [...RUNTIME_FILES, ...blocks].sort(), 'every file of runtime/ ships');
+const files = readdirSync(runtime, { recursive: true }).map((name) => String(name).split(sep).join('/')).filter((name) => name !== 'tsconfig.json' && name !== 'drivers');
+assert.deepEqual(files.sort(), [...RUNTIME_FILES, ...blocks, ...DRIVER_FILES].sort(), 'every file of runtime/ ships');
 
 // Types: the JSDoc checks, and the declarations are current.
 tsc(['-p', join(runtime, 'tsconfig.json'), '--noEmit']);

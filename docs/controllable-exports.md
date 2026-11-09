@@ -178,6 +178,17 @@ written knobs are applied through their bindings. Babylon's own systems are the 
 Skeleton, MorphTargetManager, NodeMaterial InputBlocks, NodeRenderGraph blocks. An operation whose evaluator is not
 loaded yet is queued, and the evaluator loader is asked for it.
 
+Built (step 5): `runtime/scheduler.js` runs the marked operations when a control is set, at once, so a page or a
+headless script reads the result after `set` (or after `await blend.settled()` the first time an evaluator loads). An
+operation that has run stays live: Babylon's AnimationGroup still plays the baked samples of what it writes, and the
+scheduler writes the live value back on `scene.onAfterAnimationsObservable`. The table (`DEPENDENCIES` in `scene.js`,
+written by `dependency-export.js`) holds one `driver` operation per driver of an exported ID whose inputs are controls:
+its expression, its variables (a single property as the control it reads; a transform channel, distance or rotational
+difference as the objects' transform controls and their static parts, parents included) and its own F-Curve. The
+`driver` evaluator (`runtime/driver-evaluator.js`) runs it with the clean-room units in `runtime/drivers/`, copied
+unchanged from the clean room with their proofs in `docs/clean-room/`. A driver needing Python, an F-Curve modifier
+other than Cycles, an F-Curve the units miss where the export samples it against Blender's, a bone target or an input that is no control stays baked.
+
 ### Evaluators
 
 An evaluator is the runtimes model (`runtimes.md`) applied to an export: Babylon native or mapped where Babylon has the
@@ -198,7 +209,7 @@ class, Blender where only Blender's code can do it.
 | `animation` | Native | AnimationGroup at the scene's time | With the page |
 | `material` | Native | NodeMaterial InputBlock values and textures | With the page (bindings only) |
 | `skin`, `morph` | Native | Bone local matrices, target influences from pose and Key values without constraints | With the page |
-| `driver` | Mapped | Driver expressions, variables and the driver's F-curve, as clean-room units (MIT) | On the first set of a knob a driver reads |
+| `driver` | Mapped | Driver expressions, variables and the driver's F-curve, as clean-room units (MIT OR Apache-2.0) | On the first set of a knob a driver reads |
 | `modifiers` | Blender | Mesh-only stacks in `modifiers.wasm`'s worker | On the first set of a modifier setting |
 | `blender` | Blender | Anything else: constraints and IK on a set knob, Geometry Nodes, structure, Python | On the first set that needs it |
 
@@ -404,7 +415,7 @@ does instead: native, baked, or left out.
 | Armature deform | Babylon `Skeleton` and skinning (the runtimes' mapping) | Yes |
 | Shape keys | `MorphTargetManager`, glTF morph targets | Yes |
 | Keyed animation, with drivers, constraints and NLA baked into it | Keys and samples (data) | Yes |
-| Live drivers | Clean-room driver units (MIT) | Could: being built (Decision 8); baked until then |
+| Live drivers | Clean-room driver units (MIT OR Apache-2.0) | Yes, since step 5; a driver they cannot run stays baked |
 | Live constraints | None: the module | No; baked instead |
 | Live modifiers and Geometry Nodes | None: the module | No; evaluated instead |
 | Principled BSDF materials | `PBRMaterial` (`mainPBR`), glTF PBR | Yes |
@@ -549,6 +560,8 @@ Each step lands on its own, with its tests, and leaves exports working.
    `bylonder-blocks.js` alone; a simple scene ships no blocks library; a browser comparison with the app.
 5. **Dependency table, scheduler and driver units.** Checks: Steam Engine: setting the flywheel's rotation moves the
    crosshead as Main does, at many values; fuzz tests per ported unit against the module; the scheduler under 200 lines.
+   Done: `tests/export-drivers-wasm.test.js` (every driven part and an added transform-channel driver at 40 angles, the
+   scheduler at 83 lines); the units' fuzz runs against the oracle are in `docs/clean-room/impl/`.
 6. **Evaluator loader and the Blender fallback.** Checks: the Geometry Nodes example: setting a modifier input by path
    loads the module once and the mesh equals the app's; a page whose knobs are all on fast paths never fetches the module
    or the `.blend` (counted fetches in a Node test).

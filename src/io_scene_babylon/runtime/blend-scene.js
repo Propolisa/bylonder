@@ -3,6 +3,7 @@
 // A scene exported from Bylonder, with its controls: each a Blender RNA path from bpy.data
 // (`objects["Cube"].location[0]`) whose value the page sets, and which lands on the Babylon objects it binds to.
 import { Matrix, Observable, Quaternion, Texture, Vector3 } from '@babylonjs/core';
+import { createScheduler } from './scheduler.js';
 
 /** @typedef {number | boolean | string} Value */
 
@@ -123,11 +124,13 @@ export class BlendScene {
   /**
    * @param {import('@babylonjs/core').Scene} scene
    * @param {Knob[]} knobs
-   * @param {{ root?: string, world?: { set(color: number[]): void }, compositor?: import('@babylonjs/core').NodeRenderGraph }} [options]
+   * @param {{ root?: string, world?: { set(color: number[]): void }, compositor?: import('@babylonjs/core').NodeRenderGraph,
+   *   table?: import('./scheduler.js').Table | null }} [options]
    * the package's URL, which relative image URLs resolve against, the world of one color its background controls set
-   * (world.js), and the compositor its pass controls set (bylonder-blocks.js)
+   * (world.js), the compositor its pass controls set (bylonder-blocks.js), and the dependency table whose operations
+   * propagate a set control (scheduler.js)
    */
-  constructor(scene, knobs, { root = '', world, compositor } = {}) {
+  constructor(scene, knobs, { root = '', world, compositor, table = null } = {}) {
     /** Babylon's scene. */
     this.scene = scene;
     this.#root = root;
@@ -136,7 +139,17 @@ export class BlendScene {
     this.compositor = compositor;
     this.#knobs = new Map(knobs.map((knob) => [knob.path, knob]));
     this.#values = new Map(knobs.map((knob) => [knob.path, knob.default]));
+    this.#scheduler = table && createScheduler(scene, table, {
+      paths: knobs.map((knob) => knob.path),
+      get: (path) => this.#values.get(path),
+      write: (path, value) => this.#write(path, value),
+      // The animation's frame while it plays, else the frame control's.
+      frame: () => scene.animationGroups[0]?.animatables[0]?.masterFrame ?? /** @type {number} */ ([...this.#values].find(([p]) => p.endsWith('.frame_current'))?.[1] ?? 1),
+    });
   }
+
+  /** @type {ReturnType<typeof createScheduler> | null} */
+  #scheduler;
 
   /**
    * A control's value.
@@ -150,7 +163,7 @@ export class BlendScene {
   }
 
   /**
-   * Sets a control, and what it binds to.
+   * Sets a control and what it binds to, and runs the operations that read it (its drivers).
    * @template {keyof Controls & string} P
    * @param {P} path
    * @param {Controls[P]} value
@@ -159,6 +172,22 @@ export class BlendScene {
     const knob = this.#knobs.get(path);
     if (!knob) throw new Error(`No control ${path}`);
     if (typeof value !== typeof knob.default) throw new TypeError(`${path} takes a ${typeof knob.default}, not ${typeof value}`);
+    this.#write(path, value);
+    this.#scheduler?.changed(path);
+  }
+
+  /** Resolves once what the last changes set going has run (an evaluator's first load). */
+  settled() {
+    return this.#scheduler?.settled() ?? Promise.resolve();
+  }
+
+  /**
+   * A control's value, applied to what it binds to and told.
+   * @param {string} path
+   * @param {Value} value
+   */
+  #write(path, value) {
+    const knob = /** @type {Knob} */ (this.#knobs.get(path));
     this.#values.set(path, value);
     if (knob.bind) this.#apply(knob.bind, path, value);
     this.onChanged.notifyObservers({ path, value });
@@ -171,6 +200,7 @@ export class BlendScene {
 
   /** Disposes of the scene. */
   dispose() {
+    this.#scheduler?.dispose();
     this.onChanged.clear();
     this.scene.dispose();
   }

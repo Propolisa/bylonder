@@ -6,7 +6,7 @@ import { serializeScene } from './babylon-export.js';
 import { exportModule } from './js-export.js';
 import { packageRuntime } from './runtime-files.js';
 
-const runtime = import.meta.glob('./runtime/*', { query: '?raw', import: 'default', eager: true });
+const runtime = import.meta.glob('./runtime/**/*', { query: '?raw', import: 'default', eager: true });
 
 // The polyfill's files as an export ships them.
 async function polyfill() {

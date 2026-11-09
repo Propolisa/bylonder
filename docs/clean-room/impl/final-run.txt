@@ -1,0 +1,110 @@
+expression: 0 mismatches of 300000 (25 s, seed 11)
+driver: 251 mismatches of 100000 (12 s, seed 12)
+  value multi SCRIPTED: 5 (max 2208567208 float32 ulps, relative 2.00e+0, absolute 7.05e+1)
+  noise: sign of pi TRANSFORMS TRANSFORM_SPACE AUTO ROT: 11 (max 2157060022 float32 ulps, relative 2.00e+0, absolute 6.28e+0)
+  noise: acos near 1 multi AVERAGE: 11 (max 1794481028 float32 ulps, relative 1.00e+0, absolute 3.45e-4)
+  noise: acos near 1 ROTATION_DIFF: 48 (max 984941811 float32 ulps, relative 1.00e+0, absolute 1.38e-3)
+  noise: undefined twist TRANSFORMS LOCAL_SPACE SWING_TWIST_Y ROT: 6 (max 1073938856 float32 ulps, relative 1.00e+0, absolute 2.71e+0)
+  value multi MIN: 8 (max 2154433784 float32 ulps, relative 1.80e+0, absolute 5.66e+0)
+  noise: undefined twist multi SCRIPTED: 5 (max 2127527943 float32 ulps, relative 1.08e+0, absolute 3.40e+0)
+  noise: sign of pi TRANSFORMS TRANSFORM_SPACE EULER ROT: 25 (max 2157060022 float32 ulps, relative 2.00e+0, absolute 6.28e+0)
+  noise: whole turns multi SUM: 14 (max 2157029054 float32 ulps, relative 1.57e+0, absolute 6.28e+0)
+  noise: sign of pi TRANSFORMS WORLD_SPACE EULER ROT: 19 (max 2157060022 float32 ulps, relative 2.00e+0, absolute 6.28e+0)
+  noise: whole turns TRANSFORMS LOCAL_SPACE AUTO ROT: 2 (max 2156484323 float32 ulps, relative 1.47e+0, absolute 6.28e+0)
+  noise: whole turns multi SCRIPTED: 8 (max 2157060022 float32 ulps, relative 1.80e+0, absolute 6.28e+0)
+  noise: acos near 1 multi MAX: 2 (max 976553203 float32 ulps, relative 1.00e+0, absolute 6.91e-4)
+  noise: undefined twist TRANSFORMS LOCAL_SPACE SWING_TWIST_X ROT: 3 (max 1048196166 float32 ulps, relative 1.00e+0, absolute 3.05e+0)
+  value multi AVERAGE: 9 (max 2140282806 float32 ulps, relative 2.00e+0, absolute 3.14e+0)
+  noise: sign of pi TRANSFORMS LOCAL_SPACE EULER ROT: 13 (max 2157060022 float32 ulps, relative 2.00e+0, absolute 6.28e+0)
+  noise: acos near 1 multi SUM: 12 (max 8191 float32 ulps, relative 5.45e-4, absolute 9.77e-4)
+  noise: acos near 1 multi SCRIPTED: 9 (max 976553203 float32 ulps, relative 1.00e+0, absolute 1.11e-3)
+  noise: whole turns TRANSFORMS TRANSFORM_SPACE AUTO ROT: 6 (max 2146508957 float32 ulps, relative 1.14e+0, absolute 6.28e+0)
+  noise: whole turns TRANSFORMS WORLD_SPACE AUTO ROT: 8 (max 2157060022 float32 ulps, relative 1.76e+0, absolute 6.28e+0)
+  noise: undefined twist TRANSFORMS LOCAL_SPACE SWING_TWIST_Z ROT: 5 (max 1075487359 float32 ulps, relative 1.00e+0, absolute 2.42e+0)
+  noise: undefined twist multi MIN: 1 (max 50834790 float32 ulps, relative 9.85e-1, absolute 2.83e+0)
+  noise: sign of pi multi SUM: 1 (max 2157060022 float32 ulps, relative 2.00e+0, absolute 6.28e+0)
+  value multi MAX: 9 (max 2148661155 float32 ulps, relative 1.50e+0, absolute 5.33e+0)
+  noise: undefined twist multi SUM: 2 (max 2146577188 float32 ulps, relative 1.15e+0, absolute 5.98e+0)
+  noise: acos near 1 multi MIN: 3 (max 981467136 float32 ulps, relative 1.00e+0, absolute 9.77e-4)
+  noise: undefined twist multi MAX: 1 (max 1066534464 float32 ulps, relative 1.00e+0, absolute 1.14e+0)
+  noise: sign of pi TRANSFORMS LOCAL_SPACE AUTO ROT: 1 (max 2157060021 float32 ulps, relative 2.00e+0, absolute 6.28e+0)
+  noise: sign of pi TRANSFORMS WORLD_SPACE AUTO ROT: 3 (max 2157060022 float32 ulps, relative 2.00e+0, absolute 6.28e+0)
+  noise: undefined twist multi AVERAGE: 1 (max 7868957 float32 ulps, relative 4.71e-1, absolute 1.28e-1)
+  matches by float32 ulps of max(1, |value|): {"0":75862,"1":17906,"2":3554,"3":991,"4":465,"5-16":465,"17-256":27}, max 162 ulps, max error / max(1, |value|) 1.66e-5
+driver-realistic: 350 mismatches of 100000 (10 s, seed 13)
+  noise: acos near 1 ROTATION_DIFF: 27 (max 981467136 float32 ulps, relative 1.00e+0, absolute 9.77e-4)
+  noise: sign of pi TRANSFORMS WORLD_SPACE EULER ROT: 22 (max 2157060022 float32 ulps, relative 2.00e+0, absolute 6.28e+0)
+  noise: whole turns TRANSFORMS LOCAL_SPACE AUTO ROT: 56 (max 1758007259 float32 ulps, relative 1.00e+0, absolute 6.28e+0)
+  noise: sign of pi TRANSFORMS LOCAL_SPACE AUTO ROT: 10 (max 2157060022 float32 ulps, relative 2.00e+0, absolute 6.28e+0)
+  noise: sign of pi TRANSFORMS WORLD_SPACE AUTO ROT: 13 (max 2157060022 float32 ulps, relative 2.00e+0, absolute 6.28e+0)
+  noise: whole turns TRANSFORMS WORLD_SPACE AUTO ROT: 20 (max 2157060022 float32 ulps, relative 1.60e+0, absolute 6.28e+0)
+  noise: sign of pi TRANSFORMS LOCAL_SPACE EULER ROT: 19 (max 2157060022 float32 ulps, relative 2.00e+0, absolute 6.28e+0)
+  noise: acos near 1 TRANSFORMS TRANSFORM_SPACE SWING_TWIST_X ROT: 8 (max 976553203 float32 ulps, relative 1.00e+0, absolute 6.91e-4)
+  noise: whole turns TRANSFORMS TRANSFORM_SPACE AUTO ROT: 21 (max 2153765823 float32 ulps, relative 1.33e+0, absolute 6.28e+0)
+  noise: undefined twist TRANSFORMS LOCAL_SPACE SWING_TWIST_Y ROT: 17 (max 2152996367 float32 ulps, relative 2.00e+0, absolute 5.31e+0)
+  noise: acos near 1 TRANSFORMS LOCAL_SPACE SWING_TWIST_X ROT: 2 (max 976553203 float32 ulps, relative 1.00e+0, absolute 6.91e-4)
+  noise: undefined twist TRANSFORMS LOCAL_SPACE SWING_TWIST_X ROT: 12 (max 2156880821 float32 ulps, relative 1.99e+0, absolute 6.24e+0)
+  noise: acos near 1 TRANSFORMS WORLD_SPACE SWING_TWIST_X ROT: 3 (max 976553203 float32 ulps, relative 1.00e+0, absolute 6.91e-4)
+  value TRANSFORMS LOCAL_SPACE EULER ROT: 3 (max 1930817034 float32 ulps, relative 1.00e+0, absolute 3.14e+0)
+  noise: sign of pi TRANSFORMS TRANSFORM_SPACE AUTO ROT: 13 (max 2157060022 float32 ulps, relative 2.00e+0, absolute 6.28e+0)
+  noise: acos near 1 TRANSFORMS WORLD_SPACE SWING_TWIST_Z ROT: 8 (max 976553203 float32 ulps, relative 1.00e+0, absolute 6.91e-4)
+  noise: sign of pi TRANSFORMS TRANSFORM_SPACE EULER ROT: 20 (max 2157060022 float32 ulps, relative 2.00e+0, absolute 6.28e+0)
+  noise: sign of pi TRANSFORMS LOCAL_SPACE SWING_TWIST_X ROT: 3 (max 2157060022 float32 ulps, relative 2.00e+0, absolute 6.28e+0)
+  noise: whole turns TRANSFORMS TRANSFORM_SPACE SWING_TWIST_Y ROT: 1 (max 1086918619 float32 ulps, relative 1.00e+0, absolute 6.28e+0)
+  noise: acos near 1 TRANSFORMS WORLD_SPACE SWING_TWIST_Y ROT: 3 (max 976553203 float32 ulps, relative 1.00e+0, absolute 6.91e-4)
+  noise: whole turns TRANSFORMS WORLD_SPACE SWING_TWIST_X ROT: 2 (max 1086918619 float32 ulps, relative 1.00e+0, absolute 6.28e+0)
+  value TRANSFORMS WORLD_SPACE SWING_TWIST_X ROT: 1 (max 2124482014 float32 ulps, relative 1.39e+0, absolute 1.77e+0)
+  noise: acos near 1 TRANSFORMS TRANSFORM_SPACE SWING_TWIST_Z ROT: 11 (max 976553203 float32 ulps, relative 1.00e+0, absolute 6.91e-4)
+  value TRANSFORMS WORLD_SPACE EULER ROT: 6 (max 2140282805 float32 ulps, relative 2.00e+0, absolute 3.14e+0)
+  noise: undefined twist TRANSFORMS LOCAL_SPACE SWING_TWIST_Z ROT: 8 (max 2155659584 float32 ulps, relative 2.00e+0, absolute 5.95e+0)
+  value TRANSFORMS LOCAL_SPACE QUATERNION ROT: 4 (max 2126210990 float32 ulps, relative 2.00e+0, absolute 1.73e+0)
+  noise: acos near 1 TRANSFORMS TRANSFORM_SPACE SWING_TWIST_Y ROT: 5 (max 976553203 float32 ulps, relative 1.00e+0, absolute 6.91e-4)
+  noise: acos near 1 TRANSFORMS LOCAL_SPACE SWING_TWIST_Z ROT: 5 (max 976553203 float32 ulps, relative 1.00e+0, absolute 6.91e-4)
+  noise: undefined twist TRANSFORMS WORLD_SPACE SWING_TWIST_Y ROT: 3 (max 7723377 float32 ulps, relative 4.77e-1, absolute 4.03e-1)
+  noise: undefined twist TRANSFORMS TRANSFORM_SPACE SWING_TWIST_X ROT: 2 (max 568 float32 ulps, relative 4.31e-5, absolute 1.35e-4)
+  noise: undefined twist TRANSFORMS WORLD_SPACE SWING_TWIST_X ROT: 1 (max 5431734 float32 ulps, relative 3.61e-1, absolute 9.15e-1)
+  value TRANSFORMS LOCAL_SPACE SWING_TWIST_X ROT: 1 (max 832 float32 ulps, relative 9.47e-5, absolute 4.96e-5)
+  noise: whole turns TRANSFORMS TRANSFORM_SPACE SWING_TWIST_X ROT: 1 (max 1086918619 float32 ulps, relative 1.00e+0, absolute 6.28e+0)
+  noise: sign of pi TRANSFORMS WORLD_SPACE SWING_TWIST_Z ROT: 1 (max 2157060022 float32 ulps, relative 2.00e+0, absolute 6.28e+0)
+  value TRANSFORMS WORLD_SPACE QUATERNION ROT: 2 (max 2120878566 float32 ulps, relative 2.00e+0, absolute 1.41e+0)
+  noise: whole turns TRANSFORMS LOCAL_SPACE SWING_TWIST_Z ROT: 1 (max 1086918619 float32 ulps, relative 1.00e+0, absolute 6.28e+0)
+  noise: acos near 1 TRANSFORMS LOCAL_SPACE SWING_TWIST_Y ROT: 2 (max 976553203 float32 ulps, relative 1.00e+0, absolute 6.91e-4)
+  noise: sign of pi TRANSFORMS LOCAL_SPACE SWING_TWIST_Z ROT: 1 (max 2157060022 float32 ulps, relative 2.00e+0, absolute 6.28e+0)
+  value TRANSFORMS WORLD_SPACE AUTO ROT: 3 (max 2126403860 float32 ulps, relative 1.09e+0, absolute 3.14e+0)
+  noise: sign of pi TRANSFORMS WORLD_SPACE SWING_TWIST_Y ROT: 1 (max 2157060022 float32 ulps, relative 2.00e+0, absolute 6.28e+0)
+  noise: undefined twist TRANSFORMS WORLD_SPACE SWING_TWIST_Z ROT: 2 (max 2897 float32 ulps, relative 2.20e-4, absolute 6.91e-4)
+  value TRANSFORMS TRANSFORM_SPACE EULER ROT: 2 (max 2139886883 float32 ulps, relative 1.50e+0, absolute 3.14e+0)
+  value TRANSFORMS LOCAL_SPACE AUTO ROT: 1 (max 10584740 float32 ulps, relative 6.00e-1, absolute 3.14e+0)
+  noise: sign of pi TRANSFORMS LOCAL_SPACE SWING_TWIST_Y ROT: 1 (max 2157060022 float32 ulps, relative 2.00e+0, absolute 6.28e+0)
+  value TRANSFORMS TRANSFORM_SPACE AUTO ROT: 1 (max 2196132 float32 ulps, relative 2.00e-1, absolute 1.05e+0)
+  noise: undefined twist TRANSFORMS TRANSFORM_SPACE SWING_TWIST_Y ROT: 1 (max 2114721059 float32 ulps, relative 2.00e+0, absolute 1.05e+0)
+  matches by float32 ulps of max(1, |value|): {"0":87973,"1":10006,"2":1036,"3":324,"4":270,"5-16":35,"17-256":6}, max 110 ulps, max error / max(1, |value|) 1.14e-5
+fcurve: 7274 mismatches of 100000 (4 s, seed 14)
+  handle CONT_ACCEL AUTO_CLAMPED: 1176
+  handle CONT_ACCEL AUTO: 1249
+  handle CONT_ACCEL VECTOR cyclic: 675
+  handle NONE AUTO cyclic all-auto: 152
+  handle CONT_ACCEL VECTOR: 988
+  handle CONT_ACCEL AUTO_CLAMPED all-auto: 189
+  handle CONT_ACCEL AUTO cyclic: 864
+  handle CONT_ACCEL AUTO all-auto: 189
+  handle CONT_ACCEL AUTO_CLAMPED cyclic: 776
+  handle CONT_ACCEL ALIGNED cyclic: 195
+  handle CONT_ACCEL ALIGNED: 299
+  handle NONE AUTO_CLAMPED cyclic: 25
+  handle NONE AUTO_CLAMPED cyclic all-auto: 94
+  handle NONE AUTO cyclic: 31
+  handle CONT_ACCEL AUTO_CLAMPED cyclic all-auto: 205
+  value after CONSTANT cycles: 3
+  handle CONT_ACCEL AUTO cyclic all-auto: 118
+  value before LINEAR: 7
+  handle CONT_ACCEL FREE: 3
+  value before LINEAR cycles: 2
+  handle NONE ALIGNED cyclic: 7
+  value after LINEAR cycles: 5
+  value before CONSTANT cycles: 4
+  value after LINEAR: 8
+  handle CONT_ACCEL FREE cyclic: 2
+  handle NONE ALIGNED: 6
+  value BEZIER AUTO: 1
+  value BEZIER EASE_IN_OUT: 1

@@ -17,22 +17,30 @@
       { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
     ],
     "driver:SINGLE_PROP": [
-      { "implementation": "clean-room driver units", "license": "MIT", "fidelity": "exact", "status": "planned" },
+      { "implementation": "clean-room driver units (runtime/drivers/, docs/clean-room/), run by the page's scheduler once a control the driver reads is set", "license": "MIT OR Apache-2.0", "fidelity": "exact" },
       { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
     ],
     "driver:TRANSFORMS": [
-      { "implementation": "clean-room driver units", "license": "MIT", "fidelity": "exact", "status": "planned" },
+      { "implementation": "clean-room driver units (runtime/drivers/, docs/clean-room/), run by the page's scheduler once a control the driver reads is set; rotation readings differ from Blender in about 0.3% of random cases, at float32 branch boundaries", "license": "MIT OR Apache-2.0", "fidelity": "approximate" },
       { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
     ],
     "driver:LOC_DIFF": [
-      { "implementation": "clean-room driver units", "license": "MIT", "fidelity": "exact", "status": "planned" },
+      { "implementation": "clean-room driver units (runtime/drivers/, docs/clean-room/), run by the page's scheduler once a control the driver reads is set", "license": "MIT OR Apache-2.0", "fidelity": "exact" },
       { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
     ],
     "driver:ROTATION_DIFF": [
-      { "implementation": "clean-room driver units", "license": "MIT", "fidelity": "exact", "status": "planned" },
+      { "implementation": "clean-room driver units (runtime/drivers/, docs/clean-room/), run by the page's scheduler once a control the driver reads is set; rotation readings differ from Blender in about 0.3% of random cases, at float32 branch boundaries", "license": "MIT OR Apache-2.0", "fidelity": "approximate" },
       { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
     ],
     "driver:CONTEXT_PROP": [
+      { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
+    ],
+    "driver:SCRIPTED": [
+      { "implementation": "clean-room expression unit (runtime/drivers/expression.js); an expression needing Python stays baked", "license": "MIT OR Apache-2.0", "fidelity": "exact" },
+      { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
+    ],
+    "fcurve:driver": [
+      { "implementation": "clean-room F-Curve unit (runtime/drivers/fcurve.js), a driver's own F-Curve; Continuous Acceleration smoothing and modifiers but Cycles stay baked", "license": "MIT OR Apache-2.0", "fidelity": "exact" },
       { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
     ],
     "armature": [

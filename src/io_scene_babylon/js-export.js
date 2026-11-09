@@ -12,6 +12,7 @@ import { worldNodes } from '../blenkernel/scene/world-babylon.js';
 import { createSceneBin } from './scene-bin.js';
 import { imageFiles } from './image-files.js';
 import { exportCompositor } from './compositor-export.js';
+import { exportDependencies } from './dependency-export.js';
 import { idStruct } from '../python/bpy_rna.js';
 import { displayExponent } from '../render/view-settings.js';
 import { LOG_SIZE, STOPS } from '../render/display-lut.js';
@@ -167,6 +168,7 @@ async function moduleSource(world, live, mapped, parity, hostCompression) {
   // unless one of its effects is on.
   if (display) data.renderingPipelines = data.renderingPipelines.filter((p) => !(p._name?.startsWith('__display:') && !PIPELINE_EFFECTS.some((e) => p[e])));
   const controls = [...exportControls(world, data), ...(composited?.knobs ?? [])], code = sharedCode(data.materials);
+  const dependencies = exportDependencies(world, controls);
   const parented = [...data.transformNodes, ...data.meshes, ...data.lights, ...data.cameras].filter((e) => e.parentId !== undefined);
   const parse = (name, list, code) => (list?.length ? `  for (const entry of ${name}) ${code};\n` : '');
   const settings = {
@@ -217,7 +219,8 @@ const ANIMATION_GROUPS = ${json(data.animationGroups)};
 const RENDERING_PIPELINES = ${json(data.renderingPipelines)};
 const POST_PROCESSES = ${json(data.postProcesses)};
 const BUFFERS = ${json(bin.views)};
-const CONTROLS = ${json(controls)};${display ? `
+const CONTROLS = ${json(controls)};
+const DEPENDENCIES = ${json(dependencies)};${display ? `
 const DISPLAY = ${json(display)};` : ''}${composited ? `
 const COMPOSITOR = ${json(composited.compositor)};` : ''}
 
@@ -232,7 +235,7 @@ const SCREEN_SPACE = {
 const WORLDS = new WeakMap(), COMPOSITORS = new WeakMap();
 export async function load(engine) {
   const scene = await createScene(engine, engine.getRenderingCanvas());
-  return new BlendScene(scene, CONTROLS, { root: ROOT, world: WORLDS.get(scene), compositor: COMPOSITORS.get(scene) });
+  return new BlendScene(scene, CONTROLS, { root: ROOT, world: WORLDS.get(scene), compositor: COMPOSITORS.get(scene), table: DEPENDENCIES });
 }
 
 export async function createScene(engine, canvas${live.size ? ", { modifiers = new URL('./bylonder-modifiers/', import.meta.url) } = {}" : ''}) {

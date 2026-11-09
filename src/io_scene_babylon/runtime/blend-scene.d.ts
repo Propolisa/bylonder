@@ -20,16 +20,19 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
     /**
      * @param {import('@babylonjs/core').Scene} scene
      * @param {Knob[]} knobs
-     * @param {{ root?: string, world?: { set(color: number[]): void }, compositor?: import('@babylonjs/core').NodeRenderGraph }} [options]
+     * @param {{ root?: string, world?: { set(color: number[]): void }, compositor?: import('@babylonjs/core').NodeRenderGraph,
+     *   table?: import('./scheduler.js').Table | null }} [options]
      * the package's URL, which relative image URLs resolve against, the world of one color its background controls set
-     * (world.js), and the compositor its pass controls set (bylonder-blocks.js)
+     * (world.js), the compositor its pass controls set (bylonder-blocks.js), and the dependency table whose operations
+     * propagate a set control (scheduler.js)
      */
-    constructor(scene: import("@babylonjs/core").Scene, knobs: Knob[], { root, world, compositor }?: {
+    constructor(scene: import("@babylonjs/core").Scene, knobs: Knob[], { root, world, compositor, table }?: {
         root?: string;
         world?: {
             set(color: number[]): void;
         };
         compositor?: import("@babylonjs/core").NodeRenderGraph;
+        table?: import("./scheduler.js").Table | null;
     });
     /** Told of each control's new value. @type {Observable<Change>} */
     onChanged: Observable<Change>;
@@ -45,12 +48,14 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
      */
     get<P extends keyof Controls & string>(path: P): Controls[P];
     /**
-     * Sets a control, and what it binds to.
+     * Sets a control and what it binds to, and runs the operations that read it (its drivers).
      * @template {keyof Controls & string} P
      * @param {P} path
      * @param {Controls[P]} value
      */
     set<P extends keyof Controls & string>(path: P, value: Controls[P]): void;
+    /** Resolves once what the last changes set going has run (an evaluator's first load). */
+    settled(): Promise<void>;
     /** The controls, as Blender's RNA describes them. @returns {Control[]} */
     controls(): Control[];
     /** Disposes of the scene. */
