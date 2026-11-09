@@ -141,11 +141,12 @@ export class BlendScene {
     this.#values = new Map(knobs.map((knob) => [knob.path, knob.default]));
     this.#scheduler = table && createScheduler(scene, table, {
       paths: knobs.map((knob) => knob.path),
+      defaults: knobs.map((knob) => knob.default),
       get: (path) => this.#values.get(path),
       write: (path, value) => this.#write(path, value),
       // The animation's frame while it plays, else the frame control's.
       frame: () => scene.animationGroups[0]?.animatables[0]?.masterFrame ?? /** @type {number} */ ([...this.#values].find(([p]) => p.endsWith('.frame_current'))?.[1] ?? 1),
-    });
+    }, root);
   }
 
   /** @type {ReturnType<typeof createScheduler> | null} */

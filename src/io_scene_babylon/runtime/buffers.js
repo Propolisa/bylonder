@@ -25,6 +25,14 @@ async function bodyOf(url) {
 }
 
 /**
+ * A file of the package, whole.
+ * @param {URL} url
+ */
+export async function readBytes(url) {
+  return new Uint8Array(await new Response(await bodyOf(url)).arrayBuffer());
+}
+
+/**
  * Every view of the binary file at `url`, gzipped or not.
  * @param {URL} url
  * @param {BufferView[]} views

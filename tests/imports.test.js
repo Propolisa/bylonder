@@ -5,7 +5,8 @@ import { imports, resolveImport } from '../scripts/import-graph.mjs';
 
 // Every relative import in src/ resolves, so a deleted module that something still imports fails here, not in the
 // production build.
-const GENERATED = /(^|\/)bl_py(\/|$)/;
+// Left out: Blender's compiled Python, and bundles, whose files sit beside them where they ship.
+const GENERATED = /(^|\/)bl_py(\/|$)|\.bundle\.js$/;
 const files = (await readdir('src', { recursive: true })).map((f) => join('src', f)).filter((f) => /\.(js|mjs|vue)$/.test(f) && !GENERATED.test(f));
 const missing = files.flatMap((file) => imports(file).filter((spec) => !resolveImport(file, spec)).map((spec) => `${file}: ${spec}`));
 assert.deepEqual(missing, [], 'imports of modules that do not exist');

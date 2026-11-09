@@ -226,6 +226,21 @@ names the capability groups it needs (`core`, `geometry-nodes`, `booleans`, `vol
 only those; the interface does not change. Threads are used when the page is cross-origin isolated
 (`crossOriginIsolated`), else one thread, as Safari gets.
 
+Built (step 6): the export option Include Source .blend (`sourceBlend`, off by default) writes `scene.blend` with
+Blender's writer and lists each Geometry Nodes modifier's float, integer and boolean inputs as suggested controls
+(`objects["Planet"].modifiers["Planet"].properties.inputs.Socket_2.value`, Blender 5.2's path for them), with one
+`blender` operation per modifier reading them. The scheduler loads an evaluator for the page's scene, the package's URL
+and its controls. The `blender` evaluator (`runtime/blender-evaluator.js`, MIT OR Apache-2.0) fetches `scene.blend` and
+imports `bylonder-blender/blender.js`, the Blender fallback (`blender-fallback.js`, bundled with the code it uses by
+`scripts/blender-fallback.mjs`), which instantiates the module beside it. Each run sets in Main, by RNA path, every
+control changed since the last run (fast-path ones included, so Main matches the page), evaluates, and draws what the
+depsgraph updated: an object's evaluated mesh and the thin instances of the objects its geometry instances, through
+`blenkernel/main-evaluated.js`, which the app's view (`main-view.js`) now draws through too. `bylonder-blender/` carries
+its GPL-3.0-or-later notice and the GPL's text, and `scene.js` says it includes GPL code only when it ships. Not yet:
+any other RNA path (`set` takes only the package's controls), evaluated transforms (a constraint's result), materials,
+point clouds and curves; an instancer moved by its transform controls after the fallback has run keeps its instances
+where Blender last drew them until a control only Blender evaluates is set again.
+
 **Cost, stated plainly.** Until dynamic linking lands, the first change that needs the `blender` evaluator downloads the
 whole module: 86.7 MB, 24.5 MB gzipped, 19.0 MB brotli, measured on `module-84c8dc9b`. In Node, importing it and
 starting Main takes 2.6 s and reading the compositor example's `.blend` and building its view 0.49 s. That is why the
@@ -565,6 +580,8 @@ Each step lands on its own, with its tests, and leaves exports working.
 6. **Evaluator loader and the Blender fallback.** Checks: the Geometry Nodes example: setting a modifier input by path
    loads the module once and the mesh equals the app's; a page whose knobs are all on fast paths never fetches the module
    or the `.blend` (counted fetches in a Node test).
+   Done: `tests/export-blender-wasm.test.js` (fast-path controls read neither file; three input sets read each once and
+   draw the app's planet and tree instances bit for bit).
 7. **`modifiers.wasm` under the evaluator interface.** Checks: `tests/export-live.test.js` on RNA paths, with the same
    results.
 8. **Headless SDK.** The controller in Node without a page. Exporting headless needs image pixels Node has no GPU for:

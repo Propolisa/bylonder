@@ -11,19 +11,25 @@
  * @typedef {{ evaluator: string, reads: number[], writes: number[], baked?: string, data: any }} Operation
  * @typedef {{ version: number, operations: Operation[], order: number[] }} Table
  * @typedef {{ run(operation: Operation, read: (index: number) => any, frame: number): any[] }} Evaluator
+ * @typedef {{ paths: string[], defaults: any[], get(path: string): any, write(path: string, value: any): void, frame(): number }} Controls
  */
 
-/** The evaluators by name, each its module, loaded on first use. @type {Record<string, () => Promise<Evaluator>>} */
+/**
+ * The evaluators by name, each loaded on first use for the page's scene, the package's URL and its controls.
+ * @type {Record<string, (scene: import('@babylonjs/core').Scene, root: string, controls: Controls) => Promise<Evaluator>>}
+ */
 export const EVALUATORS = {
   driver: () => import('./driver-evaluator.js'),
+  blender: (scene, root, controls) => import('./blender-evaluator.js').then((module) => module.load(scene, root, controls)),
 };
 
 /**
  * @param {import('@babylonjs/core').Scene} scene
  * @param {Table} table
- * @param {{ paths: string[], get(path: string): any, write(path: string, value: any): void, frame(): number }} controls
+ * @param {Controls} controls
+ * @param {string} root the package's URL, which evaluators load their files from
  */
-export function createScheduler(scene, table, controls) {
+export function createScheduler(scene, table, controls, root) {
   const readers = new Map(), marked = new Set(), live = new Map(), loaded = new Map();
   table.operations.forEach((op, i) => op.reads.forEach((r) => readers.set(r, [...(readers.get(r) ?? []), i])));
   /** @type {Promise<void> | null} */
@@ -40,7 +46,7 @@ export function createScheduler(scene, table, controls) {
 
   /** @param {string} name */
   const evaluator = (name) => {
-    if (!loaded.has(name)) loaded.set(name, EVALUATORS[name]().then((module) => loaded.set(name, module)));
+    if (!loaded.has(name)) loaded.set(name, EVALUATORS[name](scene, root, controls).then((module) => loaded.set(name, module)));
     const value = loaded.get(name);
     return value instanceof Promise ? null : value;
   };

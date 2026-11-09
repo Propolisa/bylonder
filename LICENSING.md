@@ -48,6 +48,10 @@ A page exported from Bylonder takes the license of the code it ships:
   Blender's code computed at export time (an evaluated mesh, sampled keys, a baked texture) is output, not code;
 - your own scene, models, textures and project code stay yours, under whatever license you choose.
 
+A JavaScript export with Include Source .blend ships the Blender fallback in `bylonder-blender/` (the module and
+`blender.js`, bundled from `src/io_scene_babylon/blender-fallback.js`), under GPL-3.0-or-later with its notice and the
+GPL's text; its `scene.js` says so.
+
 A license-free export path, which routes each feature to a form without Blender's code, is planned in
 [`docs/controllable-exports.md`](docs/controllable-exports.md).
 

@@ -50,7 +50,7 @@
       { "implementation": "Babylon MorphTargetManager", "license": "Apache-2.0", "fidelity": "approximate" }
     ],
     "modifier:NODES": [
-      { "implementation": "Blender's module (the fallback evaluator)", "license": "GPL-2.0-or-later", "fidelity": "exact", "status": "planned" },
+      { "implementation": "Blender's module (the Blender fallback, bylonder-blender/, with Include Source .blend), its float, integer and boolean inputs set by path", "license": "GPL-3.0-or-later", "fidelity": "exact" },
       { "implementation": "evaluated mesh and instances", "license": "data", "fidelity": "baked" }
     ],
     "modifier:*": [

@@ -1,4 +1,9 @@
 /**
+ * A file of the package, whole.
+ * @param {URL} url
+ */
+export function readBytes(url: URL): Promise<Uint8Array<ArrayBuffer>>;
+/**
  * Every view of the binary file at `url`, gzipped or not.
  * @param {URL} url
  * @param {BufferView[]} views

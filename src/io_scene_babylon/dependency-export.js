@@ -6,6 +6,7 @@
 import { compile, PYTHON_ONLY } from './runtime/drivers/expression.js';
 import { evaluateFCurve, prepareFCurve } from './runtime/drivers/fcurve.js';
 import { blendData } from '../python/bpy_rna.js';
+import { GEOMETRY_NODES_INPUT } from './controls-export.js';
 
 const key = (name) => `["${name.replace(/["\\]/g, (c) => '\\' + c)}"]`;
 // The bpy.data collection of each ID type a driver target names.
@@ -105,6 +106,13 @@ function topological(operations) {
   return order;
 }
 
+// One `blender` operation per Geometry Nodes modifier with controls, which reads its inputs: the page's Blender fallback
+// sets the changed controls in Main by path and draws what it evaluates (runtime/blender-evaluator.js).
+function blenderOperations(controls) {
+  const modifiers = Map.groupBy(controls.flatMap((c, i) => (GEOMETRY_NODES_INPUT.test(c.path) ? [i] : [])), (i) => GEOMETRY_NODES_INPUT.exec(controls[i].path)[1]);
+  return [...modifiers.values()].map((reads) => ({ evaluator: 'blender', reads, writes: [], data: null }));
+}
+
 // The table for `controls` (the package's CONTROLS, which the drivers' inputs are marked suggested in), or null.
 export function exportDependencies(world, controls) {
   if (!world.mainSync) return null;
@@ -115,6 +123,7 @@ export function exportDependencies(world, controls) {
       if (op) operations.push(op);
     }
   }
+  operations.push(...blenderOperations(controls));
   if (!operations.length) return null;
   for (const op of operations) for (const r of op.reads) controls[r].suggested = true;
   return { version: 1, operations, order: topological(operations) };

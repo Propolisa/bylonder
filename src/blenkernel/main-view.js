@@ -34,8 +34,9 @@ import { createGreasePencilDraw, BLENDER_LOOK } from '../draw/grease-pencil.js';
 import { provideGreasePencilRender } from '../draw/grease-pencil-render.js';
 import * as runtimes from '../runtimes/runtimes.js';
 import { uploadImageTextures } from '../imbuf/image-textures.js';
+import { ID_OB, ID_GR, ID_MA, ID_WO, babylonMatrix, blenderMatrix, drawThinInstances } from './main-evaluated.js';
 
-export const ID_OB = 0x424f, ID_GR = 0x5247, ID_MA = 0x414d, ID_WO = 0x4f57;
+export { ID_OB, ID_GR, ID_MA, ID_WO, babylonMatrix, blenderMatrix };
 export const CURVE_TYPES = ['CURVE', 'FONT'];
 // Types of Blender's the view draws only as the depsgraph evaluates them: as their evaluated mesh, or placed where they
 // are (what they do, a lattice's deform or a speaker's sound, is Blender's; a Curves object's curves, drawCurves; a Grease
@@ -76,12 +77,6 @@ function keepMesh(entry, blender) {
   [entry.creation, entry.owned] = [entry.node.metadata.wbCreation, true];
   blender.setProperty(entry.ob, PROPERTIES.standin, '');
 }
-
-// Blender's matrix (column-major, Z up) as Babylon's (row-major, Y up): Babylon's (x, y, z) is Blender's (x, z, y).
-const AXIS = [0, 2, 1, 3];
-const swapped = (m) => Array.from({ length: 16 }, (_, i) => m[AXIS[i >> 2] * 4 + AXIS[i & 3]]);
-export const babylonMatrix = (m) => Matrix.FromArray(swapped(m));
-export const blenderMatrix = (matrix) => swapped(matrix.m);
 
 //   state: the scene sync's records (main-sync.js): rna, world, selection, blender, ids, objects, materials, worlds,
 //   sceneRecords(), readCollections(), relations(entry), nodeOf, forget(node, entry), and `applying`, which mutes its hooks.
@@ -578,22 +573,11 @@ export function createMainView(state) {
       if (shape === 'OBJECT') carrier.material = source.material;
       if (geometric) carrier.material = materialFor(material);
       // Read after instanceMesh and materialFor, which can grow the module's memory.
-      const groups = [first, ...more], length = groups.reduce((sum, group) => sum + group.data.length, 0);
-      let buffer = carrier.metadata.instances;
-      if (!(buffer?.length >= length)) {
-        buffer = carrier.metadata.instances = new Float32Array(Math.max(16, 2 ** Math.ceil(Math.log2(length))));
-        carrier.thinInstanceSetBuffer('matrix', buffer, 16, false);
-      }
-      groups.reduce((offset, group) => { buffer.set(group.data, offset); return offset + group.data.length; }, 0);
-      carrier.thinInstanceBufferUpdated('matrix');
-      carrier.thinInstanceCount = length / 16;
-      carrier.metadata.instancesVersion = (carrier.metadata.instancesVersion ?? 0) + 1;
+      const groups = [first, ...more];
+      drawThinInstances(carrier, groups);
       // Its instancers, whose selection outlines it (overlay_outline.cc draws a selected object's instances).
       carrier.metadata.instancers = [...new Set(groups.map((group) => byOb.get(group.instancer)).filter(Boolean))];
       if (shape === 'OBJECT') displayBounds(carrier, bounded.has(source));
-      // Its bounds over the instances drawn, not the buffer's unused zero matrices (NaN bounds cull a carrier of several
-      // materials, whose submeshes are tested against them).
-      carrier.thinInstanceRefreshBoundingInfo(true);
     }
     for (const [key, carrier] of instanced) if (!drawn.has(key)) { carrier.dispose(); instanced.delete(key); }
     drawLightInstances(scene, lights);

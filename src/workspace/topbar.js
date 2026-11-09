@@ -6,6 +6,13 @@ import { propsDialog } from '../editors/interface/props-dialog.js';
 import { listedDemoFiles, openDemoFile, openFromUrl } from './demo-files.js';
 
 const EXPORT_PARITY_NOTE = "Lights materials as Blender's EEVEE does (view vector, second reflection as clearcoat). Off: Babylon's own lighting; Blender's texture nodes still export as one custom block.";
+// Include Source .blend: the module's size where the server states it.
+const sourceBlendNote = async () => {
+  const { BMESH_WASM } = await import('../bmesh/bmesh-module.js');
+  const bytes = Number((await fetch(BMESH_WASM, { method: 'HEAD' }).catch(() => null))?.headers.get('content-length'));
+  const module = bytes ? ` (${(bytes / 1e6).toFixed(1)} MB as this site serves it)` : '';
+  return `Ships the scene's .blend, which makes the source scene downloadable, and Blender's module${module} for controls only Blender evaluates (Geometry Nodes inputs), loaded on their first change. The module's folder is GPL-3.0-or-later. Off: those controls are left out.`;
+};
 const EXPORT_HOST_NOTE = "scene.bin uncompressed, for a host that serves it with Brotli (most CDNs): about half the size there, about four times it elsewhere. Off: gzipped in the file, the same size on any host.";
 
 export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, newProject, recentProjects, openProject, openBlend, resetApp }) {
@@ -54,9 +61,10 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
   // package's geometry is gzipped in the file unless the host compresses it.
   const exportAs = async (format, title) => {
     const fields = [{ name: 'eeveeParity', label: 'EEVEE Parity', value: false, note: EXPORT_PARITY_NOTE }];
-    if (format !== 'babylon') fields.push({ name: 'hostCompression', label: 'Host Compresses Geometry', value: false, note: EXPORT_HOST_NOTE });
+    if (format !== 'babylon') fields.push({ name: 'hostCompression', label: 'Host Compresses Geometry', value: false, note: EXPORT_HOST_NOTE },
+      { name: 'sourceBlend', label: 'Include Source .blend', value: false, note: await sourceBlendNote() });
     const options = await propsDialog({ title, confirm: 'Export', fields });
-    if (options) send('export', { format, eeveeParity: options.eeveeParity, hostCompression: !!options.hostCompression });
+    if (options) send('export', { format, eeveeParity: options.eeveeParity, hostCompression: !!options.hostCompression, sourceBlend: !!options.sourceBlend });
   };
   const operators = {
     'wm.read_homefile': { keys: () => 'Ctrl N', run: ({ app_template: name = '' }) => (name ? openExample(examples.find((e) => e.title === name)) : click('new-project')()) },

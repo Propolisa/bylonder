@@ -13,6 +13,7 @@ import { createSceneBin } from './scene-bin.js';
 import { imageFiles } from './image-files.js';
 import { exportCompositor } from './compositor-export.js';
 import { exportDependencies } from './dependency-export.js';
+import { usesBlender } from './runtime-files.js';
 import { idStruct } from '../python/bpy_rna.js';
 import { displayExponent } from '../render/view-settings.js';
 import { LOG_SIZE, STOPS } from '../render/display-lut.js';
@@ -136,20 +137,21 @@ async function displaySettings(world, bin, composites) {
 
 // The package's files but the runtime's: scene.js, scene.d.ts, scene.bin and images/. With `live`, objects whose
 // modifiers are all Blender's keep them live through the modifier kernels polyfill, which createScene loads from
-// `bylonder-modifiers/` next to the module (or its `modifiers` option).
-export async function exportModule(world, { live: keepLive = false, parity = false, hostCompression = false } = {}) {
+// `bylonder-modifiers/` next to the module (or its `modifiers` option). With `sourceBlend`, the scene's .blend too, as
+// scene.blend, and the controls only Blender evaluates, which the page's Blender fallback runs on it.
+export async function exportModule(world, { live: keepLive = false, parity = false, hostCompression = false, sourceBlend = false } = {}) {
   const live = new Map(keepLive ? world.objects.map((node) => [node, world.modifiers.live(node)]).filter(([, stack]) => stack && !stack.modifiers.some(needsOpenVDB)) : []);
   await world.modifiers.settled();
   // The mapped meshes' geometry is read below: their mapping holds until the module is written.
   const mapped = exportRuntimes(world);
   try {
-    return await moduleSource(world, live, mapped, parity, hostCompression);
+    return await moduleSource(world, live, mapped, { parity, hostCompression, sourceBlend });
   } finally {
     mapped.restore();
   }
 }
 
-async function moduleSource(world, live, mapped, parity, hostCompression) {
+async function moduleSource(world, live, mapped, { parity, hostCompression, sourceBlend }) {
   const data = await serializeScene(world, { geometry: false, live, mapped, parity });
   const { scene } = world;
   const worldEntry = await worldMaterial(scene, parity);
@@ -167,7 +169,7 @@ async function moduleSource(world, live, mapped, parity, hostCompression) {
   // off, so materials would encode to display themselves: with the view transform, which displays instead, it stays out
   // unless one of its effects is on.
   if (display) data.renderingPipelines = data.renderingPipelines.filter((p) => !(p._name?.startsWith('__display:') && !PIPELINE_EFFECTS.some((e) => p[e])));
-  const controls = [...exportControls(world, data), ...(composited?.knobs ?? [])], code = sharedCode(data.materials);
+  const controls = [...exportControls(world, data, { blender: sourceBlend }), ...(composited?.knobs ?? [])], code = sharedCode(data.materials);
   const dependencies = exportDependencies(world, controls);
   const parented = [...data.transformNodes, ...data.meshes, ...data.lights, ...data.cameras].filter((e) => e.parentId !== undefined);
   const parse = (name, list, code) => (list?.length ? `  for (const entry of ${name}) ${code};\n` : '');
@@ -183,7 +185,9 @@ async function moduleSource(world, live, mapped, parity, hostCompression) {
   const name = world.sceneSettings.state.name || 'Scene';
   const source = `// ${name}, exported from Bylonder: load(engine) gives it with its controls, createScene(engine, canvas) builds it
 // alone, with Babylon.js ${AbstractEngine.Version}. In a page, map @babylonjs/core to the same version:
-// <script type="importmap">{ "imports": { "@babylonjs/core": "${CDN}" } }</script>
+// <script type="importmap">{ "imports": { "@babylonjs/core": "${CDN}" } }</script>${usesBlender(json(dependencies)) ? `
+// Includes GPL code: its Blender fallback, bylonder-blender/ (Blender's module, GPL-3.0-or-later, bylonder-blender/
+// LICENSE.md), which loads only when a control only Blender evaluates is set.` : ''}
 import { readBuffers } from './bylonder/buffers.js';
 import { worldColor, worldNodes } from './bylonder/world.js';
 import { BlendScene } from './bylonder/blend-scene.js';${display ? `
@@ -317,5 +321,6 @@ ${parse('REFLECTION_PROBES', data.reflectionProbes, "ReflectionProbe.Parse(entry
 `;
   // An ES module package in Node too (the headless SDK), needing only Babylon.
   const manifest = { name: name.toLowerCase().replace(/[^a-z0-9-]+/g, '-'), type: 'module', main: 'scene.js', types: 'scene.d.ts', peerDependencies: { '@babylonjs/core': AbstractEngine.Version } };
-  return { 'scene.js': source, 'scene.d.ts': controlTypes(controls), 'scene.bin': bin.bytes(), 'package.json': `${JSON.stringify(manifest, null, 2)}\n`, ...images };
+  return { 'scene.js': source, 'scene.d.ts': controlTypes(controls), 'scene.bin': bin.bytes(), 'package.json': `${JSON.stringify(manifest, null, 2)}\n`, ...images,
+    ...(sourceBlend && world.mainSync && { 'scene.blend': world.mainSync.blender.writeBlend() }) };
 }

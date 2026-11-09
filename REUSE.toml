@@ -130,6 +130,14 @@ precedence = "override"
 SPDX-FileCopyrightText = ["Blender Authors", "2026 Chris Stanley"]
 SPDX-License-Identifier = "GPL-3.0-or-later"
 
+# An exported page's Blender fallback, bundled with Blender's ported and compiled code: shipped with the module in a
+# package's bylonder-blender/, under the module's license.
+[[annotations]]
+path = ["src/io_scene_babylon/blender-fallback.bundle.js", "src/io_scene_babylon/blender-fallback.LICENSE.md"]
+precedence = "override"
+SPDX-FileCopyrightText = ["Blender Authors", "Jacques de Hooge and the Transcrypt contributors", "2026 Chris Stanley"]
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
 # Patches to Apache-2.0 files: Blender's glTF add-on, OpenImageIO.
 [[annotations]]
 path = ["tools/blender-port/wasm/patches/gltf_ctypes.patch", "tools/blender-port/wasm/patches/deps/openimageio-wasi.patch"]
