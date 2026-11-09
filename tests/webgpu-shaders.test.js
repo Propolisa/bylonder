@@ -4,9 +4,9 @@
 // drawing hair, lit by an area light, and a shader of the user's naming what WGSL reserves; and every converted GLSL
 // shader keeps GLSL's freedom to take derivatives in any control flow.
 import assert from 'node:assert/strict';
-import { Scene, FreeCamera, Vector3, MeshBuilder, PBRMaterial, RectAreaLight, EffectWrapper, ShaderMaterial, WebGPUEngine } from '@babylonjs/core';
+import { Scene, FreeCamera, Vector3, MeshBuilder, PBRMaterial, RectAreaLight, EffectWrapper, ShaderMaterial } from '@babylonjs/core';
 import '@babylonjs/core/Shaders/postprocess.vertex.js';
-import { compilersPresent, createCompiler, WebGPUShaderEngine } from './webgpu-shaders.js';
+import { compilersPresent, createCompilers, WebGPUShaderEngine } from './webgpu-shaders.js';
 import { createGridOverlay } from '../src/draw/overlay-grid.js';
 import { INTEGRATION, RESOLVE, scatterShader } from '../src/draw/volume-shaders.js';
 import { engineGLSL } from '../src/nodes/blender/glsl.js';
@@ -19,7 +19,7 @@ if (!compilersPresent()) {
   console.log('WebGPU shaders: skipped, no public/webgpu compilers (npm run dev or npm run build fetches them)');
   process.exit(0);
 }
-const engine = new WebGPUShaderEngine(await createCompiler());
+const engine = new WebGPUShaderEngine(await createCompilers());
 const scene = new Scene(engine);
 new FreeCamera('camera', new Vector3(0, 2, -5), scene);
 new RectAreaLight('area', new Vector3(0, 2, 0), 1, 1, scene);
@@ -84,13 +84,13 @@ const effect = Object.values(engine._compiledEffects).find((e) => e.getUniformNa
 assert.ok(effect?.getSamplers().includes('ref') && effect.getAttributesNames().includes('from'), 'bound by the names it was given');
 
 // Every converted GLSL shader's WGSL allows derivatives in any control flow (WGSL's derivative_uniformity diagnostic
-// off), as GLSL does; WGSL of Babylon's own keeps its analysis.
-const flags = [];
-const descriptor = (shaderLanguage) => ReportingWebGPUEngine.prototype._createPipelineStageDescriptor.call(
-  Object.assign(Object.create(ReportingWebGPUEngine.prototype), { _tintWASM: { convertSpirV2WGSL: (code, off) => (flags.push(off), code) }, _device: { createShaderModule: (d) => d } }),
-  'vertex', 'fragment', shaderLanguage, false, false);
-descriptor(0);
-assert.deepEqual(flags, [true, true], 'GLSL: off');
-assert.equal(descriptor(1).fragmentStage.module.code, 'fragment', "WGSL: Babylon's as it is");
-assert.ok(WebGPUEngine.prototype._createPipelineStageDescriptor, "Babylon's engine compiles its pipelines' stages there");
+// off), as GLSL does.
+assert.ok(engine.results.every(({ wgsl: { vertex, fragment } }) => [vertex, fragment].every((code) => code.startsWith('diagnostic(off, derivative_uniformity);'))), 'uniformity off');
+// An effect built from source names its pipeline context (and so its GPU uniform buffer's label) by a hash of its key,
+// not the key's whole GLSL; a short name stays.
+const context = ReportingWebGPUEngine.prototype.createPipelineContext.call(engine, engine._getShaderProcessingContext(0, false));
+context._name = `${'precision highp float;'.repeat(400)}+fragment`;
+assert.match(context._name, /^effect-[0-9a-f]{8}$/, 'a hash of a long key');
+context._name = 'pbr';
+assert.equal(context._name, 'pbr', 'a short name as it is');
 console.log(`WebGPU shaders: ${engine.results.length} effects convert to WGSL that WebGPU accepts`);

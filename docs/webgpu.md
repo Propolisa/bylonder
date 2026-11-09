@@ -11,9 +11,10 @@ Babylon's WebGPU engine (`WebGPUEngine`) from the next start; it draws as WebGL 
 - WebGPU asks the adapter for every feature it offers and its highest limits (`enableAllFeatures`,
   `setMaximumLimits`) and logs what the device was granted.
 - Without WebGPU (no `navigator.gpu`, no adapter, a device request that fails) the app draws with WebGL 2 and logs why.
-- Babylon compiles GLSL to WGSL with glslang and Tint (twgsl). The app serves both from `webgpu/`
-  (`scripts/webgpu-compilers.mjs`, run by `npm run build` and `npm run dev`: the files at the installed Babylon version,
-  pinned by sha256), so WebGPU works offline as WebGL 2 does.
+- GLSL converts to WGSL with Babylon's builds of glslang and Tint (twgsl), in a worker (`src/render/wgsl-worker.js`,
+  `glsl-to-wgsl.js`), off the page's thread; stages of the same WGSL share one shader module. The app serves both
+  compilers from `webgpu/` (`scripts/webgpu-compilers.mjs`, run by `npm run build` and `npm run dev`: the files at the
+  installed Babylon version, pinned by sha256), so WebGPU works offline as WebGL 2 does.
 
 ## One shader source
 
@@ -76,5 +77,6 @@ feature still runs its WebGL 2 version on WebGPU.
 ## Limits
 
 - Grease Pencil's Fill tool renders on a WebGL 2 engine of its own beside WebGPU.
-- A file's first open converts its shaders from GLSL to WGSL on the main thread, so a file of many node materials
-  takes longer to settle than on WebGL 2 (Gaku: about three minutes in Rendered).
+- A file of many node materials takes longer to settle than on WebGL 2 (Gaku: Material Preview and Rendered each
+  about 75 s in Chrome), and the browser's shader module creation can hold the page for seconds, longest for a light's
+  soft cascaded shadows (PCSS).

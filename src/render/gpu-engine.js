@@ -3,8 +3,9 @@
 // preference keeps in the browser's storage. A `gpu` URL parameter on the app overrides it (the browser tests'
 // E2E_ENGINE). WebGPU falls back to WebGL 2 where the browser has no adapter.
 import { Engine, PBRBaseMaterial, WebGPUEngine } from '@babylonjs/core';
+import { WebGPUPipelineContext } from '@babylonjs/core/Engines/WebGPU/webgpuPipelineContext.js';
 import { deriveDepthMetrics } from './depth-metric-varyings.js';
-import { wgslNames } from './wgsl-names.js';
+import { stageSource } from './glsl-to-wgsl.js';
 
 const KEY = 'bylonder-gpu-backend';
 // Babylon's GLSL to WGSL compilers, served by the app (scripts/webgpu-compilers.mjs).
@@ -29,18 +30,56 @@ export class ReportingWebGPUEngine extends WebGPUEngine {
     return super.createEffect(baseName, options, ...args);
   }
 
-  // Converted GLSL keeps GLSL's rules: identifiers WGSL reserves (wgsl-names.js), renamed once Babylon has bound every
-  // input by name, and derivatives and implicit-level samples in any control flow (Babylon's own switch for a shader,
-  // DISABLE_UNIFORMITY_ANALYSIS, which writes WGSL's diagnostic(off, derivative_uniformity)).
-  _compileRawShaderToSpirV(source, type) { return super._compileRawShaderToSpirV(wgslNames(source), type); }
-  _createPipelineStageDescriptor(vertex, fragment, shaderLanguage, ...uniformity) {
-    return super._createPipelineStageDescriptor(vertex, fragment, shaderLanguage, ...(shaderLanguage === 0 ? [true, true] : uniformity));
+  // GLSL converts to WGSL in a worker (glsl-to-wgsl.js, wgsl-worker.js), off the page's thread. The browser makes a
+  // shader module from its WGSL on the page's thread: stages with the same WGSL share one module.
+  async _preparePipelineContextAsync(context, vertex, fragment, raw, rawVertex, rawFragment, rebind, defines, ...rest) {
+    try {
+      if (context.shaderProcessingContext.shaderLanguage !== 0) return await super._preparePipelineContextAsync(context, vertex, fragment, raw, rawVertex, rawFragment, rebind, defines, ...rest);
+      context.sources = { vertex, fragment, rawVertex, rawFragment };
+      const stage = async (code, kind) => ({ module: this._shaderModule(await convert(stageSource(code, defines, raw), kind), kind), entryPoint: 'main' });
+      const [vertexStage, fragmentStage] = await Promise.all([stage(vertex, 'vertex'), stage(fragment, 'fragment')]);
+      context.stages = { vertexStage, fragmentStage };
+      rest.at(-1)();
+    } catch (error) { Object.values(this._compiledEffects).find((effect) => effect._pipelineContext === context)?._processCompilationErrors(error); }
   }
 
-  async _preparePipelineContextAsync(context, ...args) {
-    try { return await super._preparePipelineContextAsync(context, ...args); }
-    catch (error) { Object.values(this._compiledEffects).find((effect) => effect._pipelineContext === context)?._processCompilationErrors(error); }
+  createPipelineContext(context) { return new ShortNamedPipelineContext(context, this); }
+
+  _shaderModule(code, label) {
+    this._modules ??= new Map();
+    if (!this._modules.has(code)) this._modules.set(code, this._device.createShaderModule({ label, code }));
+    return this._modules.get(code);
   }
+}
+
+// An effect's pipeline context names its uniform buffer after the effect's key, which for a material built from source
+// (a node material) is its whole GLSL: the GPU buffer's label, copied at every creation. It takes a hash of it instead.
+class ShortNamedPipelineContext extends WebGPUPipelineContext {
+  get _name() { return this.shortName; }
+  set _name(name) { this.shortName = name.length > 64 ? `effect-${fnv1a(name)}` : name; }
+}
+const fnv1a = (text) => {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) hash = Math.imul(hash ^ text.charCodeAt(i), 0x01000193);
+  return (hash >>> 0).toString(16).padStart(8, '0');
+};
+
+let worker = null, next = 0;
+const pending = new Map();
+// A GLSL stage's WGSL, from the worker.
+function convert(source, stage) {
+  if (!worker) {
+    worker = new Worker(new URL('./wgsl-worker.js', import.meta.url), { type: 'module' });
+    const files = (name) => ({ js: compiler(name).jsPath, wasm: compiler(name).wasmPath });
+    worker.postMessage({ init: { glslang: files('glslang'), twgsl: files('twgsl') } });
+    worker.onmessage = ({ data: { id, wgsl, error } }) => {
+      const { resolve, reject } = pending.get(id);
+      pending.delete(id);
+      if (error === undefined) resolve(wgsl); else reject(Error(error));
+    };
+  }
+  const id = next++;
+  return new Promise((resolve, reject) => { pending.set(id, { resolve, reject }); worker.postMessage({ id, source, stage }); });
 }
 
 // Babylon's pipeline cache creates its pipelines in one method, with no hook; this instance's is wrapped in error scopes.

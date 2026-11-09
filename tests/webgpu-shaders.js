@@ -1,7 +1,7 @@
 // Shaders as Babylon's WebGPU engine compiles them, without a GPU: an engine that processes an effect's GLSL with
 // Babylon's WebGPU shader processor and compiles it with the glslang and Tint (twgsl) builds the app serves
-// (public/webgpu, scripts/webgpu-compilers.mjs) after the app's engine renames its WGSL-reserved names
-// (src/render/wgsl-names.js), recording each effect's WGSL or why it has none.
+// (public/webgpu, scripts/webgpu-compilers.mjs) through the app's own conversion (src/render/glsl-to-wgsl.js, which its
+// worker runs), recording each effect's WGSL or why it has none.
 import { readFileSync, existsSync } from 'node:fs';
 import vm from 'node:vm';
 import { NullEngine } from '@babylonjs/core';
@@ -10,7 +10,7 @@ import { WebGPUShaderProcessorWGSL } from '@babylonjs/core/Engines/WebGPU/webgpu
 import { WebGPUShaderProcessingContext } from '@babylonjs/core/Engines/WebGPU/webgpuShaderProcessingContext.js';
 import { WebGPUPipelineContext } from '@babylonjs/core/Engines/WebGPU/webgpuPipelineContext.js';
 import { ShaderCodeInliner } from '@babylonjs/core/Engines/Processors/shaderCodeInliner.js';
-import { wgslNames } from '../src/render/wgsl-names.js';
+import { glslToWGSL, stageSource } from '../src/render/glsl-to-wgsl.js';
 
 const dir = new URL('../public/webgpu/', import.meta.url);
 export const compilersPresent = () => existsSync(new URL('glslang.wasm', dir)) && existsSync(new URL('twgsl.wasm', dir));
@@ -32,21 +32,28 @@ function boot(name) {
   });
 }
 
-// GLSL as Babylon's WebGPU engine hands it to glslang to WGSL, or throws with glslang's log.
-export async function createCompiler() {
+// The compilers as the app's worker uses them (glsl-to-wgsl.js): glslang.compileGLSL throws with glslang's log.
+export async function createCompilers() {
   const glslang = (await boot('glslang')).module, twgsl = (await boot('twgsl')).module;
   let wgsl = '';
   twgsl._return_string_callback = (data, length) => { wgsl = new TextDecoder().decode(twgsl.HEAPU8.subarray(data, data + length)); };
-  return (source, stage) => {
-    glslang.log.length = 0;
-    let spirv;
-    try { spirv = glslang.compileGLSL(source, stage, false); } catch { throw Error(glslang.log.join('\n')); }
-    const at = twgsl._malloc(spirv.byteLength);
-    twgsl.HEAPU32.set(spirv, at / 4);
-    wgsl = '';
-    twgsl._spirv_to_wgsl(at, spirv.byteLength);
-    twgsl._free(at);
-    return wgsl;
+  return {
+    glslang: {
+      compileGLSL(source, stage, debug) {
+        glslang.log.length = 0;
+        try { return glslang.compileGLSL(source, stage, debug); } catch { throw Error(glslang.log.join(String.fromCharCode(10))); }
+      },
+    },
+    twgsl: {
+      convertSpirV2WGSL(spirv) {
+        const at = twgsl._malloc(spirv.byteLength);
+        twgsl.HEAPU32.set(spirv, at / 4);
+        wgsl = '';
+        twgsl._spirv_to_wgsl(at, spirv.byteLength);
+        twgsl._free(at);
+        return wgsl;
+      },
+    },
   };
 }
 
@@ -58,9 +65,9 @@ export const WGSL_REJECTS = [
 
 // A NullEngine that processes and compiles effects as Babylon's WebGPU engine does; `results` holds each effect's.
 export class WebGPUShaderEngine extends NullEngine {
-  constructor(compile) {
+  constructor(compilers) {
     super();
-    Object.assign(this, { _isWebGPU: true, _shaderPlatformName: 'WEBGPU', compile, results: [] });
+    Object.assign(this, { _isWebGPU: true, _shaderPlatformName: 'WEBGPU', compilers, results: [] });
     this._features.needShaderCodeInlining = true;
     this._glslProcessor = new WebGPUShaderProcessorGLSL();
     this._wgslProcessor = new WebGPUShaderProcessorWGSL();
@@ -86,7 +93,7 @@ export class WebGPUShaderEngine extends NullEngine {
     if (context.shaderProcessingContext.shaderLanguage === 0) {
       for (const [stage, code] of [['vertex', vertex], ['fragment', fragment]]) {
         try {
-          const wgsl = this.compile(wgslNames(`#version 450\n${raw ? '' : `${defines}\n`}${code}`), stage);
+          const wgsl = glslToWGSL(this.compilers, stageSource(code, defines, raw), stage);
           result.wgsl[stage] = wgsl;
           for (const [pattern, why] of WGSL_REJECTS) if (pattern.test(wgsl)) result.errors.push(`${stage}: ${why}`);
         } catch (error) { result.errors.push(`${stage}: ${error.message.split('\n').filter((line) => /ERROR/.test(line)).slice(0, 3).join(' ')}`); }
