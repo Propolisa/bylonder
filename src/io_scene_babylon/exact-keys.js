@@ -4,6 +4,7 @@
 // they reproduce what Main evaluated at every frame of the range (`samples`): anything else that moves the value
 // (drivers, constraints, NLA, F-modifiers but a plain Cycles, another extrapolation) leaves the samples in place.
 import { Animation, AnimationKeyInterpolation } from '@babylonjs/core';
+import { actionFCurves } from './ir-export.js';
 
 const THIRD = 1e-4, TOLERANCE = 1e-5;
 
@@ -67,4 +68,33 @@ export function exactAnimation(name, property, keys, samples, { frameStart, fps 
     if (samples.every((value, i) => Math.abs(animation.evaluate(frameStart + i) - value) <= TOLERANCE * Math.max(1, Math.abs(value)))) return animation;
   }
   return null;
+}
+
+// A channel's keys (`data_path`, `array_index`) as an ID's NLA plays them where Babylon can: one track holding it, its
+// strips action clips that replace at full influence (no blend in or out, no animated influence or time, not reversed,
+// a whole number of repeats), and no action on top setting it. Each strip's keys are moved to its frames, scaled and
+// repeated; null otherwise. exactAnimation checks them against Main's samples.
+export function stripKeys(animation, dataPath, index) {
+  if (!animation?.use_nla || animation.use_tweak_mode || animation.nla_tracks.length === 0) return null;
+  const sets = (owner) => actionFCurves(owner).find((fc) => fc.data_path === dataPath && fc.array_index === index && !fc.mute);
+  if (animation.action && sets(animation)) return null;
+  const tracks = [...animation.nla_tracks].filter((track) => !track.mute && [...track.strips].some((strip) => !strip.mute && strip.action && sets(strip)));
+  if (tracks.length !== 1 || [...animation.nla_tracks].some((track) => track.is_solo)) return null;
+  const keys = [];
+  for (const strip of tracks[0].strips) {
+    const fc = !strip.mute && sets(strip);
+    if (!fc || strip.type !== 'CLIP' || strip.blend_type !== 'REPLACE' || strip.blend_in || strip.blend_out || strip.use_animated_influence || strip.use_animated_time
+      || strip.use_reverse || strip.repeat !== Math.round(strip.repeat) || [...fc.modifiers].length) return null;
+    const length = strip.action_frame_end - strip.action_frame_start, scale = Math.abs(strip.scale) || 1;
+    const own = [...fc.keyframe_points].filter((k) => k.co[0] >= strip.action_frame_start && k.co[0] <= strip.action_frame_end);
+    const at = (x, n) => strip.frame_start + (x - strip.action_frame_start + n * length) * scale;
+    for (let n = 0; n < strip.repeat; n++) for (const k of own) {
+      const key = { frame: at(k.co[0], n), value: k.co[1], interpolation: k.interpolation, handle_left: [at(k.handle_left[0], n), k.handle_left[1]], handle_right: [at(k.handle_right[0], n), k.handle_right[1]] };
+      // A repeat that starts where the last ended shares its key.
+      const last = keys.at(-1);
+      if (last?.frame === key.frame) Object.assign(last, { interpolation: key.interpolation, handle_right: key.handle_right });
+      else keys.push(key);
+    }
+  }
+  return keys.length ? keys : null;
 }

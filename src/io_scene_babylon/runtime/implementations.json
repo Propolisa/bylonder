@@ -15,6 +15,7 @@
       { "implementation": "sampled per frame from Main (Bake Animation, or what the unit does not reproduce)", "license": "data", "fidelity": "baked" }
     ],
     "nla": [
+      { "implementation": "Babylon AnimationGroup, an object transform's strip keys moved, scaled and repeated where one track replaces at full influence and the keys are the F-curve", "license": "Apache-2.0", "fidelity": "exact" },
       { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
     ],
     "driver:SINGLE_PROP": [

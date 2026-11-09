@@ -3,13 +3,14 @@
 // with exact keys where an F-curve is all that moves a value, the clean-room F-Curve unit where Babylon cannot play it
 // (rotations, easings), and samples elsewhere (drivers, NLA, constraints), or samples wherever Babylon cannot play it
 // with Bake Animation. A location eased with Elastic runs live. Meshes deformed by shape keys and armatures are drawn by
-// Babylon's morph targets and skeletons where Main evaluates them.
+// Babylon's morph targets and skeletons where Main evaluates them. The NLA example with its Hop and Turn tracks muted,
+// its Slide strip alone moving the box, plays that strip's keys as Babylon's.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { NullEngine } from '@babylonjs/core';
 import { babylonMatrix } from '../src/blenkernel/main-view.js';
-import { idStruct } from '../src/python/bpy_rna.js';
+import { blendData, idStruct } from '../src/python/bpy_rna.js';
 import { actionFCurves } from '../src/io_scene_babylon/ir-export.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
 import { openExample } from './open-example.js';
@@ -22,8 +23,9 @@ const EXAMPLES = { 'drivers-and-graph-editor': [1, 7, 13, 30, 61, 96], nla: [1, 
 // with Elastic.
 const ELASTIC = 'compositor';
 
-async function check(id, { bake = false, elastic = false } = {}) {
+async function check(id, { bake = false, elastic = false, slide = false } = {}) {
   const { world, scene, sync } = openExample(id);
+  if (slide) for (const track of blendData().objects.get('Box').animation_data.nla_tracks) track.mute = track.name !== 'Slide';
   sync.view();
   let eased;
   if (elastic) {
@@ -37,6 +39,10 @@ async function check(id, { bake = false, elastic = false } = {}) {
   if (bake) assert.equal(live.length, 0, `${id}: with Bake Animation, no F-Curve runs in the page`);
   // Material inputs the Compositor example animates (an ad's mapping, lights' emission) run on the unit too.
   if (id === 'compositor' && !bake) assert.ok(live.filter(([, e]) => e.outputs.value.property.startsWith('materials[')).length >= 3, `${id}: material inputs run live`);
+  if (slide) {
+    const box = JSON.parse(/const ANIMATION_GROUPS = (.*);\n/.exec(files['scene.js'])[1])[0].targetedAnimations.filter((t) => t.targetId === 'Box').map((t) => t.animation.property);
+    assert.ok(box.length && box.every((p) => /^position\.[xyz]$/.test(p)), `the Slide strip's location plays as Babylon's keys, not sampled (${box})`);
+  }
   if (eased) assert.ok(live.some(([key, e]) => key === eased && 'buffer' in e.inputs.curve.keyframes), `${eased}: the Elastic curve runs live, its keys in scene.bin`);
   // Materials of one node structure share one code body; their values are tunable inputs.
   const code = JSON.parse(/const CODE = (.*);/.exec(files['scene.js'])[1]), materials = JSON.parse(/const MATERIALS = (.*);/.exec(files['scene.js'])[1]).filter((m) => m.customType === 'BABYLON.NodeMaterial');
@@ -74,15 +80,15 @@ async function check(id, { bake = false, elastic = false } = {}) {
     group.stop();
   }
   const keys = group.targetedAnimations.map((t) => t.animation.getKeys().length);
-  console.log(`${id}${bake ? ' (Bake Animation)' : elastic ? ' (Elastic)' : ''}: ${meshes.length} meshes and ${deformed.length} deformed at ${EXAMPLES[id].length} frames as Main; ${keys.length} tracks, ${keys.reduce((a, b) => a + b, 0)} keys, ${live.length} F-Curves run live`);
+  console.log(`${id}${bake ? ' (Bake Animation)' : elastic ? ' (Elastic)' : slide ? ' (Slide)' : ''}: ${meshes.length} meshes and ${deformed.length} deformed at ${EXAMPLES[id].length} frames as Main; ${keys.length} tracks, ${keys.reduce((a, b) => a + b, 0)} keys, ${live.length} F-Curves run live`);
   blend.dispose();
   written.remove();
 }
 
 const [example, mode] = process.argv.slice(2);
-if (example) await check(example, { bake: mode === 'bake', elastic: mode === 'elastic' });
+if (example) await check(example, { bake: mode === 'bake', elastic: mode === 'elastic', slide: mode === 'slide' });
 else {
-  const runs = [...Object.keys(EXAMPLES).map((id) => [id]), [ELASTIC, 'elastic'], ['drivers-and-graph-editor', 'bake']];
+  const runs = [...Object.keys(EXAMPLES).map((id) => [id]), [ELASTIC, 'elastic'], ['nla', 'slide'], ['drivers-and-graph-editor', 'bake']];
   for (const args of runs) process.stdout.write(execFileSync(process.execPath, [fileURLToPath(import.meta.url), ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] }).split('\n').filter((l) => !l.startsWith('BJS')).join('\n'));
   console.log('Export animation: meshes play where Main evaluates them at each checked frame, with exact keys where the F-curve is the motion and F-Curves Babylon cannot play run live');
 }

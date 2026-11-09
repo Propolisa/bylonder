@@ -7,7 +7,7 @@ import { deleted, nodeId } from '../editors/object/identity.js';
 import { exportRuntimes } from '../runtimes/runtimes.js';
 import { imageFile } from '../imbuf/image-textures.js';
 import { exportNodeMaterial } from './node-material-export.js';
-import { exactAnimation } from './exact-keys.js';
+import { exactAnimation, stripKeys } from './exact-keys.js';
 import { liveTransform } from './live-curves.js';
 import { report } from '../windowmanager/wm-reports.js';
 import { channelKey } from './modifiers-export.js';
@@ -148,10 +148,19 @@ function animatedChannels(world, content, live) {
   return [...animation.channels].filter(([ref, channel]) => channel.available() && !channel.transform && animationTarget(channel, content, live)
     && !!idStruct(animation.ownerOf(ref))?.animation_data).map(([ref]) => ref);
 }
-// The keys of each transform channel of objects (`position.x`), as their actions hold them; read while the objects'
-// metadata, which names their channels, is theirs.
+// The keys of each transform channel of objects (`position.x`), as their actions hold them, or as their NLA strips play
+// them (exact-keys.js stripKeys); read while the objects' metadata, which names their channels, is theirs.
 const TRANSFORM_PATHS = ['position', 'scaling'].flatMap((key) => ['x', 'y', 'z'].map((c) => `${key}.${c}`));
-const transformKeys = (world, nodes) => new Map(nodes.map((node) => [node, Object.fromEntries(TRANSFORM_PATHS.map((path) => [path, world.animation.track(world.animation.ref('object:' + nodeId(node), path))?.keys]))]));
+// Blender's property and index of each, Babylon's y being Blender's z.
+const BLENDER_CHANNELS = { position: 'location', scaling: 'scale', x: 0, y: 2, z: 1 };
+function transformKeys(world, nodes) {
+  const keysOf = (node, path) => {
+    const animation = idStruct(world.mainSync.objectOf(node)).animation_data, [key, c] = path.split('.');
+    if (animation?.nla_tracks.length) return stripKeys(animation, BLENDER_CHANNELS[key], BLENDER_CHANNELS[c]);
+    return world.animation.track(world.animation.ref('object:' + nodeId(node), path))?.keys;
+  };
+  return new Map(nodes.map((node) => [node, Object.fromEntries(TRANSFORM_PATHS.map((path) => [path, keysOf(node, path)]))]));
+}
 // The animations of the transforms that change over the range: a position or scale whose changing components are their
 // F-curves exactly (exact-keys.js) as one float animation each; else, with `runs` (live-curves.js), F-Curves the page
 // runs, added to `curves`; else every transform sampled at each frame, named in `gaps` when the page could have run it.

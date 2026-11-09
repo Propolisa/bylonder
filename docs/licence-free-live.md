@@ -49,10 +49,11 @@ modifier run in one `modifiers.wasm` call, each Geometry Nodes modifier on Bylon
 kernels (`geometry-nodes.wasm`), leaves F-Curves Babylon plays exactly to its AnimationGroup (`native`), and runs an
 object's transform F-Curves it cannot (rotations, easings, other extrapolations, Cycles it cannot repeat) on the
 clean-room F-Curve unit (`fcurve`), their keys in `scene.bin`, unless the export's Bake Animation option samples them.
-Pose bones run on `fcurve` the same way where their F-Curves alone give the pose. F-modifiers but Cycles, NLA, drivers
-on transforms and constraints (and IK) still leave a transform or a bone's pose sampled, each named in the Info editor.
-No package ships
-`scene.blend`. Until the kernels have a module of their own, `geometry-nodes.wasm` is the scene module
+Pose bones run on `fcurve` the same way where their F-Curves alone give the pose. An object's NLA track that replaces
+at full influence plays as Babylon's keys, its strips' keys moved, scaled and repeated; other NLA (blend in and out,
+other blend modes, several tracks) waits for a clean-room NLA unit. F-modifiers but Cycles, other NLA, drivers on
+transforms and constraints (and IK) still leave a transform or a bone's pose sampled, each named in the Info editor.
+No package ships `scene.blend`. Until the kernels have a module of their own, `geometry-nodes.wasm` is the scene module
 (`runtime-files.js` `GEOMETRY_NODES_KERNELS`), the page calling only its per-node entry points. Known limits: where a
 unit takes over a modifier mid-stack, the mesh passed across carries positions, topology and UVs only (the module's
 mesh input takes no more). Geometry Nodes in the page:
