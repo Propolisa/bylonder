@@ -70,6 +70,20 @@ const SCENARIOS = {
       'each with its matrices and its source geometry');
     assert.match(await exportModule(world), /thinInstanceSetBuffer/, 'the JavaScript export writes them too');
   },
+  async driver() {
+  // The Steam Engine's crosshead, moved by a driver only, slides in the export as it does in Blender.
+    const { world } = open('drivers-and-graph-editor');
+    const json = await serializeScene(world);
+    const slide = animated(json, 'Crosshead', 'position');
+    assert.ok(slide && range(slide.animation.keys, 0) > 0.5, 'the driven crosshead slides');
+  },
+  async nla() {
+  // The NLA example has no active action, only strips: the box's motion is exported as Blender evaluates them.
+    const { world } = open('nla');
+    const json = await serializeScene(world);
+    const moves = animated(json, 'Box', 'position');
+    assert.ok(moves && Math.max(range(moves.animation.keys, 0), range(moves.animation.keys, 1), range(moves.animation.keys, 2)) > 0.5, 'the strips move the box');
+  },
 };
 
 const scenario = process.argv[2];

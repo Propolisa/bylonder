@@ -1,6 +1,7 @@
 // File > Export > Babylon (.babylon): the scene as Babylon's SceneSerializer writes it, from the evaluated scene, as
 // Blender's glTF exporter exports the evaluated depsgraph (docs/blender-boundary.md, Export for Babylon).
-import { Animation, AnimationKeyInterpolation, Quaternion, SceneSerializer, Texture, VertexBuffer } from '@babylonjs/core';
+import { Animation, AnimationKeyInterpolation, Quaternion, SceneSerializer, Texture, Vector3, VertexBuffer } from '@babylonjs/core';
+import { idStruct } from '../python/bpy_rna.js';
 import { deleted, nodeId } from '../editors/object/identity.js';
 import { exportRuntimes } from '../runtimes/runtimes.js';
 import { straightImageData } from '../imbuf/image-textures.js';
@@ -88,6 +89,42 @@ async function environment(json, scene) {
   if (scene.getMeshByName(WORLD_SKYBOX)) Object.assign(json, { createDefaultSkybox: true, isPBR: true });
 }
 
+// An object Main holds is drawn at the world matrix Blender evaluated (its drivers, constraints, NLA and parents;
+// main-view.js), which its own transform may not be: the export writes that matrix as its transform, relative to its
+// parent's, as Blender's glTF exporter writes the evaluated depsgraph.
+const placed = (world, nodes) => (world.mainSync ? [...nodes].filter((node) => node.freezeWorldMatrix && world.mainSync.objectOf(node)) : []);
+function evaluatedTransform(sync, node) {
+  const matrix = sync.worldMatrix(node), parent = node.parent && (sync.worldMatrix(node.parent) ?? node.parent.computeWorldMatrix(true));
+  const position = new Vector3(), rotationQuaternion = new Quaternion(), scaling = new Vector3();
+  (parent ? matrix.multiply(parent.clone().invert()) : matrix).decompose(scaling, rotationQuaternion, position);
+  return { position, rotationQuaternion, scaling };
+}
+const TRANSFORM = ['position', 'rotation', 'rotationQuaternion', 'scaling'];
+// Each placed object's evaluated transform at every frame of the scene range, as Blender's animation system evaluates
+// the frames (anything animates an object: its own animation data or constraints, or its parent's); the frame shown is
+// evaluated again after.
+function transformsByFrame(world, nodes) {
+  const sync = world.mainSync, { frameStart, frameEnd } = world.animation.time.state, current = world.animation.time.frame;
+  const moves = (node) => { const ob = idStruct(sync.objectOf(node)); return !!ob.animation_data || ob.constraints.length > 0; };
+  if (frameEnd <= frameStart || !nodes.some(moves)) return null;
+  const frames = new Map(nodes.map((node) => [node, []]));
+  for (let frame = frameStart; frame <= frameEnd; frame++) {
+    sync.frameChanged(frame);
+    for (const node of nodes) frames.get(node).push(evaluatedTransform(sync, node));
+  }
+  sync.frameChanged(current);
+  return frames;
+}
+// The animations of the transforms that change over the range.
+function transformAnimations(name, frames, { frameStart, fps }) {
+  const changes = (key) => frames.some((t) => !t[key].equalsWithEpsilon(frames[0][key], 1e-6));
+  return [['position', Animation.ANIMATIONTYPE_VECTOR3], ['rotationQuaternion', Animation.ANIMATIONTYPE_QUATERNION], ['scaling', Animation.ANIMATIONTYPE_VECTOR3]].filter(([key]) => changes(key)).map(([key, type]) => {
+    const animation = new Animation(name + ' ' + key, key, fps, type, Animation.ANIMATIONLOOPMODE_CYCLE);
+    animation.setKeys(frames.map((t, i) => ({ frame: frameStart + i, value: t[key] })));
+    return animation;
+  });
+}
+
 const ANIMATION_TYPES = { Vector2: Animation.ANIMATIONTYPE_VECTOR2, Vector3: Animation.ANIMATIONTYPE_VECTOR3, Color3: Animation.ANIMATIONTYPE_COLOR3, Color4: Animation.ANIMATIONTYPE_COLOR4, Quaternion: Animation.ANIMATIONTYPE_QUATERNION };
 const read = (object, path) => path.reduce((value, key) => value?.[key], object);
 
@@ -113,12 +150,12 @@ function animationTarget(channel, content, live) {
 // Each animated channel with a place in the file (animationTarget), sampled at every frame of the scene range, and the
 // runtimes' animations (`mapped`, a skeleton's bones). Channels without one (stores, modifier settings unless they are
 // live, depthOfField) stay out.
-function bakeAnimations(world, samples, content, live, mapped) {
+function bakeAnimations(world, samples, content, live, mapped, transforms) {
   const { fps, frameStart, frameEnd } = world.animation.time.state;
   const tracks = new Map();
   for (const { channel, start, values } of samples) {
     const at = animationTarget(channel, content, live);
-    if (!at) continue;
+    if (!at || (transforms?.has(at.owner) && TRANSFORM.includes(at.path[0]))) continue;
     const key = at.owner.uniqueId + ':' + at.path.join('.');
     if (!tracks.has(key)) tracks.set(key, { ...at, components: [], step: false });
     const track = tracks.get(key);
@@ -127,6 +164,9 @@ function bakeAnimations(world, samples, content, live, mapped) {
     track.components.push({ component: at.component, start, values: values.map((v) => (typeof v === 'boolean' ? +v : v)) });
   }
   const targetedAnimations = mapped.map(({ animation, target }) => ({ animation: animation.serialize(), targetId: target.id }));
+  for (const [node, frames] of transforms ?? []) {
+    for (const animation of transformAnimations(node.name, frames, { frameStart, fps })) targetedAnimations.push({ animation: animation.serialize(), targetId: node.id });
+  }
   for (const { owner, path, value, components, step } of tracks.values()) {
     if (typeof value !== 'number' && !ANIMATION_TYPES[value?.getClassName?.()]) continue;
     const quaternion = path.join('.') === 'rotation' && owner.rotationQuaternion;
@@ -207,6 +247,8 @@ async function serializeMapped(world, { geometry, live, mapped, parity }) {
   const straight = new Map(scene.textures.filter((t) => t instanceof Texture).map((t) => [t, straightImageData(t)]).filter(([, data]) => data));
   // Sampled before the export's flags and metadata are set, which channels read to know they are available.
   const samples = world.animation.sample(), liveIds = live && new Map([...live].map(([node, stack]) => [nodeId(node), [node, stack]]));
+  // Objects' evaluated transforms too, while their metadata, which evaluating a frame reads, is theirs.
+  const objects = placed(world, content.nodes), frames = objects.length ? transformsByFrame(world, objects) : null;
   const restores = [
     setFor(all, 'doNotSerialize', (n) => !content.nodes.has(n)),
     setFor(scene.materials, 'doNotSerialize', (m) => !content.materials.has(m)),
@@ -224,7 +266,7 @@ async function serializeMapped(world, { geometry, live, mapped, parity }) {
   try {
     // The serializer reads the scene synchronously; only texture readbacks finish later.
     pending = SceneSerializer.SerializeAsync(scene);
-    animationGroups = bakeAnimations(world, samples, content, liveIds, mapped);
+    animationGroups = bakeAnimations(world, samples, content, liveIds, mapped, frames);
     activeCameraID = camera?.id;
   } finally {
     restores.forEach((restore) => restore());
