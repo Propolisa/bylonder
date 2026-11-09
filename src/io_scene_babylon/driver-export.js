@@ -37,7 +37,7 @@ function objectData(ob, objects, reads) {
 // The F-Curve that maps a driver's value (driver.js FCurveInput), or null without keys; undefined when it has
 // modifiers the units do not evaluate, or when the units' curve misses Blender's anywhere it is sampled (some
 // Continuous Acceleration curves do, docs/clean-room/impl/RESULTS.md).
-function driverCurve(fc) {
+export function driverCurve(fc) {
   if ([...fc.modifiers].some((m) => m.type !== 'CYCLES')) return undefined;
   if (!fc.keyframe_points.length) return null;
   const curve = curveInput(fc);

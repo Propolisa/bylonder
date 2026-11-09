@@ -2,7 +2,8 @@
 // the node graphs and the computed entities, as plain data for scene.ir.json.
 import { blendData, idStruct, pointerOf } from '../python/bpy_rna.js';
 import { writeGraph } from './ir-graphs.js';
-import { driverEntities } from './driver-export.js';
+import { driverCurve, driverEntities } from './driver-export.js';
+import { packKeys } from './runtime/fcurve-evaluator.js';
 import { geometryNodesEntities, modifierEntities } from './modifiers-export.js';
 import { entityOrder, IR_SCHEMA, IR_VERSION, referencesIn } from './runtime/ir.js';
 
@@ -150,9 +151,25 @@ export function actionFCurves(animation) {
     .filter((bag) => !animation.action_slot || bag.slot?.handle === animation.action_slot.handle).flatMap((bag) => [...bag.fcurves]);
 }
 
-// Each F-Curve of the carried IDs' actions, by name: one of `curves` (live-curves.js) runs on the clean-room unit
-// (`fcurve`), its keys in scene.bin; another Babylon's animation of the node it lands on plays (`native`), its keys
-// being that animation's; else it stays baked.
+// The property an F-Curve sets: its RNA path with its index, else without, else a Geometry Nodes input's.
+function curveTarget(id, fc, properties) {
+  const path = `${id.path}${fc.data_path.startsWith('[') ? '' : '.'}${fc.data_path}`, socket = /^(modifiers\["(?:[^"\\]|\\.)*"\])\["([^"]+)"\]$/.exec(fc.data_path);
+  return [`${path}[${fc.array_index}]`, path, socket && `${id.path}.${socket[1]}.properties.inputs.${socket[2]}.value`].find((p) => p && properties[p]) ?? null;
+}
+
+// A FLOAT property no Babylon binding sets (a custom property, a Geometry Nodes input), whose F-Curve the unit runs
+// as Blender evaluates it and nothing else animates: its F-Curve as the `fcurve` implementation runs it, else null.
+function propertyCurve(animation, fc, property) {
+  if (property?.bind || property?.type !== 'FLOAT' || animation.nla_tracks.length || [...animation.drivers].some((d) => d.data_path === fc.data_path)) return null;
+  const input = driverCurve(fc);
+  if (!input) return null;
+  const { keyframes, ...settings } = input;
+  return { settings, keys: packKeys(keyframes) };
+}
+
+// Each F-Curve of the carried IDs' actions, by name: one of `curves` (live-curves.js) or of a property no Babylon
+// binding sets runs on the clean-room unit (`fcurve`), its keys in scene.bin; another Babylon's animation of the node
+// it lands on plays (`native`), its keys being that animation's; else it stays baked.
 function animationEntities(ids, properties, time, animationGroups, curves, bin) {
   const data = blendData(), entities = {};
   const groupOf = (node) => animationGroups.find((group) => group.targetedAnimations?.some((t) => t.targetId === node))?.name;
@@ -160,12 +177,13 @@ function animationEntities(ids, properties, time, animationGroups, curves, bin) 
   for (const [k, id] of Object.entries(ids)) {
     const collection = COLLECTION_OF.get(k.split(':')[0]), animation = collection && safe(() => data[collection].get(id.name)?.animation_data);
     for (const fc of actionFCurves(animation)) {
-      const name = `${k}/animation/${fc.data_path}[${fc.array_index}]`, target = `${id.path}${fc.data_path.startsWith('[') ? '' : '.'}${fc.data_path}[${fc.array_index}]`;
-      const group = id.node && groupOf(id.node), run = properties[target] && time && live.get(name), native = !run && group !== undefined && !!properties[target];
+      const name = `${k}/animation/${fc.data_path}[${fc.array_index}]`, target = curveTarget(id, fc, properties);
+      const run = target && time && !fc.mute && (live.get(name) ?? propertyCurve(animation, fc, properties[target]));
+      const group = id.node && groupOf(id.node), native = !run && group !== undefined && !!target;
       entities[name] = { type: 'animation:FCURVE', id: k,
         inputs: { action: `actions${key(animation.action.name)}`, data_path: fc.data_path, array_index: fc.array_index, ...(native && { animation: { group, target: id.node } }),
           ...(run && { curve: { ...run.settings, keyframes: { buffer: bin.add(run.keys) } } }), ...(time && { frame: { property: time } }) },
-        outputs: { value: properties[target] ? { property: target } : null }, ...((run || native) && { implementation: run ? 'fcurve' : 'native' }) };
+        outputs: { value: target ? { property: target } : null }, ...((run || native) && { implementation: run ? 'fcurve' : 'native' }) };
     }
   }
   return entities;
