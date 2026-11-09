@@ -5,6 +5,7 @@
 // box around the eye, baked once into a reflection probe, filtered with Babylon's HDRFiltering, which then lights the
 // scene.
 import { Color4, Constants, CubeMapToSphericalPolynomialTools, HDRFiltering, MeshBuilder, ReflectionProbe, RenderTargetTexture } from '@babylonjs/core';
+import { WORLD_CUBE_TYPE } from '../../overrides/webgpu/float-world-cube.js';
 
 /** @typedef {import('@babylonjs/core').Scene} Scene */
 /** @typedef {import('@babylonjs/core').Material} Material */
@@ -15,7 +16,7 @@ import { Color4, Constants, CubeMapToSphericalPolynomialTools, HDRFiltering, Mes
  * @param {number[]} color
  */
 export function worldColor(scene, color) {
-  const texture = new RenderTargetTexture('world', 1, scene, { isCube: true, type: Constants.TEXTURETYPE_FLOAT, generateMipMaps: false, doNotChangeAspectRatio: true });
+  const texture = new RenderTargetTexture('world', 1, scene, { isCube: true, type: WORLD_CUBE_TYPE, generateMipMaps: false, doNotChangeAspectRatio: true });
   Object.assign(texture, { gammaSpace: false, renderList: [], refreshRate: RenderTargetTexture.REFRESHRATE_RENDER_ONCE });
   scene.customRenderTargets.push(texture);
   scene.environmentTexture = texture;

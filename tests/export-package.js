@@ -5,14 +5,15 @@ import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'nod
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { gplFiles, packageRuntime } from '../src/io_scene_babylon/runtime-files.js';
+import { gplFiles, packagedRuntime, packageOverrides, packageRuntime } from '../src/io_scene_babylon/runtime-files.js';
 
 const CORE = JSON.stringify(import.meta.resolve('@babylonjs/core'));
 const src = (path) => readFileSync(new URL(`../src/${path}`, import.meta.url));
 
 export function writePackage(files) {
   const dir = mkdtempSync(join(tmpdir(), 'bylonder-package-'));
-  const all = { ...files, ...Object.fromEntries(packageRuntime(files['scene.js']).map(([path, name]) => [path, src(`io_scene_babylon/runtime/${name}`)])),
+  const all = { ...files, ...Object.fromEntries(packageRuntime(files['scene.js']).map(([path, name]) => [path, packagedRuntime(String(src(`io_scene_babylon/runtime/${name}`)))])),
+    ...Object.fromEntries(packageOverrides().map(([path, from]) => [path, src(from)])),
     ...Object.fromEntries(gplFiles(files['scene.js']).map(([path, from]) => [path, src(from)])) };
   for (const [path, data] of Object.entries(all)) {
     mkdirSync(dirname(join(dir, path)), { recursive: true });

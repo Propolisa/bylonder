@@ -2,6 +2,7 @@ import { Color3, Color4, Constants, Vector3, CubeMapToSphericalPolynomialTools, 
 import { RAY_TYPE, setRayType } from '../../nodes/blender/shader-nodes.js';
 import { createLight, deriveBabylonLight, lightRecord } from '../light/light-home.js';
 import { PrefilteredEXRCubeTexture, StudioLightTexture, firstBand } from './world-sun.js';
+import { WORLD_CUBE_TYPE } from '../../overrides/webgpu/float-world-cube.js';
 
 // Babylon adapter for a World datablock. Babylon has no World object, so a world is pushed into
 // scene.clearColor, environmentTexture/environmentIntensity, a skybox and fog. Nothing else touches these.
@@ -192,7 +193,7 @@ export function createWorldRenderer(scene, { asset = path => path, studioLight }
 // A world color as EEVEE's world probe (eevee_lightprobe_sphere.cc): the world drawn into a cubemap, which surfaces
 // reflect at every roughness and whose spherical harmonics light them diffusely.
 function worldProbe(scene) {
-  const texture = new RenderTargetTexture('__worldProbe', 1, scene, { isCube: true, type: Constants.TEXTURETYPE_FLOAT, generateMipMaps: false, doNotChangeAspectRatio: true });
+  const texture = new RenderTargetTexture('__worldProbe', 1, scene, { isCube: true, type: WORLD_CUBE_TYPE, generateMipMaps: false, doNotChangeAspectRatio: true });
   Object.assign(texture, { gammaSpace: false, renderList: [], refreshRate: RenderTargetTexture.REFRESHRATE_RENDER_ONCE });
   scene.customRenderTargets.push(texture);
   return {

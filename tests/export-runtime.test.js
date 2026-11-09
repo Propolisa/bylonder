@@ -9,7 +9,7 @@ import { tmpdir } from 'node:os';
 import { join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { controlTypes } from '../src/io_scene_babylon/controls-export.js';
-import { BLOCK_FILES, EVALUATOR_FILES, RUNTIME_FILES } from '../src/io_scene_babylon/runtime-files.js';
+import { BLOCK_FILES, EVALUATOR_FILES, OVERRIDE_FILES, RUNTIME_FILES } from '../src/io_scene_babylon/runtime-files.js';
 
 const runtime = fileURLToPath(new URL('../src/io_scene_babylon/runtime/', import.meta.url));
 const tsc = (args) => execFileSync(process.execPath, [fileURLToPath(new URL('../node_modules/typescript/bin/tsc', import.meta.url)), ...args], { encoding: 'utf8' });
@@ -20,7 +20,7 @@ for (const name of sources) {
   assert.doesNotMatch(text, /blender-port|port-override/i, `${name} holds no code derived from Blender`);
   assert.match(text, /SPDX-License-Identifier: MIT OR Apache-2\.0/, `${name} carries its license`);
   for (const [, specifier] of text.matchAll(/(?:import|from)\s*\(?\s*'([^']+)'/g)) {
-    assert.ok(specifier === '@babylonjs/core' || specifier === 'node:fs/promises' || specifier.startsWith('./'), `${name} imports ${specifier}`);
+    assert.ok(specifier === '@babylonjs/core' || specifier === 'node:fs/promises' || specifier.startsWith('./') || specifier.startsWith('../../overrides/'), `${name} imports ${specifier}`);
   }
 }
 // The clean-room driver units (drivers/): MIT OR Apache-2.0, written from Blender's observed behavior only
@@ -36,6 +36,13 @@ for (const name of readdirSync(join(runtime, 'drivers')).filter((n) => n.endsWit
 const blocks = Object.values(BLOCK_FILES).flatMap((name) => [name, name.replace(/\.js$/, '.d.ts')]);
 const files = readdirSync(runtime, { recursive: true }).map((name) => String(name).split(sep).join('/')).filter((name) => name !== 'tsconfig.json' && name !== 'drivers');
 assert.deepEqual(files.sort(), [...RUNTIME_FILES, ...blocks, ...Object.values(EVALUATOR_FILES).flatMap((e) => e.runtime)].sort(), 'every file of runtime/ ships');
+
+// The overrides every package carries (src/overrides/): licensed as the runtime, importing only Babylon.
+for (const name of OVERRIDE_FILES.filter((n) => n.endsWith('.js'))) {
+  const text = readFileSync(new URL(`../src/overrides/${name}`, import.meta.url), 'utf8');
+  assert.match(text, /SPDX-License-Identifier: MIT OR Apache-2.0/, `overrides/${name} carries its license`);
+  for (const [, specifier] of text.matchAll(/(?:import|from)\s*\(?\s*'([^']+)'/g)) assert.equal(specifier, '@babylonjs/core', `overrides/${name} imports ${specifier}`);
+}
 
 // Types: the JSDoc checks, and the declarations are current.
 tsc(['-p', join(runtime, 'tsconfig.json'), '--noEmit']);
