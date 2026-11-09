@@ -35,7 +35,8 @@ body{display:flex;flex-direction:column;height:100dvh}
 .bl-splash-banner{position:relative;aspect-ratio:2/1;background:url(/splash.webp) center/cover}
 .bl-splash-version{position:absolute;right:12px;top:10px;color:#fff;font-size:11px}
 .bl-splash-columns{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px 34px 12px}
-.bl-splash-columns>div{max-height:calc(23px * 9 + 20px);overflow-y:auto}
+/* A list longer than its box darkens at its lower edge until its last rows are reached, as Blender's regions indicate overflow. */
+.bl-splash-columns>div{max-height:min(calc(23px * 15 + 20px),calc(100dvh - 430px));overflow-y:auto;background:linear-gradient(var(--bl-region),var(--bl-region)) bottom/100% 24px no-repeat local,linear-gradient(transparent,color-mix(in srgb,var(--bl-gap) 80%,transparent)) bottom/100% 24px no-repeat scroll}
 .bl-splash-links{margin:0 34px;padding:12px 0 18px;border-top:1px solid #ffffff14}
 .bl-splash h3{margin:0 0 4px;font-size:12px;font-weight:400;color:var(--bl-text-dim)}.bl-splash h3:empty{display:none}
 .bl-splash button{display:flex;align-items:center;gap:6px;width:100%;height:23px;padding:0 2px;border:0;border-radius:3px;background:transparent;color:var(--bl-text);font:inherit;text-align:left;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

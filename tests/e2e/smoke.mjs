@@ -1721,6 +1721,20 @@ const checks = {
     await app.page.waitForFunction(() => !!document.querySelector('iframe[src*="viewport.html"]')?.contentWindow?.__bylonder?.world?.scene.getNodeByName("Cube"), null, { timeout: 120000 });
   } },
 
+  // The splash's examples list the newest first, in a box taller than nine rows that darkens at its lower edge while more
+  // rows are below (its bottom background scrolls with the rows, so it shows the hint until they end).
+  "the splash's example list shows the newest first and hints that it scrolls": { open: { example: null, node: "sphere" }, async run() {
+    await menu("TOPBAR_MT_help", "Splash Screen");
+    const splash = app.page.locator("dialog.bl-splash");
+    await splash.getByRole("button", { name: "Examples…" }).click();
+    const list = splash.locator(".bl-splash-columns > div").first();
+    const titles = await list.getByRole("button").allTextContents();
+    assert.deepEqual(titles.slice(0, 2).map((t) => t.trim()), ["Neon Night", "Temple Light"]);
+    const { client, scroll, rows } = await list.evaluate((el) => ({ client: el.clientHeight, scroll: el.scrollHeight, rows: el.clientHeight / el.querySelector("button").offsetHeight }));
+    assert.ok(scroll > client && rows > 10, `${rows} rows show of a list that scrolls`);
+    assert.match(await list.evaluate((el) => getComputedStyle(el).backgroundAttachment), /local.*scroll/, "the edge's shade scrolls away with the rows");
+  } },
+
   // Shading switched while Dithered node materials rebuild for the new lights (point, spot, area, with shadows): their
   // shadows and surfaces draw once rebuilt, with no shader or binding errors (on WebGPU too).
   "Dithered node materials draw with their lights' shadows from Material Preview to Rendered": { open: { example: null, node: "sphere" }, async run() {
