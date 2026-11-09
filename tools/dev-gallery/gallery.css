@@ -4,3 +4,4 @@
 /* A phone-sized interface: Blender's tokens at a larger scale. */
 :root { --bl-ui-scale: 1.5; }
 body { margin: 0; background: var(--bl-region); color: var(--bl-text); font-family: var(--bl-font-family); }
+.pswp__caption { position: absolute; left: 0; right: 0; bottom: 0; padding: 8px 16px; background: var(--bl-region); color: var(--bl-text); opacity: 0.9; font-size: 13px; overflow-wrap: anywhere; }

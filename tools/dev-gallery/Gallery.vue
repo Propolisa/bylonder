@@ -1,9 +1,10 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { onMounted, onUnmounted, ref, watch } from "vue";
+import PhotoSwipe from "photoswipe";
+import "photoswipe/style.css";
 import { Button } from "@/editors/interface/components/ui/button";
 import { Checkbox } from "@/editors/interface/components/ui/checkbox";
 import { Input } from "@/editors/interface/components/ui/input";
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/editors/interface/components/ui/dialog";
 
 const KINDS = { docs: "Docs media", comparisons: "Side by side", testing: "Testing and bug fixes" };
 const stored = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } };
@@ -13,7 +14,7 @@ const filter = ref("");
 watch(kinds, (v) => localStorage.setItem("kinds", JSON.stringify(v)), { deep: true });
 watch(follow, (v) => localStorage.setItem("follow", JSON.stringify(v)));
 
-const pictures = ref([]), servers = ref([]), done = ref(false), open = ref(-1), fresh = ref(0);
+const pictures = ref([]), servers = ref([]), done = ref(false), fresh = ref(0);
 let loading = false;
 const query = (extra) => `/pictures?kinds=${Object.keys(kinds.value).filter((k) => kinds.value[k])}&q=${encodeURIComponent(filter.value)}&${extra}`;
 const get = async (url) => (await fetch(url, { cache: "no-store" })).json();
@@ -36,13 +37,12 @@ async function newer() {
   const first = pictures.value[0];
   if (!first) return older();
   const page = await get(query(`after=${first.mtime}`));
-  if (!page.length) return;
+  if (!page.length || viewer) return;
   pictures.value.unshift(...page);
-  if (open.value >= 0) open.value += page.length;
-  if (follow.value && open.value < 0 && scrollY < 400) scrollTo({ top: 0, behavior: "smooth" });
+  if (follow.value && scrollY < 400) scrollTo({ top: 0, behavior: "smooth" });
   else fresh.value += page.length;
 }
-function restart() { pictures.value = []; done.value = false; open.value = -1; older(); }
+function restart() { viewer?.close(); pictures.value = []; done.value = false; older(); }
 watch([kinds, filter], restart, { deep: true });
 
 // A thumbnail the server could not make yet (a picture still being written) is asked for again.
@@ -51,20 +51,38 @@ function retry(event, p) {
   if (tries < 5) setTimeout(() => { img.dataset.tries = tries + 1; img.src = thumbUrl(p) + "&retry=" + (tries + 1); }, 1500 * (tries + 1));
 }
 
-const current = computed(() => pictures.value[open.value]);
-async function step(by) {
-  const next = open.value + by;
-  if (next >= pictures.value.length - 2) await older();
-  if (next >= 0 && next < pictures.value.length) open.value = next;
+// The viewer is PhotoSwipe: pinch, wheel and double tap zoom to full resolution, drag pans, swipe or arrow keys step.
+// It needs each picture's size, measured as it comes near.
+const sizes = new Map();
+const measure = (p) => new Promise((done) => {
+  const url = fileUrl(p);
+  if (sizes.has(url)) return done();
+  const img = new Image();
+  img.onload = () => { sizes.set(url, [img.naturalWidth, img.naturalHeight]); done(); };
+  img.onerror = done;
+  img.src = url;
+});
+let viewer = null;
+async function show(index) {
+  await measure(pictures.value[index]);
+  viewer = new PhotoSwipe({ dataSource: [], index, wheelToZoom: true, secondaryZoomLevel: 1, maxZoomLevel: 8, preload: [1, 2] });
+  viewer.addFilter("numItems", () => pictures.value.length);
+  viewer.addFilter("itemData", (_, i) => {
+    const p = pictures.value[i], src = fileUrl(p), [width, height] = sizes.get(src) ?? [0, 0];
+    if (!width) measure(p).then(() => viewer?.refreshSlideContent(i));
+    return { src, width, height, alt: p.name };
+  });
+  viewer.on("change", () => { if (viewer.currIndex >= pictures.value.length - 3) older(); });
+  viewer.on("uiRegister", () => viewer.ui.registerElement({
+    name: "caption", appendTo: "root", isButton: false,
+    onInit: (el) => viewer.on("change", () => {
+      const p = pictures.value[viewer.currIndex];
+      el.textContent = `${p.name} · ${when(p)} · ${viewer.currIndex + 1} of ${pictures.value.length}${done.value ? "" : "+"}`;
+    }),
+  }));
+  viewer.on("destroy", () => { viewer = null; });
+  viewer.init();
 }
-function keys(e) {
-  if (open.value < 0) return;
-  if (e.key === "ArrowRight") step(1);
-  if (e.key === "ArrowLeft") step(-1);
-}
-let swipeX = null;
-const swipeStart = (e) => { swipeX = e.clientX; };
-const swipeEnd = (e) => { if (swipeX !== null && Math.abs(e.clientX - swipeX) > 50) step(e.clientX < swipeX ? 1 : -1); swipeX = null; };
 function toTop() { fresh.value = 0; scrollTo({ top: 0, behavior: "smooth" }); }
 
 const sentinel = ref();
@@ -75,9 +93,8 @@ onMounted(() => {
   const tick = async () => { await newer().catch(() => {}); servers.value = await get("/servers").catch(() => servers.value); };
   timer = setInterval(tick, 4000);
   tick();
-  addEventListener("keydown", keys);
 });
-onUnmounted(() => { observer.disconnect(); clearInterval(timer); removeEventListener("keydown", keys); });
+onUnmounted(() => { observer.disconnect(); clearInterval(timer); viewer?.destroy(); });
 </script>
 
 <template>
@@ -98,7 +115,7 @@ onUnmounted(() => { observer.disconnect(); clearInterval(timer); removeEventList
     <Button v-if="fresh" class="fixed left-1/2 top-24 z-20 -translate-x-1/2 shadow" @click="toTop">{{ fresh }} new</Button>
 
     <main class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3 p-4">
-      <button v-for="(p, i) in pictures" :key="p.path + p.mtime" class="overflow-hidden rounded-md border border-border bg-input text-left" @click="open = i">
+      <button v-for="(p, i) in pictures" :key="p.path + p.mtime" class="overflow-hidden rounded-md border border-border bg-input text-left" @click="show(i)">
         <img :src="thumbUrl(p)" loading="lazy" decoding="async" class="block aspect-video w-full object-contain" @error="retry($event, p)">
         <div class="truncate px-2 pt-1 text-xs">{{ file(p) }}</div>
         <div class="truncate px-2 pb-1 text-xs text-muted-foreground">{{ folder(p) }} · {{ when(p) }}</div>
@@ -106,17 +123,5 @@ onUnmounted(() => { observer.disconnect(); clearInterval(timer); removeEventList
     </main>
     <div ref="sentinel" class="p-4 text-center text-xs text-muted-foreground">{{ done ? "No more pictures" : "Loading..." }}</div>
 
-    <Dialog :open="open >= 0" @update:open="(v) => !v && (open = -1)">
-      <DialogContent v-if="current" class="h-[calc(100dvh-24px)] max-w-[calc(100vw-24px)] gap-2 p-3" @pointerdown="swipeStart" @pointerup="swipeEnd">
-        <DialogTitle class="truncate pr-8 text-sm">{{ file(current) }}</DialogTitle>
-        <DialogDescription class="truncate text-xs text-muted-foreground">{{ folder(current) }} · {{ when(current) }} · {{ open + 1 }} of {{ pictures.length }}{{ done ? "" : "+" }}</DialogDescription>
-        <img :src="fileUrl(current)" class="min-h-0 flex-1 touch-pan-y object-contain">
-        <div class="flex justify-between gap-2">
-          <Button variant="outline" :disabled="open === 0" @click="step(-1)">Newer</Button>
-          <a :href="fileUrl(current)" target="_blank" class="text-foreground no-underline"><Button variant="outline">Full size</Button></a>
-          <Button variant="outline" :disabled="done && open === pictures.length - 1" @click="step(1)">Older</Button>
-        </div>
-      </DialogContent>
-    </Dialog>
   </div>
 </template>
