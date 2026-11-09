@@ -3,6 +3,7 @@
 // scene's sound mixes in one (sequencer/scene-audio.js), on an offline audio context its audio engines play into.
 // Render Image and Render Animation render the live scene instead (live.js).
 import { createEngine } from './gpu-engine.js';
+import { sceneReady } from './ready.js';
 import { installVirtualClock } from './clock.js';
 import { createWorld } from '../runtime/world.js';
 import { createFrameRenderer, frameMs } from './frames.js';
@@ -36,7 +37,7 @@ async function open(input, { width, height }, { camera: cameraName, audio } = {}
   // A file's compositor composites final frames on the CPU (frames.js), its views on the GPU.
   world.beforeViewRender({ rendered: true, compositor: !world.compositor.onCPU });
   if (input.overrides?.compositor) await world.compositor.apply(input.overrides.compositor);
-  await scene.whenReadyAsync();
+  await sceneReady(scene);
   return { camera: camera.name, warnings };
 }
 

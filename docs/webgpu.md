@@ -33,6 +33,8 @@ Bylonder's shaders are GLSL only, on both backends; Babylon converts them on Web
   it leaves unmarked, is marked for it, so area lights light node materials.
 - An environment Babylon prefilters on load (Material Preview's studio light, an EXR world) is ready for materials
   only once filtered, so no WebGPU bind group keeps the texture it replaces.
+- A shader that does not compile fails Render Image and Render Animation with the material's name and the error, on
+  both backends; on WebGPU the engine sends Babylon's compile failure through the effect's error path.
 - Points are drawn as quads on both backends (`src/draw/point-sprites.js`): WebGPU has no point size.
 - Reading a texture back is asynchronous on WebGPU. The CPU compositor awaits it on both backends; Grease Pencil's Fill
   tool, which Blender's code reads synchronously, renders on a small WebGL 2 engine of its own.

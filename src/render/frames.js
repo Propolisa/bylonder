@@ -9,6 +9,7 @@ import { jitter, jitterProjection, sampleTimes, createAccumulator } from './samp
 import { frameRate } from '../blenkernel/scene/time.js';
 import { filmJitter } from './film.js';
 import { readySceneDepth } from './scene-depth.js';
+import { sceneReady } from './ready.js';
 
 export const frameMs = (frame, start, fps) => (frame - start + 1) * 1000 / fps;
 
@@ -25,7 +26,7 @@ export function createFrameRenderer({ world: built, engine, canvas, resize, cloc
     shadedCamera = camera;
     warm = false;
     world.setViewShading({ renderedCameras: [camera], compositorCamera: camera });
-    await scene.whenReadyAsync();
+    await sceneReady(scene);
     return camera;
   }
 
@@ -124,7 +125,7 @@ export function createFrameRenderer({ world: built, engine, canvas, resize, cloc
     animation.time.configure({ frameCurrent: t }, { record: false });
     await world.modifiers.settled();
     // Geometry modifiers just drew may need shaders compiled before it can be drawn.
-    await scene.whenReadyAsync();
+    await sceneReady(scene);
     await readySceneDepth(scene, camera);
     if (offset[0] || offset[1]) {
       const m = Array.from(camera.getProjectionMatrix(true).m);

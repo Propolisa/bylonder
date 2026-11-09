@@ -8,6 +8,15 @@ const KEY = 'bylonder-gpu-backend';
 // Babylon's GLSL to WGSL compilers, served by the app (scripts/webgpu-compilers.mjs).
 const compiler = (name) => ({ jsPath: new URL(`webgpu/${name}.js`, document.baseURI).href, wasmPath: new URL(`webgpu/${name}.wasm`, document.baseURI).href });
 
+// Babylon's WebGPU engine compiles an effect's GLSL in a promise whose failure reaches no effect, so a shader that does
+// not compile leaves its effect waiting for ever. It fails here as on WebGL 2, through the effect's own error path.
+class ReportingWebGPUEngine extends WebGPUEngine {
+  async _preparePipelineContextAsync(context, ...args) {
+    try { return await super._preparePipelineContextAsync(context, ...args); }
+    catch (error) { Object.values(this._compiledEffects).find((effect) => effect._pipelineContext === context)?._processCompilationErrors(error); }
+  }
+}
+
 export function requestedBackend() {
   try { return (new URLSearchParams(top.location.search).get('gpu')?.toUpperCase() ?? localStorage.getItem(KEY)) === 'WEBGPU' ? 'WEBGPU' : 'WEBGL2'; } catch { return 'WEBGL2'; }
 }
@@ -18,7 +27,7 @@ export const rememberBackend = (backend) => { try { localStorage.setItem(KEY, ba
 export async function createEngine(canvas, options = {}, backend = requestedBackend()) {
   if (backend === 'WEBGPU') {
     try {
-      const engine = new WebGPUEngine(canvas, { ...options, enableAllFeatures: true, setMaximumLimits: true, glslangOptions: compiler('glslang'), twgslOptions: compiler('twgsl') });
+      const engine = new ReportingWebGPUEngine(canvas, { ...options, enableAllFeatures: true, setMaximumLimits: true, glslangOptions: compiler('glslang'), twgslOptions: compiler('twgsl') });
       await engine.initAsync();
       const { features, limits } = engine._device, granted = {};
       for (const name in limits) granted[name] = limits[name];

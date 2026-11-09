@@ -1,4 +1,5 @@
 import { createWriter } from '../../render/output.js';
+import { report } from '../../windowmanager/wm-reports.js';
 import { outputSpec, encodeSize, fileFormats } from '../../render/formats.js';
 import { outputSize } from '../../blenkernel/scene/render.js';
 import { pointerStruct, structFind } from '../../python/bpy_rna.js';
@@ -105,8 +106,9 @@ export function createRenderHost({ world, live, sceneAudio, sequencer, name = ()
       if (kind === 'animation') download(last);
     } catch (error) {
       await writer?.cancel();
-      setStatus(error.name === 'AbortError' ? 'Render cancelled' : 'Render failed: ' + (error.message || error));
-      if (error.name !== 'AbortError') console.error(error);
+      const failed = 'Render failed: ' + (error.message || error);
+      setStatus(error.name === 'AbortError' ? 'Render cancelled' : failed);
+      if (error.name !== 'AbortError') report('ERROR', failed);
     } finally {
       source?.dispose();
       setProgress(null);

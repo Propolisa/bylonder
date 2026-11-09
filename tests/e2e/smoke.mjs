@@ -907,11 +907,12 @@ const checks = {
       await app.bylonder((b, rotation) => b.runOperator("mesh.primitive_plane_add", { size: 40, location: [0, 0, -1], rotation }), rotation);
       await app.settled();
       await app.bylonder((b) => b.views.input.setShading("rendered"));
-      await app.until((b) => b.world.scene.isReady(), null, 60000);
+      // The film's samples, all of them (a view that compiles its shaders slowly may converge before a frame count).
+      await app.until((b) => b.world.scene.isReady() && b.world.renderSettings.converged(), null, 60000);
       const mean = await app.bylonder(async (b) => {
         const { canvas } = b.views.input, { width, height } = canvas, scene = b.world.scene;
-        // A few frames for the film's samples (the view is not idle in Rendered while it accumulates).
-        await new Promise((done) => { let frames = 0; const o = scene.onAfterRenderObservable.add(() => { if (++frames > 20) { scene.onAfterRenderObservable.remove(o); done(); } }); });
+        b.views.wake();
+        await new Promise((done) => scene.onAfterRenderObservable.addOnce(done));
         const context = new OffscreenCanvas(width, height).getContext("2d");
         context.drawImage(await createImageBitmap(canvas), 0, 0);
         const { data } = context.getImageData(0, Math.round(height * 0.8), width, Math.round(height * 0.15));
@@ -1034,6 +1035,26 @@ const checks = {
   },
   // Render Image composites on Blender's CPU compositor and shows the composite at the render's size: Render Layers
   // straight into the Group Output gives the render as it is (a composite written at another size shows as stripes).
+  // A material whose shader does not compile fails the render, named in the render window and Info, instead of
+  // leaving it waiting.
+  "Render Image reports a material whose shader does not compile": { open: { example: null, node: "sphere" }, async run() {
+    await app.bylonder((b) => {
+      const { ShaderMaterial } = globalThis.BABYLON, scene = b.world.scene;
+      const broken = new ShaderMaterial("broken", scene, { vertexSource: "precision highp float;\nattribute vec3 position;\nuniform mat4 worldViewProjection;\nvoid main() { gl_Position = worldViewProjection * vec4(position, 1.0); }", fragmentSource: "precision highp float;\nvoid main() { gl_FragColor = undefined_color; }" }, { attributes: ["position"], uniforms: ["worldViewProjection"] });
+      scene.getMeshByName("sphere").material = broken;
+    });
+    await app.page.click('[data-blender="TOPBAR_MT_render"]');
+    await app.page.getByRole("menuitem", { name: "Render Image" }).click();
+    await rendered();
+    const status = await app.frame().evaluate((selector) => document.querySelector(selector).textContent, renderStatus);
+    assert.match(status, /^Render failed: the shader of material "broken" did not compile/);
+    await app.page.click('[data-workspace="scripting"]');
+    // Info's lines wrap where the area ends.
+    await app.until(() => /Renderfailed:theshaderofmaterial"broken"/.test(document.querySelector('[data-blender="INFO"]')?.textContent.replace(/\s+/g, "")), null, 10000);
+    // Babylon logs the broken shader's code and error as errors of the page.
+    app.errors.length = 0;
+  } },
+
   "Render Image shows the composite at the render's size": { open: { example: null, node: "sphere" }, async run() {
     await app.bylonder((b) => { b.world.renderSettings.set("render.resolutionX", 1280); b.world.renderSettings.set("render.resolutionY", 720); });
     const render = async () => {
@@ -1126,6 +1147,7 @@ const checks = {
     await app.hover(0.5, 0.5);
     await app.page.keyboard.press("Numpad6");
     await app.settled();
+    await quiet();
     await app.bylonder((b) => { const regions = b.views.input.regions, draw = regions.draw; b.headerDraws = 0; regions.draw = () => { b.headerDraws++; draw(); }; });
     for (const key of ["Numpad4", "Numpad8", "Numpad1"]) await app.page.keyboard.press(key);
     await app.until((b) => b.views.input.section.querySelector(".view-name").textContent === "Front Orthographic").catch(() => {});
