@@ -59,7 +59,8 @@ bool line_end(vec2 P, out vec2 coord, out vec3 pos) {
   }
   else {
     if (!flag_test(grid_flag, ${AXIS_X} << axis)) return false;
-    pos[axis] = P.x;
+    // Not pos[axis]: FXC, WebGPU's shader compiler on D3D12, fails this write to a vector at a dynamic index.
+    pos = P.x * vec3(equal(ivec3(axis), ivec3(0, 1, 2)));
   }
   return true;
 }

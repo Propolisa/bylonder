@@ -47,7 +47,8 @@ Bylonder's shaders are GLSL only, on both backends; Babylon converts them on Web
 
 `E2E_ENGINE=webgpu` runs the smoke tests and the perf guard on WebGPU. Playwright's Chromium for Windows ships no DXC,
 so its WebGPU compiles shaders with FXC, which fails some that Chrome compiles; `E2E_CHROME` (the path of an installed
-Chrome) runs them on it instead, in a temporary profile.
+Chrome) runs them on it instead, in a temporary profile. A WebGPU error no error scope caught (Babylon's "WebGPU
+uncaptured error" warning) fails a check as a page error does.
 
 ## Compute shaders
 

@@ -49,7 +49,7 @@ export async function startServer({ build = true } = {}) {
 }
 
 // Opens Bylonder in a fresh browser context (fresh project storage), opens `example` from the splash (none: the new
-// project's scene) and waits until the 3D Viewport shows the node `node`. Page errors of every frame land in `errors`.
+// project's scene) and waits until the 3D Viewport shows the node `node`. Page and GPU errors of every frame land in `errors`.
 // `link`: an example's id, opened by its #example= link instead of the splash. `video`: a directory to record the
 // session to. `persistent`: a browser profile of its own instead of an incognito context. `touch`: a touch device
 // (touch events, a coarse pointer, no hover).
@@ -59,7 +59,8 @@ export async function openApp(browser, url, { example = "Default Cube", node = "
   const page = await context.newPage();
   const errors = [];
   page.on("pageerror", (error) => errors.push(process.env.E2E_STACKS ? error.stack : error.message));
-  page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
+  // Babylon warns of a GPU error no scope caught; on WebGPU it invalidates the frame's command buffer, so nothing draws.
+  page.on("console", (message) => { if (message.type() === "error" || message.text().includes("WebGPU uncaptured error")) errors.push(message.text()); });
   const start = E2E_ENGINE ? `${url}${url.includes("?") ? "&" : "?"}gpu=${E2E_ENGINE}` : url;
   await page.goto(link ? `${start}#example=${link}` : start);
   const frame = () => page.frames().findLast((f) => f.url().includes("viewport.html") && !f.isDetached());
