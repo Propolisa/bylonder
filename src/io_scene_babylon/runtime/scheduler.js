@@ -32,6 +32,8 @@ export const EVALUATORS = {
   grease_pencil: () => import('./grease-pencil.js').then(({ run }) => ({ run })),
   curves: (page) => import('./curves.js').then((module) => module.load(page)),
 };
+/** What a package draws only by running it: its export bakes none of it. */
+const UNBAKED = ['curves'];
 /** What Babylon runs itself (`native`: an F-Curve its AnimationGroup plays), which the scheduler leaves to it unless a unit takes over. */
 export const NATIVE = ['native'];
 
@@ -165,8 +167,10 @@ export function createScheduler(ir, page) {
 
   // What reads the frame loads its implementation now, so it runs as the first frame draws.
   timedLive().forEach(implementation);
-  // What reads no property or entity (curves at export) runs once: nothing runs it later and the package bakes none of it.
-  Object.keys(entities).filter((key) => ![...referencesIn(entities[key].inputs)].some(([ref]) => 'property' in ref || 'entity' in ref)).forEach(mark);
+  // What the package bakes none of (curves) and reads no property or entity runs once: nothing runs it later. What the
+  // package bakes (a modifier's mesh in scene.bin) stays as baked.
+  Object.keys(entities).filter((key) => UNBAKED.includes(entities[key].implementation ?? '')
+    && ![...referencesIn(entities[key].inputs)].some(([ref]) => 'property' in ref || 'entity' in ref)).forEach(mark);
   run();
 
   return {
