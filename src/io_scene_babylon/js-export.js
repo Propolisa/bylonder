@@ -259,7 +259,11 @@ export async function createScene(engine, canvas${live.size ? ", { modifiers = n
   // A custom block's code is written once for every material that shares it.
   for (const entry of MATERIALS) for (const block of entry.blocks ?? []) if (typeof block.options?.code === 'number') block.options.code = CODE[block.options.code];
   for (const entry of MATERIALS) materials[entry.uniqueId] = Material.Parse(entry, scene, ROOT);
-  for (const entry of MULTI_MATERIALS) materials[entry.uniqueId] = MultiMaterial.ParseMultiMaterial(entry, scene);
+  // A multi-material's slots by the exported materials' unique ids, as Babylon's loader resolves them after parsing.
+  for (const entry of MULTI_MATERIALS) {
+    const multi = materials[entry.uniqueId] = MultiMaterial.ParseMultiMaterial(entry, scene);
+    multi.subMaterials = (entry.materialsUniqueIds ?? []).map((id) => materials[id] ?? null);
+  }
   // The world lights the scene: its color, or its nodes baked once their shader is ready.
   const world = SCENE.world;
   if (world) WORLDS.set(scene, world.material !== null ? worldNodes(scene, materials[world.material]) : worldColor(scene, world.color));

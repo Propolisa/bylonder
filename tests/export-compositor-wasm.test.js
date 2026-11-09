@@ -48,6 +48,9 @@ console.log(JSON.stringify(graph.attachedBlocks.map((b) => [b.name, b.getClassNa
   const lights = constant('LIGHTS');
   assert.ok(lights.filter((l) => l.type === 0).every((l) => !l.direction), 'point lights carry no direction');
   assert.deepEqual(blend.scene.getLightByName('Door Light').excludedMeshes.map((m) => m.name), ['Road'], 'the Door Light leaves out the mesh it does not reach');
+  // A joined object's material slots: its multi-material holds each slot's material, not Babylon's default.
+  const slots = blend.scene.getMeshByName('Shop Front').material;
+  assert.deepEqual(slots.subMaterials.map((m) => m?.name), constant('MULTI_MATERIALS').find((m) => m.name === slots.name).materials, "the Shop Front's slots hold its materials");
   const block = (name) => blend.compositor.attachedBlocks.find((b) => b.name === name);
   const gain = 'node_groups["Compositor Nodes"].nodes["Color Balance"].inputs[8].default_value[0]';
   const { uniform, component } = constant('CONTROLS').find((c) => c.path === gain).bind;
