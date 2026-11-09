@@ -116,14 +116,19 @@ export function createFilm(scene, camera) {
     const projection = camera.getProjectionMatrix(true).m;
     return [...camera.getViewMatrix().m, ...projection, engine.getRenderWidth(), engine.getRenderHeight(), shaders].join();
   };
-  // The effects the camera's meshes drew with in its own pass, as one number.
+  // The effect each of the camera's submeshes drew with in its own pass: a count that grows when one draws with another
+  // (or for the first time). Not the set of meshes drawn, which a sample's jitter can change at the view's edge.
+  const drew = new WeakMap();
   const drawnShaders = () => {
     const meshes = scene.getActiveMeshes();
-    let hash = 0;
+    let changed = shaders;
     for (let i = 0; i < meshes.length; i++) {
-      for (const subMesh of meshes.data[i].subMeshes ?? []) hash = (Math.imul(hash, 31) + (subMesh._drawWrappers?.[camera.renderPassId]?.effect?.uniqueId ?? 0)) | 0;
+      for (const subMesh of meshes.data[i].subMeshes ?? []) {
+        const effect = subMesh._drawWrappers?.[camera.renderPassId]?.effect?.uniqueId;
+        if (effect !== undefined && drew.get(subMesh) !== effect) { drew.set(subMesh, effect); changed = shaders + 1; }
+      }
     }
-    return hash;
+    return changed;
   };
   const before = scene.onBeforeCameraRenderObservable.add((rendering) => {
     if (rendering !== camera || controls.manual) return;

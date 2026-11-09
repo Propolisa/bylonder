@@ -124,6 +124,12 @@ assert.ok(Array.from({ length: 64 }, (_, i) => filmJitter(i)).every(([x, y]) => 
   engine._compiledEffects = { ...engine._compiledEffects, shadowDepth: {} };
   frame();
   assert.ok(view.converged, "another pass's new shader keeps the film");
+  // A mesh that a sample's jitter culls at the view's edge, drawn again with its shader, keeps it.
+  filmScene.getActiveMeshes().reset();
+  frame();
+  filmScene.getActiveMeshes().push(mesh);
+  frame();
+  assert.ok(view.converged, "a mesh leaving and coming back keeps the film");
   wrapper.effect = { uniqueId: 2 };
   frame(); frame();
   assert.ok(!view.converged, 'a drawn mesh swapping its shader starts it again');
