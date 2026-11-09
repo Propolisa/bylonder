@@ -12,6 +12,7 @@ import { influenceRadius, isBlenderLight, lightRecord } from '../blenkernel/ligh
 import { filmSample } from '../render/film.js';
 import { halton } from '../render/sampling.js';
 import { INTEGRATION, MAX_LIGHTS, RESOLVE, scatterShader, shadowSamplers, shadowUniforms } from './volume-shaders.js';
+import { engineGLSL } from '../nodes/blender/glsl.js';
 
 // blender-port: DNA_scene_defaults.h: the scene's default Volumes settings.
 export const VOLUME_DEFAULTS = { start: 0.1, end: 100, tileSize: 8, samples: 64, distribution: 0.8, customRange: false, clampDirect: 0, clampIndirect: 0,
@@ -115,7 +116,6 @@ function localBounds(mesh) {
 
 const HALF = Constants.TEXTURETYPE_HALF_FLOAT, NEAREST = Constants.TEXTURE_NEAREST_SAMPLINGMODE;
 const GRID_UNIFORMS = ['volumeSize', 'atlasColumns', 'depthParams', 'perspective', 'coordScale', 'inverseProjection'];
-ShaderStore.ShadersStore.blenderVolumeResolveFragmentShader = RESOLVE;
 
 // A domain's box corners in world space, from its vertices' bounds (localBounds).
 const corners = (mesh) => {
@@ -127,7 +127,8 @@ const corners = (mesh) => {
 // the volumes draw (their shaders compile after the film may have converged without them) and when they go.
 export function cameraVolumes(scene, camera, film = null) {
   const engine = scene.getEngine(), renderer = new EffectRenderer(engine);
-  const effect = (name, fragmentShader, uniforms, samplers) => new EffectWrapper({ engine, name, fragmentShader, useShaderStore: false, uniforms: [...GRID_UNIFORMS, ...uniforms], samplers });
+  ShaderStore.ShadersStore.blenderVolumeResolveFragmentShader = engineGLSL(engine, RESOLVE);
+  const effect = (name, fragmentShader, uniforms, samplers) => new EffectWrapper({ engine, name, fragmentShader: engineGLSL(engine, fragmentShader), useShaderStore: false, uniforms: [...GRID_UNIFORMS, ...uniforms], samplers });
   // The scatter pass of each layout of shadow maps the lights have.
   const scatters = new Map();
   const scatterOf = (shadows) => {

@@ -76,8 +76,7 @@ export const MAX_LIGHTS = 16;
 // the scene's Volumes > Shadows, dimmed by the volumes' extinction toward it. While the view holds still, each froxel's
 // light and extinction blend with its last frame's, so its jitter's noise averages away over frames.
 // `shadows`: the shadow maps' kinds ('SUN', 'SPOT', 'CUBE') in the order of the lights' shadow slots.
-export const scatterShader = (shadows) => `${TARGETS(2)}${GRID}${FROXEL_JITTER}
-${shadows.map(shadowDeclaration).join('\n')}
+export const scatterShader = (shadows) => `${TARGETS(2)}${shadows.map(shadowDeclaration).join('\n')}
 uniform float ndcHalfZ;
 uniform sampler2D scatteringProps;
 uniform sampler2D extinctionProps;
@@ -106,6 +105,7 @@ uniform float shadowSteps;
 uniform float shadowReach;
 uniform vec3 worldRadiance;
 uniform vec2 volumeClamp;
+${GRID}${FROXEL_JITTER}
 const float M_PI = 3.14159265358979323846;
 float square(float x) { return x * x; }
 float reduce_max(vec3 v) { return max(v.x, max(v.y, v.z)); }
@@ -256,9 +256,9 @@ export const shadowSamplers = (shadows) => shadows.map((kind, j) => `volumeShado
 
 // blender-port: eevee_volume.bsl.hh integration_main: each froxel the light scattered toward the view and the
 // transmittance from the grid's start to its far side, each slice's segment integrated analytically.
-export const INTEGRATION = `${TARGETS(2)}${GRID}
-uniform sampler2D scatteringTexture;
+export const INTEGRATION = `${TARGETS(2)}uniform sampler2D scatteringTexture;
 uniform sampler2D extinctionTexture;
+${GRID}
 void main(void) {
   ivec3 froxel = froxelOf(ivec2(gl_FragCoord.xy));
   vec3 scattering = vec3(0.0), transmittance = vec3(1.0);

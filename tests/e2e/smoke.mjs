@@ -1052,6 +1052,13 @@ const checks = {
     const mean = composited.reduce((sum, v, i) => sum + Math.abs(v - plain[i]), 0) / composited.length;
     assert.ok(mean < 3, `the composite differs from the render by ${mean.toFixed(1)} on average`);
   } },
+  // The Volumes example's light shafts draw in Rendered: its volume passes compile and fill the film (on WebGPU too).
+  "Volumes draw in Rendered shading": { open: { link: "volumes", node: null }, async run() {
+    await app.bylonder((b) => b.views.input.setShading("rendered"));
+    await app.until((b) => b.world.scene.isReady() && b.world.renderSettings.converged(), null, 90000);
+    assert.ok(await app.bylonder((b) => b.world.scene.activeCamera._postProcesses.some((p) => p?.name === "__volumeResolve")), "the volumes resolve over the render");
+  } },
+
   // An idle view does nothing, as Blender redraws and evaluates only on change: an opened .blend's Rendered view
   // neither evaluates Main nor saves it again once it settled.
   "an idle Rendered view of an opened .blend evaluates and saves nothing": { open: { link: "bouncing-ball", node: null }, async run() {
