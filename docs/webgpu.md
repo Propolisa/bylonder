@@ -38,7 +38,9 @@ Bylonder's shaders are GLSL only, on both backends; Babylon converts them on Web
   off, when the views settle with new shaders, and lets them settle once the GPU has compiled those pipelines
   (`src/draw/pipeline-warmup.js`).
 - A shader that does not compile fails Render Image and Render Animation with the material's name and the error, on
-  both backends; on WebGPU the engine sends Babylon's compile failure through the effect's error path.
+  both backends; on WebGPU the engine sends Babylon's compile failure through the effect's error path. A pipeline the
+  GPU rejects (FXC, a shader compiler Dawn uses on D3D12, fails some WGSL) fails its effect the same way, so the
+  objects using it are skipped and reported once instead of invalidating the frame, which would draw nothing.
 - Points are drawn as quads on both backends (`src/draw/point-sprites.js`): WebGPU has no point size.
 - Reading a texture back is asynchronous on WebGPU. The CPU compositor awaits it on both backends; Grease Pencil's Fill
   tool, which Blender's code reads synchronously, renders on a small WebGL 2 engine of its own.

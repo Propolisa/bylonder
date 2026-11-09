@@ -10,11 +10,36 @@ const compiler = (name) => ({ jsPath: new URL(`webgpu/${name}.js`, document.base
 
 // Babylon's WebGPU engine compiles an effect's GLSL in a promise whose failure reaches no effect, so a shader that does
 // not compile leaves its effect waiting for ever. It fails here as on WebGL 2, through the effect's own error path.
+// A pipeline the GPU rejects (FXC, a shader compiler of Dawn's D3D12 backend, fails some WGSL) fails its effect the same
+// way, so its meshes are skipped and reported once instead of invalidating every frame's command buffer.
 class ReportingWebGPUEngine extends WebGPUEngine {
+  async initAsync(...args) {
+    await super.initAsync(...args);
+    failRejectedPipelines(this._cacheRenderPipeline, this._device);
+  }
+
   async _preparePipelineContextAsync(context, ...args) {
     try { return await super._preparePipelineContextAsync(context, ...args); }
     catch (error) { Object.values(this._compiledEffects).find((effect) => effect._pipelineContext === context)?._processCompilationErrors(error); }
   }
+}
+
+// Babylon's pipeline cache creates its pipelines in one method, with no hook; this instance's is wrapped in error scopes.
+export function failRejectedPipelines(cache, device) {
+  const create = cache._createRenderPipeline.bind(cache);
+  cache._createRenderPipeline = (effect, ...args) => {
+    const context = effect._pipelineContext;
+    device.pushErrorScope('validation');
+    device.pushErrorScope('internal');
+    const pipeline = create(effect, ...args);
+    Promise.all([device.popErrorScope(), device.popErrorScope()]).then((errors) => {
+      const error = errors.find(Boolean);
+      if (!error || effect._pipelineContext !== context || !context.stages) return;
+      effect._processCompilationErrors(error);
+      if (effect._pipelineContext === context) { context.stages = null; effect._isReady = false; }
+    });
+    return pipeline;
+  };
 }
 
 export function requestedBackend() {
