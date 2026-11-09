@@ -1,0 +1,218 @@
+version = 1
+SPDX-PackageName = "Bylonder"
+SPDX-PackageDownloadLocation = "https://github.com/propolisa/bylonder"
+
+# Licensing of every file, by path (LICENSING.md explains it). The last matching entry wins, so the default comes
+# first. scripts/licenses.mjs checks that every tracked file matches and every license named here is in LICENSES/.
+
+# Bylonder's own code, docs, examples and tests.
+[[annotations]]
+path = "**"
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Chris Stanley"
+SPDX-License-Identifier = "MIT OR Apache-2.0"
+
+# Derived from Blender's sources (GPL-2.0-or-later): logic copied from Blender (`blender-port:` markers), Blender's
+# C++ ported to JS (the *.gen.js units, their shims and the hand ports of BMesh and BLI beside them), Blender's
+# Python compiled to JS, Blender's GLSL, patches to Blender's files, and Blender's UI text, theme and icons.
+[[annotations]]
+path = [
+  "src/blenkernel/curveprofile*.js",
+  "src/blenkernel/customdata*.js",
+  "src/blenkernel/deform*.js",
+  "src/blenkernel/mesh-mapping*.js",
+  "src/blenkernel/mesh.js",
+  "src/blenkernel/mesh.gen.js",
+  "src/blenkernel/multires*.js",
+  "src/blenkernel/mesh/mesh-tessellate*.js",
+  "src/blenkernel/mesh/mesh-normals.js",
+  "src/blenlib/**",
+  "src/bmesh/intern/**",
+  "src/bmesh/operators/**",
+  "src/bmesh/tools/**",
+  "src/makesdna/**",
+  "src/intern/eigen*.js",
+  "src/bl_py/**",
+  "src/nodes/blender/gpu-library.js",
+  "src/compositor/compositor-shaders.js",
+  "src/makesrna/rna-curves.json",
+  "src/makesrna/rna-modifiers.json",
+  "src/makesrna/rna-operators.json",
+  "src/makesrna/rna-ui.json",
+  "src/nodes/blender/node-types.json",
+  "src/editors/interface/theme-default.json",
+  "src/editors/interface/icon-themes.json",
+  "src/editors/interface/userdef-default-theme.js",
+  "public/icons/blender/**",
+  "public/splash.webp",
+  # config.ocio names an ocio-license.txt Blender does not have; AgX and Filmic upstream carry no license.
+  "src/bmesh/datafiles/colormanagement/**",
+  "tools/blender-port/include/RNA_prototypes.hh",
+  "tools/blender-port/wasm/patches/*.patch",
+  "tools/blender-port/python/startup/bylonder_cpython.py",
+  "tests/fixtures/io/suzanne.*",
+  "tests/fixtures/io-addons/suzanne.*",
+  # Files with `blender-port:` markers (scripts/licenses.mjs fails when a marked file is missing here).
+  "src/blenkernel/light/area-specular.js",
+  "src/blenkernel/light/light-home.js",
+  "src/blenkernel/light/light-shadows.js",
+  "src/blenkernel/main-sync.js",
+  "src/blenkernel/scene/time.js",
+  "src/blenkernel/scene/world-babylon.js",
+  "src/blenkernel/scene/world-sun.js",
+  "src/draw/curves.js",
+  "src/draw/draw-view.js",
+  "src/draw/grease-pencil.js",
+  "src/draw/overlay-armature.js",
+  "src/draw/overlay-edit-mesh.js",
+  "src/draw/overlay-extra.js",
+  "src/draw/overlay-grid.js",
+  "src/draw/overlay-origin.js",
+  "src/draw/overlay-particle.js",
+  "src/draw/overlay-pass.js",
+  "src/draw/overlay-shape.js",
+  "src/draw/pointcloud.js",
+  "src/draw/volume-shaders.js",
+  "src/draw/volumes.js",
+  "src/draw/workbench.js",
+  "src/io_scene_babylon/node-material-export.js",
+  "src/nodes/blender/shader-nodes.js",
+  "src/render/film.js",
+  "src/render/view-settings.js",
+  "src/windowmanager/wm-event-system.js",
+  "tools/docs/record.mjs",
+  "tools/blender-port/wasm/armature-draw.cc",
+  "tools/blender-port/wasm/compositor-api.cc",
+  "tools/blender-port/wasm/draw-mesh.cc",
+  "tools/blender-port/wasm/gpu-material-api.cc",
+  "tools/blender-port/wasm/gpu-record.cc",
+  "tools/blender-port/wasm/grease-pencil-api.cc",
+  "tools/blender-port/wasm/image-api.cc",
+  "tools/blender-port/wasm/main-api.cc",
+  "tools/blender-port/wasm/relations-draw.cc",
+  "tools/blender-port/wasm/shader-node-api.cc",
+  "tools/blender-port/wasm/wm-api.cc",
+]
+precedence = "override"
+SPDX-FileCopyrightText = ["Blender Authors", "2026 Chris Stanley"]
+SPDX-License-Identifier = "GPL-2.0-or-later"
+
+# Blender's Python, compiled, holds two Apache-2.0 scripts among its GPL ones.
+[[annotations]]
+path = "src/bl_py/_files.js"
+precedence = "override"
+SPDX-FileCopyrightText = ["Blender Authors", "2026 Chris Stanley"]
+SPDX-License-Identifier = "GPL-2.0-or-later AND Apache-2.0"
+
+# Transcrypt's runtime and Python library modules, compiled with Blender's Python.
+[[annotations]]
+path = [
+  "src/bl_py/org.transcrypt.__runtime__.js",
+  "src/bl_py/copy.js",
+  "src/bl_py/dataclasses.js",
+  "src/bl_py/datetime.js",
+  "src/bl_py/inspect.js",
+  "src/bl_py/itertools.js",
+  "src/bl_py/math.js",
+  "src/bl_py/random.js",
+  "src/bl_py/re.js",
+  "src/bl_py/re.translate.js",
+  "src/bl_py/time.js",
+]
+precedence = "override"
+SPDX-FileCopyrightText = "Jacques de Hooge and the Transcrypt contributors"
+SPDX-License-Identifier = "Apache-2.0"
+
+# Blender built to WebAssembly: Blender's code with its Apache-2.0 libraries, which Blender as a whole licenses as
+# GPL-3.0-or-later. The main module (src/bmesh/bmesh.wasm) is fetched, not kept in git.
+[[annotations]]
+path = ["**/*.wasm"]
+precedence = "override"
+SPDX-FileCopyrightText = ["Blender Authors", "2026 Chris Stanley"]
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+# Patches to Apache-2.0 files: Blender's glTF add-on, OpenImageIO.
+[[annotations]]
+path = ["tools/blender-port/wasm/patches/gltf_ctypes.patch", "tools/blender-port/wasm/patches/deps/openimageio-wasi.patch"]
+precedence = "override"
+SPDX-FileCopyrightText = ["Blender Authors", "Contributors to the OpenImageIO project", "2026 Chris Stanley"]
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "tools/blender-port/wasm/patches/deps/cpython-pthread-stubs-cxx.patch"
+precedence = "override"
+SPDX-FileCopyrightText = ["Python Software Foundation", "2026 Chris Stanley"]
+SPDX-License-Identifier = "Python-2.0"
+
+[[annotations]]
+path = "tools/blender-port/wasm/patches/deps/numpy-wasm.patch"
+precedence = "override"
+SPDX-FileCopyrightText = ["NumPy Developers", "2026 Chris Stanley"]
+SPDX-License-Identifier = "BSD-3-Clause"
+
+[[annotations]]
+path = "tools/blender-port/runtimes/llvm-wasm-eh.patch"
+precedence = "override"
+SPDX-FileCopyrightText = ["LLVM Project contributors", "2026 Chris Stanley"]
+SPDX-License-Identifier = "Apache-2.0 WITH LLVM-exception"
+
+# Babylon.js: its node editors' block catalogs, forked by tools/babylon-editor/vendor.mjs, and its type declarations.
+[[annotations]]
+path = ["src/editors/space_node/babylon/*-blocks.js", "public/babylon-types.json"]
+precedence = "override"
+SPDX-FileCopyrightText = "The Babylon.js contributors"
+SPDX-License-Identifier = "Apache-2.0"
+
+# Blender's Essentials assets and Poly Haven's studio light, as Blender ships them.
+[[annotations]]
+path = ["src/bmesh/datafiles/assets/**", "src/bmesh/datafiles/studiolights/**"]
+precedence = "override"
+SPDX-FileCopyrightText = ["Blender Authors", "Greg Zaal (Poly Haven)"]
+SPDX-License-Identifier = "CC0-1.0"
+
+# Quaternius's Animated Woman (poly.pizza/m/9kF7eTDbhO).
+[[annotations]]
+path = "examples/compositor/models/animated-woman.glb"
+precedence = "override"
+SPDX-FileCopyrightText = "Quaternius"
+SPDX-License-Identifier = "CC0-1.0"
+
+# Fonts.
+[[annotations]]
+path = "public/fonts/Inter.woff2"
+precedence = "override"
+SPDX-FileCopyrightText = "2020 The Inter Project Authors (https://github.com/rsms/inter)"
+SPDX-License-Identifier = "OFL-1.1"
+
+[[annotations]]
+path = "public/fonts/DejaVuSansMono.woff2"
+precedence = "override"
+SPDX-FileCopyrightText = ["2003 Bitstream, Inc.", "2006 Tavmjong Bah", "DejaVu changes are in the public domain"]
+SPDX-License-Identifier = "Bitstream-Vera AND LicenseRef-Arev-Fonts"
+
+[[annotations]]
+path = ["examples/compositor/fonts/PoiretOne-*", "examples/compositor/fonts/ZenMaruGothic-*", "tests/fixtures/fonts/Sacramento-*"]
+precedence = "override"
+SPDX-FileCopyrightText = ["Denis Masharov (Poiret One)", "The Zen Maru Gothic Project Authors", "Astigmatic (Sacramento)"]
+SPDX-License-Identifier = "OFL-1.1"
+
+# KubeezCut's screenshots in the video sequencer proposal.
+[[annotations]]
+path = "docs/media/kubeezcut-*.png"
+precedence = "override"
+SPDX-FileCopyrightText = "2026 KubeezCut"
+SPDX-License-Identifier = "MIT"
+
+
+# The root license texts GitHub and npm detect (the dual layout), copies of LICENSES/MIT.txt and LICENSES/Apache-2.0.txt.
+[[annotations]]
+path = "LICENSE-MIT"
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Chris Stanley"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "LICENSE-APACHE"
+precedence = "override"
+SPDX-FileCopyrightText = "NONE"
+SPDX-License-Identifier = "Apache-2.0"

@@ -2,7 +2,7 @@
 
 # Bylonder
 
-Full-viewport Babylon.js workspace with modular reactive systems, generated controls, transform tools and browser-local persistence. Licensed under GPL-3.0-or-later (see `LICENSE`). Dependencies are pinned; Inspector is loaded on demand.
+Full-viewport Babylon.js workspace with modular reactive systems, generated controls, transform tools and browser-local persistence. Licensed as `LICENSING.md` describes. Dependencies are pinned; Inspector is loaded on demand.
 
 **Live site:** https://propolisa.github.io/bylonder/ . **Manual:** the [features index](docs/features/README.md) has a
 page per feature with step-by-step GIFs and an Open in Bylonder link (`index.html#example=<id>` opens an example);

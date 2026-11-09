@@ -129,7 +129,9 @@ are in [CLAUDE.md](CLAUDE.md).
 
 ## License and thanks
 
-GPL-3.0-or-later (see [LICENSE](LICENSE)). Bylonder is built on the work of the
+Bylonder's own code is MIT ([LICENSE-MIT](LICENSE-MIT)) or Apache-2.0 ([LICENSE-APACHE](LICENSE-APACHE)), at your
+choice. Code taken from Blender stays GPL, and the built app, which runs Blender's code, is distributed under the GPL as
+a whole: [LICENSING.md](LICENSING.md) says which files and why. Bylonder is built on the work of the
 [Blender Foundation](https://www.blender.org/) and Blender's contributors (GPL) and of the
 [Babylon.js](https://www.babylonjs.com/) team and community (Apache-2.0). It is an independent project, not
 affiliated with or endorsed by either.

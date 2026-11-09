@@ -8,7 +8,7 @@ An experienced Blender user enters Edit Mode with Tab and works without relearni
 
 ## Decisions
 
-1. **License.** Decided: Bylonder is GPL-3.0-or-later, so `src/bmesh`, `src/blenkernel/mesh` and `src/editors/mesh` can port Blender (GPL-2.0-or-later) faithfully. MIT KubeezCut, Apache-2.0 Babylon and manifold-3d, and MPL-2.0 mediabunny combine under it.
+1. **License.** Code ported from Blender (in `src/bmesh` and parts of `src/blenkernel/mesh`) stays GPL-2.0-or-later, and the built app is GPL-3.0-or-later as a whole; Bylonder's own code is MIT OR Apache-2.0 ([LICENSING.md](../LICENSING.md)).
 2. **Identifiers.** Keep Blender's names exactly for ported API (`BM_edge_split`, `bmo_extrude_face_region_exec`, `corner_verts`, operator idnames `mesh.extrude_region`, RNA property names), so a Blender change set greps straight to our code. Glue code stays in the repo's camelCase. Recommendation: yes.
 3. **BMesh layout.** Decided by benchmark (Grid 316 x 316, about 100k verts, Node 22): typed arrays build BMesh in about 200 ms against 270 to 520 ms for one JS object per element, compute normals in 20 ms against 90 to 155 ms, and use about 29 MB against 94 MB. BMesh stays in typed arrays.
 4. **Code-built meshes.** A mesh that `createScene` builds becomes Mesh data on its first edit, saved as a scene edit that replaces the code's geometry on every build, like a library override. A "Reset to Code Geometry" operator drops it. Recommendation: yes.
