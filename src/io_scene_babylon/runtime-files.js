@@ -16,6 +16,7 @@ export const EVALUATOR_FILES = {
   'geometry-nodes': { runtime: [...declared('geometry-nodes-evaluator'), ...['index', 'evaluator', 'geometry', 'convert', 'kernels'].flatMap((n) => declared(`geometry-nodes/${n}`))],
     folder: 'bylonder-geometry-nodes',
     files: { 'kernels.js': 'io_scene_babylon/polyfill/geometry-nodes-kernels.bundle.js', 'geometry-nodes.wasm': GEOMETRY_NODES_KERNELS } },
+  grease_pencil: { runtime: declared('grease-pencil') },
 };
 // GPL's notice and text in a folder of a package: [package path, src/ path].
 export const noticeFiles = (folder) => Object.entries(NOTICE).map(([name, from]) => [`${folder}/${name}`, from]);

@@ -6,6 +6,7 @@ import { driverCurve, driverEntities } from './driver-export.js';
 import { packKeys } from './runtime/fcurve-evaluator.js';
 import { baseMesh, geometryNodesEntities, modifierEntities } from './modifiers-export.js';
 import { ID_OB } from '../blenkernel/main-evaluated.js';
+import { greasePencilEntities } from './grease-pencil-export.js';
 import { entityOrder, IR_SCHEMA, IR_VERSION, referencesIn } from './runtime/ir.js';
 
 // Blender's two-letter ID codes, by the bpy.data collection of each ID type.
@@ -263,7 +264,8 @@ export function exportIR(world, { controls, live, bin, animationGroups = [], cur
     const time = Object.keys(properties).find((p) => p.endsWith('.frame_current'));
     // A Geometry Nodes modifier whose graph reads the scene's time runs again when the frame changes.
     for (const entity of Object.values(entities)) if (time && entity.type === 'modifier:NODES' && readsTime(graphs, entity.inputs.graph.graph)) entity.inputs.frame = { property: time };
-    Object.assign(entities, driverEntities(properties), animationEntities(ids, properties, time, animationGroups, curves, bin));
+    Object.assign(entities, driverEntities(properties), animationEntities(ids, properties, time, animationGroups, curves, bin),
+      greasePencilEntities(world, objects.map(([node]) => node), bin, time));
   }
   // What the page computes from is offered to authors.
   for (const entity of Object.values(entities)) if (entity.implementation) for (const [ref] of referencesIn(entity.inputs)) if ('property' in ref) properties[ref.property].suggested = true;

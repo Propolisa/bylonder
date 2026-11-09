@@ -15,7 +15,7 @@ import { Constants } from '@babylonjs/core/Engines/constants.js';
 import '@babylonjs/core/Engines/Extensions/engine.readTexture.js';
 import { provided } from '../port/wasm.js';
 import { blenderModule } from '../bmesh/bmesh-wasm.js';
-import { colorsTexture, greasedLineMaterial } from './grease-pencil.js';
+import { colorsTexture, greasedLineMaterial } from '../io_scene_babylon/runtime/grease-pencil.js';
 
 const { exports: x } = blenderModule;
 // grease-pencil-render.cc's kinds of lines and the floats of a point (view-space position, width, RGBA).

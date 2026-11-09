@@ -52,11 +52,15 @@ code:
   - tools/blender-port/wasm/grease-pencil-api.cc
   - tools/blender-port/wasm/grease-pencil-render.cc
   - src/draw/grease-pencil.js
+  - src/io_scene_babylon/runtime/grease-pencil.js
+  - src/io_scene_babylon/grease-pencil-export.js
   - src/draw/grease-pencil-render.js
   - src/runtimes/grease-pencil.js
   - src/editors/object/main-modes.js
 tests:
   - tests/grease-pencil-wasm.test.js
+  - tests/grease-pencil-onion-render-wasm.test.js
+  - tests/export-grease-pencil-wasm.test.js
   - tests/e2e/smoke.mjs
 limits:
   - Stroke ends and corners are flat (GreasedLine has no round caps or joins); Dots and Squares strokes draw as lines.
@@ -69,6 +73,7 @@ limits:
   - Drawing a stroke through the camera (Numpad 0), as in Dusk Lake, hides the whole object until it is reopened; draw in a perspective view instead.
   - Fill does not yet fill a shape drawn in a new 2D Animation file in the viewport.
   - Properties > Data does not open on Dusk Lake (a page error); the Outliner and the Dope Sheet list its layers.
+  - In exported pages (File > Export > JavaScript) each layer shows its keyed drawings as the app draws them at their key: layer opacity, tint or transforms animated between keys, time-dependent modifiers and onion skins are not carried, and overlapping objects sort by layer rather than as whole objects.
 ---
 # Grease Pencil
 

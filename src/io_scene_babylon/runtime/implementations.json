@@ -92,6 +92,9 @@
       { "implementation": "view transform extension (bylonder-view-transform.js): Standard as sRGB's encoding, other views and looks through a lattice of Blender's display processor computed at export (data; the license of Blender's color management files is still to be checked)", "license": "MIT OR Apache-2.0", "fidelity": "exact" },
       { "implementation": "Babylon's image processing", "license": "Apache-2.0", "fidelity": "approximate" }
     ],
+    "grease_pencil:LAYER": [
+      { "implementation": "page runtime (grease-pencil.js): each keyed drawing as Main draws it, strokes as GreasedLine meshes and fills as triangles, the drawing of the last key at or before the frame shown", "license": "MIT OR Apache-2.0", "fidelity": "approximate" }
+    ],
     "particles": [
       { "implementation": "per-frame cache", "license": "data", "fidelity": "baked", "status": "planned" }
     ]

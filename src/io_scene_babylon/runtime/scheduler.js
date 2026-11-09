@@ -28,6 +28,7 @@ export const EVALUATORS = {
   fcurve: () => import('./fcurve-evaluator.js'),
   modifiers: (page) => import('./modifiers-evaluator.js').then((module) => module.load(page)),
   'geometry-nodes': (page) => import('./geometry-nodes-evaluator.js').then((module) => module.load(page)),
+  grease_pencil: () => import('./grease-pencil.js').then(({ run }) => ({ run })),
 };
 /** What Babylon runs itself (`native`: an F-Curve its AnimationGroup plays), which the scheduler leaves to it unless a unit takes over. */
 export const NATIVE = ['native'];
@@ -54,6 +55,9 @@ export function createScheduler(ir, page) {
   const drawing = { nodeOf: (id) => ir.ids[id]?.node };
   if (Object.values(entities).some((e) => e.implementation === 'modifiers')) {
     drawing.meshBuffers = async (mesh) => /** @type {any} */ (await evaluator('modifiers')).draw(mesh);
+  }
+  if (Object.values(entities).some((e) => e.implementation === 'grease_pencil')) {
+    drawing.greasePencil = (node, layer) => import('./grease-pencil.js').then((module) => module.drawLayer(scene, node, layer));
   }
   /** @type {Promise<void> | null} */
   let pending = null, frame = NaN;

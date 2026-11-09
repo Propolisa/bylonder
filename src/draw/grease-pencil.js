@@ -5,135 +5,31 @@
 // a change of its last strokes (a stroke being drawn) rebuilds only the active mesh, so drawing stays cheap however many
 // strokes the drawing holds. Layers draw in their order over the scene, as Blender's 2D layers do.
 import { Mesh } from '@babylonjs/core/Meshes/mesh.js';
-import { VertexData } from '@babylonjs/core/Meshes/mesh.vertexData.js';
-import { GreasedLineMesh } from '@babylonjs/core/Meshes/GreasedLine/greasedLineMesh.js';
-import { CreateGreasedLineMaterial } from '@babylonjs/core/Meshes/Builders/greasedLineBuilder.js';
-import { RawTexture } from '@babylonjs/core/Materials/Textures/rawTexture.js';
-import { ShaderMaterial } from '@babylonjs/core/Materials/shaderMaterial.js';
 import { Constants } from '@babylonjs/core/Engines/constants.js';
 import { Material } from '@babylonjs/core/Materials/material.js';
-import { MaterialPluginBase } from '@babylonjs/core/Materials/materialPluginBase.js';
+import { RenderingGroup } from '@babylonjs/core/Rendering/renderingGroup.js';
 import defaultTheme from '../editors/interface/theme-default.json' with { type: 'json' };
 import { overlayMaterial } from './overlay-edit-mesh.js';
 import { pointSprites, setPoints } from './point-sprites.js';
-import { Vector2 } from '@babylonjs/core/Maths/math.vector.js';
-import { RenderingGroup } from '@babylonjs/core/Rendering/renderingGroup.js';
+import { BLEND_MODES, CURVE_INTS, POINT_FLOATS, alphaIndex, fillMesh as fillGeometry, followResolution, greasedLineMaterial, meanScale, strokeArrays, strokesMesh } from '../io_scene_babylon/runtime/grease-pencil.js';
 
-// grease-pencil-api.cc's packing: a curve's ints and a point's floats.
-export const CURVE_INTS = 5, POINT_FLOATS = 14;
-export const CURVE_CYCLIC = 1, CURVE_STROKE = 2, CURVE_FILL = 4;
 // A drawing's last strokes that change without the rest (a stroke being drawn) stay in the active mesh up to this many.
 const ACTIVE_STROKES = 8;
-// GreasePencilLayerBlendMode (DNA_grease_pencil_types.h) as Babylon's alpha modes; Hard Light and Divide blend normally.
-const BLEND_MODES = [Constants.ALPHA_COMBINE, Constants.ALPHA_COMBINE, Constants.ALPHA_ADD, Constants.ALPHA_SUBTRACT, Constants.ALPHA_MULTIPLY, Constants.ALPHA_COMBINE];
-// GreasedLineMeshColorDistributionType and GreasedLineMeshColorMode.
-const COLOR_DISTRIBUTION_SEGMENT = 0, COLOR_MODE_SET = 0;
-// The layer order within the transparent pass: onion skins first, then layers bottom to top, each layer's fills under its strokes.
-const alphaIndex = (draw, part) => (draw.onion ? -1000 : 0) + draw.layer * 3 + part;
-
-const FILL_VERTEX = `precision highp float;
-attribute vec3 position;
-attribute vec4 color;
-uniform mat4 worldViewProjection;
-varying vec4 vColor;
-void main() { vColor = color; gl_Position = worldViewProjection * vec4(position, 1.0); }`;
-// Colors come as Blender's draw gives them, in display sRGB (grease-pencil-api.cc color_output): a view that draws in
-// scene linear (Rendered, its post-process displaying it) takes them back to linear, as Blender's render draws them.
-const FILL_FRAGMENT = `precision highp float;
-varying vec4 vColor;
-uniform float sceneLinear;
-vec3 linear(vec3 c) { return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c)); }
-void main() { if (vColor.a <= 0.0) discard; gl_FragColor = vec4(sceneLinear > 0.5 ? linear(vColor.rgb) : vColor.rgb, vColor.a); }`;
-// GreasedLine sets a stroke's color after Babylon's material takes its color to scene linear: this does it after.
-class SceneLinearStrokePlugin extends MaterialPluginBase {
-  constructor(material) { super(material, 'BlenderSceneLinearStroke', 300, {}, true, true); }
-  getClassName() { return 'BlenderSceneLinearStrokePlugin'; }
-  isCompatible() { return true; }
-  getCustomCode(shaderType, shaderLanguage = 0) {
-    const linear = shaderLanguage === 0 ? 'color.rgb = toLinearSpace(color.rgb);' : 'color = vec4f(toLinearSpaceVec3(color.rgb), color.a);';
-    return shaderType === 'fragment' ? { CUSTOM_FRAGMENT_BEFORE_FRAGCOLOR: `#ifdef IMAGEPROCESSINGPOSTPROCESS\n${linear}\n#endif\n` } : null;
-  }
-}
-
-// The mean scale of a matrix's axes, by which Blender scales a stroke's radius.
-const meanScale = (m) => [0, 4, 8].reduce((sum, i) => sum + Math.hypot(m[i], m[i + 1], m[i + 2]), 0) / 3;
-
-// A drawing's strokes from `first` to `last` curve as GreasedLine points, widths (two per point) and their colors.
-function strokeArrays(draw, first, last, scale) {
-  const { curves, points } = draw, lines = [], widths = [], colors = [];
-  for (let c = first; c < last; c++) {
-    const at = c * CURVE_INTS, flags = curves[at + 2];
-    if (!(flags & CURVE_STROKE)) continue;
-    const start = curves[at], count = curves[at + 1], cyclic = flags & CURVE_CYCLIC;
-    if (!count) continue;
-    const order = Array.from({ length: count + (cyclic ? 1 : 0) }, (_, i) => start + (i % count));
-    if (count === 1) order.push(start);
-    const line = new Float32Array(order.length * 3);
-    order.forEach((p, i) => {
-      const o = p * POINT_FLOATS;
-      const width = 2 * points[o + 3] * scale;
-      line.set(points.subarray(o, o + 3), i * 3);
-      // A dot: a line as long as it is wide (GreasedLine has no caps).
-      if (count === 1) line[i * 3] += (i ? 0.5 : -0.5) * width / scale;
-      widths.push(width, width);
-      colors.push(...points.subarray(o + 4, o + 8));
-    });
-    lines.push(line);
-  }
-  return { lines, widths, colors: Float32Array.from(colors) };
-}
-
-// A colors texture the size of `count` colors (RGBA floats), laid out as GreasedLine looks them up.
-export function colorsTexture(scene, colors, kept) {
-  const count = colors.length / 4, max = scene.getEngine().getCaps().maxTextureSize;
-  const width = Math.max(1, Math.min(count, max)), height = Math.max(1, Math.ceil(count / max));
-  const data = new Float32Array(width * height * 4);
-  data.set(colors);
-  const size = kept?.getSize();
-  if (kept && size.width === width && size.height === height) {
-    kept.update(data);
-    return kept;
-  }
-  kept?.dispose();
-  return new RawTexture(data, width, height, Constants.TEXTUREFORMAT_RGBA, scene, false, true, RawTexture.NEAREST_NEAREST, Constants.TEXTURETYPE_FLOAT);
-}
-
-// GreasedLine widens strokes by the aspect of the view it draws in: each view (and a render) sets it before drawing.
-const plugins = new Set();
-function trackAspect(scene) {
-  if (scene.metadata?.greasedLineAspect) return;
-  scene.metadata = { ...scene.metadata, greasedLineAspect: true };
-  const resolution = new Vector2();
-  scene.onBeforeCameraRenderObservable.add(() => {
-    const engine = scene.getEngine();
-    resolution.set(engine.getRenderWidth(), engine.getRenderHeight());
-    for (const plugin of plugins) plugin.resolution = resolution;
-  });
-}
 
 // GreasedLine's settings for a drawing's object (runtimes/grease-pencil.js): Blender's look (world widths, no dashes)
 // unless its object's Babylon settings ask otherwise.
 export const BLENDER_LOOK = { sizeAttenuation: false, screenScale: 1, useDash: false, dashCount: 1, dashRatio: 0.5, dashOffset: 0 };
-export function greasedLineMaterial(scene, name, sizeAttenuation) {
-  const material = CreateGreasedLineMaterial(name, { useColors: true, width: 1, sizeAttenuation, colorMode: COLOR_MODE_SET,
-    colorDistributionType: COLOR_DISTRIBUTION_SEGMENT, cameraFacing: true }, scene);
-  Object.assign(material, { transparencyMode: Material.MATERIAL_ALPHABLEND, disableDepthWrite: true, backFaceCulling: false, disableLighting: true });
-  new SceneLinearStrokePlugin(material);
-  return material;
-}
 
 // One GreasedLine mesh of strokes, rebuilt with set(); empty, it has no mesh. Its material is made again only when size
 // attenuation (a define of GreasedLine's) changes.
 function strokeBatch(scene, name, owner) {
-  trackAspect(scene);
   const batch = { mesh: null, material: null, plugin: null, texture: null, look: null };
   batch.configure = (look, blend) => {
     if (batch.look?.sizeAttenuation !== look.sizeAttenuation) {
-      if (batch.plugin) plugins.delete(batch.plugin);
       batch.material?.dispose();
       batch.material = greasedLineMaterial(scene, name, look.sizeAttenuation);
       batch.plugin = batch.material.pluginManager.getPlugin('GreasedLinePluginMaterial');
-      plugins.add(batch.plugin);
+      followResolution(scene, batch.plugin);
       if (batch.texture) batch.plugin.colorsTexture = batch.texture;
       if (batch.mesh) batch.mesh.material = batch.material;
     }
@@ -143,42 +39,25 @@ function strokeBatch(scene, name, owner) {
     Object.assign(batch.plugin, { width: look.sizeAttenuation ? screenScale : 1, useDash, dashCount, dashRatio, dashOffset });
     batch.material.alphaMode = blend;
   };
-  batch.set = ({ lines, widths, colors }, matrix, order) => {
+  batch.set = (strokes, matrix, order) => {
     batch.mesh?.dispose();
     batch.mesh = null;
-    if (!lines.length) return;
-    let pointer = 0;
-    const colorPointers = lines.flatMap((line) => Array.from({ length: line.length / 3 }, () => [pointer, pointer++]).flat());
-    batch.texture = colorsTexture(scene, colors, batch.texture);
-    batch.plugin.colorsTexture = batch.texture;
-    const mesh = new GreasedLineMesh(name, scene, { points: lines, widths, colorPointers });
+    if (!strokes.lines.length) return;
+    const mesh = strokesMesh(scene, name, strokes, batch.plugin, batch.texture);
+    batch.texture = batch.plugin.colorsTexture;
     Object.assign(mesh, { material: batch.material, alphaIndex: order, isPickable: true, metadata: { drawOwner: owner, greasePencil: true } });
     mesh.freezeWorldMatrix(matrix);
     batch.mesh = mesh;
   };
   batch.place = (matrix) => batch.mesh?.freezeWorldMatrix(matrix);
-  batch.dispose = () => { batch.mesh?.dispose(); batch.texture?.dispose(); batch.material?.dispose(); plugins.delete(batch.plugin); };
+  batch.dispose = () => { batch.mesh?.dispose(); batch.texture?.dispose(); batch.material?.dispose(); };
   return batch;
-}
-
-export function fillMaterial(scene, name) {
-  const material = Object.assign(new ShaderMaterial(name, scene, { vertexSource: FILL_VERTEX, fragmentSource: FILL_FRAGMENT },
-    { attributes: ['position', 'color'], uniforms: ['worldViewProjection', 'sceneLinear'], needAlphaBlending: true }), { backFaceCulling: false, disableDepthWrite: true });
-  material.onBindObservable.add(() => material.getEffect().setFloat('sceneLinear', +scene.imageProcessingConfiguration.applyByPostProcess));
-  return material;
 }
 
 // A drawing's fills: its points' positions and fill colors, Blender's triangles.
 function fillMesh(scene, name, owner, draw, matrix, kept) {
-  if (!draw.triangles.length) { kept?.dispose(); return null; }
-  const mesh = kept ?? new Mesh(name, scene);
-  const count = draw.points.length / POINT_FLOATS, positions = new Float32Array(count * 3), colors = new Float32Array(count * 4);
-  for (let p = 0; p < count; p++) {
-    positions.set(draw.points.subarray(p * POINT_FLOATS, p * POINT_FLOATS + 3), p * 3);
-    colors.set(draw.points.subarray(p * POINT_FLOATS + 8, p * POINT_FLOATS + 12), p * 4);
-  }
-  Object.assign(new VertexData(), { positions, colors, indices: Uint32Array.from(draw.triangles) }).applyToMesh(mesh, false);
-  mesh.material ??= fillMaterial(scene, name);
+  const mesh = fillGeometry(scene, name, draw, kept);
+  if (!mesh) return null;
   mesh.material.alphaMode = BLEND_MODES[draw.blend] ?? Constants.ALPHA_COMBINE;
   Object.assign(mesh, { alphaIndex: alphaIndex(draw, 0), isPickable: true, metadata: { drawOwner: owner, greasePencil: true } });
   mesh.freezeWorldMatrix(matrix);

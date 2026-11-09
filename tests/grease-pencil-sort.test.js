@@ -4,7 +4,8 @@
 // overlapping legs flicker.
 import assert from 'node:assert/strict';
 import { FreeCamera, Mesh, NullEngine, Scene, TransformNode, Vector3 } from '@babylonjs/core';
-import { greasePencilSortCompare, greasedLineMaterial } from '../src/draw/grease-pencil.js';
+import { greasePencilSortCompare } from '../src/draw/grease-pencil.js';
+import { greasedLineMaterial } from '../src/io_scene_babylon/runtime/grease-pencil.js';
 
 const scene = new Scene(new NullEngine());
 new FreeCamera('Camera', Vector3.Zero(), scene).setTarget(new Vector3(0, 0, 1));

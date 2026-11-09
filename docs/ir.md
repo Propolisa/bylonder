@@ -90,7 +90,11 @@ arrays in Blender's axes (Z up), `face_offsets` with one more entry than there a
 general is `{ mesh?, points?, instances? }`: points are `{ positions, attributes }`, a radius being the attribute
 `radius`; instances are `{ references, reference_indices, transforms, attributes }`, each reference an ID
 (`{ "id": "OB:Tree" }`) or a geometry (`{ "geometry": ... }`), and per instance the index of its reference and its 4x4
-transform by columns. Curves are not defined yet. `runtime/mesh.js` draws any of them in Babylon: a mesh as draw
+transform by columns. A Grease Pencil layer's drawing, `grease_pencil`, is `{ layer, blend, matrix, scale, drawing }`: the
+layer's index and blend mode, its matrix in its object's space (Babylon's axes and layout) and scale, and `drawing`
+`{ curves, points, triangles }` as Main draws it (5 ints per curve: first point, points, flags, material index, hash;
+14 floats per point: position in Babylon's axes, radius, stroke and fill colors in display sRGB, selection, weight; the
+fills' triangles by point), or null. Curves are not defined yet. `runtime/mesh.js` draws any of them in Babylon: a mesh as draw
 buffers (the modifier kernel's draw step where the package ships it, else a fan of each face), instances as thin
 instances of their references' meshes, points as a point cloud.
 
@@ -108,7 +112,8 @@ resolves each node's type key through the registry as the scheduler resolves an 
 `entities` are the computed things, keyed `<id>/<kind>/<name>`: a modifier (`OB:Cube/modifier/Bevel`,
 `modifier:BEVEL`), a driver (`OB:Crosshead/driver/location[0]`, `driver:SCRIPTED`), an F-Curve
 (`OB:Flywheel/animation/rotation_euler[1]`, `animation:FCURVE`, reading the frame and writing a property), a Geometry
-Nodes modifier (`modifier:NODES`, its graph an input), a material (`material:NODES`). Each has its `type`, `id`,
+Nodes modifier (`modifier:NODES`, its graph an input), a material (`material:NODES`), a Grease Pencil layer
+(`OB:Ball/grease_pencil/Ball`, `grease_pencil:LAYER`). Each has its `type`, `id`,
 `inputs`, `outputs` (where each lands: `{ "property": path }`, `{ "draw": node }`, or nowhere when only other entities
 read it) and `implementation`: what the package ships for it (`driver`, `modifiers`, `geometry-nodes`, `animation`
 for Babylon's AnimationGroup), or none when only its baked result ships. `order` lists the keys so each runs after what it reads.
@@ -120,6 +125,7 @@ What each kind of entity reads and gives:
 | `driver:<type>` | `driver` (type, expression, variables, a single property's target as `{ value }`), `curve`, `objects` (transform properties and static parts), `frame` when the expression reads it | `value` |
 | `modifier:<TYPE>` | `mesh` (the base mesh's buffers, or the previous modifier's output), its settings by name (a vector as an array), `kernel` (the module's type and layouts) | `mesh` |
 | `modifier:NODES` | `graph`, `geometry` (`{ mesh }` of the base mesh with its attributes, or the previous modifier's output), the interface's inputs by identifier, `frame` when the graph reads the scene's time (Scene Time) | `geometry` |
+| `grease_pencil:LAYER` | `layer`, `blend`, `matrix`, `scale`, `frames` (the layer's keyed frames) and `drawings` (each key's drawing, its arrays buffers, or null), `frame` | `geometry` (the drawing shown at the frame: its last key's at or before it) |
 | `animation:FCURVE` | its action's RNA path, `data_path` and `array_index` as names, `animation` (the Babylon AnimationGroup and target node that play it, `native`) or `curve` (`extrapolation`, `auto_smoothing`, `cycles`, and `keyframes` as a buffer of 13 floats per key: co, handles, interpolation, easing, handle types, back, amplitude, period; `fcurve`), `frame` | `value` |
 
 Each frame, the scheduler runs again what reads `frame_current` and is not Babylon's own. An F-Curve's keys are not

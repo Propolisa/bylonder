@@ -8,7 +8,7 @@ import { BlenderMain, datafiles } from '../src/bmesh/bmesh-wasm.js';
 import { contextStruct, setContextPointer } from '../src/python/bpy_rna.js';
 import '../src/python/bpy_interface.js';
 import { Window, loadKeyconfig, SPACE_VIEW3D, RGN_TYPE_WINDOW } from '../src/windowmanager/wm-window.js';
-import { CURVE_INTS, POINT_FLOATS, CURVE_STROKE, CURVE_FILL } from '../src/draw/grease-pencil.js';
+import { CURVE_INTS, POINT_FLOATS, CURVE_STROKE, CURVE_FILL } from '../src/io_scene_babylon/runtime/grease-pencil.js';
 
 await datafiles;
 const { view: fixtureView } = JSON.parse(await readFile(new URL('./fixtures/sculpt/suzanne-draw.json', import.meta.url), 'utf8'));

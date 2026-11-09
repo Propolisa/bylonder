@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import { FreeCamera, NullEngine, Scene, Vector3 } from '@babylonjs/core';
 import { GreasedLineMesh } from '@babylonjs/core/Meshes/GreasedLine/greasedLineMesh.js';
-import { fillMaterial, greasedLineMaterial } from '../src/draw/grease-pencil.js';
+import { fillMaterial, greasedLineMaterial } from '../src/io_scene_babylon/runtime/grease-pencil.js';
 
 const scene = new Scene(new NullEngine());
 new FreeCamera('Camera', new Vector3(0, 0, -5), scene);

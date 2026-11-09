@@ -4,7 +4,7 @@
 // passed to their Parse functions as Babylon's .babylon loader does, with images as files beside it. `load(engine)`
 // gives the scene with its controls (runtime/blend-scene.js), `createScene(engine, canvas)` the scene alone. The scene's IR
 // (docs/ir.md), its properties and computed entities among it, is scene.ir.json beside it.
-import { AbstractEngine, Matrix } from '@babylonjs/core';
+import { AbstractEngine, Animation, Matrix } from '@babylonjs/core';
 import { objectMatrix } from '../runtime/object-transform.js';
 import { CLOCK, sampledGaps, serializeScene } from './babylon-export.js';
 import { exportRuntimes } from '../runtimes/runtimes.js';
@@ -165,6 +165,18 @@ async function displaySettings(world, bin, composites) {
   return { exposure: 2 ** view.exposure, exponent: displayExponent(view.gamma), lattice };
 }
 
+// A scene whose only animation is its Grease Pencil drawings plays its frames all the same: an animation group counting
+// the frames (CLOCK) on a Grease Pencil object's node, whose frame the page shows.
+function greasePencilClock(world, ir, groups) {
+  const animated = Object.values(ir.entities).find((e) => e.type === 'grease_pencil:LAYER' && e.inputs.frames.length > 1);
+  if (groups.length || !animated) return;
+  const { fps, frameStart, frameEnd, loop } = world.animation.time.state;
+  const animation = new Animation('Frame', CLOCK, fps, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CYCLE);
+  animation.setKeys([{ frame: frameStart, value: frameStart }, { frame: frameEnd, value: frameEnd }]);
+  groups.push({ name: 'Grease Pencil', from: frameStart, to: frameEnd, speedRatio: 1, loopAnimation: !!loop, isAdditive: false, weight: -1, playOrder: 0,
+    targetedAnimations: [{ animation: animation.serialize(), targetId: animated.outputs.geometry.draw }] });
+}
+
 // The package's files but the runtime's: scene.js, scene.d.ts, scene.ir.json, scene.bin and images/. With `live`, objects whose
 // modifiers are all Blender's keep them live (modifiers-export.js), run by modifiers.wasm in bylonder-modifiers/. With
 // `bakeAnimation`, what Babylon cannot play as its F-Curve is sampled per frame.
@@ -202,6 +214,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   const controls = [...exportControls(world, data), ...(composited?.knobs ?? [])];
   const ir = exportIR(world, { controls, live, bin, animationGroups: data.animationGroups, curves: data.liveCurves }), irJson = json(ir);
   sampledGaps(data, ir);
+  greasePencilClock(world, ir, data.animationGroups);
   const kernels = await irMaterials(data.materials, graphs, ir, parity), code = sharedCode(data.materials);
   parentInstances(objects);
   const parented = [...data.transformNodes, ...data.meshes, ...data.lights, ...data.cameras].filter((e) => e.parentId !== undefined);
