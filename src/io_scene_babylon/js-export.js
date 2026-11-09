@@ -208,8 +208,9 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   }
   const composited = data.cameras.length ? exportCompositor(world) : null;
   const display = await displaySettings(world, bin);
-  // Area lights that cast shadows, as Bylonder's Area Light Shadows extension has them (runtime/area-light.js).
-  const areaShadows = (data.shadowGenerators ?? []).some((g) => data.lights.some((l) => l.id === g.lightId && l.type === AREA_LIGHT));
+  // Area lights as Bylonder's (runtime/area-light.js): lit once parsed, and casting shadows as its Area Light Shadows
+  // extension has them.
+  const areaLights = data.lights.some((l) => l.type === AREA_LIGHT);
   // Bylonder's own pipeline of a rendered view (render-babylon.js SceneLinearPipeline) turns the scene's image processing
   // off, so materials would encode to display themselves: with the view transform, which displays instead, it stays out
   // unless one of its effects is on.
@@ -248,7 +249,7 @@ import { fillMaterials } from './bylonder/materials.js';
 import kernels from './${NODE_KERNELS}';` : ''}${curves ? `
 // The curves blocks the materials drawing curves use, before they are parsed.
 import './${CURVES_GLSL_FILE}';` : ''}${display ? `
-import { viewTransform } from './bylonder-view-transform.js';` : ''}${areaShadows ? `
+import { viewTransform } from './bylonder-view-transform.js';` : ''}${areaLights ? `
 import { parseLight } from './bylonder-area-light.js';` : ''}${composited ? `
 import { compositor } from './bylonder-blocks.js';` : ''}
 import { Animation, AnimationGroup, CascadedShadowGenerator, Color3, Color4, CubeTexture, EffectLayer, Geometry, HDRCubeTexture, Light, LinesMesh, Material, Matrix, Mesh, MorphTargetManager, MultiMaterial, PostProcess, Quaternion, ReflectionProbe, Scene, SerializationHelper, ShadowGenerator, Skeleton, SubMesh, TransformNode, Vector3, Camera, ParticleSystem } from '@babylonjs/core';
@@ -348,7 +349,7 @@ ${geometryLines.join('\n')}
 
   const nodes = {};
 ${objectLines}
-${parse('LIGHTS', data.lights, `nodes[entry.uniqueId] = ${areaShadows ? 'parseLight' : 'Light.Parse'}(entry, scene)`)}${parse('CAMERAS', data.cameras, 'nodes[entry.uniqueId] = Camera.Parse(entry, scene)')}
+${parse('LIGHTS', data.lights, `nodes[entry.uniqueId] = ${areaLights ? 'parseLight' : 'Light.Parse'}(entry, scene)`)}${parse('CAMERAS', data.cameras, 'nodes[entry.uniqueId] = Camera.Parse(entry, scene)')}
 ${parented.map((e) => `  nodes[${e.uniqueId}].parent = nodes[${e.parentId}] ?? null;`).join('\n')}${data.lights.some((l) => l.excludedMeshesIds?.length || l.includedOnlyMeshesIds?.length) ? `
   // The meshes each light leaves out or lights alone, by id, as Babylon's loader resolves them once the meshes exist.
   const meshes = (ids) => ids.map((id) => scene.getMeshById(id)).filter(Boolean);

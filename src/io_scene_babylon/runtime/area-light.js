@@ -1,9 +1,9 @@
 // @ts-check
 // SPDX-License-Identifier: MIT OR Apache-2.0
-// Blender's Area light as Babylon's rectangular area light that casts shadows: Babylon has no shadow for its area lights,
-// so this one is a shadow light (Babylon's IShadowLight) whose shadow is a point light's cube from its center, as EEVEE's
-// punctual shadow of an area light is. The app's Area Light Shadows extension (blenkernel/light/area-light.js), and an
-// exported page's area lights that cast shadows.
+// Blender's Area light as Babylon's rectangular area light, lit once parsed and casting shadows: Babylon has no shadow
+// for its area lights, so this one is a shadow light (Babylon's IShadowLight) whose shadow is a point light's cube from
+// its center, as EEVEE's punctual shadow of an area light is. The app's Area Light Shadows extension
+// (blenkernel/light/area-light.js), and an exported page's area lights.
 import { Light, Matrix, Node, RectAreaLight, Vector3 } from '@babylonjs/core';
 
 /** @typedef {import('@babylonjs/core').Scene} Scene @typedef {import('@babylonjs/core').Camera} Camera */
@@ -23,6 +23,9 @@ export class AreaLight extends RectAreaLight {
     this.shadowMaxZ = undefined;
   }
 
+  // Babylon scales an area light's intensity by 1 until its intensity mode or radius is set (as a parsed light's are),
+  // which then scale it by 0, a light type it has no case for: an area light shines by its intensity alone.
+  getScaledIntensity() { return this.intensity; }
   needCube() { return true; }
   needProjectionMatrixCompute() { return false; }
   forceProjectionMatrixCompute() {}
@@ -56,7 +59,7 @@ export class AreaLight extends RectAreaLight {
 const AREA = 'Light_Type_4';
 
 /**
- * A serialized light parsed as Babylon's loader parses it, an area light as one that casts shadows.
+ * A serialized light parsed as Babylon's loader parses it, an area light as this one.
  * @param {any} entry @param {Scene} scene
  */
 export function parseLight(entry, scene) {
