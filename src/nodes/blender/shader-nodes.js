@@ -32,7 +32,7 @@ import { eeveeParity, eeveeParityChanged } from '../../draw/eevee-parity.js';
 import { DITHER_FUNCTIONS, ditherOffset } from '../../render/dither.js';
 import { readsSceneDepth, sceneDepth } from '../../render/scene-depth.js';
 import { FROXEL_JITTER } from '../../draw/volume-shaders.js';
-import { AREA_SPECULAR, LIGHT_SPECULAR, usesAreaLights } from '../../blenkernel/light/area-specular.js';
+import { AREA_PRE_LIGHTING, AREA_SPECULAR, LIGHT_SPECULAR, usesAreaLights } from '../../blenkernel/light/area-specular.js';
 import '../graph-roots.js';
 import { SharedShadowDepthWrapper } from '../../draw/shadow-depth-wrapper.js';
 
@@ -68,7 +68,6 @@ export class BlenderNodeMaterial extends NodeMaterial {
   needAlphaTesting() { return this.#hashed || super.needAlphaTesting(); }
 }
 
-const AREA_PRE_LIGHTING = /preLightingInfo computeAreaPreLightingInfo\(/;
 const DIMENSIONS = ['1D', '2D', '3D', '4D'];
 // The outputs whose socket holds the node's value ('=identifier' in its values), drawn on the node (custom_draw).
 export const OUTPUT_VALUES = { ShaderNodeValue: ['Value'], ShaderNodeRGB: ['Color'], ShaderNodeNormal: ['Normal'] };
@@ -1319,10 +1318,9 @@ export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
   _areaSpecular(state) {
     const key = 'pbrDirectLightingFunctions', store = ShaderStore.GetIncludesShadersStore(state.shaderLanguage);
     if (state.functions[key]?.includes(`#include<${key}>`)) state.functions[key] = store[key].replace(AREA_SPECULAR.search, AREA_SPECULAR.replace);
-    // Babylon's WebGPU engine inlines the functions marked `#define inline` (ShaderCodeInliner), which samples their sampler
-    // arguments in place as WebGPU's GLSL needs; its PBR's area light function is not marked.
+    // Its area light function marked for inlining on WebGPU (AREA_PRE_LIGHTING).
     const setup = 'pbrDirectLightingSetupFunctions';
-    if (state.sharedData.scene.getEngine().isWebGPU && state.functions[setup]?.includes(`#include<${setup}>`)) state.functions[setup] = store[setup].replace(AREA_PRE_LIGHTING, '\n#define inline\n$&');
+    if (state.sharedData.scene.getEngine().isWebGPU && state.functions[setup]?.includes(`#include<${setup}>`)) state.functions[setup] = store[setup].replace(AREA_PRE_LIGHTING.search, AREA_PRE_LIGHTING.replace);
     // The lights' specular color (LIGHT_SPECULAR), in code emitted inline and in an include of the lights of its own name.
     store[LIGHT_FRAGMENT] ??= store.lightFragment.replace(LIGHT_SPECULAR.search, LIGHT_SPECULAR.replace);
     state.compilationString = state.compilationString.replaceAll('#include<lightFragment>', `#include<${LIGHT_FRAGMENT}>`).replace(LIGHT_SPECULAR.search, LIGHT_SPECULAR.replace);

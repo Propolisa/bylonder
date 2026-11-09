@@ -312,7 +312,7 @@ export function createMainView(state) {
     const tree = !graph && !kind ? nodeTreeOf(ma, warnings) : null;
     const nodes = tree && !tree.nodes.every((node) => PRINCIPLED_TREE.includes(node.idname)) ? nodeMaterialFromTree(name, scene, tree) : null;
     if (nodes?.missing.length) warnings.push(`Material "${name}": its ${nodes.missing.join(', ')} nodes are not opened`);
-    const material = graph ? Material.Parse(JSON.parse(graph), scene, '') : nodes ? nodes.material : kind === 'standard' ? new StandardMaterial(name, scene)
+    const material = graph ? Material.Parse(JSON.parse(graph), scene, '') : nodes ? nodes.material : kind === 'standard' ? new StandardMaterial(name, scene, true)
       : Object.assign(new PBRMaterial(name, scene), { metallic: 0, roughness: 0.5, albedoColor: new Color3(0.8, 0.8, 0.8) });
     material.name = name;
     material.metadata = { ...material.metadata, wbId: name };

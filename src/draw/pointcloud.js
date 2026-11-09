@@ -48,7 +48,7 @@ export class PointCloudPlugin extends MaterialPluginBase {
     super(material, 'BlenderPointCloud', 310, { POINTCLOUD: false });
     this._enable(true);
   }
-  // GLSL only: on WebGPU, Babylon's materials are WGSL and draw a point as its square (docs/webgpu.md).
+  // GLSL only: a WGSL material draws a point as its square (on WebGPU Bylonder's are GLSL, gpu-engine.js materialsFromGLSL).
   static of(material) { return material.pluginManager?.getPlugin('BlenderPointCloud') ?? (material.shaderLanguage === 0 ? new PointCloudPlugin(material) : null); }
   getClassName() { return 'PointCloudPlugin'; }
   prepareDefines(defines, scene, mesh) { defines.POINTCLOUD = !!mesh.metadata?.pointcloud; }
@@ -63,7 +63,7 @@ export class PointCloudPlugin extends MaterialPluginBase {
 // Blender's default surface (the startup cube's material) for a point cloud without one.
 const defaults = new WeakMap();
 const defaultMaterial = (scene) => {
-  if (!defaults.has(scene)) defaults.set(scene, Object.assign(new StandardMaterial('__pointcloud default', scene), { diffuseColor: new Color3(0.8, 0.8, 0.8), specularColor: Color3.Black() }));
+  if (!defaults.has(scene)) defaults.set(scene, Object.assign(new StandardMaterial('__pointcloud default', scene, true), { diffuseColor: new Color3(0.8, 0.8, 0.8), specularColor: Color3.Black() }));
   return defaults.get(scene);
 };
 

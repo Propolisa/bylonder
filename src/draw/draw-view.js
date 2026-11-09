@@ -4,7 +4,6 @@
 // Computed once per view render and reused, without allocations.
 import { Camera, MaterialPluginBase, PBRBaseMaterial, RegisterMaterialPlugin, ShaderStore, Vector3, Vector4 } from '@babylonjs/core';
 import '@babylonjs/core/Shaders/ShadersInclude/reflectionFunction.js';
-import { reflectionFunctionWGSL } from '@babylonjs/core/ShadersWGSL/ShadersInclude/reflectionFunction.js';
 import { eeveeParity } from './eevee-parity.js';
 
 const view = { right: [0, 0, 0], up: [0, 0, 0], forward: [0, 0, 0], position: [0, 0, 0], persp: true, pixelFac: 1, size: [1, 1], winmat: [1, 1], camera: null, renderId: -1 };
@@ -54,15 +53,7 @@ export function viewForward(camera, orthographic = true) {
 // the scene's EEVEE Parity (eevee-parity.js) the view is bound as a perspective one, so the eye is Babylon's.
 export const REFLECTION_EYE = /worldNormal,vEyePosition\.xyz/;
 if (!REFLECTION_EYE.test(ShaderStore.IncludesShadersStore.reflectionFunction)) throw Error("Babylon's reflectionFunction changed: BlenderViewPlugin cannot set its eye");
-// The same in Babylon's WGSL (WebGPU), which has no ?: and reads uniforms from its uniform buffer.
-const REFLECTION_EYE_WGSL = /worldNormal,scene\.vEyePosition\.xyz/;
-if (!REFLECTION_EYE_WGSL.test(reflectionFunctionWGSL.shader)) throw Error("Babylon's WGSL reflectionFunction changed: BlenderViewPlugin cannot set its eye");
-const viewEyeWGSL = (P, eye = 'scene.vEyePosition.xyz') => `select(${eye}, ${P} - uniforms.${VIEW_FORWARD}.xyz, uniforms.${VIEW_FORWARD}.w > 0.5)`;
-const VIEW_CODE = [
-  { CUSTOM_FRAGMENT_BEFORE_LIGHTS: `viewDirectionW = normalize(${viewEye('vPositionW')} - vPositionW);`, [`!!${REFLECTION_EYE.source}`]: `worldNormal,${viewEye('worldPos.xyz')}` },
-  { CUSTOM_FRAGMENT_BEFORE_LIGHTS: `viewDirectionW = normalize(${viewEyeWGSL('fragmentInputs.vPositionW')} - fragmentInputs.vPositionW);`,
-    [`!!${REFLECTION_EYE_WGSL.source}`]: `worldNormal,${viewEyeWGSL('worldPos.xyz')}` },
-];
+const VIEW_CODE = { CUSTOM_FRAGMENT_BEFORE_LIGHTS: `viewDirectionW = normalize(${viewEye('vPositionW')} - vPositionW);`, [`!!${REFLECTION_EYE.source}`]: `worldNormal,${viewEye('worldPos.xyz')}` };
 class BlenderViewPlugin extends MaterialPluginBase {
   constructor(material) {
     super(material, 'BlenderView', 300, {}, true, true);
@@ -76,6 +67,7 @@ class BlenderViewPlugin extends MaterialPluginBase {
     return shaderLanguage === 0 ? { ubo, fragment: `uniform vec4 ${VIEW_FORWARD};` } : { ubo };
   }
   bindForSubMesh(ubo, scene) { ubo.updateVector4(VIEW_FORWARD, viewForward(scene.activeCamera, eeveeParity(scene))); }
-  getCustomCode(shaderType, shaderLanguage = 0) { return shaderType === 'fragment' ? VIEW_CODE[shaderLanguage] : null; }
+  // GLSL: Bylonder's PBR materials compile from it on WebGPU too (gpu-engine.js materialsFromGLSL).
+  getCustomCode(shaderType, shaderLanguage = 0) { return shaderType === 'fragment' && shaderLanguage === 0 ? VIEW_CODE : null; }
 }
 RegisterMaterialPlugin('BlenderView', (material) => (material instanceof PBRBaseMaterial ? new BlenderViewPlugin(material) : null));

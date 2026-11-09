@@ -2,7 +2,7 @@
 // (workspace/preferences.js) picks it; the engine exists before the Preferences load, so it is read from the mirror the
 // preference keeps in the browser's storage. A `gpu` URL parameter on the app overrides it (the browser tests'
 // E2E_ENGINE). WebGPU falls back to WebGL 2 where the browser has no adapter.
-import { Engine, WebGPUEngine } from '@babylonjs/core';
+import { Engine, PBRBaseMaterial, WebGPUEngine } from '@babylonjs/core';
 import { deriveDepthMetrics } from './depth-metric-varyings.js';
 
 const KEY = 'bylonder-gpu-backend';
@@ -52,6 +52,10 @@ export function failRejectedPipelines(cache, device) {
   };
 }
 
+// PBR materials compile from Babylon's GLSL on WebGPU, converted as Bylonder's own shaders are, so the GLSL plugins on
+// them (curves, point clouds, Dithered) draw there too; Bylonder's Standard materials ask for it (forceGLSL).
+export function materialsFromGLSL() { PBRBaseMaterial.ForceGLSL = true; }
+
 export function requestedBackend() {
   try { return (new URLSearchParams(top.location.search).get('gpu')?.toUpperCase() ?? localStorage.getItem(KEY)) === 'WEBGPU' ? 'WEBGPU' : 'WEBGL2'; } catch { return 'WEBGL2'; }
 }
@@ -61,6 +65,7 @@ export const rememberBackend = (backend) => { try { localStorage.setItem(KEY, ba
 // highest limits the adapter offers.
 export async function createEngine(canvas, options = {}, backend = requestedBackend()) {
   if (backend === 'WEBGPU') {
+    materialsFromGLSL();
     try {
       const engine = new ReportingWebGPUEngine(canvas, { ...options, enableAllFeatures: true, setMaximumLimits: true, glslangOptions: compiler('glslang'), twgslOptions: compiler('twgsl') });
       await engine.initAsync();

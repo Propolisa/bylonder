@@ -78,7 +78,7 @@ export function createMaterialLibrary(world, { commit = () => {}, asset = path =
     let material;
     const label = unique(name || 'Material');
     if (type === 'node') { material = new BlenderNodeMaterial(label, scene); blenderDefaultTree(material); buildMaterial(material); }
-    else if (type === 'standard') material = new StandardMaterial(label, scene);
+    else if (type === 'standard') material = new StandardMaterial(label, scene, true);
     else { material = new PBRMaterial(label, scene); material.metallic = 0; material.roughness = 0.5; material.albedoColor = new Color3(0.8, 0.8, 0.8); }
     return tag(material);
   };

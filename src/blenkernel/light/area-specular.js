@@ -19,13 +19,7 @@ export const LIGHT_SPECULAR = {
   search: /(info\.(?:specular|clearCoat)=compute(?:Anisotropic)?(?:Specular|ClearCoat)Lighting\([^;]*,)diffuse(\d+|\{X\})\.rgb\);/g,
   replace: '$1light$2.vLightSpecular.rgb);',
 };
-// Babylon's WGSL (WebGPU) writes the area formula as its own expression; the light's specular as its GLSL does.
-const AREA_SPECULAR_WGSL = {
-  search: /var fresnel:vec3f =reflectance0\*specularColor\*info\.areaLightFresnel\.x\+\( vec3f\( 1\.0 \)-specularColor \)\*info\.areaLightFresnel\.y\*reflectance90;/,
-  replace: 'var fresnel:vec3f=reflectance0*info.areaLightFresnel.x+(reflectance90-reflectance0)*info.areaLightFresnel.y;',
-};
-const formula = (area) => ({ [`!${area.search.source}`]: area.replace, [`!${LIGHT_SPECULAR.search.source}`]: LIGHT_SPECULAR.replace });
-const FORMULA = [formula(AREA_SPECULAR), formula(AREA_SPECULAR_WGSL)];
+const FORMULA = { [`!${AREA_SPECULAR.search.source}`]: AREA_SPECULAR.replace, [`!${LIGHT_SPECULAR.search.source}`]: LIGHT_SPECULAR.replace };
 
 class BlenderAreaSpecularPlugin extends MaterialPluginBase {
   constructor(material) {
@@ -35,12 +29,18 @@ class BlenderAreaSpecularPlugin extends MaterialPluginBase {
   }
   getClassName() { return `${NAME}Plugin`; }
   isCompatible() { return true; }
-  getCustomCode(shaderType, shaderLanguage = 0) { return shaderType === 'fragment' ? FORMULA[shaderLanguage] : null; }
+  // GLSL: Bylonder's PBR materials compile from it on WebGPU too (gpu-engine.js materialsFromGLSL).
+  getCustomCode(shaderType, shaderLanguage = 0) { return shaderType === 'fragment' && shaderLanguage === 0 ? FORMULA : null; }
 }
 
 // A light turned into an area light at an index a material drew before defines AREALIGHT{X} but not AREALIGHTUSED,
 // which Babylon adds only when it rebuilds the defines' keys, so the light's code calls area light functions the
 // material's includes left out and the shader does not compile. The key is there from the start here.
+// On WebGPU, PBR's area light function takes the LTC samplers as arguments, which WebGPU's GLSL does not: Babylon's
+// WebGPU engine inlines the functions marked `#define inline` (ShaderCodeInliner), sampling their arguments in place,
+// and this one is marked here (and in a node material's PBR block, nodes/blender/shader-nodes.js).
+export const AREA_PRE_LIGHTING = { search: /preLightingInfo computeAreaPreLightingInfo\(/, replace: '\n#define inline\n$&' };
+const INLINE_AREA = { [`!${AREA_PRE_LIGHTING.search.source}`]: AREA_PRE_LIGHTING.replace };
 // Of the lights the material draws (its first maxSimultaneousLights, none unlit), as Babylon defines and binds them.
 export const usesAreaLights = (mesh, material) => !material.disableLighting && !!mesh?.getScene().lightsEnabled
   && !!mesh.lightSources?.slice(0, material.maxSimultaneousLights).some((light) => light instanceof AreaLight);
@@ -52,6 +52,10 @@ class BlenderAreaLightsPlugin extends MaterialPluginBase {
   getClassName() { return 'BlenderAreaLightsPlugin'; }
   isCompatible() { return true; }
   prepareDefines(defines, scene, mesh) { defines.AREALIGHTUSED = usesAreaLights(mesh, this._material); }
+  getCustomCode(shaderType, shaderLanguage = 0) {
+    const inline = this._material instanceof PBRBaseMaterial && this._material.getScene().getEngine().isWebGPU && shaderLanguage === 0;
+    return shaderType === 'fragment' && inline ? INLINE_AREA : null;
+  }
 }
 RegisterMaterialPlugin('BlenderAreaLights', (material) => (material instanceof PBRBaseMaterial || material instanceof StandardMaterial ? new BlenderAreaLightsPlugin(material) : null));
 

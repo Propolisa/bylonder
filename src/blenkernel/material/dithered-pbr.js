@@ -28,7 +28,7 @@ class BlenderDitheredPBRPlugin extends MaterialPluginBase {
     this._enable(true);
   }
   getClassName() { return `${NAME}Plugin`; }
-  // WebGPU's WGSL keeps Babylon's alpha test: Blender's hash is GLSL (docs/webgpu.md).
+  // A WGSL material keeps Babylon's alpha test: Blender's hash is GLSL (gpu-engine.js materialsFromGLSL).
   isCompatible() { return true; }
   prepareDefines(defines, scene, mesh) { defines[DEFINE] = isDithered(this._material); }
   // Its own uniform, bound at every draw: Babylon's material cache skips a rebind between a frame's draws.

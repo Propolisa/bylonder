@@ -146,7 +146,7 @@ export class CurvesPlugin extends MaterialPluginBase {
     super(material, 'BlenderCurves', 300, { CURVES: false, CURVES_FACES: 0, CURVES_VERTEX_PER_SEGMENT: 1 });
     this._enable(true);
   }
-  // GLSL only: on WebGPU, Babylon's materials are WGSL and draw no curves (docs/webgpu.md).
+  // GLSL only: a WGSL material draws no curves (on WebGPU Bylonder's are GLSL, gpu-engine.js materialsFromGLSL).
   static of(material) { return material.pluginManager?.getPlugin('BlenderCurves') ?? (material.shaderLanguage === 0 ? new CurvesPlugin(material) : null); }
   // Whether a material draws curves: a node material by its geometry block, the others with the plugin.
   static draws(material) { return material.getClassName() === 'NodeMaterial' ? material.attachedBlocks.some((b) => b instanceof CurvesGeometryBlock) : !!CurvesPlugin.of(material); }
