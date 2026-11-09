@@ -17,6 +17,7 @@ import { createFullscreenPass } from './fullscreen-pass.js';
 import { CURVES_VERTEX_GLSL, CURVES_UNIFORMS, CURVES_SAMPLERS, curvesDefines, bindCurves } from './curves.js';
 import { view_3d as theme } from '../editors/interface/userdef-default-theme.js';
 import { imagePremultiplied } from '../imbuf/image-textures.js';
+import { meshHidden } from '../blenkernel/scene/mesh-hiding.js';
 
 // BKE_studiolight_default (studiolight.cc): direction, diffuse color with wrap (smooth), specular color.
 const STUDIO_LIGHT_DEFAULT = [
@@ -430,7 +431,7 @@ export function createWorkbench(scene, { wireColor = () => theme.wire, paintText
     for (const mesh of displayedAsWire) if (mesh.isDisposed()) displayedAsWire.delete(mesh); else if (!wires.has(mesh)) edges(mesh);
     for (const [mesh, lines] of wires) {
       if (mesh.isDisposed()) { lines.dispose(); wires.delete(mesh); continue; }
-      const asWire = displayedAsWire.has(mesh) && mesh.isEnabled() && !mesh.isVisible;
+      const asWire = displayedAsWire.has(mesh) && mesh.isEnabled() && !mesh.isVisible && !meshHidden(mesh);
       edges(mesh).isVisible = (show && mesh.isVisible) || asWire;
       lines.material = asWire && !show ? wireBehind : wire;
     }

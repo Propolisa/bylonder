@@ -16,7 +16,7 @@ import { mesh_deserialize, mesh_serialize } from '../blenkernel/mesh/mesh.js';
 import { rna, collection, baseOf, INFO, pyArgs, rnaProperty } from './rna.js';
 import modifierTypes from './rna-modifiers.json' with { type: 'json' };
 import { modifierStack } from '../modifiers/stack.js';
-import { deleted, nodeId, hasMesh } from '../editors/object/identity.js';
+import { deleted, nodeId, hasMesh, hidden, setHidden, visible } from '../editors/object/identity.js';
 import { address } from '../blenkernel/animation/model.js';
 import { viewTransforms, looks } from '../blenkernel/scene/render-babylon.js';
 import { outputSize } from '../blenkernel/scene/render.js';
@@ -405,9 +405,9 @@ const STRUCTS = {
     // Object > Visibility > Shadow: whether it casts shadows (light-shadows.js).
     visible_shadow: { get: (ob) => ob.metadata?.wbVisibleShadow !== false, set: (ob, value) => { ob.metadata = { ...ob.metadata, wbVisibleShadow: !!value }; }, sync: true },
     hide_viewport: { get: (ob) => !!ob.metadata?.wbHideViewport, set: (ob, value) => { ob.metadata = { ...ob.metadata, wbHideViewport: !!value }; }, sync: true },
-    hide_get: (ob) => () => !ob.isEnabled(false),
-    hide_set: (ob, r) => (hide) => { ob.setEnabled(!hide); r.host.update?.('Object', 'hide', ob); },
-    visible_get: (ob) => () => !deleted(ob) && ob.isEnabled() && ob.isVisible !== false,
+    hide_get: (ob) => () => hidden(ob),
+    hide_set: (ob, r) => (hide) => { setHidden(ob, hide); r.host.update?.('Object', 'hide', ob); },
+    visible_get: (ob) => () => visible(ob) && ob.isVisible !== false,
     select_get: (ob, r) => () => !!r.host.selection?.has(ob),
     select_set: (ob, r) => (state) => { if (!!r.host.selection?.has(ob) !== !!state) r.host.selection?.toggle(ob, true); },
   },

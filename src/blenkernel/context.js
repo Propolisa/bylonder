@@ -3,6 +3,7 @@
 //   r: createRNA(host), area: the editor's Blender type (uiType its sub-type, TIMELINE), region: the region's, space: the editor's own data (a 3D
 //   Viewport's view, editors/space_view3d/view3d.js), or none for Blender's defaults.
 import { rna, collection } from '../makesrna/rna.js';
+import { visible as shown } from '../editors/object/identity.js';
 
 const SPACES = { VIEW_3D: 'SpaceView3D', PROPERTIES: 'SpaceProperties', OUTLINER: 'SpaceOutliner', DOPESHEET_EDITOR: 'SpaceDopeSheetEditor', GRAPH_EDITOR: 'SpaceGraphEditor', NLA_EDITOR: 'SpaceNLA',
   NODE_EDITOR: 'SpaceNodeEditor', SEQUENCE_EDITOR: 'SpaceSequenceEditor', TEXT_EDITOR: 'SpaceTextEditor', FILE_BROWSER: 'SpaceFileBrowser', TOPBAR: 'Space',
@@ -29,7 +30,7 @@ export function createContext(r, { area: type = 'VIEW_3D', uiType = type, region
   // Bylonder's active object is the last selected, or the one in Edit Mode.
   const activeObject = () => editObject() ?? host.selection?.active ?? null;
   const selected = () => r.objects().filter((ob) => host.selection?.has(ob));
-  const visible = () => r.objects().filter((ob) => ob.isEnabled() && ob.isVisible !== false);
+  const visible = () => r.objects().filter((ob) => shown(ob) && ob.isVisible !== false);
   const editable = (list) => list.filter((ob) => !ob.metadata?.wbLocked);
   const inMode = () => (editObject() ? [object(editObject())] : []);
   const data = {

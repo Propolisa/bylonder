@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { NullEngine, Scene, MeshBuilder } from "@babylonjs/core";
 import { createSelection } from "../src/editors/object/selection.js";
+import { hidden } from "../src/editors/object/identity.js";
 import { snapshot, apply, createHistory } from "../src/editors/undo/storage.js";
 import { sceneMain } from "./scene-main.js";
 import { createObjectCommands } from "../src/editors/object/commands.js";
@@ -65,9 +66,9 @@ const identity = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 main.blender.view = { viewmat: identity, winmat: identity, winx: 100, winy: 100, persp: false };
 main.run(() => main.blender.run("object.hide_view_set"));
 history.commit();
-assert(!authored.isEnabled());
+assert(hidden(authored) && !authored.isVisible && authored.isEnabled(), "Hide stops drawing the object alone");
 history.undo();
-assert(authored.isEnabled());
+assert(!hidden(authored) && authored.isVisible);
 const recipe = {
     builder: "CreateSphere",
     options: { diameter: 2, segments: 16 },

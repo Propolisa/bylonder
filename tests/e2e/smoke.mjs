@@ -565,6 +565,30 @@ const checks = {
     await app.until((b) => b.world.objects.some((n) => n.name === "Cube" && !n.metadata?.wbDeleted));
   },
 
+  // Filter > Restriction Toggles > Selectable shows the arrow column; turned off for an object, a click on it in the 3D
+  // Viewport selects nothing (object.hide_select).
+  async "Outliner: the Selectable restriction toggle makes an object unselectable in the viewport"() {
+    const header = app.frame().locator(".bl-outliner-header");
+    await header.locator('[data-blender="OUTLINER_PT_filter"]').click();
+    const popover = app.frame().locator(".bl-popover-block");
+    await popover.locator('[data-blender="show_restrict_column_select"]').first().click();
+    await app.page.keyboard.press("Escape");
+    const region = app.frame().locator(".bl-outliner-region");
+    const box = await region.boundingBox();
+    const toggle = await app.bylonder((b) => {
+      const { draw } = b.world.outliner.area.draw();
+      const cube = draw.find((c) => c.op === "text" && c.text === "Cube");
+      return draw.find((c) => c.op === "icon" && c.icon === "RESTRICT_SELECT_OFF" && Math.abs(c.at[1] + 3 - cube.at[1]) <= 2)?.at;
+    });
+    assert.ok(toggle, "the Cube's row has the Selectable toggle");
+    await app.page.mouse.click(box.x + toggle[0] + 8, box.y + box.height - toggle[1] - 8);
+    await app.until((b) => b.world.scene.getNodeByName("Cube").metadata?.wbLocked === true);
+    await app.bylonder((b) => b.editor.selection.replace([]));
+    await app.click();
+    await app.page.waitForTimeout(500);
+    assert.deepEqual(await app.bylonder((b) => b.editor.selection.nodes.map((n) => n.name)), [], "a click on the Cube selects nothing");
+  },
+
   async "Edit Mode: Tab, select all, extrude and confirm"() {
     await app.click();
     await app.page.keyboard.press("Tab");

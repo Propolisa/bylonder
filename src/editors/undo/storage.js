@@ -1,5 +1,5 @@
 import { Mesh, TransformNode, VertexData } from "@babylonjs/core";
-import { nodeId, identify } from "../object/identity.js";
+import { nodeId, identify, hidden, setHidden } from "../object/identity.js";
 import { buildMesh, rebuildMesh } from "../object/mesh-catalog.js";
 export const snapshot = (objects) =>
   objects.map((m) => ({
@@ -21,6 +21,7 @@ export const snapshot = (objects) =>
     pickable: m.isPickable !== false,
     deleted: !!m.metadata?.wbDeleted,
     locked: !!m.metadata?.wbLocked,
+    ...(hidden(m) ? { hidden: true } : {}),
     ...(m.metadata?.wbHideRender ? { hideRender: true } : {}),
     ...(m.metadata?.wbModifiers ? {modifiers:structuredClone(m.metadata.wbModifiers)} : {}),
     ...(m.metadata?.wbParticles ? {particles:structuredClone(m.metadata.wbParticles)} : {}),
@@ -114,6 +115,7 @@ export function apply(objects, data, { partial = false } = {}) {
     node.rotation.copyFromFloats(...row.r);
     node.scaling.copyFromFloats(...row.s);
     node.setEnabled(!row.deleted && row.enabled !== false);
+    if (!row.deleted) setHidden(node, !!row.hidden);
     if ("isPickable" in node)
       node.isPickable = row.pickable !== false && !row.locked;
   }

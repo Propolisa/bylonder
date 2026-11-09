@@ -18,7 +18,7 @@ import { mesh_serialize } from '../src/blenkernel/mesh/mesh.js';
 import { primitive_add } from '../src/editors/mesh/editmesh-add.js';
 import { OPERATOR_FINISHED } from '../src/bmesh/bmesh-wasm.js';
 import { dnaGet, dnaSet } from '../src/makesrna/dna-struct.js';
-import { nodeId } from '../src/editors/object/identity.js';
+import { nodeId, hidden } from '../src/editors/object/identity.js';
 import { asObject } from '../src/runtime/object-transform.js';
 import { createHistory } from '../src/editors/undo/storage.js';
 import '../src/editors/interface/region-draw.js';
@@ -164,7 +164,7 @@ const steps = [
 const round = (values) => values.map((v) => Math.round(v * 1e4) / 1e4);
 const shown = () => JSON.stringify({
   objects: objects.filter((node) => !node.metadata?.wbDeleted).map((node) => [node.name, node.parent?.name ?? null, round(node.position.asArray()),
-    round((node.rotationQuaternion ?? node.rotation).asArray()), round(node.scaling.asArray()), node.isEnabled(false), !!node.metadata?.wbHideRender,
+    round((node.rotationQuaternion ?? node.rotation).asArray()), round(node.scaling.asArray()), !hidden(node), !!node.metadata?.wbHideRender,
     node.getTotalVertices?.() ?? 0, round([node.getVerticesData?.("position")?.reduce((sum, v) => sum + Math.abs(v), 0) ?? 0])]),
   selected: selection.nodes.map((node) => node.name),
   spot: [round(spot.diffuse.asArray()), round([spot.angle, camera.fov, camera.maxZ])],

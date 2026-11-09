@@ -1,20 +1,15 @@
 import { nodeId } from '../../editors/object/identity.js';
+import { hideMesh } from './mesh-hiding.js';
 
 // Babylon adapter for collection visibility. Babylon has no collections, so an object hidden by its collections
 // (excluded, hidden in the view layer, disabled in viewports or, in a render, disabled in renders like the object
-// itself) gets mesh.isVisible = false. That hides only the object itself, like Blender, not its children. Only meshes
-// this adapter hid are ever touched, and their authored isVisible is restored when they come back.
+// itself) is hidden as a mesh alone (mesh-hiding.js), like Blender, not its children.
 export function createCollectionVisibility(world) {
-  const hidden = new Map();
+  const meshes = () => world.objects.filter((node) => 'isVisible' in node);
   return {
     apply(resolved, render) {
-      for (const node of world.objects) {
-        if (!('isVisible' in node)) continue;
-        const show = (resolved.get(nodeId(node))?.visible ?? true) && !(render && node.metadata?.wbHideRender);
-        if (!show && !hidden.has(node)) { hidden.set(node, node.isVisible); node.isVisible = false; }
-        else if (show && hidden.has(node)) { node.isVisible = hidden.get(node); hidden.delete(node); }
-      }
+      for (const node of meshes()) hideMesh(node, 'collection', !((resolved.get(nodeId(node))?.visible ?? true) && !(render && node.metadata?.wbHideRender)));
     },
-    dispose() { for (const [node, visible] of hidden) node.isVisible = visible; hidden.clear(); },
+    dispose() { for (const node of meshes()) hideMesh(node, 'collection', false); },
   };
 }

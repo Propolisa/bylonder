@@ -3,6 +3,7 @@ import { GizmoManager, Matrix, Vector3 } from "@babylonjs/core";
 import { startGestureBox } from "../../windowmanager/wm-gesture-box.js";
 import { dragStart } from "../../windowmanager/wm-event-system.js";
 import { boxRegion } from "../space_view3d/view3d-select.js";
+import { visible } from "./identity.js";
 
 // Object-mode editing shared by every 3D Viewport: one selection, one tool mode, one gizmo set (drawn in every
 // view). Picking and projection use the view the gesture happens in (views.input).
@@ -17,7 +18,7 @@ export function createEditor(world, views, history, changed, capture) {
   // One rule for what a click can select: live, unlocked, visible, and selectable through its collections.
   const selectable = (m) =>
     (m = owner(m), objects.includes(m)) && !m.metadata?.wbDeleted && !m.metadata?.wbLocked &&
-    m.isEnabled() && m.isVisible !== false && (world.collections?.selectable(m) ?? true);
+    visible(m) && m.isVisible !== false && (world.collections?.selectable(m) ?? true);
   const selected = selection.pivot;
   let mode = "select";
   let last = { x: 0, y: 0 };

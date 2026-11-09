@@ -9,7 +9,8 @@ import { INFO } from '../makesrna/rna.js';
 import { BLENDER, createLight, deriveBabylonLight, isBlenderLight, lightRecord } from './light/light-home.js';
 import { createWorld } from './scene/world.js';
 import { createMesh, mesh_serialize } from './mesh/mesh.js';
-import { nodeId, deleted } from '../editors/object/identity.js';
+import { nodeId, deleted, setHidden } from '../editors/object/identity.js';
+import { meshHidden } from './scene/mesh-hiding.js';
 import { CurveObject } from './curve/curve.js';
 import { mesh_batch_cache_apply } from '../draw/mesh-batch-cache.js';
 import { asObject, setEvaluatedMatrix } from '../runtime/object-transform.js';
@@ -149,7 +150,7 @@ export function createMainView(state) {
     if (!entry) return;
     entry.lines?.dispose();
     bounded.delete(mesh);
-    mesh.isVisible = true;
+    if (!meshHidden(mesh)) mesh.isVisible = true;
   }
   // Meshes shown as their edges in the viewport (Display As > Wire): Workbench's wire in every shading, in place of
   // their surfaces, which renders draw.
@@ -157,12 +158,12 @@ export function createMainView(state) {
   function displayAs(mesh, type) {
     displayBounds(mesh, type === 'BOUNDS');
     if (type === 'WIRE') wired.add(mesh);
-    else if (wired.delete(mesh)) { mesh.isVisible = true; world.workbench?.displayAsWire(mesh, false); }
+    else if (wired.delete(mesh)) { if (!meshHidden(mesh)) mesh.isVisible = true; world.workbench?.displayAsWire(mesh, false); }
   }
   const displayed = world.scene.onBeforeRenderObservable.add(() => {
     const rendering = !!world.collections?.rendering;
     // The workbench may come after Main's objects (main.js makes it once the world is built).
-    for (const mesh of wired) if (mesh.isDisposed()) wired.delete(mesh); else { mesh.isVisible = rendering; world.workbench?.displayAsWire(mesh, true); }
+    for (const mesh of wired) if (mesh.isDisposed()) wired.delete(mesh); else if (!meshHidden(mesh)) { mesh.isVisible = rendering; world.workbench?.displayAsWire(mesh, true); }
     for (const [mesh, entry] of bounded) {
       if (mesh.isDisposed()) { displayBounds(mesh, false); continue; }
       const instanced = mesh.hasThinInstances, box = (instanced ? mesh.rawBoundingInfo : mesh.getBoundingInfo())?.boundingBox;
@@ -173,6 +174,7 @@ export function createMainView(state) {
         entry.lines = boundsLines(world.scene, '__bounds ' + mesh.name, box, instanced ? mesh.thinInstanceGetWorldMatrices() : undefined, entry.lines);
         if (!instanced) entry.lines.parent = mesh;
       }
+      if (meshHidden(mesh)) { entry.lines.isVisible = false; continue; }
       mesh.isVisible = rendering;
       entry.lines.isVisible = !rendering;
     }
@@ -256,7 +258,7 @@ export function createMainView(state) {
         const kept = world.objects.find((node) => !objects.has(node) && nodeId(node) === id);
         if (kept) {
           kept.metadata = { ...kept.metadata, wbDeleted: false };
-          kept.setEnabled(!blender.base(ob)?.hidden);
+          setHidden(kept, !!blender.base(ob)?.hidden);
           revived.push(link(kept, ob, type));
           continue;
         }
@@ -278,6 +280,8 @@ export function createMainView(state) {
       }
       for (const entry of made) {
         const { node, ob } = entry;
+        // Hidden as the file keeps it (H), once its kind is known.
+        if (blender.base(ob)?.hidden) setHidden(node, true);
         foldUndrawn(entry);
         if (blender.camera === ob) scene.activeCamera = node;
       }
@@ -441,7 +445,7 @@ export function createMainView(state) {
         const base = blender.base(ob), data = rna.pointer('Object', node);
         if (base?.selected) chosen.push(node);
         if (base?.active) active = node;
-        if (base && data.hide_get() !== base.hidden) node.setEnabled(!base.hidden);
+        if (base && data.hide_get() !== base.hidden) setHidden(node, base.hidden);
         if (entry.type === 'MESH') displayAs(node, idStruct(ob).display_type);
         extraDisplay(entry);
         // A stand-in Blender's code changed becomes Main's; one an undo step read again stays Babylon's.

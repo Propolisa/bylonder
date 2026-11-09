@@ -16,6 +16,7 @@ import { BlockView, treeMenu } from '../interface/block-view.js';
 import { regionHeader, menuTree, menuLabel } from '../interface/ui-tree.js';
 import { createApp, h, reactive, markRaw } from 'vue';
 import '../interface/layout-view.css';
+import { hidden } from '../object/identity.js';
 import { OutlinerArea, modifierOf, OPERATOR_FINISHED, OPERATOR_CANCELLED, OPERATOR_PASS_THROUGH, RGN_TYPE_HEADER } from './outliner-area.js';
 import './space-outliner.css';
 
@@ -305,7 +306,7 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
 
   // Redraws when Bylonder's data the Outliner shows changed.
   function refresh() {
-    const next = JSON.stringify([world.objects.map((n) => [n.uniqueId, n.name, n.parent?.uniqueId, n.isEnabled(false), n.metadata?.wbDeleted, n.metadata?.wbLocked,
+    const next = JSON.stringify([world.objects.map((n) => [n.uniqueId, n.name, n.parent?.uniqueId, hidden(n), n.metadata?.wbDeleted, n.metadata?.wbLocked,
       n.metadata?.wbHideRender, editor.selection.has(n)]), editor.selection.active?.uniqueId, world.collections.state]);
     if (next !== signature) {
       signature = next;
