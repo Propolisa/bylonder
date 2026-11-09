@@ -1,4 +1,4 @@
-import { createPrimitive, createLight, createWorld } from '@workbench/sdk';
+import { createPrimitive, createLight, createWorld, renderSettings } from '@workbench/sdk';
 
 export const createScene = function () {
   const scene = new BABYLON.Scene(engine);
@@ -23,5 +23,7 @@ export const createScene = function () {
   light.position.set(4.0762, 5.9039, 1.0055);
   light.rotation.set(0.918468, -1.938812, -0.091041);
   createWorld(scene);
+  // startup.blend's view settings: AgX, as Blender shows its startup scene.
+  renderSettings({ viewSettings: { viewTransform: 'AgX' } });
   return scene;
 };
