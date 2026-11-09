@@ -158,6 +158,8 @@ export function createMainView(state) {
   }
   const displayed = world.scene.onBeforeRenderObservable.add(() => {
     const rendering = !!world.collections?.rendering;
+    // A render or playback starting or ending shows or hides onion skins.
+    if (greasePencil && onionWanted() !== onionDrawn) drawGreasePencil();
     // The workbench may come after Main's objects (main.js makes it once the world is built).
     for (const mesh of wired) if (mesh.isDisposed()) wired.delete(mesh); else if (!meshHidden(mesh)) { mesh.isVisible = rendering; world.workbench?.displayAsWire(mesh, true); }
     for (const [mesh, entry] of bounded) {
@@ -653,14 +655,16 @@ export function createMainView(state) {
     for (const [key, { data, mesh, overlay }] of curved) if (!drawn.has(key)) { disposeCurvesData(data); mesh.dispose(); overlay?.dispose(); curved.delete(key); }
   }
   // Grease Pencil objects' visible drawings (draw/grease-pencil.js), onion skins but in a render or playback.
-  let greasePencil = null, repack = false;
+  let greasePencil = null, repack = false, onionDrawn = null;
+  const onionWanted = () => !world.collections?.rendering && !world.animation?.playing;
   function drawGreasePencil() {
     if (!greasePencil) {
       greasePencil = createGreasePencilDraw(world.scene, { matrix: babylonMatrix, look: (ob) => runtimes.look(idStruct(ob).data) ?? BLENDER_LOOK });
       provideGreasePencilRender(world.scene.getEngine());
     }
-    const byOb = new Map([...objects.values()].map((e) => [e.ob, e.node])), onion = !world.collections?.rendering && !world.animation?.playing;
-    repack = greasePencil.update(blender.greasePencil({ onion, repack }), (ob) => byOb.get(ob));
+    const byOb = new Map([...objects.values()].map((e) => [e.ob, e.node])), onion = onionWanted();
+    repack = greasePencil.update(blender.greasePencil({ onion, repack: repack || onion !== onionDrawn }), (ob) => byOb.get(ob));
+    onionDrawn = onion;
   }
   // A light whose type Blender changed (its Properties' Type) is drawn by a Babylon light of the new type, which takes the
   // old one's place: its name, ids, parent, children and selection.
