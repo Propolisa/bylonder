@@ -1,6 +1,6 @@
 // Asks for operator properties in Blender's props dialog: resolves to the values entered, or null when cancelled.
-//   fields: [{ name, label, value }]; at: the pointer, in client pixels.
-export async function propsDialog({ title, fields, confirm, at = { x: innerWidth / 2, y: innerHeight / 2 } }) {
+//   fields: [{ name, label, value, note }]; note: a line under them; at: the pointer, in client pixels.
+export async function propsDialog({ title, fields, note, confirm, at = { x: innerWidth / 2, y: innerHeight / 2 } }) {
   const [{ createApp, h }, { default: PropsDialog }] = await Promise.all([
     import('vue'),
     import('./components/PropsDialog.vue'),
@@ -8,7 +8,7 @@ export async function propsDialog({ title, fields, confirm, at = { x: innerWidth
   ]);
   const host = document.body.appendChild(document.createElement('div'));
   return new Promise((resolve) => {
-    const app = createApp({ render: () => h(PropsDialog, { title, fields, confirm, at, onDone: (values) => { app.unmount(); host.remove(); resolve(values); } }) });
+    const app = createApp({ render: () => h(PropsDialog, { title, fields, note, confirm, at, onDone: (values) => { app.unmount(); host.remove(); resolve(values); } }) });
     app.mount(host);
   });
 }

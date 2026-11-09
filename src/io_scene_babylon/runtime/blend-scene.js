@@ -163,9 +163,7 @@ export class BlendScene {
     const knobs = Object.entries(this.ir.properties).map(([path, { id, ...property }]) => /** @type {Knob} */ ({ path, ...property }));
     this.#knobs = new Map(knobs.map((knob) => [knob.path, knob]));
     this.#values = new Map(knobs.map((knob) => [knob.path, knob.default]));
-    this.#scheduler = Object.keys(this.ir.entities).length ? createScheduler(this.ir, { scene, root, buffers, controls: {
-      paths: knobs.map((knob) => knob.path),
-      defaults: knobs.map((knob) => knob.default),
+    this.#scheduler = Object.keys(this.ir.entities).length ? createScheduler(this.ir, { scene, root, ir: this.ir, buffers, controls: {
       get: (path) => this.#values.get(path),
       write: (path, value) => this.#write(path, value),
       // The animation's frame while it plays, else the frame control's.

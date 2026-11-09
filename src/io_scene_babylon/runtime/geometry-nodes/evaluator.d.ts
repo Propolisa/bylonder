@@ -17,7 +17,7 @@ export function createEvaluator(graphs: Record<string, import("../ir.js").Graph>
  * evaluated on) or `geometry` (runs on geometries). The type key says which, as Blender's node families do.
  * @param {Node} node
  */
-export function kindOf(node: Node): "geometry" | "function" | "field";
+export function kindOf(node: Node): "function" | "geometry" | "field";
 /**
  * @typedef {import('../ir.js').GraphNode & { sockets?: { inputs: Record<string, string>, outputs: Record<string, string> } }} Node
  * @typedef {import('./geometry.js').Geometry} Geometry

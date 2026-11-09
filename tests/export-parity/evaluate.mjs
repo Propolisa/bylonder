@@ -22,7 +22,7 @@ const TOLERANCE = 1e-4;
 // Controls checked per example at most, and the values each is set to.
 const MAX_CONTROLS = 60;
 
-// Sets an RNA path from bpy.data as the page's Blender fallback does (blender-fallback.js setPath).
+// Sets an RNA path from bpy.data as the page's retired Blender fallback did (blender-fallback.js setPath).
 const STEP = /^(.*?)(?:\.(\w+)|\[(\d+)\]|\["((?:[^"\\]|\\.)*)"\])$/;
 function setPath(path, value) {
   const [, owner, name, index, key] = STEP.exec(path) ?? [];

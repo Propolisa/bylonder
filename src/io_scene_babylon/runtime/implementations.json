@@ -51,7 +51,7 @@
       { "implementation": "Babylon MorphTargetManager", "license": "Apache-2.0", "fidelity": "approximate" }
     ],
     "modifier:NODES": [
-      { "implementation": "Blender's module (the Blender fallback, bylonder-blender/, with Include Source .blend), its float, integer and boolean inputs set by path", "license": "GPL-3.0-or-later", "fidelity": "exact" },
+      { "implementation": "Bylonder's Geometry Nodes evaluator (runtime/geometry-nodes/) over the IR's graph, each node a call into Blender's kernels (bylonder-geometry-nodes/geometry-nodes.wasm) unless a unit is registered for it; its float, integer and boolean inputs set by path; no simulation zones yet", "license": "MIT OR Apache-2.0 (evaluator), GPL-3.0-or-later (kernels)", "fidelity": "exact" },
       { "implementation": "evaluated mesh and instances", "license": "data", "fidelity": "baked" }
     ],
     "modifier:*": [

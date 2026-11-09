@@ -1,13 +1,13 @@
 <script setup>
 // Blender's operator properties dialog (WM_operator_props_dialog_popup): the title, a row per property, and the
 // confirm button, at the pointer. Enter confirms, Escape or a click outside cancels. A field whose value is a boolean is
-// a checkbox; a field's note is a line under it.
+// a checkbox; a field's note is a line under it, the dialog's under them all.
 import { onMounted, reactive, ref } from "vue";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Checkbox } from "./ui/checkbox";
 
-const props = defineProps({ title: String, fields: Array, confirm: { type: String, default: "OK" }, at: Object });
+const props = defineProps({ title: String, fields: Array, note: String, confirm: { type: String, default: "OK" }, at: Object });
 const emit = defineEmits(["done"]);
 const values = reactive(Object.fromEntries(props.fields.map((f) => [f.name, f.value ?? ""])));
 const isBoolean = (field) => typeof field.value === "boolean";
@@ -40,6 +40,7 @@ const outside = (e) => { if (!root.value.contains(e.target)) done(false); };
         </label>
         <p v-if="field.note" class="px-1 text-muted-foreground">{{ field.note }}</p>
       </template>
+      <p v-if="note" class="px-1 text-muted-foreground">{{ note }}</p>
       <Button @click="done(true)">{{ confirm }}</Button>
     </div>
   </div>

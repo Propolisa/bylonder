@@ -167,21 +167,20 @@ async function displaySettings(world, bin, composites) {
 
 // The package's files but the runtime's: scene.js, scene.d.ts, scene.ir.json, scene.bin and images/. With `live`, objects whose
 // modifiers are all Blender's keep them live (modifiers-export.js), run by modifiers.wasm in bylonder-modifiers/. With
-// `sourceBlend`, the scene's .blend too, as scene.blend, and the controls only Blender evaluates, which the page's
-// Blender fallback runs on it. With `bakeAnimation`, what Babylon cannot play as its F-Curve is sampled per frame.
-export async function exportModule(world, { live: keepLive = false, parity = false, hostCompression = false, sourceBlend = false, bakeAnimation = false } = {}) {
+// `bakeAnimation`, what Babylon cannot play as its F-Curve is sampled per frame.
+export async function exportModule(world, { live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false } = {}) {
   const live = new Map(keepLive ? world.objects.map((node) => [node, world.modifiers.live(node)]).filter(([node, stack]) => stack && !stack.modifiers.some(needsOpenVDB) && !readsOtherIDs(world, node)) : []);
   await world.modifiers.settled();
   // The mapped meshes' geometry is read below: their mapping holds until the module is written.
   const mapped = exportRuntimes(world);
   try {
-    return await moduleSource(world, live, mapped, { parity, hostCompression, sourceBlend, bakeAnimation });
+    return await moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation });
   } finally {
     mapped.restore();
   }
 }
 
-async function moduleSource(world, live, mapped, { parity, hostCompression, sourceBlend, bakeAnimation }) {
+async function moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation }) {
   const graphs = [], graphOf = materialGraphs(world, graphs);
   const data = await serializeScene(world, { geometry: false, live, mapped, parity, graphOf, bake: bakeAnimation });
   const { scene } = world;
@@ -201,7 +200,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, sour
   // unless one of its effects is on.
   if (display) data.renderingPipelines = data.renderingPipelines.filter((p) => !(p._name?.startsWith('__display:') && !PIPELINE_EFFECTS.some((e) => p[e])));
   const controls = [...exportControls(world, data), ...(composited?.knobs ?? [])];
-  const ir = exportIR(world, { controls, live, bin, blender: sourceBlend, animationGroups: data.animationGroups, curves: data.liveCurves }), irJson = json(ir);
+  const ir = exportIR(world, { controls, live, bin, animationGroups: data.animationGroups, curves: data.liveCurves }), irJson = json(ir);
   const kernels = await irMaterials(data.materials, graphs, ir, parity), code = sharedCode(data.materials);
   parentInstances(objects);
   const parented = [...data.transformNodes, ...data.meshes, ...data.lights, ...data.cameras].filter((e) => e.parentId !== undefined);
@@ -361,6 +360,5 @@ ${data.animationGroups.some((g) => g.targetedAnimations.some((t) => t.animation.
 `;
   // An ES module package in Node too (the headless SDK), needing only Babylon.
   const manifest = { name: name.toLowerCase().replace(/[^a-z0-9-]+/g, '-'), type: 'module', main: 'scene.js', types: 'scene.d.ts', peerDependencies: { '@babylonjs/core': AbstractEngine.Version } };
-  return { 'scene.js': source, 'scene.d.ts': controlTypes(Object.entries(ir.properties).map(([path, { type }]) => ({ path, type }))), 'scene.ir.json': irJson, ...(kernels && { [NODE_KERNELS]: kernels }), 'scene.bin': bin.bytes(), 'package.json': `${JSON.stringify(manifest, null, 2)}\n`, ...images,
-    ...(sourceBlend && world.mainSync && { 'scene.blend': world.mainSync.blender.writeBlend() }) };
+  return { 'scene.js': source, 'scene.d.ts': controlTypes(Object.entries(ir.properties).map(([path, { type }]) => ({ path, type }))), 'scene.ir.json': irJson, ...(kernels && { [NODE_KERNELS]: kernels }), 'scene.bin': bin.bytes(), 'package.json': `${JSON.stringify(manifest, null, 2)}\n`, ...images };
 }

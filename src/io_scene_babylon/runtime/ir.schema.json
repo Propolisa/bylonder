@@ -50,6 +50,27 @@
                 "type": "null"
               }
             ]
+          },
+          "evaluated": {
+            "type": "object",
+            "properties": {
+              "matrix_world": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              },
+              "geometry": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              }
+            },
+            "required": [
+              "matrix_world"
+            ]
           }
         },
         "required": [
@@ -72,11 +93,13 @@
           },
           "to": {
             "type": "string"
+          },
+          "relation": {
+            "type": "string"
           }
         },
         "required": [
           "from",
-          "path",
           "to"
         ]
       }

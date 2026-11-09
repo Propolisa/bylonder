@@ -12,7 +12,7 @@
  * @param {(key: string) => ResolvedID | null} resolve
  */
 export function createKernels(x: Exports, resolve: (key: string) => ResolvedID | null): {
-    unit: import("../units.js").Unit & {
+    unit: import("../units.js").Unit<Record<string, any>> & {
         kernel: true;
     };
     define: (key: string) => void;

@@ -124,9 +124,9 @@ and its `.d.ts` files are generated from the JSDoc and committed, a test keeping
 types. `controls()` fields are named as Blender's RNA names them.
 
 - Paths are Blender RNA paths from `bpy.data`, Blender's identifiers. In the app the same path goes to the module's
-  `rna_set`, so the fallback evaluator needs no translation.
+  `rna_set`, so the IR names them as the app does.
 - Every RNA path is settable; there is no hidden whitelist. A path with a binding or an operation in the table runs on
-  its fast path; any other goes to the Blender fallback.
+  its fast path; any other is not live in the page yet (no IR entity computes it).
 - The export lists suggested controls for authors and UIs: custom properties, exposed node group and Geometry Nodes
   inputs, the SDK store controls, and every property a driver reads. An author can trim the list in the export options.
 - The controller is returned by the loader, not hung on Babylon's Scene. The page and the headless SDK get the same
@@ -141,7 +141,8 @@ types. `controls()` fields are named as Blender's RNA names them.
 The same package runs in Node without a page, on Babylon's `NullEngine`: install `@babylonjs/core` beside it (its
 `package.json` names the version), import its `scene.js` by file URL, set controls and read the evaluated scene from
 Babylon's objects. Drivers run in the clean-room units, live modifiers run `modifiers.wasm` in the script's own thread
-(Node has no Web Worker) and the Blender fallback runs Blender's module, each reading its files from the package
+(Node has no Web Worker) and Geometry Nodes run Bylonder's evaluator on Blender's per-node kernels, each reading its
+files from the package
 folder. Values read back are in Babylon's axes (y up).
 
 ```js
@@ -217,44 +218,31 @@ class, Blender where only Blender's code can do it.
 | `skin`, `morph` | Native | Bone local matrices, target influences from pose and Key values without constraints | With the page |
 | `driver` | Mapped | Driver expressions, variables and the driver's F-curve, as clean-room units (MIT OR Apache-2.0) | On the first set of a knob a driver reads |
 | `modifiers` | Blender | Mesh-only stacks in `modifiers.wasm`'s worker | On the first set of a modifier setting |
-| `blender` | Blender | Anything else: constraints and IK on a set knob, Geometry Nodes, structure, Python | On the first set that needs it |
+| `geometry-nodes` | Mapped, Blender kernels | Geometry Nodes modifiers: Bylonder's evaluator over the IR graph, each node a call into `geometry-nodes.wasm` unless a unit is registered for it | On the first set of an input the modifier reads |
 
 `runtimes.js` features gain an `exportOperations(world)` beside `export(world)`, writing their table entries; no other
 code changes for a feature to join.
 
 ### Evaluator loader
 
-Interim (Decision 7): the `blender` evaluator below and its `scene.blend` sidecar go once Geometry Nodes run on the IR;
-nothing new builds on them.
+The scheduler loads an implementation the first time an entity needs it (`runtime/scheduler.js` `EVALUATORS`), with
+the page's scene, the package's URL, the IR, `scene.bin`'s buffers and the controls. Threads are used when the page is
+cross-origin isolated (`crossOriginIsolated`), else one thread, as Safari gets.
 
-`load(evaluator)` imports an evaluator's module and its WebAssembly once, and resolves queued operations. The `blender`
-evaluator is the headless module on the scene's `.blend`, fetched as a sidecar file only then: set becomes `rna_set`,
-Main is evaluated, and what it updated (`main_updates`) is pulled into the page's Babylon objects by the same mapping the
-app uses (`main-view.js`), split into a module that loads only with this evaluator. With dynamic linking, an evaluator
-names the capability groups it needs (`core`, `geometry-nodes`, `booleans`, `volumes`, `python`) and the loader fetches
-only those; the interface does not change. Threads are used when the page is cross-origin isolated
-(`crossOriginIsolated`), else one thread, as Safari gets.
-
-Built (step 6): the export option Include Source .blend (`sourceBlend`, off by default) writes `scene.blend` with
-Blender's writer and lists each Geometry Nodes modifier's float, integer and boolean inputs as suggested controls
-(`objects["Planet"].modifiers["Planet"].properties.inputs.Socket_2.value`, Blender 5.2's path for them), with one
-`modifier:NODES` entity per modifier reading them, on the `blender` implementation. The scheduler loads an evaluator for the page's scene, the package's URL
-and its controls. The `blender` evaluator (`runtime/blender-evaluator.js`, MIT OR Apache-2.0) fetches `scene.blend` and
-imports `bylonder-blender/blender.js`, the Blender fallback (`blender-fallback.js`, bundled with the code it uses by
-`scripts/blender-fallback.mjs`), which instantiates the module beside it. Each run sets in Main, by RNA path, every
-control changed since the last run (fast-path ones included, so Main matches the page), evaluates, and draws what the
-depsgraph updated: an object's evaluated mesh and the thin instances of the objects its geometry instances, through
-`blenkernel/main-evaluated.js`, which the app's view (`main-view.js`) now draws through too. `bylonder-blender/` carries
-its GPL-3.0-or-later notice and the GPL's text, and `scene.js` says it includes GPL code only when it ships. Not yet:
-any other RNA path (`set` takes only the package's controls), evaluated transforms (a constraint's result), materials,
-point clouds and curves. The thin instances of one instancer are its child, in its space, so they follow its transform
-controls and its animation without Blender.
-
-**Cost, stated plainly.** Until dynamic linking lands, the first change that needs the `blender` evaluator downloads the
-whole module: 86.7 MB, 24.5 MB gzipped, 19.0 MB brotli, measured on `module-84c8dc9b`. In Node, importing it and
-starting Main takes 2.6 s and reading the compositor example's `.blend` and building its view 0.49 s. That is why the
-fast paths matter: native leaves, clean-room driver units, and `modifiers.wasm` for mesh-only stacks cover the common knobs
-without it.
+Geometry Nodes (`geometry-nodes`): each Geometry Nodes modifier is a `modifier:NODES` entity reading its graph, the
+geometry before it (the base mesh with its attributes, in `scene.bin`) and its float, integer and boolean inputs,
+suggested controls by path (`objects["Planet"].modifiers["Planet"].properties.inputs.Socket_2.value`). On the first set
+of one, `runtime/geometry-nodes-evaluator.js` (MIT OR Apache-2.0) imports `bylonder-geometry-nodes/kernels.js` and
+instantiates `geometry-nodes.wasm` beside it, Blender's Geometry Nodes kernels (GPL-3.0-or-later). For now that file
+is the scene module itself (`runtime-files.js` `GEOMETRY_NODES_KERNELS`), of which the page calls only the per-node
+entry points (`geometry-nodes-api.cc`); a module of their own replaces it once built. Bylonder's evaluator (`runtime/geometry-nodes/`) walks the graph and runs each node through the
+registry, else as one kernel call. The IDs a graph reads come from the IR: an object's world matrix and mesh as
+evaluated at export (`ids[...].evaluated`), a collection's members. The result is drawn by `runtime/mesh.js`: the mesh
+with a submesh per material and smooth or flat normals per face, instances as thin instances of their objects' meshes
+under the modifier's object (so they follow its transform without running the nodes again), points as a point cloud.
+Until an input is set, the baked result shows. The whole-scene Blender fallback (`scene.blend` opened in Blender's Main)
+that this replaces is gone, with the Include Source .blend option. Not yet: simulation zones, and the limits listed in
+`docs/licence-free-live.md`.
 
 ### Blocks library
 
@@ -299,7 +287,7 @@ bylonder-blocks.js    only if the scene composites
 bylonder-<extension>.js  each only if the scene uses it (bylonder-view-transform.js)
 drivers.js            only if a knob feeds a driver
 modifiers/            modifiers.wasm, its worker and modifiers.js, only if a knob feeds a mesh-only stack
-scene.blend           only with Include Source .blend (Live)
+bylonder-geometry-nodes/  geometry-nodes.wasm and kernels.js, only if a Geometry Nodes modifier is live
 ```
 
 The `.babylon` export stays as it is, the snapshot alone.
@@ -319,13 +307,10 @@ functionality first, then performance, then load time.
 |---|---|---|
 | **Static** | The snapshot: evaluated geometry and instances, animation as exact or sampled keys with drivers, constraints and NLA baked, node materials as CustomBlocks with their values as constants, the compositor as a frame graph. No controller | Babylon's own properties; time |
 | **Tunable** | Static, plus the controller, the control table, the scheduler, clean-room driver units, material and compositor inputs as uniforms, and `modifiers.wasm` only when a suggested control feeds a mesh-only stack. No `.blend` | Every bound path and suggested control: transforms, visibility, light, camera and world values, node inputs, custom properties, SDK controls, drivers that read them |
-| **Live** | Tunable, plus the `.blend` and the Blender fallback | Every RNA path, structure included; the first change without a fast path downloads the module |
+| **Live** | Tunable, plus every computed entity of the IR live: Live Modifiers and Geometry Nodes on their kernels | Every IR property; the first change an entity needs downloads its kernels |
 
-The default is Tunable (owner, 2026-11-09). Live as written here is interim (Decision 7): it becomes Tunable with every
-entity on the IR, and the `.blend` option goes. The `.blend` is a choice of its own in the dialog, Include Source .blend
-(`use_source_blend`), off by default, with a plain note that it makes the source scene downloadable. Choosing Live turns
-it on and shows the note. Off by default because publishing a source file cannot be undone; the full range of
-functionality is still one click away.
+The default is Tunable (owner, 2026-11-09). No level ships the scene's `.blend`: every entity runs on the IR
+(Decision 7), and the Include Source .blend option is gone.
 
 ### Overrides by feature
 
@@ -341,7 +326,6 @@ sub-panel of the file browser's sidebar. The level sets them all; changing one s
 | `export_compositor` | `GRAPH` (Blender's nodes on the frame graph), `NATIVE` (Babylon's post-processes), `NONE` | `GRAPH` | `GRAPH` | `GRAPH` |
 | `export_lighting` | `LIVE` (lights and shadows), `PROBES` (reflection probes) | `LIVE` | `LIVE` | `LIVE` |
 | `export_simulation` | `CACHE` (per frame in `scene.bin`) | `CACHE` | `CACHE` | `CACHE` |
-| `use_source_blend` | Boolean: the `.blend` beside the page | Off | Off | On |
 | `use_license_free` | Boolean | Off | Off | Off |
 
 Items appear only when they exist: `BAKED` materials and worlds, and baked lightmaps, wait for their bakers.
@@ -467,7 +451,7 @@ does instead: native, baked, or left out.
    and custom blocks for variable types: more glue than it removes. The table is plain data and the scheduler stays
    under 200 lines; FlowGraph interoperates through the property API.
 2. **Blender RNA paths for the property API**, on a controller the loader returns (`blend.set`, `get`, `onChanged`,
-   `blend.scene`). Blender's identifiers, and the fallback takes them as they are. The animation channel registry seeds
+   `blend.scene`). Blender's identifiers, which the IR keeps as they are. The animation channel registry seeds
    the bindings; SDK store controls are Scene custom properties.
 3. **Animation in three exact tiers.** Bezier segments whose handles sit at 1/3 and 2/3 of the key spacing become
    Babylon Hermite keys (`inTangent`, `outTangent`), which Babylon serializes; measured, all 237 Bezier segments of the
@@ -483,7 +467,7 @@ does instead: native, baked, or left out.
    granularity is an option (Node graph granularity): fused by default for Static and Tunable, one block per node for
    Live (owner, 2026-11-09).
 5. **Compositor as a NodeRenderGraph** with one generic Blender pass block and recorded plans, in the blocks library. A
-   plan that depends on a value (a blur size that changes the pass count) goes to the fallback.
+   plan that depends on a value (a blur size that changes the pass count) stays as exported.
 6. **Fast loads**: the JavaScript module plus `scene.bin`, the raw typed arrays gzipped in the file (fflate at export,
    the platform's `DecompressionStream` in the page and in Node), images as files. Meshopt was planned and dropped on
    measurement: its lossless codecs (bit-equality rules out quantizing and reordering; its triangle codec rotates
@@ -507,15 +491,14 @@ does instead: native, baked, or left out.
    evaluator, Blender itself"). The scene is described by Bylonder's own IR (`docs/ir.md`) and the page's scheduler
    walks it, resolving each computed entity by type key: a clean unit, else Babylon-native, else a Blender atomic kernel
    (compiled shader code in a graph block, `modifiers.wasm` for one modifier, a Geometry Nodes node kernel), else baked
-   (`docs/licence-free-live.md`). Nothing structural comes from Blender at run time. The `blender` evaluator on the
-   `scene.blend` sidecar and the Include Source .blend option are interim: they are removed once Geometry Nodes run on
-   the IR, and nothing new builds on them.
+   (`docs/licence-free-live.md`). Nothing structural comes from Blender at run time. Done: Geometry Nodes run on the IR,
+   and the interim `blender` evaluator, its `scene.blend` sidecar and the Include Source .blend option are removed.
 8. **Driver math as clean-room units (MIT)** (owner, 2026-11-09): simple expressions, the variables `SINGLE_PROP`,
    `TRANSFORMS`, `LOC_DIFF` and `ROTATION_DIFF` (values and world matrices read through the controller), and a driver's
    own F-curve with its F-modifiers. A separate track builds them: an oracle that records the module's behavior, a spec
    written from it, and an implementer without access to Blender's or Bylonder's Blender-derived source, recorded as
    proof; each unit is fuzz-tested against the module. They live in a folder of their own, which step 5 uses. A driver
-   that needs Python goes to the fallback. Auto-ported units (Decision 16) are the fallback only if the clean-room ones
+   that needs Python stays baked. Auto-ported units (Decision 16) are the fallback only if the clean-room ones
    fall short on robustness.
 9. **Geometry Nodes are never mapped to NodeGeometry.** Babylon's NodeGeometry has no face, edge or corner domains and
    no fields over them, so a mapping would approximate. They ship evaluated (instances as thin instances) and are tuned
@@ -523,14 +506,13 @@ does instead: native, baked, or left out.
    already is NodeGeometry and stays so. A future exact mapping, or an auto-ported subset, needs a fuzz-tested proof
    against the module, not a rule against it.
 10. **Particles, simulations and Python handlers are baked** for playback (simulation and particle positions per frame
-    in `scene.bin`) and tunable only through the fallback, which starts Python only when one needs it.
+    in `scene.bin`), not tunable in the page yet.
 11. **Every path is settable; the export suggests controls.** No whitelist: `set` takes any RNA path. The export lists
     suggested controls (custom properties, exposed node group and Geometry Nodes inputs, SDK store controls, every
     property a driver reads), which an author can trim. Reason: the API stays Blender's whole data model, while UIs and
     the table stay small.
 12. **Three export levels**, Static, Tunable and Live, one enum that sets every feature (Export levels). Tunable is the
-    default; Include Source .blend is its own option, off by default and on with Live, with a note that it makes the
-    source scene downloadable (owner, 2026-11-09).
+    default (owner, 2026-11-09). No level ships the scene's `.blend`.
 13. **Overrides as export operator properties**, Blender's exporter idiom, in a collapsed sub-panel; changing one shows
     the level as Custom. `export_materials` and `export_world` include the node graph granularity
     (`NODES_FUSED`, `NODES_PER_NODE`).
@@ -559,7 +541,6 @@ does instead: native, baked, or left out.
 | `liveModifiers`, `modifiers.wasm`, its worker | The `modifiers` evaluator | Keyed by RNA path; its per-frame JSON comparison of every stack (`modifiers.js:50`) is replaced by the scheduler's dirty set |
 | Shader node block classes | Stay in the app | Not shipped; their code is made at export |
 | Compositor block classes | The app's; one generic pass block ships | Code and plans made at export |
-| `main-view.js` mapping | Loaded with the `blender` evaluator | Split from the editor's overlays and draw code it imports today |
 | `sdk.js` controls | Knobs | Already Scene custom properties; nothing new |
 | Generated ports (`*.gen.js`) | Not in pages | Only if the clean-room units fall short (Decision 16) |
 | Desktop Blender | A native entry: File > Export > Bylonder Package | A thin add-on: Blender writes the `.blend`, the headless SDK (Node and the module) writes the package; no second mapping in Python |
@@ -591,11 +572,12 @@ Each step lands on its own, with its tests, and leaves exports working.
    crosshead as Main does, at many values; fuzz tests per ported unit against the module; the scheduler under 200 lines.
    Done: `tests/export-drivers-wasm.test.js` (every driven part and an added transform-channel driver at 40 angles, the
    scheduler at 83 lines); the units' fuzz runs against the oracle are in `docs/clean-room/impl/`.
-6. **Evaluator loader and the Blender fallback** (interim, Decision 7). Checks: the Geometry Nodes example: setting a modifier input by path
+6. **Evaluator loader and the Blender fallback** (interim, Decision 7; retired: Geometry Nodes run on the IR). Checks: the Geometry Nodes example: setting a modifier input by path
    loads the module once and the mesh equals the app's; a page whose knobs are all on fast paths never fetches the module
    or the `.blend` (counted fetches in a Node test).
-   Done: `tests/export-blender-wasm.test.js` (fast-path controls read neither file; three input sets read each once and
-   draw the app's planet and tree instances bit for bit).
+   Done, then retired: `tests/export-blender-wasm.test.js` now checks the evaluator (fast-path controls run no nodes;
+   three input sets draw the app's planet bit for bit and its tree instances; no package ships `scene.blend` or
+   `bmesh.wasm`).
 7. **`modifiers.wasm` under the evaluator interface.** Checks: `tests/export-live.test.js` on RNA paths, with the same
    results.
    Done: modifier settings are controls by RNA path with one `modifiers` operation per live object

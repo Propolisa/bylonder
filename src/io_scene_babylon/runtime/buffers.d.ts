@@ -8,10 +8,20 @@ export function readBytes(url: URL): Promise<Uint8Array<ArrayBuffer>>;
  * @param {URL} url
  * @param {BufferView[]} views
  * @param {boolean} [gzip]
- * @returns {Promise<(Float32Array | Uint16Array | Uint32Array | Int32Array)[]>}
+ * @returns {Promise<ArrayBufferView[]>}
  */
-export function readBuffers(url: URL, views: BufferView[], gzip?: boolean): Promise<(Float32Array | Uint16Array | Uint32Array | Int32Array)[]>;
+export function readBuffers(url: URL, views: BufferView[], gzip?: boolean): Promise<ArrayBufferView[]>;
 /**
  * One buffer of scene.bin: where its bytes start once inflated, how many values it has, and their type.
  */
-export type BufferView = [byteOffset: number, length: number, type: "f32" | "u16" | "u32" | "i32"];
+export type BufferView = [byteOffset: number, length: number, type: keyof typeof TYPES];
+declare namespace TYPES {
+    let f32: Float32ArrayConstructor;
+    let u16: Uint16ArrayConstructor;
+    let u32: Uint32ArrayConstructor;
+    let i32: Int32ArrayConstructor;
+    let u8: Uint8ArrayConstructor;
+    let i8: Int8ArrayConstructor;
+    let i16: Int16ArrayConstructor;
+}
+export {};

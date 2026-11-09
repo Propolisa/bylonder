@@ -44,11 +44,17 @@ export const IDSchema: import("zod/mini").ZodMiniObject<{
     path: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNullable<import("zod/mini").ZodMiniString<string>>>;
     node: import("zod/mini").ZodMiniOptional<import("zod/mini").ZodMiniString<string>>;
     data: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNullable<import("zod/mini").ZodMiniRecord<import("zod/mini").ZodMiniString<string>, import("zod/mini").ZodMiniAny>>>;
+    evaluated: import("zod/mini").ZodMiniOptional<import("zod/mini").ZodMiniObject<{
+        matrix_world: import("zod/mini").ZodMiniArray<import("zod/mini").ZodMiniNumber<number>>;
+        geometry: import("zod/mini").ZodMiniOptional<import("zod/mini").ZodMiniRecord<import("zod/mini").ZodMiniString<string>, import("zod/mini").ZodMiniAny>>;
+    }, import("zod/v4/core").$strip>>;
 }, import("zod/v4/core").$strip>;
+/** `from` reads `to`: by the ID pointer at `path` in it, or by a depsgraph `relation` (`to` being `time` for the scene's time). */
 export const IDReferenceSchema: import("zod/mini").ZodMiniObject<{
     from: import("zod/mini").ZodMiniString<string>;
-    path: import("zod/mini").ZodMiniString<string>;
+    path: import("zod/mini").ZodMiniOptional<import("zod/mini").ZodMiniString<string>>;
     to: import("zod/mini").ZodMiniString<string>;
+    relation: import("zod/mini").ZodMiniOptional<import("zod/mini").ZodMiniString<string>>;
 }, import("zod/v4/core").$strip>;
 export const PROPERTY_TYPES: readonly ["FLOAT", "INT", "BOOLEAN", "STRING"];
 /** A value a page sets and reads, by RNA path; `bind` is where it lands in Babylon (blend-scene.js Binding). */
@@ -123,21 +129,31 @@ export const IRSchema: import("zod/mini").ZodMiniObject<{
         path: string | null;
         data: Record<string, any> | null;
         node?: string | undefined;
+        evaluated?: {
+            matrix_world: number[];
+            geometry?: Record<string, any> | undefined;
+        } | undefined;
     }>, any, import("zod/v4/core").$ZodTypeInternals<Record<string, {
         type: string;
         name: string;
         path: string | null;
         data: Record<string, any> | null;
         node?: string | undefined;
+        evaluated?: {
+            matrix_world: number[];
+            geometry?: Record<string, any> | undefined;
+        } | undefined;
     }>, any>>>;
     references: import("zod/mini").ZodMiniDefault<z.ZodMiniType<{
         from: string;
-        path: string;
         to: string;
+        path?: string | undefined;
+        relation?: string | undefined;
     }[], any, import("zod/v4/core").$ZodTypeInternals<{
         from: string;
-        path: string;
         to: string;
+        path?: string | undefined;
+        relation?: string | undefined;
     }[], any>>>;
     properties: import("zod/mini").ZodMiniDefault<z.ZodMiniType<Record<string, {
         id: string | null;

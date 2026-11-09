@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // The registry of units: implementations of the IR's computed entities by type key (docs/ir.md). A page or a script
 // registers a unit before it loads a scene; the scheduler then runs every entity of that type with it, ahead of what
-// the package ships (a clean-room unit, Babylon's own, Blender's fallback) and of the baked snapshot.
+// the package ships (a clean-room unit, Babylon's own, Blender's kernels) and of the baked snapshot.
 import * as z from './zod.js';
 import { explain } from './ir.js';
 

@@ -17,9 +17,9 @@ import { drawGeometry } from './mesh.js';
  * @typedef {{ run(inputs: Record<string, any>, context: { frame: number }, entity: import('./ir.js').Entity): Outputs,
  *   runChain?(run: [Record<string, any>, import('./ir.js').Entity][], context: { frame: number }): Outputs,
  *   draw?(mesh: import('./ir.js').Mesh): Promise<import('./mesh.js').DrawBuffers>, settled?(): Promise<void> }} Evaluator
- * @typedef {{ paths: string[], defaults: any[], get(path: string): any, write(path: string, value: any): void, frame(): number }} Controls
- * What an implementation loads for: the page's scene, the package's URL, scene.bin's buffers and the properties.
- * @typedef {{ scene: import('@babylonjs/core').Scene, root: string, buffers: ArrayBufferView[], controls: Controls }} Page
+ * @typedef {{ get(path: string): any, write(path: string, value: any): void, frame(): number }} Controls
+ * What an implementation loads for: the page's scene, the package's URL, the IR, scene.bin's buffers and the properties.
+ * @typedef {{ scene: import('@babylonjs/core').Scene, root: string, ir: import('./ir.js').IR, buffers: ArrayBufferView[], controls: Controls }} Page
  */
 
 /** The implementations a package ships, by name, each loaded on first use. @type {Record<string, (page: Page) => Promise<Evaluator>>} */
@@ -27,7 +27,7 @@ export const EVALUATORS = {
   driver: () => import('./driver-evaluator.js'),
   fcurve: () => import('./fcurve-evaluator.js'),
   modifiers: (page) => import('./modifiers-evaluator.js').then((module) => module.load(page)),
-  blender: (page) => import('./blender-evaluator.js').then((module) => module.load(page)),
+  'geometry-nodes': (page) => import('./geometry-nodes-evaluator.js').then((module) => module.load(page)),
 };
 /** What Babylon runs itself (`native`: an F-Curve its AnimationGroup plays), which the scheduler leaves to it unless a unit takes over. */
 export const NATIVE = ['native'];

@@ -21,9 +21,12 @@ export const IDSchema = z.object({
   node: z.optional(Name),
   /** its RNA properties that differ from their defaults; an ID pointer as `{ id }` */
   data: z._default(z.nullable(Data), null),
+  /** what Blender evaluated at export, for an object a Geometry Nodes graph reads: its world matrix (4x4 by columns) and IR geometry */
+  evaluated: z.optional(z.object({ matrix_world: z.array(z.number()), geometry: z.optional(Data) })),
 });
 
-export const IDReferenceSchema = z.object({ from: Name, path: Name, to: Name });
+/** `from` reads `to`: by the ID pointer at `path` in it, or by a depsgraph `relation` (`to` being `time` for the scene's time). */
+export const IDReferenceSchema = z.object({ from: Name, path: z.optional(Name), to: Name, relation: z.optional(Name) });
 
 export const PROPERTY_TYPES = /** @type {const} */ (['FLOAT', 'INT', 'BOOLEAN', 'STRING']);
 /** A value a page sets and reads, by RNA path; `bind` is where it lands in Babylon (blend-scene.js Binding). */

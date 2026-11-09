@@ -22,8 +22,7 @@ Owner's direction, 2026-11-09: no porting yet; first the IR and the framework th
    4. baked: the snapshot's evaluated result, not tunable.
 4. **Blender's code only as atomic kernels**: compiled shader code inside graph blocks, modifier kernels
    (`modifiers.wasm`: a mesh and settings in, a mesh out), per-node Geometry Nodes kernels. Nothing structural comes
-   from Blender at run time: the whole-scene fallback (`scene.blend` opened in Blender's Main) is interim and goes once
-   Geometry Nodes run on the IR.
+   from Blender at run time. The interim whole-scene fallback (`scene.blend` opened in Blender's Main) is retired.
 
 A unit's interface is the IR's: `register('modifier:BEVEL', { run(inputs, { frame }) { return { mesh }; } })`, inputs
 as plain values and IR geometry, outputs by name (`runtime/units.js`). A page, a script or a later package registers
@@ -39,19 +38,31 @@ units; the scheduler prefers them to what the package ships.
    and the Geometry Nodes example evaluate with each entity on its shipped implementation; a stand-in unit registered
    in a test for one type key takes over that entity with no other change (`tests/ir-units.test.js`).
 3. **Geometry Nodes on the IR**: Bylonder's graph evaluator with fields, attributes and instances on IR geometry, each
-   node a kernel call (brief below).
-4. **Retire the scene.blend fallback** (brief below).
+   node a kernel call (brief below). Done.
+4. **Retire the scene.blend fallback** (brief below). Done.
 
 Materials move onto the IR graph alongside step 3 (brief below).
 
-Status: steps 1 and 2 are built. Every package ships `scene.ir.json`; `scene.js` holds no controls or table. The
+Status: steps 1 to 4 are built. Every package ships `scene.ir.json`; `scene.js` holds no controls or table. The
 scheduler (`runtime/scheduler.js`) runs drivers on the clean-room units, a Live Modifiers stack as one entity per
-modifier run in one `modifiers.wasm` call, Geometry Nodes modifiers on the interim `blender` implementation, leaves
-F-Curves Babylon plays exactly to its AnimationGroup (`native`), and runs an object's transform F-Curves it cannot
-(rotations, easings, other extrapolations, Cycles it cannot repeat) on the clean-room F-Curve unit (`fcurve`), their
-keys in `scene.bin`, unless the export's Bake Animation option samples them. F-modifiers but Cycles, NLA, drivers on
-transforms and constraints still leave a transform sampled. Known limit: where a unit takes over a modifier mid-stack, the mesh
-passed across carries positions, topology and UVs only (the module's mesh input takes no more).
+modifier run in one `modifiers.wasm` call, each Geometry Nodes modifier on Bylonder's evaluator with Blender's per-node
+kernels (`geometry-nodes.wasm`), leaves F-Curves Babylon plays exactly to its AnimationGroup (`native`), and runs an
+object's transform F-Curves it cannot (rotations, easings, other extrapolations, Cycles it cannot repeat) on the
+clean-room F-Curve unit (`fcurve`), their keys in `scene.bin`, unless the export's Bake Animation option samples them.
+F-modifiers but Cycles, NLA, drivers on transforms and constraints still leave a transform sampled. No package ships
+`scene.blend`. Until the kernels have a module of their own, `geometry-nodes.wasm` is the scene module
+(`runtime-files.js` `GEOMETRY_NODES_KERNELS`), the page calling only its per-node entry points. Known limits: where a
+unit takes over a modifier mid-stack, the mesh passed across carries positions, topology and UVs only (the module's
+mesh input takes no more). Geometry Nodes in the page:
+
+- simulation zones are not evaluated, nor dynamic-item nodes (Capture Attribute items, Index and Menu Switch items)
+  inside kernel fragments; JS units inside fields fed to kernel nodes evaluate on the POINT and INSTANCE domains only;
+- a stack with a Geometry Nodes modifier stays live only when all its shown modifiers are Geometry Nodes; others stay
+  baked;
+- the objects a graph reads (Object Info, Collection Info) give their world matrix and mesh as evaluated at export, so
+  moving one in the page does not change the result;
+- meshes are drawn with flat or smooth normals per face (`sharp_face`); sharp edges and custom normals are not drawn,
+  and point clouds draw as points, not spheres.
 
 ## Relation gaps
 
@@ -64,9 +75,12 @@ v1 reads references by walking each ID's RNA pointers. It misses relations that 
 - Geometry Nodes' Object Info and Collection Info inputs given by a link rather than a socket's own value, and
   Self Object.
 
-The IR records time as an input where it can see it (a driver's expression, an F-Curve). `tests/ir-relations.test.js`
-lists the other cases on the examples so the gap stays visible. A `deg_relations` seam (Blender's depsgraph relations between
-IDs, read at export) closes it with the next module rebuild.
+The IR records time as an input where it can see it (a driver's expression, an F-Curve). The export also reads the
+depsgraph's relations between IDs (`deg_relations`, `tools/blender-port/wasm/deg-relations.cc`) and adds each one the
+pointer walk missed as a reference with its `relation` name (`to` is `time` for the scene's time). That closes time,
+the active camera, Object and Collection Info given by a link, and Self Object. What only the view layer says (a
+collection excluded in it, Is Viewport) is not a relation between IDs and stays open; `tests/ir-relations.test.js`
+lists it per example.
 
 ## Inventory and later units
 
@@ -114,7 +128,8 @@ compare, mix, noise) are the cheapest units and are shared with shader nodes.
 
 ## Geometry Nodes kernel seams
 
-For the next module rebuild, seam source in `tools/blender-port/wasm/`, marshalling IR geometry in and out:
+Seam source in `tools/blender-port/wasm/` (`geometry-nodes-api.cc`), marshalling IR geometry in and out, built into
+the scene module, which exported pages load as `geometry-nodes.wasm` until a module of its own is linked:
 
 - `fn_node_eval(idname, settings, inputs)`: a function node's multi-function (Math, Compare, Noise Texture, Random
   Value, Mix, Map Range, Color Ramp) over arrays of inputs, giving arrays of outputs.
@@ -123,7 +138,7 @@ For the next module rebuild, seam source in `tools/blender-port/wasm/`, marshall
 - `geo_node_eval(fragment, geometries, values)`: one geometry node with the field-only nodes feeding it (the fragment,
   in IR graph form), on IR geometries, giving geometries and values. Fields stay inside Blender's evaluation, so each
   node evaluates them on the domains it chooses.
-- `deg_relations()`: the depsgraph's relations between IDs, for the IR's references.
+- `deg_relations()`: the depsgraph's relations between IDs, for the IR's references (done).
 
 ## Briefs
 
@@ -136,7 +151,7 @@ Babylon block where verified, else Blender's GLSL for that node made at export (
 Checks: Lava, Shader Gallery and Blue Planet pages match the app in a browser check (ask for the GPU slot); a stand-in
 unit for `node:ShaderNodeTexNoise` takes over in a test.
 
-### Geometry Nodes evaluator
+### Geometry Nodes evaluator (done)
 
 Bylonder's evaluator over an IR graph of type `GEOMETRY`: lazy fields, attributes on the four domains, instances,
 node groups, repeat zones; each node through the registry, Blender's kernels through the seams above. Files: a new
@@ -144,8 +159,9 @@ node groups, repeat zones; each node through the registry, Blender's kernels thr
 examples' meshes and instances equal the app's for several input values, with no `scene.blend`; a stand-in unit for
 `node:ShaderNodeMath` takes over.
 
-### Retire the scene.blend fallback
+### Retire the scene.blend fallback (done)
 
 Once the evaluator lands: remove `blender-evaluator.js`, `blender-fallback.js` and its bundle, Include Source .blend
 and the `Live` level's dependency on them; `modifier:NODES` resolves to the evaluator. Checks:
-`tests/export-blender-wasm.test.js` rewritten on the evaluator; no package ships `bmesh.wasm` or `scene.blend`.
+`tests/export-blender-wasm.test.js` rewritten on the evaluator; no package ships `scene.blend`, and the scene module
+only as the Geometry Nodes kernels.

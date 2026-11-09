@@ -4,7 +4,8 @@ import { blendData, idStruct, pointerOf } from '../python/bpy_rna.js';
 import { writeGraph } from './ir-graphs.js';
 import { driverCurve, driverEntities } from './driver-export.js';
 import { packKeys } from './runtime/fcurve-evaluator.js';
-import { geometryNodesEntities, modifierEntities } from './modifiers-export.js';
+import { baseMesh, geometryNodesEntities, modifierEntities } from './modifiers-export.js';
+import { ID_OB } from '../blenkernel/main-evaluated.js';
 import { entityOrder, IR_SCHEMA, IR_VERSION, referencesIn } from './runtime/ir.js';
 
 // Blender's two-letter ID codes, by the bpy.data collection of each ID type.
@@ -189,22 +190,74 @@ function animationEntities(ids, properties, time, animationGroups, curves, bin) 
   return entities;
 }
 
-// The package's IR (docs/ir.md): `controls` (controls-export.js) as its properties, with what the `live` stacks and,
-// with `blender`, the Geometry Nodes modifiers add; the carried IDs, their node trees, and the computed entities, with the
-// F-Curves the page runs (`curves`, live-curves.js).
-export function exportIR(world, { controls, live, bin, blender = false, animationGroups = [], curves = [] }) {
+// Whether a graph, or a group it uses, reads the scene's time (a Scene Time node).
+function readsTime(graphs, graphKey, seen = new Set()) {
+  if (seen.has(graphKey) || !graphs[graphKey]) return false;
+  seen.add(graphKey);
+  return graphs[graphKey].nodes.some((node) => node.type === 'node:GeometryNodeInputSceneTime' || (node.settings.node_tree?.id && readsTime(graphs, node.settings.node_tree.id, seen)));
+}
+
+// The depsgraph's relations (BlenderMain.relations) the pointer walk does not see, as references from the ID that
+// depends to the one it reads (`time`: the scene's time), each pair once, between carried IDs: the scene's time, an
+// Object or Collection Info given its ID by a link, the view layer's flags.
+export function depsgraphReferences(ids, references, relations) {
+  const seen = new Set(references.flatMap(({ from, to }) => [`${from}\0${to}`, `${to}\0${from}`]));
+  return (relations ?? []).filter(({ from, to }) => (from === 'time' || ids[from]) && ids[to] && !seen.has(`${to}\0${from}`) && seen.add(`${to}\0${from}`).add(`${from}\0${to}`))
+    .map(({ from, to, name }) => ({ from: to, to: from, relation: name }));
+}
+
+// The IDs a graph names in its nodes' settings and inputs, and those of the groups it uses.
+function graphIDs(graphs, graphKey, seen = new Set()) {
+  if (seen.has(graphKey) || !graphs[graphKey]) return [];
+  seen.add(graphKey);
+  const found = [];
+  const walk = (value) => {
+    if (!value || typeof value !== 'object') return;
+    if (typeof value.id === 'string') found.push(value.id);
+    Object.values(value).forEach(walk);
+  };
+  graphs[graphKey].nodes.forEach((node) => walk([node.settings, node.inputs]));
+  return found.flatMap((k) => (k.startsWith('NT:') ? graphIDs(graphs, k, seen) : [k]));
+}
+
+// What Blender evaluated at export for the objects the Geometry Nodes graphs read, directly or through a collection:
+// each object's world matrix and mesh (in scene.bin), as `evaluated` on its ID, which the page's evaluator reads.
+function evaluatedIDs(ids, graphs, entities, sync, bin) {
+  const objects = new Set(), visit = (k) => {
+    if (k.startsWith('OB:')) objects.add(k);
+    if (k.startsWith('GR:')) [...(ids[k]?.data?.objects ?? []), ...(ids[k]?.data?.children ?? [])].forEach((member) => visit(member.id));
+  };
+  for (const entity of Object.values(entities)) if (entity.type === 'modifier:NODES') graphIDs(graphs, entity.inputs.graph.graph).forEach(visit);
+  const pointers = new Map(sync.blender.ids(ID_OB).map((ob) => [`OB:${sync.blender.name(ob)}`, ob]));
+  for (const k of objects) {
+    const pointer = pointers.get(k), ob = pointer && idStruct(pointer);
+    if (!ids[k] || !ob) continue;
+    ids[k].evaluated = { matrix_world: Array.from(sync.blender.transform(pointer).matrix_world),
+      ...(ob.type === 'MESH' && { geometry: { mesh: baseMesh(sync.blender.mesh(pointer), bin, { attributes: true }) } }) };
+  }
+}
+
+// The package's IR (docs/ir.md): `controls` (controls-export.js) as its properties, with what the `live` stacks and the
+// Geometry Nodes modifiers add; the carried IDs, their node trees, and the computed entities, with the F-Curves the page
+// runs (`curves`, live-curves.js).
+export function exportIR(world, { controls, live, bin, animationGroups = [], curves = [] }) {
   const sync = world.mainSync, objects = world.objects.map((node) => [node, sync?.objectOf(node)]).filter(([, pointer]) => pointer);
   const { ids, references } = sync ? exportIDs(rootIDs(objects.map(([, pointer]) => pointer))) : { ids: {}, references: [] };
   for (const [node, pointer] of objects) if (ids[idKey(idStruct(pointer))]) ids[idKey(idStruct(pointer))].node = node.id;
+  if (sync) references.push(...depsgraphReferences(ids, references, sync.blender.relations()));
   const graphs = {};
-  const entities = sync ? { ...modifierEntities(world, live, controls, bin), ...(blender && geometryNodesEntities(world, controls, bin, (tree) => {
+  const entities = sync ? { ...modifierEntities(world, live, controls, bin), ...geometryNodesEntities(world, controls, bin, (tree) => {
     writeGraph(tree, idKey(tree), graphs);
     return idKey(tree);
-  })) } : {};
+  }) } : {};
   const properties = Object.fromEntries(controls.map(({ path, bind, ...property }) => [path, { id: pathID(path), ...property, ...(bind && { bind }) }]));
   if (sync) {
+    evaluatedIDs(ids, graphs, entities, sync, bin);
     idGraphs(ids, properties, graphs);
-    Object.assign(entities, driverEntities(properties), animationEntities(ids, properties, Object.keys(properties).find((p) => p.endsWith('.frame_current')), animationGroups, curves, bin));
+    const time = Object.keys(properties).find((p) => p.endsWith('.frame_current'));
+    // A Geometry Nodes modifier whose graph reads the scene's time runs again when the frame changes.
+    for (const entity of Object.values(entities)) if (time && entity.type === 'modifier:NODES' && readsTime(graphs, entity.inputs.graph.graph)) entity.inputs.frame = { property: time };
+    Object.assign(entities, driverEntities(properties), animationEntities(ids, properties, time, animationGroups, curves, bin));
   }
   // What the page computes from is offered to authors.
   for (const entity of Object.values(entities)) if (entity.implementation) for (const [ref] of referencesIn(entity.inputs)) if ('property' in ref) properties[ref.property].suggested = true;

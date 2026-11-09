@@ -3,6 +3,9 @@ const declared = (...names) => names.flatMap((name) => [`${name}.js`, `${name}.d
 export const RUNTIME_FILES = [...declared('blend-scene', 'buffers', 'world', 'scheduler', 'ir', 'units', 'mesh', 'zod'), 'ir.schema.json', 'implementations.json', 'LICENSE.md'];
 // GPL's notice and text, beside Blender's code in a package (src/ paths).
 const NOTICE = { 'LICENSE.md': 'io_scene_babylon/blender-code.LICENSE.md', COPYING: '../LICENSES/GPL-3.0-or-later.txt' };
+// Stopgap: the scene module stands in as a package's Geometry Nodes kernels (its gn_* entry points, one node a call)
+// until a module of their own is built; point this at it to swap.
+export const GEOMETRY_NODES_KERNELS = 'bmesh/bmesh.wasm';
 // Each implementation an IR's entities name: its runtime/ files, in bylonder/ when an entity runs on it, and the folder
 // of Blender's code it loads, its files from src/ (GPL-3.0-or-later).
 export const EVALUATOR_FILES = {
@@ -10,9 +13,9 @@ export const EVALUATOR_FILES = {
   fcurve: { runtime: [...declared('fcurve-evaluator'), ...declared('drivers/fcurve')] },
   modifiers: { runtime: declared('modifiers-evaluator'), folder: 'bylonder-modifiers',
     files: { 'modifiers-worker.js': 'io_scene_babylon/polyfill/modifiers-worker.bundle.js', 'modifiers.wasm': 'modifiers/modifiers.wasm' } },
-  'geometry-nodes': { runtime: ['index', 'evaluator', 'geometry', 'convert', 'kernels'].flatMap((n) => declared(`geometry-nodes/${n}`)) },
-  blender: { runtime: declared('blender-evaluator'), folder: 'bylonder-blender',
-    files: { 'blender.js': 'io_scene_babylon/blender-fallback.bundle.js', 'bmesh.wasm': 'bmesh/bmesh.wasm', 'mesh-tessellate.wasm': 'blenkernel/mesh/mesh-tessellate.wasm' } },
+  'geometry-nodes': { runtime: [...declared('geometry-nodes-evaluator'), ...['index', 'evaluator', 'geometry', 'convert', 'kernels'].flatMap((n) => declared(`geometry-nodes/${n}`))],
+    folder: 'bylonder-geometry-nodes',
+    files: { 'kernels.js': 'io_scene_babylon/polyfill/geometry-nodes-kernels.bundle.js', 'geometry-nodes.wasm': GEOMETRY_NODES_KERNELS } },
 };
 // GPL's notice and text in a folder of a package: [package path, src/ path].
 export const noticeFiles = (folder) => Object.entries(NOTICE).map(([name, from]) => [`${folder}/${name}`, from]);

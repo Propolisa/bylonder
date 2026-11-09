@@ -3,7 +3,7 @@
 // examples, gzip of the raw arrays is as small as meshopt's lossless codecs or smaller, and keeps every value bit for bit.
 import { gzipSync } from 'fflate';
 
-const TYPES = new Map([[Float32Array, 'f32'], [Uint16Array, 'u16'], [Uint32Array, 'u32'], [Int32Array, 'i32']]);
+const TYPES = new Map([[Float32Array, 'f32'], [Uint16Array, 'u16'], [Uint32Array, 'u32'], [Int32Array, 'i32'], [Uint8Array, 'u8'], [Int8Array, 'i8'], [Int16Array, 'i16']]);
 
 export function createSceneBin({ gzip = true } = {}) {
   const arrays = [], views = [];

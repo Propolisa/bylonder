@@ -12,13 +12,12 @@ import { sceneMain } from './scene-main.js';
 import { asObject } from '../src/runtime/object-transform.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
 import { writePackage } from './export-package.js';
-import { bundleWorker } from '../scripts/modifiers-polyfill.mjs';
+import { current } from '../scripts/modifiers-polyfill.mjs';
 
 // Live Modifiers: an exported scene's modifier settings are controls by their Blender paths, and the `modifiers`
 // evaluator (modifiers.wasm in a worker) runs a stack when one of them is set, or animated: its result must be the
 // applied export's geometry, for each modifier type, a set setting and an animated one.
-assert.equal(await bundleWorker(), (await import('node:fs')).readFileSync(new URL('../src/io_scene_babylon/polyfill/modifiers-worker.bundle.js', import.meta.url), 'utf8'),
-  'modifiers-worker.bundle.js is out of date: run node scripts/modifiers-polyfill.mjs');
+assert.ok(await current('modifiers-worker.bundle.js'), 'modifiers-worker.bundle.js is out of date: run node scripts/modifiers-polyfill.mjs');
 
 // Every modifier Bylonder offers evaluates in the committed module without trapping (the build's check, which it also
 // runs with the module's data moved: tools/blender-port/check-modifiers.mjs).

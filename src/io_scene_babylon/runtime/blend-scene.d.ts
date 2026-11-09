@@ -62,11 +62,16 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
             path: string | null;
             data: Record<string, any> | null;
             node?: string | undefined;
+            evaluated?: {
+                matrix_world: number[];
+                geometry?: Record<string, any> | undefined;
+            } | undefined;
         }>;
         references: {
             from: string;
-            path: string;
             to: string;
+            path?: string | undefined;
+            relation?: string | undefined;
         }[];
         properties: Record<string, {
             id: string | null;

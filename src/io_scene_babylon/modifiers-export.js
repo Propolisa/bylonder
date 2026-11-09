@@ -22,12 +22,19 @@ export const channelKey = (index, path) => `${index}:${path}`;
 // An object's channels, with their values: its node's metadata.bylonderChannels.
 export const channels = ({ modifiers }) => Object.fromEntries(modifiers.flatMap(({ values }, i) => Object.entries(values).map(([path, value]) => [channelKey(i, path), value])));
 
-// A Mesh's arrays as scene.bin buffers, an IR mesh of references.
-function baseMesh(mesh, bin) {
-  const uvs = mesh.attribute('UVMap'), buffer = (array) => ({ buffer: bin.add(array) });
+// The attribute types IR geometry carries (runtime/geometry-nodes/geometry.js LAYOUTS), by the array that holds them.
+const ATTRIBUTE_ARRAYS = { FLOAT: Float32Array, INT: Int32Array, BOOLEAN: Uint8Array, INT8: Int8Array, FLOAT2: Float32Array, FLOAT_VECTOR: Float32Array,
+  FLOAT_COLOR: Float32Array, BYTE_COLOR: Uint8Array, QUATERNION: Float32Array, FLOAT4X4: Float32Array, INT16_2D: Int16Array, INT32_2D: Int32Array };
+
+// A Mesh's arrays as scene.bin buffers, an IR mesh of references; with `attributes`, its generic attributes too, which
+// Geometry Nodes read, but the editor's selection.
+export function baseMesh(mesh, bin, { attributes = false } = {}) {
+  const uvs = mesh.attribute?.('UVMap'), buffer = (array) => ({ buffer: bin.add(array) });
   return {
     vert_positions: buffer(Float32Array.from(mesh.vert_positions)), edges: buffer(Int32Array.from(mesh.edges)), face_offsets: buffer(Int32Array.from(mesh.face_offsets)),
     corner_verts: buffer(Int32Array.from(mesh.corner_verts)), corner_edges: buffer(Int32Array.from(mesh.corner_edges)), ...(uvs && { uvs: buffer(Float32Array.from(uvs)) }),
+    ...(attributes && { attributes: Object.fromEntries([...mesh.attributes].filter(([name, { type }]) => ATTRIBUTE_ARRAYS[type] && name !== 'position' && !name.startsWith('.select'))
+      .map(([name, { domain, type, data }]) => [name, { domain, type, data: buffer(ATTRIBUTE_ARRAYS[type].from(data)) }])) }),
   };
 }
 
@@ -74,19 +81,19 @@ export function modifierEntities(world, live, properties, bin) {
 }
 
 // A Geometry Nodes modifier's inputs of a value (its interface's float, integer and boolean sockets): properties,
-// suggested, which the interim `blender` implementation sets in Main (runtime/blender-evaluator.js).
+// suggested.
 const SOCKETS = { NodeSocketFloat: 'FLOAT', NodeSocketInt: 'INT', NodeSocketBool: 'BOOLEAN' };
 
-// Each stack with a Geometry Nodes modifier, its properties added to `properties`, as entities on Blender (the
-// whole stack, as Main evaluates it), its graph by key from `graphOf`.
+// Each object whose shown modifiers are all Geometry Nodes, as entities run by Bylonder's evaluator
+// (runtime/geometry-nodes-evaluator.js), each reading the geometry the one before gives, the first its base mesh with its
+// attributes; its inputs added to `properties`, its graph by key from `graphOf`. A stack with other modifiers stays baked.
 export function geometryNodesEntities(world, properties, bin, graphOf) {
   const sync = world.mainSync, entities = {};
   for (const node of world.objects) {
-    const pointer = sync.objectOf(node), ob = pointer && idStruct(pointer);
-    if (!ob || ![...ob.modifiers].some((m) => m.type === 'NODES' && m.node_group)) continue;
-    const base = `objects${key(ob.name)}`, mesh = ob.type === 'MESH' && sync.blender.mesh(pointer);
-    const modifiers = [...ob.modifiers].filter((m) => m.show_viewport).map((m) => {
-      if (m.type !== 'NODES' || !m.node_group) return { name: m.name, type: m.type, inputs: {}, implementation: 'blender', output: 'mesh' };
+    const pointer = sync.objectOf(node), ob = pointer && idStruct(pointer), shown = ob ? [...ob.modifiers].filter((m) => m.show_viewport) : [];
+    if (ob?.type !== 'MESH' || !shown.length || !shown.every((m) => m.type === 'NODES' && m.node_group)) continue;
+    const base = `objects${key(ob.name)}`;
+    const modifiers = shown.map((m) => {
       const inputs = { graph: { graph: graphOf(m.node_group) } };
       for (const item of m.node_group.interface.items_tree) {
         if (item.item_type !== 'SOCKET' || item.in_out !== 'INPUT' || !SOCKETS[item.socket_type]) continue;
@@ -95,9 +102,9 @@ export function geometryNodesEntities(world, properties, bin, graphOf) {
           { type: SOCKETS[item.socket_type], ...(item.min_value !== undefined && { soft_min: item.min_value, soft_max: item.max_value }), suggested: true }));
         inputs[item.identifier] = { property };
       }
-      return { name: m.name, type: 'NODES', inputs, implementation: 'blender', output: 'geometry' };
+      return { name: m.name, type: 'NODES', inputs, implementation: 'geometry-nodes', output: 'geometry' };
     });
-    Object.assign(entities, chain(ob, node.id, modifiers, mesh ? { mesh: baseMesh(mesh, bin) } : {}));
+    Object.assign(entities, chain(ob, node.id, modifiers, { mesh: baseMesh(sync.blender.mesh(pointer), bin, { attributes: true }) }));
   }
   return entities;
 }

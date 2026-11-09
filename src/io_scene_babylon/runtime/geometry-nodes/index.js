@@ -23,13 +23,15 @@ function clean(geometry) {
  * The `modifier:NODES` unit over an IR's graphs. Its entity's inputs: `graph` (the graph or its key), `geometry` and
  * each interface input by identifier; its output `geometry`.
  * @param {Record<string, import('../ir.js').Graph>} graphs
- * @param {{ kernels?: import('../units.js').Unit, resolve?: (key: string) => any }} [options]
+ * `units` are the caller's node units, tried after the registry's and before the kernels.
+ * @param {{ kernels?: import('../units.js').Unit, units?: Record<string, import('../units.js').Unit>, resolve?: (key: string) => any }} [options]
  * @returns {import('../units.js').Unit}
  */
-export function geometryNodesUnit(graphs, { kernels, resolve } = {}) {
-  const evaluator = createEvaluator(graphs, { unit: (type) => unitFor(type) ?? kernels, resolve });
+export function geometryNodesUnit(graphs, { kernels, units = {}, resolve } = {}) {
+  const evaluator = createEvaluator(graphs, { unit: (type) => unitFor(type) ?? units[type] ?? kernels, resolve });
   return {
-    async run({ graph, geometry, ...values }, { frame }) {
+    // The entity reads `frame` only to run again when it changes; the context gives it.
+    async run({ graph, geometry, frame: _, ...values }, { frame }) {
       const key = typeof graph === 'string' ? graph : graph?.graph ?? Object.keys(graphs).find((k) => graphs[k] === graph);
       if (!key || !graphs[key]) throw new Error('Geometry Nodes: the modifier has no graph');
       const sockets = graphs[key].interface ?? [];

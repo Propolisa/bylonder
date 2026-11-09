@@ -520,6 +520,7 @@ bNodeTree *fragment_tree(const DictionaryValue &fragment)
       }
     }
   }
+  // port-override: node_add_link numbers a multi-input's links as they come; the request's order is set over it.
   /* A multi-input socket (Join Geometry) takes its links in the request's order: Blender takes the highest sort id
    * first, and gives each new link the next one. */
   for (const auto &[socket, socket_links] : multi_inputs.items()) {

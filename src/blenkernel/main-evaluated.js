@@ -1,6 +1,5 @@
 // What Main evaluated, drawn into Babylon objects with nothing of the editor's: Blender's matrices as Babylon's and
-// instances as thin instances. The view (main-view.js) and an exported page's Blender fallback
-// (io_scene_babylon/blender-fallback.js) draw through it.
+// instances as thin instances. The view (main-view.js) draws through it.
 import { Matrix } from '@babylonjs/core';
 
 // Main's ID types (ID_Type, the ID code's two letters).

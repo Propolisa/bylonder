@@ -47,14 +47,18 @@ Nested structs are objects, collections arrays (each item with its `name` where 
 `{ "id": key }` or null, and bulk arrays (vertices, keyframes of a long F-Curve) `{ "buffer": n }` into `scene.bin`.
 So a scene's collections and their hierarchy, view layers and their visibility flags, render and view settings, world,
 active camera, actions with their F-Curves, keyframes, easing and modifiers, NLA tracks, and the compositor's node
-group are all in `ids`.
+group are all in `ids`. An object a Geometry Nodes graph reads (directly or through a collection) also has `evaluated`:
+its world matrix (`matrix_world`, 4x4 by columns) and its geometry (`{ mesh }` of buffers, with its attributes) as
+Blender evaluated them at export.
 
 ## References
 
 `references` lists every ID pointer between the carried IDs, `{ from, path, to }`, `path` being the pointer's RNA path
 in `from` (`parent`, `data`, `material_slots[0].material`, `modifiers["Array"].offset_object`,
-`animation_data.drivers[0].driver.variables[0].targets[0].id`). They come from the same walk as `data`. What a pointer
-walk cannot see is named in `docs/licence-free-live.md` (Relation gaps).
+`animation_data.drivers[0].driver.variables[0].targets[0].id`). They come from the same walk as `data`. Relations that
+are not pointers come from Blender's depsgraph, `{ from, to, relation }`: `from` depends on `to` (`time` for the
+scene's time), `relation` naming it as Blender does (`Nodes Modifier`, `Time Source -> Modifier`). What neither shows is
+named in `docs/licence-free-live.md` (Relation gaps).
 
 ## Properties
 
@@ -106,8 +110,8 @@ resolves each node's type key through the registry as the scheduler resolves an 
 (`OB:Flywheel/animation/rotation_euler[1]`, `animation:FCURVE`, reading the frame and writing a property), a Geometry
 Nodes modifier (`modifier:NODES`, its graph an input), a material (`material:NODES`). Each has its `type`, `id`,
 `inputs`, `outputs` (where each lands: `{ "property": path }`, `{ "draw": node }`, or nowhere when only other entities
-read it) and `implementation`: what the package ships for it (`driver`, `modifiers`, `animation` for Babylon's
-AnimationGroup), or none when only its baked result ships. `order` lists the keys so each runs after what it reads.
+read it) and `implementation`: what the package ships for it (`driver`, `modifiers`, `geometry-nodes`, `animation`
+for Babylon's AnimationGroup), or none when only its baked result ships. `order` lists the keys so each runs after what it reads.
 
 What each kind of entity reads and gives:
 
@@ -115,7 +119,7 @@ What each kind of entity reads and gives:
 |---|---|---|
 | `driver:<type>` | `driver` (type, expression, variables, a single property's target as `{ value }`), `curve`, `objects` (transform properties and static parts), `frame` when the expression reads it | `value` |
 | `modifier:<TYPE>` | `mesh` (the base mesh's buffers, or the previous modifier's output), its settings by name (a vector as an array), `kernel` (the module's type and layouts) | `mesh` |
-| `modifier:NODES` | `graph`, `geometry` (`{ mesh }` of the base mesh, or the previous modifier's output), the interface's inputs by identifier | `geometry` |
+| `modifier:NODES` | `graph`, `geometry` (`{ mesh }` of the base mesh with its attributes, or the previous modifier's output), the interface's inputs by identifier, `frame` when the graph reads the scene's time (Scene Time) | `geometry` |
 | `animation:FCURVE` | its action's RNA path, `data_path` and `array_index` as names, `animation` (the Babylon AnimationGroup and target node that play it, `native`) or `curve` (`extrapolation`, `auto_smoothing`, `cycles`, and `keyframes` as a buffer of 13 floats per key: co, handles, interpolation, easing, handle types, back, amplitude, period; `fcurve`), `frame` | `value` |
 
 Each frame, the scheduler runs again what reads `frame_current` and is not Babylon's own. An F-Curve's keys are not

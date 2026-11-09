@@ -3,12 +3,16 @@
 // compared with what the app's Main evaluates for the same inputs: the mesh bit for bit, the instances' world matrices.
 import assert from 'node:assert/strict';
 import { openExample } from '../open-example.js';
-import { blenderModule } from '../../src/bmesh/bmesh-wasm.js';
 import { blendData } from '../../src/python/bpy_rna.js';
 import { writeGraph, idKey } from '../../src/io_scene_babylon/ir-graphs.js';
 import { geometryNodesUnit } from '../../src/io_scene_babylon/runtime/geometry-nodes/index.js';
 import { createKernels } from '../../src/io_scene_babylon/runtime/geometry-nodes/kernels.js';
 import { ID_OB } from '../../src/blenkernel/main-evaluated.js';
+import { GEOMETRY_NODES_KERNELS } from '../../src/io_scene_babylon/runtime-files.js';
+import { instantiate } from '../../src/io_scene_babylon/polyfill/geometry-nodes.js';
+
+// The Geometry Nodes kernels a package ships, loaded as an exported page loads them.
+export const shippedKernels = () => instantiate(new URL(`../../src/${GEOMETRY_NODES_KERNELS}`, import.meta.url));
 
 // Blender's 4x4 (column-major) from Babylon's layout and back: the same swap of Y and Z.
 const AXIS = [0, 2, 1, 3];
@@ -18,9 +22,9 @@ const multiply = (a, b) => Array.from({ length: 16 }, (_, i) => [0, 1, 2, 3].red
 /**
  * @param {string} id the example
  * @param {Record<string, any>[]} cases modifier inputs by interface identifier, set in turn
- * @param {object} [exports] the module's exports the kernels call
+ * @param {object} exports the module's exports the kernels call
  */
-export async function compareExample(id, cases, exports = blenderModule.exports) {
+export async function compareExample(id, cases, exports) {
   const { sync } = openExample(id);
   const { blender } = sync, data = blendData();
   sync.view();

@@ -129,8 +129,8 @@ const SCENARIOS = {
   async 'geometry-nodes'() {
     const { world, sync } = openExample('geometry-nodes');
     sync.view();
-    const files = await exportModule(world, { sourceBlend: true }), { on } = irOf(files);
-    assert.deepEqual(on('blender').map(([key, e]) => [key, e.type]), [['OB:Planet/modifier/Planet', 'modifier:NODES']], 'Geometry Nodes on the interim Blender fallback');
+    const files = await exportModule(world), { on } = irOf(files);
+    assert.deepEqual(on('geometry-nodes').map(([key, e]) => [key, e.type]), [['OB:Planet/modifier/Planet', 'modifier:NODES']], 'Geometry Nodes on Bylonder\'s evaluator');
     const written = writePackage(files), blend = await (await import(written.url)).load(new NullEngine());
     const planet = blend.scene.getMeshById('Planet'), before = positions(planet);
     blend.set('objects["Planet"].modifiers["Planet"].properties.inputs.Socket_3.value', 0.9);
@@ -138,7 +138,7 @@ const SCENARIOS = {
     assert.notDeepEqual(positions(planet), before, 'setting Mountains evaluates the planet again');
     blend.dispose();
     written.remove();
-    console.log('geometry nodes: the Planet\'s modifier entity runs on the Blender fallback');
+    console.log('geometry nodes: the Planet\'s modifier entity runs on Bylonder\'s evaluator');
   },
 };
 

@@ -529,6 +529,9 @@ export class BlenderMain {
   // The Main's address and an object's data's address (0 for an empty), for subsystems with their own exports.
   get bmain() { return x.main_bmain(this.#context) >>> 0; }
   get scene() { return x.main_scene(this.#context) >>> 0; }
+  // The view layer's depsgraph relations between IDs (deg-relations.cc), `{ from, to, name }` by IR key (`time` for the
+  // scene's time source); null with a module that has none.
+  relations() { return x.deg_relations ? JSON.parse(cString(x.deg_relations(this.bmain, this.scene, x.main_view_layer(this.#context)))) : null; }
   // The scene's display transform on a size^3 lattice of shaped colors (a log shaper over `stops` below its range, else
   // pow 2.2) and the scene linear range it spans (image-api.cc display_lut), a copy; null with a module that has none.
   displayLut(size, stops = 0) {
