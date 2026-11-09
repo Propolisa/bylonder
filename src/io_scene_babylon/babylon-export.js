@@ -356,7 +356,6 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
   // the lights' metadata, which it reads, is theirs; the views set them back as they next draw.
   world.shadows?.setActive(true, world.renderSettings.state.eevee.shadowRayCount);
   const effects = camera ? cameraEffects(world, scene, camera) : { renderingPipelines: [], postProcesses: [] };
-  const all = [...scene.meshes, ...scene.transformNodes, ...scene.lights, ...scene.cameras];
   const imageData = new Map(scene.textures.filter((t) => t instanceof Texture).map((t) => [t, imageFile(t)]).filter(([, data]) => data));
   // Sampled before the export's flags and metadata are set, which channels read to know they are available.
   const samples = world.animation.sample(), liveIds = live && new Map([...live].map(([node, stack]) => [nodeId(node), [node, stack]]));
@@ -368,6 +367,8 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
   const sampled = [...samples.filter(({ channel }) => !evaluated.channels.has(world.animation.ref(channel.id, channel.path))),
     ...[...evaluated.channels].map(([ref, values]) => ({ channel: world.animation.channels.get(ref), start: frameStart, values }))];
   const transforms = new Map(objects.map((node) => [node.uniqueId, evaluatedTransform(world.mainSync, node)]));
+  // Taken after the frames are evaluated, which redraw what the view draws per frame (a Grease Pencil's strokes).
+  const all = [...scene.meshes, ...scene.transformNodes, ...scene.lights, ...scene.cameras];
   const restores = [
     setFor(all, 'doNotSerialize', (n) => !content.nodes.has(n)),
     setFor(scene.materials, 'doNotSerialize', (m) => !content.materials.has(m)),
