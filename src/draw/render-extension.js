@@ -10,11 +10,12 @@ const kw = (keywords) => __kwargtrans__(keywords);
 const types = () => globalThis.__py_modules['_bpy.types'];
 const props = () => globalThis.__py_modules['_bpy.props'];
 
-// id: the Scene property's name (bylonder_...); label; description (the checkbox's tooltip); detail: the panel's text.
-export function renderExtension({ id, label, description, detail }) {
+// id: the Scene property's name (bylonder_...); label; description (the checkbox's tooltip); detail: the panel's text;
+// pull(scene, struct): reads what else of Blender's scene (its RNA struct) the extension follows, as the scene changes.
+export function renderExtension({ id, label, description, detail, pull = () => {} }) {
   const values = new WeakMap(); // Babylon scene -> on
   const extension = {
-    id, label, description, detail,
+    id, label, description, detail, pull,
     // Told with the Babylon scene whose setting changed.
     changed: new Observable(),
     enabled: (scene) => values.get(scene) ?? true,
@@ -31,7 +32,10 @@ export function renderExtension({ id, label, description, detail }) {
 // Each extension's setting as Blender's scene (an ID pointer) holds it, for the Babylon scene drawing it.
 export function pullRenderExtensions(scene, sce) {
   const struct = idStruct(sce);
-  for (const extension of extensions) extension.set(scene, struct[extension.id]?.use ?? true);
+  for (const extension of extensions) {
+    extension.set(scene, struct[extension.id]?.use ?? true);
+    extension.pull(scene, struct);
+  }
 }
 
 // The extensions' properties and panels, once Blender's Python is loaded; `icon` is the Bylonder icon's icon_value.

@@ -1,6 +1,7 @@
 import { Camera, Constants, DefaultRenderingPipeline, DepthOfFieldEffectBlurLevel, ImageProcessingConfiguration, SSAO2RenderingPipeline, SSRRenderingPipeline } from '@babylonjs/core';
 import { seededRandom } from '../../render/clock.js';
 import { createFilm } from '../../render/film.js';
+import { cameraVolumes } from '../../draw/volumes.js';
 import { createDisplayTransform, setDisplaySettings } from '../../render/display-transform.js';
 import { displayedViewSettings } from '../../render/view-settings.js';
 
@@ -100,7 +101,7 @@ export function createRenderEngine(scene, { dof = () => null, displayTransform =
   };
   const drop = camera => {
     const entry = attached.get(camera); if (!entry) return;
-    const e = entry.effects; e.pipeline?.dispose(); e.ssr?.dispose(); e.ssao?.dispose(); e.display.dispose(camera); e.film.dispose();
+    const e = entry.effects; e.pipeline?.dispose(); e.ssr?.dispose(); e.ssao?.dispose(); e.display.dispose(camera); e.film.dispose(); e.volumes.dispose();
     attached.delete(camera);
     if (ownGeometryBuffer && ![...attached.values()].some(a => usesGeometry(a.effects))) scene.disableGeometryBufferRenderer();
   };
@@ -113,6 +114,8 @@ export function createRenderEngine(scene, { dof = () => null, displayTransform =
     const e = settings.eevee, effects = {};
     // EEVEE's film first: the samples a view accumulates (its viewport samples) in scene linear.
     effects.film = Object.assign(createFilm(scene, camera), { samples: () => viewportSamples });
+    // EEVEE's volumes, resolved over the render before the film (draw/volumes.js).
+    effects.volumes = cameraVolumes(scene, camera, effects.film);
     // Babylon's pipeline manager keys pipelines by name, so each camera's pipelines need their own.
     const name = id => `__${id}:${camera.uniqueId}`;
     // Drawn in half float, displayed by its own display transform (display-transform.js), after blending, as Blender's.

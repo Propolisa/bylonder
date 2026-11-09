@@ -152,8 +152,9 @@ export function createFilm(scene, camera) {
   const afterFrame = scene.onAfterRenderObservable.add(() => sampling.delete(scene));
   const controls = {
     manual: false,
-    // The render target the scene draws into, its depth a texture.
-    target: () => film.inputTexture ?? null,
+    // The render target the scene draws into (the first post-process's input: the film's, or the volumes' resolve's
+    // before it, draw/volumes.js), its depth a texture.
+    target: () => (camera._postProcesses.find(Boolean) ?? film).inputTexture ?? null,
     samples: () => 1,
     // Starts again: the next sample is the first.
     reset() { state.clear = true; count = 0; },

@@ -30,6 +30,7 @@ import { VIEW_FORWARD, viewEye, viewForward } from '../../draw/draw-view.js';
 import { eeveeParity, eeveeParityChanged } from '../../draw/eevee-parity.js';
 import { DITHER_FUNCTIONS, ditherOffset } from '../../render/dither.js';
 import { readsSceneDepth, sceneDepth } from '../../render/scene-depth.js';
+import { FROXEL_JITTER } from '../../draw/volume-shaders.js';
 import { AREA_SPECULAR, LIGHT_SPECULAR } from '../../blenkernel/light/area-specular.js';
 import '../graph-roots.js';
 import { SharedShadowDepthWrapper } from '../../draw/shadow-depth-wrapper.js';
@@ -168,6 +169,14 @@ export const SHADER_NODES = {
   ShaderNodeBsdfRefraction: (p, decl, { connected }) => [G_DATA, ['bl_node_bsdf_glass', ['Color', 'Roughness', 'IOR', normal(connected)], ['@BSDF']]],
   ShaderNodeBsdfTransparent: () => [['bl_node_bsdf_transparent', ['Color'], ['@BSDF']]],
   ShaderNodeHoldout: () => [['bl_node_holdout', [], ['@Holdout']]],
+  // node_shader_volume_principled.cc, node_shader_volume_scatter.cc, node_shader_volume_absorption.cc: a mesh has no
+  // grids, so a named density or color attribute is its default (1) and a named temperature none (0); the weight is
+  // the mix nodes' (bl_node_mix_shader).
+  ShaderNodeVolumePrincipled: (p, decl, { value }) => [['node_volume_principled', ['Color', 'Density', 'Anisotropy', 'Absorption Color', 'Emission Strength',
+    'Emission Color', 'Blackbody Intensity', 'Blackbody Tint', 'Temperature', 1, [1, 1, 1, 1], [1, 1, 1, 1], value('Temperature Attribute') ? [0, 0, 0, 0] : [1, 1, 1, 1],
+    { texture: blackbodyTable() }, 0.5], ['@Volume']]],
+  ShaderNodeVolumeScatter: () => [['node_volume_scatter', ['Color', 'Density', 'Anisotropy', 'IOR', 'Backscatter', 'Alpha', 'Diameter', 1], ['@Volume']]],
+  ShaderNodeVolumeAbsorption: () => [['node_volume_absorption', ['Color', 'Density', 1], ['@Volume']]],
   ShaderNodeMixShader: (p, decl) => [stack('bl_node_mix_shader', decl)],
   ShaderNodeAddShader: (p, decl) => [stack('bl_node_add_shader', decl)],
   // node_shader_curves.cc, gpu_shader_curve_rgb, gpu_shader_curve_vec, gpu_shader_curve_float: shader nodes do no
@@ -431,25 +440,28 @@ void bl_engine(mat4 model, mat4 model_inverse, mat4 viewmat, mat4 viewinv, mat4 
   // lights each lobe once (BlenderSurfaceBlock), as EEVEE merges the closures of one bin.
   bl_closure: `struct BlLobe { vec3 color; float weight; float roughness; vec3 normal; };
 struct BlClosure { vec3 dielectric; float dielectric_weight; vec3 metal; float metal_weight; vec3 transmission; float transmission_weight;
-  float roughness; float ior; vec3 normal; vec3 emission; float transparency; BlLobe lobe1; BlLobe lobe2; };
+  float roughness; float ior; vec3 normal; vec3 emission; float transparency; BlLobe lobe1; BlLobe lobe2;
+  vec3 volume_scattering; vec3 volume_absorption; float volume_anisotropy; };
 BlLobe bl_lobe_weigh(BlLobe l, float w) { return BlLobe(l.color * w, l.weight * w, l.roughness * w, l.normal * w); }
 BlLobe bl_lobe_add(BlLobe a, BlLobe b) { return BlLobe(a.color + b.color, a.weight + b.weight, a.roughness + b.roughness, a.normal + b.normal); }
 const BlLobe bl_lobe_empty = BlLobe(vec3(0.0), 0.0, 0.0, vec3(0.0));
-BlClosure bl_closure_empty() { return BlClosure(vec3(0.0), 0.0, vec3(0.0), 0.0, vec3(0.0), 0.0, 0.0, 0.0, vec3(0.0), vec3(0.0), 0.0, bl_lobe_empty, bl_lobe_empty); }
+BlClosure bl_closure_empty() { return BlClosure(vec3(0.0), 0.0, vec3(0.0), 0.0, vec3(0.0), 0.0, 0.0, 0.0, vec3(0.0), vec3(0.0), 0.0, bl_lobe_empty, bl_lobe_empty, vec3(0.0), vec3(0.0), 0.0); }
 BlClosure bl_closure_weigh(BlClosure c, float w) {
   return BlClosure(c.dielectric * w, c.dielectric_weight * w, c.metal * w, c.metal_weight * w, c.transmission * w, c.transmission_weight * w,
-    c.roughness * w, c.ior * w, c.normal * w, c.emission * w, c.transparency * w, bl_lobe_weigh(c.lobe1, w), bl_lobe_weigh(c.lobe2, w));
+    c.roughness * w, c.ior * w, c.normal * w, c.emission * w, c.transparency * w, bl_lobe_weigh(c.lobe1, w), bl_lobe_weigh(c.lobe2, w),
+    c.volume_scattering * w, c.volume_absorption * w, c.volume_anisotropy * w);
 }
 BlClosure bl_closure_add(BlClosure a, BlClosure b) {
   return BlClosure(a.dielectric + b.dielectric, a.dielectric_weight + b.dielectric_weight, a.metal + b.metal, a.metal_weight + b.metal_weight,
     a.transmission + b.transmission, a.transmission_weight + b.transmission_weight, a.roughness + b.roughness, a.ior + b.ior, a.normal + b.normal,
-    a.emission + b.emission, a.transparency + b.transparency, bl_lobe_add(a.lobe1, b.lobe1), bl_lobe_add(a.lobe2, b.lobe2));
+    a.emission + b.emission, a.transparency + b.transparency, bl_lobe_add(a.lobe1, b.lobe1), bl_lobe_add(a.lobe2, b.lobe2),
+    a.volume_scattering + b.volume_scattering, a.volume_absorption + b.volume_absorption, a.volume_anisotropy + b.volume_anisotropy);
 }
 // A reflection of weight 1, its color split among the kinds by their weights.
 BlClosure bl_closure_bsdf(vec3 color, float dielectric, float metal, float transmission, float roughness, float ior, vec3 N) {
   color = max(color, vec3(0.0));
   return BlClosure(color * dielectric, dielectric, color * metal, metal, color * transmission, transmission, roughness, ior, normalize(N), vec3(0.0), 0.0,
-    bl_lobe_empty, bl_lobe_empty);
+    bl_lobe_empty, bl_lobe_empty, vec3(0.0), vec3(0.0), 0.0);
 }
 // A reflection of weight 1 in a lobe: the base's metal (0), or a lobe of its own (1, 2).
 BlClosure bl_closure_reflection(vec3 color, float roughness, vec3 N, float lobe) {
@@ -518,6 +530,26 @@ vec4 bl_closure_radiance(BlClosure c, vec3 lit) {
   result.emission = max(emission.rgb, vec3(0.0)) * max(emission_strength, 0.0);
   result = bl_closure_weigh(result, alpha);
   result.transparency = 1.0 - alpha;
+}`,
+  // blender-port: eevee_nodetree_lib.bsl.hh closure_eval of the volume closures and emission: what a volume shader of
+  // Blender's (gpu_shader_material_volume_*.glsl) gathers, its parts weighted (the weight tree is the mix nodes' here).
+  closure_eval: `#define Closure BlClosure
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+struct ClosureVolumeScatter { float weight; vec3 scattering; float anisotropy; };
+struct ClosureVolumeAbsorption { float weight; vec3 absorption; };
+struct ClosureEmission { float weight; vec3 emission; };
+BlClosure closure_eval(ClosureVolumeScatter s) {
+  BlClosure c = bl_closure_empty();
+  c.volume_scattering = s.scattering * s.weight;
+  c.volume_anisotropy = s.anisotropy * s.weight;
+  return c;
+}
+BlClosure closure_eval(ClosureVolumeAbsorption a) { BlClosure c = bl_closure_empty(); c.volume_absorption = a.absorption * a.weight; return c; }
+BlClosure closure_eval(ClosureEmission e) { BlClosure c = bl_closure_empty(); c.emission = e.emission * e.weight; return c; }
+BlClosure closure_eval(ClosureVolumeScatter s, ClosureVolumeAbsorption a, ClosureEmission e) {
+  return bl_closure_add(bl_closure_add(closure_eval(s), closure_eval(a)), closure_eval(e));
 }`,
   // node_emission: max(color, 0) times max(strength, 0).
   bl_node_emission: `void bl_node_emission(vec4 color, float strength, inout BlClosure result) {
@@ -777,7 +809,7 @@ function geometryBlock(material, name) {
   if (name === '__tangent') return Object.assign(attributeBlock(material, value, type), { blenderAttribute: { tangent: true, kind: value } });
   if (kind === 'attribute') return attributeBlock(material, value, type);
   if (name === '__normal') return shadingNormal(material);
-  if (kind === 'geometry') return { output: curvesGeometry(material).getOutputByName(value) };
+  if (kind === 'geometry') return { output: material.blenderGeometry?.(value) ?? curvesGeometry(material).getOutputByName(value) };
   if (name === '__world') return finalWorld(material);
   return helper(material, name, (full) => Object.assign(new InputBlock(full, undefined, type), { systemValue: value }));
 }
@@ -802,7 +834,7 @@ function texspace(mesh) {
   const base = mesh?.metadata?.wbModifierBase ?? mesh;
   if (!base) return [[0, 0, 0], [1, 1, 1]];
   if (!texspaces.has(base)) {
-    const positions = base.positions ?? mesh.getVerticesData?.('position') ?? [];
+    const positions = base.positions ?? base.getVerticesData?.('position') ?? [];
     const min = [Infinity, Infinity, Infinity], max = [-Infinity, -Infinity, -Infinity];
     for (let i = 0; i < positions.length; i += 3) for (let k = 0; k < 3; k++) { min[k] = Math.min(min[k], positions[i + k]); max[k] = Math.max(max[k], positions[i + k]); }
     const axes = (v) => [v[0], v[2], v[1]];
@@ -903,6 +935,7 @@ const blenderShader = (Base) => class extends Base {
       image: () => (this.properties.image ? blendData().images.get(this.properties.image) ?? null : null),
       lobe: () => this.lobe ?? 0,
       world: () => !!this._world,
+      value: (id) => this.values[id],
     }) ?? [];
   }
 
@@ -1528,7 +1561,7 @@ export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock)
     const position = this.getInputByName('blPosition');
     if (material.blenderDithered) wire(worldPosition(material).output, position);
     else position.connectedPoint?.disconnectFrom(position);
-    // EEVEE draws no surface for a Volume without a Surface (and Bylonder draws no volumes yet).
+    // EEVEE draws no surface for a Volume without a Surface (draw/volumes.js draws its volume).
     material.blenderNoSurface = this._noSurface = !closure && !!this.blenderVolume;
     // EEVEE's transparent shadows: a Dithered surface's shadow is hashed per sample as the surface is, so its samples
     // average a shadow as dense as its coverage. Babylon's shadow maps draw it with the material's own shader.
@@ -1655,6 +1688,116 @@ export class ShaderNodeOutputWorld extends ShaderNodeOutputMaterial {
   }
 }
 
+// A material's Volume as EEVEE stores it in its froxels (eevee_surf_volume.bsl.hh SurfVolume::write_froxel), drawn by
+// draw/volumes.js: the mesh it draws is a slab of the view's froxel slices in its domain's object space, each slice at its
+// tile of the froxel atlas (`blFroxelClip`), so the nodes read each froxel's point as they read a surface's. It writes
+// the four property textures additively: scattering, extinction, emission, and the phase (anisotropy, weight). A point
+// outside the domain's bounds (`blVolumeBounds` of the mesh, in its local space) holds nothing.
+export const FROXEL_CLIP = 'blFroxelClip', FROXEL_SLICE = 'blFroxelSlice', FROXEL_CORNER = 'blFroxelCorner';
+// Each froxel's point, found per fragment from the slab's fixed geometry (each vertex its slice, `blFroxelSlice`, and
+// its corner of the grid in volume uv, `blFroxelCorner`) and the view's state as uniforms (the mesh's `blFroxel`
+// metadata: the view's inverse projection, the view to the mesh's space, the depth distribution, the grid's width,
+// height, slices and the sample's noise offset, its coordinate scale), so the slab never changes and its material never
+// prepares again; moved along its view ray within its slice by the sample's noise, as EEVEE's eval_froxel jitters it.
+class BlenderFroxelPositionBlock extends NodeMaterialBlock {
+  constructor(name) {
+    super(name, Targets.Fragment);
+    this.registerInput('corner', T.Vector2);
+    this.registerInput('slice', T.Float);
+    this.registerOutput('output', T.Vector3);
+  }
+  getClassName() { return 'BlenderFroxelPositionBlock'; }
+  bind(effect, nodeMaterial, mesh) {
+    const froxel = mesh?.metadata?.blFroxel;
+    if (!froxel) return;
+    effect.setMatrix('bl_froxel_inverse_projection', froxel.inverseProjection);
+    effect.setMatrix('bl_froxel_to_local', froxel.toLocal);
+    effect.setFloat4('bl_froxel_depth', ...froxel.depth, froxel.perspective ? 1 : 0);
+    effect.setFloat4('bl_froxel_grid', ...froxel.grid);
+    effect.setFloat2('bl_froxel_scale', ...froxel.coordScale);
+  }
+  _buildBlock(state) {
+    super._buildBlock(state);
+    if (!state.sharedData.bindableBlocks.includes(this)) state.sharedData.bindableBlocks.push(this);
+    for (const [name, type] of [['bl_froxel_inverse_projection', T.Matrix], ['bl_froxel_to_local', T.Matrix], ['bl_froxel_depth', T.Vector4],
+      ['bl_froxel_grid', T.Vector4], ['bl_froxel_scale', T.Vector2]]) state._emitUniformFromString(name, type);
+    state._emitFunction('bl_froxel_jitter', FROXEL_JITTER, '');
+    const [corner, slice] = this._inputs.map((input) => input.associatedVariableName), out = this._outputs[0];
+    // As volume-shaders.js volume_view_point finds a froxel's point in the view, then in the mesh's space.
+    state.compilationString += `${state._declareOutput(out)};
+{
+  float jitter = bl_froxel_jitter(mod(floor(gl_FragCoord.xy), bl_froxel_grid.xy), bl_froxel_grid.w);
+  float view_z = bl_volume_z_to_view_z(bl_froxel_depth.xyz, bl_froxel_depth.w, (floor(${slice} + 0.5) + 0.5 - jitter) / bl_froxel_grid.z);
+  vec2 ndc = ${corner} / bl_froxel_scale * 2.0 - 1.0;
+  vec4 a = bl_froxel_inverse_projection * vec4(ndc, 0.0, 1.0), b = bl_froxel_inverse_projection * vec4(ndc, 0.5, 1.0);
+  vec3 view_point = mix(a.xyz / a.w, b.xyz / b.w, (-view_z - a.z / a.w) / (b.z / b.w - a.z / a.w));
+  ${out.associatedVariableName} = (bl_froxel_to_local * vec4(view_point, 1.0)).xyz;
+}
+`;
+    return this;
+  }
+}
+const VOLUME_TARGETS = `#extension GL_EXT_draw_buffers : require
+layout(location = 0) out highp vec4 glFragData[4];
+highp vec4 gl_FragColor;`;
+export class ShaderNodeOutputVolume extends ShaderNodeOutputMaterial {
+  constructor(name) {
+    super(name);
+    this.registerInput('blLocal', T.Vector3, true, Targets.Fragment);
+  }
+
+  attach(material) {
+    material.addOutputNode(this);
+    // The nodes read each froxel's jittered point where they read a mesh's position.
+    material.blenderGeometry = (value) => {
+      if (value !== 'position') return null;
+      const froxel = helper(material, '__froxelPosition', (name) => new BlenderFroxelPositionBlock(name));
+      wire(attributeBlock(material, FROXEL_CORNER, T.Vector2).output, froxel.getInputByName('corner'));
+      wire(attributeBlock(material, FROXEL_SLICE, T.Float).output, froxel.getInputByName('slice'));
+      return froxel.getOutputByName('output');
+    };
+    const output = helper(material, '__vertexOutput', (name) => new VertexOutputBlock(name));
+    wire(attributeBlock(material, FROXEL_CLIP, T.Vector4).output, output.vector);
+    material.addOutputNode(output);
+  }
+
+  initialize(state) {
+    FragmentOutputBlock.prototype.initialize.call(this, state);
+    Object.assign(state.sharedData.nodeMaterial, { alphaMode: Constants.ALPHA_ONEONE, forceAlphaBlending: true, backFaceCulling: false,
+      disableDepthWrite: true, depthFunction: Constants.ALWAYS, separateCullingPass: false });
+    wire(geometryBlock(state.sharedData.nodeMaterial, '__position').output, this.getInputByName('blLocal'));
+  }
+
+  prepareDefines() {}
+
+  bind(effect, nodeMaterial, mesh) {
+    super.bind(effect, nodeMaterial, mesh);
+    const [min, max] = mesh?.metadata?.blVolumeBounds ?? [[0, 0, 0], [0, 0, 0]];
+    effect.setFloat3('bl_volume_min', ...min);
+    effect.setFloat3('bl_volume_max', ...max);
+  }
+
+  _buildBlock(state) {
+    NodeMaterialBlock.prototype._buildBlock.call(this, state);
+    if (!state.sharedData.bindableBlocks.includes(this) && !state.sharedData.forcedBindableBlocks.includes(this)) state.sharedData.forcedBindableBlocks.push(this);
+    if (state.target !== Targets.Fragment) return this;
+    state._emitExtension('bl_volume_targets', VOLUME_TARGETS);
+    state._emitFunction('bl_closure', STAND_INS.bl_closure, '');
+    for (const name of ['bl_volume_min', 'bl_volume_max']) state._emitUniformFromString(name, T.Vector3);
+    const volume = this.getInputByName('Volume'), local = this.getInputByName('blLocal').associatedVariableName;
+    state.compilationString += `if (any(lessThan(${local}, bl_volume_min)) || any(greaterThan(${local}, bl_volume_max))) discard;
+BlClosure bl_volume = ${volume.isConnected ? volume.associatedVariableName : 'bl_closure_empty()'};
+vec3 bl_scattering = max(bl_volume.volume_scattering, 0.0);
+float bl_phase_weight = any(greaterThan(bl_scattering, vec3(0.0))) ? 1.0 : 0.0;
+glFragData[0] = vec4(bl_scattering, 0.0);
+glFragData[1] = vec4(bl_scattering + max(bl_volume.volume_absorption, 0.0), 0.0);
+glFragData[2] = vec4(max(bl_volume.emission, 0.0), 0.0);
+glFragData[3] = vec4(bl_volume.volume_anisotropy * bl_phase_weight, bl_phase_weight, 0.0, 0.0);
+`;
+    return this;
+  }
+}
+
 // A scene's node materials build again when its EEVEE Parity changes.
 eeveeParityChanged.add((scene) => {
   for (const material of scene.materials) if (material.attachedBlocks?.some((block) => block instanceof ShaderNodeOutputMaterial)) buildMaterial(material);
@@ -1741,10 +1884,13 @@ export const outputValues = (node) => Object.fromEntries((OUTPUT_VALUES[node.bl_
 
 // A Blender node tree (plain: { nodes: [{ idname, name, properties, values }], links: [[from node, output, to node,
 // input]] }, as a read .blend's Main holds it) as a node material of the blocks for Blender's nodes, linked as in the
-// tree. Returns the material and the node types it has no block for, which it leaves out.
-export function nodeMaterialFromTree(name, scene, tree) {
+// tree. Returns the material and the node types it has no block for, which it leaves out. The surface is drawn with
+// Material Output; given `volumeOutput`, a block class in its place, the tree's Volume is drawn with it instead
+// (draw/volumes.js), from the same tree (`material.blenderTree`).
+export function nodeMaterialFromTree(name, scene, tree, volumeOutput = null) {
   const material = new BlenderNodeMaterial(name, scene), blocks = new Map(), missing = new Set(), output = eeveeOutput(tree.nodes);
   material.clear();
+  material.blenderTree = tree;
   material.blenderWorld = output?.idname === 'ShaderNodeOutputWorld';
   for (const node of tree.nodes) {
     if (node.idname === 'GeometryNodeRepeatInput') {
@@ -1756,7 +1902,7 @@ export function nodeMaterialFromTree(name, scene, tree) {
       continue;
     }
     if (node.idname === 'GeometryNodeRepeatOutput') continue;
-    const Block = shaderNodeClasses[node.idname];
+    const Block = node === output && volumeOutput ? volumeOutput : shaderNodeClasses[node.idname];
     if (!Block) { if (!['NodeFrame', 'NodeReroute'].includes(node.idname)) missing.add(node.idname); continue; }
     const block = new Block(node.name);
     Object.assign(block.properties, structuredClone(node.properties ?? {}));
@@ -1765,10 +1911,12 @@ export function nodeMaterialFromTree(name, scene, tree) {
     if (node === output) block.attach(material);
     else material.attachedBlocks.push(block);
   }
+  // The output's Volume is drawn by its own material, its Surface (and displacement) by this one.
+  const drawn = (to, input) => to !== output?.name || (input === 'Volume') === !!volumeOutput;
   const links = rerouted(tree);
-  // Volumes are not drawn yet: whether the output has one is kept apart from the links to blocks.
-  if (blocks.get(output?.name)) blocks.get(output.name).blenderVolume = links.some(([, , to, input]) => to === output.name && input === 'Volume');
-  for (const [from, output, to, input] of links) {
+  material.blenderVolume = links.some(([, , to, input]) => to === output?.name && input === 'Volume');
+  if (blocks.get(output?.name)) blocks.get(output.name).blenderVolume = material.blenderVolume;
+  for (const [from, output, to, input] of links.filter(([, , to, input]) => drawn(to, input))) {
     const fromBlock = blocks.get(from), source = fromBlock instanceof BlenderRepeatWriteBlock ? fromBlock.zone.result(output) : fromBlock?.getOutputByName(output);
     const target = blocks.get(to)?.getInputByName(input);
     if (!source || !target) continue;

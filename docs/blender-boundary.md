@@ -255,7 +255,9 @@ can be maintained on its own:
   axes and relationship lines, as `docs/armatures.md` says), `overlay-particle.js` (dots, circles, crosses, axes, hair and Particle Edit
   Mode as the overlay draws them), `curves.js` (curves' data and meshes, the one curves vertex stage every engine uses), `workbench.js`
   (Solid, with curves as Workbench's hair), `grease-pencil.js` (Grease Pencil drawings as GreasedLine meshes and fill
-  meshes, from `grease-pencil-api.cc` `main_grease_pencil`, which packs a drawing again only when it changed), called
+  meshes, from `grease-pencil-api.cc` `main_grease_pencil`, which packs a drawing again only when it changed), `volumes.js`
+  (EEVEE's object volumes: a material's Volume drawn by Blender's node GLSL into a froxel atlas on slabs of the view's
+  slices, then EEVEE's scatter, integration and resolve passes, `volume-shaders.js`, ported from `eevee_volume.bsl.hh`), called
   by the view (`main-view.js` `drawInstances`, `drawCurves`, `drawGreasePencil`, `particleEditOverlay`).
 - **Blender's GPU offscreen on Babylon.** Where Blender's code renders into a GPU offscreen and reads the pixels back
   (Grease Pencil's `image_render`, which the Fill tool's Pixel solver renders strokes with), the seam records what it

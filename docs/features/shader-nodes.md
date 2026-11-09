@@ -94,7 +94,7 @@ limits:
   - With EEVEE Parity off (Properties > Render), lobes are lit as one and the view direction is Babylon's eye, as plain Babylon PBR does.
   - File > Export writes a material of Blender's nodes as Babylon's own blocks, its Blender nodes one CustomBlock of their code: their values, the drawn object's color, index and texture space are fixed at export, and a color ramp's table is 8 bits.
   - The export's EEVEE Parity lights a second reflection lobe as Babylon's clearcoat, a dielectric whose strength follows the lobe's color, not as EEVEE's lobe; exported Principled-only materials (PBRMaterial) keep Babylon's view direction through an orthographic camera.
-  - Not run yet: Wireframe, Point Info, Particle Info, the volume nodes, Script, Sky, Environment and IES textures, Toon BSDF, Specular BSDF, Ray Portal, Raycast, AOV Output and node groups.
+  - Not run yet: Wireframe, Point Info, Particle Info, Volume Info, Volume Coefficients, Script, Sky, Environment and IES textures, Toon BSDF, Specular BSDF, Ray Portal, Raycast, AOV Output and node groups.
 ---
 # Shader Nodes
 

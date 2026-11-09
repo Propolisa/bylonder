@@ -87,6 +87,10 @@ ROOTS = [
     'gpu_shader_material_background.glsl',
     'gpu_shader_material_tex_sky.glsl',
     'gpu_shader_material_tex_environment.glsl',
+    # Volumes (draw/volumes.js): the volume shaders' closures, drawn into EEVEE's froxels.
+    'gpu_shader_material_volume_principled.glsl',
+    'gpu_shader_material_volume_scatter.glsl',
+    'gpu_shader_material_volume_absorption.glsl',
     # Curves drawing (particle hair, Curves objects): the curve shape library and the hash its strands vary by.
     'draw_curves_lib.glsl',
     'gpu_shader_common_hash.glsl',
