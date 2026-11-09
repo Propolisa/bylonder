@@ -32,7 +32,9 @@ export function compositorGraph(tree, scene, name = 'Compositing') {
     if (node.idname === GROUP_OUTPUT) { place(output, node); continue; }
     const Block = compositorBlockClasses[node.idname];
     const sockets = Block && declaration('compositor', node.idname);
-    if (!sockets?.inputs.length && !sockets?.outputs.length) { if (!UNCOMPOSITED.includes(node.idname)) missing.add(node.idname); continue; }
+    // A node Blender no longer defines (Undefined[CompositorNodeTexture], removed in Blender 5) composites nothing in
+    // Blender either, so it is not reported.
+    if (!sockets?.inputs.length && !sockets?.outputs.length) { if (!UNCOMPOSITED.includes(node.idname) && !node.idname.startsWith('Undefined')) missing.add(node.idname); continue; }
     const block = new Block(node.name, graph.frameGraph, scene);
     Object.assign(block.properties, structuredClone(node.properties ?? {}));
     for (const [id, value] of Object.entries(node.values ?? {})) if (value !== null && id in block.values) block.values[id] = value;

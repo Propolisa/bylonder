@@ -111,3 +111,8 @@ assert.equal(inputs(ellipse).find((s) => s.id === 'Position').value.socket.size,
 assert.ok(inputs(ellipse).find((s) => s.id === 'Operation').value.socket.items.includes('Multiply'), "a menu socket's items");
 assert.ok(!inputs(grade).some((s) => s.id === 'Base Offset') && inputs(grade).some((s) => s.id === 'Base Gain'), "the inputs its menu uses");
 console.log("Compositor: Main's group is drawn as Blender's node editor draws it");
+// A node Blender 5 no longer defines (a file's old Texture node) composites nothing in Blender either: not reported.
+const { compositorGraph } = await import('../src/compositor/compositor-tree.js');
+const old = compositorGraph({ name: 'Old', nodes: [{ name: 'Texture', idname: 'Undefined[CompositorNodeTexture]' }], links: [] }, new Scene(new NullEngine()));
+assert.deepEqual(old.missing, []);
+console.log('Compositor: nodes Blender no longer defines are not reported');
