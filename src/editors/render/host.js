@@ -4,6 +4,7 @@ import { outputSpec, encodeSize, fileFormats } from '../../render/formats.js';
 import { outputSize } from '../../blenkernel/scene/render.js';
 import { pointerStruct, structFind } from '../../python/bpy_rna.js';
 import './result.css';
+import { onPreparing } from '../../render/ready.js';
 import { frameRate } from '../../blenkernel/scene/time.js';
 
 const cancelled = () => new DOMException('Render cancelled', 'AbortError');
@@ -70,10 +71,12 @@ export function createRenderHost({ world, live, sceneAudio, sequencer, name = ()
     last = null; sync(); show();
     setStatus('Preparing render…');
     setProgress(0);
+    const preparing = onPreparing.add(({ ready, total }) => { setStatus(`Preparing render | compiling shaders: ${ready} of ${total} materials ready | ${clock(started)}`); setProgress(total ? ready / total : 0); });
     let source = null, writer = null;
     try {
       const edit = settings.render.useSequencer && sequencer?.hasStrips();
       source = edit ? await openUntilCancelled(sequencer.openCompositor({ frameStart: frames[0], frameEnd: frames.at(-1), ...size }), signal) : await cameraSource(size, frames, spec.audio?.rate, signal);
+      onPreparing.remove(preparing);
       const mixing = (done, total) => { setStatus(`Mixing scene sound | ${done} / ${total} | ${clock(started)}`); setProgress(done / total); };
       // The sequencer mixes its sound first; the camera's mixes while its frames render.
       let audio = spec.audio && edit ? await untilCancelled(source.audio(signal, mixing), signal) : null;
@@ -110,6 +113,7 @@ export function createRenderHost({ world, live, sceneAudio, sequencer, name = ()
       setStatus(error.name === 'AbortError' ? 'Render cancelled' : failed);
       if (error.name !== 'AbortError') report('ERROR', failed);
     } finally {
+      onPreparing.remove(preparing);
       source?.dispose();
       setProgress(null);
       job = null; sync();
