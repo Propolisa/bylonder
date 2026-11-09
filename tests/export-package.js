@@ -10,8 +10,8 @@ import { gplFiles, packagedRuntime, packageOverrides, packageRuntime } from '../
 const CORE = JSON.stringify(import.meta.resolve('@babylonjs/core'));
 const src = (path) => readFileSync(new URL(`../src/${path}`, import.meta.url));
 
-export function writePackage(files) {
-  const dir = mkdtempSync(join(tmpdir(), 'bylonder-package-'));
+// `dir`: where to write it (default a new temporary folder).
+export function writePackage(files, dir = mkdtempSync(join(tmpdir(), 'bylonder-package-'))) {
   const all = { ...files, ...Object.fromEntries(packageRuntime(files).map(([path, name]) => [path, packagedRuntime(String(src(`io_scene_babylon/runtime/${name}`)))])),
     ...Object.fromEntries(packageOverrides().map(([path, from]) => [path, src(from)])),
     ...Object.fromEntries(gplFiles(files).map(([path, from]) => [path, src(from)])) };

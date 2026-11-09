@@ -3,7 +3,9 @@
 // output of failures. E2E_SHARDS and WORKFLOW_SHARDS (default 2) set the shards.
 // By default only what the files changed since origin/main can reach runs: the unit tests whose imports reach a changed
 // file or that name it, the smoke checks of its areas (scripts/smoke-select.mjs), the workflows when every smoke check
-// is needed, the perf guard when drawing, rendering or evaluation changed. --full runs everything; --list only lists.
+// is needed, the perf guard when drawing, rendering or evaluation changed, the export parity matrix
+// (tests/export-parity/matrix.mjs) on the examples the changes reach: its Node checks beside the unit tests, its browser
+// checks on the build after the production check. --full runs everything; --list only lists.
 import { spawn, execFileSync } from 'node:child_process';
 import { readdirSync, readFileSync } from 'node:fs';
 import { selectChecks } from './smoke-select.mjs';
@@ -48,6 +50,7 @@ function selectUnits(files) {
 const PERF = /^(src\/(draw|render|runtime|runtimes|blenkernel|nodes|compositor|bmesh|modifiers|editors\/space_view3d)\/|src\/main\.js$|tools\/(blender-port|blender-nodes)\/|package-lock\.json$)/;
 
 const full = process.argv.includes('--full');
+const parity = (part) => run(`export parity ${part}`, process.execPath, ['tests/export-parity/matrix.mjs', `--${part}`, ...(full ? [] : ['--changed']), ...(part === 'look' ? ['--prod'] : [])]);
 const { files, smokeDiff } = changes();
 const selection = full ? { checks: [], reasons: [], full: true } : selectChecks(files, undefined, smokeDiff);
 const units = full ? null : selectUnits(files);
@@ -60,6 +63,7 @@ const smokeEnv = selection.full ? {} : { SMOKE_CHECKS: selection.checks.join('\n
 const results = [await run('build', 'npm', ['run', 'build'])];
 results.push(...await Promise.all([
   ...(units?.length === 0 ? [] : [run('unit', process.execPath, ['scripts/run-tests.mjs', ...(units ?? []).map((t) => t.slice('tests/'.length))], { JOBS: '2' })]),
+  parity('node'),
   ...(results[0].code ? [] : [
     ...shards('e2e', 'tests/e2e/smoke.mjs', Number(process.env.E2E_SHARDS) || 2, smokeEnv),
     ...(selection.full ? shards('workflows', 'tests/e2e/workflows.mjs', Number(process.env.WORKFLOW_SHARDS) || 2) : []),
@@ -67,6 +71,7 @@ results.push(...await Promise.all([
 ]));
 if (!results[0].code) {
   results.push(await run('prod', process.execPath, ['tests/e2e/prod.mjs']));
+  results.push(await parity('look'));
   // Alone on the machine, so its frame counts compare with its baseline.
   if (perf) results.push(await run('perf', process.execPath, ['tests/e2e/perf-guard.mjs']));
 }

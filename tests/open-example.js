@@ -1,6 +1,6 @@
 // An example opened as a project opens it (sdk.openBlend), in a world with the slices the view reads, for the export
 // tests: one per process, as Blender's module holds one Main.
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { NullEngine, Scene } from '@babylonjs/core';
 import { blenderMain } from '../src/bmesh/bmesh-wasm.js';
 import '../src/python/bpy_interface.js';
@@ -18,7 +18,6 @@ import { createCurveObjects } from '../src/editors/curve/curve-objects.js';
 import { createSelection } from '../src/editors/object/selection.js';
 import { createRNA } from '../src/makesrna/rna-bylonder.js';
 import { createMainSync } from '../src/blenkernel/main-sync.js';
-// The runtimes the app registers (main.js), which map shape keys and armatures into Babylon for an export.
 import { registerRuntimeTypes } from '../src/runtimes/runtimes.js';
 import '../src/runtimes/armature.js';
 import '../src/runtimes/image.js';
@@ -26,7 +25,14 @@ import '../src/runtimes/grease-pencil.js';
 import '../src/runtimes/shape-keys.js';
 import { bylonderIcon } from '../src/python/bpy_icons.js';
 
+// The runtimes the app registers (main.js): what an export writes of shape keys, armatures and images.
 registerRuntimeTypes(bylonderIcon());
+
+// An example's .blend: <id>.blend, else the one .blend its folder holds.
+export function exampleBlend(id) {
+  const dir = new URL(`../examples/${id}/`, import.meta.url), blends = readdirSync(dir).filter((f) => f.endsWith('.blend'));
+  return blends.includes(`${id}.blend`) ? new URL(`${id}.blend`, dir) : blends.length === 1 ? new URL(blends[0], dir) : null;
+}
 
 export function openExample(id) {
   // NullEngine has no GL to upload an image's pixels to.
@@ -35,7 +41,7 @@ export function openExample(id) {
   const objects = Object.assign([], { scene });
   const world = { scene, objects, animation };
   const opening = createMainSync({ rna: createRNA({ world: { scene, objects: [] } }), ids: animation.ids });
-  objects.push(...opening.readBlend(readFileSync(new URL(`../examples/${id}/${id}.blend`, import.meta.url)), scene).nodes);
+  objects.push(...opening.readBlend(readFileSync(exampleBlend(id)), scene).nodes);
   let camera = scene.activeCamera;
   world.sceneSettings = createSceneSettings(world, { cameras: { list: () => scene.cameras, get: () => camera, set: (c) => { camera = c; } } });
   world.renderSettings = createRenderSettings(world);

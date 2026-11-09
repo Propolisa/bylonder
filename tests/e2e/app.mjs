@@ -79,7 +79,9 @@ export async function openApp(browser, url, { example = "Default Cube", node = "
     const w = document.querySelector('iframe[src*="viewport.html"]')?.contentWindow;
     return !!(w?.__bylonder?.editor && (!node || w.__bylonder.world.scene.getNodeByName(node)));
   }, node, { timeout: 180000 });
-  await page.locator('[data-workspace="layout"]').evaluate((tab) => tab.click());
+  // An application template (2D Animation) has workspaces of its own, without Layout.
+  const layout = page.locator('[data-workspace="layout"]');
+  if (await layout.waitFor({ state: 'attached', timeout: 10000 }).then(() => true, () => false)) await layout.evaluate((tab) => tab.click());
   const app = {
     page, context, errors, frame,
     // Evaluates fn(window.__bylonder, arg) in the 3D Viewport frame.
