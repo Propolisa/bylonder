@@ -50,4 +50,3 @@ Chrome) runs them on it instead, in a temporary profile.
   each point as a square: their shaders are GLSL plugins on Babylon's PBR material.
 - Grease Pencil's Fill tool renders on a WebGL 2 engine of its own beside WebGPU.
 - Material Preview runs at about half WebGL 2's frame rate.
-- Render Image's compositor output differs from the render (smoke check: 118 of 255 on average).

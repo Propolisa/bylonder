@@ -57,7 +57,7 @@ limits:
   - Glass refracts the world behind it, not the objects; a Transparent BSDF mixed in lets the objects through.
   - Khronos PBR Neutral's darkest tones (its toe) can differ from Blender's by up to three 8-bit steps; other view transforms and looks are within one in Rendered shading and Render Image, and within two or three in Solid and Material Preview.
   - The 3D Viewport's camera view frames tighter than the camera when the viewport's aspect differs from the render's; Render Image frames as Blender does.
-  - WebGPU (Preferences > System > Bylonder > GPU Backend) is a preview: Solid, Material Preview, node materials and Render Image draw; the compositor's Render Image output does not yet work (docs/webgpu.md).
+  - WebGPU (Preferences > System > Bylonder > GPU Backend) is a preview: Solid, Material Preview, node materials and Render Image draw (docs/webgpu.md lists what differs).
 ---
 # Rendering
 

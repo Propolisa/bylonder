@@ -48,5 +48,7 @@ export async function compositeFinalFrame(world, camera) {
   // In place, at the target's own size (an upload of a whole texture would make it a power of two).
   engine.updateTextureData(texture, halfFloats(composite), 0, 0, width, height);
   world.scene.postProcessManager.directRender(display.passes, null, true);
+  // Submitted for the canvas to show it at once: WebGPU submits its draws at the end of a frame.
+  engine.flushFramebuffer();
   return true;
 }
