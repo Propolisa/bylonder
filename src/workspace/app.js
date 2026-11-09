@@ -24,6 +24,7 @@ import { sceneList, activeSceneId, setSceneData, switchScene, addScene, renameSc
 import { menuButton } from "../editors/interface/menu.js";
 import { iconButton } from "../editors/interface/icon.js";
 import { mountTouch, showScale } from "../editors/interface/touch.js";
+import { installBack } from "../windowmanager/wm-back.js";
 import { zipSync, unzipSync, strToU8, strFromU8 } from "fflate";
 performance.mark("bl:workspace-imported");
 await preloadIcons();
@@ -993,6 +994,7 @@ window.addEventListener("keydown", (e) => {
     save().catch(failure);
   }
 });
+installBack(window, { unsaved: () => dirty });
 window.addEventListener("beforeunload", (e) => {
   if (dirty) {
     e.preventDefault();

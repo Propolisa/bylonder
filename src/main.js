@@ -25,6 +25,7 @@ import { windowCapture } from "./windowmanager/mouse-capture";
 import { createEventSystem } from "./windowmanager/wm-event-system.js";
 import { blenderView3DOperators, createView3DWindow } from "./editors/space_view3d/view3d-window.js";
 import { RGN_TYPE_TOOLS } from "./windowmanager/wm-window.js";
+import { onBack, exposeBack } from "./windowmanager/wm-back.js";
 import * as BABYLON from "@babylonjs/core";
 import "./style.css";
 import "./theme.css";
@@ -116,6 +117,9 @@ import { mountSpreadsheet } from "./editors/space_spreadsheet/spreadsheet.js";
 performance.mark("bl:viewport-imported");
 await Promise.all([preloadIcons(), restorePreferences()]);
 const viewportDock = mountRuntimeLayout();
+// Back (wm-back.js) reaches the scene's window, and a maximized area goes back to the layout as Back to Previous does.
+exposeBack();
+onBack(() => !!viewportDock.focused && (viewportDock.maximize(viewportDock.focused), true));
 const canvas = document.querySelector("#viewport");
 let toastTimer;
 const notify = (text) => {

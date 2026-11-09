@@ -22,6 +22,7 @@ import { pointerStruct } from '../../python/bpy_rna.js';
 import { buttonMenu, buttonApplied, buttonValueSet, buttonTextSet, buttonRename, viewItemContextMenu, regionPanels, categorySet } from './ui-tree.js';
 import { WM_DRAG_THRESHOLD_MOUSE } from '../../windowmanager/wm-event-system.js';
 import { keyType } from '../../windowmanager/input/keymap.js';
+import { onBack } from '../../windowmanager/wm-back.js';
 import { treeMenu, treeSearch, propSearchItems, press, runOperator } from './tree-menu.js';
 import { parse as parseUnit, editText as unitText } from '../../blenkernel/unit.js';
 import { hoverButton, leaveButton } from '../animation/keyframing-button.js';
@@ -94,7 +95,9 @@ function openPopover(tree, ui, owner) {
   host.className = 'bl-ui bl-popover-block flex flex-col';
   Object.assign(host.style, { left: `${r.left}px`, top: `${r.bottom + 2}px`, width: `calc(var(--bl-row) * ${Math.max(10, tree.children?.[0]?.w ?? 10)})` });
   document.body.append(host);
-  const close = (e) => { if (!host.contains(e.target)) { host.remove(); removeEventListener('pointerdown', close, true); } };
+  const dismiss = () => { host.remove(); removeEventListener('pointerdown', close, true); releaseBack(); return true; };
+  const close = (e) => { if (!host.contains(e.target)) dismiss(); };
+  const releaseBack = onBack(dismiss);
   addEventListener('pointerdown', close, true);
   import('vue').then(({ createApp }) => createApp({ render: () => h(BlockView, { tree, ui }) }).mount(host));
 }

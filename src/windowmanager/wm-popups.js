@@ -6,6 +6,7 @@ import { openMenu } from '../editors/interface/menu.js';
 import { BlockView, treeMenu } from '../editors/interface/block-view.js';
 import { blenderMain } from '../bmesh/bmesh-wasm.js';
 import { invokeOperator, runOperator } from './wm-operators.js';
+import { onBack } from './wm-back.js';
 import '../editors/interface/layout-view.css';
 
 // The popup an operator a button or menu entry called opened (takeOperatorPopup: { type, title, text }), with the
@@ -57,8 +58,10 @@ function openPropsPopup(title, text, at, finish, base) {
     app.unmount();
     popup.remove();
     removeEventListener('pointerdown', outside, true);
+    releaseBack();
     finish(confirmed ? {} : null);
   };
+  const releaseBack = onBack(() => (close(false), true));
   const outside = (e) => { if (!popup.contains(e.target) && !e.target.closest?.('.bl-menu')) close(false); };
   const app = createApp({ render: () => {
     void state.revision;

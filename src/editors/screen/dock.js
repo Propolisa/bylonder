@@ -6,6 +6,7 @@ import { Splitpanes, Pane } from 'splitpanes';
 import 'splitpanes/dist/splitpanes.css';
 import './dock.css';
 import { validateLayout, swapSections, focusedSection } from './model.js';
+import { onBack } from '../../windowmanager/wm-back.js';
 
 // Pane sizes (percent of the panes, and pixels) of a split `size` px long whose first pane takes `share` of it, as
 // Blender places areas: the edge between them is a screen vertex at that share of the vertex range, rounded from the
@@ -106,6 +107,8 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
     else if(state.layout.hidden.length<ids.length-1)state.layout.hidden.push(id);
     persist();
   };
+  // Back closes an open drawer (wm-back.js).
+  const releaseBack=onBack(()=>state.drawer!==null&&(state.drawer=null,true));
   const closeMenu=()=>menuElement?.close();
   const openMenu=()=>{if(!menuElement.open)menuElement.showModal();};
   const reset=()=>{
@@ -270,5 +273,5 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
   window.addEventListener('pointerup',unlock);window.addEventListener('pointercancel',unlock);window.addEventListener('blur',unlock);
   // Blender's workspace switch: another screen over the same areas.
   const setScreen=name=>{const next=name in screens?name:null;if(next===state.screen)return;persist();state.screen=next;load();persist();};
-  return {show,toggle,reset,openMenu,setFactory,header,setScreen,onHeaderMenu(fn){headerMenu=fn;},onEdgeMenu(fn){edgeMenu=fn;},onSwap(fn){swapAreas=fn;},swap,join(keep,remove){if(siblings(keep,remove))closeArea(state.layout.order.indexOf(remove));},get hovered(){return hovered===null?null:state.layout.order[hovered];},get screen(){return state.screen;},get areas(){return leaves(state.tree).map(slot=>state.layout.order[slot]);},get maximized(){return focus();},maximize(id){state.focus=state.focus===id?null:id;persist();},split(id,horizontal){if(state.factoryCount)split(state.layout.order.indexOf(id),horizontal);},close(id){if(typeof state.tree!=='number')closeArea(state.layout.order.indexOf(id));},dispose(){disposed=true;cancelAnimationFrame(frameId);observer.disconnect();instances.forEach(instance=>instance?.dispose?.());host.removeEventListener('keydown',keyboard,true);app.unmount();window.removeEventListener('pointerup',unlock);window.removeEventListener('pointercancel',unlock);window.removeEventListener('blur',unlock);}};
+  return {show,toggle,reset,openMenu,setFactory,header,setScreen,onHeaderMenu(fn){headerMenu=fn;},onEdgeMenu(fn){edgeMenu=fn;},onSwap(fn){swapAreas=fn;},swap,join(keep,remove){if(siblings(keep,remove))closeArea(state.layout.order.indexOf(remove));},get hovered(){return hovered===null?null:state.layout.order[hovered];},get screen(){return state.screen;},get areas(){return leaves(state.tree).map(slot=>state.layout.order[slot]);},get maximized(){return focus();},get focused(){return state.focus;},maximize(id){state.focus=state.focus===id?null:id;persist();},split(id,horizontal){if(state.factoryCount)split(state.layout.order.indexOf(id),horizontal);},close(id){if(typeof state.tree!=='number')closeArea(state.layout.order.indexOf(id));},dispose(){disposed=true;releaseBack();cancelAnimationFrame(frameId);observer.disconnect();instances.forEach(instance=>instance?.dispose?.());host.removeEventListener('keydown',keyboard,true);app.unmount();window.removeEventListener('pointerup',unlock);window.removeEventListener('pointercancel',unlock);window.removeEventListener('blur',unlock);}};
 }

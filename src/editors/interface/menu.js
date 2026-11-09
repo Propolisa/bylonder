@@ -2,6 +2,7 @@
 // interface_region_menu_popup.cc, interface_handlers.cc). Sizes are multiples of the UI unit (--bl-row).
 import { keysLabel } from '../../windowmanager/input/keymap.js';
 import { iconEl } from './icon.js';
+import { onBack } from '../../windowmanager/wm-back.js';
 
 // Blender's timings in ms (sub-menu auto-open, auto-scroll, towards-submenu grace) and its fixed screen margin in px.
 const SUBMENU_DELAY = 200, SCROLL_INTERVAL = 100, TOWARDS_TIMEOUT = 1000, TOWARDS_MARGIN = 20, SCREEN_MARGIN = 10;
@@ -9,7 +10,7 @@ const SUBMENU_DELAY = 200, SCROLL_INTERVAL = 100, TOWARDS_TIMEOUT = 1000, TOWARD
 const levels = [];
 const memory = new Map();
 const pointer = { x: 0, y: 0 };
-let bar = null, towards = null, dragOpened = false;
+let bar = null, towards = null, dragOpened = false, releaseBack = null;
 
 const resolve = items => (typeof items === 'function' ? items() : items);
 const unit = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bl-row'));
@@ -25,6 +26,7 @@ function closeFrom(level) {
   }
   levels.at(-1)?.el.classList.remove('sub-open');
   if (!levels.length && bar) { bar.button.classList.remove('open'); bar = null; }
+  if (!levels.length) { releaseBack?.(); releaseBack = null; }
 }
 export const closeMenus = () => closeFrom(0);
 
@@ -304,6 +306,7 @@ export function openMenu(items, at, title, { side = false, scale = 1, hold = fal
   dragOpened = hold;
   const menu = render(items, { ...anchor, scale }, 0, title, search ?? find);
   Object.assign(menu, { search, find });
+  releaseBack ??= onBack(() => (closeMenus(), true));
   if (find) searchMenu('', menu);
   return menu.el;
 }

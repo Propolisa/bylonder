@@ -159,6 +159,30 @@ const checks = {
     await closeDrawer();
   },
 
+  // The phone's Back closes what is open and never leaves the app: the drawer, a menu, a maximized area.
+  async "Back closes the drawer, a menu, a maximized area, and stays in the app"() {
+    const back = async () => { await app.page.evaluate(() => history.back()); await app.page.waitForTimeout(300); };
+    const fold = app.locator(".dock-fold").first(), drawer = app.locator(".dock-drawer");
+    if (await fold.count()) {
+      await touch.tap(await center(fold));
+      await drawer.waitFor();
+      await back();
+      await drawer.waitFor({ state: "detached" });
+    }
+    await touch.hold(await app.point(0.5, 0.5), 1000);
+    await app.locator(".bl-menu").first().waitFor();
+    await back();
+    assert.equal(await app.locator(".bl-menu").count(), 0, "Back closes the menu");
+    await app.bylonder((b) => b.runOperator("screen.screen_full_area"));
+    await app.until((b) => !!b.dock.focused);
+    await back();
+    await app.until((b) => !b.dock.focused);
+    const url = app.page.url();
+    await back();
+    assert.equal(app.page.url(), url, "Back with nothing open stays in the app");
+    assert.ok(await app.bylonder((b) => !!b.editor), "which keeps running");
+  },
+
   async "a tap selects, a tap on nothing deselects"() {
     await touch.tap(await app.point(0.5, 0.92));
     await app.until((b) => b.editor.selection.size === 0);

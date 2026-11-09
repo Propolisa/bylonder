@@ -195,6 +195,12 @@ column.
 On a large phone in portrait the Layout screen is the 3D Viewport over the Timeline, with a strip on the right for the
 Outliner and Properties column. On a tablet nothing folds at Resolution Scale 1.0.
 
+### Back
+
+The phone's Back button never closes the app. It closes the topmost open thing: a menu, popover or popup, a dialog,
+a folded area's drawer, then a maximized area (as Back to Previous). With nothing open it stays in the app, or, with
+unsaved changes, asks before leaving (`src/windowmanager/wm-back.js`, one history entry kept above the page).
+
 ### Area management
 
 All of it is Blender's:

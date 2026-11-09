@@ -13,6 +13,7 @@
 //     animation: { state(refs), insert(refs), remove(refs) }, drawMenu(idname), revision,
 //     popover(idname): a panel drawn for a popover, { label, layout, units } (null without one),
 //     panelsOf({ space_type, region_type, context, category }): the panels' idnames, for popover_group }
+import { onBack } from '../../windowmanager/wm-back.js';
 import { defineComponent, h, ref, Teleport, onBeforeUnmount, cloneVNode } from 'vue';
 import { NumberField } from './components/ui/number-field/index.js';
 import { openMenu } from './menu.js';
@@ -155,15 +156,16 @@ const Popover = defineComponent({
   props: { panels: Array, text: String, iconName: String, iconOnly: Boolean, arrowOnly: Boolean, disabled: Boolean, env: Object },
   setup(props) {
     const at = ref(null);
-    let owner = null;
+    let owner = null, releaseBack = null;
     const outside = (e) => { if (!e.target.closest?.('.bl-popover-block,.bl-menu') && !owner?.contains(e.target)) hide(); };
-    const hide = () => { at.value = null; removeEventListener('pointerdown', outside, true); };
+    const hide = () => { at.value = null; removeEventListener('pointerdown', outside, true); releaseBack?.(); releaseBack = null; return true; };
     const toggle = (e) => {
       if (at.value) return hide();
       owner = e.currentTarget;
       const r = owner.getBoundingClientRect();
       at.value = { left: `${r.left}px`, top: `${r.bottom + 2}px` };
       addEventListener('pointerdown', outside, true);
+      releaseBack = onBack(hide);
     };
     onBeforeUnmount(hide);
     return () => {
