@@ -4287,9 +4287,15 @@ function removeOthers(babylonMesh, kept2) {
   for (const kind of babylonMesh.getVerticesDataKinds?.() ?? []) if (BUFFERS[kind] && !kept2(kind)) babylonMesh.removeVerticesData(kind);
 }
 
+// src/io_scene_babylon/blender-fallback.js
+import { Matrix as Matrix2 } from "@babylonjs/core";
+
 // src/blenkernel/main-evaluated.js
 import { Matrix } from "@babylonjs/core";
 var ID_OB = 16975;
+var AXIS = [0, 2, 1, 3];
+var swapped = (m) => Array.from({ length: 16 }, (_, i) => m[AXIS[i >> 2] * 4 + AXIS[i & 3]]);
+var babylonMatrix = (m) => Matrix.FromArray(swapped(m));
 function drawThinInstances(carrier, groups) {
   const metadata = carrier.metadata ??= {}, length = groups.reduce((sum, group) => sum + group.data.length, 0);
   let buffer = metadata.instances;
@@ -4325,6 +4331,11 @@ function openBlend(scene, bytes) {
   blender.readBlend(bytes);
   setContextPointer(blender.C);
   const data = blendData(), name = (ob) => blender.name(ob), instanced = carriers(scene);
+  const local = (group) => {
+    const data2 = new Float32Array(group.data), inverse = babylonMatrix(blender.transform(group.instancer).matrix_world).invert();
+    for (let i = 0; i < data2.length; i += 16) Matrix2.FromArray(data2, i).multiply(inverse).copyToArray(data2, i);
+    return { data: data2 };
+  };
   let frame = idStruct(blender.scene).frame_current;
   blender.evaluate();
   blender.updates();
@@ -4343,7 +4354,7 @@ function openBlend(scene, bytes) {
         const { source, carrier } = instanced.get(id) ?? {};
         if (!carrier) continue;
         if (carrier.geometry !== source.geometry) source.geometry.applyToMesh(carrier);
-        drawThinInstances(carrier, list2);
+        drawThinInstances(carrier, carrier.parent ? list2.map(local) : list2);
       }
     }
   };

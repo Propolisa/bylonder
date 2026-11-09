@@ -238,8 +238,8 @@ depsgraph updated: an object's evaluated mesh and the thin instances of the obje
 `blenkernel/main-evaluated.js`, which the app's view (`main-view.js`) now draws through too. `bylonder-blender/` carries
 its GPL-3.0-or-later notice and the GPL's text, and `scene.js` says it includes GPL code only when it ships. Not yet:
 any other RNA path (`set` takes only the package's controls), evaluated transforms (a constraint's result), materials,
-point clouds and curves; an instancer moved by its transform controls after the fallback has run keeps its instances
-where Blender last drew them until a control only Blender evaluates is set again.
+point clouds and curves. The thin instances of one instancer are its child, in its space, so they follow its transform
+controls and its animation without Blender.
 
 **Cost, stated plainly.** Until dynamic linking lands, the first change that needs the `blender` evaluator downloads the
 whole module: 86.7 MB, 24.5 MB gzipped, 19.0 MB brotli, measured on `module-84c8dc9b`. In Node, importing it and

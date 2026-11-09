@@ -1,12 +1,13 @@
 // The Blender fallback of an exported page (docs/controllable-exports.md, step 6) on the Geometry Nodes example
 // (examples/geometry-nodes): exported with its source .blend, the planet's modifier inputs are controls only Blender
 // evaluates. Controls on fast paths read neither Blender's module nor the .blend; the first set of a modifier input
-// reads each once, and the planet's mesh and its trees' instances are then the app's, bit for bit, as are later sets.
+// reads each once, and the planet's mesh (bit for bit) and its trees' instances are then the app's, as are later sets;
+// the trees follow the planet when it moves.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { syncBuiltinESMExports } from 'node:module';
 import { fileURLToPath } from 'node:url';
-import { NullEngine } from '@babylonjs/core';
+import { Matrix, NullEngine } from '@babylonjs/core';
 import { openExample } from './open-example.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
 import { writePackage } from './export-package.js';
@@ -52,12 +53,17 @@ blendData().objects.get('Planet').location[2] = 0.5;
 assert.deepEqual(fallbackReads(), [0, 0], 'controls on fast paths read neither the module nor the .blend');
 
 const vertices = (mesh) => Array.from(mesh.getVerticesData('position'));
-const instances = (scene, names) => names.map((name) => scene.meshes.find((m) => m.hasThinInstances && m.geometry === scene.getMeshById(name)?.geometry)).map((m) => Array.from(m.thinInstanceGetWorldMatrices().flatMap((matrix) => Array.from(matrix.m))));
+// Each tree's instances in world space: a page's carrier is its instancer's child (js-export.js parentInstances), the
+// app's is in the world.
 const trees = ['Fir', 'Maple', 'Oak', 'Pine'];
-const appInstances = () => trees.map((name) => {
-  const carrier = world.scene.meshes.find((m) => m.hasThinInstances && m.geometry === node(name).geometry);
-  return Array.from(carrier.thinInstanceGetWorldMatrices().flatMap((matrix) => Array.from(matrix.m)));
+const instances = (scene, source) => trees.map((name) => {
+  // Read from the buffer: Babylon's thinInstanceGetWorldMatrices keeps the matrices it first read.
+  const carrier = scene.meshes.find((m) => m.hasThinInstances && m.geometry === source(name).geometry), world = carrier.computeWorldMatrix(true);
+  const data = carrier._thinInstanceDataStorage.matrixData;
+  return Array.from({ length: carrier.thinInstanceCount }, (_, i) => Array.from(Matrix.FromArray(data, i * 16).multiply(world).m)).flat();
 });
+const near = (a, b) => a.length === b.length && a.every((list, i) => list.length === b[i].length && list.every((v, j) => Math.abs(v - b[i][j]) < 1e-5));
+const sameTrees = (message) => assert.ok(near(instances(page, (name) => page.getMeshById(name)), instances(world.scene, node)), message);
 const before = vertices(page.getMeshById('Planet'));
 for (const [path, value] of [[seed, 7], [mountains, 0.4], [seed, 31]]) {
   blend.set(path, value);
@@ -65,9 +71,16 @@ for (const [path, value] of [[seed, 7], [mountains, 0.4], [seed, 31]]) {
   blendData().path_resolve(path.replace(/\.value$/, '')).value = value;
   sync.view();
   assert.deepEqual(vertices(page.getMeshById('Planet')), vertices(node('Planet')), `the planet at ${path} = ${value} is the app's`);
-  assert.deepEqual(instances(page, trees), appInstances(), `the trees at ${path} = ${value} are the app's`);
+  sameTrees(`the trees at ${path} = ${value} are the app's`);
 }
 assert.notDeepEqual(vertices(page.getMeshById('Planet')), before, 'the planet changed');
+
+// The planet moved on its fast path after Blender drew its trees: they move with it, as in the app, without Blender.
+blend.set('objects["Planet"].location[2]', 1.5);
+await blend.settled();
+blendData().objects.get('Planet').location = [0, 0, 1.5];
+sync.view();
+sameTrees('the trees follow the moved planet');
 assert.deepEqual(fallbackReads(), [1, 1], 'the module and the .blend are read once');
 
 fs.readFile = readFile;

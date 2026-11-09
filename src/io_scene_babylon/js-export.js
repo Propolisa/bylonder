@@ -3,7 +3,8 @@
 // scene.bin (scene-bin.js); materials, lights, cameras, shadows, animation and effects are Babylon's own serialization,
 // passed to their Parse functions as Babylon's .babylon loader does, with images as files beside it. `load(engine)`
 // gives the scene with its controls (runtime/blend-scene.js), `createScene(engine, canvas)` the scene alone.
-import { AbstractEngine } from '@babylonjs/core';
+import { AbstractEngine, Matrix } from '@babylonjs/core';
+import { objectMatrix } from '../runtime/object-transform.js';
 import { serializeScene } from './babylon-export.js';
 import { exportRuntimes } from '../runtimes/runtimes.js';
 import { exportControls, controlTypes } from './controls-export.js';
@@ -96,6 +97,19 @@ const liveStack = ({ mesh, modifiers }) => ({
   stack: modifiers.map(({ type, layouts, values }) => ({ type, layouts, values })),
 });
 
+// The thin instances of one instancer (main-view.js drawInstances) become its child's, in its space: they follow it when
+// it moves, as Blender's instances do. Instances of several instancers stay in world space.
+function parentInstances(objects) {
+  const exported = new Set(objects.map(({ entry }) => entry.uniqueId));
+  for (const { entry, mesh } of objects) {
+    const [instancer, ...more] = mesh?.metadata?.instancers ?? [], { thinInstances } = entry;
+    if (!thinInstances?.instancesCount || !instancer || more.length || !exported.has(instancer.uniqueId)) continue;
+    const inverse = objectMatrix(instancer).clone().invert();
+    for (let i = 0; i < thinInstances.instancesCount; i++) Matrix.FromArray(thinInstances.matrixData, i * 16).multiply(inverse).copyToArray(thinInstances.matrixData, i * 16);
+    entry.parentId = instancer.uniqueId;
+  }
+}
+
 const indent = (lines, by = '    ') => lines.map((l) => by + l).join('\n');
 
 // The world's node material, as the export writes a material's, or null for a world of one color.
@@ -171,6 +185,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, sour
   if (display) data.renderingPipelines = data.renderingPipelines.filter((p) => !(p._name?.startsWith('__display:') && !PIPELINE_EFFECTS.some((e) => p[e])));
   const controls = [...exportControls(world, data, { blender: sourceBlend }), ...(composited?.knobs ?? [])], code = sharedCode(data.materials);
   const dependencies = exportDependencies(world, controls);
+  parentInstances(objects);
   const parented = [...data.transformNodes, ...data.meshes, ...data.lights, ...data.cameras].filter((e) => e.parentId !== undefined);
   const parse = (name, list, code) => (list?.length ? `  for (const entry of ${name}) ${code};\n` : '');
   const settings = {

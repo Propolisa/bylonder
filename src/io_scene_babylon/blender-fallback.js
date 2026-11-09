@@ -6,7 +6,8 @@
 import { BlenderMain, ID_RECALC_GEOMETRY } from '../bmesh/bmesh-wasm.js';
 import { blendData, idStruct, setContextPointer } from '../python/bpy_rna.js';
 import { mesh_batch_cache_apply } from '../draw/mesh-batch-cache.js';
-import { ID_OB, drawThinInstances } from '../blenkernel/main-evaluated.js';
+import { Matrix } from '@babylonjs/core';
+import { ID_OB, babylonMatrix, drawThinInstances } from '../blenkernel/main-evaluated.js';
 
 // A path's owner and its last step: a property's name, an index or a quoted key.
 const STEP = /^(.*?)(?:\.(\w+)|\[(\d+)\]|\["((?:[^"\\]|\\.)*)"\])$/;
@@ -21,7 +22,8 @@ function setPath(data, path, value) {
 }
 
 // The meshes drawing the objects a geometry instances, by their source's name: the carriers sharing their source's
-// geometry (js-export.js writes a carrier's thin instances with its source's geometry).
+// geometry (js-export.js writes a carrier's thin instances with its source's geometry, in its instancer's space when
+// it has one).
 const carriers = (scene) => new Map(scene.meshes.filter((mesh) => mesh.hasThinInstances).flatMap((carrier) => {
   const source = scene.meshes.find((mesh) => mesh !== carrier && mesh.geometry && mesh.geometry === carrier.geometry);
   return source ? [[source.id, { source, carrier }]] : [];
@@ -33,6 +35,13 @@ export function openBlend(scene, bytes) {
   blender.readBlend(bytes);
   setContextPointer(blender.C);
   const data = blendData(), name = (ob) => blender.name(ob), instanced = carriers(scene);
+  // A group's world matrices in its instancer's space, where its carrier is the instancer's child (js-export.js
+  // parentInstances).
+  const local = (group) => {
+    const data = new Float32Array(group.data), inverse = babylonMatrix(blender.transform(group.instancer).matrix_world).invert();
+    for (let i = 0; i < data.length; i += 16) Matrix.FromArray(data, i).multiply(inverse).copyToArray(data, i);
+    return { data };
+  };
   // The page draws the file as it was evaluated, at its frame: only what changes from here is drawn.
   let frame = idStruct(blender.scene).frame_current;
   blender.evaluate();
@@ -52,7 +61,7 @@ export function openBlend(scene, bytes) {
         const { source, carrier } = instanced.get(id) ?? {};
         if (!carrier) continue;
         if (carrier.geometry !== source.geometry) source.geometry.applyToMesh(carrier);
-        drawThinInstances(carrier, list);
+        drawThinInstances(carrier, carrier.parent ? list.map(local) : list);
       }
     },
   };
