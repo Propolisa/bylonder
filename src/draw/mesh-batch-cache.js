@@ -161,15 +161,16 @@ function drawn(babylonMesh, { positions, normals, uvs, tris, lines, tangents, at
 }
 
 // An attribute a material reads that the mesh does not have reads as Blender's draw leaves it, an unbound vertex
-// attribute: (0, 0, 0, 1). Without a buffer, Babylon's draw of the mesh fails; a buffer of one value that every vertex
-// reads (an instanced divisor, as a draw of one instance reads it) costs no memory per vertex.
-const UNBOUND = new Float32Array([0, 0, 0, 1]);
-// A divisor no draw's instance count reaches, so instanced draws read the one value too.
-const EVERY_INSTANCE = 2 ** 30;
+// attribute: (0, 0, 0, 1), as each vertex's value. Without a buffer, Babylon's draw of the mesh fails; one value read by
+// every instance (a divisor) is WebGL's alone: WebGPU steps an instanced buffer once per instance.
+const UNBOUND = [0, 0, 0, 1];
 export function fillMissingAttributes(babylonMesh, names) {
+  const count = babylonMesh.getTotalVertices();
   for (const kind of names.map(attributeKind)) {
-    if (babylonMesh.isVerticesDataPresent(kind)) continue;
-    babylonMesh.setVerticesBuffer(new VertexBuffer(babylonMesh.getEngine(), UNBOUND, kind, { size: 4, instanced: true, divisor: EVERY_INSTANCE }));
+    const buffer = babylonMesh.getVertexBuffer(kind);
+    if (buffer && !(buffer.blenderUnbound && buffer.getData().length !== count * 4)) continue;
+    babylonMesh.setVerticesData(kind, Float32Array.from({ length: count * 4 }, (_, i) => UNBOUND[i % 4]), false, 4);
+    babylonMesh.getVertexBuffer(kind).blenderUnbound = true;
   }
 }
 
