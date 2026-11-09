@@ -57,5 +57,7 @@
 .dock-drawer{position:absolute;z-index:8;display:flex;background:var(--bl-gap);box-shadow:var(--bl-shadow-popup)}
 .dock-drawer.right{top:0;bottom:0;right:var(--bl-header-h)}.dock-drawer.left{top:0;bottom:0;left:var(--bl-header-h)}
 .dock-drawer.bottom{left:0;right:0;bottom:var(--bl-header-h)}.dock-drawer.top{left:0;right:0;top:var(--bl-header-h)}
+/* The strip stays above the drawer's backdrop, so a tap on it closes the drawer it opened. */
+.dock-fold{position:relative;z-index:9}
 .dock-content.dock-in-drawer{z-index:9}
 .dock-leaf.no-header>.dock-heading{display:none}

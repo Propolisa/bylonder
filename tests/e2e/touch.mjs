@@ -115,6 +115,19 @@ const checks = {
     }
   },
 
+  // The strip toggles its drawer from a tap anywhere on it, its empty end too.
+  async "a tap anywhere on a strip toggles its drawer"() {
+    if (!(await app.locator(".dock-fold").count())) return;
+    const fold = app.locator(".dock-fold").first(), drawer = app.locator(".dock-drawer");
+    const strip = await fold.boundingBox(), empty = [strip.x + strip.width / 2, strip.y + strip.height - strip.width];
+    await touch.tap(empty);
+    await drawer.waitFor();
+    await pause();
+    await touch.tap(empty);
+    await drawer.waitFor({ state: "detached" });
+    await pause();
+  },
+
   async "a tap selects, a tap on nothing deselects"() {
     await touch.tap(await app.point(0.5, 0.92));
     await app.until((b) => b.editor.selection.size === 0);
