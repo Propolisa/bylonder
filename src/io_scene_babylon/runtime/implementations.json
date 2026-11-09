@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "about": "Bylonder's implementation registry: each Blender unit an export uses, by Blender's identifier, and the implementations a page can run it with, each with its license and fidelity. A key ending in * stands for every identifier with that prefix; a more specific key comes first. Status planned: not built yet.",
+  "units": {
+    "transform": [
+      { "implementation": "page runtime (blend-scene.js) composing location, rotation and scale", "license": "MIT OR Apache-2.0", "fidelity": "exact" }
+    ],
+    "constraint:*": [
+      { "implementation": "Blender's module (the fallback evaluator)", "license": "GPL-2.0-or-later", "fidelity": "exact", "status": "planned" },
+      { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
+    ],
+    "action": [
+      { "implementation": "Babylon AnimationGroup, Hermite keys where they are the F-curve", "license": "Apache-2.0", "fidelity": "exact" },
+      { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
+    ],
+    "nla": [
+      { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
+    ],
+    "driver:SINGLE_PROP": [
+      { "implementation": "clean-room driver units", "license": "MIT", "fidelity": "exact", "status": "planned" },
+      { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
+    ],
+    "driver:TRANSFORMS": [
+      { "implementation": "clean-room driver units", "license": "MIT", "fidelity": "exact", "status": "planned" },
+      { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
+    ],
+    "driver:LOC_DIFF": [
+      { "implementation": "clean-room driver units", "license": "MIT", "fidelity": "exact", "status": "planned" },
+      { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
+    ],
+    "driver:ROTATION_DIFF": [
+      { "implementation": "clean-room driver units", "license": "MIT", "fidelity": "exact", "status": "planned" },
+      { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
+    ],
+    "driver:CONTEXT_PROP": [
+      { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
+    ],
+    "armature": [
+      { "implementation": "Babylon Skeleton, the pose sampled from Main", "license": "Apache-2.0", "fidelity": "approximate" }
+    ],
+    "shape_keys": [
+      { "implementation": "Babylon MorphTargetManager", "license": "Apache-2.0", "fidelity": "approximate" }
+    ],
+    "modifier:NODES": [
+      { "implementation": "Blender's module (the fallback evaluator)", "license": "GPL-2.0-or-later", "fidelity": "exact", "status": "planned" },
+      { "implementation": "evaluated mesh and instances", "license": "data", "fidelity": "baked" }
+    ],
+    "modifier:*": [
+      { "implementation": "modifiers.wasm (Live Modifiers), mesh-only types", "license": "GPL-2.0-or-later", "fidelity": "exact" },
+      { "implementation": "evaluated mesh", "license": "data", "fidelity": "baked" }
+    ],
+    "ShaderNodeBsdfPrincipled": [
+      { "implementation": "Babylon PBRMaterial (a material of one Principled BSDF)", "license": "Apache-2.0", "fidelity": "approximate" },
+      { "implementation": "Blender's GLSL in a CustomBlock", "license": "GPL-2.0-or-later", "fidelity": "exact" }
+    ],
+    "ShaderNode*": [
+      { "implementation": "Blender's GLSL in a CustomBlock", "license": "GPL-2.0-or-later", "fidelity": "exact" },
+      { "implementation": "baked textures", "license": "data", "fidelity": "baked", "status": "planned" }
+    ],
+    "CompositorNode*": [
+      { "implementation": "Blender's GLSL on Babylon's frame graph (blocks library)", "license": "GPL-2.0-or-later", "fidelity": "exact", "status": "planned" },
+      { "implementation": "Babylon's post-processes", "license": "Apache-2.0", "fidelity": "approximate", "status": "planned" }
+    ],
+    "light": [
+      { "implementation": "Babylon lights and shadow generators", "license": "Apache-2.0", "fidelity": "approximate" }
+    ],
+    "light:AREA:shadows": [
+      { "implementation": "Bylonder's area light shadows extension", "license": "GPL-2.0-or-later", "fidelity": "exact", "status": "planned" },
+      { "implementation": "Babylon's area light without shadows", "license": "Apache-2.0", "fidelity": "approximate" }
+    ],
+    "volume": [
+      { "implementation": "Bylonder's volumes extension", "license": "GPL-2.0-or-later", "fidelity": "exact", "status": "planned" }
+    ],
+    "view_transform": [
+      { "implementation": "Bylonder's display LUT", "license": "GPL-2.0-or-later", "fidelity": "exact", "status": "planned" },
+      { "implementation": "Babylon's image processing", "license": "Apache-2.0", "fidelity": "approximate" }
+    ],
+    "particles": [
+      { "implementation": "per-frame cache", "license": "data", "fidelity": "baked", "status": "planned" }
+    ]
+  }
+}

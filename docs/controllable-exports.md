@@ -329,6 +329,22 @@ ratios (gzip), so no trial export is needed to open the dialog:
 
 The export's report in the Info editor gives the real numbers after.
 
+## The representation and its implementations
+
+What an export writes is Bylonder's own intermediate representation (owner, 2026-11-09): the bindings, the dependency
+table, the node graphs (their types, links and values), the keys and the controls. It is data, MIT, and uses Blender's
+identifiers only as names. The GPL attaches only to implementations of units: the code that evaluates a node type, a
+modifier, a driver variable or a render feature.
+
+The implementation registry (`src/io_scene_babylon/runtime/implementations.json`) is one table of plain data mapping
+each Blender unit (a node type's idname, `modifier:<type>`, `driver:<variable type>`, an evaluator such as `action` or
+`transform`) to the implementations a page can run it with, each with its license (`MIT`, `Apache-2.0`,
+`GPL-2.0-or-later`, or `data` for a baked result) and fidelity (`exact`, `approximate`, `baked`), and `planned` where it
+is not built yet. A key ending in `*` stands for every identifier with that prefix. The license-free check, the export
+dialog's license line and the clean-room priority list read from it, and a page is license-free exactly when every unit
+it uses resolves to a free implementation or is baked. It is seeded with what exists today; each new implementation adds
+a row.
+
 ## License-free pages
 
 Babylon.js is Apache-2.0 and Blender is GPL-2.0-or-later. Bylonder's own code is MIT OR Apache-2.0, and GPL only where
