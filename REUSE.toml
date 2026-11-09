@@ -93,6 +93,7 @@ path = [
   "tools/blender-port/wasm/grease-pencil-api.cc",
   "tools/blender-port/wasm/image-api.cc",
   "tools/blender-port/wasm/main-api.cc",
+  "tools/blender-port/wasm/outliner-api.cc",
   "tools/blender-port/wasm/relations-draw.cc",
   "tools/blender-port/wasm/shader-node-api.cc",
   "tools/blender-port/wasm/wm-api.cc",
