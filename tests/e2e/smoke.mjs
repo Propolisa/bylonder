@@ -1141,6 +1141,15 @@ const checks = {
     await app.page.keyboard.press("Escape");
     assert.equal(drawn, 0, `view frames while hovering a menu: ${drawn}`);
   },
+  // Reading the system clipboard asks the user for permission, so entering a view must not read it.
+  async "hovering a view reads nothing from the clipboard"() {
+    await app.frame().evaluate(() => { window.clipboardReads = 0; navigator.clipboard.readText = async () => { window.clipboardReads++; return ""; }; });
+    await app.hover(0.2, 0.2);
+    await app.hover(0.6, 0.6);
+    await app.frame().evaluate(() => window.dispatchEvent(new FocusEvent("focus")));
+    await app.settled();
+    assert.equal(await app.frame().evaluate(() => window.clipboardReads), 0);
+  },
   // Navigating changes where the view looks and its name, not its header: Blender redraws the window region only, so
   // orbiting draws no header or tool settings again.
   async "navigating the view redraws its name, not its header"() {

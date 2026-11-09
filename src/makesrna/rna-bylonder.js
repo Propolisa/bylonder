@@ -746,7 +746,6 @@ function meshElements(ob, r) {
 // The window manager's clipboard (WM_clipboard_text_set); the system's is written too, and read where it can be.
 let clipboard = '';
 export const setClipboard = (value) => { clipboard = value; globalThis.navigator?.clipboard?.writeText(value).catch(() => {}); };
-export const readClipboard = async () => { try { return (await globalThis.navigator.clipboard.readText()) ?? clipboard; } catch { return clipboard; } };
 // A flag of an animation editor's space (eGraphEdit_Flag, eSAction_Flag), and of its dope sheet's filters; `inverted`
 // for a property that is on when the flag is off (show_handles is !SIPO_NOHANDLES).
 function spaceFlag(bit, inverted = false) {

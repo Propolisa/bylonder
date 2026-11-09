@@ -9,7 +9,13 @@ let bytes = new Uint8Array();
 
 export const clipboardText = () => decoder.decode(bytes);
 export const setClipboardText = (text) => { bytes = encoder.encode(text); };
-const refresh = () => globalThis.navigator?.clipboard?.readText?.().then(setClipboardText, () => {});
+// Read when the window comes back, only where the user already allowed it: reading otherwise asks for permission.
+const refresh = async (event) => {
+  if (event.target !== globalThis) return;
+  try {
+    if ((await navigator.permissions.query({ name: 'clipboard-read' })).state === 'granted') setClipboardText(await navigator.clipboard.readText());
+  } catch { /* No clipboard permission to query: the paste event brings the text. */ }
+};
 
 provided.clipboard_text_length = () => bytes.length;
 provided.clipboard_text_read = (pointer) => new Uint8Array(x.memory.buffer, pointer >>> 0, bytes.length).set(bytes);
