@@ -19,7 +19,7 @@ function scene() {
 }
 
 // The tree's rows top down, and a row's place (region pixels, y up) over its name.
-const rows = (area) => area.draw().draw.filter((c) => c.op === 'text').map((c) => ({ text: c.text, x: c.at[0], y: c.at[1] }));
+const rows = (area) => area.draw().draw.filter((c) => c.op === 'text' && c.text).map((c) => ({ text: c.text, x: c.at[0], y: c.at[1] }));
 const names = (area) => rows(area).map((r) => r.text);
 const at = (area, name) => {
   const row = rows(area).find((r) => r.text === name);
@@ -31,6 +31,17 @@ const event = (type, value, region, modifier = 0) => ({ type, value, region, mod
 {
   const { area } = scene();
   assert.deepEqual(names(area), ['Scene Collection', 'Collection', 'Camera', 'Cube', 'Light'], 'View Layer tree, sorted');
+}
+
+{
+  // Each object's row draws its type's icon between the disclosure arrow and the name, as Blender's rows do.
+  const { area } = scene();
+  const drawn = area.draw().draw;
+  for (const [name, icon] of [['Camera', 'OUTLINER_OB_CAMERA'], ['Cube', 'OUTLINER_OB_MESH'], ['Light', 'OUTLINER_OB_LIGHT']]) {
+    const row = drawn.find((c) => c.op === 'text' && c.text === name);
+    const before = drawn.find((c) => c.op === 'icon' && c.icon === icon && Math.abs(c.at[1] + 3 - row.at[1]) <= 2);
+    assert.ok(before && before.at[0] < row.at[0] && row.at[0] - before.at[0] <= 24, `${name}'s row draws ${icon} before its name`);
+  }
 }
 
 {

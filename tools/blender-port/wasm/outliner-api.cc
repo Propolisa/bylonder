@@ -72,6 +72,9 @@ EXPORT(outliner_region_size) void outliner_region_size(ScrArea *area, int x, int
   region->winx = short(winx);
   region->winy = short(winy);
   region->winrct = {x, x + winx - 1, y, y + winy - 1};
+  /* As region_rect_recursive leaves a shown region: its blocks take their matrix and aspect from it
+   * (ui_update_window_matrix), which places the icon labels of the tree's rows. */
+  region->runtime->visible = true;
   region->flag |= RGN_FLAG_INDICATE_OVERFLOW;
   region->v2d.scroll |= (V2D_SCROLL_RIGHT | V2D_SCROLL_BOTTOM);
   region->v2d.scroll &= ~(V2D_SCROLL_LEFT | V2D_SCROLL_TOP);
