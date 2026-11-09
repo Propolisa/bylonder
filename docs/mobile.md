@@ -186,10 +186,10 @@ so they scale with Resolution Scale, and pinching the UI smaller unfolds areas. 
 along the split and takes the largest across it. Of a split's two sides, the one under its minimum folds (the smaller
 if both are).
 
-A folded side is drawn as a strip one header thick on its edge of the split, with its editors' icons. A tap on the
-strip opens it as a drawer over its neighbour, at the size its share of startup.blend's 1920 x 1080 window would have
-at Resolution Scale (within nine tenths of the split, never under its minimum); a tap outside or on the strip closes
-it. A folded side keeps its own splits inside the drawer, so the Outliner over the Properties editor stays one
+A folded side is drawn as a strip one header thick on its edge of the split, with its editors' icons. A tap anywhere
+on the strip opens it as a drawer over its neighbour, three quarters of the split wide (never under its minimum); a
+tap on the strip again, a tap outside or Back closes it. The drawer's inner edge drags to resize it, as an area edge
+does, and keeps its size. A folded side keeps its own splits inside the drawer, so the Outliner over the Properties editor stays one
 column.
 
 On a large phone in portrait the Layout screen is the 3D Viewport over the Timeline, with a strip on the right for the

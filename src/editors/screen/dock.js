@@ -34,7 +34,7 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
   // (screen.area_options, onEdgeMenu); an area dropped on another by its header (screen.area_swap, onSwap).
   let headerMenu=()=>{},edgeMenu=()=>{},swapAreas=(a,b)=>swap(a,b);
   try{const value=JSON.parse(localStorage.getItem(storageKey)||'{}');if(value&&typeof value==='object'&&!Array.isArray(value))saved=value;}catch{}
-  const state=reactive({drop:null,drawer:null,screen:null,layout:null,remember:saved.remember!==false,focus:null,tree:structuredClone(firstTree),factoryCount:0,width:0,height:0,content:null});
+  const state=reactive({drop:null,drawer:null,drawers:{},screen:null,layout:null,remember:saved.remember!==false,focus:null,tree:structuredClone(firstTree),factoryCount:0,width:0,height:0,content:null});
   const screenOf=()=>screens[state.screen]??{tree:firstTree,defaults:firstDefaults};
   const tree=()=>screenOf().tree,defaults=()=>screenOf().defaults();
   // Each screen keeps its own layout; the first screen's under 'main'.
@@ -51,6 +51,7 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
     if(stored?.sizes)for(const [split,pair] of Object.entries(stored.sizes))if(Array.isArray(pair)&&pair.length===2&&pair.every(n=>Number.isFinite(n)&&n>0))state.layout.sizes[split]=pair;
     if(stored?.horizontal)Object.assign(state.layout.horizontal,stored.horizontal);
     state.focus=!stored?defaultFocus:ids.includes(stored.focus)?stored.focus:null;
+    state.drawers=Object.fromEntries(Object.entries(stored?.drawers??{}).filter(([,share])=>Number.isFinite(share)&&share>0&&share<=1));
   };
   load();
   host.classList.add('dock');
@@ -90,7 +91,7 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
   // Blender keeps each area at least one header high (screen_geom_vertices_scale).
   const minSize=horizontal=>{const header=parseFloat(getComputedStyle(host).getPropertyValue('--bl-header-h'))||26,length=horizontal?state.height:state.width;return length?Math.min(50,100*header/length):8;};
   const persist=()=>{
-    saved[key()]={...JSON.parse(JSON.stringify(state.layout)),focus:state.focus,tree:JSON.parse(JSON.stringify(state.tree))};saved.remember=state.remember;saved.extras=items.slice(baseCount).map(({id,type})=>({id,type}));
+    saved[key()]={...JSON.parse(JSON.stringify(state.layout)),focus:state.focus,tree:JSON.parse(JSON.stringify(state.tree)),drawers:{...state.drawers}};saved.remember=state.remember;saved.extras=items.slice(baseCount).map(({id,type})=>({id,type}));
     try{localStorage.setItem(storageKey,JSON.stringify(state.remember?saved:{remember:false}));}catch{}
     position();nextTick(()=>{position();schedule();});
   };
@@ -159,9 +160,21 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
   };
   const leaves=node=>typeof node==='number'?(visible(node)?[node]:[]):node.children.flatMap(leaves);
   const itemOf=slot=>items.find(item=>item.id===state.layout.order[slot]);
-  // The drawer's size: three quarters of the split, never under the area's minimum nor over the strip.
+  // The drawer's size: three quarters of the split, or the share its edge was dragged to, never under the area's
+  // minimum nor over the strip.
   const DRAWER_SHARE=0.75;
-  const drawerSize=(node,i,horizontal,total)=>Math.min(total-token('--bl-header-h'),Math.max(minimum(node.children[i],horizontal),DRAWER_SHARE*total));
+  const drawerSize=(node,i,horizontal,total)=>Math.min(total-token('--bl-header-h'),Math.max(minimum(node.children[i],horizontal),(state.drawers[node.id]??DRAWER_SHARE)*total));
+  // Its edge dragged, by a finger too (touch-action none, so the touch layer sends it as a press; its moves are the
+  // window's, wherever the finger goes).
+  const resizeDrawer=(event,node,side,total)=>{
+    event.preventDefault();event.stopPropagation();
+    const rect=event.currentTarget.parentElement.getBoundingClientRect(),start=event;
+    const size={right:rect.width,left:rect.width,bottom:rect.height,top:rect.height}[side];
+    const sizeAt=e=>size+{right:start.clientX-e.clientX,left:e.clientX-start.clientX,bottom:start.clientY-e.clientY,top:e.clientY-start.clientY}[side];
+    const move=e=>{state.drawers[node.id]=Math.max(0.05,Math.min(1,sizeAt(e)/total));};
+    const end=()=>{removeEventListener('pointermove',move,true);removeEventListener('pointerup',end,true);removeEventListener('pointercancel',end,true);persist();};
+    addEventListener('pointermove',move,true);addEventListener('pointerup',end,true);addEventListener('pointercancel',end,true);
+  };
   function renderFolded(node,i,horizontal,extent){
     const child=node.children[i],other=node.children[1-i],open=state.drawer===node.id,strip=token('--bl-header-h');
     const total=horizontal?extent.height:extent.width,size=drawerSize(node,i,horizontal,total);
@@ -171,7 +184,8 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
     const rest=h('div',{class:'dock-fold-rest'},[renderNode(other,horizontal?{...extent,height:total-strip}:{...extent,width:total-strip})]);
     const side=horizontal?(i?'bottom':'top'):(i?'right':'left');
     const drawer=open?[h('div',{class:'dock-drawer-backdrop',onPointerdown:()=>{state.drawer=null;}}),
-      h('div',{class:['dock-drawer',side],style:{[horizontal?'height':'width']:size+'px'}},[renderNode(child,horizontal?{...extent,height:size}:{...extent,width:size})])]:[];
+      h('div',{class:['dock-drawer',side],style:{[horizontal?'height':'width']:size+'px'}},[renderNode(child,horizontal?{...extent,height:size}:{...extent,width:size}),
+        h('div',{class:['dock-drawer-edge',side],role:'separator','aria-orientation':horizontal?'horizontal':'vertical','aria-label':'Resize '+titles,onPointerdown:e=>resizeDrawer(e,node,side,total)})])]:[];
     return h('div',{class:['dock-folded',horizontal?'horizontal':'vertical']},i?[rest,handle,...drawer]:[handle,rest,...drawer]);
   }
   const setFactory=(type,factory)=>{factories.set(type,factory);state.factoryCount=factories.size;for(const item of items)if(item.type===type&&!instances.has(item.id))instances.set(item.id,factory(item.element,item.id));};

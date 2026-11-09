@@ -139,6 +139,26 @@ const checks = {
     await closeDrawer();
   },
 
+  // The drawer's inner edge drags to resize it, as an area edge does, and it opens again at the size it was given.
+  async "a drawer's edge drags to resize it, and the size is kept"() {
+    if (!(await app.locator(".dock-fold").count())) return;
+    const fold = app.locator(".dock-fold").first(), drawer = app.locator(".dock-drawer");
+    await touch.tap(await center(fold));
+    await drawer.waitFor();
+    const split = await fold.evaluate((el) => el.parentElement.getBoundingClientRect().width);
+    const edge = await app.locator(".dock-drawer-edge").boundingBox(), x = edge.x + edge.width / 2, y = edge.y + edge.height / 2;
+    const width = (await drawer.boundingBox()).width;
+    await touch.drag([x, y], [x + split / 8, y]);
+    const resized = (await drawer.boundingBox()).width;
+    assert.ok(Math.abs(resized - (width - split / 8)) < 6, `dragged an eighth of ${split} px in: ${width} to ${resized} px`);
+    await closeDrawer();
+    await touch.tap(await center(fold));
+    await drawer.waitFor();
+    assert.ok(Math.abs((await drawer.boundingBox()).width - resized) < 2, "it opens again at the size it was given");
+    await touch.drag([x + split / 8, y], [x, y]);
+    await closeDrawer();
+  },
+
   async "a tap selects, a tap on nothing deselects"() {
     await touch.tap(await app.point(0.5, 0.92));
     await app.until((b) => b.editor.selection.size === 0);

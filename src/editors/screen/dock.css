@@ -59,5 +59,17 @@
 .dock-drawer.bottom{left:0;right:0;bottom:var(--bl-header-h)}.dock-drawer.top{left:0;right:0;top:var(--bl-header-h)}
 /* The strip stays above the drawer's backdrop, so a tap on it closes the drawer it opened. */
 .dock-fold{position:relative;z-index:9}
+/* The drawer's edge toward its neighbour drags to resize it: an area edge's 3 px line beside the drawer, in a hit area
+   a finger can take (the drawer's own panels cover its inside). */
+.dock-drawer-edge{position:absolute;z-index:1;touch-action:none;--edge:calc(2*var(--bl-edge-margin) + 3px)}
+.dock-drawer-edge::after{content:'';position:absolute;background:var(--bl-gap)}
+.dock-drawer-edge.right,.dock-drawer-edge.left{top:0;bottom:0;width:var(--edge);cursor:ew-resize}
+.dock-drawer-edge.right{right:100%}.dock-drawer-edge.left{left:100%}
+.dock-drawer-edge.right::after,.dock-drawer-edge.left::after{top:0;bottom:0;width:3px}
+.dock-drawer-edge.right::after{right:0}.dock-drawer-edge.left::after{left:0}
+.dock-drawer-edge.bottom,.dock-drawer-edge.top{left:0;right:0;height:var(--edge);cursor:ns-resize}
+.dock-drawer-edge.bottom{bottom:100%}.dock-drawer-edge.top{top:100%}
+.dock-drawer-edge.bottom::after,.dock-drawer-edge.top::after{left:0;right:0;height:3px}
+.dock-drawer-edge.bottom::after{bottom:0}.dock-drawer-edge.top::after{top:0}
 .dock-content.dock-in-drawer{z-index:9}
 .dock-leaf.no-header>.dock-heading{display:none}
