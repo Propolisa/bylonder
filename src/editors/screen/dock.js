@@ -159,11 +159,9 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
   };
   const leaves=node=>typeof node==='number'?(visible(node)?[node]:[]):node.children.flatMap(leaves);
   const itemOf=slot=>items.find(item=>item.id===state.layout.order[slot]);
-  // The drawer's size: the area's share of startup.blend's 1920 x 1080 window at Resolution Scale, within the split.
-  const drawerSize=(node,i,horizontal,total)=>{
-    const [a,b]=state.layout.sizes[node.id],share=(i?b:a)/(a+b),reference=(horizontal?1080:1920)*token('--bl-row')/20;
-    return Math.min(0.9*total,Math.max(minimum(node.children[i],horizontal),share*reference));
-  };
+  // The drawer's size: three quarters of the split, never under the area's minimum nor over the strip.
+  const DRAWER_SHARE=0.75;
+  const drawerSize=(node,i,horizontal,total)=>Math.min(total-token('--bl-header-h'),Math.max(minimum(node.children[i],horizontal),DRAWER_SHARE*total));
   function renderFolded(node,i,horizontal,extent){
     const child=node.children[i],other=node.children[1-i],open=state.drawer===node.id,strip=token('--bl-header-h');
     const total=horizontal?extent.height:extent.width,size=drawerSize(node,i,horizontal,total);

@@ -128,6 +128,17 @@ const checks = {
     await pause();
   },
 
+  // An open drawer takes three quarters of its split, leaving the rest of the screen in sight.
+  async "a drawer opens three quarters of its split wide"() {
+    if (!(await app.locator(".dock-fold").count())) return;
+    const fold = app.locator(".dock-fold").first(), drawer = app.locator(".dock-drawer");
+    await touch.tap(await center(fold));
+    await drawer.waitFor();
+    const split = await fold.evaluate((el) => el.parentElement.getBoundingClientRect().width), { width } = await drawer.boundingBox();
+    assert.ok(Math.abs(width - 0.75 * split) < 2, `the drawer is ${width} px of ${split}`);
+    await closeDrawer();
+  },
+
   async "a tap selects, a tap on nothing deselects"() {
     await touch.tap(await app.point(0.5, 0.92));
     await app.until((b) => b.editor.selection.size === 0);
