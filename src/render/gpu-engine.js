@@ -3,6 +3,7 @@
 // preference keeps in the browser's storage. A `gpu` URL parameter on the app overrides it (the browser tests'
 // E2E_ENGINE). WebGPU falls back to WebGL 2 where the browser has no adapter.
 import { Engine, WebGPUEngine } from '@babylonjs/core';
+import { deriveDepthMetrics } from './depth-metric-varyings.js';
 
 const KEY = 'bylonder-gpu-backend';
 // Babylon's GLSL to WGSL compilers, served by the app (scripts/webgpu-compilers.mjs).
@@ -16,6 +17,15 @@ class ReportingWebGPUEngine extends WebGPUEngine {
   async initAsync(...args) {
     await super.initAsync(...args);
     failRejectedPipelines(this._cacheRenderPipeline, this._device);
+  }
+
+  // GLSL effects derive their shadows' depth metrics in the fragment stage, within WebGPU's inter-stage limit.
+  createEffect(baseName, options, ...args) {
+    if (options?.attributes !== undefined && !options.shaderLanguage) {
+      const after = options.processCodeAfterIncludes;
+      options = { ...options, processCodeAfterIncludes: (type, code, defines) => deriveDepthMetrics(type, after ? after(type, code, defines) : code) };
+    }
+    return super.createEffect(baseName, options, ...args);
   }
 
   async _preparePipelineContextAsync(context, ...args) {
