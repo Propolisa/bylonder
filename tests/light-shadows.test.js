@@ -7,10 +7,12 @@ import { createLight } from '../src/blenkernel/light/light-home.js';
 import { createLightShadows, shadowJitter, shadowRange } from '../src/blenkernel/light/light-shadows.js';
 import { createFilm, filmJitter } from '../src/render/film.js';
 import { evaluatedMatrix, setEvaluatedMatrix } from '../src/runtime/object-transform.js';
-import { Matrix } from '@babylonjs/core';
+import { Matrix, ShadowGenerator } from '@babylonjs/core';
 import { areaLightShadows } from '../src/blenkernel/light/area-light.js';
 
 const engine = new NullEngine();
+// A NullEngine compiles no shader: every caster's shadow shader counts as ready.
+ShadowGenerator.prototype.isReady = () => true;
 // The app's WebGL 2 engine has cascades (texture arrays with a depth texture); a NullEngine stands in for them.
 Object.assign(engine, { createDepthStencilTexture: () => null });
 engine._features.supportCSM = true;
@@ -47,6 +49,26 @@ floor._markSubMeshesAsLightDirty = () => marked++;
 for (let i = 0; i < 3; i++) { shadows.setActive(true); map.render(); }
 delete floor._markSubMeshesAsLightDirty;
 assert.equal(marked, 0, 'no light marks from drawing the same casters again');
+// A map drawn while a caster's shadow shader compiles (its material recompiled) is drawn again until it holds them all.
+ball.material = new PBRMaterial('Clay', scene);
+const ready = generator.isReady, drawsAgain = () => map._objectRenderer._currentRefreshId === -1;
+generator.isReady = () => false;
+map._shouldRender();
+map.render();
+assert.ok(drawsAgain(), 'a map drawn without a compiling caster draws again');
+generator.isReady = ready;
+map._shouldRender();
+map.render();
+assert.ok(!drawsAgain(), 'and stops once it drew every caster');
+generator.isReady = () => false;
+const failedShadows = (effect) => { for (const mesh of [floor, ball]) mesh.subMeshes[0]._getDrawWrapper(map.renderPassId, true).effect = effect; };
+failedShadows({ getCompilationError: () => 'ERROR: 0:1: syntax error' });
+map._shouldRender();
+map.render();
+assert.ok(!drawsAgain(), 'a caster whose shadow shader failed counts as drawn: the map does not draw every frame');
+failedShadows(null);
+generator.isReady = ready;
+ball.material = null;
 shadows.setActive(false);
 assert.deepEqual(casters(), [], 'a view without the scene lights draws no shadow map');
 assert.equal(map.refreshRate, RenderTargetTexture.REFRESHRATE_RENDER_ONCE, 'which it draws empty once');

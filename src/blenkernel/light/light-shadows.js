@@ -3,6 +3,7 @@
 // into it. Materials receive them through Babylon's own light code. Shadow maps are drawn for the views that show the
 // scene's lights (Rendered shading, Render Image); other views draw them empty, which changes no material.
 import { CascadedShadowGenerator, Constants, LinesMesh, Matrix, RenderTargetTexture, ShaderStore, ShadowGenerator, Texture, Vector3 } from '@babylonjs/core';
+import { drawAgainUntilComplete } from '../../overrides/babylon/shadow-map-complete.js';
 import { shadowMapVertexShader } from '@babylonjs/core/Shaders/shadowMap.vertex.js';
 import { shadowMapPixelShader } from '@babylonjs/core/Shaders/shadowMap.fragment.js';
 import { shadowMapVertexShaderWGSL } from '@babylonjs/core/ShadersWGSL/shadowMap.vertex.js';
@@ -80,6 +81,7 @@ function createGenerator(light, type) {
   else if (type === 'SUN') softSun(light, generator);
   else Object.assign(generator, { usePercentageCloserFiltering: true, filteringQuality: ShadowGenerator.QUALITY_HIGH });
   Object.assign(generator, { bias: 0.002, normalBias: 0.02, customShaderOptions: { shaderName: SHADOW_MAP } });
+  drawAgainUntilComplete(generator);
   return generator;
 }
 
