@@ -1378,7 +1378,6 @@
    "Reflections and refraction show the world's color only; EEVEE's light probes (sphere, plane, volume) and screen space reflections are not drawn, so glass and metal do not reflect the room.",
    "Screen-traced reflections (Raytracing with the Screen-Trace method) ignore a Principled BSDF's Specular IOR Level: a surface at Specular 0 still reflects as a plain dielectric does.",
    "A world's node tree draws as the background and lights the scene through one world probe baked when the world changes, clamped at the world's Sun Threshold as EEVEE's, without the sun light EEVEE makes of what it clamps; a Sky Texture's Preetham and Hosek / Wilkie models, the world's Volume and its Background's blur are not drawn yet, and the tree's values are not followed while it is edited.",
-   "Volumes are not drawn: a material with only a Volume (a Principled Volume, say) shows nothing, as EEVEE shows no surface for it, and fog or smoke inside it is missing.",
    "Glass refracts the world behind it, not the objects; a Transparent BSDF mixed in lets the objects through.",
    "Khronos PBR Neutral's darkest tones (its toe) can differ from Blender's by up to three 8-bit steps; other view transforms and looks are within one in Rendered shading and Render Image, and within two or three in Solid and Material Preview.",
    "The 3D Viewport's camera view frames tighter than the camera when the viewport's aspect differs from the render's; Render Image frames as Blender does."
@@ -1687,7 +1686,7 @@
    "With EEVEE Parity off (Properties > Render), lobes are lit as one and the view direction is Babylon's eye, as plain Babylon PBR does.",
    "File > Export writes a material of Blender's nodes as Babylon's own blocks, its Blender nodes one CustomBlock of their code: their values, the drawn object's color, index and texture space are fixed at export, and a color ramp's table is 8 bits.",
    "The export's EEVEE Parity lights a second reflection lobe as Babylon's clearcoat, a dielectric whose strength follows the lobe's color, not as EEVEE's lobe; exported Principled-only materials (PBRMaterial) keep Babylon's view direction through an orthographic camera.",
-   "Not run yet: Wireframe, Point Info, Particle Info, the volume nodes, Script, Sky, Environment and IES textures, Toon BSDF, Specular BSDF, Ray Portal, Raycast, AOV Output and node groups."
+   "Not run yet: Wireframe, Point Info, Particle Info, Volume Info, Volume Coefficients, Script, Sky, Environment and IES textures, Toon BSDF, Specular BSDF, Ray Portal, Raycast, AOV Output and node groups."
   ],
   "page": "docs/features/shader-nodes.md",
   "open": "https://propolisa.github.io/bylonder/#example=blue-planet",
@@ -2153,6 +2152,82 @@
     "supported": 5,
     "partial": 0,
     "total": 5
+   }
+  }
+ },
+ {
+  "id": "volumes",
+  "title": "Volumes",
+  "summary": "Fill an object with fog, dust or smoke from a material's Volume shader and light it as EEVEE does, here sunset shafts through a temple's windows into drifting dust.",
+  "expect": "Principled Volume, Volume Scatter and Volume Absorption on objects and the world draw in EEVEE's froxel grid from the scene's Volumes settings, lit by sun, spot and point lights through their shadows (light shafts) and by the world, close to EEVEE in shape, density and color; a volume fills its object's bounding box rather than its mesh, a 4D Noise Texture's density draws empty, and a moving view shows the grid's noise until it holds still.",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/render/shader_nodes/shader/volume_principled.html",
+   "https://docs.blender.org/manual/en/5.2/render/shader_nodes/shader/volume_scatter.html",
+   "https://docs.blender.org/manual/en/5.2/render/shader_nodes/shader/volume_absorption.html",
+   "https://docs.blender.org/manual/en/5.2/render/eevee/render_settings/volumes.html",
+   "https://docs.blender.org/manual/en/5.2/render/materials/components/volume.html"
+  ],
+  "example": "volumes",
+  "thumbnail": "volumes/thumbnail.png",
+  "media": [
+   "volumes/shading.gif",
+   "volumes/dust.png",
+   "volumes/anisotropy.gif",
+   "volumes/sun-rotate.gif",
+   "volumes/cast-shadow.gif",
+   "volumes/settings.png",
+   "volumes/presets.png",
+   "volumes/play.gif",
+   "volumes/render-image.png"
+  ],
+  "ui": [
+   "VIEW_3D",
+   "PROPERTIES",
+   "EEVEE_MATERIAL_PT_volume",
+   "EEVEE_MATERIAL_PT_settings_volume",
+   "EEVEE_WORLD_PT_volume",
+   "RENDER_PT_eevee_volumes*",
+   "RENDER_PT_eevee_clamping_volume",
+   "DATA_PT_EEVEE_light_shadow"
+  ],
+  "operators": [
+   "view3d.toggle_shading",
+   "view3d.view_camera",
+   "screen.animation_play",
+   "render.render"
+  ],
+  "code": [
+   "src/draw/volumes.js",
+   "src/draw/volume-shaders.js",
+   "src/nodes/blender/shader-nodes.js",
+   "src/blenkernel/scene/render-babylon.js"
+  ],
+  "tests": [
+   "tests/volumes.test.js"
+  ],
+  "limits": [
+   "A volume fills its object's bounding box, not its mesh's shape (EEVEE fills the mesh), so a sphere of fog is a box of fog; shape it with its density instead.",
+   "A Noise Texture in 4D (with W) gives a volume no density yet; 1D, 2D and 3D work.",
+   "A volume object's grids (OpenVDB) are not drawn; a mesh's volume reads no attributes, so a Density Attribute is 1 and a Temperature Attribute 0.",
+   "Volumes show behind opaque surfaces only: a blended surface in front of a volume does not hide it, and volumes cast no shadow onto surfaces.",
+   "Shadows in volumes take one depth comparison per froxel (EEVEE filters them); area lights light volumes from their center on both sides and cast no shadow into them.",
+   "The grid's noise averages away while the view holds still (EEVEE reprojects it as the view moves too), so a moving view shows it in thin fog.",
+   "Volumes are Bylonder's render extension (Properties > Render > Volumes, Bylonder icon), with no Babylon runtime: Babylon's fog is a depth tint, not a volume, and an export to Babylon leaves volumes out."
+  ],
+  "page": "docs/features/volumes.md",
+  "open": "https://propolisa.github.io/bylonder/#example=volumes",
+  "example_title": "Temple Light",
+  "coverage": {
+   "operators": {
+    "supported": 4,
+    "partial": 0,
+    "total": 4
+   },
+   "ui": {
+    "supported": 7,
+    "partial": 0,
+    "total": 7
    }
   }
  }
