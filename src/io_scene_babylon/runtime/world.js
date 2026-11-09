@@ -56,7 +56,8 @@ export function worldNodes(scene, material) {
     drawn.render();
     if (clamp) clamp.value = 0;
     const polynomial = await CubeMapToSphericalPolynomialTools.ConvertCubeMapTextureToSphericalPolynomial(drawn);
-    await new HDRFiltering(scene.getEngine()).prefilter(drawn);
+    // Unfiltered where the engine cannot prefilter (a NullEngine, in Node).
+    if (scene.getEngine()._features.allowTexturePrefiltering) await new HDRFiltering(scene.getEngine()).prefilter(drawn);
     drawn.sphericalPolynomial = polynomial;
     scene.environmentTexture = drawn;
   };
