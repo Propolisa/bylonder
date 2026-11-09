@@ -47,6 +47,7 @@ export const KNOWN = {
   'shape-keys animation': 'shape keys counted twice (live animation agent)',
   "vertex-and-weight-paint controls": "the live Simple Deform (Tail Swing) gives another mesh than Main's: its vertex group or lock axes do not reach modifiers.wasm",
   'vertex-and-weight-paint animation': 'the koi meshes, deformed by an animated Simple Deform, are off at every frame',
+  "compositor controls": "City's City Towers Geometry Nodes, evaluated by the page, give another mesh than Main's (off 1.4e3); it reads no control, so the page keeps the baked mesh and this passes until something runs it",
   "compositor animation": "the Aircraft Light material's animated emission does not play in the page; Tea Break's mesh off 0.02 at frame 89",
   'animation look-webgl2': 'the page skips the Standard view transform, so linear colors reach the screen unencoded (fixed on export-fixes-parity)',
   'animation look-webgpu': 'the page skips the Standard view transform, so linear colors reach the screen unencoded (fixed on export-fixes-parity)',
