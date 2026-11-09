@@ -38,7 +38,7 @@ export const packageOverrides = () => OVERRIDE_FILES.map((name) => [`bylonder/ov
 export const packagedRuntime = (text) => text.replaceAll("'../../overrides/", "'./overrides/");
 // The blocks library and Bylonder's extensions of Babylon, by package path: runtime/ files a package ships beside its
 // scene.js only when it imports them.
-export const BLOCK_FILES = { 'bylonder-blocks.js': 'blocks.js', 'bylonder-view-transform.js': 'view-transform.js' };
+export const BLOCK_FILES = { 'bylonder-blocks.js': 'blocks.js', 'bylonder-view-transform.js': 'view-transform.js', 'bylonder-area-light.js': 'area-light.js' };
 // The material builder (runtime/materials.js) and the registry it resolves nodes through, for a scene.js that imports it.
 export const MATERIAL_FILES = declared('materials');
 // The runtime/ files a package with these files ships: [package path, runtime/ file name].

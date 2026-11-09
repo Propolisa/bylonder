@@ -79,7 +79,7 @@
       { "implementation": "Babylon lights and shadow generators", "license": "Apache-2.0", "fidelity": "approximate" }
     ],
     "light:AREA:shadows": [
-      { "implementation": "Bylonder's area light shadows extension", "license": "GPL-2.0-or-later", "fidelity": "exact", "status": "planned" },
+      { "implementation": "area light shadows extension (bylonder-area-light.js, the app's Area Light Shadows): a shadow cube from the light's center, as EEVEE's punctual shadow of an area light", "license": "MIT OR Apache-2.0", "fidelity": "approximate" },
       { "implementation": "Babylon's area light without shadows", "license": "Apache-2.0", "fidelity": "approximate" }
     ],
     "world:probe_clamp": [

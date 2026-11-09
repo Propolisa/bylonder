@@ -21,6 +21,7 @@ import { gplFolders, NODE_KERNELS } from './runtime-files.js';
 import { CURVES_GLSL_FILE, curvesGlslFile } from './curves-export.js';
 import { idStruct } from '../python/bpy_rna.js';
 import { displayExponent } from '../render/view-settings.js';
+import { AREA_LIGHT } from './area-lights.js';
 import { LOG_SIZE, STOPS } from '../render/display-lut.js';
 import { colorManagementFiles } from '../imbuf/colormanagement.js';
 import { halfFloats } from '../blenkernel/colorband.js';
@@ -208,6 +209,8 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   }
   const composited = data.cameras.length ? exportCompositor(world) : null;
   const display = await displaySettings(world, bin, !!composited);
+  // Area lights that cast shadows, as Bylonder's Area Light Shadows extension has them (runtime/area-light.js).
+  const areaShadows = (data.shadowGenerators ?? []).some((g) => data.lights.some((l) => l.id === g.lightId && l.type === AREA_LIGHT));
   // Bylonder's own pipeline of a rendered view (render-babylon.js SceneLinearPipeline) turns the scene's image processing
   // off, so materials would encode to display themselves: with the view transform, which displays instead, it stays out
   // unless one of its effects is on.
@@ -246,7 +249,8 @@ import { fillMaterials } from './bylonder/materials.js';
 import kernels from './${NODE_KERNELS}';` : ''}${curves ? `
 // The curves blocks the materials drawing curves use, before they are parsed.
 import './${CURVES_GLSL_FILE}';` : ''}${display ? `
-import { viewTransform } from './bylonder-view-transform.js';` : ''}${composited ? `
+import { viewTransform } from './bylonder-view-transform.js';` : ''}${areaShadows ? `
+import { parseLight } from './bylonder-area-light.js';` : ''}${composited ? `
 import { compositor } from './bylonder-blocks.js';` : ''}
 import { Animation, AnimationGroup, CascadedShadowGenerator, Color3, Color4, CubeTexture, EffectLayer, Geometry, HDRCubeTexture, Light, LinesMesh, Material, Matrix, Mesh, MorphTargetManager, MultiMaterial, PostProcess, Quaternion, ReflectionProbe, Scene, SerializationHelper, ShadowGenerator, Skeleton, SubMesh, TransformNode, Vector3, Camera, ParticleSystem } from '@babylonjs/core';
 import * as BABYLON from '@babylonjs/core';
@@ -345,7 +349,7 @@ ${geometryLines.join('\n')}
 
   const nodes = {};
 ${objectLines}
-${parse('LIGHTS', data.lights, 'nodes[entry.uniqueId] = Light.Parse(entry, scene)')}${parse('CAMERAS', data.cameras, 'nodes[entry.uniqueId] = Camera.Parse(entry, scene)')}
+${parse('LIGHTS', data.lights, `nodes[entry.uniqueId] = ${areaShadows ? 'parseLight' : 'Light.Parse'}(entry, scene)`)}${parse('CAMERAS', data.cameras, 'nodes[entry.uniqueId] = Camera.Parse(entry, scene)')}
 ${parented.map((e) => `  nodes[${e.uniqueId}].parent = nodes[${e.parentId}] ?? null;`).join('\n')}${data.lights.some((l) => l.excludedMeshesIds?.length || l.includedOnlyMeshesIds?.length) ? `
   // The meshes each light leaves out or lights alone, by id, as Babylon's loader resolves them once the meshes exist.
   const meshes = (ids) => ids.map((id) => scene.getMeshById(id)).filter(Boolean);
