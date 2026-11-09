@@ -297,6 +297,7 @@
     "modifiers/modifiers.wasm": {
       "api": ["modifier-api.cc", "modifier-object.cc", "no-depsgraph.cc", "modifiers-only.cc", "texture-api.cc"],
       "check": "tools/blender-port/check-modifiers.mjs",
+      "fetch": ["release/datafiles/userdef/userdef_default_theme.c"],
       "defines": ["WITH_OPENSUBDIV", "WITH_BULLET", "WITH_MOD_REMESH"],
       "includes": ["intern/opensubdiv", "intern/dualcon", "intern/rigidbody", "extern/bullet2/src"],
       "dependencies": {

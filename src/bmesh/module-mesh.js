@@ -5,6 +5,12 @@
 export const FLAGS = [['.select_vert', 'POINT'], ['.hide_vert', 'POINT'], ['.select_edge', 'EDGE'], ['.hide_edge', 'EDGE'], ['.uv_seam', 'EDGE'],
   ['sharp_edge', 'EDGE'], ['.select_poly', 'FACE'], ['.hide_poly', 'FACE'], ['sharp_face', 'FACE']];
 
+// A Mesh attribute's AttrDomain, and its AttrType with the array of its values and their number per element.
+export const DOMAINS = { POINT: 0, EDGE: 1, FACE: 2, CORNER: 3 };
+export const ATTRIBUTE_TYPES = { BOOLEAN: [0, Uint8Array, 1], INT: [3, Int32Array, 1], FLOAT: [5, Float32Array, 1], FLOAT2: [6, Float32Array, 2] };
+// Bylonder's Mesh attribute names that Blender 5.2's Mesh names otherwise.
+export const MAIN_NAMES = new Map([['.uv_seam', 'uv_seam']]);
+
 export function moduleMesh(x, createMesh) {
   // Copies arrays into module memory (null stays a null pointer), runs fn with their pointers, and frees them.
   function withArrays(arrays, fn) {
@@ -104,8 +110,22 @@ export function moduleMesh(x, createMesh) {
   function evaluateModifiers(mesh, modifiers) {
     withArrays(meshArrays(mesh), ([p, e, f, cv, ce, uv]) =>
       x.modifier_object_mesh_set(modifierObject(), mesh.verts_num, p, mesh.edges_num, e, mesh.faces_num, f, cv, ce, uv));
+    addMeshData(mesh);
     const { errors } = setModifiers(x.modifier_object(modifierObject()), modifiers);
     return { mesh: extractedMesh(x.modifier_object_eval(modifierObject()) >>> 0), errors: errors() };
+  }
+
+  // What modifiers read of the Mesh besides its arrays: its attributes (creases, bevel weights, sharp edges and faces)
+  // and vertex groups ({ name, verts, weights }); a module without the seam (the scene module's object) takes the arrays.
+  function addMeshData({ attributes = new Map(), vertex_groups: groups = [] }) {
+    if (!x.modifier_object_attribute_add) return;
+    for (const [name, { domain, type, data }] of attributes) {
+      const [code, Type] = ATTRIBUTE_TYPES[type] ?? [];
+      if (Type && name !== 'UVMap') withString(MAIN_NAMES.get(name) ?? name, (p) => withArrays([Type.from(data)], ([values]) => x.modifier_object_attribute_add(modifierObject(), p, DOMAINS[domain], code, values)));
+    }
+    for (const { name, verts, weights } of groups) {
+      withString(name, (p) => withArrays([Int32Array.from(verts), Float32Array.from(weights)], ([v, w]) => x.modifier_object_vertex_group_add(modifierObject(), p, verts.length, v, w)));
+    }
   }
 
   // The one module Object modifier stacks are evaluated on.

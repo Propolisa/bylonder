@@ -81,7 +81,10 @@ export const IRSchema = z.object({
 // Geometry as units take it and give it (docs/ir.md, Geometry): typed arrays in Blender's axes.
 const Floats = z.instanceof(Float32Array), Ints = z.instanceof(Int32Array);
 export const AttributesSchema = fresh(z.record(Name, z.object({ domain: z.enum(['POINT', 'EDGE', 'FACE', 'CORNER', 'INSTANCE']), type: Name, data: z.any() })), () => ({}));
-export const MeshSchema = z.object({ vert_positions: Floats, edges: Ints, face_offsets: Ints, corner_verts: Ints, corner_edges: Ints, uvs: z.optional(Floats), attributes: AttributesSchema });
+/** A vertex group: its name, and its vertices with their weights. */
+export const VertexGroupSchema = z.object({ name: Name, verts: Ints, weights: Floats });
+export const MeshSchema = z.object({ vert_positions: Floats, edges: Ints, face_offsets: Ints, corner_verts: Ints, corner_edges: Ints, uvs: z.optional(Floats), attributes: AttributesSchema,
+  vertex_groups: z.optional(z.array(VertexGroupSchema)) });
 /** Points; a radius is the attribute `radius`. */
 export const PointsSchema = z.object({ positions: Floats, attributes: AttributesSchema });
 /**

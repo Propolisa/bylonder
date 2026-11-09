@@ -20,6 +20,7 @@ export function createEvaluator(exports) {
       ...ir,
       verts_num: ir.vert_positions.length / 3, edges_num: ir.edges.length / 2, faces_num: ir.face_offsets.length - 1,
       attribute: (name) => (name === 'UVMap' ? ir.uvs : undefined),
+      attributes: new Map(Object.entries(ir.attributes ?? {})),
     };
     const modifiers = stack.map(({ type, layouts, values }) => ({ type, write: (view, address) => writeValues(view, address, layouts, values) }));
     const { mesh: result, errors } = evaluateModifiers(mesh, modifiers);

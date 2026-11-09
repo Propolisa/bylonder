@@ -12,10 +12,17 @@ export const fieldLayout = (located, prop) => ({
 });
 
 // Writes a value into a field at a struct's address: a bit of a flag field, an element of an array, an enum by its
-// item's identifier, or a number.
+// item's identifier, a name, or a number.
 function writeField(view, address, layout, value, index) {
-  const { offset, size, kind, signed, bit, bitset, negative, boolean, items } = layout;
+  const { offset, size, kind, signed, bit, bitset, negative, boolean, items, length } = layout;
   const at = address + offset + (bitset ? 0 : index * size);
+  // A name (a vertex group's): its UTF-8 bytes in the field's characters, the rest zero.
+  if (typeof value === 'string' && !items) {
+    const field = new Uint8Array(view.buffer, view.byteOffset + at, length);
+    field.fill(0);
+    field.set(new TextEncoder().encode(value).subarray(0, length - 1));
+    return;
+  }
   const type = { 1: signed ? 'Int8' : 'Uint8', 2: signed ? 'Int16' : 'Uint16', 4: signed ? 'Int32' : 'Uint32' }[size];
   if (kind === 'float') return view.setFloat32(at, value, true);
   if (bit !== undefined && boolean) {

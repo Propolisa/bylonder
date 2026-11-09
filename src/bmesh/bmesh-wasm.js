@@ -5,7 +5,7 @@ import { instantiate, files, read } from '../port/wasm.js';
 import { DATAFILES } from './datafiles.js';
 import { createMesh } from '../blenkernel/mesh/mesh.js';
 import { BMESH_WASM } from './bmesh-module.js';
-import { moduleMesh } from './module-mesh.js';
+import { ATTRIBUTE_TYPES, DOMAINS, MAIN_NAMES, moduleMesh } from './module-mesh.js';
 
 const { exports: x } = await instantiate(BMESH_WASM);
 // Blender's datafiles (its Essentials asset libraries) at its system directory (ghost-paths.cc), read in once the module
@@ -187,8 +187,6 @@ export const ID_RECALC_TRANSFORM = 1 << 0, ID_RECALC_GEOMETRY = 1 << 1, ID_RECAL
 const ID_IM = 0x4d49;
 const OBJECT_TYPES = { EMPTY: 0, MESH: 1, CURVE: 2, FONT: 4, LIGHT: 10, CAMERA: 11, ARMATURE: 25 };
 const ROTATION_MODES = ['QUATERNION', 'XYZ', 'XZY', 'YXZ', 'YZX', 'ZXY', 'ZYX'];
-// A Mesh attribute's AttrDomain, and its AttrType with the array of its values and their number per element.
-const DOMAINS = { POINT: 0, EDGE: 1, FACE: 2, CORNER: 3 };
 // eBaseFlags, and the bit main_base_get adds for the active base.
 const BASE_SELECTED = 1 << 0, BASE_HIDDEN = 1 << 8, BASE_ACTIVE = 1 << 30;
 // The addresses an export writes when given an array, after it counted them without one.
@@ -202,11 +200,9 @@ const DOMAIN_SIZES = { POINT: 'verts_num', EDGE: 'edges_num', FACE: 'faces_num',
 // PROP_FACTOR, PROP_DIRECTION).
 const SOCKET_TYPES = { NodeSocketFloat: [0, 0], NodeSocketFloatFactor: [0, 15], NodeSocketVector: [1, 0], NodeSocketVectorDirection: [1, 22],
   NodeSocketColor: [2, 0], NodeSocketShader: [3, 0] };
-const ATTRIBUTE_TYPES = { BOOLEAN: [0, Uint8Array, 1], INT: [3, Int32Array, 1], FLOAT: [5, Float32Array, 1], FLOAT2: [6, Float32Array, 2] };
 const ATTRIBUTE_TYPE_NAMES = new Map(Object.entries(ATTRIBUTE_TYPES).map(([name, [code]]) => [code, name]));
 const DOMAIN_NAMES = Object.keys(DOMAINS);
-// Bylonder's Mesh attribute names that Blender 5.2's Mesh names otherwise.
-const MAIN_NAMES = new Map([['.uv_seam', 'uv_seam']]), OWN_NAMES = new Map([...MAIN_NAMES].map(([own, main]) => [main, own]));
+const OWN_NAMES = new Map([...MAIN_NAMES].map(([own, main]) => [main, own]));
 
 // Blender's data outside Edit Mode (main-api.cc): a Main of objects and their data, a scene whose view layer holds the
 // selection and the active object, and the context operators run in. Other subsystems add their IDs to `bmain` and

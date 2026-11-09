@@ -6,7 +6,9 @@
 
 #include <ctime>
 
+#include "BKE_cpp_types.hh"
 #include "BKE_global.hh"
+#include "BKE_modifier.hh"
 #include "BKE_node.hh"
 #include "BKE_idtype.hh"
 #include "BLO_readfile.hh"
@@ -140,3 +142,12 @@ LEFT_OUT_MODIFIER(WeightVGProximity);
 /* Text objects and their fonts are not in this module. */
 void fonts_init() {}
 void movie_init() {}
+
+/* port-override: modifier-api.cc's module_init, Blender's main's initialization, which reaches the window manager, the
+ * interface and Python: this module needs Blender's types, ID types and modifier types alone. */
+void module_init()
+{
+  blender::BKE_cpp_types_init();
+  blender::BKE_idtype_init();
+  blender::BKE_modifier_init();
+}

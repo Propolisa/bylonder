@@ -1,10 +1,15 @@
 /* The modifier kernels module's object (modifiers.wasm): a mesh object outside any Main, its mesh from arrays and its
  * stack evaluated by mesh_create_eval_final on a scene of its own, as the depsgraph would (no-depsgraph.cc). */
+#include "BKE_attribute.hh"
+#include "BKE_deform.hh"
 #include "BKE_lib_id.hh"
 #include "BKE_mesh.hh"
 #include "BKE_mesh_runtime.hh"
 #include "BKE_object_types.hh"
 #include "BKE_scene.hh"
+#include "BLI_listbase.h"
+#include "BLI_string.h"
+#include "DNA_meshdata_types.h"
 #include "DNA_mesh_types.h"
 #include "DNA_object_types.h"
 #include "DNA_scene_types.h"
@@ -69,6 +74,32 @@ void modifier_object_mesh_set(ModifierObject *mo, int verts_num, const float3 *p
     BKE_id_free(nullptr, object_mesh(*mo));
   }
   object_mesh(*mo) = mesh;
+}
+
+/* Adds an attribute of a domain (AttrDomain) and type (AttrType) to the object's mesh, from one value per element: what
+ * modifiers read besides the arrays (creases, bevel weights, sharp edges and faces). */
+EXPORT(modifier_object_attribute_add)
+bool modifier_object_attribute_add(ModifierObject *mo, const char *name, int domain, int type, const void *data)
+{
+  bke::MutableAttributeAccessor attributes = object_mesh(*mo)->attributes_for_write();
+  const CPPType &cpp_type = bke::attribute_type_to_cpp_type(bke::AttrType(type));
+  const GSpan values(cpp_type, data, attributes.domain_size(bke::AttrDomain(domain)));
+  return attributes.add(name, bke::AttrDomain(domain), bke::AttrType(type), bke::AttributeInitVArray(GVArray::from_span(values)));
+}
+
+/* Adds a vertex group to the object's mesh: its name and the weight of each vertex in it. */
+EXPORT(modifier_object_vertex_group_add)
+void modifier_object_vertex_group_add(ModifierObject *mo, const char *name, int count, const int *verts, const float *weights)
+{
+  Mesh *mesh = object_mesh(*mo);
+  bDeformGroup *group = MEM_new<bDeformGroup>(__func__);
+  STRNCPY(group->name, name);
+  BLI_addtail(&mesh->vertex_group_names, group);
+  const int index = BLI_listbase_count(&mesh->vertex_group_names) - 1;
+  MutableSpan<MDeformVert> dverts = mesh->deform_verts_for_write();
+  for (int i = 0; i < count; i++) {
+    BKE_defvert_add_index_notest(&dverts[verts[i]], index, weights[i]);
+  }
 }
 
 EXPORT(modifier_object) Object *modifier_object(ModifierObject *mo) { return &mo->object; }

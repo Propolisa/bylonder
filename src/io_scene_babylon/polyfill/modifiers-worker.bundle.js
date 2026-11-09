@@ -355,6 +355,9 @@ var FLAGS = [
   [".hide_poly", "FACE"],
   ["sharp_face", "FACE"]
 ];
+var DOMAINS = { POINT: 0, EDGE: 1, FACE: 2, CORNER: 3 };
+var ATTRIBUTE_TYPES = { BOOLEAN: [0, Uint8Array, 1], INT: [3, Int32Array, 1], FLOAT: [5, Float32Array, 1], FLOAT2: [6, Float32Array, 2] };
+var MAIN_NAMES = /* @__PURE__ */ new Map([[".uv_seam", "uv_seam"]]);
 function moduleMesh(x, createMesh) {
   function withArrays(arrays, fn) {
     const pointers = arrays.map((a) => {
@@ -451,8 +454,19 @@ function moduleMesh(x, createMesh) {
   }
   function evaluateModifiers(mesh, modifiers) {
     withArrays(meshArrays(mesh), ([p, e, f, cv, ce, uv]) => x.modifier_object_mesh_set(modifierObject(), mesh.verts_num, p, mesh.edges_num, e, mesh.faces_num, f, cv, ce, uv));
+    addMeshData(mesh);
     const { errors } = setModifiers(x.modifier_object(modifierObject()), modifiers);
     return { mesh: extractedMesh(x.modifier_object_eval(modifierObject()) >>> 0), errors: errors() };
+  }
+  function addMeshData({ attributes = /* @__PURE__ */ new Map(), vertex_groups: groups = [] }) {
+    if (!x.modifier_object_attribute_add) return;
+    for (const [name, { domain, type, data }] of attributes) {
+      const [code, Type] = ATTRIBUTE_TYPES[type] ?? [];
+      if (Type && name !== "UVMap") withString(MAIN_NAMES.get(name) ?? name, (p) => withArrays([Type.from(data)], ([values]) => x.modifier_object_attribute_add(modifierObject(), p, DOMAINS[domain], code, values)));
+    }
+    for (const { name, verts, weights } of groups) {
+      withString(name, (p) => withArrays([Int32Array.from(verts), Float32Array.from(weights)], ([v, w]) => x.modifier_object_vertex_group_add(modifierObject(), p, verts.length, v, w)));
+    }
   }
   let object = 0;
   const modifierObject = () => object ||= x.modifier_object_new();
@@ -461,8 +475,14 @@ function moduleMesh(x, createMesh) {
 
 // src/modifiers/dna-write.js
 function writeField(view, address, layout, value, index) {
-  const { offset, size: size2, kind, signed, bit, bitset, negative, boolean, items } = layout;
+  const { offset, size: size2, kind, signed, bit, bitset, negative, boolean, items, length } = layout;
   const at = address + offset + (bitset ? 0 : index * size2);
+  if (typeof value === "string" && !items) {
+    const field = new Uint8Array(view.buffer, view.byteOffset + at, length);
+    field.fill(0);
+    field.set(new TextEncoder().encode(value).subarray(0, length - 1));
+    return;
+  }
   const type = { 1: signed ? "Int8" : "Uint8", 2: signed ? "Int16" : "Uint16", 4: signed ? "Int32" : "Uint32" }[size2];
   if (kind === "float") return view.setFloat32(at, value, true);
   if (bit !== void 0 && boolean) {
@@ -539,7 +559,8 @@ function createEvaluator(exports) {
       verts_num: ir.vert_positions.length / 3,
       edges_num: ir.edges.length / 2,
       faces_num: ir.face_offsets.length - 1,
-      attribute: (name) => name === "UVMap" ? ir.uvs : void 0
+      attribute: (name) => name === "UVMap" ? ir.uvs : void 0,
+      attributes: new Map(Object.entries(ir.attributes ?? {}))
     };
     const modifiers = stack.map(({ type, layouts, values }) => ({ type, write: (view, address) => writeValues(view, address, layouts, values) }));
     const { mesh: result, errors } = evaluateModifiers(mesh, modifiers);

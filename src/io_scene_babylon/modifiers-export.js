@@ -4,6 +4,9 @@
 // (runtime/blend-scene.js). The first modifier reads the object's base Mesh, written to scene.bin, each next one the
 // mesh the one before gives, and the last one's is drawn; run in the page by modifiers.wasm
 // (runtime/modifiers-evaluator.js) when a setting changes. Until then the page draws the applied geometry.
+import rna from '../makesrna/rna-modifiers.json' with { type: 'json' };
+import dna from '../makesrna/dna-modifiers.json' with { type: 'json' };
+import { fieldLayout } from '../modifiers/dna-write.js';
 import { idStruct, pointerOf } from '../python/bpy_rna.js';
 import { knob, key } from './controls-export.js';
 import { idKey } from './ir-export.js';
@@ -38,6 +41,33 @@ export function baseMesh(mesh, bin, { attributes = false } = {}) {
   };
 }
 
+// The attribute types Blender's modifiers read of a Mesh (bmesh/module-mesh.js ATTRIBUTE_TYPES).
+const MODIFIER_ATTRIBUTES = new Set(['BOOLEAN', 'INT', 'FLOAT', 'FLOAT2']);
+
+// The vertex groups of an object (pointer) as an IR mesh holds them: each one's name, its vertices and their weights.
+function vertexGroups(ob) {
+  const groups = [...ob.vertex_groups].map(({ name }) => ({ name, verts: [], weights: [] }));
+  if (groups.length) Array.from(ob.data.vertices).forEach((vertex, v) => {
+    for (const { group, weight } of vertex.groups) groups[group].verts.push(v), groups[group].weights.push(weight);
+  });
+  return groups;
+}
+
+// A live stack's base: the object's Mesh (`mesh`, its arrays) with what modifiers read of Main's Mesh besides the arrays,
+// its attributes (creases, bevel weights, sharp edges and faces, material indices; the editors' and the arrays' own
+// left out) and vertex groups.
+function stackMesh(mesh, bin, sync, pointer) {
+  const buffer = (array) => ({ buffer: bin.add(array) });
+  const main = sync.blender.mesh(pointer), same = main.vert_positions.length === mesh.vert_positions.length && main.edges.length === mesh.edges.length;
+  const groups = same ? vertexGroups(idStruct(pointer)) : [], grouped = new Set(groups.map((g) => g.name));
+  const attributes = same ? [...main.attributes].filter(([name, { type }]) => !name.startsWith('.') && name !== 'UVMap' && !grouped.has(name) && MODIFIER_ATTRIBUTES.has(type)) : [];
+  return {
+    ...baseMesh(mesh, bin),
+    attributes: Object.fromEntries(attributes.map(([name, { domain, type, data }]) => [name, { domain, type, data: buffer(ATTRIBUTE_ARRAYS[type].from(data)) }])),
+    ...(groups.length && { vertex_groups: groups.map(({ name, verts, weights }) => ({ name, verts: buffer(Int32Array.from(verts)), weights: buffer(Float32Array.from(weights)) })) }),
+  };
+}
+
 // Settings by path as inputs: a vector's components (`relative_offset_displace[0]`) as one array.
 function settingInputs(paths) {
   const inputs = {};
@@ -60,6 +90,17 @@ function ownFields(values, layouts) {
   });
 }
 
+// A modifier's names of other data its mesh holds (`vertex_group`, a UV map's), set: their values, written into the
+// ModifierData as they are, and their DNA layouts.
+function nameSettings(modifier) {
+  const type = rna.types[modifier.type], located = type && dna[type.struct]?.properties;
+  const named = [...modifier.bl_rna.properties].filter(({ type: kind, identifier }) => kind === 'STRING' && identifier !== 'name' && located?.[identifier]?.length && modifier[identifier]);
+  return {
+    values: Object.fromEntries(named.map(({ identifier }) => [identifier, modifier[identifier]])),
+    layouts: Object.fromEntries(named.map(({ identifier }) => [identifier, fieldLayout(located[identifier], type.properties[identifier])])),
+  };
+}
+
 // A stack's entities by key, each modifier reading the mesh the one before gives, the last one's drawn on `node`.
 function chain(ob, node, modifiers, base) {
   const entities = {};
@@ -77,16 +118,19 @@ function chain(ob, node, modifiers, base) {
 export function modifierEntities(world, live, properties, bin) {
   const entities = {};
   for (const [node, stack] of live) {
-    const ob = idStruct(world.mainSync.objectOf(node)), names = [...ob.modifiers].filter((m) => m.show_viewport).map((m) => m.name);
-    const modifiers = stack.modifiers.map(({ kind, type, layouts, values }, i) => ({
-      name: names[i], type: kind, implementation: 'modifiers', output: 'mesh',
-      inputs: { ...settingInputs(ownFields(values, layouts).map(([path, value]) => {
-        const float = typeof value === 'number' && layouts[/^\w+/.exec(path)[0]]?.kind === 'float', property = `objects${key(ob.name)}.modifiers${key(names[i])}.${path}`;
-        properties.push(knob(property, value, float ? { type: 'FLOAT' } : {}, { node: node.id, channel: channelKey(i, path) }));
-        return [path, { property }];
-      })), kernel: { type, layouts } },
-    }));
-    Object.assign(entities, chain(ob, node.id, modifiers, baseMesh(stack.mesh, bin)));
+    const ob = idStruct(world.mainSync.objectOf(node)), shown = [...ob.modifiers].filter((m) => m.show_viewport), names = shown.map((m) => m.name);
+    const modifiers = stack.modifiers.map(({ kind, type, layouts, values }, i) => {
+      const named = nameSettings(shown[i]);
+      return {
+        name: names[i], type: kind, implementation: 'modifiers', output: 'mesh',
+        inputs: { ...settingInputs(ownFields(values, layouts).map(([path, value]) => {
+          const float = typeof value === 'number' && layouts[/^\w+/.exec(path)[0]]?.kind === 'float', property = `objects${key(ob.name)}.modifiers${key(names[i])}.${path}`;
+          properties.push(knob(property, value, float ? { type: 'FLOAT' } : {}, { node: node.id, channel: channelKey(i, path) }));
+          return [path, { property }];
+        })), ...named.values, kernel: { type, layouts: { ...layouts, ...named.layouts } } },
+      };
+    });
+    Object.assign(entities, chain(ob, node.id, modifiers, stackMesh(stack.mesh, bin, world.mainSync, world.mainSync.objectOf(node))));
   }
   return entities;
 }

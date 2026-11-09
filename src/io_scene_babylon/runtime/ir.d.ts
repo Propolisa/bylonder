@@ -231,6 +231,12 @@ export const AttributesSchema: import("zod/mini").ZodMiniDefault<z.ZodMiniType<R
     type: string;
     data: any;
 }>, any>>>;
+/** A vertex group: its name, and its vertices with their weights. */
+export const VertexGroupSchema: import("zod/mini").ZodMiniObject<{
+    name: import("zod/mini").ZodMiniString<string>;
+    verts: import("zod/mini").ZodMiniCustom<Int32Array<ArrayBuffer>, Int32Array<ArrayBuffer>>;
+    weights: import("zod/mini").ZodMiniCustom<Float32Array<ArrayBuffer>, Float32Array<ArrayBuffer>>;
+}, import("zod/v4/core").$strip>;
 export const MeshSchema: import("zod/mini").ZodMiniObject<{
     vert_positions: import("zod/mini").ZodMiniCustom<Float32Array<ArrayBuffer>, Float32Array<ArrayBuffer>>;
     edges: import("zod/mini").ZodMiniCustom<Int32Array<ArrayBuffer>, Int32Array<ArrayBuffer>>;
@@ -247,6 +253,11 @@ export const MeshSchema: import("zod/mini").ZodMiniObject<{
         type: string;
         data: any;
     }>, any>>>;
+    vertex_groups: import("zod/mini").ZodMiniOptional<import("zod/mini").ZodMiniArray<import("zod/mini").ZodMiniObject<{
+        name: import("zod/mini").ZodMiniString<string>;
+        verts: import("zod/mini").ZodMiniCustom<Int32Array<ArrayBuffer>, Int32Array<ArrayBuffer>>;
+        weights: import("zod/mini").ZodMiniCustom<Float32Array<ArrayBuffer>, Float32Array<ArrayBuffer>>;
+    }, import("zod/v4/core").$strip>>>;
 }, import("zod/v4/core").$strip>;
 /** Points; a radius is the attribute `radius`. */
 export const PointsSchema: import("zod/mini").ZodMiniObject<{
@@ -300,6 +311,11 @@ export const GeometrySchema: import("zod/mini").ZodMiniObject<{
             type: string;
             data: any;
         }>, any>>>;
+        vertex_groups: import("zod/mini").ZodMiniOptional<import("zod/mini").ZodMiniArray<import("zod/mini").ZodMiniObject<{
+            name: import("zod/mini").ZodMiniString<string>;
+            verts: import("zod/mini").ZodMiniCustom<Int32Array<ArrayBuffer>, Int32Array<ArrayBuffer>>;
+            weights: import("zod/mini").ZodMiniCustom<Float32Array<ArrayBuffer>, Float32Array<ArrayBuffer>>;
+        }, import("zod/v4/core").$strip>>>;
     }, import("zod/v4/core").$strip>>;
     points: import("zod/mini").ZodMiniOptional<import("zod/mini").ZodMiniObject<{
         positions: import("zod/mini").ZodMiniCustom<Float32Array<ArrayBuffer>, Float32Array<ArrayBuffer>>;

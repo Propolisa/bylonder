@@ -107,9 +107,13 @@ static void blender_init()
   operators_register();
 }
 
+/* The module's initialization: Blender's main's, or a module's own with what its part of Blender needs
+ * (modifiers-only.cc). */
+__attribute__((weak)) void module_init() { blender_init(); }
+
 void types_ensure()
 {
-  static const bool types = (blender_init(), true);
+  static const bool types = (module_init(), true);
   (void)types;
 }
 
