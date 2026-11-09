@@ -116,10 +116,13 @@ What each kind of entity reads and gives:
 | `driver:<type>` | `driver` (type, expression, variables, a single property's target as `{ value }`), `curve`, `objects` (transform properties and static parts), `frame` when the expression reads it | `value` |
 | `modifier:<TYPE>` | `mesh` (the base mesh's buffers, or the previous modifier's output), its settings by name (a vector as an array), `kernel` (the module's type and layouts) | `mesh` |
 | `modifier:NODES` | `graph`, `geometry` (`{ mesh }` of the base mesh, or the previous modifier's output), the interface's inputs by identifier | `geometry` |
-| `animation:FCURVE` | its action's RNA path, `data_path` and `array_index` as names, `animation` (the Babylon AnimationGroup and target node that play it), `frame` | `value` |
+| `animation:FCURVE` | its action's RNA path, `data_path` and `array_index` as names, `animation` (the Babylon AnimationGroup and target node that play it, `native`) or `curve` (`extrapolation`, `auto_smoothing`, `cycles`, and `keyframes` as a buffer of 13 floats per key: co, handles, interpolation, easing, handle types, back, amplitude, period; `fcurve`), `frame` | `value` |
 
-Each frame, the scheduler runs again what reads `frame_current` and is not Babylon's own. An F-Curve's keys are not in
-the IR: Babylon's animation that plays it (`native`) holds them, as the export writes them. Consecutive modifiers of a
+Each frame, the scheduler runs again what reads `frame_current` and is not Babylon's own. An F-Curve's keys are not
+copied into the IR: Babylon's animation that plays it exactly (`native`) holds them, or, for an object's transform
+Babylon cannot play exactly (an Euler rotation, an easing, another extrapolation), they are a buffer of `scene.bin` and
+the clean-room F-Curve unit runs it (`fcurve`), writing its property after Babylon's animation, from which blend-scene.js
+places the node's location, rotation or scale. The export option Bake Animation samples those per frame instead. Consecutive modifiers of a
 stack on the same shipped implementation run as one call (its `runChain`), so what one writes (sharp edges, creases,
 face strengths) reaches the next; a stack is split only where a unit takes over a modifier.
 

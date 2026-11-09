@@ -8,6 +8,7 @@ import { exportRuntimes } from '../runtimes/runtimes.js';
 import { imageFile } from '../imbuf/image-textures.js';
 import { exportNodeMaterial } from './node-material-export.js';
 import { exactAnimation } from './exact-keys.js';
+import { liveTransform } from './live-curves.js';
 import { channelKey } from './modifiers-export.js';
 import { AREA_LIGHT, rigAreaLights, rigId, rigTransform } from './area-lights.js';
 
@@ -151,14 +152,20 @@ function animatedChannels(world, content, live) {
 const TRANSFORM_PATHS = ['position', 'scaling'].flatMap((key) => ['x', 'y', 'z'].map((c) => `${key}.${c}`));
 const transformKeys = (world, nodes) => new Map(nodes.map((node) => [node, Object.fromEntries(TRANSFORM_PATHS.map((path) => [path, world.animation.track(world.animation.ref('object:' + nodeId(node), path))?.keys]))]));
 // The animations of the transforms that change over the range: a position or scale whose changing components are their
-// F-curves exactly (exact-keys.js) as one float animation each, else every transform sampled at each frame.
-function transformAnimations(node, keys, frames, { frameStart, fps }) {
+// F-curves exactly (exact-keys.js) as one float animation each; else, with `runs` (live-curves.js), F-Curves the page
+// runs, added to `curves`; else every transform sampled at each frame.
+function transformAnimations(node, keys, frames, { frameStart, fps }, runs, curves) {
   const changes = (key) => frames.some((t) => !t[key].equalsWithEpsilon(frames[0][key], 1e-6));
   return Object.keys(frames[0]).filter(changes).flatMap((key) => {
     if (key === 'position' || key === 'scaling') {
       const moving = ['x', 'y', 'z'].filter((c) => frames.some((t) => Math.abs(t[key][c] - frames[0][key][c]) > 1e-6));
       const exact = moving.map((c) => exactAnimation(`${node.name} ${key}.${c}`, `${key}.${c}`, keys?.[`${key}.${c}`], frames.map((t) => t[key][c]), { frameStart, fps }));
       if (exact.every(Boolean)) return exact;
+    }
+    const run = runs?.(key, frames, frameStart);
+    if (run) {
+      curves.push(...run);
+      return [];
     }
     const animation = new Animation(node.name + ' ' + key, key, fps, ANIMATION_TYPES[frames[0][key].getClassName()], Animation.ANIMATIONLOOPMODE_CYCLE);
     animation.setKeys(frames.map((t, i) => ({ frame: frameStart + i, value: t[key] })));
@@ -190,8 +197,8 @@ function animationTarget(channel, content, live) {
 
 // Each animated channel with a place in the file (animationTarget), sampled at every frame of the scene range, and the
 // runtimes' animations (`mapped`, a skeleton's bones). Channels without one (stores, modifier settings unless they are
-// live, depthOfField) stay out.
-function bakeAnimations(world, samples, content, live, mapped, transforms, keys) {
+// live, depthOfField) stay out. With `curves`, an object's transform F-Curves the page runs go there instead.
+function bakeAnimations(world, samples, content, live, mapped, transforms, keys, curves) {
   const { fps, frameStart, frameEnd } = world.animation.time.state;
   const tracks = new Map();
   for (const { channel, start, values } of samples) {
@@ -206,7 +213,8 @@ function bakeAnimations(world, samples, content, live, mapped, transforms, keys)
   }
   const targetedAnimations = mapped.map(({ animation, target }) => ({ animation: animation.serialize(), targetId: target.id }));
   for (const [node, frames] of transforms ?? []) {
-    for (const animation of transformAnimations(node, keys.get(node), frames, { frameStart, fps })) targetedAnimations.push({ animation: animation.serialize(), targetId: node instanceof RectAreaLight ? rigId(node.id) : node.id });
+    const runs = curves && liveTransform(world.mainSync, node);
+    for (const animation of transformAnimations(node, keys.get(node), frames, { frameStart, fps }, runs, curves)) targetedAnimations.push({ animation: animation.serialize(), targetId: node instanceof RectAreaLight ? rigId(node.id) : node.id });
   }
   for (const { owner, path, value, components, step } of tracks.values()) {
     if (typeof value !== 'number' && !ANIMATION_TYPES[value?.getClassName?.()]) continue;
@@ -234,8 +242,19 @@ function bakeAnimations(world, samples, content, live, mapped, transforms, keys)
     animation.setKeys(frames);
     targetedAnimations.push({ animation: animation.serialize(), targetId: owner.id });
   }
+  // Babylon's animation keeps the page's time where F-Curves the page runs are all that moves.
+  if (!targetedAnimations.length && curves?.length) targetedAnimations.push({ animation: clock(frameStart, frameEnd, fps).serialize(), targetId: curves[0].node });
   if (!targetedAnimations.length) return [];
   return [{ name: world.animation.action.name || 'Action', from: frameStart, to: frameEnd, speedRatio: 1, loopAnimation: !!world.animation.time.state.loop, isAdditive: false, weight: -1, playOrder: 0, targetedAnimations }];
+}
+
+// The scene's frame, which the page's F-Curves read through the animation group playing it: a property of its node the
+// page adds (js-export.js).
+export const CLOCK = 'bylonderFrame';
+function clock(frameStart, frameEnd, fps) {
+  const animation = new Animation('Frame', CLOCK, fps, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CYCLE);
+  animation.setKeys([{ frame: frameStart, value: frameStart }, { frame: frameEnd, value: frameEnd }]);
+  return animation;
 }
 
 // Babylon's serializer writes a skinned geometry's first four bone influences and its loader reads the extra four only
@@ -333,11 +352,12 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
     uniqueIds(content.nodes),
   ];
   let pending, animationGroups, activeCameraID, shadowGenerators;
+  const curves = bake || !world.mainSync ? null : [];
   try {
     // The serializer reads the scene synchronously; only texture readbacks finish later.
     pending = SceneSerializer.SerializeAsync(scene);
     shadowGenerators = shadowsOf(world, content);
-    animationGroups = bakeAnimations(world, sampled, content, liveIds, mapped, evaluated.transforms, keys);
+    animationGroups = bakeAnimations(world, sampled, content, liveIds, mapped, evaluated.transforms, keys, curves);
     activeCameraID = camera?.id;
   } finally {
     restores.forEach((restore) => restore());
@@ -371,5 +391,7 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
   Object.assign(json, { animationGroups, activeCameraID, renderingPipelines: effects.renderingPipelines, imageProcessingConfiguration: scene.imageProcessingConfiguration.serialize(), producer: { name: 'Bylonder', file: 'scene.babylon' } });
   json.postProcesses.push(...effects.postProcesses);
   await environment(json, scene);
+  // The F-Curves the page runs (live-curves.js), for the package's IR; not part of the file.
+  Object.defineProperty(json, 'liveCurves', { value: curves ?? [] });
   return json;
 }

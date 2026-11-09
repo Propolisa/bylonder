@@ -46,8 +46,11 @@ Materials move onto the IR graph alongside step 3 (brief below).
 
 Status: steps 1 and 2 are built. Every package ships `scene.ir.json`; `scene.js` holds no controls or table. The
 scheduler (`runtime/scheduler.js`) runs drivers on the clean-room units, a Live Modifiers stack as one entity per
-modifier run in one `modifiers.wasm` call, Geometry Nodes modifiers on the interim `blender` implementation, and leaves
-F-Curves to Babylon's AnimationGroup (`native`). Known limit: where a unit takes over a modifier mid-stack, the mesh
+modifier run in one `modifiers.wasm` call, Geometry Nodes modifiers on the interim `blender` implementation, leaves
+F-Curves Babylon plays exactly to its AnimationGroup (`native`), and runs an object's transform F-Curves it cannot
+(rotations, easings, other extrapolations, Cycles it cannot repeat) on the clean-room F-Curve unit (`fcurve`), their
+keys in `scene.bin`, unless the export's Bake Animation option samples them. F-modifiers but Cycles, NLA, drivers on
+transforms and constraints still leave a transform sampled. Known limit: where a unit takes over a modifier mid-stack, the mesh
 passed across carries positions, topology and UVs only (the module's mesh input takes no more).
 
 ## Relation gaps

@@ -142,33 +142,39 @@ function idGraphs(ids, properties, graphs) {
   }
 }
 
-// Each F-Curve of the carried IDs' actions, in the slot each ID uses, by name: Babylon's animation of the node it lands on
-// plays it (`native`), its keys being that animation's, else it stays baked.
-function animationEntities(ids, properties, time, animationGroups) {
+// The F-Curves of an ID's action, in the slot it uses.
+export function actionFCurves(animation) {
+  const action = animation?.action;
+  if (!action) return [];
+  return [...action.layers].flatMap((layer) => [...layer.strips].flatMap((strip) => [...strip.channelbags]))
+    .filter((bag) => !animation.action_slot || bag.slot?.handle === animation.action_slot.handle).flatMap((bag) => [...bag.fcurves]);
+}
+
+// Each F-Curve of the carried IDs' actions, by name: one of `curves` (live-curves.js) runs on the clean-room unit
+// (`fcurve`), its keys in scene.bin; another Babylon's animation of the node it lands on plays (`native`), its keys
+// being that animation's; else it stays baked.
+function animationEntities(ids, properties, time, animationGroups, curves, bin) {
   const data = blendData(), entities = {};
   const groupOf = (node) => animationGroups.find((group) => group.targetedAnimations?.some((t) => t.targetId === node))?.name;
+  const live = new Map(curves.map((c) => [`${idKey(c.id)}/animation/${c.fc.data_path}[${c.fc.array_index}]`, c]));
   for (const [k, id] of Object.entries(ids)) {
     const collection = COLLECTION_OF.get(k.split(':')[0]), animation = collection && safe(() => data[collection].get(id.name)?.animation_data);
-    const action = animation?.action;
-    if (!action) continue;
-    for (const bag of [...action.layers].flatMap((layer) => [...layer.strips].flatMap((strip) => [...strip.channelbags]))) {
-      if (animation.action_slot && bag.slot?.handle !== animation.action_slot.handle) continue;
-      for (const fc of bag.fcurves) {
-        const target = `${id.path}${fc.data_path.startsWith('[') ? '' : '.'}${fc.data_path}[${fc.array_index}]`, group = id.node && groupOf(id.node);
-        const native = group !== undefined && !!properties[target];
-        entities[`${k}/animation/${fc.data_path}[${fc.array_index}]`] = { type: 'animation:FCURVE', id: k,
-          inputs: { action: `actions${key(action.name)}`, data_path: fc.data_path, array_index: fc.array_index, ...(native && { animation: { group, target: id.node } }),
-            ...(time && { frame: { property: time } }) },
-          outputs: { value: properties[target] ? { property: target } : null }, ...(native && { implementation: 'native' }) };
-      }
+    for (const fc of actionFCurves(animation)) {
+      const name = `${k}/animation/${fc.data_path}[${fc.array_index}]`, target = `${id.path}${fc.data_path.startsWith('[') ? '' : '.'}${fc.data_path}[${fc.array_index}]`;
+      const group = id.node && groupOf(id.node), run = properties[target] && time && live.get(name), native = !run && group !== undefined && !!properties[target];
+      entities[name] = { type: 'animation:FCURVE', id: k,
+        inputs: { action: `actions${key(animation.action.name)}`, data_path: fc.data_path, array_index: fc.array_index, ...(native && { animation: { group, target: id.node } }),
+          ...(run && { curve: { ...run.settings, keyframes: { buffer: bin.add(run.keys) } } }), ...(time && { frame: { property: time } }) },
+        outputs: { value: properties[target] ? { property: target } : null }, ...((run || native) && { implementation: run ? 'fcurve' : 'native' }) };
     }
   }
   return entities;
 }
 
 // The package's IR (docs/ir.md): `controls` (controls-export.js) as its properties, with what the `live` stacks and,
-// with `blender`, the Geometry Nodes modifiers add; the carried IDs, their node trees, and the computed entities.
-export function exportIR(world, { controls, live, bin, blender = false, animationGroups = [] }) {
+// with `blender`, the Geometry Nodes modifiers add; the carried IDs, their node trees, and the computed entities, with the
+// F-Curves the page runs (`curves`, live-curves.js).
+export function exportIR(world, { controls, live, bin, blender = false, animationGroups = [], curves = [] }) {
   const sync = world.mainSync, objects = world.objects.map((node) => [node, sync?.objectOf(node)]).filter(([, pointer]) => pointer);
   const { ids, references } = sync ? exportIDs(rootIDs(objects.map(([, pointer]) => pointer))) : { ids: {}, references: [] };
   for (const [node, pointer] of objects) if (ids[idKey(idStruct(pointer))]) ids[idKey(idStruct(pointer))].node = node.id;
@@ -180,7 +186,7 @@ export function exportIR(world, { controls, live, bin, blender = false, animatio
   const properties = Object.fromEntries(controls.map(({ path, bind, ...property }) => [path, { id: pathID(path), ...property, ...(bind && { bind }) }]));
   if (sync) {
     idGraphs(ids, properties, graphs);
-    Object.assign(entities, driverEntities(properties), animationEntities(ids, properties, Object.keys(properties).find((p) => p.endsWith('.frame_current')), animationGroups));
+    Object.assign(entities, driverEntities(properties), animationEntities(ids, properties, Object.keys(properties).find((p) => p.endsWith('.frame_current')), animationGroups, curves, bin));
   }
   // What the page computes from is offered to authors.
   for (const entity of Object.values(entities)) if (entity.implementation) for (const [ref] of referencesIn(entity.inputs)) if ('property' in ref) properties[ref.property].suggested = true;

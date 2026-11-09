@@ -6,7 +6,7 @@
 // (docs/ir.md), its properties and computed entities among it, is scene.ir.json beside it.
 import { AbstractEngine, Matrix } from '@babylonjs/core';
 import { objectMatrix } from '../runtime/object-transform.js';
-import { serializeScene } from './babylon-export.js';
+import { CLOCK, serializeScene } from './babylon-export.js';
 import { exportRuntimes } from '../runtimes/runtimes.js';
 import { exportControls, controlTypes } from './controls-export.js';
 import { exportNodeMaterial, materialKernels } from './node-material-export.js';
@@ -201,7 +201,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, sour
   // unless one of its effects is on.
   if (display) data.renderingPipelines = data.renderingPipelines.filter((p) => !(p._name?.startsWith('__display:') && !PIPELINE_EFFECTS.some((e) => p[e])));
   const controls = [...exportControls(world, data), ...(composited?.knobs ?? [])];
-  const ir = exportIR(world, { controls, live, bin, blender: sourceBlend, animationGroups: data.animationGroups }), irJson = json(ir);
+  const ir = exportIR(world, { controls, live, bin, blender: sourceBlend, animationGroups: data.animationGroups, curves: data.liveCurves }), irJson = json(ir);
   const kernels = await irMaterials(data.materials, graphs, ir, parity), code = sharedCode(data.materials);
   parentInstances(objects);
   const parented = [...data.transformNodes, ...data.meshes, ...data.lights, ...data.cameras].filter((e) => e.parentId !== undefined);
@@ -346,7 +346,9 @@ ${parse('REFLECTION_PROBES', data.reflectionProbes, "ReflectionProbe.Parse(entry
     else BABYLON[entry.customType]?.Parse(entry, scene, ROOT);
   }
   for (const entry of POST_PROCESSES) PostProcess.Parse(entry, scene, ROOT);
-  for (const entry of ANIMATION_GROUPS) AnimationGroup.Parse(entry, scene).play(entry.loopAnimation);${display ? `
+${data.animationGroups.some((g) => g.targetedAnimations.some((t) => t.animation.property === CLOCK)) ? `  // The frame Babylon's animation keeps where the page's F-Curves are all that moves.
+  for (const entry of ANIMATION_GROUPS) for (const { animation, targetId } of entry.targetedAnimations) if (animation.property === '${CLOCK}') scene.getNodeById(targetId).${CLOCK} = entry.from;
+` : ''}  for (const entry of ANIMATION_GROUPS) AnimationGroup.Parse(entry, scene).play(entry.loopAnimation);${display ? `
   // Displayed as Blender's rendered view: scene linear, ${composited ? 'composited, ' : ''}then the view transform.
   const camera = scene.activeCamera;
   if (camera) {

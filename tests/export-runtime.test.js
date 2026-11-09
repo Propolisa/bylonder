@@ -40,7 +40,7 @@ for (const name of readdirSync(join(runtime, 'drivers')).filter((n) => n.endsWit
 // (their .d.ts files are checked below).
 const blocks = Object.values(BLOCK_FILES).flatMap((name) => [name, name.replace(/\.js$/, '.d.ts')]);
 const files = readdirSync(runtime, { recursive: true }).map((name) => String(name).split(sep).join('/')).filter((name) => name !== 'tsconfig.json' && name !== 'drivers');
-assert.deepEqual(files.sort(), [...RUNTIME_FILES, ...blocks, ...MATERIAL_FILES, ...Object.values(EVALUATOR_FILES).flatMap((e) => e.runtime)].sort(), 'every file of runtime/ ships');
+assert.deepEqual(files.sort(), [...new Set([...RUNTIME_FILES, ...blocks, ...MATERIAL_FILES, ...Object.values(EVALUATOR_FILES).flatMap((e) => e.runtime)])].sort(), 'every file of runtime/ ships');
 
 // The overrides every package carries (src/overrides/): licensed as the runtime, importing only Babylon.
 for (const name of OVERRIDE_FILES.filter((n) => n.endsWith('.js'))) {

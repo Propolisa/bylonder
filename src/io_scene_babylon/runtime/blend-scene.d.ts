@@ -6,6 +6,18 @@
  */
 export function babylonRotation(mode: string, values: number[]): Quaternion;
 /**
+ * Where an object's location, rotation and scale place its node, as Blender's matrix_world of an object without
+ * constraints: the parent's, its parent inverse, then its own; for a light, its direction.
+ * @param {Transform} transform
+ * @param {(name: string, count: number) => number[]} vector the object's value of a property (`location`, 3)
+ */
+export function placement({ mode, parent_inverse, offset, direction }: Transform, vector: (name: string, count: number) => number[]): {
+    position: Vector3;
+    rotation: Quaternion;
+    scaling: Vector3;
+    direction: Vector3 | null;
+};
+/**
  * A scene exported from Bylonder, loaded: `url` is its scene.js.
  * @param {import('@babylonjs/core').AbstractEngine} engine
  * @param {string | URL} url
@@ -181,4 +193,5 @@ export type Change = {
     value: Value;
 };
 import { Quaternion } from '@babylonjs/core';
+import { Vector3 } from '@babylonjs/core';
 import { Observable } from '@babylonjs/core';

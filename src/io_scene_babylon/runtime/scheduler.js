@@ -25,6 +25,7 @@ import { drawGeometry } from './mesh.js';
 /** The implementations a package ships, by name, each loaded on first use. @type {Record<string, (page: Page) => Promise<Evaluator>>} */
 export const EVALUATORS = {
   driver: () => import('./driver-evaluator.js'),
+  fcurve: () => import('./fcurve-evaluator.js'),
   modifiers: (page) => import('./modifiers-evaluator.js').then((module) => module.load(page)),
   blender: (page) => import('./blender-evaluator.js').then((module) => module.load(page)),
 };

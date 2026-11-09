@@ -11,7 +11,8 @@
     ],
     "action": [
       { "implementation": "Babylon AnimationGroup, Hermite keys where they are the F-curve", "license": "Apache-2.0", "fidelity": "exact" },
-      { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
+      { "implementation": "clean-room F-Curve unit (runtime/fcurve-evaluator.js, drivers/fcurve.js): an object transform's F-Curve Babylon cannot play exactly (rotations, easings, extrapolation, Cycles), its keys in scene.bin; modifiers but Cycles stay baked", "license": "MIT OR Apache-2.0", "fidelity": "exact" },
+      { "implementation": "sampled per frame from Main (Bake Animation, or what the unit does not reproduce)", "license": "data", "fidelity": "baked" }
     ],
     "nla": [
       { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }

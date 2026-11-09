@@ -36,7 +36,7 @@ function rotationOffset(node, mode, values) {
 const IDENTITY = Matrix.Identity().asArray();
 // The binding of the object's location, rotation and scale: the node they place and how (blend-scene.js Transform), or
 // none for a rotation mode the page does not compose (Axis Angle).
-function transformBinding(node, ob, rotation, parentInverse) {
+export function transformBinding(node, ob, rotation, parentInverse) {
   const mode = ob.rotation_mode;
   if (mode === 'AXIS_ANGLE') return undefined;
   const inverse = babylonMatrix(parentInverse).asArray();

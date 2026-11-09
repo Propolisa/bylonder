@@ -94,6 +94,25 @@ export function babylonRotation(mode, values) {
 }
 
 /**
+ * Where an object's location, rotation and scale place its node, as Blender's matrix_world of an object without
+ * constraints: the parent's, its parent inverse, then its own; for a light, its direction.
+ * @param {Transform} transform
+ * @param {(name: string, count: number) => number[]} vector the object's value of a property (`location`, 3)
+ */
+export function placement({ mode, parent_inverse, offset, direction }, vector) {
+  const [x, y, z] = vector('location', 3), [sx, sy, sz] = vector('scale', 3);
+  const position = new Vector3(x, z, y), scaling = new Vector3(sx, sz, sy);
+  const rotation = babylonRotation(mode, vector(mode === 'QUATERNION' ? 'rotation_quaternion' : 'rotation_euler', mode === 'QUATERNION' ? 4 : 3));
+  if (offset || parent_inverse) {
+    let matrix = Matrix.Compose(scaling, rotation, position);
+    if (offset) matrix = Quaternion.FromArray(offset).toRotationMatrix(new Matrix()).multiply(matrix);
+    if (parent_inverse) matrix = matrix.multiply(Matrix.FromArray(parent_inverse));
+    matrix.decompose(scaling, rotation, position);
+  }
+  return { position, rotation, scaling, direction: direction ? Vector3.FromArray(direction).applyRotationQuaternion(rotation) : null };
+}
+
+/**
  * Sets the dotted `path` of `owner` to `value`.
  * @param {any} owner
  * @param {string} path
@@ -244,31 +263,20 @@ export class BlendScene {
   }
 
   /**
-   * Places a node by its object's location, rotation and scale (`base`: the object's path), as Blender's matrix_world
-   * of an object without constraints: the parent's, its parent inverse, then its own.
+   * Places a node by the part of its object's transform a control at `path` sets (location, rotation or scale): the
+   * rest of the node stays as it is, which Babylon's animation may be playing.
    * @param {any} node
-   * @param {string} base
+   * @param {string} path
    * @param {Transform} transform
    */
-  #place(node, base, { mode, parent_inverse, offset, direction }) {
-    /** @param {string} name @param {number} count */
-    const vector = (name, count) => Array.from({ length: count }, (_, i) => /** @type {number} */ (this.#values.get(`${base}.${name}[${i}]`) ?? 1));
-    const [x, y, z] = vector('location', 3), [sx, sy, sz] = vector('scale', 3);
-    const position = new Vector3(x, z, y), scaling = new Vector3(sx, sz, sy);
-    const rotation = babylonRotation(mode, vector(mode === 'QUATERNION' ? 'rotation_quaternion' : 'rotation_euler', mode === 'QUATERNION' ? 4 : 3));
-    if (offset || parent_inverse) {
-      let matrix = Matrix.Compose(scaling, rotation, position);
-      if (offset) matrix = Quaternion.FromArray(offset).toRotationMatrix(new Matrix()).multiply(matrix);
-      if (parent_inverse) matrix = matrix.multiply(Matrix.FromArray(parent_inverse));
-      matrix.decompose(scaling, rotation, position);
-    }
-    if (node.position) node.position.copyFrom(position);
-    if (direction !== undefined) {
-      if (direction) node.direction = Vector3.FromArray(direction).applyRotationQuaternion(rotation);
-      return;
-    }
-    node.rotationQuaternion = rotation;
-    node.scaling?.copyFrom(scaling);
+  #place(node, path, transform) {
+    const base = path.slice(0, path.lastIndexOf('.')), part = path.slice(base.length + 1).replace(/\[\d+\]$/, '');
+    const placed = placement(transform, (name, count) => Array.from({ length: count }, (_, i) => /** @type {number} */ (this.#values.get(`${base}.${name}[${i}]`) ?? 1)));
+    if (part === 'location') node.position?.copyFrom(placed.position);
+    else if (transform.direction !== undefined) {
+      if (part !== 'scale' && placed.direction) node.direction = placed.direction;
+    } else if (part === 'scale') node.scaling?.copyFrom(placed.scaling);
+    else node.rotationQuaternion = placed.rotation;
   }
 
   /**
@@ -309,7 +317,7 @@ export class BlendScene {
     const node = /** @type {any} */ (bind.node === undefined ? this.scene : this.scene.getNodeById(bind.node));
     if (!node) return;
     if (bind.transform) {
-      this.#place(node, path.slice(0, path.lastIndexOf('.')), bind.transform);
+      this.#place(node, path, bind.transform);
     } else if (bind.hide) {
       const base = path.slice(0, path.lastIndexOf('.'));
       const hidden = ['viewport', 'render'].some((kind) => this.#values.get(`${base}.hide_${kind}`) === true);

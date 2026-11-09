@@ -54,7 +54,7 @@ function matchesBlender(fc, input) {
 }
 
 // A driver's F-Curve as the units take it (fcurve.js FCurveInput).
-function curveInput(fc) {
+export function curveInput(fc) {
   const pair = (p) => [p[0], p[1]];
   return {
     keyframes: [...fc.keyframe_points].map((k) => ({ co: pair(k.co), handle_left: pair(k.handle_left), handle_right: pair(k.handle_right), interpolation: k.interpolation,

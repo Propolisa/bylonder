@@ -28,7 +28,7 @@ const SCENARIOS = {
     sync.view();
     const files = await exportModule(world), { on } = irOf(files);
     assert.ok(on('driver').length >= 8 && on('driver').every(([, e]) => e.type.startsWith('driver:')), 'each driver on the clean-room driver units');
-    assert.ok(on('native').some(([, e]) => e.inputs.animation?.target === 'Flywheel'),'the flywheel\'s F-Curve on Babylon\'s AnimationGroup');
+    assert.ok(on('fcurve').some(([key, e]) => key === 'OB:Flywheel/animation/rotation_euler[1]' && 'buffer' in e.inputs.curve.keyframes), 'the flywheel\'s rotation on the clean-room F-Curve unit, its keys in scene.bin');
     const written = writePackage(files), blend = await (await import(written.url)).load(new NullEngine());
     const crosshead = blend.scene.getNodeById('Crosshead'), before = crosshead.position.clone();
     blend.set('objects["Flywheel"].rotation_euler[1]', 1.3);

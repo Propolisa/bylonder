@@ -7,6 +7,7 @@ const NOTICE = { 'LICENSE.md': 'io_scene_babylon/blender-code.LICENSE.md', COPYI
 // of Blender's code it loads, its files from src/ (GPL-3.0-or-later).
 export const EVALUATOR_FILES = {
   driver: { runtime: [...declared('driver-evaluator'), ...['driver', 'expression', 'fcurve', 'float32', 'rotation-reading'].flatMap((n) => declared(`drivers/${n}`))] },
+  fcurve: { runtime: [...declared('fcurve-evaluator'), ...declared('drivers/fcurve')] },
   modifiers: { runtime: declared('modifiers-evaluator'), folder: 'bylonder-modifiers',
     files: { 'modifiers-worker.js': 'io_scene_babylon/polyfill/modifiers-worker.bundle.js', 'modifiers.wasm': 'modifiers/modifiers.wasm' } },
   blender: { runtime: declared('blender-evaluator'), folder: 'bylonder-blender',
