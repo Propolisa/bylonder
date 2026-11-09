@@ -21,7 +21,8 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
+      # Packages download binaries from GitHub releases (ffmpeg), which answer 5xx at times.
+      - run: for i in 1 2 3; do npm ci && exit 0; sleep 30; done; exit 1
       # Babylon's GLSL to WGSL compilers for the WebGPU backend (scripts/webgpu-compilers.mjs), pinned by hash.
       - uses: actions/cache@v4
         with:
@@ -46,7 +47,8 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
+      # Packages download binaries from GitHub releases (ffmpeg), which answer 5xx at times.
+      - run: for i in 1 2 3; do npm ci && exit 0; sleep 30; done; exit 1
       - uses: actions/cache@v4
         with:
           path: .tools/playwright
@@ -69,7 +71,8 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
+      # Packages download binaries from GitHub releases (ffmpeg), which answer 5xx at times.
+      - run: for i in 1 2 3; do npm ci && exit 0; sleep 30; done; exit 1
       - uses: actions/download-artifact@v4
         with:
           name: dist
