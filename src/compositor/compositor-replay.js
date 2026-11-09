@@ -10,7 +10,7 @@ import { compute } from './compositor-shaders.js';
 import { blenderMain, blenderModule } from '../bmesh/bmesh-wasm.js';
 import { withScratchNode } from '../nodes/blender/gpu-graph.js';
 import { glsl as libraries } from '../nodes/blender/gpu-library.js';
-import { glslShader } from '../nodes/blender/glsl.js';
+import { engineGLSL, glslShader } from '../nodes/blender/glsl.js';
 import { implicitConversions } from '../nodes/blender/glsl-conversions.js';
 
 const { exports: x, withString, withArrays, cString } = blenderModule;
@@ -289,7 +289,7 @@ export class BlenderReplayTask extends FrameGraphTask {
   #effect(code, step) {
     let wrapper = this.#effects.get(code);
     if (!wrapper) {
-      wrapper = new EffectWrapper({ name: this.name, engine: this._frameGraph.engine, fragmentShader: code, useAsPostProcess: true,
+      wrapper = new EffectWrapper({ name: this.name, engine: this._frameGraph.engine, fragmentShader: engineGLSL(this._frameGraph.engine, code), useAsPostProcess: true,
         uniforms: ['bl_domain', ...step.pushConstants.map((c) => c.name)], samplers: [...step.samplers.map((s) => s.name), ...step.before.map((b) => b.name)] });
       this.#effects.set(code, wrapper);
     }

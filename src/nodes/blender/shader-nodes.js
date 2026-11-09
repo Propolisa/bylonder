@@ -17,6 +17,7 @@ import {
 import { attributeKind, requestedAttributes, TANGENT_KIND } from './attributes.js';
 import { BlenderRepeatWriteBlock, repeatZoneBlocks } from './repeat-zone.js';
 import { functions } from './gpu-library.js';
+import { engineGLSL } from './glsl.js';
 import { BABYLON_TYPES, convert, converts, glslType, glslValue, kindOf, LUMINANCE, socketType } from './sockets.js';
 import { availability, declaration, defaults } from './declarations.js';
 import { compileSteps, glslIdentifier, kindOfSocket, menuValue, muteLinks, setUniforms, socketOf, stack } from './node-code.js';
@@ -49,6 +50,14 @@ export class BlenderNodeMaterial extends NodeMaterial {
   }
   _initializeBlock(node, state, ...rest) { if (BlenderNodeMaterial.#first(this.#initialized, state, node)) super._initializeBlock(node, state, ...rest); }
   _resetDualBlocks(node, id) { if (BlenderNodeMaterial.#first(this.#reset, this._fragmentCompilationState, node)) super._resetDualBlocks(node, id); }
+  // On WebGPU, Blender's functions sample the images they are given in copies of their own (glsl.js specializeSamplers).
+  constructor(...args) {
+    super(...args);
+    this.onBuildObservable.add(() => {
+      const fragment = this._fragmentCompilationState;
+      fragment._builtCompilationString = engineGLSL(this.getScene().getEngine(), fragment._builtCompilationString);
+    });
+  }
   // EEVEE's Dithered render method (the default): a surface that lets light through is hashed in the opaque pass,
   // depth-tested and depth-writing, not sorted and blended (ShaderNodeOutputMaterial sets blenderDithered).
   get #hashed() { return !!this.blenderDithered && this.transparencyMode == null; }

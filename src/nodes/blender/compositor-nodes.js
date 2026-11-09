@@ -6,6 +6,7 @@ import { Constants, EffectWrapper, FrameGraphPostProcessTask, Matrix, NodeRender
 import { availability, declaration, declarations, defaults } from './declarations.js';
 import { glslIdentifier, kindOfSocket, muteLinks } from './node-code.js';
 import { convert, glslType, glslValue, socketType } from './sockets.js';
+import { engineGLSL } from './glsl.js';
 import { graphCode, nodeGraph, nodeTypeHasGpu } from './gpu-graph.js';
 import { rampTexture } from './shader-nodes.js';
 import { BlenderReplayTask, nodeRecording, nodeTypeHasOperation } from '../../compositor/compositor-replay.js';
@@ -135,7 +136,7 @@ export class BlenderCompositorBlock extends NodeRenderGraphBlock {
 
   _effect() {
     const { code, uniforms, samplers, bands } = this._fragment();
-    const effect = new BlenderEffect({ name: this.name, engine: this._engine, fragmentShader: code, useAsPostProcess: true, uniforms: uniforms.map(([n]) => n),
+    const effect = new BlenderEffect({ name: this.name, engine: this._engine, fragmentShader: engineGLSL(this._engine, code), useAsPostProcess: true, uniforms: uniforms.map(([n]) => n),
       samplers: [...samplers.map(([n]) => n), ...bands.map(([n]) => n)] });
     return Object.assign(effect, { code, uniformList: uniforms, samplerList: samplers, bandList: bands, block: this });
   }
