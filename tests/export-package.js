@@ -11,7 +11,7 @@ import { bundlePackage } from '../src/io_scene_babylon/bundle.js';
 const CORE = import.meta.resolve('@babylonjs/core').replace(/index\.js$/, '');
 const src = (path) => readFileSync(new URL(`../src/${path}`, import.meta.url));
 
-// The files the app serves from public/ (scripts/webgpu-compilers.mjs) that a package ships, empty where the app has
+// The files the app serves from public/ (scripts/babylon-assets.mjs) that a package ships, empty where the app has
 // not fetched them.
 const appFile = (path) => { const at = new URL(`../public/${path}`, import.meta.url); return existsSync(at) ? readFileSync(at) : new Uint8Array(); };
 const withAppFiles = (files, shipped) => ({ ...shipped, ...Object.fromEntries(appFiles(files).map(([path, from]) => [path, appFile(from)])) });

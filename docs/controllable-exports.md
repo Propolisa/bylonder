@@ -310,7 +310,8 @@ File > Export's Bundle setting chooses how a page loads the package:
   (GPL) stays in its own files, each an entry of the same bundle with its leading comments and its folder's notices:
   only `scene.js` imports it, and no chunk holds any of it; a unit the page replaces is absent from the package, so
   from the bundle too. A package made for WebGPU carries Babylon's GLSL to WGSL compilers in `bundle/webgpu/`, which
-  its `createEngine` passes to the engine. Babylon's sources come from the app's own site, an archive of the installed
+  its `createEngine` passes to the engine. A package with area lights, bundled or not, carries Babylon's LTC table
+  in `babylon-assets/`, as the app serves it (`scripts/babylon-assets.mjs`), so its page loads nothing from Babylon's sites. Babylon's sources come from the app's own site, an archive of the installed
   `@babylonjs/core` (`babylon-core-<version>.zip`, made by `vite.config.js`), fetched on the first bundled export and kept
   in the browser's Cache Storage; esbuild's WebAssembly is the app's too. Minify off writes the bundle readable.
 - **Modules.** Bundle off writes the modules as they are. Map Babylon's module paths to the same version, as the header

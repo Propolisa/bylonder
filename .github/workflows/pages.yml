@@ -63,11 +63,13 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run module
       - run: npm test
-      # Babylon's GLSL to WGSL compilers for the WebGPU backend (scripts/webgpu-compilers.mjs), pinned by hash.
+      # Files Babylon loads from its CDNs, served by the app (scripts/babylon-assets.mjs), pinned by hash.
       - uses: actions/cache@v4
         with:
-          path: public/webgpu
-          key: webgpu-compilers-${{ hashFiles('scripts/webgpu-compilers.mjs') }}
+          path: |
+            public/webgpu
+            public/babylon-assets
+          key: babylon-assets-${{ hashFiles('scripts/babylon-assets.mjs') }}
       - run: npm run build
         env:
           BASE_PATH: ./

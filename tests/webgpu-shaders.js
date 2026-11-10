@@ -1,6 +1,6 @@
 // Shaders as Babylon's WebGPU engine compiles them, without a GPU: an engine that processes an effect's GLSL with
 // Babylon's WebGPU shader processor and compiles it with the glslang and Tint (twgsl) builds the app serves
-// (public/webgpu, scripts/webgpu-compilers.mjs) through the app's own conversion (src/render/glsl-to-wgsl.js, which its
+// (public/webgpu, scripts/babylon-assets.mjs) through the app's own conversion (src/render/glsl-to-wgsl.js, which its
 // worker runs), recording each effect's WGSL or why it has none.
 import { readFileSync, existsSync } from 'node:fs';
 import vm from 'node:vm';

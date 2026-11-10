@@ -19,7 +19,7 @@ import { GL_ARGS, E2E_CHROME } from './tools.mjs';
 const root = fileURLToPath(new URL('../..', import.meta.url));
 const shots = fileURLToPath(new URL('../../../bylonder/.shots/agents/exports/', import.meta.url));
 mkdirSync(shots, { recursive: true });
-execFileSync(process.execPath, [join(root, 'scripts/webgpu-compilers.mjs')], { cwd: root, stdio: 'inherit' });
+execFileSync(process.execPath, [join(root, 'scripts/babylon-assets.mjs')], { cwd: root, stdio: 'inherit' });
 
 // The package: Lava under a world of nodes, written with @babylonjs/core left as the page's import map resolves it.
 const { world, sync, scene } = openExample('lava');

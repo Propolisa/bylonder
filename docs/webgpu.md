@@ -13,7 +13,7 @@ Babylon's WebGPU engine (`WebGPUEngine`) from the next start; it draws as WebGL 
 - Without WebGPU (no `navigator.gpu`, no adapter, a device request that fails) the app draws with WebGL 2 and logs why.
 - GLSL converts to WGSL with Babylon's builds of glslang and Tint (twgsl), in a worker (`src/render/wgsl-worker.js`,
   `glsl-to-wgsl.js`), off the page's thread; stages of the same WGSL share one shader module. The app serves both
-  compilers from `webgpu/` (`scripts/webgpu-compilers.mjs`, run by `npm run build` and `npm run dev`: the files at the
+  compilers from `webgpu/` (`scripts/babylon-assets.mjs`, run by `npm run build` and `npm run dev`: the files at the
   installed Babylon version, pinned by sha256), so WebGPU works offline as WebGL 2 does.
 
 ## One shader source

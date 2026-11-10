@@ -18,7 +18,7 @@ import { imageFiles } from './image-files.js';
 import { exportCompositor } from './compositor-export.js';
 import { exportIR, idKey } from './ir-export.js';
 import { channels, readsOtherIDs } from './modifiers-export.js';
-import { AREA_SPECULAR, CHUNKS, COMPILER_FOLDER, gplFolders, NODE_KERNELS, UNITS_FILE } from './runtime-files.js';
+import { AREA_LIGHTS_LTC, AREA_SPECULAR, BABYLON_ASSETS, CHUNKS, COMPILER_FOLDER, gplFolders, NODE_KERNELS, UNITS_FILE } from './runtime-files.js';
 import { AREA_SPECULAR_UNIT, replaces, stripEntities, stripPieces, unitManifest } from './unit-manifest.js';
 import { CURVES_GLSL_FILE, curvesGlslFile } from './curves-export.js';
 import { exportVolumes, VOLUMES_FILE } from './volumes-export.js';
@@ -77,7 +77,7 @@ const PAGE_MODULES = ['Culling/ray.js'], DEFAULT_MATERIAL = 'Materials/standardM
 // The names scene.js imports from @babylonjs/core, each only where its code uses it.
 const BABYLON_NAMES = ['Animation', 'AnimationGroup', 'Camera', 'CascadedShadowGenerator', 'Color3', 'Color4', 'Constants', 'CubeTexture', 'EffectLayer', 'Engine', 'Geometry', 'HDRCubeTexture', 'Light',
   'LinesMesh', 'Material', 'Matrix', 'Mesh', 'MorphTargetManager', 'MultiMaterial', 'ParticleSystem', 'Quaternion', 'ReflectionProbe', 'Scene', 'SerializationHelper', 'ShadowGenerator', 'Skeleton',
-  'SSAO2RenderingPipeline', 'SSRRenderingPipeline', 'SubMesh', 'TransformNode', 'Vector3', 'WebGPUEngine'];
+  'SSAO2RenderingPipeline', 'SSRRenderingPipeline', 'SubMesh', 'Tools', 'TransformNode', 'Vector3', 'WebGPUEngine'];
 const usedNames = (source) => {
   const code = source.replace(/^\s*\/\/.*$/gm, '').replace(/"(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*'/g, '""');
   return BABYLON_NAMES.filter((name) => new RegExp(String.raw`(?<![\w$.])${name}\b`).test(code));
@@ -362,7 +362,9 @@ import { blenderAreaSpecular } from './${AREA_SPECULAR}';` : ''}
 ${BABYLON_IMPORTS}
 
 // Images and scene.bin sit beside this module.
-const ROOT = new URL('./', import.meta.url).href;
+const ROOT = new URL('./', import.meta.url).href;${areaLights ? `
+// Babylon's assets too, unless the page has its own: its area lights' LTC table, ${AREA_LIGHTS_LTC}.
+Tools.AssetBaseUrl ||= new URL('${BABYLON_ASSETS}', ROOT).href;` : ''}
 let geometryCount = 0;
 function geometry(scene, vertices, indices) {
   const result = new Geometry('geometry' + geometryCount++, scene);

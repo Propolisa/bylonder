@@ -77,9 +77,11 @@ export const packagedModules = (files) => Object.fromEntries(Object.entries(file
 }));
 // A bundled package's chunks (bundle.js), and Babylon's GLSL to WGSL compilers a bundled WebGPU page carries.
 export const CHUNKS = 'bundle', COMPILER_FOLDER = `${CHUNKS}/webgpu`;
-// Files the app serves from public/ (scripts/webgpu-compilers.mjs) that a package ships where scene.js names their
+// Babylon's assets a page loads (its area lights' LTC table), beside scene.js as the app serves them.
+export const BABYLON_ASSETS = 'babylon-assets', AREA_LIGHTS_LTC = `${BABYLON_ASSETS}/areaLights/areaLightsLTC.bin`;
+// Files the app serves from public/ (scripts/babylon-assets.mjs) that a package ships where scene.js names their
 // folder: [package path, the app's path].
-const APP_FILES = ['glslang.js', 'glslang.wasm', 'twgsl.js', 'twgsl.wasm'].map((name) => [`${COMPILER_FOLDER}/${name}`, `webgpu/${name}`]);
+const APP_FILES = [...['glslang.js', 'glslang.wasm', 'twgsl.js', 'twgsl.wasm'].map((name) => [`${COMPILER_FOLDER}/${name}`, `webgpu/${name}`]), [AREA_LIGHTS_LTC, AREA_LIGHTS_LTC]];
 export const appFiles = (files) => APP_FILES.filter(([path]) => String(files['scene.js']).includes(path.slice(0, path.lastIndexOf('/') + 1)));
 // The blocks library and Bylonder's extensions of Babylon, by package path: runtime/ files a package ships beside its
 // scene.js only when it imports them.

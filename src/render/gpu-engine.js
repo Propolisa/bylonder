@@ -2,7 +2,7 @@
 // (workspace/preferences.js) picks it; the engine exists before the Preferences load, so it is read from the mirror the
 // preference keeps in the browser's storage. A `gpu` URL parameter on the app overrides it (the browser tests'
 // E2E_ENGINE). WebGPU falls back to WebGL 2 where the browser has no adapter.
-import { Engine, WebGPUEngine } from '@babylonjs/core';
+import { Engine, Tools, WebGPUEngine } from '@babylonjs/core';
 import '../overrides/babylon/geometry-gamma-albedo.js';
 import { declarationLists } from '../overrides/webgpu/declaration-lists.js';
 import { depthMetricVaryings } from '../overrides/webgpu/depth-metric-varyings.js';
@@ -14,7 +14,9 @@ import { rejectedPipelines } from '../overrides/webgpu/rejected-pipelines.js';
 import { shortEffectNames } from '../overrides/webgpu/short-effect-names.js';
 
 const KEY = 'bylonder-gpu-backend';
-// Babylon's GLSL to WGSL compilers, served by the app (scripts/webgpu-compilers.mjs).
+// Babylon's assets (its area lights' LTC table), served by the app (scripts/babylon-assets.mjs) instead of Babylon's site.
+Tools.AssetBaseUrl = new URL('babylon-assets', document.baseURI).href;
+// Babylon's GLSL to WGSL compilers, served by the app (scripts/babylon-assets.mjs).
 const compiler = (name) => ({ jsPath: new URL(`webgpu/${name}.js`, document.baseURI).href, wasmPath: new URL(`webgpu/${name}.wasm`, document.baseURI).href });
 const workerFiles = (name) => ({ js: compiler(name).jsPath, wasm: compiler(name).wasmPath });
 

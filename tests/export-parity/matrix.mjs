@@ -136,7 +136,7 @@ async function lookChecks(ids, keys, engines, { prod }) {
   const { chromium, startServer } = await import('../e2e/app.mjs');
   const { GL_ARGS } = await import('../e2e/tools.mjs');
   const { appPicture, pagePicture, comparePictures, servePackages } = await import('./look.mjs');
-  execFileSync(process.execPath, ['scripts/webgpu-compilers.mjs'], { cwd: root, stdio: 'ignore' });
+  execFileSync(process.execPath, ['scripts/babylon-assets.mjs'], { cwd: root, stdio: 'ignore' });
   const server = prod || process.env.E2E_URL ? await startServer({ build: false }) : await devServer();
   const browser = await chromium.launch({ args: [...GL_ARGS, '--enable-unsafe-webgpu'], executablePath: process.env.E2E_CHROME });
   const served = servePackages(CACHE);
