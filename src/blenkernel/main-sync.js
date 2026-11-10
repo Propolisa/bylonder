@@ -29,7 +29,7 @@ import { viewTransforms, looks } from './scene/render-babylon.js';
 import { createDisplayLut } from '../render/display-lut.js';
 import { BlenderAnimation } from './animation/anim-blender.js';
 import { Camera, MultiMaterial, VertexData } from '@babylonjs/core';
-import { setOrthoView } from '../editors/space_view3d/navigation.js';
+import { setOrthoView } from '../io_scene_babylon/runtime/ortho-scale.js';
 import { setOutputFrame } from '../runtime/object-transform.js';
 import { armatureData, setArmatureData } from './armature/armature.js';
 import { armatureChanged } from '../draw/overlay-armature.js';

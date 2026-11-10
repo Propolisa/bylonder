@@ -262,7 +262,8 @@ import { parsePostProcess } from './bylonder/overrides/babylon/god-rays-parse.js
 import './bylonder/overrides/babylon/chromatic-aberration-size.js';
 import './bylonder/overrides/babylon/geometry-gamma-albedo.js';
 import './bylonder/overrides/babylon/environment-probe.js';
-import { parseCamera } from './bylonder/overrides/babylon/camera-quaternion.js';${kernels ? `
+import { parseCamera } from './bylonder/overrides/babylon/camera-quaternion.js';
+import { orthoScaled } from './bylonder/ortho-scale.js';${kernels ? `
 import { fillMaterials } from './bylonder/materials.js';
 import kernels from './${NODE_KERNELS}';` : ''}${curves ? `
 // The curves blocks the materials drawing curves use, before they are parsed.
@@ -379,7 +380,7 @@ ${geometryLines.join('\n')}
 
   const nodes = {};
 ${objectLines}
-${parse('LIGHTS', data.lights, `nodes[entry.uniqueId] = ${areaLights ? 'parseLight(entry, scene, AreaLight)' : 'Light.Parse(entry, scene)'}`)}${parse('CAMERAS', data.cameras, 'nodes[entry.uniqueId] = parseCamera(entry, scene)')}
+${parse('LIGHTS', data.lights, `nodes[entry.uniqueId] = ${areaLights ? 'parseLight(entry, scene, AreaLight)' : 'Light.Parse(entry, scene)'}`)}${parse('CAMERAS', data.cameras, 'nodes[entry.uniqueId] = orthoScaled(parseCamera(entry, scene))')}
 ${parented.map((e) => `  nodes[${e.uniqueId}].parent = nodes[${e.parentId}] ?? null;`).join('\n')}${data.lights.some((l) => l.excludedMeshesIds?.length || l.includedOnlyMeshesIds?.length) ? `
   // The meshes each light leaves out or lights alone, by id, as Babylon's loader resolves them once the meshes exist.
   const meshes = (ids) => ids.map((id) => scene.getMeshById(id)).filter(Boolean);

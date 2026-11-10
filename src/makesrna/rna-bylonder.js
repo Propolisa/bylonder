@@ -9,7 +9,7 @@
 //           update(struct, name, owner), undoPush(name) }
 import { blendData } from '../python/bpy_rna.js';
 import { Camera, Light, PointLight, SpotLight, Quaternion } from '@babylonjs/core';
-import { fitsOrthoScale } from '../editors/space_view3d/navigation.js';
+import { fitsOrthoScale } from '../io_scene_babylon/runtime/ortho-scale.js';
 import { objectMesh } from '../editors/object/object-mesh.js';
 import { rebuildMesh } from '../editors/object/mesh-catalog.js';
 import { mesh_deserialize, mesh_serialize } from '../blenkernel/mesh/mesh.js';

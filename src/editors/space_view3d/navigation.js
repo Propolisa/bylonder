@@ -9,26 +9,6 @@ const VIEW_NAMES = ["User", "Front", "Back", "Left", "Right", "Top", "Bottom"];
 // An orthographic camera's bounds for a view of the given aspect, halfHeight up from its center.
 export const fitOrtho = (camera, halfHeight, aspect) =>
   Object.assign(camera, { orthoTop: halfHeight, orthoBottom: -halfHeight, orthoLeft: -halfHeight * aspect, orthoRight: halfHeight * aspect });
-// A scene camera, while orthographic, takes its bounds from Blender's Orthographic Scale (6 unless set), which spans the
-// longer side of each view it renders (sensor fit Auto). Getters, as Babylon computes a projection before its camera
-// render observers run; the scale is Main's, so Babylon's own writes are ignored.
-const ORTHO_SIDES = { orthoTop: [1, 0], orthoBottom: [-1, 0], orthoLeft: [0, -1], orthoRight: [0, 1] };
-const fitted = new WeakSet();
-// A camera view's half width and height in scene units, where it shows more than the scale spans (camera view).
-const orthoViews = new WeakMap();
-export const setOrthoView = (camera, halfExtents) => (halfExtents ? orthoViews.set(camera, halfExtents) : orthoViews.delete(camera));
-export function fitsOrthoScale(camera) {
-  if (fitted.has(camera)) return camera;
-  fitted.add(camera);
-  const aspect = () => camera.getEngine().getAspectRatio(camera);
-  const half = () => (camera.metadata?.orthoScale ?? 6) / 2 / Math.max(aspect(), 1);
-  for (const [side, [up, right]] of Object.entries(ORTHO_SIDES)) {
-    const get = () => { const view = orthoViews.get(camera); return view ? up * view[1] + right * view[0] : half() * (up || right * aspect()); };
-    Object.defineProperty(camera, side, { configurable: true, get, set() {} });
-  }
-  return camera;
-}
-
 // The editor camera of one 3D Viewport, placed where the view's RegionView3D says. Blender's navigation operators
 // (view3d.rotate, move, zoom, dolly, view_axis, view_all, view_selected, view_persportho, and the trackpad's) change
 // the RegionView3D in the module, with the Preferences' navigation settings; the camera follows it (`follow`).
