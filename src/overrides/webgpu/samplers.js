@@ -2,6 +2,18 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // Override of WebGPU's rules for GLSL: a function that takes an image as an argument gets a copy for each image it is called with, as WebGPU's GLSL (Vulkan's) takes a sampler only where it samples it; for the app's node materials and an exported page's; goes when Babylon's conversion does this itself.
 
+import { ShaderStore } from '@babylonjs/core';
+
+// Babylon's area light function, which takes the LTC images as arguments, marked `#define inline` so Babylon's WebGPU
+// engine inlines it (ShaderCodeInliner), sampling them in place; in a node material its include is written out marked.
+export const AREA_PRE_LIGHTING = { search: /preLightingInfo computeAreaPreLightingInfo\(/, replace: '\n#define inline\n$&' };
+const AREA_SETUP = 'pbrDirectLightingSetupFunctions';
+/** @param {string} text */
+const inlineAreaLights = (text) => {
+  const setup = ShaderStore.GetIncludesShadersStore(0)[AREA_SETUP];
+  return setup ? text.replace(`#include<${AREA_SETUP}>`, () => setup.replace(AREA_PRE_LIGHTING.search, AREA_PRE_LIGHTING.replace)) : text;
+};
+
 // A call's arguments from the text after its opening parenthesis: [arguments, the index after its closing one].
 /**
  * @param {string} text @param {number} at
@@ -92,7 +104,7 @@ export function webgpuSamplers(material) {
   const built = /** @type {any} */ (material);
   const specialize = () => {
     for (const state of [built._vertexCompilationState, built._fragmentCompilationState]) {
-      if (state?._builtCompilationString) state._builtCompilationString = specializeSamplers(state._builtCompilationString);
+      if (state?._builtCompilationString) state._builtCompilationString = specializeSamplers(inlineAreaLights(state._builtCompilationString));
     }
   };
   // Parsing built it already.
