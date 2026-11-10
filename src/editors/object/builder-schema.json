@@ -1007,7 +1007,7 @@
         "required": false
       },
       "onReady": {
-        "type": "(mesh: GroundMesh, heightBuffer?: Float32Array<ArrayBuffer>) => void",
+        "type": "(mesh: GroundMesh, heightBuffer?: Float32Array<ArrayBufferLike>) => void",
         "required": false
       },
       "onError": {
