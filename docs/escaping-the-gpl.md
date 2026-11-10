@@ -109,9 +109,8 @@ origin, limits as shares of the object's extent, the vertex group weighing the r
 - A Geometry Nodes field node feeding a node that runs in Blender's kernels runs there with it; replace both to run
   either as yours.
 - A shader node's oracle in Node checks that it builds; its pixels are compared on the GPU only.
-- The shipped Simple Deform (`modifiers.wasm`) ignores the lock axes for Bend, where the app's own evaluation gives
-  another mesh (export parity's known vertex-and-weight-paint failure); the worked example matches the shipped unit and
-  ignores them too. Its Twist's locks, Taper and Stretch are not written.
+- Simple Deform's Bend takes no lock axes, in the shipped unit as in the app (export parity agrees at every lock), so
+  the worked example ignores them too. Its Twist's locks, Taper and Stretch are not written.
 - The Units branch is asked at each export and not saved with the project. It lists what the scene's data holds
   (every object's modifiers, every material's and world's nodes, every Geometry Nodes group's); `units.json` lists
   what the package uses.
