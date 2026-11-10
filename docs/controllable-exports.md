@@ -293,6 +293,25 @@ modifiers/            modifiers.wasm, its worker and modifiers.js, only if a kno
 bylonder-geometry-nodes/  geometry-nodes.wasm and kernels.js, only if a Geometry Nodes modifier is live
 ```
 
+Every module of the package imports Babylon module by module (`@babylonjs/core/Meshes/mesh.js`, never the whole
+`@babylonjs/core`), so a page loads only the Babylon modules its scene uses. `scene.js` also imports, for their side
+effects, the modules its data needs registered before it parses: each class a `customType` or `className` names (a
+material, a node material's blocks, a texture, a pipeline), each light's and camera's constructor, and the scene
+components of its shadows, effect layers and particles. The export writes these imports from
+`babylon-modules.json` (`scripts/babylon-modules.mjs`, kept current by a test), which names the module of each name
+Babylon exports or registers and of each member one module adds to another's class (`thinInstanceSetBuffer`).
+
+A page loads the package in one of two ways:
+
+- **From a CDN, unbundled.** Map Babylon's module paths to the same version, as the header of `scene.js` says:
+  `<script type="importmap">{ "imports": { "@babylonjs/core/": "https://cdn.jsdelivr.net/npm/@babylonjs/core@<version>/" } }</script>`.
+  The browser fetches each module the scene reaches, about 700 for a typical scene (HTTP/2 serves them in parallel).
+- **Bundled.** With `@babylonjs/core` installed beside the package, bundle `scene.js` into one file and chunks that
+  load on demand (shaders, evaluators):
+  `npx esbuild scene.js --bundle --splitting --format=esm --minify --external:node:* --outdir=. --entry-names=[name].bundle --chunk-names=bundle/[name]-[hash]`,
+  then import `./scene.bundle.js`. It stays in the package folder, where `scene.js` finds `scene.bin`, `images/` and
+  the folders of Blender's code. The `node:*` imports are the package's Node path, which a page never runs.
+
 The `.babylon` export stays as it is, the snapshot alone.
 
 ## Export levels

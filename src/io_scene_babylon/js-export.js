@@ -28,8 +28,9 @@ import { AREA_LIGHT } from './area-lights.js';
 import { LOG_SIZE, STOPS } from '../render/display-lut.js';
 import { colorManagementFiles } from '../imbuf/colormanagement.js';
 import { halfFloats } from '../blenkernel/colorband.js';
+import { babylonModule, sideEffectImports } from './babylon-modules.js';
 
-const CDN = `https://cdn.jsdelivr.net/npm/@babylonjs/core@${AbstractEngine.Version}/+esm`;
+const CDN = `https://cdn.jsdelivr.net/npm/@babylonjs/core@${AbstractEngine.Version}/`;
 const json = (value) => JSON.stringify(value);
 const TARGET_NAMES = Object.fromEntries(TARGETS.map(([id, label]) => [id, label]));
 // The page's createEngine for each target: WebGPU with the adapter's limits its materials need.
@@ -42,8 +43,45 @@ export async function createEngine(canvas, options = {}) {
   WEBGPU: `export const createEngine = (canvas, options = {}) => ${WEBGPU_ENGINE};`,
   WEBGL2: 'export const createEngine = async (canvas, options = {}) => new Engine(canvas, true, options);',
 };
+// Where scene.js imports Babylon: the names its code uses, and the modules its data needs registered.
+const BABYLON_IMPORTS = '/* @babylonjs/core imports */';
 const number = (v) => +v.toFixed(7);
 const vector = (values) => values.map(number).join(', ');
+
+// Babylon's classes the scene's data names, which parse only once their modules have registered them: each customType
+// and className (BABYLON.PBRMaterial, a node material's blocks), each light's and camera's constructor, and the
+// textures Texture.Parse makes through another module.
+function parsedClasses(data) {
+  const names = new Set([...data.lights.map((l) => `node:Light_Type_${l.type}`), ...data.cameras.map((c) => `node:${c.type}`)]);
+  // Material.Parse reads a material without a customType as a StandardMaterial.
+  if (data.materials.some((m) => !m.customType)) names.add('StandardMaterial');
+  const walk = (value) => {
+    if (Array.isArray(value)) return value.forEach(walk);
+    if (!value || typeof value !== 'object') return;
+    if (value.isCube) names.add(value.isRenderTarget ? 'RenderTargetTexture' : 'CubeTexture');
+    else if (value.isRenderTarget) names.add(value.mirrorPlane ? 'MirrorTexture' : 'RenderTargetTexture');
+    for (const [key, v] of Object.entries(value)) (key === 'customType' || key === 'className') && typeof v === 'string' ? names.add(v) : walk(v);
+  };
+  walk(data);
+  return [...names].map(babylonModule).filter(Boolean);
+}
+// The scene components the parsed objects add themselves to.
+const COMPONENTS = { shadowGenerators: 'Lights/Shadows/shadowGeneratorSceneComponent.js', effectLayers: 'Layers/effectLayerSceneComponent.js', particleSystems: 'Particles/particleSystemComponent.js' };
+// What every page uses, picking under the pointer (Ray), and the material a mesh without its own draws with.
+const PAGE_MODULES = ['Culling/ray.js'], DEFAULT_MATERIAL = 'Materials/standardMaterial.js';
+// The names scene.js imports from @babylonjs/core, each only where its code uses it.
+const BABYLON_NAMES = ['Animation', 'AnimationGroup', 'Camera', 'CascadedShadowGenerator', 'Color3', 'Color4', 'Constants', 'CubeTexture', 'EffectLayer', 'Engine', 'Geometry', 'HDRCubeTexture', 'Light',
+  'LinesMesh', 'Material', 'Matrix', 'Mesh', 'MorphTargetManager', 'MultiMaterial', 'ParticleSystem', 'Quaternion', 'ReflectionProbe', 'Scene', 'SerializationHelper', 'ShadowGenerator', 'Skeleton',
+  'SSAO2RenderingPipeline', 'SSRRenderingPipeline', 'SubMesh', 'TransformNode', 'Vector3', 'WebGPUEngine'];
+const usedNames = (code) => BABYLON_NAMES.filter((name) => new RegExp(String.raw`\b${name}\b`).test(code));
+
+// Babylon's screen-space pipelines, made as scene.js makes them (below), by customType, on the geometry buffer's scene
+// component, which they use without importing it.
+const GEOMETRY_BUFFER = 'Rendering/geometryBufferRendererSceneComponent.js';
+const SCREEN_SPACE_PIPELINES = {
+  SSRRenderingPipeline: '(entry, scene) => new SSRRenderingPipeline(entry._name, scene, undefined, true, Constants.TEXTURETYPE_HALF_FLOAT)',
+  SSAO2RenderingPipeline: '(entry, scene) => new SSAO2RenderingPipeline(entry._name, scene, entry._ratio, undefined, true, Constants.TEXTURETYPE_HALF_FLOAT)',
+};
 
 // Vertex buffers by Babylon kind, with their sizes, and the indices, as buffers of scene.bin: one entry per geometry,
 // shared by its meshes. A thin instance buffer (world0 to world3, per instance) is the mesh's thinInstances, written
@@ -257,6 +295,8 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   volumes?.dispose();
   parentInstances(objects);
   const parented = [...data.transformNodes, ...data.meshes, ...data.lights, ...data.cameras].filter((e) => e.parentId !== undefined);
+  const pipelineTypes = [...new Set(data.renderingPipelines.map((p) => p.customType))];
+  const pipelineClasses = pipelineTypes.filter((type) => !SCREEN_SPACE_PIPELINES[type] && babylonModule(type));
   const parse = (name, list, code) => (list?.length ? `  for (const entry of ${name}) ${code};\n` : '');
   const settings = {
     clearColor: data.clearColor, ambientColor: data.ambientColor, gravity: data.gravity, autoClear: data.autoClear, collisionsEnabled: data.collisionsEnabled,
@@ -267,11 +307,13 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   };
   // Written before the module's tables: they add thin instance buffers to scene.bin.
   const objectLines = objects.map(({ entry, mesh }) => `  // ${entry.name}\n  {\n${indent(nodeCode(entry, mesh, geometries, live.get(mesh), bin))}\n  }`).join('\n');
-  const name = world.sceneSettings.state.name || 'Scene', webgpu = target !== 'WEBGL2', webgl = target !== 'WEBGPU';
+  const name = world.sceneSettings.state.name || 'Scene', webgpu = target !== 'WEBGL2';
   const source = `// ${name}, exported from Bylonder: load(engine) gives it with its controls, createScene(engine, canvas) builds it
 // alone, with Babylon.js ${AbstractEngine.Version}; createEngine(canvas) makes the engine it is exported for: ${TARGET_NAMES[target]}.
-// In a page, map @babylonjs/core to the same version:
-// <script type="importmap">{ "imports": { "@babylonjs/core": "${CDN}" } }</script>${[...gplFolders({ 'scene.ir.json': irJson, [UNITS_FILE]: units }), ...(pieces && Object.keys(pieces.pieces).length ? [NODE_KERNELS.split('/')[0]] : []), ...(volumes ? [VOLUMES_FILE.split('/')[0]] : [])].map((folder) => `
+// It imports Babylon module by module, so a page loads only the modules its scene uses. In a page, map them to the
+// same version: <script type="importmap">{ "imports": { "@babylonjs/core/": "${CDN}" } }</script>
+// or, with @babylonjs/core installed, bundle it beside this module and import ./scene.bundle.js: npx esbuild scene.js --bundle
+// --splitting --format=esm --minify --external:node:* --outdir=. --entry-names=[name].bundle --chunk-names=bundle/[name]-[hash]${[...gplFolders({ 'scene.ir.json': irJson, [UNITS_FILE]: units }), ...(pieces && Object.keys(pieces.pieces).length ? [NODE_KERNELS.split('/')[0]] : []), ...(volumes ? [VOLUMES_FILE.split('/')[0]] : [])].map((folder) => `
 // Includes GPL code: ${folder}/, Blender's code (GPL-3.0-or-later, ${folder}/LICENSE.md), loaded only when a control
 // that needs it is set.`).join('')}${blenderSpecular ? `
 // Includes GPL code: ${AREA_SPECULAR}, Blender's light specular (GPL-3.0-or-later, ${AREA_SPECULAR.split('/')[0]}/LICENSE.md).` : ''}
@@ -285,10 +327,10 @@ import { WEBGPU_OPTIONS, warnUnlessMaximumLimits } from './bylonder/overrides/we
 import { depthMetricVaryings } from './bylonder/overrides/webgpu/depth-metric-varyings.js';
 import { lightBlocksWhereRead } from './bylonder/overrides/webgpu/vertex-light-blocks.js';
 import { pbrFromGLSL } from './bylonder/overrides/webgpu/pbr-from-glsl.js';
-` : ''}import { parsePostProcess } from './bylonder/overrides/babylon/god-rays-parse.js';
-import { parsedPipeline } from './bylonder/overrides/babylon/pipeline-effects.js';
+` : ''}${data.postProcesses.length ? `import { parsePostProcess } from './bylonder/overrides/babylon/god-rays-parse.js';
+` : ''}${pipelineTypes.length ? `import { parsedPipeline } from './bylonder/overrides/babylon/pipeline-effects.js';
 import './bylonder/overrides/babylon/chromatic-aberration-size.js';
-import './bylonder/overrides/babylon/geometry-gamma-albedo.js';
+` : ''}import './bylonder/overrides/babylon/geometry-gamma-albedo.js';
 import './bylonder/overrides/babylon/environment-probe.js';
 import './bylonder/overrides/babylon/srgb-texture-parse.js';
 import { parseCamera } from './bylonder/overrides/babylon/camera-quaternion.js';
@@ -306,8 +348,7 @@ import { parseLight } from './bylonder/overrides/babylon/area-light-parse.js';` 
 import { compositor } from './bylonder-blocks.js';` : ''}${areaSpecular ? `
 import { unitFor } from './bylonder/units.js';` : ''}${blenderSpecular ? `
 import { blenderAreaSpecular } from './${AREA_SPECULAR}';` : ''}
-import { Animation, AnimationGroup, CascadedShadowGenerator, Color3, Color4, CubeTexture, EffectLayer, ${[webgl && 'Engine', webgpu && 'WebGPUEngine'].filter(Boolean).join(', ')}, Geometry, HDRCubeTexture, Light, LinesMesh, Material, Matrix, Mesh, MorphTargetManager, MultiMaterial, Quaternion, ReflectionProbe, Scene, SerializationHelper, ShadowGenerator, Skeleton, SubMesh, TransformNode, Vector3, Camera, ParticleSystem } from '@babylonjs/core';
-import * as BABYLON from '@babylonjs/core';
+${BABYLON_IMPORTS}
 
 // Images and scene.bin sit beside this module.
 const ROOT = new URL('./', import.meta.url).href;
@@ -339,14 +380,15 @@ const BUFFERS = ${json(bin.views)};${volumes ? `
 const VOLUMES = ${json(volumes.config)};` : ''}${display ? `
 const DISPLAY = ${json(display)};` : ''}${composited ? `
 const COMPOSITOR = ${json(composited.compositor)};` : ''}
-
+${pipelineTypes.length ? `
 // Babylon's screen-space pipelines draw from its geometry buffer in half floats, as Bylonder's rendered views have them:
 // their own Parse takes its prepass, which turns the scene's image processing back into the materials, and 8-bit targets.
-const SCREEN_SPACE = {
-  SSRRenderingPipeline: (entry, scene) => new BABYLON.SSRRenderingPipeline(entry._name, scene, undefined, true, BABYLON.Constants.TEXTURETYPE_HALF_FLOAT),
-  SSAO2RenderingPipeline: (entry, scene) => new BABYLON.SSAO2RenderingPipeline(entry._name, scene, entry._ratio, undefined, true, BABYLON.Constants.TEXTURETYPE_HALF_FLOAT),
+const SCREEN_SPACE = {${pipelineTypes.filter((type) => SCREEN_SPACE_PIPELINES[type]).map((type) => `
+  ${type}: ${SCREEN_SPACE_PIPELINES[type]},`).join('')}
 };
-
+// Babylon's other pipelines, by their customType.
+const PIPELINES = { ${pipelineClasses.join(', ')} };
+` : ''}
 // Each built scene's IR, world, compositor and scene.bin buffers, which load gives its controls.
 const IRS = new WeakMap(), WORLDS = new WeakMap(), COMPOSITORS = new WeakMap(), SCENE_BUFFERS = new WeakMap();
 ${ENGINES[target]}
@@ -370,13 +412,11 @@ export async function createScene(engine, canvas) {${webgpu ? `
   scene.collisionsEnabled = SCENE.collisionsEnabled;
   if (SCENE.fog) Object.assign(scene, SCENE.fog, { fogColor: Color3.FromArray(SCENE.fog.fogColor) });
   SerializationHelper.Parse(() => scene.imageProcessingConfiguration, IMAGE_PROCESSING, scene);
-  const env = SCENE.environment;
-  if (env) {
-    scene.environmentTexture = env.hdr ? new HDRCubeTexture(new URL(env.url, ROOT).href, scene, env.size ?? 128) : CubeTexture.CreateFromPrefilteredData(new URL(env.url, ROOT).href, scene, env.extension);
-    scene.environmentTexture.rotationY = env.rotationY;
-    if (env.skybox) scene.createDefaultSkybox(scene.environmentTexture, true, 1000, 0);
-  }
-  scene.environmentIntensity = SCENE.environmentIntensity;
+${settings.environment ? `  const env = SCENE.environment;
+  scene.environmentTexture = ${settings.environment.hdr ? 'new HDRCubeTexture(new URL(env.url, ROOT).href, scene, env.size ?? 128)' : 'CubeTexture.CreateFromPrefilteredData(new URL(env.url, ROOT).href, scene, env.extension)'};
+  scene.environmentTexture.rotationY = env.rotationY;
+  if (env.skybox) scene.createDefaultSkybox(scene.environmentTexture, true, 1000, 0);
+` : ''}  scene.environmentIntensity = SCENE.environmentIntensity;
   scene.iblIntensity = SCENE.iblIntensity ?? 1;
   const buffers = await readBuffers(new URL('scene.bin', ROOT), BUFFERS, ${!hostCompression});
   SCENE_BUFFERS.set(scene, buffers);
@@ -427,12 +467,12 @@ ${parented.map((e) => `  nodes[${e.uniqueId}].parent = nodes[${e.parentId}] ?? n
 
 ${parse('REFLECTION_PROBES', data.reflectionProbes, "ReflectionProbe.Parse(entry, scene, ROOT)")}${parse('SHADOW_GENERATORS', data.shadowGenerators, "(entry.className === 'CascadedShadowGenerator' ? CascadedShadowGenerator : ShadowGenerator).Parse(entry, scene)")}${parse('EFFECT_LAYERS', data.effectLayers, "EffectLayer.Parse(entry, scene, ROOT)")}${parse('PARTICLE_SYSTEMS', data.particleSystems, "ParticleSystem.Parse(entry, scene, ROOT)")}  if (SCENE.environmentProbe) scene.environmentTexture = scene.reflectionProbes.find((p) => p.name === SCENE.environmentProbe)?.cubeTexture ?? scene.environmentTexture;
   scene.activeCamera = scene.getCameraById(${json(data.activeCameraID ?? null)}) ?? scene.cameras[0] ?? null;
-  for (const entry of RENDERING_PIPELINES) {
+${pipelineTypes.length ? `  for (const entry of RENDERING_PIPELINES) {
     const make = SCREEN_SPACE[entry.customType];
     if (make) SerializationHelper.Parse(() => make(entry, scene), entry, scene, ROOT);
-    else parsedPipeline(BABYLON[entry.customType]?.Parse(entry, scene, ROOT), entry);
+    else parsedPipeline(PIPELINES[entry.customType]?.Parse(entry, scene, ROOT), entry);
   }
-  for (const entry of POST_PROCESSES) parsePostProcess(entry, scene, ROOT);${volumes ? `
+` : ''}${parse('POST_PROCESSES', data.postProcesses, 'parsePostProcess(entry, scene, ROOT)').trimEnd()}${volumes ? `
   // EEVEE's volumes, resolved over each camera's render before its other post-processes.
   sceneVolumes(scene, VOLUMES, materials, WORLDS.get(scene)?.box ?? null);` : ''}
 ${data.animationGroups.some((g) => g.targetedAnimations.some((t) => t.animation.property === CLOCK)) ? `  // The frame Babylon's animation keeps where the page's F-Curves are all that moves.
@@ -448,7 +488,11 @@ ${data.animationGroups.some((g) => g.targetedAnimations.some((t) => t.animation.
   return scene;
 }
 `;
+  const unmaterialed = settings.defaultMaterial === null && data.meshes.some((m) => m.materialUniqueId === undefined);
+  const geometryBuffer = pipelineTypes.some((type) => SCREEN_SPACE_PIPELINES[type]);
+  const babylonImports = `${sideEffectImports([...PAGE_MODULES, ...(unmaterialed ? [DEFAULT_MATERIAL] : []), ...(geometryBuffer ? [GEOMETRY_BUFFER] : []), ...parsedClasses(data), ...Object.entries(COMPONENTS).filter(([key]) => data[key]?.length).map(([, file]) => file)])}
+import { ${[...usedNames(source.replace(/^\s*\/\/.*$/gm, '')), ...pipelineClasses].join(', ')} } from '@babylonjs/core';`;
   // An ES module package in Node too (the headless SDK), needing only Babylon.
   const manifest = { name: name.toLowerCase().replace(/[^a-z0-9-]+/g, '-'), type: 'module', main: 'scene.js', types: 'scene.d.ts', peerDependencies: { '@babylonjs/core': AbstractEngine.Version } };
-  return { 'scene.js': source, 'scene.d.ts': controlTypes(Object.entries(ir.properties).map(([path, { type }]) => ({ path, type }))), 'scene.ir.json': irJson, [UNITS_FILE]: units, ...(kernels && { [NODE_KERNELS]: kernels }), ...(curves && { [CURVES_GLSL_FILE]: curvesGlslFile() }), 'scene.bin': bin.bytes(), 'package.json': `${JSON.stringify(manifest, null, 2)}\n`, ...images };
+  return { 'scene.js': source.replace(BABYLON_IMPORTS, babylonImports), 'scene.d.ts': controlTypes(Object.entries(ir.properties).map(([path, { type }]) => ({ path, type }))), 'scene.ir.json': irJson, [UNITS_FILE]: units, ...(kernels && { [NODE_KERNELS]: kernels }), ...(curves && { [CURVES_GLSL_FILE]: curvesGlslFile() }), 'scene.bin': bin.bytes(), 'package.json': `${JSON.stringify(manifest, null, 2)}\n`, ...images };
 }

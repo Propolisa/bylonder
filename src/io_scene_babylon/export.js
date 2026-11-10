@@ -6,7 +6,7 @@
 import { zipSync, strToU8 } from 'fflate';
 import { serializeScene } from './babylon-export.js';
 import { exportModule } from './js-export.js';
-import { gplFiles, packagedRuntime, packageOverrides, packageRuntime } from './runtime-files.js';
+import { gplFiles, packagedModules, packagedRuntime, packageOverrides, packageRuntime } from './runtime-files.js';
 import { MODULES } from './module-files.js';
 import { exportOptions } from './export-options.js';
 
@@ -33,7 +33,7 @@ async function scenePackage(world, options) {
   for (const [path, name] of packageRuntime(files)) files[path] = packagedRuntime(runtime['./runtime/' + name]);
   for (const [path, from] of packageOverrides(files)) files[path] = overrides['../' + from];
   for (const [path, from] of gplFiles(files)) files[path] = await SOURCES[from]();
-  return Object.fromEntries(Object.entries(files).map(([path, data]) => [path, typeof data === 'string' ? strToU8(data) : data]));
+  return Object.fromEntries(Object.entries(packagedModules(files)).map(([path, data]) => [path, typeof data === 'string' ? strToU8(data) : data]));
 }
 
 const FORMATS = {

@@ -54,10 +54,11 @@ const ID_STEP = 32;
 const PAGE = `<!doctype html><meta charset="utf-8"><title>Exported package</title>
 <link rel="icon" href="data:,">
 <style>html,body{margin:0;background:#000}canvas{display:block}</style>
-<script type="importmap">{ "imports": { "@babylonjs/core": "/core/index.js" } }</script>
+<script type="importmap">{ "imports": { "@babylonjs/core/": "/core/" } }</script>
 <canvas id="c"></canvas>
 <script type="module">
-import { Color3, Color4, Engine, StandardMaterial, WebGPUEngine } from '@babylonjs/core';
+// Babylon module by module, as the package imports it: the page loads only what the package needs.
+import { Color3, Color4 } from '@babylonjs/core/Maths/math.color.js';
 import { load } from './scene.js';
 import { WEBGPU_OPTIONS } from './bylonder/overrides/webgpu/maximum-limits.js';
 const errors = [], query = new URLSearchParams(location.search), canvas = document.getElementById('c');
@@ -66,8 +67,8 @@ addEventListener('unhandledrejection', (e) => errors.push(String(e.reason?.messa
 Object.assign(canvas, { width: +query.get('width'), height: +query.get('height') });
 Object.assign(canvas.style, { width: query.get('width') + 'px', height: query.get('height') + 'px' });
 const engine = query.get('engine') === 'webgpu'
-  ? await WebGPUEngine.CreateAsync(canvas, { ...WEBGPU_OPTIONS, glslangOptions: { jsPath: '/webgpu/glslang.js', wasmPath: '/webgpu/glslang.wasm' }, twgslOptions: { jsPath: '/webgpu/twgsl.js', wasmPath: '/webgpu/twgsl.wasm' } })
-  : new Engine(canvas, true, { preserveDrawingBuffer: true });
+  ? await (await import('@babylonjs/core/Engines/webgpuEngine.js')).WebGPUEngine.CreateAsync(canvas, { ...WEBGPU_OPTIONS, glslangOptions: { jsPath: '/webgpu/glslang.js', wasmPath: '/webgpu/glslang.wasm' }, twgslOptions: { jsPath: '/webgpu/twgsl.js', wasmPath: '/webgpu/twgsl.wasm' } })
+  : new (await import('@babylonjs/core/Engines/engine.js')).Engine(canvas, true, { preserveDrawingBuffer: true });
 const blend = await load(engine), scene = blend.scene, frame = +query.get('frame');
 scene.materials.forEach((m) => m.onError = (effect, error) => errors.push(m.name + ': ' + error));
 // The app's frame, held: Render Image draws one still.
@@ -82,7 +83,8 @@ window.check = {
   stats: () => (${STATS})(scene, () => true, scene.activeCamera?.name),
   // The ID layer: each drawn mesh in a flat color of its own on black, unlit and without post processes. Gives the
   // mesh of each color.
-  idLayer() {
+  async idLayer() {
+    const { StandardMaterial } = await import('@babylonjs/core/Materials/standardMaterial.js');
     Object.assign(scene, { postProcessesEnabled: false, fogEnabled: false, clearColor: new Color4(0, 0, 0, 1) });
     scene.imageProcessingConfiguration.isEnabled = false;
     if (scene.frameGraph) scene.frameGraph = null;
@@ -151,7 +153,8 @@ async function exportPackage(app, dir) {
   await app.page.click('[data-blender="TOPBAR_MT_file"]');
   await app.page.getByRole('menuitem', { name: /^Export/ }).first().hover();
   await app.page.getByRole('menuitem', { name: 'JavaScript (.zip)' }).click();
-  await app.page.locator('[role="dialog"][aria-label^="Export"]').getByRole('button', { name: 'Export' }).click();
+  // The export's settings open in the 3D Viewport's frame.
+  await app.frame().locator('[role="dialog"][aria-label^="Export"]').getByRole('button', { name: 'Export' }).click();
   const chunks = [];
   for await (const chunk of await (await download).createReadStream()) chunks.push(chunk);
   for (const [path, data] of Object.entries(unzipSync(Buffer.concat(chunks)))) {

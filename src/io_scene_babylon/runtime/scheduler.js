@@ -29,7 +29,7 @@ export const EVALUATORS = {
   constraints: (page) => import('./constraints-evaluator.js').then((module) => module.load(page)),
   modifiers: (page) => import('./modifiers-evaluator.js').then((module) => module.load(page)),
   'geometry-nodes': (page) => import('./geometry-nodes-evaluator.js').then((module) => module.load(page)),
-  grease_pencil: () => import('./grease-pencil.js').then(({ run }) => ({ run })),
+  grease_pencil: () => import('./grease-pencil.js'),
   curves: (page) => import('./curves.js').then((module) => module.load(page)),
 };
 /** What a package draws only by running it: its export bakes none of it. */
@@ -62,7 +62,7 @@ export function createScheduler(ir, page) {
     drawing.meshBuffers = async (mesh) => /** @type {any} */ (await evaluator('modifiers')).draw(mesh);
   }
   if (Object.values(entities).some((e) => e.implementation === 'grease_pencil')) {
-    drawing.greasePencil = (node, layer) => import('./grease-pencil.js').then((module) => module.drawLayer(scene, node, layer));
+    drawing.greasePencil = async (node, layer) => /** @type {any} */ (await evaluator('grease_pencil')).drawLayer(scene, node, layer);
   }
   if (Object.values(entities).some((e) => e.implementation === 'curves')) {
     drawing.curves = async (node, curves) => /** @type {any} */ (await evaluator('curves')).drawCurves(node, curves);

@@ -393,8 +393,9 @@ operators `bylonder.export_babylon` and `bylonder.export_js` (`workspace/topbar.
   loader ignores the first two and does not play animation groups: the `.js` export applies them all.
 - **JavaScript.** `createScene(engine, canvas)` builds each mesh and empty as code (geometry, transform, parent,
   material, flags, thin instances), and parses materials, lights, cameras, shadows, effect layers, probes, particles,
-  pipelines and animation with Babylon's `Parse` functions, as the loader does. It imports `@babylonjs/core`, mapped
-  in a page to `cdn.jsdelivr.net/npm/@babylonjs/core@<the app's version>/+esm` (the header names the URL). The export
+  pipelines and animation with Babylon's `Parse` functions, as the loader does. It imports `@babylonjs/core` module by module,
+  mapped in a page to `cdn.jsdelivr.net/npm/@babylonjs/core@<the app's version>/` (the header names the URL), so a page
+  loads only the modules its scene uses (`controllable-exports.md`, The package). The export
   is a package (`controllable-exports.md`): `scene.js` with its geometry in `scene.bin` and its images as files, and
   `load(engine)`, the scene with its controls by Blender RNA path, from the page runtime in `bylonder/`.
 - **Checked.** `tests/export.test.js` (NullEngine: serialize, reload with Babylon's loader and import the module,

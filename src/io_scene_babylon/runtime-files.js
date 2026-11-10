@@ -1,4 +1,6 @@
 // The page runtime's files (runtime/), which every JavaScript package carries in bylonder/.
+import { deepImports } from './babylon-modules.js';
+
 const declared = (...names) => names.flatMap((name) => [`${name}.js`, `${name}.d.ts`]);
 export const RUNTIME_FILES = [...declared('blend-scene', 'buffers', 'world', 'scheduler', 'ir', 'units', 'mesh', 'ortho-scale', 'zod'), 'ir.schema.json', 'implementations.json', 'LICENSE.md'];
 // GPL's notice and text, beside Blender's code in a package (src/ paths).
@@ -65,6 +67,14 @@ export const packageOverrides = (files) => {
   return declaredOverrides(OVERRIDES.filter((name) => code.includes(`overrides/${name}.js'`))).map((name) => [`bylonder/overrides/${name}`, `overrides/${name}`]);
 };
 export const packagedRuntime = (text) => text.replaceAll("'../../overrides/", "'./overrides/");
+// The scheduler's implementations but those a package does not ship, so that a bundler finds every module it names.
+const shippedEvaluators = (text, files) => text.replace(/^ +'?[\w-]+'?: .*import\('\.\/([\w-]+\.js)'\).*\n/gm, (line, file) => (`bylonder/${file}` in files ? line : ''));
+// A package's files as it ships them: its modules import @babylonjs/core module by module (babylon-modules.js).
+export const packagedModules = (files) => Object.fromEntries(Object.entries(files).map(([path, data]) => {
+  if (!path.endsWith('.js')) return [path, data];
+  const code = deepImports(String(data));
+  return [path, path === 'bylonder/scheduler.js' ? shippedEvaluators(code, files) : code];
+}));
 // The blocks library and Bylonder's extensions of Babylon, by package path: runtime/ files a package ships beside its
 // scene.js only when it imports them.
 export const BLOCK_FILES = { 'bylonder-blocks.js': 'blocks.js', 'bylonder-view-transform.js': 'view-transform.js', 'bylonder-area-light.js': 'area-light.js' };

@@ -4,7 +4,7 @@
 // color lights through a cube of that color with its spherical harmonics; a world of nodes is its material drawn on a
 // box around the eye, baked once into a reflection probe, filtered with Babylon's HDRFiltering, which then lights the
 // scene.
-import { Color4, Constants, CubeMapToSphericalPolynomialTools, HDRFiltering, MeshBuilder, ReflectionProbe, RenderTargetTexture } from '@babylonjs/core';
+import { Color4, Constants, CreateBox, CubeMapToSphericalPolynomialTools, HDRFiltering, ReflectionProbe, RenderTargetTexture } from '@babylonjs/core';
 import { WORLD_CUBE_TYPE } from '../../overrides/webgpu/float-world-cube.js';
 
 /** @typedef {import('@babylonjs/core').Scene} Scene */
@@ -41,7 +41,7 @@ export function worldColor(scene, color) {
  * @param {Material} material
  */
 export function worldNodes(scene, material) {
-  const box = MeshBuilder.CreateBox('world', { size: 2 }, scene);
+  const box = CreateBox('world', { size: 2 }, scene);
   Object.assign(box, { material, infiniteDistance: true, isPickable: false, applyFog: false, alwaysSelectAsActiveMesh: true });
   const bake = async () => {
     // Not ready: tried again after a while (an observer added while the observable notifies would run at once).

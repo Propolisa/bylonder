@@ -2,6 +2,7 @@
 // geometry loads from scene.bin bit for bit as the app draws it, and a control set by its Blender path moves, turns,
 // scales, hides, lights and frames the page's Babylon objects as Main's evaluation of the same value does.
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { Camera, Matrix, NullEngine, Scene, Vector3 } from '@babylonjs/core';
 import { blenderMain } from '../src/bmesh/bmesh-wasm.js';
@@ -55,6 +56,13 @@ animation.insert([slide], 30, keyLight.position.x + 2);
 const files = await exportModule(world);
 assert.doesNotMatch(files['scene.js'], /bylonder-blocks/, 'a scene without a compositor ships no blocks library');
 assert.ok(files['scene.d.ts'].includes(`'objects["Flywheel"].location[0]': number;`), 'scene.d.ts types the controls');
+// Babylon module by module (babylon-modules.js), so a page loads only what its scene uses: the classes its data names
+// registered before they parse, and no module of the package importing the whole of @babylonjs/core.
+for (const [path, code] of Object.entries(packageFiles(files)).filter(([path]) => path.endsWith('.js'))) {
+  assert.doesNotMatch(String(code), /from '@babylonjs\/core'|import \* as \w+ from '@babylonjs\/core/, `${path} imports Babylon module by module`);
+}
+assert.match(packageFiles(files)['scene.js'], /^import '@babylonjs\/core\/Materials\/PBR\/pbrMaterial\.js';$/m, 'the materials\' class registered');
+assert.match(packageFiles(files)['scene.js'], /^import '@babylonjs\/core\/Lights\/\w+Light\.js';$/m, 'the lights\' constructors');
 // The GPU engine target (export-options.js TARGETS): scene.js makes that engine, and the package ships the WebGPU
 // overrides only for a target with WebGPU. A WebGL 2 package still loads.
 const shipped = (files) => Object.keys(packageFiles(files)).filter((path) => path.startsWith('bylonder/overrides/webgpu/') && path.endsWith('.js'));
@@ -74,6 +82,12 @@ assert.ok((await (await import(webgl2Package.url)).load(new NullEngine())).scene
 webgl2Package.remove();
 
 const written = writePackage(files);
+// The package alone, in a process that imports nothing else of Babylon's: its own imports register what it parses.
+const alone = `const { NullEngine } = await import(${JSON.stringify(import.meta.resolve('@babylonjs/core/Engines/nullEngine.js'))});
+const { scene } = await (await import(${JSON.stringify(written.url)})).load(new NullEngine());
+console.log(scene.meshes.length, scene.lights.length, scene.cameras.length);`;
+const [aloneMeshes, aloneLights, aloneCameras] = execFileSync(process.execPath, ['--input-type=module', '-e', alone], { encoding: 'utf8' }).trim().split('\n').at(-1).split(' ').map(Number);
+assert.ok(aloneMeshes && aloneLights && aloneCameras, 'the package loads with only the Babylon modules it imports');
 const blend = await (await import(written.url)).load(new NullEngine());
 const page = blend.scene;
 

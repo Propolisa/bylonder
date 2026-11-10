@@ -5,16 +5,16 @@ import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'nod
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { gplFiles, packagedRuntime, packageOverrides, packageRuntime } from '../src/io_scene_babylon/runtime-files.js';
+import { gplFiles, packagedModules, packagedRuntime, packageOverrides, packageRuntime } from '../src/io_scene_babylon/runtime-files.js';
 
-const CORE = JSON.stringify(import.meta.resolve('@babylonjs/core'));
+const CORE = import.meta.resolve('@babylonjs/core').replace(/index\.js$/, '');
 const src = (path) => readFileSync(new URL(`../src/${path}`, import.meta.url));
 
 // The package's files by path, as export.js zips them.
 export function packageFiles(files) {
   const withRuntime = { ...files, ...Object.fromEntries(packageRuntime(files).map(([path, name]) => [path, packagedRuntime(String(src(`io_scene_babylon/runtime/${name}`)))])) };
-  return { ...withRuntime, ...Object.fromEntries(packageOverrides(withRuntime).map(([path, from]) => [path, src(from)])),
-    ...Object.fromEntries(gplFiles(files).map(([path, from]) => [path, src(from)])) };
+  return packagedModules({ ...withRuntime, ...Object.fromEntries(packageOverrides(withRuntime).map(([path, from]) => [path, src(from)])),
+    ...Object.fromEntries(gplFiles(files).map(([path, from]) => [path, src(from)])) });
 }
 
 // `dir`: where to write it (default a new temporary folder).
@@ -22,7 +22,7 @@ export function writePackage(files, dir = mkdtempSync(join(tmpdir(), 'bylonder-p
   const all = packageFiles(files);
   for (const [path, data] of Object.entries(all)) {
     mkdirSync(dirname(join(dir, path)), { recursive: true });
-    writeFileSync(join(dir, path), /\.m?js$/.test(path) ? String(data).replace(/(['"])@babylonjs\/core\1/g, CORE) : data);
+    writeFileSync(join(dir, path), /\.m?js$/.test(path) ? String(data).replace(/(['"])@babylonjs\/core(?:\/([^'"]+))?\1/g, (_, quote, path) => JSON.stringify(CORE + (path ?? 'index.js'))) : data);
   }
   return { dir, url: pathToFileURL(join(dir, 'scene.js')).href, remove: () => rmSync(dir, { recursive: true }) };
 }
