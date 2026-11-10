@@ -8,6 +8,12 @@ export function applyRenderSettings(engine, settings=renderSettings()){
   const level=settings.mode==='custom'?settings.ratio:1/(devicePixelRatio||1);
   if(engine.getHardwareScalingLevel()!==level)engine.setHardwareScalingLevel(level);
 }
+// The engine at a view canvas's size, as a page's canvas has it before its scene is made: what a project sizes from the
+// canvas (a glow layer's textures, god rays' map) is never empty, which WebGPU fails along with the frame's other passes.
+export function sizeToCanvas(engine, canvas){
+  const level=engine.getHardwareScalingLevel();
+  engine.setSize(Math.max(1,Math.floor(canvas.clientWidth/level)),Math.max(1,Math.floor(canvas.clientHeight/level)));
+}
 export function setupRenderSettings(onChange){
   const dialog=document.createElement('dialog');dialog.className='workbench-dialog';
   dialog.innerHTML='<h2>Viewport resolution</h2><label><input data-native type="checkbox">Native screen resolution</label><label>Hardware scaling ratio <input data-ratio type="number" min="0.25" max="4" step="0.05"></label><p>1 = one render pixel per CSS pixel. 0.5 = twice the resolution; 2 = half. Lower ratios look sharper and use more GPU power.</p><p data-resolution></p><div class="dialog-actions"><button data-close>Close</button></div>';
