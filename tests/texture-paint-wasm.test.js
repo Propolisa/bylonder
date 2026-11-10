@@ -14,7 +14,8 @@ import { Window, loadKeyconfig, SPACE_VIEW3D, RGN_TYPE_WINDOW } from '../src/win
 
 const SPACE_IMAGE = 6, RGN_TYPE_UI = 4;
 import { imageTexture, updateImageTextures } from '../src/imbuf/image-textures.js';
-import { registerRuntimeTypes, evaluated } from '../src/runtimes/runtimes.js';
+import { registerRuntimeTypes, evaluated, exportRuntimes } from '../src/runtimes/runtimes.js';
+import { subscribeReports } from '../src/windowmanager/wm-reports.js';
 import '../src/runtimes/image.js';
 import { bylonderIcon, BYLONDER_ICON } from '../src/python/bpy_icons.js';
 import { regionPanels, categorySet } from '../src/editors/interface/ui-tree.js';
@@ -104,6 +105,17 @@ assert.equal(texture.anisotropicFilteringLevel, 8, 'Babylon\'s anisotropic filte
 assert.equal(texture.samplingMode, Texture.BILINEAR_SAMPLINGMODE, 'Babylon\'s sampling without mipmaps');
 image.bylonder.runtime = 'BLENDER';
 evaluated({});
+// File > Export choosing Babylon (native) for the image (export-options.js) samples its textures so while it writes, then
+// as its own runtime again; a choice image sampling does not offer is reported, and the image exports with its own.
+const exporting = exportRuntimes({}, { runtimes: { IMAGE: { instances: { [image.name]: 'NATIVE' } } } });
+assert.equal(texture.anisotropicFilteringLevel, 8, "exported with Babylon's anisotropic filtering");
+exporting.restore();
+assert.equal(texture.anisotropicFilteringLevel, Math.max(1, anisotropy), "drawn with Blender's again");
+const reports = [];
+subscribeReports((r) => reports.push(r));
+exportRuntimes({}, { runtime: 'MAPPED' }).restore();
+assert.ok(reports.some((r) => r.type === 'WARNING' && r.message === `${image.name}: Image sampling exported on Blender, Babylon (mapped) is not offered`), JSON.stringify(reports));
+assert.equal(texture.anisotropicFilteringLevel, Math.max(1, anisotropy));
 
 // Its Runtime panel in the Image Editor's sidebar, Image tab, with the Bylonder icon.
 const imageArea = window.area(SPACE_IMAGE);

@@ -246,6 +246,7 @@ function influenceAnimations(world, mapped) {
 registerRuntime({
   id: 'SHAPE_KEYS', label: 'Shape keys', struct: 'Key', owner: (context) => context.mesh?.shape_keys ?? null, context: 'data', icon: 'SHAPEKEY_DATA',
   runtimes: ['BLENDER', 'MAPPED'],
+  instanceLabel: (key) => `${key.user.name} (${key.name})`,
   settings: (props, kw) => ({
     use_normal_morphing: props.BoolProperty(kw({ name: 'Morph Normals', description: "Normals blended with the positions (MorphTargetManager's enableNormalMorphing)",
       default: true, options: new Set() })),

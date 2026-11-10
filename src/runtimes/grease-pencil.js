@@ -18,6 +18,8 @@ const APPROXIMATIONS = [
 registerRuntime({
   id: 'GREASE_PENCIL', label: 'Grease Pencil drawing', struct: 'GreasePencil', owner: 'grease_pencil', context: 'data', icon: 'OUTLINER_DATA_GREASEPENCIL',
   runtimes: ['BLENDER', 'MAPPED'],
+  // A package's page draws strokes as Blender's look: GreasedLine's own settings are not written yet.
+  exported: ['BLENDER'],
   settings: (props, kw) => ({
     use_size_attenuation: props.BoolProperty(kw({ name: 'Size Attenuation', description: "Strokes keep their thickness on screen at any distance (GreasedLine's sizeAttenuation)",
       default: false, options: new Set() })),

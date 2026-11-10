@@ -338,10 +338,11 @@ const authoredMetadata = (node) => {
 // restores, else one made and restored here. Materials of Blender's shader nodes are written as Babylon's own blocks
 // (node-material-export.js), with Bylonder's EEVEE extensions when `parity`.
 // `graphOf` gives a material's IR graph key, for a package whose page builds its nodes from the IR. `bake: false` is for a
-// package whose page runs F-Curves Babylon cannot play exactly.
-export async function serializeScene(world, { geometry = true, live = null, mapped = null, parity = false, graphOf = () => null, bake = true } = {}) {
+// package whose page runs F-Curves Babylon cannot play exactly. `runtime`, `runtimes`: the runtimes chosen for the export
+// (export-options.js).
+export async function serializeScene(world, { geometry = true, live = null, mapped = null, parity = false, graphOf = () => null, bake = true, runtime = null, runtimes: chosen = {} } = {}) {
   await world.modifiers.settled();
-  const runtimes = mapped ?? exportRuntimes(world, { bake });
+  const runtimes = mapped ?? exportRuntimes(world, { bake, runtime, runtimes: chosen });
   try {
     return await serializeMapped(world, { geometry, live, mapped: runtimes, parity, graphOf, bake });
   } finally {

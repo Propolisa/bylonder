@@ -1,6 +1,7 @@
 // File > Export's options: one schema, the source of their defaults and types. A value that does not parse is repaired to
 // its default with a warning, as readIR repairs an IR (runtime/ir.js).
 import * as z from 'zod/mini';
+import { RUNTIMES } from '../runtimes/runtimes.js';
 
 // The GPU engine a package's page is made for: [identifier, name, description], as an EnumProperty's items.
 export const TARGETS = [
@@ -9,9 +10,21 @@ export const TARGETS = [
   ['WEBGL2', 'WebGL 2', 'The page creates a WebGL 2 engine only, and ships no WebGPU overrides of its own'],
 ];
 
-const repaired = (name, schema, fallback) => z.catch(z._default(schema, fallback), ({ value }) => {
-  console.warn(`Export option ${name}: ${JSON.stringify(value)} is not valid, ${JSON.stringify(fallback)} used`);
-  return fallback;
+// `fallback`: the default, or a function making it (a fresh object each time).
+const repaired = (name, schema, fallback) => {
+  const made = () => (typeof fallback === 'function' ? fallback() : fallback);
+  return z.catch(z._default(schema, made), ({ value }) => {
+    console.warn(`Export option ${name}: ${JSON.stringify(value)} is not valid, ${JSON.stringify(made())} used`);
+    return made();
+  });
+};
+// A runtime (runtimes.js RUNTIMES) chosen at one level of the export's tree, or null: unset, inherited from the level above.
+const chosen = (name) => repaired(name, z.nullable(z.enum(Object.keys(RUNTIMES))), null);
+const FeatureRuntimes = z.object({
+  /** for every instance of the feature */
+  runtime: chosen('runtime'),
+  /** by instance name (the name of the struct the feature lives on, runtimes.js) */
+  instances: repaired('instances', z.record(z.string(), chosen('instance runtime')), () => ({})),
 });
 
 export const ExportOptionsSchema = z.object({
@@ -23,7 +36,12 @@ export const ExportOptionsSchema = z.object({
   bakeAnimation: repaired('bakeAnimation', z.boolean(), false),
   /** the GPU engine a package's page creates (TARGETS) */
   target: repaired('target', z.enum(TARGETS.map(([id]) => id)), 'BOTH'),
+  /** the runtime every feature instance exports with; null: each its own (docs/runtimes.md) */
+  runtime: chosen('runtime'),
+  /** by runtimes.js feature id, overriding `runtime` for that feature and its instances */
+  runtimes: repaired('runtimes', z.record(z.string(), repaired('feature runtimes', FeatureRuntimes, () => ({ runtime: null, instances: {} }))), () => ({})),
 });
 
 /** The options given, with defaults filled and what does not parse repaired. */
 export const exportOptions = (options = {}) => z.parse(ExportOptionsSchema, options);
+

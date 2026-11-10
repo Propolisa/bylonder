@@ -5,7 +5,7 @@
 // the runtime panels and the Scene tab's Runtimes panel are drawn from it by Blender's Properties editor
 // (`registerRuntimeTypes`). The choice is `<struct>.bylonder.runtime`, saved in the .blend as a custom property.
 import { __class__, __kwargtrans__ } from '../bl_py/org.transcrypt.__runtime__.js';
-import { registerClass, defineAssignedProperties, pointerOf } from '../python/bpy_rna.js';
+import { registerClass, defineAssignedProperties, pointerOf, contextStruct } from '../python/bpy_rna.js';
 import { report } from '../windowmanager/wm-reports.js';
 
 export const RUNTIMES = {
@@ -19,8 +19,9 @@ export const APPROXIMATION = 'APPROXIMATION', FALLBACK = 'FALLBACK';
 // sidebar ({ space, category }: its panel's place in an editor's sidebar instead), owner (the context member holding it,
 // or a function of the context giving it),
 // runtimes (the identifiers it offers), settings (its Babylon-only settings, bpy.props by name), poll(struct),
-// issues(struct): [{ kind, setting, message }], instances(view): the structs it evaluates, evaluates(entry),
-// evaluate(view), export(world, { bake }): { issues, animations, curves?, gaps?, restore } }.
+// issues(struct): [{ kind, setting, message }], instances(context): the structs it evaluates, evaluates(entry),
+// evaluate(view), instanceLabel(struct) (its name in lists, default the struct's), exported (the runtimes its export writes as such; default all it offers), export(world, { bake,
+// runtime(struct): the runtime an instance exports with }): { issues, animations, curves?, gaps?, restore } }.
 const features = [];
 export function registerRuntime(feature) {
   features.push(feature);
@@ -49,13 +50,43 @@ function reportIssues(title, issues) {
 // Export (io_scene_babylon): every feature's instances mapped into Babylon for the file (those in Blender for its
 // duration), their issues reported, and Babylon animations of what Blender's animation system drives that the mapping
 // makes (a skeleton's bones). Without `bake`, F-Curves a package's page runs instead (live-curves.js) go in `curves`,
-// and what is still sampled in `gaps`. Returns { animations: [{ animation, target }], curves, gaps, restore() }.
-export function exportRuntimes(world, { bake = true } = {}) {
-  const results = features.map((feature) => feature.export(world, { bake }));
+// and what is still sampled in `gaps`. `choice`: File > Export's runtime options (export-options.js), each instance on its
+// own runtime where they choose none. Returns { animations: [{ animation, target }], curves, gaps, restore() }.
+export function exportRuntimes(world, { bake = true, ...choice } = {}) {
+  const results = features.map((feature) => feature.export(world, { bake, runtime: exportedRuntime(feature, choice) }));
   for (const { title, issues } of results.flatMap((r) => r.reports)) reportIssues(title, issues);
   return { animations: results.flatMap((r) => r.animations), curves: results.flatMap((r) => r.curves ?? []), gaps: results.flatMap((r) => r.gaps ?? []),
     restore: () => results.forEach((r) => r.restore()) };
 }
+
+// The runtime File > Export's options (export-options.js) choose for an instance of a feature: set on the instance, else
+// its feature, else the package; null: its own.
+export function chosenRuntime({ runtime = null, runtimes = {} }, feature, instance) {
+  const set = runtimes[feature];
+  return set?.instances?.[instance] ?? set?.runtime ?? runtime;
+}
+// Why a feature's instance cannot export with a runtime, or null.
+const exports = (feature, runtime) => (feature.exported ?? feature.runtimes).includes(runtime);
+export const exportIssue = (feature, runtime) => (!feature.runtimes.includes(runtime) ? `${RUNTIMES[runtime][0]} is not offered`
+  : !exports(feature, runtime) ? `its export does not carry ${RUNTIMES[runtime][0]} yet` : null);
+// The runtime each instance of a feature exports with: the one the export chooses for it, else its own. One its feature
+// does not offer or does not export as such is reported to the Info editor, and the instance exports with its own (or
+// Blender, if its own is not exported either).
+function exportedRuntime(feature, choice) {
+  const runtimes = new Map();
+  for (const struct of feature.instances(contextStruct())) {
+    const own = runtimeOf(struct), chosen = chosenRuntime(choice, feature.id, struct.name) ?? own;
+    const runtime = exports(feature, chosen) ? chosen : exports(feature, own) ? own : 'BLENDER';
+    if (runtime !== chosen) report('WARNING', `${struct.name}: ${feature.label} exported on ${RUNTIMES[runtime][0]}, ${exportIssue(feature, chosen)}`);
+    runtimes.set(struct.name, runtime);
+  }
+  return (struct) => runtimes.get(struct.name) ?? runtimeOf(struct);
+}
+
+// File > Export's runtime tree (export-dialog.js): each feature with instances in the context, and its instances' own
+// runtimes.
+export const exportChoices = (context) => features.map((feature) => ({ feature, instances: feature.instances(context).map((struct) => ({ name: struct.name, label: feature.instanceLabel?.(struct) ?? struct.name, own: runtimeOf(struct) })) }))
+  .filter(({ instances }) => instances.length);
 
 // ---- Blender's side: `bylonder` on each struct a feature lives on, as an add-on registers its properties, and the panels.
 const kw = (keywords) => __kwargtrans__(keywords);

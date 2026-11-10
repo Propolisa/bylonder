@@ -19,7 +19,7 @@ onMounted(() => root.value.querySelector("button")?.focus());
 <template>
   <div class="bl-ui fixed inset-0 z-[2000]" @pointerdown="outside">
     <div ref="root" role="dialog" :aria-label="title"
-      class="absolute left-1/2 top-1/2 flex max-h-[calc(100vh-16px)] w-[360px] -translate-x-1/2 -translate-y-1/2 flex-col gap-2 overflow-y-auto rounded-md border border-border bg-background p-2 text-sm text-foreground shadow-[var(--bl-shadow-popup)]"
+      class="absolute left-1/2 top-1/2 flex max-h-[calc(100vh-16px)] w-[440px] -translate-x-1/2 -translate-y-1/2 flex-col gap-2 overflow-y-auto rounded-md border border-border bg-background p-2 text-sm text-foreground shadow-[var(--bl-shadow-popup)]"
       @keydown.enter.prevent="done(true)" @keydown.esc.prevent="done(false)">
       <div class="px-1 font-semibold">{{ title }}</div>
       <template v-for="field in fields" :key="field.name">
@@ -34,7 +34,7 @@ onMounted(() => root.value.querySelector("button")?.focus());
         <SettingRow v-for="node in tree" :key="node.key" :node="node" />
       </div>
       <p v-if="note" class="px-1 text-muted-foreground">{{ note }}</p>
-      <Button @click="done(true)">Export</Button>
+      <Button class="self-end" @click="done(true)">Export</Button>
     </div>
   </div>
 </template>

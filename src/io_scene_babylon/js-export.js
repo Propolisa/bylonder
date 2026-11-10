@@ -196,12 +196,12 @@ function greasePencilClock(world, ir, groups) {
 // The package's files but the runtime's: scene.js, scene.d.ts, scene.ir.json, scene.bin and images/. With `live`, objects whose
 // modifiers are all Blender's keep them live (modifiers-export.js), run by modifiers.wasm in bylonder-modifiers/. With
 // `bakeAnimation`, what Babylon cannot play as its F-Curve is sampled per frame; `target`, the GPU engine its page makes
-// (export-options.js TARGETS).
-export async function exportModule(world, { live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, target = 'BOTH' } = {}) {
+// (export-options.js TARGETS); `runtime`, `runtimes`, the runtimes its features export with (runtimes.js chosenRuntime).
+export async function exportModule(world, { live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, target = 'BOTH', runtime = null, runtimes = {} } = {}) {
   const live = new Map(keepLive ? world.objects.map((node) => [node, world.modifiers.live(node)]).filter(([node, stack]) => stack && !stack.modifiers.some(needsOpenVDB) && !readsOtherIDs(world, node)) : []);
   await world.modifiers.settled();
   // The mapped meshes' geometry is read below: their mapping holds until the module is written.
-  const mapped = exportRuntimes(world, { bake: bakeAnimation });
+  const mapped = exportRuntimes(world, { bake: bakeAnimation, runtime, runtimes });
   try {
     return await moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, target });
   } finally {

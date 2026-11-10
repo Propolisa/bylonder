@@ -2,7 +2,7 @@
 id: import-export
 title: Import and Export
 summary: Bring scenes in and write them out with Blender's own importers and exporters (Wavefront OBJ, Stanford PLY, STL, FBX) and its default add-ons (glTF 2.0, FBX export, Motion Capture, SVG as Curves), through the browser's file dialogs with each format's options.
-expect: OBJ, PLY, STL, FBX, glTF 2.0, BVH and SVG import and export with Blender's own code and options; the add-ons' entries wait a few seconds for Python the first time File opens, Alembic and USD are greyed out, and an export's extra files download. File > Export > JavaScript asks which GPU engine its page makes (WebGPU, WebGL 2, or WebGPU where the browser has it).
+expect: OBJ, PLY, STL, FBX, glTF 2.0, BVH and SVG import and export with Blender's own code and options; the add-ons' entries wait a few seconds for Python the first time File opens, Alembic and USD are greyed out, and an export's extra files download. File > Export > JavaScript asks which GPU engine its page makes (WebGPU, WebGL 2, or WebGPU where the browser has it) and which runtime each feature exports with, for the package, a feature or one instance.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/files/import_export/index.html
@@ -22,6 +22,8 @@ media:
   - import-export/imported.png
   - import-export/export-menu.png
   - import-export/export-options.png
+  - import-export/export-javascript.png
+  - import-export/export-javascript-override.png
 ui:
   - TOPBAR_MT_file
   - TOPBAR_MT_file_import*
@@ -55,12 +57,15 @@ code:
   - src/io_scene_babylon/export-dialog.js
   - src/editors/interface/components/ExportDialog.vue
   - src/editors/interface/components/SettingRow.vue
+  - src/runtimes/runtimes.js
 tests:
   - tests/io-wasm.test.js
   - tests/io-addons-wasm.test.js
   - tests/e2e/smoke.mjs
   - tests/export-options.test.js
   - tests/export-package-wasm.test.js
+  - tests/runtimes-armature-wasm.test.js
+  - tests/texture-paint-wasm.test.js
 limits:
   - Alembic is greyed out until the module is built with C++ exceptions, which its reader relies on.
   - Universal Scene Description is greyed out; OpenUSD needs threads and run-time plugins the module does not have.
@@ -69,6 +74,10 @@ limits:
   - The file dialogs are the browser's; an export with several files (an OBJ's .mtl, a .gltf's .bin and textures) saves the first where you choose and downloads the others.
   - Imported color attributes are kept in Main; Solid shading's Attribute color and the Color Attribute node do not draw them yet.
   - File > Export > JavaScript's GPU Engine: a WebGL 2 package still ships the few WebGPU overrides its runtime files import (node material samplers, curves' attributes, the world cube's texture type); they do nothing on WebGL 2.
+  - File > Export's Runtime: an armature and shape keys export the same on Blender and Babylon (mapped), through the mapping (docs/runtimes.md, Export); the choice changes what an image's sampling exports.
+  - Grease Pencil drawings export as Blender draws them: Babylon (mapped) chosen for them is reported to the Info editor, as GreasedLine's own settings are not written yet.
+  - A runtime a feature does not offer (Babylon (native) for an armature) is reported to the Info editor, and its instances export with their own.
+  - The export's settings are asked each time; they are not saved with the project.
   - The package's createEngine is for pages; in Node (the headless SDK) pass a NullEngine to load as before.
   - The splash's Open from URL downloads only from servers that allow downloads from a web page (CORS); Blender's demo files are served from Bylonder's own copy for that reason.
 ---
@@ -117,6 +126,21 @@ Bronze and Marble materials. The steps below take the bust out and import it aga
 
    ![The STL exporter's options](../media/features/import-export/export-options.png)
 
+6. **Export for Babylon.** File > Export > JavaScript (.zip) writes a package that loads in plain Babylon.js. Below its
+   checkboxes, its settings are a tree: GPU Engine, then Runtime with each feature that has a runtime choice and, under
+   each, the scene's instances of it. A setting left unset shows what it inherits greyed, with a linked decorator; hover
+   it to see where the value comes from. Unset everywhere, each instance exports with its own
+   [runtime](../runtimes.md).
+
+   ![File > Export > JavaScript's settings, inherited](../media/features/import-export/export-javascript.png)
+
+7. **Override.** Set Runtime to Babylon (native): every feature inherits it, and an armature, which does not offer it,
+   shows an error icon (its instances export with their own, reported in the Info editor). Right click Rig and choose
+   Blender: its field turns teal with the override decorator, as Blender draws an overridden property; Remove Override
+   in the same menu, or the decorator, makes it inherit again.
+
+   ![A package-wide runtime and the rig's override](../media/features/import-export/export-javascript-override.png)
+
 ## Project files
 
 - [import-export.py](../../examples/import-export/import-export.py): writes bust.glb with Blender 5.2's glTF exporter,
@@ -128,4 +152,6 @@ Bronze and Marble materials. The steps below take the bust out and import it aga
   [io-addon-fixtures.py](../../tools/blender-reference/io-addon-fixtures.py): the files and Blender's own import results
   the tests compare with ([io-wasm.test.js](../../tests/io-wasm.test.js),
   [io-addons-wasm.test.js](../../tests/io-addons-wasm.test.js)).
-- [record-import-export.mjs](../../tools/docs/record-import-export.mjs): records this page's pictures.
+- [record-import-export.mjs](../../tools/docs/record-import-export.mjs) and
+  [record-export-javascript.mjs](../../tools/docs/record-export-javascript.mjs) (on the Rigged Character example):
+  record this page's pictures.

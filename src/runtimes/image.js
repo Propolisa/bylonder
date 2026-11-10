@@ -13,13 +13,20 @@ const LINEAR = { true: Texture.TRILINEAR_SAMPLINGMODE, false: Texture.BILINEAR_S
 const sampleAsBabylon = (texture, { anisotropic_filtering, use_mipmaps }) =>
   sample(texture, anisotropic_filtering, (texture.metadata.interpolation === 'Closest' ? NEAREST : LINEAR)[use_mipmaps]);
 
-function evaluate() {
+// Every image's textures sampled as `runtime(image)` says.
+function sampleImages(runtime) {
   const images = [...blendData().images];
   for (const image of images) {
-    const native = runtimeOf(image) === 'NATIVE';
+    const native = runtime(image) === 'NATIVE';
     for (const texture of imageTextures(image)) (native ? sampleAsBabylon(texture, image.bylonder.babylon) : sampleAsBlender(texture));
   }
   return images;
+}
+
+// Export writes the textures' sampling: sampled as the export chooses, then as their own runtime again.
+function exportImages(world, { runtime }) {
+  sampleImages(runtime);
+  return { reports: [], animations: [], restore: () => sampleImages(runtimeOf) };
 }
 
 registerRuntime({
@@ -35,6 +42,6 @@ registerRuntime({
   issues: () => [],
   instances: (context) => [...context.blend_data.images],
   evaluates: () => false,
-  evaluate,
-  export: () => ({ reports: [], animations: [], restore() {} }),
+  evaluate: () => sampleImages(runtimeOf),
+  export: exportImages,
 });

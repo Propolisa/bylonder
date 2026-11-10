@@ -254,4 +254,17 @@ assert.equal(body.skeleton, null);
 assert.equal(scene.skeletons.length, 0);
 assert.ok(drawnError() < PRECISION);
 
+// File > Export's runtime choice (export-options.js): Babylon (mapped) chosen for the rig exports as on Blender, through
+// the mapping (docs/runtimes.md, Export); Babylon (native), which an armature does not offer, is reported and the rig
+// exports with its own.
+reports.length = 0;
+const chosenMapped = await serializeScene(world, { runtimes: { ARMATURE: { instances: { Rig: 'MAPPED' } } } });
+assert.equal(chosenMapped.meshes.find((m) => m.name === 'Body').skeletonId, 'Rig');
+assert.ok(!reports.some((r) => r.type === 'WARNING' && /exported on/.test(r.message)), 'a choice it offers is not reported');
+const chosenNative = await serializeScene(world, { runtime: 'NATIVE' });
+assert.equal(chosenNative.meshes.find((m) => m.name === 'Body').skeletonId, 'Rig');
+assert.ok(reports.some((r) => r.type === 'WARNING' && r.message === 'Rig: Armature deform exported on Blender, Babylon (native) is not offered'), JSON.stringify(reports));
+assert.equal(rig.bylonder.runtime, 'BLENDER', 'the export leaves the rig on its own runtime');
+assert.equal(scene.skeletons.length, 0);
+
 console.log('Armature runtimes: the Rigged Character skinned by Babylon as Main deforms it at 3 poses and 2 frames of an action, the Runtime panel, approximations and fallbacks, Edit Mode, .babylon and .js export reloaded and skinned the same');

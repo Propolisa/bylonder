@@ -60,6 +60,9 @@ Blender is the default everywhere, and the only runtime of features that offer n
 6. **Export** writes Babylon objects. A feature in Blender or Babylon (mapped) is exported through the mapping, with its
    approximations reported (a fallback part is exported as its evaluated result, baked). A feature in Babylon (native)
    is exported with its Babylon settings. Babylon (mapped) is therefore a live preview of the export.
+   File > Export's Runtime setting can choose one runtime for the package, a feature or an instance instead of each
+   instance's own (`runtimes.js` `chosenRuntime`); a choice a feature does not offer or does not export yet is reported to
+   the Info editor, and the instance exports with its own.
 7. **Files.** The runtime and Babylon's settings are saved in the .blend on the struct that holds the feature (custom
    properties under `bylonder`), so desktop Blender opens the file unchanged and evaluates it as Blender.
 

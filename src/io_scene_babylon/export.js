@@ -37,7 +37,7 @@ async function scenePackage(world, options) {
 }
 
 const FORMATS = {
-  babylon: { extension: 'babylon', type: 'application/json', build: async (world, name, { parity }) => JSON.stringify(await serializeScene(world, { parity })) },
+  babylon: { extension: 'babylon', type: 'application/json', build: async (world, name, { parity, runtime, runtimes }) => JSON.stringify(await serializeScene(world, { parity, runtime, runtimes })) },
   js: { extension: 'zip', type: 'application/zip', build: async (world, name, options) => zipSync(await scenePackage(world, options)) },
   'js-live': { extension: 'zip', type: 'application/zip', build: async (world, name, options) => zipSync(await scenePackage(world, { ...options, live: true })) },
 };
