@@ -257,7 +257,9 @@ import { BlendScene } from './bylonder/blend-scene.js';
 import { derivativeUniformity } from './bylonder/overrides/webgpu/derivative-uniformity.js';
 import { reservedNames } from './bylonder/overrides/webgpu/reserved-names.js';
 import { webgpuSamplers } from './bylonder/overrides/webgpu/samplers.js';
-import { warnUnlessMaximumLimits } from './bylonder/overrides/webgpu/maximum-limits.js';${kernels ? `
+import { warnUnlessMaximumLimits } from './bylonder/overrides/webgpu/maximum-limits.js';
+import { parsePostProcess } from './bylonder/overrides/babylon/god-rays-parse.js';${turnedCameras.length ? `
+import { turnByQuaternion } from './bylonder/overrides/babylon/camera-quaternion.js';` : ''}${kernels ? `
 import { fillMaterials } from './bylonder/materials.js';
 import kernels from './${NODE_KERNELS}';` : ''}${curves ? `
 // The curves blocks the materials drawing curves use, before they are parsed.
@@ -265,10 +267,11 @@ import './${CURVES_GLSL_FILE}';` : ''}${volumes ? `
 // The volume passes, whose blocks the volume materials use, before they are parsed.
 import { sceneVolumes } from './${VOLUMES_FILE}';` : ''}${display ? `
 import { viewTransform } from './bylonder-view-transform.js';` : ''}${areaLights ? `
-import { parseLight } from './bylonder-area-light.js';` : ''}${composited ? `
+import { AreaLight } from './bylonder-area-light.js';
+import { parseLight } from './bylonder/overrides/babylon/area-light-parse.js';` : ''}${composited ? `
 import { compositor } from './bylonder-blocks.js';` : ''}${areaSpecular ? `
 import { blenderAreaSpecular } from './${AREA_SPECULAR}';` : ''}
-import { Animation, AnimationGroup, CascadedShadowGenerator, Color3, Color4, CubeTexture, EffectLayer, Geometry, HDRCubeTexture, Light, LinesMesh, Material, Matrix, Mesh, MorphTargetManager, MultiMaterial, PostProcess, Quaternion, ReflectionProbe, Scene, SerializationHelper, ShadowGenerator, Skeleton, SubMesh, TransformNode, Vector3, Camera, ParticleSystem } from '@babylonjs/core';
+import { Animation, AnimationGroup, CascadedShadowGenerator, Color3, Color4, CubeTexture, EffectLayer, Geometry, HDRCubeTexture, Light, LinesMesh, Material, Matrix, Mesh, MorphTargetManager, MultiMaterial, Quaternion, ReflectionProbe, Scene, SerializationHelper, ShadowGenerator, Skeleton, SubMesh, TransformNode, Vector3, Camera, ParticleSystem } from '@babylonjs/core';
 import * as BABYLON from '@babylonjs/core';
 
 // Images and scene.bin sit beside this module.
@@ -307,13 +310,6 @@ const COMPOSITOR = ${json(composited.compositor)};` : ''}
 const SCREEN_SPACE = {
   SSRRenderingPipeline: (entry, scene) => new BABYLON.SSRRenderingPipeline(entry._name, scene, undefined, true, BABYLON.Constants.TEXTURETYPE_HALF_FLOAT),
   SSAO2RenderingPipeline: (entry, scene) => new BABYLON.SSAO2RenderingPipeline(entry._name, scene, entry._ratio, undefined, true, BABYLON.Constants.TEXTURETYPE_HALF_FLOAT),
-};
-
-// Post processes Babylon parses as plain ones, built as their class: god rays, with the pass that draws their source.
-const POST_PROCESS_TYPES = {
-  'BABYLON.VolumetricLightScatteringPostProcess': (entry, scene) => new BABYLON.VolumetricLightScatteringPostProcess(entry.name, entry.options,
-    scene.getCameraById(entry.cameraId), scene.getMeshById(entry.mesh), +/NUM_SAMPLES (\\d+)/.exec(entry.defines ?? '')?.[1] || undefined,
-    entry.renderTargetSamplingMode, undefined, entry.reusable, scene),
 };
 
 // Each built scene's IR, world, compositor and scene.bin buffers, which load gives its controls.
@@ -376,7 +372,7 @@ ${geometryLines.join('\n')}
 
   const nodes = {};
 ${objectLines}
-${parse('LIGHTS', data.lights, `nodes[entry.uniqueId] = ${areaLights ? 'parseLight' : 'Light.Parse'}(entry, scene)`)}${parse('CAMERAS', data.cameras, 'nodes[entry.uniqueId] = Camera.Parse(entry, scene)')}${turnedCameras.length ? `  for (const id of ${json(turnedCameras)}) nodes[id].rotationQuaternion = Quaternion.FromEulerVector(nodes[id].rotation);
+${parse('LIGHTS', data.lights, `nodes[entry.uniqueId] = ${areaLights ? 'parseLight(entry, scene, AreaLight)' : 'Light.Parse(entry, scene)'}`)}${parse('CAMERAS', data.cameras, 'nodes[entry.uniqueId] = Camera.Parse(entry, scene)')}${turnedCameras.length ? `  for (const id of ${json(turnedCameras)}) turnByQuaternion(nodes[id]);
 ` : ''}
 ${parented.map((e) => `  nodes[${e.uniqueId}].parent = nodes[${e.parentId}] ?? null;`).join('\n')}${data.lights.some((l) => l.excludedMeshesIds?.length || l.includedOnlyMeshesIds?.length) ? `
   // The meshes each light leaves out or lights alone, by id, as Babylon's loader resolves them once the meshes exist.
@@ -394,11 +390,7 @@ ${parse('REFLECTION_PROBES', data.reflectionProbes, "ReflectionProbe.Parse(entry
     if (make) SerializationHelper.Parse(() => make(entry, scene), entry, scene, ROOT);
     else BABYLON[entry.customType]?.Parse(entry, scene, ROOT);
   }
-  for (const entry of POST_PROCESSES) {
-    const make = POST_PROCESS_TYPES[entry.customType];
-    if (make) SerializationHelper.Parse(() => make(entry, scene), entry, scene, ROOT);
-    else PostProcess.Parse(entry, scene, ROOT);
-  }${volumes ? `
+  for (const entry of POST_PROCESSES) parsePostProcess(entry, scene, ROOT);${volumes ? `
   // EEVEE's volumes, resolved over each camera's render before its other post-processes.
   sceneVolumes(scene, VOLUMES, materials, WORLDS.get(scene)?.box ?? null);` : ''}
 ${data.animationGroups.some((g) => g.targetedAnimations.some((t) => t.animation.property === CLOCK)) ? `  // The frame Babylon's animation keeps where the page's F-Curves are all that moves.

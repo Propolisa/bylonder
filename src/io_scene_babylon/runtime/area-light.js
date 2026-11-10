@@ -4,7 +4,7 @@
 // for its area lights, so this one is a shadow light (Babylon's IShadowLight) whose shadow is a point light's cube from
 // its center, as EEVEE's punctual shadow of an area light is. The app's Area Light Shadows extension
 // (blenkernel/light/area-light.js), and an exported page's area lights.
-import { Light, Matrix, Node, RectAreaLight, Vector3 } from '@babylonjs/core';
+import { Matrix, RectAreaLight, Vector3 } from '@babylonjs/core';
 
 /** @typedef {import('@babylonjs/core').Scene} Scene @typedef {import('@babylonjs/core').Camera} Camera */
 
@@ -52,22 +52,5 @@ export class AreaLight extends RectAreaLight {
     const minZ = this.getDepthMinZ(camera), maxZ = this.getDepthMaxZ(camera);
     Matrix.PerspectiveFovLHToRef(Math.PI / 2, 1, reverse ? maxZ : minZ, reverse ? minZ : maxZ, matrix, true, engine.isNDCHalfZRange, undefined, reverse);
     return this;
-  }
-}
-
-// The constructor Babylon's Light.Parse makes an area light (light type 4) with.
-const AREA = 'Light_Type_4';
-
-/**
- * A serialized light parsed as Babylon's loader parses it, an area light as this one.
- * @param {any} entry @param {Scene} scene
- */
-export function parseLight(entry, scene) {
-  if (entry.type !== Light.LIGHTTYPEID_RECT_AREALIGHT) return Light.Parse(entry, scene);
-  Node.AddNodeConstructor(AREA, (name, scene) => () => new AreaLight(name, Vector3.Zero(), 1, 1, scene));
-  try {
-    return Light.Parse(entry, scene);
-  } finally {
-    Node.AddNodeConstructor(AREA, (name, scene) => () => new RectAreaLight(name, Vector3.Zero(), 1, 1, scene));
   }
 }

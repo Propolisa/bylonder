@@ -1,0 +1,1 @@
+export function parseLight(entry: any, scene: import('@babylonjs/core').Scene, AreaLight: typeof import('@babylonjs/core').RectAreaLight): import('@babylonjs/core').Nullable<import('@babylonjs/core').Light>;

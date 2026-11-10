@@ -12,6 +12,8 @@ import { liveConstraints, liveTransform } from './live-curves.js';
 import { report } from '../windowmanager/wm-reports.js';
 import { channelKey } from './modifiers-export.js';
 import { AREA_LIGHT, rigAreaLights, rigId, rigTransform } from './area-lights.js';
+import { eulerCameras } from '../overrides/babylon/camera-quaternion.js';
+import { writePostProcesses } from '../overrides/babylon/camera-post-processes.js';
 
 // The World's skybox is Bylonder's (world-babylon.js) but is what a render shows; the loader rebuilds it.
 const WORLD_SKYBOX = '__worldSkybox';
@@ -80,9 +82,7 @@ function cameraEffects(world, scene, camera) {
     // Bylonder's film (render/film.js) stays out.
     return {
       renderingPipelines: pipelines.map((p) => p.serialize()),
-      // With the defines its effect compiles with (a god rays' samples), which Babylon writes only once they change.
-      postProcesses: (camera._postProcesses ?? []).filter((pp) => pp && !owned.has(pp) && !pp.name.startsWith('__'))
-        .map((pp) => ({ ...pp.serialize(), ...(pp.getEffect()?.defines && { defines: pp.getEffect().defines }) })),
+      postProcesses: (camera._postProcesses ?? []).filter((pp) => pp && !owned.has(pp) && !pp.name.startsWith('__')),
     };
   } finally {
     world.renderSettings.setRenderedCameras(rendered);
@@ -417,13 +417,7 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
     for (const [key, value] of Object.entries(transform)) if (!(key === 'direction' && entry.type === Light.LIGHTTYPEID_POINTLIGHT)) entry[key] = value.asArray();
     if (transform.rotationQuaternion) entry.rotation = [0, 0, 0];
   }
-  // Babylon's camera parser reads no rotationQuaternion: a camera keeps its rotation as Euler angles, Babylon's yaw,
-  // pitch and roll.
-  for (const entry of json.cameras) {
-    if (!entry.rotationQuaternion) continue;
-    entry.rotation = Quaternion.FromArray(entry.rotationQuaternion).toEulerAngles().asArray();
-    delete entry.rotationQuaternion;
-  }
+  eulerCameras(json.cameras);
   json.materials = await Promise.all(json.materials.map(async (entry) => {
     const material = scene.materials.find((m) => m.uniqueId === entry.uniqueId);
     return (material && await exportNodeMaterial(material, { parity, graph: graphOf(material) })) ?? withoutOwnPlugins(entry, scene);
@@ -434,8 +428,7 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
   for (const entry of json.cameras) aimed(entry, scene.getCameraByUniqueId(entry.uniqueId));
   extraInfluences(json, scene);
   Object.assign(json, { animationGroups, activeCameraID, renderingPipelines: effects.renderingPipelines, imageProcessingConfiguration: scene.imageProcessingConfiguration.serialize(), producer: { name: 'Bylonder', file: 'scene.babylon' } });
-  // The camera's own, in place of the scene's every one Babylon writes: a pipeline's, Bylonder's film, and the camera's again.
-  json.postProcesses = effects.postProcesses;
+  writePostProcesses(json, effects.postProcesses);
   await environment(json, scene);
   // The F-Curves the page runs (live-curves.js), for the package's IR, and what it still plays as samples (sampledGaps):
   // neither is part of the file.

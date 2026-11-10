@@ -1,8 +1,3 @@
-/**
- * A serialized light parsed as Babylon's loader parses it, an area light as this one.
- * @param {any} entry @param {Scene} scene
- */
-export function parseLight(entry: any, scene: Scene): import("@babylonjs/core").Nullable<Light>;
 export class AreaLight extends RectAreaLight {
     /** @param {string} name @param {Vector3} position @param {number} width @param {number} height @param {Scene} scene */
     constructor(name: string, position: Vector3, width: number, height: number, scene: Scene);
@@ -28,7 +23,6 @@ export class AreaLight extends RectAreaLight {
 }
 export type Scene = import("@babylonjs/core").Scene;
 export type Camera = import("@babylonjs/core").Camera;
-import { Light } from '@babylonjs/core';
 import { RectAreaLight } from '@babylonjs/core';
 import { Vector3 } from '@babylonjs/core';
 import { Matrix } from '@babylonjs/core';

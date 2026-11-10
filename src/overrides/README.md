@@ -37,7 +37,9 @@ Woven into code that is otherwise Bylonder's own, or derived from Blender's:
 - `runtime/object-transform.js`: lights' and cameras' world matrices for Blender's transforms.
 - `runtime/world.js`: `CreateAudioEngineAsync` with the render's audio context and no parameter ramps.
 - `io_scene_babylon/babylon-export.js`: what Babylon's serializer leaves out (extra bone influences, a locked target's
-  rotation, cameras' quaternions, shadow generators).
+  rotation, shadow generators).
+- `io_scene_babylon/runtime/area-light.js`: `getScaledIntensity`, an area light scaled by its intensity alone, which
+  `babylon/area-light-parse.js` parses lights to.
 - `io_scene_babylon/js-export.js`: `SCREEN_SPACE`, screen space pipelines in half floats.
 - `io_scene_babylon/runtime/view-transform.js`: the display transform kept the camera's last post process.
 - `windowmanager/mouse-capture.js`: Chromium's first move under a new pointer lock.
