@@ -24,8 +24,6 @@ Woven into code that is otherwise Bylonder's own, or derived from Blender's:
 - `blenkernel/material/dithered-pbr.js`: Babylon's alpha test replaced through a `!` plugin key.
 - `draw/draw-view.js`: `REFLECTION_EYE`, Babylon's reflection eye position replaced in its include.
 - `draw/overlay-pass.js`: the scene's `_applyByPostProcess` set without its setter around the overlay pass.
-- `draw/mesh-batch-cache.js`: `fillMissingAttributes`, buffers for attributes a mesh lacks, which Babylon's draw
-  needs and WebGPU steps per instance.
 - `draw/overlay-grid.js`: no write at a dynamic vector index (FXC), and each vertex holds its index instead of
   `gl_VertexID` (Chromium's software GL).
 - `draw/volume-shaders.js`: no `isnan` (Tint's uniform arrays).

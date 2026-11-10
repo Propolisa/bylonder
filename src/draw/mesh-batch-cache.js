@@ -13,6 +13,7 @@ import { SubMesh } from '@babylonjs/core/Meshes/subMesh.js';
 import { mesh_batch_cache_vertex_buffers } from './mesh-batch-buffers.js';
 import { DRAW_LINES, DRAW_TANGENTS } from '../bmesh/bmesh-wasm.js';
 import { attributeKind, meshAttributes, TANGENT_KIND } from '../nodes/blender/attributes.js';
+import { fillMissingAttributes } from '../overrides/webgpu/missing-attributes.js';
 
 // VertexData's field of each vertex buffer kind it can hold.
 const BUFFERS = { [VertexBuffer.PositionKind]: 'positions', [VertexBuffer.NormalKind]: 'normals', [VertexBuffer.UVKind]: 'uvs', [VertexBuffer.ColorKind]: 'colors', [VertexBuffer.TangentKind]: 'tangents' };
@@ -114,7 +115,7 @@ export function mesh_batch_cache_apply(mesh, babylonMesh) {
   const read = meshAttributes(babylonMesh);
   const buffers = mesh.drawBuffers?.(DRAW_LINES | (read.tangents ? DRAW_TANGENTS : 0), read.names);
   setSubMeshes(babylonMesh, buffers ? drawn(babylonMesh, buffers, read.names) : built(babylonMesh, mesh));
-  fillMissingAttributes(babylonMesh, read.names);
+  fillMissingAttributes(babylonMesh, read.names.map(attributeKind));
   babylonMesh.getChildMeshes(true).filter((child) => child.metadata?.drawOwner === babylonMesh).forEach((child) => child.dispose());
   const loose = mesh.loose_edges();
   if (loose.length) {
@@ -158,20 +159,6 @@ function drawn(babylonMesh, { positions, normals, uvs, tris, lines, tangents, at
   if (counts.length < 2) return null;
   let start = 0;
   return counts.flatMap((tris, slot) => (tris ? [{ slot, start: (start += tris * 3) - tris * 3, count: tris * 3 }] : []));
-}
-
-// An attribute a material reads that the mesh does not have reads as Blender's draw leaves it, an unbound vertex
-// attribute: (0, 0, 0, 1), as each vertex's value. Without a buffer, Babylon's draw of the mesh fails; one value read by
-// every instance (a divisor) is WebGL's alone: WebGPU steps an instanced buffer once per instance.
-const UNBOUND = [0, 0, 0, 1];
-export function fillMissingAttributes(babylonMesh, names) {
-  const count = babylonMesh.getTotalVertices();
-  for (const kind of names.map(attributeKind)) {
-    const buffer = babylonMesh.getVertexBuffer(kind);
-    if (buffer && !(buffer.blenderUnbound && buffer.getData().length !== count * 4)) continue;
-    babylonMesh.setVerticesData(kind, Float32Array.from({ length: count * 4 }, (_, i) => UNBOUND[i % 4]), false, 4);
-    babylonMesh.getVertexBuffer(kind).blenderUnbound = true;
-  }
 }
 
 // A buffer the new geometry does not have goes (a UV map an evaluation left out), so every buffer has its vertex count.

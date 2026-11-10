@@ -36,6 +36,7 @@ import { provideGreasePencilRender } from '../draw/grease-pencil-render.js';
 import * as runtimes from '../runtimes/runtimes.js';
 import { uploadImageTextures } from '../imbuf/image-textures.js';
 import { ID_OB, ID_GR, ID_MA, ID_WO, babylonMatrix, blenderMatrix, drawThinInstances } from './main-evaluated.js';
+import { fillWhatItReads } from '../overrides/webgpu/missing-attributes.js';
 
 export { ID_OB, ID_GR, ID_MA, ID_WO, babylonMatrix, blenderMatrix };
 export const CURVE_TYPES = ['CURVE', 'FONT'];
@@ -641,6 +642,7 @@ export function createMainView(state) {
       if (kept.data) disposeCurvesData(kept.data);
       const data = curvesData(scene, record);
       const mesh = curvesMesh(scene, '__curves ' + key, data, record.faces, kept.mesh);
+      if (!kept.mesh) fillWhatItReads(mesh);
       Object.assign(mesh.metadata.curves, { render: record.render, viewport: record.viewport });
       const material = materialFor(record.material);
       mesh.material = material && CurvesPlugin.draws(material) ? material : null;
