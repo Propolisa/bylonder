@@ -20,7 +20,8 @@ assert.ok(validate(file()), JSON.stringify(validate.errors));
 
 // Omitted fields take their defaults.
 const bare = read({ schema: 'bylonder-ir', version: 1 });
-assert.deepEqual(bare.ir, { schema: 'bylonder-ir', version: 1, ids: {}, references: [], properties: {}, graphs: {}, entities: {}, order: [] });
+assert.deepEqual(bare.ir, { schema: 'bylonder-ir', version: 1, scene: { id: null, collection: null, view_layer: null }, ids: {}, collections: {}, references: [], properties: {}, graphs: {},
+  entities: {}, order: [] });
 assert.deepEqual(read({ schema: 'bylonder-ir', version: 1, entities: { 'OB:A/driver/x': { type: 'driver:SCRIPTED', id: 'OB:A' } } }).ir.entities['OB:A/driver/x'],
   { type: 'driver:SCRIPTED', id: 'OB:A', inputs: {}, outputs: {} });
 
@@ -37,6 +38,21 @@ assert.equal(bevel.implementation, undefined, 'an implementation this runtime do
 assert.deepEqual(repaired.ir.order, ['OB:Cube/modifier/Bevel'], 'order is made from the entities');
 assert.equal(repaired.warnings.length, 4, repaired.warnings.join('\n'));
 assert.match(repaired.warnings.join('\n'), /entities\["OB:Cube\/modifier\/Bevel"\]\.inputs\.width refers to/);
+
+// Collections: defaults filled, the root found, and what does not hold together repaired.
+const tree = read({ schema: 'bylonder-ir', version: 1, ids: { 'OB:Cube': { type: 'OBJECT', name: 'Cube' } }, collections: {
+  'GR:Scene Collection': { name: 'Scene Collection', children: ['GR:A', 'GR:Gone'] },
+  'GR:A': { name: 'A', children: ['GR:B', 'GR:A'], objects: ['OB:Cube', 'OB:Gone'], color_tag: 'COLOR_42' },
+  'GR:B': { name: 'B', children: ['GR:A'], view_layers: { ViewLayer: { exclude: true } } },
+} });
+assert.equal(tree.ir.scene.collection, 'GR:Scene Collection', 'the root: the collection no other lists');
+assert.deepEqual(tree.ir.collections['GR:Scene Collection'].children, ['GR:A']);
+assert.deepEqual(tree.ir.collections['GR:A'], { name: 'A', children: ['GR:B'], objects: ['OB:Cube'], color_tag: 'NONE', custom: {}, hide_viewport: false, hide_render: false,
+  hide_select: false, view_layers: {} });
+assert.deepEqual(tree.ir.collections['GR:B'].children, [], 'a collection holding one that holds it lets go');
+assert.deepEqual(tree.ir.collections['GR:B'].view_layers.ViewLayer, { exclude: true, hide_viewport: false, holdout: false, indirect_only: false });
+assert.equal(tree.warnings.length, 5, tree.warnings.join('\n'));
+assert.ok(validate({ schema: 'bylonder-ir', version: 1, collections: { 'GR:A': { name: 'A' } } }), JSON.stringify(validate.errors));
 
 // What cannot be read throws, naming the path, what was expected and what is there.
 const corrupt = (change, message) => {

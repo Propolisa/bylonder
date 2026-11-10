@@ -9,7 +9,8 @@ import { objectMatrix } from '../runtime/object-transform.js';
 import { CLOCK, sampledGaps, serializeScene } from './babylon-export.js';
 import { exportRuntimes } from '../runtimes/runtimes.js';
 import { chosenState, NAVIGATION, TARGETS } from './export-options.js';
-import { exportControls, controlTypes, withUI } from './controls-export.js';
+import { exportControls, controlTypes, sceneOf, withUI } from './controls-export.js';
+import { exportCollections } from './collections-export.js';
 import { exportNodeMaterial, kernelsFile, materialKernels } from './node-material-export.js';
 import { fillMaterials, MESH_VALUE } from './runtime/materials.js';
 import { worldNodes } from '../blenkernel/scene/world-babylon.js';
@@ -290,8 +291,9 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   // unless one of its effects is on.
   if (display) data.renderingPipelines = data.renderingPipelines.filter((p) => !displayOnly(p));
   // Baked, the compositor runs with its settings as exported: none of them a control.
-  const controls = withUI([...exportControls(world, data), ...(compositorState === 'LIVE' ? composited?.knobs ?? [] : [])]);
-  const ir = exportIR(world, { controls, live, bin, animationGroups: data.animationGroups, curves: data.liveCurves, constraints: data.liveConstraints, states });
+  const collected = world.mainSync ? exportCollections(sceneOf(world.mainSync)) : null;
+  const controls = withUI([...exportControls(world, data), ...(collected?.controls ?? []), ...(compositorState === 'LIVE' ? composited?.knobs ?? [] : [])]);
+  const ir = exportIR(world, { controls, collections: collected, live, bin, animationGroups: data.animationGroups, curves: data.liveCurves, constraints: data.liveConstraints, states });
   const computed = { ...ir, entities: structuredClone(ir.entities) };
   stripEntities(ir, replace);
   const irJson = json(ir);

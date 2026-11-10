@@ -66,6 +66,11 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
     ir: {
         schema: "bylonder-ir";
         version: 1;
+        scene: {
+            id: string | null;
+            collection: string | null;
+            view_layer: string | null;
+        };
         ids: Record<string, {
             type: string;
             name: string;
@@ -76,6 +81,22 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
                 matrix_world: number[];
                 geometry?: Record<string, any> | undefined;
             } | undefined;
+        }>;
+        collections: Record<string, {
+            name: string;
+            children: string[];
+            objects: string[];
+            color_tag: "NONE" | "COLOR_01" | "COLOR_02" | "COLOR_03" | "COLOR_04" | "COLOR_05" | "COLOR_06" | "COLOR_07" | "COLOR_08";
+            custom: Record<string, any>;
+            hide_viewport: boolean;
+            hide_render: boolean;
+            hide_select: boolean;
+            view_layers: Record<string, {
+                exclude: boolean;
+                hide_viewport: boolean;
+                holdout: boolean;
+                indirect_only: boolean;
+            }>;
         }>;
         references: {
             from: string;
@@ -125,6 +146,33 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
         }>;
         order: string[];
     };
+    /** The scene's collections from its scene collection down, in the outliner's order, with their flags as set. @returns {CollectionInfo[]} */
+    collections(): CollectionInfo[];
+    /**
+     * The objects a collection holds (by key or name), with those of its child collections unless `recursive` is false;
+     * ID keys (`OB:Cube`).
+     * @param {string} collection
+     * @param {{ recursive?: boolean }} [options]
+     */
+    objectsIn(collection: string, { recursive }?: {
+        recursive?: boolean;
+    }): string[];
+    /** The collections an object (by key or name) is linked to. @param {string} object */
+    collectionsOf(object: string): string[];
+    /** The Babylon node an object (by key) draws as, if any. @param {string} object */
+    nodeOf(object: string): import("@babylonjs/core").Nullable<import("@babylonjs/core").Node>;
+    /**
+     * Shows or hides a collection (by key or name) in the view layer drawn, as the outliner's eye does: what it holds
+     * shows only where it and the collections holding it show. With `children`, its child collections too, as Shift does.
+     * @param {string} collection
+     * @param {boolean} [visible]
+     * @param {{ children?: boolean }} [options]
+     */
+    showCollection(collection: string, visible?: boolean, { children }?: {
+        children?: boolean;
+    }): void;
+    /** Whether a collection (by key or name) shows. @param {string} collection */
+    isCollectionVisible(collection: string): boolean;
     /**
      * A control's value.
      * @template {keyof Controls & string} P
@@ -220,6 +268,21 @@ export type Binding = {
      * the key in its node's `metadata.bylonderChannels` the scene's animation sets it through
      */
     channel?: string | undefined;
+    /**
+     * a collection's visibility flag: the key of the collection it hides
+     */
+    collection?: string | undefined;
+};
+/**
+ * A collection of the scene (docs/ir.md, Collections): its key and Blender data, its place in the tree, and whether it
+ * shows (neither it nor a collection holding it excluded or hidden).
+ */
+export type CollectionInfo = import("./ir.js").Collection & {
+    key: string;
+    parent: string | null;
+    depth: number;
+    all_objects: string[];
+    visible: boolean;
 };
 export type Knob = Control & {
     bind?: Binding;

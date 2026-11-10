@@ -72,6 +72,8 @@ code:
   - src/runtimes/runtimes.js
   - src/io_scene_babylon/unit-manifest.js
   - src/io_scene_babylon/controls-export.js
+  - src/io_scene_babylon/collections-export.js
+  - src/io_scene_babylon/runtime/collections.js
   - src/io_scene_babylon/runtime/control-panel.js
   - src/io_scene_babylon/runtime/control-panel-ui.js
   - src/io_scene_babylon/runtime/control-panel-model.js
@@ -92,6 +94,7 @@ tests:
   - tests/export-bundle-wasm.test.js
   - tests/control-panel.test.js
   - tests/export-runtime.test.js
+  - tests/collections-sdk-wasm.test.js
   - tests/unit-swap-wasm.test.js
   - tests/runtimes-armature-wasm.test.js
   - tests/texture-paint-wasm.test.js

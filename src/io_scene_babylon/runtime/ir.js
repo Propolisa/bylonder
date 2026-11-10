@@ -73,11 +73,40 @@ export const EntitySchema = z.object({
   implementation: z.optional(Name),
 });
 
+/** A collection's flags in a view layer, as its LayerCollection holds them. */
+export const LayerCollectionSchema = z.object({
+  exclude: z._default(z.boolean(), false), hide_viewport: z._default(z.boolean(), false),
+  holdout: z._default(z.boolean(), false), indirect_only: z._default(z.boolean(), false),
+});
+
+export const COLOR_TAGS = /** @type {const} */ (['NONE', 'COLOR_01', 'COLOR_02', 'COLOR_03', 'COLOR_04', 'COLOR_05', 'COLOR_06', 'COLOR_07', 'COLOR_08']);
+/** A collection: its members by key (child collections, then objects), its metadata and its visibility. */
+export const CollectionSchema = z.object({
+  name: Name,
+  children: fresh(z.array(Name), () => []),
+  objects: fresh(z.array(Name), () => []),
+  color_tag: z._default(z.enum(COLOR_TAGS), 'NONE'),
+  /** its custom properties */
+  custom: fresh(Data, () => ({})),
+  hide_viewport: z._default(z.boolean(), false), hide_render: z._default(z.boolean(), false), hide_select: z._default(z.boolean(), false),
+  /** its flags by view layer name */
+  view_layers: fresh(z.record(Name, LayerCollectionSchema), () => ({})),
+});
+
+/** The scene the page shows: its ID, its scene collection (the collections' root) and the view layer it draws. */
+export const SceneSchema = z.object({
+  id: z._default(z.nullable(Name), null),
+  collection: z._default(z.nullable(Name), null),
+  view_layer: z._default(z.nullable(Name), null),
+});
+
 export const IR_SCHEMA = 'bylonder-ir', IR_VERSION = 1;
 export const IRSchema = z.object({
   schema: z.literal(IR_SCHEMA),
   version: z.literal(IR_VERSION),
+  scene: fresh(SceneSchema, () => ({ id: null, collection: null, view_layer: null })),
   ids: fresh(z.record(matching(/^[A-Z]{2,3}:/), IDSchema), () => ({})),
+  collections: fresh(z.record(Name, CollectionSchema), () => ({})),
   references: fresh(z.array(IDReferenceSchema), () => []),
   properties: fresh(z.record(Name, PropertySchema), () => ({})),
   graphs: fresh(z.record(Name, GraphSchema), () => ({})),
@@ -114,6 +143,8 @@ export const GeometrySchema = z.object({ mesh: z.optional(MeshSchema), points: z
  * @typedef {z.infer<typeof PointsSchema>} Points
  * @typedef {z.infer<typeof InstancesSchema>} Instances
  * @typedef {z.infer<typeof GeometrySchema>} Geometry
+ * @typedef {z.infer<typeof CollectionSchema>} Collection
+ * @typedef {z.infer<typeof LayerCollectionSchema>} LayerCollection
  * A reference an entity's input may hold, resolved before a unit runs.
  * @typedef {{ property: string } | { entity: string, output: string } | { buffer: number } | { data: [string, string] } | { graph: string }} Reference
  */
@@ -217,9 +248,46 @@ export function readIR(raw, { warn = (message) => console.warn(`Bylonder IR: ${m
     warn(`properties[${JSON.stringify(path)}] has no type: ${typeOf(p.default)}, from its default`);
     return [path, { ...p, type: typeOf(p.default) }];
   }));
-  const parsed = z.safeParse(IRSchema, { ...ir, properties }, { reportInput: true });
+  const collections = Object.fromEntries(Object.entries(ir.collections ?? {}).map(([key, c]) => {
+    if (c?.color_tag === undefined || COLOR_TAGS.includes(c.color_tag)) return [key, c];
+    warn(`collections[${JSON.stringify(key)}].color_tag is ${JSON.stringify(c.color_tag)}: NONE`);
+    return [key, { ...c, color_tag: 'NONE' }];
+  }));
+  const parsed = z.safeParse(IRSchema, { ...ir, properties, collections }, { reportInput: true });
   if (!parsed.success) throw new Error(explain(parsed.error));
   return repair(parsed.data, warn, implementations);
+}
+
+/**
+ * Collections made whole: a member the IR lacks dropped, a collection listed under two parents or under itself kept
+ * under its first, and the scene's collection the root when it names none.
+ * @param {IR} ir
+ * @param {(message: string) => void} warn
+ */
+function repairCollections(ir, warn) {
+  const parents = new Map();
+  /** @param {string} key @param {string[]} path */
+  const visit = (key, path) => {
+    const collection = ir.collections[key], at = `collections[${JSON.stringify(key)}]`;
+    collection.children = collection.children.filter((child) => {
+      const why = !ir.collections[child] ? 'which the IR lacks' : path.includes(child) ? 'which holds it' : parents.has(child) ? `which ${JSON.stringify(parents.get(child))} holds` : '';
+      if (why) warn(`${at}.children lists ${JSON.stringify(child)}, ${why}: dropped`);
+      else parents.set(child, key);
+      return !why;
+    });
+    collection.objects = collection.objects.filter((object) => object in ir.ids || void warn(`${at}.objects lists ${JSON.stringify(object)}, which the IR lacks: dropped`));
+    collection.children.forEach((child) => visit(child, [...path, child]));
+  };
+  const keys = Object.keys(ir.collections);
+  if (!keys.length) return;
+  const listed = new Set(keys.flatMap((key) => ir.collections[key].children));
+  if (!ir.scene.collection || !ir.collections[ir.scene.collection]) {
+    const root = keys.find((key) => !listed.has(key)) ?? keys[0];
+    if (ir.scene.collection) warn(`scene.collection is ${JSON.stringify(ir.scene.collection)}, which the IR lacks: ${JSON.stringify(root)}`);
+    ir.scene.collection = root;
+  }
+  visit(ir.scene.collection, [ir.scene.collection]);
+  for (const key of keys) if (key !== ir.scene.collection && !parents.has(key)) visit(key, [key]);
 }
 
 /**
@@ -256,6 +324,7 @@ function repair(ir, warn, implementations) {
       }
     }
   }
+  repairCollections(ir, warn);
   const order = ir.order.filter((key) => key in ir.entities);
   if (order.length !== ir.order.length || order.length !== Object.keys(ir.entities).length) {
     warn('order does not list the entities: made from their references');

@@ -5,6 +5,7 @@
 import { Matrix, Observable, Quaternion, Texture, Vector3 } from '@babylonjs/core';
 import { createScheduler, EVALUATORS, NATIVE } from './scheduler.js';
 import { readIR } from './ir.js';
+import { collectionKey, collectionTree, objectsIn, showing } from './collections.js';
 
 /** @typedef {number | boolean | string} Value */
 
@@ -64,6 +65,13 @@ import { readIR } from './ir.js';
  * @property {'viewport' | 'render'} [hide]
  * @property {number} [lens]
  * @property {string} [channel] the key in its node's `metadata.bylonderChannels` the scene's animation sets it through
+ * @property {string} [collection] a collection's visibility flag: the key of the collection it hides
+ */
+
+/**
+ * A collection of the scene (docs/ir.md, Collections): its key and Blender data, its place in the tree, and whether it
+ * shows (neither it nor a collection holding it excluded or hidden).
+ * @typedef {import('./ir.js').Collection & { key: string, parent: string | null, depth: number, all_objects: string[], visible: boolean }} CollectionInfo
  */
 
 /** @typedef {Control & { bind?: Binding }} Knob */
@@ -145,6 +153,12 @@ function assign(owner, path, value) {
   keys.reduce((o, key) => o[key], owner)[last] = value;
 }
 
+/** Hides a mesh alone, as Blender hides an object and not its children, or another node with its children. @param {any} node @param {boolean} hidden */
+function hide(node, hidden) {
+  if ('isVisible' in node) node.isVisible = !hidden;
+  else node.setEnabled(!hidden);
+}
+
 /**
  * The exported scene and its controls.
  * @template {Record<string, Value>} [Controls=Record<string, Value>]
@@ -194,6 +208,116 @@ export class BlendScene {
       frame: () => scene.animationGroups[0]?.animatables[0]?.masterFrame ?? /** @type {number} */ ([...this.#values].find(([p]) => p.endsWith('.frame_current'))?.[1] ?? 1),
     } }) : null;
     this.#channels(knobs);
+    for (const { path, bind } of knobs) if (bind?.collection) {
+      const flag = path.endsWith('.exclude') ? 'exclude' : path.endsWith('.hide_render') ? 'hide_render' : path.includes('.layer_collection') ? 'layer_hide_viewport' : 'hide_viewport';
+      this.#flags.set(`${bind.collection} ${flag}`, path);
+    }
+    this.#hiddenAtExport = new Set([...showing(this.ir, (key, flag) => this.#flag(key, flag))].filter(([, shown]) => !shown).map(([object]) => object));
+  }
+
+  /** The objects their collections hid at export. */
+  /** @type {Set<string>} */
+  #hiddenAtExport;
+
+  /** The path of each collection's visibility flag, by `<key> <flag>`. @type {Map<string, string>} */
+  #flags = new Map();
+
+  /**
+   * A collection's flag: its control's value, else its Blender data's in the view layer drawn.
+   * @param {string} key
+   * @param {import('./collections.js').Flag} flag
+   */
+  #flag(key, flag) {
+    const path = this.#flags.get(`${key} ${flag}`);
+    if (path) return this.#values.get(path) === true;
+    const collection = this.ir.collections[key], layer = collection?.view_layers[this.ir.scene.view_layer ?? ''];
+    return flag === 'exclude' ? !!layer?.exclude : flag === 'layer_hide_viewport' ? !!layer?.hide_viewport : !!collection?.[flag];
+  }
+
+  /** The scene's collections from its scene collection down, in the outliner's order, with their flags as set. @returns {CollectionInfo[]} */
+  collections() {
+    const shown = this.#shownCollections();
+    const layer = this.ir.scene.view_layer ?? '';
+    return collectionTree(this.ir).map(({ key, parent, depth }) => {
+      const collection = structuredClone(this.ir.collections[key]), flags = collection.view_layers[layer];
+      if (flags) Object.assign(flags, { exclude: this.#flag(key, 'exclude'), hide_viewport: this.#flag(key, 'layer_hide_viewport') });
+      return { ...collection, hide_viewport: this.#flag(key, 'hide_viewport'), hide_render: this.#flag(key, 'hide_render'), key, parent, depth,
+        all_objects: objectsIn(this.ir, key), visible: shown.has(key) };
+    });
+  }
+
+  /** The collections that show: the scene collection and those under it neither excluded nor hidden. */
+  #shownCollections() {
+    const shown = new Set();
+    for (const { key, parent } of collectionTree(this.ir)) {
+      const hidden = ['exclude', 'layer_hide_viewport', 'hide_viewport', 'hide_render'].some((flag) => this.#flag(key, /** @type {any} */ (flag)));
+      if (parent === null || (shown.has(parent) && !hidden)) shown.add(key);
+    }
+    return shown;
+  }
+
+  /**
+   * The objects a collection holds (by key or name), with those of its child collections unless `recursive` is false;
+   * ID keys (`OB:Cube`).
+   * @param {string} collection
+   * @param {{ recursive?: boolean }} [options]
+   */
+  objectsIn(collection, { recursive = true } = {}) {
+    return objectsIn(this.ir, collectionKey(this.ir, collection), recursive);
+  }
+
+  /** The collections an object (by key or name) is linked to. @param {string} object */
+  collectionsOf(object) {
+    const key = this.ir.ids[object] ? object : `OB:${object}`;
+    return Object.keys(this.ir.collections).filter((k) => this.ir.collections[k].objects.includes(key));
+  }
+
+  /** The Babylon node an object (by key) draws as, if any. @param {string} object */
+  nodeOf(object) {
+    const node = this.ir.ids[object]?.node;
+    return node === undefined ? null : this.scene.getNodeById(node);
+  }
+
+  /**
+   * Shows or hides a collection (by key or name) in the view layer drawn, as the outliner's eye does: what it holds
+   * shows only where it and the collections holding it show. With `children`, its child collections too, as Shift does.
+   * @param {string} collection
+   * @param {boolean} [visible]
+   * @param {{ children?: boolean }} [options]
+   */
+  showCollection(collection, visible = true, { children = false } = {}) {
+    const key = collectionKey(this.ir, collection);
+    for (const k of children ? collectionTree(this.ir, key).map((c) => c.key) : [key]) {
+      const path = this.#flags.get(`${k} layer_hide_viewport`);
+      if (path) this.set(path, /** @type {any} */ (!visible));
+      else if (k === key && this.ir.scene.collection !== key) throw new Error(`${collection} has no Hide in Viewport control`);
+    }
+  }
+
+  /** Whether a collection (by key or name) shows. @param {string} collection */
+  isCollectionVisible(collection) {
+    return this.#shownCollections().has(collectionKey(this.ir, collection));
+  }
+
+  /**
+   * Shows each object as its own Hide in Viewport and Disable in Renders and its collections give.
+   * @param {string[]} objects their keys
+   */
+  #showObjects(objects) {
+    const shown = showing(this.ir, (key, flag) => this.#flag(key, flag));
+    for (const object of objects) {
+      const node = /** @type {any} */ (this.nodeOf(object)), path = this.ir.ids[object]?.path;
+      if (!node) continue;
+      const hidden = !(shown.get(object) ?? true) || this.#hidden(path);
+      // An object its collections hid at export is a disabled node (an instance source's, an excluded collection's).
+      if (this.#hiddenAtExport.has(object)) node.setEnabled(!hidden);
+      hide(node, hidden);
+    }
+  }
+
+  /** Whether an object's own Hide in Viewport or Disable in Renders hides it. @param {string | null | undefined} path its RNA path */
+  #hidden(path) {
+    return ['viewport', 'render'].some((kind) => this.#values.get(`${path}.hide_${kind}`) === true);
   }
 
   /** @type {ReturnType<typeof createScheduler> | null} */
@@ -319,6 +443,10 @@ export class BlendScene {
       this.#world?.set([0, 1, 2].map((i) => /** @type {number} */ (this.#values.get(`${inputs}[0].default_value[${i}]`)) * strength));
       return;
     }
+    if (bind.collection) {
+      this.#showObjects(objectsIn(this.ir, bind.collection));
+      return;
+    }
     if (bind.compositor !== undefined) {
       const pass = /** @type {any} */ (this.compositor?.attachedBlocks.find((b) => b.name === bind.compositor));
       if (bind.upload !== undefined) pass?.setUpload(bind.upload, value);
@@ -346,10 +474,9 @@ export class BlendScene {
     if (bind.transform) {
       this.#place(node, path, bind.transform);
     } else if (bind.hide) {
-      const base = path.slice(0, path.lastIndexOf('.'));
-      const hidden = ['viewport', 'render'].some((kind) => this.#values.get(`${base}.hide_${kind}`) === true);
-      if ('isVisible' in node) node.isVisible = !hidden;
-      else node.setEnabled(!hidden);
+      const object = Object.keys(this.ir.ids).find((k) => this.ir.ids[k].node === bind.node);
+      if (object) this.#showObjects([object]);
+      else hide(node, this.#hidden(path.slice(0, path.lastIndexOf('.'))));
     } else if (bind.lens !== undefined) {
       node.fov = 2 * Math.atan(bind.lens / /** @type {number} */ (value));
     } else if (bind.property) {

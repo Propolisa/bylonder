@@ -10,6 +10,37 @@
       "type": "number",
       "const": 1
     },
+    "scene": {
+      "default": {
+        "id": null,
+        "collection": null,
+        "view_layer": null
+      },
+      "type": "object",
+      "properties": {
+        "id": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "collection": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "view_layer": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
     "ids": {
       "default": {},
       "type": "object",
@@ -75,6 +106,101 @@
         },
         "required": [
           "type",
+          "name"
+        ]
+      }
+    },
+    "collections": {
+      "default": {},
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "children": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "objects": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "color_tag": {
+            "default": "NONE",
+            "type": "string",
+            "enum": [
+              "NONE",
+              "COLOR_01",
+              "COLOR_02",
+              "COLOR_03",
+              "COLOR_04",
+              "COLOR_05",
+              "COLOR_06",
+              "COLOR_07",
+              "COLOR_08"
+            ]
+          },
+          "custom": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          },
+          "hide_viewport": {
+            "default": false,
+            "type": "boolean"
+          },
+          "hide_render": {
+            "default": false,
+            "type": "boolean"
+          },
+          "hide_select": {
+            "default": false,
+            "type": "boolean"
+          },
+          "view_layers": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "exclude": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "hide_viewport": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "holdout": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "indirect_only": {
+                  "default": false,
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        },
+        "required": [
           "name"
         ]
       }

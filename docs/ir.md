@@ -51,7 +51,30 @@ group are all in `ids`. An object a Geometry Nodes graph reads (directly or thro
 its world matrix (`matrix_world`, 4x4 by columns) and its geometry (`{ mesh }` of buffers, with its attributes) as
 Blender evaluated them at export.
 
-## References
+## Scene and collections
+
+`scene` names what the page shows: `id`, the scene's ID key, `collection`, its scene collection's key (the root of
+`collections`), and `view_layer`, the view layer it draws (the first one used for rendering).
+
+`collections` holds the scene's collections by ID key, the scene collection (`GR:Scene Collection`) included, each with
+its members and metadata as Blender's outliner shows them:
+
+```json
+"collections": {
+  "GR:Scene Collection": { "name": "Scene Collection", "children": ["GR:Lane"], "objects": ["OB:Camera"] },
+  "GR:Lane": { "name": "Lane", "children": ["GR:Rain"], "objects": ["OB:Road"], "color_tag": "COLOR_04",
+    "custom": { "Wetness": 0.8 }, "hide_render": false,
+    "view_layers": { "ViewLayer": { "exclude": false, "hide_viewport": false, "holdout": false, "indirect_only": false } } }
+}
+```
+
+`children` are child collection keys and `objects` object keys, both in Blender's order; `color_tag` is Blender's
+(`NONE`, `COLOR_01` to `COLOR_08`); `custom` its custom properties; `hide_viewport`, `hide_render` and `hide_select` the
+collection's own flags (Disable in Viewports, Disable in Renders, Disable Selection); `view_layers` its LayerCollection's
+flags in each view layer (Exclude, Hide in Viewport, Holdout, Indirect Only). A collection's data stays in `ids` too;
+this section is the tree a page and its tools use (`runtime/collections.js`). Omitted fields take their defaults. The
+visibility flags of the drawn view layer are properties as well (Properties).
+
 
 `references` lists every ID pointer between the carried IDs, `{ from, path, to }`, `path` being the pointer's RNA path
 in `from` (`parent`, `data`, `material_slots[0].material`, `modifiers["Array"].offset_object`,
@@ -65,7 +88,11 @@ named in `docs/licence-free-live.md` (Relation gaps).
 `properties` are the values a page sets and reads, keyed by RNA path: `type` (`FLOAT`, `INT`, `BOOLEAN`, `STRING`),
 `default`, `soft_min`, `soft_max`, `subtype` and `unit` as Blender's RNA describes them, `id`, `suggested` (offered to
 authors and UIs) and `bind`, where its value lands in Babylon (a node's transform or property, a material input block,
-a light, the world, a compositor pass, the frame). Time is the property `scenes["Scene"].frame_current`.
+a light, the world, a compositor pass, the frame, a collection's visibility). Time is the property
+`scenes["Scene"].frame_current`. A collection's visibility flags are `collections["Lane"].hide_viewport` and
+`.hide_render`, and its LayerCollection's in the drawn view layer
+`scenes["Scene"].view_layers["ViewLayer"].layer_collection.children["Lane"].exclude` and `.hide_viewport`, each bound
+to the collection (`{ "collection": "GR:Lane" }`).
 
 ## Inputs
 
@@ -165,7 +192,10 @@ interfaces, and File > Export's Replaced Units leaves out the code of those the 
 `readIR` (`runtime/ir.js`) reads a file kindly: an older version is migrated by its step (`MIGRATIONS`), omitted fields
 take their defaults, and what can be solved is repaired with a warning: a property without a type takes its default's,
 a reference to a property, entity, graph or ID the IR lacks is dropped, an implementation the runtime does not ship
-leaves its entity baked, and `order` is remade when it does not list the entities. What cannot be read throws, naming
+leaves its entity baked, and `order` is remade when it does not list the entities. In `collections`, an unknown color
+tag becomes `NONE`, a member the IR lacks is dropped, a collection listed under two parents stays under its first, one
+listed under itself or a collection it holds is let go, and `scene.collection` falls back to the collection no other
+lists. What cannot be read throws, naming
 the path, what was expected and what is there (`ir.entities["OB:Cube/modifier/Bevel"].type: expected string, got 5`).
 
 ## Versioning

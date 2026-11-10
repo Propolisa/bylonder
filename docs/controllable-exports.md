@@ -114,6 +114,10 @@ blend.get('objects["Flywheel"].rotation_euler[1]');
 blend.set('objects["Flywheel"].location[2]', 0.5);
 blend.onChanged.add(({ path, value }) => {});          // a Babylon Observable
 blend.controls();                                     // [{ path, type, default, soft_min, soft_max, subtype, unit, suggested }]
+blend.collections();                                  // the collection tree: [{ key, name, parent, depth, children, objects, all_objects, visible, ... }]
+blend.objectsIn('Lane');                              // ['OB:Rain', ...], with its child collections' ({ recursive: false }: its own)
+blend.collectionsOf('Rain');                          // ['GR:Lane', ...]
+blend.showCollection('Lane', false);                  // the outliner's eye; { children: true } as Shift does
 blend.dispose();
 ```
 
@@ -133,6 +137,13 @@ types. `controls()` fields are named as Blender's RNA names them.
   object.
 - SDK store controls are Scene custom properties in Main already (`blender-boundary.md`, Animation:
   `scenes["Scene"]["<owner> <path>"]`), so they are knobs like any other.
+- Collections are the IR's `collections` (`docs/ir.md`, Collections). Their visibility flags are controls like any
+  other, by RNA path: `collections["Lane"].hide_viewport` and `.hide_render`, and the drawn view layer's
+  `scenes["Scene"].view_layers["ViewLayer"].layer_collection.children["Lane"].exclude` and `.hide_viewport` (the eye).
+  An object shows while one of its collection paths from the scene collection shows and its own flags do not hide it,
+  as Blender resolves an object linked to several collections; the page shows what both Blender's viewport and its
+  render show, so Hide in Viewport and Disable in Renders both hide. Hiding hides a mesh alone, not its children, as
+  Blender does. `nodeOf(key)` gives an object's Babylon node.
 - Interop: a pair of FlowGraph blocks (Get and Set Bylonder Property) calls `get` and `set`, so a user's own FlowGraph
   or glTF interactivity drives the same knobs. Nothing else is FlowGraph's.
 

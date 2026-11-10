@@ -124,11 +124,66 @@ export const EntitySchema: import("zod/mini").ZodMiniObject<{
     } | null>, any>>>;
     implementation: import("zod/mini").ZodMiniOptional<import("zod/mini").ZodMiniString<string>>;
 }, import("zod/v4/core").$strip>;
+/** A collection's flags in a view layer, as its LayerCollection holds them. */
+export const LayerCollectionSchema: import("zod/mini").ZodMiniObject<{
+    exclude: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniBoolean<boolean>>;
+    hide_viewport: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniBoolean<boolean>>;
+    holdout: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniBoolean<boolean>>;
+    indirect_only: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniBoolean<boolean>>;
+}, import("zod/v4/core").$strip>;
+export const COLOR_TAGS: readonly ["NONE", "COLOR_01", "COLOR_02", "COLOR_03", "COLOR_04", "COLOR_05", "COLOR_06", "COLOR_07", "COLOR_08"];
+/** A collection: its members by key (child collections, then objects), its metadata and its visibility. */
+export const CollectionSchema: import("zod/mini").ZodMiniObject<{
+    name: import("zod/mini").ZodMiniString<string>;
+    children: import("zod/mini").ZodMiniDefault<z.ZodMiniType<string[], any, import("zod/v4/core").$ZodTypeInternals<string[], any>>>;
+    objects: import("zod/mini").ZodMiniDefault<z.ZodMiniType<string[], any, import("zod/v4/core").$ZodTypeInternals<string[], any>>>;
+    color_tag: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniEnum<{
+        NONE: "NONE";
+        COLOR_01: "COLOR_01";
+        COLOR_02: "COLOR_02";
+        COLOR_03: "COLOR_03";
+        COLOR_04: "COLOR_04";
+        COLOR_05: "COLOR_05";
+        COLOR_06: "COLOR_06";
+        COLOR_07: "COLOR_07";
+        COLOR_08: "COLOR_08";
+    }>>;
+    custom: import("zod/mini").ZodMiniDefault<z.ZodMiniType<Record<string, any>, any, import("zod/v4/core").$ZodTypeInternals<Record<string, any>, any>>>;
+    hide_viewport: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniBoolean<boolean>>;
+    hide_render: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniBoolean<boolean>>;
+    hide_select: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniBoolean<boolean>>;
+    view_layers: import("zod/mini").ZodMiniDefault<z.ZodMiniType<Record<string, {
+        exclude: boolean;
+        hide_viewport: boolean;
+        holdout: boolean;
+        indirect_only: boolean;
+    }>, any, import("zod/v4/core").$ZodTypeInternals<Record<string, {
+        exclude: boolean;
+        hide_viewport: boolean;
+        holdout: boolean;
+        indirect_only: boolean;
+    }>, any>>>;
+}, import("zod/v4/core").$strip>;
+/** The scene the page shows: its ID, its scene collection (the collections' root) and the view layer it draws. */
+export const SceneSchema: import("zod/mini").ZodMiniObject<{
+    id: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNullable<import("zod/mini").ZodMiniString<string>>>;
+    collection: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNullable<import("zod/mini").ZodMiniString<string>>>;
+    view_layer: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNullable<import("zod/mini").ZodMiniString<string>>>;
+}, import("zod/v4/core").$strip>;
 export const IR_SCHEMA: "bylonder-ir";
 export const IR_VERSION: 1;
 export const IRSchema: import("zod/mini").ZodMiniObject<{
     schema: import("zod/mini").ZodMiniLiteral<"bylonder-ir">;
     version: import("zod/mini").ZodMiniLiteral<1>;
+    scene: import("zod/mini").ZodMiniDefault<z.ZodMiniType<{
+        id: string | null;
+        collection: string | null;
+        view_layer: string | null;
+    }, any, import("zod/v4/core").$ZodTypeInternals<{
+        id: string | null;
+        collection: string | null;
+        view_layer: string | null;
+    }, any>>>;
     ids: import("zod/mini").ZodMiniDefault<z.ZodMiniType<Record<string, {
         type: string;
         name: string;
@@ -149,6 +204,37 @@ export const IRSchema: import("zod/mini").ZodMiniObject<{
             matrix_world: number[];
             geometry?: Record<string, any> | undefined;
         } | undefined;
+    }>, any>>>;
+    collections: import("zod/mini").ZodMiniDefault<z.ZodMiniType<Record<string, {
+        name: string;
+        children: string[];
+        objects: string[];
+        color_tag: "NONE" | "COLOR_01" | "COLOR_02" | "COLOR_03" | "COLOR_04" | "COLOR_05" | "COLOR_06" | "COLOR_07" | "COLOR_08";
+        custom: Record<string, any>;
+        hide_viewport: boolean;
+        hide_render: boolean;
+        hide_select: boolean;
+        view_layers: Record<string, {
+            exclude: boolean;
+            hide_viewport: boolean;
+            holdout: boolean;
+            indirect_only: boolean;
+        }>;
+    }>, any, import("zod/v4/core").$ZodTypeInternals<Record<string, {
+        name: string;
+        children: string[];
+        objects: string[];
+        color_tag: "NONE" | "COLOR_01" | "COLOR_02" | "COLOR_03" | "COLOR_04" | "COLOR_05" | "COLOR_06" | "COLOR_07" | "COLOR_08";
+        custom: Record<string, any>;
+        hide_viewport: boolean;
+        hide_render: boolean;
+        hide_select: boolean;
+        view_layers: Record<string, {
+            exclude: boolean;
+            hide_viewport: boolean;
+            holdout: boolean;
+            indirect_only: boolean;
+        }>;
     }>, any>>>;
     references: import("zod/mini").ZodMiniDefault<z.ZodMiniType<{
         from: string;
@@ -379,10 +465,12 @@ export type Entity = z.infer<typeof EntitySchema>;
 export type Mesh = z.infer<typeof MeshSchema>;
 export type Points = z.infer<typeof PointsSchema>;
 export type Instances = z.infer<typeof InstancesSchema>;
+export type Geometry = z.infer<typeof GeometrySchema>;
+export type Collection = z.infer<typeof CollectionSchema>;
 /**
  * A reference an entity's input may hold, resolved before a unit runs.
  */
-export type Geometry = z.infer<typeof GeometrySchema>;
+export type LayerCollection = z.infer<typeof LayerCollectionSchema>;
 export type Reference = {
     property: string;
 } | {

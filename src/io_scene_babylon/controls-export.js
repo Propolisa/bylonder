@@ -153,13 +153,16 @@ function sdkControls(world, scene) {
     .map(([ref, channel]) => knob(base + world.animation.dataPath(ref), channel.get(), { suggested: true }));
 }
 
+// Main's scene, as RNA.
+export const sceneOf = (sync) => pointerStruct(structFind('Scene'), sync.blender.scene, sync.blender.scene);
+
 // The controls of the serialized scene `data`, the IR's properties (ir-export.js): none without Main.
 export function exportControls(world, data) {
   const sync = world.mainSync;
   if (!sync) return [];
   const { scene } = world, byUniqueId = new Map([...scene.meshes, ...scene.transformNodes, ...scene.lights, ...scene.cameras].map((n) => [n.uniqueId, n]));
   const nodes = [...data.meshes, ...data.transformNodes, ...data.lights, ...data.cameras].map((entry) => byUniqueId.get(entry.uniqueId)).filter(Boolean);
-  const mainScene = pointerStruct(structFind('Scene'), sync.blender.scene, sync.blender.scene);
+  const mainScene = sceneOf(sync);
   const list = [];
   for (const node of nodes) {
     const pointer = sync.objectOf(node);
