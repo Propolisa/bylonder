@@ -53,7 +53,6 @@ export const KNOWN = {
   'animation look-webgpu': 'the page skips the Standard view transform, so linear colors reach the screen unencoded (fixed on export-fixes-parity)',
   'lava look-webgl2': 'the page skips the Standard view transform, so linear colors reach the screen unencoded (fixed on export-fixes-parity)',
   'lava look-webgpu': 'the page skips the Standard view transform, so linear colors reach the screen unencoded (fixed on export-fixes-parity)',
-  'city look-webgl2': 'the page skips the Standard view transform, so linear colors reach the screen unencoded (fixed on export-fixes-parity)',
   'city look-webgpu': 'the page skips the Standard view transform, so linear colors reach the screen unencoded (fixed on export-fixes-parity)',
   'bouncing-ball look-webgl2': 'Grease Pencil strokes are not exported (fixed on export-grease-pencil), and the view transform',
   'bouncing-ball look-webgpu': 'Grease Pencil strokes are not exported (fixed on export-grease-pencil), and the view transform',

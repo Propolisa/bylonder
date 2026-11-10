@@ -238,7 +238,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
     fog: data.fogMode ? { fogMode: data.fogMode, fogColor: data.fogColor, fogStart: data.fogStart, fogEnd: data.fogEnd, fogDensity: data.fogDensity } : null,
     environment: data.environmentTexture ? { url: data.environmentTexture, rotationY: data.environmentTextureRotationY ?? 0, hdr: data.environmentTextureType === 'BABYLON.HDRCubeTexture', size: data.environmentTextureSize, extension: data.environmentTextureForcedExtension, skybox: !!data.createDefaultSkybox } : null,
     world: !data.environmentTexture && scene.metadata?.wbWorld ? { color: scene.metadata.wbWorld.color.map((v) => v * (scene.metadata.wbWorld.strength ?? 1)), material: worldEntry?.uniqueId ?? null } : null,
-    environmentProbe: data.environmentProbe ?? null, environmentIntensity: data.environmentIntensity, iblIntensity: data.iblIntensity, useRightHandedSystem: data.useRightHandedSystem,
+    defaultMaterial: data.defaultMaterialId ?? null, environmentProbe: data.environmentProbe ?? null, environmentIntensity: data.environmentIntensity, iblIntensity: data.iblIntensity, useRightHandedSystem: data.useRightHandedSystem,
   };
   // Written before the module's tables: they add thin instance buffers to scene.bin.
   const objectLines = objects.map(({ entry, mesh }) => `  // ${entry.name}\n  {\n${indent(nodeCode(entry, mesh, geometries, live.get(mesh), bin))}\n  }`).join('\n');
@@ -351,6 +351,7 @@ export async function createScene(engine, canvas) {
 ${kernels ? `  // Blender's nodes of each material and world, made from the IR's graphs.
   fillMaterials(MATERIALS, ir, kernels);
 ` : ''}  for (const entry of MATERIALS) materials[entry.uniqueId] = Material.Parse(entry, scene, ROOT);
+  if (SCENE.defaultMaterial !== null) scene.defaultMaterial = materials[SCENE.defaultMaterial];
   // Node materials' samplers as WebGPU binds them.
   for (const material of Object.values(materials)) if (material.getClassName() === 'NodeMaterial') webgpuSamplers(material);${areaSpecular ? `
   // Lights' specular as EEVEE's, as the app's PBR materials have it.

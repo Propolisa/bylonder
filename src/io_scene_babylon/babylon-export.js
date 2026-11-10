@@ -61,7 +61,10 @@ function exportedContent(scene) {
   // Curves are drawn by the page (curves-export.js) in the materials the app draws them in.
   const curves = scene.meshes.filter((m) => m.metadata?.curves && !m.metadata.overlay && m.isEnabled());
   const materials = new Set([...meshes, ...curves].flatMap((m) => (m.material ? [m.material, ...(m.material.subMaterials ?? [])] : [])).filter(Boolean));
-  return { nodes: new Set(nodes), meshes, materials };
+  // An object without a material draws Blender's default surface (material/library.js), as the page's default material.
+  const defaultMaterial = meshes.some((m) => !m.material && m.getTotalVertices() > 0) ? scene._defaultMaterial : null;
+  if (defaultMaterial) materials.add(defaultMaterial);
+  return { nodes: new Set(nodes), meshes, materials, defaultMaterial };
 }
 
 // Babylon ids need not be unique, but the file refers to nodes by id: each exported node gets its object's name,
@@ -431,7 +434,7 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
   json.particleSystems = kept(json.particleSystems, scene.particleSystems, (p) => !p.emitter?.getClassName || content.nodes.has(p.emitter));
   for (const entry of json.cameras) aimed(entry, scene.getCameraByUniqueId(entry.uniqueId));
   extraInfluences(json, scene);
-  Object.assign(json, { animationGroups, activeCameraID, renderingPipelines: effects.renderingPipelines, imageProcessingConfiguration: scene.imageProcessingConfiguration.serialize(), producer: { name: 'Bylonder', file: 'scene.babylon' } });
+  Object.assign(json, { animationGroups, activeCameraID, defaultMaterialId: content.defaultMaterial?.uniqueId, renderingPipelines: effects.renderingPipelines, imageProcessingConfiguration: scene.imageProcessingConfiguration.serialize(), producer: { name: 'Bylonder', file: 'scene.babylon' } });
   writePostProcesses(json, effects.postProcesses);
   await environment(json, scene);
   // The F-Curves the page runs (live-curves.js), for the package's IR, and what it still plays as samples (sampledGaps):
