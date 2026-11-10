@@ -2,8 +2,9 @@
 // with custom properties added (CUSTOM below), bundled, as a page on WebGL 2 in Playwright's Chromium: the panel opened
 // from the top right corner, a field dragged, a search and Show All; then on a phone, a finger scrolling the panel and
 // dragging a field, and a pinch scaling it. Each step checks what it shows.
-//   usage: node tools/docs/record-control-panel.mjs [--mobile] [--serve]
+//   usage: node tools/docs/record-control-panel.mjs [--mobile] [--colours] [--serve]
 //     --mobile  the phone's part only
+//     --colours the materials' icons in the colours they show on screen, on the Compositor example, only
 //     --serve   exports and serves the page, printing its URL, until stopped (for working on the panel); EXAMPLE another
 //               example, PORT and HOST where (default any port on localhost)
 //     BUNDLE=0  the package as ES modules, with an import map
@@ -20,7 +21,8 @@ const root = fileURLToPath(new URL('../..', import.meta.url));
 const MEDIA = join(root, 'docs/media/features/import-export');
 // Pictures go where the owner follows them too: the main checkout's .shots/ beside a worktree, else this one's.
 const SHOTS = join(existsSync(join(root, '../bylonder/.shots')) ? join(root, '../bylonder/.shots') : join(root, '.shots'), 'control-panel');
-const EXAMPLE = process.env.EXAMPLE ?? 'lava';
+const COLOURS = process.argv.includes('--colours');
+const EXAMPLE = process.env.EXAMPLE ?? (COLOURS ? 'compositor' : 'lava');
 // Custom properties the page's author would have added, by object (or the scene).
 const CUSTOM = EXAMPLE !== 'lava' ? {} : { Sphere: { Glow: 0.75, Spin: true, Turns: 3 }, scene: { Speed: 2 } };
 // Bundled, as File > Export writes a package by default, unless BUNDLE=0.
@@ -127,7 +129,20 @@ async function open(context) {
   return { page, panel, toggle, pause, shot, gif, value };
 }
 
-if (!process.argv.includes('--mobile')) {
+// The materials, each icon in the colour it shows on screen, sampled with On Screen's shares.
+if (COLOURS) {
+  const { page, panel, toggle, pause, shot } = await open(await browser.newContext({ viewport: SIZE, deviceScaleFactor: 1 }));
+  await page.mouse.move(SIZE.width - 30, 30, { steps: 8 });
+  await toggle.click();
+  await panel.locator('.share', { hasText: '%' }).first().waitFor();
+  await pause(1000);
+  const tints = await panel.locator('.dot.materials').evaluateAll((dots) => dots.map((d) => d.style.getPropertyValue('--tint')));
+  if (new Set(tints.filter((t) => t.startsWith('rgb'))).size < 5) throw new Error(`the materials' icons took too few colours from the screen: ${tints.join(', ')}`);
+  await page.mouse.move(SIZE.width / 3, SIZE.height / 2);
+  await pause(300);
+  await shot('material-colours');
+  await page.close();
+} else if (!process.argv.includes('--mobile')) {
   const { page, panel, toggle, pause, shot, gif, value } = await open(await browser.newContext({ viewport: SIZE, deviceScaleFactor: 1 }));
   // The button shows as the pointer nears the corner; the panel opens on it.
   await page.mouse.move(SIZE.width - 30, 30, { steps: 8 });
@@ -173,7 +188,7 @@ if (!process.argv.includes('--mobile')) {
 
 // On a phone: a tap at the corner shows the button, one finger scrolls the panel or drags a field sideways, two pinch
 // the panel's scale; with Orbit chosen, a finger outside the panel turns the view.
-{
+if (!COLOURS) {
   const { page, panel, toggle, pause, gif, value } = await open(await browser.newContext({ viewport: PHONE, deviceScaleFactor: 2, isMobile: true, hasTouch: true }));
   const cdp = await page.context().newCDPSession(page);
   const touch = (type, points) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: points.map(([x, y], id) => ({ x, y, id })) });

@@ -6,7 +6,7 @@
 // Ctrl: snap, Escape: undo the drag), type (Enter or a click; arithmetic and units) and step with the arrow keys;
 // Backspace resets a field to the scene's value, Ctrl+C and Ctrl+V copy and paste it, Ctrl+Shift+C copies its data path.
 // An ID that one of Babylon's editors shows links to it (dev-tools.js).
-import { atDefault, clamp, componentLabel, dragScale, formatValue, hexOf, layout, matches, parseValue, rgbOf, snapped, snapStep, softRange, toDisplay } from './control-panel-model.js';
+import { atDefault, baseColor, clamp, componentLabel, dragScale, formatValue, hexOf, layout, matches, parseValue, rgbOf, snapped, snapStep, softRange, toDisplay } from './control-panel-model.js';
 
 /** @typedef {import('./control-panel-model.js').Row} Row */
 /** @typedef {import('./control-panel-model.js').Group} Group */
@@ -49,7 +49,8 @@ const STYLE = `
 .tri{width:8px;height:8px;flex:none;background:var(--bl-text-dim);clip-path:polygon(15% 10%,85% 50%,15% 90%);transition:transform .1s}
 [aria-expanded=true]>.tri{transform:rotate(90deg)}
 .dot{width:8px;height:8px;flex:none;border-radius:2px;background:var(--bl-icon-scene)}
-.dot.objects{background:var(--bl-icon-object)}.dot.materials{background:var(--bl-icon-shading)}.dot.lights,.dot.cameras,.dot.worlds{background:var(--bl-icon-object-data)}
+.dot.objects{background:var(--bl-icon-object)}.dot.lights,.dot.cameras,.dot.worlds{background:var(--bl-icon-object-data)}
+.dot.materials{width:12px;height:12px;border-radius:50%;background:radial-gradient(circle at 35% 30%,rgb(255 255 255/.45),transparent 45%),radial-gradient(circle,transparent 55%,rgb(0 0 0/.25)),var(--tint,var(--bl-icon-shading))}
 .dot.modifiers,.dot.node_groups{background:var(--bl-icon-modifier)}.dot.nodes{background:var(--bl-icon-shading);border-radius:50%}.dot.bones{background:var(--bl-icon-object-data);border-radius:50%}
 .rows{padding:2px 4px 4px}
 .row{display:flex;align-items:flex-start;gap:6px;margin-top:var(--cp-gap)}
@@ -356,12 +357,10 @@ export function createPanel(shadow, blend, { button, place, viewer, ...tools }) 
     const components = el('div', { className: 'value', hidden: true }, row.controls.map((c, i) => numberField(c, { slider: true, component: componentLabel(c, i) })));
     const expand = el('button', { type: 'button', className: 'tool expand', title: 'Values', 'aria-label': `${row.label} values`, 'aria-expanded': 'false' }, [el('span', { className: 'tri' })]);
     expand.addEventListener('click', () => { components.hidden = !components.hidden; expand.setAttribute('aria-expanded', String(!components.hidden)); });
-    const values = () => row.controls.map((c) => /** @type {number} */ (get(c.path)));
     const show = () => {
-      const [r, g, b, a] = values(), css = (/** @type {number} */ v) => Math.round((gamma ? Math.min(1, Math.max(0, v)) : toDisplay(v)) * 255);
-      const color = `rgb(${css(r)} ${css(g)} ${css(b)})`;
-      rgb.style.background = color;
-      if (alpha) alpha.style.background = `rgb(${css(r)} ${css(g)} ${css(b)} / ${a})`;
+      const [r, g, b, a] = row.controls.map((c) => /** @type {number} */ (get(c.path)));
+      rgb.style.background = cssOf(row);
+      if (alpha) alpha.style.background = cssOf(row, a);
       picker.value = hexOf([r, g, b], gamma);
     };
     for (const c of row.controls) watch(c.path, show);
@@ -369,6 +368,13 @@ export function createPanel(shadow, blend, { button, place, viewer, ...tools }) 
     picker.addEventListener('input', () => rgbOf(picker.value, gamma).forEach((v, i) => set(row.controls[i].path, v)));
     swatch.addEventListener('contextmenu', (e) => contextMenu(e, row.controls[0]));
     return [el('div', { className: 'value inline' }, [swatch, expand]), components];
+  }
+
+  /** A color row's value as CSS, display encoded. @param {Row} row @param {number} [alpha] */
+  function cssOf(row, alpha) {
+    const gamma = row.controls[0].subtype === 'COLOR_GAMMA';
+    const byte = (/** @type {Control} */ c) => { const v = Number(get(c.path)); return Math.round((gamma ? Math.min(1, Math.max(0, v)) : toDisplay(v)) * 255); };
+    return `rgb(${row.controls.slice(0, 3).map(byte).join(' ')}${alpha === undefined ? '' : ` / ${alpha}`})`;
   }
 
   /** @param {Row} row */
@@ -460,28 +466,37 @@ export function createPanel(shadow, blend, { button, place, viewer, ...tools }) 
     const element = el('div', { className: 'group', 'data-key': group.key });
     const material = titles.length === 1 && group.kind === 'materials' ? allRows(group).flatMap((r) => r.controls).map((c) => bindOf(c.path)?.material).find((m) => m !== undefined) : undefined;
     const share = material !== undefined ? el('span', { className: 'share' }) : null;
-    if (share) onScreen.push({ element, material: String(material), share, order: onScreen.length });
     element.append(...collapsible(group.key, group.title, group.kind, siblings <= 6, () => [
       ...group.rows.flatMap((row) => { const made = rowElement(row); for (const m of made) filtered.push({ element: m, rows: [row], titles: path }); return made; }),
       ...group.groups.map((g) => groupElement(g, path, group.groups.length)),
     ], share, link));
+    if (share) {
+      const dot = /** @type {HTMLElement} */ (element.querySelector('.dot'));
+      onScreen.push({ element, material: String(material), share, dot, base: baseColor(group), order: onScreen.length });
+    }
     filtered.push({ element, rows: allRows(group), titles: path });
     return element;
   }
 
   // Materials by how much of the view each covers, measured a few times a second while the panel is open
-  // (control-panel-coverage.js), their order held while a field is dragged or typed into; or the scene's order.
-  /** @type {{ element: HTMLElement, material: string, share: HTMLElement, order: number }[]} */
+  // (control-panel-coverage.js), their order held while a field is dragged or typed into; or the scene's order. Each
+  // material's icon is tinted with the colour it shows on screen, else its base colour.
+  /** @type {{ element: HTMLElement, material: string, share: HTMLElement, dot: HTMLElement, base?: Row, order: number }[]} */
   const onScreen = [];
   const byScreen = el('button', { type: 'button', className: 'tool link order', textContent: 'On Screen', title: "Materials by how much of the view each covers; off: the scene's order",
     'aria-pressed': String(state.byScreen !== false), onclick: () => {
       state.byScreen = byScreen.getAttribute('aria-pressed') !== 'true';
       byScreen.setAttribute('aria-pressed', String(state.byScreen));
       save();
-      measure(!panel.hidden);
+      if (!state.byScreen) sortMaterials(new Map());
     } });
   /** @type {Promise<{ dispose(): void }> | null} */
   let coverage = null;
+  /** @param {Map<string, number>} shares @param {Map<string, string>} colours */
+  const measured = (shares, colours) => {
+    for (const m of onScreen) m.dot.style.setProperty('--tint', colours.get(m.material) ?? (m.base ? cssOf(m.base) : null));
+    sortMaterials(state.byScreen !== false ? shares : new Map());
+  };
   /** @param {Map<string, number>} shares */
   const sortMaterials = (shares) => {
     for (const m of onScreen) {
@@ -493,12 +508,14 @@ export function createPanel(shadow, blend, { button, place, viewer, ...tools }) 
     if (sorted.some((m, i) => m.element.parentElement?.children[i] !== m.element)) for (const m of sorted) m.element.parentElement?.append(m.element);
   };
   const measure = (/** @type {boolean} */ on) => {
-    const wanted = on && state.byScreen !== false && onScreen.length > 1;
-    if (wanted && !coverage) coverage = import('./control-panel-coverage.js').then(({ createCoverage }) => createCoverage(blend.scene, sortMaterials));
+    const wanted = on && onScreen.length > 0;
+    if (wanted && !coverage) {
+      measured(new Map(), new Map());
+      coverage = import('./control-panel-coverage.js').then(({ createCoverage }) => createCoverage(blend.scene, measured));
+    }
     if (!wanted && coverage) {
       coverage.then((c) => c.dispose());
       coverage = null;
-      sortMaterials(new Map());
     }
   };
 

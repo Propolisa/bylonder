@@ -28,6 +28,7 @@ media:
   - import-export/export-javascript-branches.png
   - import-export/control-panel-button.png
   - import-export/control-panel-open.png
+  - import-export/control-panel-material-colours.png
   - import-export/control-panel-drag.gif
   - import-export/control-panel-search.png
   - import-export/control-panel-all.png
@@ -119,7 +120,7 @@ limits:
   - The control panel labels a node by its name, not its label, and a property by Blender's name for it (Euler Rotation, where the N panel says Rotation).
   - Babylon's Inspector and node editors are Babylon's own bundles, which read the page's Babylon from a global: a bundled package holds the whole of Babylon's core (about 3 MB) in bundle/ for them, fetched only when one opens; In the Package does not ship Babylon's GUI, which the Inspector loads from Babylon's CDN.
   - The control panel's navigation copies the chosen camera's view onto the exported one each frame, so the view transform and compositor stay; a camera's roll is not kept, and Walk finds the floor by casting down from the camera.
-  - On Screen measures the materials' shares from a 64 pixel wide drawing of the scene, a few times a second while the panel is open: a material smaller than a pixel there shows no share, and a material's share counts where it is drawn, behind transparent ones too.
+  - On Screen measures the materials' shares from a 64 pixel wide drawing of the scene, a few times a second while the panel is open: a material smaller than a pixel there shows no share, and a material's share counts where it is drawn, behind transparent ones too. A material's icon colour is the average of the frame's pixels there, at the same size, so it mixes its lit and shaded sides; where it is not seen, the icon shows its Base Color (or Color) if it has one as a control, else the plain icon.
   - The Node Material Editor opens in a window of its own, which a browser's popup blocker may stop.
   - The splash's Open from URL downloads only from servers that allow downloads from a web page (CORS); Blender's demo files are served from Bylonder's own copy for that reason.
 ---
@@ -209,12 +210,15 @@ Bronze and Marble materials. The steps below take the bust out and import it aga
     tap there): a button shows, which opens the control panel. Custom properties come first, then the materials (those
     you named before Blender's Material.001), each with its nodes, then objects, lights, cameras, the world and the
     scene, every property under Blender's name for it. On Screen, beside Materials, orders the materials by how much of
-    the view each covers, its share beside its name (off: the scene's order). What is at Blender's defaults is hidden;
-    All shows it. Control Panel, in the export's settings, turns the panel off.
+    the view each covers, its share beside its name (off: the scene's order). Each material's icon takes the colour
+    it shows on screen, else its Base Color. What is at Blender's defaults is hidden; All shows it. Control Panel, in
+    the export's settings, turns the panel off.
 
     ![The button at the corner](../media/features/import-export/control-panel-button.png)
 
     ![The control panel](../media/features/import-export/control-panel-open.png)
+
+    ![Each material's icon in the colour it shows on screen](../media/features/import-export/control-panel-material-colours.png)
 
 11. **Drag and type.** Drag a number field sideways as in Blender: Shift for precision, Ctrl to snap, Escape to undo
     the drag. Click it to type a value, with units (20cm) and arithmetic (2 * 3); a rotation is typed in degrees. The
@@ -252,4 +256,4 @@ Bronze and Marble materials. The steps below take the bust out and import it aga
   [record-export-javascript.mjs](../../tools/docs/record-export-javascript.mjs) (on the Rigged Character and Compositor
   examples):
   record this page's pictures, and [record-control-panel.mjs](../../tools/docs/record-control-panel.mjs) (on the Lava
-  example, with custom properties added) the control panel's.
+  example, with custom properties added, and the Compositor example for its materials' colours) the control panel's.

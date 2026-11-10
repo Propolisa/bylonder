@@ -267,6 +267,42 @@ export const toDisplay = (v) => { const c = Math.min(1, Math.max(0, v)); return 
 /** A display (sRGB) component as linear. @param {number} v */
 export const toLinear = (v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
 
+// sRGB bytes in linear light, to average colours as light mixes.
+const LINEAR = Float32Array.from({ length: 256 }, (_, i) => toLinear(i / 255));
+
+/**
+ * What each id of an ID pass covers (0 to 1) and the average colour it shows there (CSS), from the ID pass's pixels
+ * (an id in the red and green bytes, 0 for none) and the frame's at the same size, RGBA bytes both.
+ * @param {ArrayLike<number>} ids
+ * @param {ArrayLike<number>} shown
+ */
+export function seen(ids, shown) {
+  /** Each id's pixel count and summed linear colour. @type {Map<number, number[]>} */
+  const sums = new Map();
+  for (let i = 0; i < ids.length; i += 4) {
+    const id = ids[i] + (ids[i + 1] << 8);
+    if (!id) continue;
+    let sum = sums.get(id);
+    if (!sum) sums.set(id, sum = [0, 0, 0, 0]);
+    sum[0]++;
+    for (let c = 0; c < 3; c++) sum[c + 1] += LINEAR[shown[i + c]];
+  }
+  const pixels = ids.length / 4;
+  return new Map([...sums].map(([id, [count, ...rgb]]) => [id, { share: count / pixels, colour: `rgb(${rgb.map((v) => Math.round(toDisplay(v / count) * 255)).join(' ')})` }]));
+}
+
+/**
+ * A material's main colour where it is not seen: its first Base Color row, else its first Color row.
+ * @param {Group} group
+ * @returns {Row | undefined}
+ */
+export function baseColor(group) {
+  /** @param {Group} g @returns {Row[]} */
+  const colors = (g) => [...g.rows.filter((r) => r.widget === 'color'), ...g.groups.flatMap(colors)];
+  const found = colors(group);
+  return found.find((r) => r.label === 'Base Color') ?? found.find((r) => r.label === 'Color');
+}
+
 /** A color's hex as a color input takes it, from linear components (gamma ones for COLOR_GAMMA). @param {number[]} rgb @param {boolean} gamma */
 export const hexOf = (rgb, gamma) => `#${rgb.slice(0, 3).map((v) => Math.round((gamma ? Math.min(1, Math.max(0, v)) : toDisplay(v)) * 255).toString(16).padStart(2, '0')).join('')}`;
 /** A color input's hex as components. @param {string} hex @param {boolean} gamma */

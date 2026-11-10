@@ -1,11 +1,12 @@
 // An exported page's control panel (src/io_scene_babylon/runtime/control-panel*.js): its layout of a scene's controls
 // (custom properties first, then materials, the author's named ones first, then the rest; vectors as one row; widgets by
-// subtype), what it hides at Blender's defaults, values shown and typed in Blender's units, drag and snap steps, the
-// theme it copies from the app, a package ships it only when scene.js imports it, and what it weighs.
+// subtype), what it hides at Blender's defaults, values shown and typed in Blender's units, drag and snap steps, each
+// material's colour as seen, the theme it copies from the app, a package ships it only when scene.js imports it, and
+// what it weighs.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { gzipSync } from 'node:zlib';
-import { atDefault, clamp, dragScale, formatValue, hexOf, layout, matches, parsePath, parseValue, rgbOf, snapped, snapStep } from '../src/io_scene_babylon/runtime/control-panel-model.js';
+import { atDefault, baseColor, clamp, dragScale, formatValue, hexOf, layout, matches, parsePath, parseValue, rgbOf, seen, snapped, snapStep } from '../src/io_scene_babylon/runtime/control-panel-model.js';
 import { TOKENS } from '../src/io_scene_babylon/runtime/control-panel.js';
 import { PANEL_FILES, packageRuntime } from '../src/io_scene_babylon/runtime-files.js';
 
@@ -80,6 +81,13 @@ assert.equal(snapStep({ path: 'l', type: 'FLOAT', default: 0, unit: 'LENGTH', st
 assert.equal(hexOf([1, 0.2158605, 0], false), '#ff8000');
 assert.deepEqual(rgbOf('#ff8000', true).map((v) => v.toFixed(3)), ['1.000', '0.502', '0.000']);
 
+// Each material's icon: the colour it shows on screen, averaged as light mixes, from the coverage pass's ids and the
+// frame read at the same size; where it is not seen, its Base Color (or Color), else the plain icon.
+const ids = [1, 0, 0, 255, 1, 0, 0, 255, 2, 0, 0, 255, 0, 0, 0, 0], shown = [0, 0, 0, 255, 255, 255, 255, 255, 255, 128, 0, 255, 9, 9, 9, 255];
+assert.deepEqual(seen(ids, shown), new Map([[1, { share: 0.5, colour: 'rgb(188 188 188)' }], [2, { share: 0.25, colour: 'rgb(255 128 0)' }]]), 'black and white seen as half light, not mid grey');
+assert.equal(baseColor(brick)?.label, 'Base Color');
+assert.equal(baseColor(sections[1].groups[1]), undefined, 'a material without a color keeps the plain icon');
+
 // The theme the panel draws with is the app's (src/theme.css).
 const theme = Object.fromEntries([...readFileSync(new URL('../src/theme.css', import.meta.url), 'utf8').matchAll(/(--bl-[\w-]+):([^;}]+)/g)].map(([, name, value]) => [name, value.trim()]));
 for (const [, name, value] of TOKENS.matchAll(/(--bl-[\w-]+):([^;]+)/g)) assert.equal(value.trim(), theme[name], `${name} is the app's`);
@@ -93,4 +101,4 @@ assert.ok(!shipped('').some((path) => path.includes('control-panel')));
 const kb = (...names) => gzipSync(names.map(runtime).join('')).length / 1024;
 assert.ok(kb('control-panel.js') < 3, `the button: ${kb('control-panel.js').toFixed(1)} KB gzipped`);
 assert.ok(kb('control-panel-ui.js', 'control-panel-model.js') < 20, `the panel: ${kb('control-panel-ui.js', 'control-panel-model.js').toFixed(1)} KB gzipped`);
-console.log(`control panel: layout, defaults, units, drag steps, theme and shipping ok; ${kb('control-panel.js').toFixed(1)} KB, then ${kb('control-panel-ui.js', 'control-panel-model.js').toFixed(1)} KB gzipped`);
+console.log(`control panel: layout, defaults, units, drag steps, material colours, theme and shipping ok; ${kb('control-panel.js').toFixed(1)} KB, then ${kb('control-panel-ui.js', 'control-panel-model.js').toFixed(1)} KB gzipped`);

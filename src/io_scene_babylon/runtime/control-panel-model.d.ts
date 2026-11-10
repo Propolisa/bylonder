@@ -57,6 +57,22 @@ export function dragScale(control: Control): number;
  * @param {boolean} fine
  */
 export function snapStep(control: Control, fine: boolean): number;
+/**
+ * What each id of an ID pass covers (0 to 1) and the average colour it shows there (CSS), from the ID pass's pixels
+ * (an id in the red and green bytes, 0 for none) and the frame's at the same size, RGBA bytes both.
+ * @param {ArrayLike<number>} ids
+ * @param {ArrayLike<number>} shown
+ */
+export function seen(ids: ArrayLike<number>, shown: ArrayLike<number>): Map<number, {
+    share: number;
+    colour: string;
+}>;
+/**
+ * A material's main colour where it is not seen: its first Base Color row, else its first Color row.
+ * @param {Group} group
+ * @returns {Row | undefined}
+ */
+export function baseColor(group: Group): Row | undefined;
 export function labelOf(control: Control): string;
 export function componentLabel(control: Control, index: number): string;
 export function atDefault(row: Row, value: (path: string) => Value): boolean;
