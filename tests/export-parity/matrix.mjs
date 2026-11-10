@@ -66,7 +66,6 @@ export const KNOWN = {
   'still-life look-webgl2': '88% of pixels agree, mean 5.3: the Wine Glass (99% of its pixels) and the brass Candlestick differ (not yet classified)',
   'carousel look-webgl2': '53% of pixels agree: not yet classified, rerun once the view transform fix lands',
   'compositor look-webgl2': '14.5% of pixels agree: not yet classified, rerun once the view transform fix lands',
-  'framed-print look-webgl2': '72% of pixels agree: not yet classified, rerun once the view transform fix lands',
   'geometry-node-editor look-webgl2': '32% of pixels agree: not yet classified, rerun once the view transform fix lands',
   'geometry-nodes look-webgl2': '28% of pixels agree: not yet classified, rerun once the view transform fix lands',
   'desk-lamp look-webgl2': 'the page is never ready within 180 s (a material never reports ready)',

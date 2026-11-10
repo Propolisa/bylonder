@@ -262,6 +262,7 @@ import { parsePostProcess } from './bylonder/overrides/babylon/god-rays-parse.js
 import './bylonder/overrides/babylon/chromatic-aberration-size.js';
 import './bylonder/overrides/babylon/geometry-gamma-albedo.js';
 import './bylonder/overrides/babylon/environment-probe.js';
+import './bylonder/overrides/babylon/srgb-texture-parse.js';
 import { parseCamera } from './bylonder/overrides/babylon/camera-quaternion.js';
 import { orthoScaled } from './bylonder/ortho-scale.js';${kernels ? `
 import { fillMaterials } from './bylonder/materials.js';

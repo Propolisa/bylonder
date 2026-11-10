@@ -446,6 +446,6 @@ async function textureJson(texture) {
   try { json = texture.serialize() ?? {}; } finally { texture._forceSerialize = forced; }
   const base64String = data ?? (await json.base64String);
   return { ...json, name: texture.name || 'blender', url: '', base64String, wrapU: texture.wrapU, wrapV: texture.wrapV, samplingMode: texture.samplingMode, invertY: !!data,
-    noMipmap: !!table };
+    noMipmap: !!table, _useSRGBBuffer: !!texture.getInternalTexture()?._useSRGBBuffer };
 }
 
