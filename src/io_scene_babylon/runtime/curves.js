@@ -4,6 +4,8 @@
 // entity gives Main's curves draw as the app draws it (docs/ir.md Geometry), which the package's bylonder-curves/
 // (Blender's curve shape functions, GPL) draws in the curves' material, as the app's view does.
 
+import { fillWhatItReads } from '../../overrides/webgpu/missing-attributes.js';
+
 /**
  * Main's curves draw: each evaluated point's position and radius, the drawn segments' indirection, each point's time
  * along its curve, each curve's length, the object's matrix (Blender's), the faces round each segment (the scene's Hair
@@ -29,6 +31,7 @@ export async function load({ root, scene }) {
       if (scene.getMeshById(id)) return;
       const mesh = curvesMesh(scene, id, curvesData(scene, { posRad, indirection, time, length, objectToWorld }), faces);
       mesh.id = id;
+      fillWhatItReads(mesh);
       mesh.material = material ? scene.getMaterialById(material) : null;
     },
   };
