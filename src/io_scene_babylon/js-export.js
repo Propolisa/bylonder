@@ -256,7 +256,8 @@ import { worldColor, worldNodes } from './bylonder/world.js';
 import { BlendScene } from './bylonder/blend-scene.js';
 import { derivativeUniformity } from './bylonder/overrides/webgpu/derivative-uniformity.js';
 import { reservedNames } from './bylonder/overrides/webgpu/reserved-names.js';
-import { webgpuSamplers } from './bylonder/overrides/webgpu/samplers.js';${kernels ? `
+import { webgpuSamplers } from './bylonder/overrides/webgpu/samplers.js';
+import { warnUnlessMaximumLimits } from './bylonder/overrides/webgpu/maximum-limits.js';${kernels ? `
 import { fillMaterials } from './bylonder/materials.js';
 import kernels from './${NODE_KERNELS}';` : ''}${curves ? `
 // The curves blocks the materials drawing curves use, before they are parsed.
@@ -318,6 +319,7 @@ const POST_PROCESS_TYPES = {
 // Each built scene's IR, world, compositor and scene.bin buffers, which load gives its controls.
 const IRS = new WeakMap(), WORLDS = new WeakMap(), COMPOSITORS = new WeakMap(), SCENE_BUFFERS = new WeakMap();
 export async function load(engine) {
+  warnUnlessMaximumLimits(engine);
   const scene = await createScene(engine, engine.getRenderingCanvas());
   return new BlendScene(scene, IRS.get(scene), { root: ROOT, world: WORLDS.get(scene), compositor: COMPOSITORS.get(scene), buffers: SCENE_BUFFERS.get(scene) });
 }
