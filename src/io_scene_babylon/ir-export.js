@@ -8,6 +8,7 @@ import { baseMesh, geometryNodesEntities, modifierEntities } from './modifiers-e
 import { ID_OB } from '../blenkernel/main-evaluated.js';
 import { greasePencilEntities } from './grease-pencil-export.js';
 import { curvesEntities } from './curves-export.js';
+import { chosenState } from './export-options.js';
 import { entityOrder, IR_SCHEMA, IR_VERSION, referencesIn } from './runtime/ir.js';
 
 // Blender's two-letter ID codes, by the bpy.data collection of each ID type.
@@ -281,7 +282,7 @@ export function exportIR(world, { controls, live, bin, animationGroups = [], cur
     for (const entity of Object.values(entities)) if (time && entity.type === 'modifier:NODES' && readsTime(graphs, entity.inputs.graph.graph)) entity.inputs.frame = { property: time };
     Object.assign(entities, driverEntities(properties), animationEntities(ids, properties, time, animationGroups, curves, bin),
       greasePencilEntities(world, objects.map(([node]) => node), bin, time),
-      curvesEntities(world, objects.map(([node]) => node), bin), constraintEntities(ids, constraints, time));
+      chosenState(states, 'curves') === 'OFF' ? {} : curvesEntities(world, objects.map(([node]) => node), bin), constraintEntities(ids, constraints, time));
   }
   // What the page computes from is offered to authors.
   for (const entity of Object.values(entities)) if (entity.implementation) for (const [ref] of referencesIn(entity.inputs)) if ('property' in ref) properties[ref.property].suggested = true;

@@ -17,7 +17,7 @@ import { createSceneBin } from './scene-bin.js';
 import { imageFiles } from './image-files.js';
 import { exportCompositor } from './compositor-export.js';
 import { exportIR, idKey } from './ir-export.js';
-import { channels, readsOtherIDs } from './modifiers-export.js';
+import { channels, liveStack } from './modifiers-export.js';
 import { AREA_LIGHTS_LTC, AREA_SPECULAR, BABYLON_ASSETS, CHUNKS, COMPILER_FOLDER, gplFolders, NODE_KERNELS, UNITS_FILE } from './runtime-files.js';
 import { AREA_SPECULAR_UNIT, replaces, stripEntities, stripPieces, unitManifest } from './unit-manifest.js';
 import { CURVES_GLSL_FILE, curvesGlslFile } from './curves-export.js';
@@ -143,7 +143,6 @@ function nodeCode(entry, mesh, geometries, live, bin) {
 }
 
 // Remesh's Voxel mode needs OpenVDB, which the kernels module is built without: such a stack stays applied.
-const needsOpenVDB = (modifier) => modifier.kind === 'REMESH' && modifier.values.mode === 'VOXEL';
 
 // The thin instances of one instancer (main-view.js drawInstances) become its child's, in its space: they follow it when
 // it moves, as Blender's instances do. Instances of several instancers stay in world space.
@@ -213,6 +212,8 @@ function sharedCode(materials) {
 }
 
 const PIPELINE_EFFECTS = ['bloomEnabled', 'depthOfFieldEnabled', 'fxaaEnabled', 'sharpenEnabled', 'chromaticAberrationEnabled', 'grainEnabled', 'glowLayerEnabled'];
+// Bylonder's own pipeline of a rendered view with none of its effects on: it only displays (render-babylon.js).
+export const displayOnly = (pipeline) => pipeline._name?.startsWith('__display:') && !PIPELINE_EFFECTS.some((e) => pipeline[e]);
 // A rendered view's display transform (runtime/view-transform.js) as Main's view settings give it: its lattice of
 // Blender's display processor goes to scene.bin, but for Standard without a look, which is sRGB's encoding. Standard
 // too is a post process, as the app's: the world's clear color, which no material draws, is scene linear.
@@ -241,20 +242,21 @@ function greasePencilClock(world, ir, groups) {
     targetedAnimations: [{ animation: animation.serialize(), targetId: animated.outputs.geometry.draw }] });
 }
 
-// The package's files but the runtime's: scene.js, scene.d.ts, scene.ir.json, scene.bin and images/. With `live`, objects whose
-// modifiers are all Blender's keep them live (modifiers-export.js), run by modifiers.wasm in bylonder-modifiers/. With
-// `bakeAnimation`, what Babylon cannot play as its F-Curve is sampled per frame; `target`, the GPU engine its page makes
+// The package's files but the runtime's: scene.js, scene.d.ts, scene.ir.json, scene.bin and images/. With `live` (the
+// Modifiers branch's default state), objects whose modifiers are all Blender's keep them live (modifiers-export.js), run
+// by modifiers.wasm in bylonder-modifiers/. With `bakeAnimation`, what Babylon cannot play as its F-Curve is sampled per frame; `target`, the GPU engine its page makes
 // (export-options.js TARGETS); `runtime`, `runtimes`, the runtimes its features export with (runtimes.js chosenRuntime);
 // `replace`, the type keys of units the page registers itself, which the package ships none of (unit-manifest.js); `bundle`,
 // whether the package is then bundled (bundle.js); `branchState` and `branches`, the states of the scene's branches
 // (export-options.js chosenState).
 export async function exportModule(world, { live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, target = 'BOTH', runtime = null, runtimes = {}, replace = [], bundle = false, controlPanel = true, devTools = 'CDN', navigation = 'FIXED', navigationModes = {}, branchState = null, branches = {} } = {}) {
-  const live = new Map(keepLive ? world.objects.map((node) => [node, world.modifiers.live(node)]).filter(([node, stack]) => stack && !stack.modifiers.some(needsOpenVDB) && !readsOtherIDs(world, node)) : []);
+  const states = { branchState, branches }, stackState = (node) => chosenState(states, 'modifiers', node.name) ?? (keepLive ? 'LIVE' : 'BAKED');
+  const live = new Map(world.objects.filter((node) => stackState(node) === 'LIVE').map((node) => [node, liveStack(world, node)]).filter(([, stack]) => stack));
   await world.modifiers.settled();
   // The mapped meshes' geometry is read below: their mapping holds until the module is written.
   const mapped = exportRuntimes(world, { bake: bakeAnimation, runtime, runtimes });
   try {
-    return await moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states: { branchState, branches } });
+    return await moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states });
   } finally {
     mapped.restore();
   }
@@ -263,10 +265,11 @@ export async function exportModule(world, { live: keepLive = false, parity = fal
 async function moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states }) {
   const graphs = [], graphOf = materialGraphs(world, graphs);
   const data = await serializeScene(world, { geometry: false, live, mapped, parity, graphOf, bake: bakeAnimation });
+  if (chosenState(states, 'postProcessing') === 'OFF') Object.assign(data, { renderingPipelines: [], postProcesses: [] });
   const { scene } = world;
   const worldEntry = await worldMaterial(scene, parity, graphOf);
   if (worldEntry) data.materials.push(worldEntry);
-  const volumes = await exportVolumes(scene, { parity, graphOf, meshes: new Set(data.meshes.map((m) => m.id)), lights: new Set(data.lights.map((l) => l.id)) });
+  const volumes = chosenState(states, 'volumes') === 'OFF' ? null : await exportVolumes(scene, { parity, graphOf, meshes: new Set(data.meshes.map((m) => m.id)), lights: new Set(data.lights.map((l) => l.id)) });
   if (volumes) data.materials.push(...volumes.materials);
   const bin = createSceneBin({ gzip: !hostCompression }), images = imageFiles(data);
   const geometries = new Map(), geometryLines = [];
@@ -285,7 +288,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   // Bylonder's own pipeline of a rendered view (render-babylon.js SceneLinearPipeline) turns the scene's image processing
   // off, so materials would encode to display themselves: with the view transform, which displays instead, it stays out
   // unless one of its effects is on.
-  if (display) data.renderingPipelines = data.renderingPipelines.filter((p) => !(p._name?.startsWith('__display:') && !PIPELINE_EFFECTS.some((e) => p[e])));
+  if (display) data.renderingPipelines = data.renderingPipelines.filter((p) => !displayOnly(p));
   // Baked, the compositor runs with its settings as exported: none of them a control.
   const controls = withUI([...exportControls(world, data), ...(compositorState === 'LIVE' ? composited?.knobs ?? [] : [])]);
   const ir = exportIR(world, { controls, live, bin, animationGroups: data.animationGroups, curves: data.liveCurves, constraints: data.liveConstraints, states });

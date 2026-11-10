@@ -16,6 +16,16 @@ const LIGHT_FIELDS = ['type', 'energy', 'exposure', 'color', 'volume_factor', 's
   'use_custom_distance', 'cutoff_distance', 'diffuse_factor', 'specular_factor', 'use_shadow'];
 const plain = (value) => (value && typeof value === 'object' ? [...value] : value);
 
+// The scene's volume domains seen by `camera`, of the `meshes` exported (ids; all when unset): [mesh, material], the
+// world's as [null, world]. The world's box is shown only in rendered views: the world's volume is its material's.
+function volumeDomains(scene, camera, meshes) {
+  const world = worldNodes.get(scene);
+  return scene.meshes.filter((mesh) => isVolumeDomain(mesh, camera) && !mesh.material.blenderWorld && (!meshes || meshes.has(mesh.id)))
+    .map((mesh) => [mesh, mesh.material]).concat(world?.blenderVolume ? [[null, world]] : []);
+}
+/** Whether a package of the scene has volumes to draw. */
+export const hasVolumes = (scene) => !!scene.activeCamera && volumes.enabled(scene) && volumeDomains(scene, scene.activeCamera).length > 0;
+
 // The volumes of the scene as its camera draws them: { config, materials } (the volume materials' serializations, and
 // `dispose` once the export no longer reads them), or null when it draws none. `meshes`: the exported meshes' ids;
 // `lights`: the exported lights' ids; `graphOf(material, volume)`: the IR graph of a material's tree (js-export.js
@@ -23,9 +33,7 @@ const plain = (value) => (value && typeof value === 'object' ? [...value] : valu
 export async function exportVolumes(scene, { parity, graphOf, meshes, lights }) {
   const camera = scene.activeCamera;
   if (!camera || !volumes.enabled(scene)) return null;
-  // The world's box is shown only in rendered views: the world's volume is its material's.
-  const world = worldNodes.get(scene), domains = scene.meshes.filter((mesh) => isVolumeDomain(mesh, camera) && !mesh.material.blenderWorld && meshes.has(mesh.id))
-    .map((mesh) => [mesh, mesh.material]).concat(world?.blenderVolume ? [[null, world]] : []);
+  const domains = volumeDomains(scene, camera, meshes);
   if (!domains.length) return null;
   const made = [], config = { settings: volumeSettings(scene), domains: [], lights: {} };
   for (const [domain, source] of domains) {

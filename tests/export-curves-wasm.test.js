@@ -1,11 +1,13 @@
 // Curves in the JavaScript export: each set of curves a render draws (here a Curves object's, Hair Dynamics' Tentacles)
 // is an IR entity holding Main's curves draw in scene.bin, and the page draws it as the app does: the same buffers and
-// Hair shape on a mesh of Blender's batch vertices, in the exported material with the app's curves blocks.
+// Hair shape on a mesh of Blender's batch vertices, in the exported material with the app's curves blocks. Curves Off in
+// File > Export's Branches leaves them out.
 import assert from 'node:assert/strict';
 import { NullEngine } from '@babylonjs/core';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
 import { openExample } from './open-example.js';
 import { writePackage } from './export-package.js';
+import { sceneBranches } from '../src/io_scene_babylon/branches.js';
 
 const { world, sync } = openExample('hair-dynamics');
 sync.view();
@@ -34,5 +36,8 @@ assert.equal(data.segments, app.indirection.length, "Blender's drawn segments");
 assert.deepEqual(data.pos_rad.getInternalTexture()._bufferView.subarray(0, app.posRad.length), app.posRad, "Main's points");
 blend.dispose();
 written.remove();
+assert.ok(sceneBranches(world).curves, 'Branches lists the curves');
+const off = await exportModule(world, { live: true, branches: { curves: { state: 'OFF', instances: {} } } });
+assert.ok(!Object.values(JSON.parse(off['scene.ir.json']).entities).some((e) => e.type === 'curves:CURVES') && !off['bylonder-curves/glsl.js'], 'Off ships no curves');
 console.log(`Export curves: ${record.length.length} curves of ${app.posRad.length / 4} points drawn with the app's curves blocks`);
 process.exit(0);

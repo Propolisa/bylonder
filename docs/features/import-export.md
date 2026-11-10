@@ -2,7 +2,7 @@
 id: import-export
 title: Import and Export
 summary: Bring scenes in and write them out with Blender's own importers and exporters (Wavefront OBJ, Stanford PLY, STL, FBX) and its default add-ons (glTF 2.0, FBX export, Motion Capture, SVG as Curves), through the browser's file dialogs with each format's options.
-expect: OBJ, PLY, STL, FBX, glTF 2.0, BVH and SVG import and export with Blender's own code and options; the add-ons' entries wait a few seconds for Python the first time File opens, Alembic and USD are greyed out, and an export's extra files download. File > Export > JavaScript asks which GPU engine its page makes (WebGPU, WebGL 2, or WebGPU where the browser has it) and which runtime each feature exports with, for the package, a feature or one instance, which branches of the scene run in the page, are baked or left out (Geometry Nodes stacks, the compositor), and writes one minified bundle per package that needs no CDN (or ES modules, with Bundle off). Its page has a control panel at the canvas's top right corner: every control of the scene under Blender's names, dragged and typed as in Blender, hiding what is at Blender's defaults, with the view's navigation and links to Babylon's Inspector and node editors.
+expect: OBJ, PLY, STL, FBX, glTF 2.0, BVH and SVG import and export with Blender's own code and options; the add-ons' entries wait a few seconds for Python the first time File opens, Alembic and USD are greyed out, and an export's extra files download. File > Export > JavaScript asks which GPU engine its page makes (WebGPU, WebGL 2, or WebGPU where the browser has it) and which runtime each feature exports with, for the package, a feature or one instance, which branches of the scene run in the page, are baked or left out (modifier and Geometry Nodes stacks, curves, volumes, post-processing, the compositor), and writes one minified bundle per package that needs no CDN (or ES modules, with Bundle off). Its page has a control panel at the canvas's top right corner: every control of the scene under Blender's names, dragged and typed as in Blender, hiding what is at Blender's defaults, with the view's navigation and links to Babylon's Inspector and node editors.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/files/import_export/index.html
@@ -83,6 +83,10 @@ tests:
   - tests/e2e/smoke.mjs
   - tests/export-options.test.js
   - tests/export-branches-wasm.test.js
+  - tests/export-live-bevel-wasm.test.js
+  - tests/export-curves-wasm.test.js
+  - tests/export-volumes-wasm.test.js
+  - tests/export-god-rays-wasm.test.js
   - tests/export-package-wasm.test.js
   - tests/export-bundle-wasm.test.js
   - tests/control-panel.test.js
@@ -109,7 +113,7 @@ limits:
   - A package with area lights carries Babylon's LTC table they read (64 KB in babylon-assets/), as the app serves it, and points Babylon at it unless the page has set its own Tools.AssetBaseUrl.
   - A Geometry Nodes stack exports Live (run in the page, shipping Blender's Geometry Nodes kernels, about 87 MB) or Baked (its evaluated mesh, no kernels). By default one nothing in the page drives (no input of a value, no tree reading the frame) is Baked, and so is Smooth by Angle unless its angle is animated.
   - A Baked branch is the scene as exported: a baked stack does not follow the frame or the page's controls, and a baked compositor offers none of its settings as controls.
-  - Branches covers Geometry Nodes stacks and the compositor; volumes, curves, post-processing and Blender's modifier stacks are not in it yet.
+  - Curves, volumes and post-processing are Live or Off for the whole scene, not per object. Off leaves curves' materials in the package, unused.
   - The package's createEngine is for pages; in Node (the headless SDK) pass a NullEngine to load as before.
   - The control panel shows the controls the export lists (transforms, visibility, lights, the camera, node inputs, custom properties, modifier and Geometry Nodes inputs); a property the page cannot drive yet is not in it, and enum properties have no controls yet, so its dropdowns choose only an image.
   - The control panel labels a node by its name, not its label, and a property by Blender's name for it (Euler Rotation, where the N panel says Rotation).
@@ -192,10 +196,12 @@ Bronze and Marble materials. The steps below take the bust out and import it aga
 
 9. **Branches.** Open the Compositor example and File > Export > JavaScript. Branches lists the parts of the scene a
    package can run in its page (Live), freeze to their evaluated result (Baked, no code of their own shipped) or leave
-   out (Off): Geometry Nodes, with each object's stack under it, and the Compositor. Unset, each takes its default,
-   hover it to see why: a stack an input or the frame drives is Live; one nothing drives, and Smooth by Angle, are
-   Baked, so this package ships none of Blender's Geometry Nodes kernels (87 MB). Set Upstairs Bar to Live to run its
-   Smooth by Angle in the page, and Compositor to Baked: it still composites, with none of its settings as controls.
+   out (Off): Modifiers and Geometry Nodes, each with the objects' stacks under it, Curves, Volumes, Post-processing and
+   the Compositor, those the scene has. Unset, each takes its default, hover it to see why: a modifier stack is Baked
+   (Live with File > Export > JavaScript, Live Modifiers); a Geometry Nodes stack an input or the frame drives is Live,
+   one nothing drives, and Smooth by Angle, are Baked, so this package ships none of Blender's Geometry Nodes kernels
+   (87 MB); the others are Live. Set Upstairs Bar to Live to run its Smooth by Angle in the page, and Compositor to
+   Baked: it still composites, with none of its settings as controls.
 
    ![Branches: Upstairs Bar Live, the compositor Baked](../media/features/import-export/export-javascript-branches.png)
 

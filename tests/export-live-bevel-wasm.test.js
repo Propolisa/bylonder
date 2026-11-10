@@ -1,11 +1,13 @@
 // Live Modifiers: a Bevel's width set in the page bevels as the app does (Newton's Cradle's base). Its `width_pct` is
-// the same DNA field in percent, not a control of its own that writes the old width back.
+// the same DNA field in percent, not a control of its own that writes the old width back. File > Export's Branches sets
+// a stack Live or Baked whichever menu entry exported it.
 import assert from 'node:assert/strict';
 import { NullEngine } from '@babylonjs/core';
 import { openExample } from './open-example.js';
 import { writePackage } from './export-package.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
 import { blendData } from '../src/python/bpy_rna.js';
+import { sceneBranches } from '../src/io_scene_babylon/branches.js';
 
 const { world, sync } = openExample('newtons-cradle');
 sync.view();
@@ -25,5 +27,9 @@ const off = Math.max(...page.map((v, i) => Math.abs(v - app[i])));
 assert.ok(off < 1e-4, `positions off by ${off}`);
 blend.dispose();
 written.remove();
+const runs = (files) => Object.values(JSON.parse(files['scene.ir.json']).entities).some((e) => e.id === 'OB:Base' && e.implementation === 'modifiers');
+assert.deepEqual(sceneBranches(world, { live: true }).modifiers.instances.find((i) => i.name === 'Base'), { name: 'Base', state: 'LIVE' }, 'Branches lists the stack, Live');
+assert.ok(!runs(await exportModule(world, { live: true, branches: { modifiers: { state: 'BAKED', instances: {} } } })), 'Baked, the stack is applied');
+assert.ok(runs(await exportModule(world, { branches: { modifiers: { state: null, instances: { Base: 'LIVE' } } } })), 'Live, it runs without Live Modifiers');
 console.log("Live modifiers: a Bevel's width set in the page bevels as in the app");
 process.exit(0);

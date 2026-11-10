@@ -1,12 +1,13 @@
 // EEVEE's volumes in exported pages as in the app: the Volumes example's dust (an object's Volume) and Hair Dynamics'
 // water (the world's Volume Scatter) ship as volume materials built from the IR's graphs, drawn by the app's volume
-// passes in bylonder-volumes/ (GPL, beside its notice).
+// passes in bylonder-volumes/ (GPL, beside its notice). Volumes Off in File > Export's Branches leaves them out.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { NullEngine } from '@babylonjs/core';
 import { openExample } from './open-example.js';
 import { writePackage } from './export-package.js';
+import { sceneBranches } from '../src/io_scene_babylon/branches.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
 import { gplFiles } from '../src/io_scene_babylon/runtime-files.js';
 import { current } from '../scripts/modifiers-polyfill.mjs';
@@ -40,5 +41,8 @@ if (!example) {
   blend.scene.render();
   blend.dispose();
   written.remove();
+  assert.ok(sceneBranches(world).volumes, `${example}: Branches lists its volumes`);
+  const off = await exportModule(world, { branches: { volumes: { state: 'OFF', instances: {} } } });
+  assert.ok(!off['scene.js'].includes('const VOLUMES =') && !gplFiles(off).some(([path]) => path.startsWith('bylonder-volumes/')), `${example}: Off ships no volumes`);
 }
 process.exit(0);

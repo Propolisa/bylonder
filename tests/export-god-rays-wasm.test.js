@@ -1,6 +1,7 @@
 // God rays in an exported page stream from their source as in the app (Dusk Coast's sun): Babylon parses them as a
 // plain post process, without their samples or the pass that draws their mesh, whose shader does not compile; the
-// page builds them as their class, with the settings and samples the app's have.
+// page builds them as their class, with the settings and samples the app's have. Post-processing Off in File > Export's
+// Branches leaves them out.
 import assert from 'node:assert/strict';
 import { NullEngine, Scene, FreeCamera, MeshBuilder, Vector3, VolumetricLightScatteringPostProcess } from '@babylonjs/core';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
@@ -34,5 +35,7 @@ assert.deepEqual([page.decay, page.exposure], [rays.decay, rays.exposure], 'with
 assert.match(page.getEffect()?.defines ?? '', /NUM_SAMPLES 60/, 'and samples');
 blend.dispose();
 written.remove();
+const off = await exportModule(world, { branches: { postProcessing: { state: 'OFF', instances: {} } } });
+assert.match(off['scene.js'], /const POST_PROCESSES = \[\];/, 'Off ships no post-processes');
 console.log('Export: god rays stream from their source in the page as in the app');
 process.exit(0);

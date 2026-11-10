@@ -20,6 +20,14 @@ export const readsOtherIDs = (world, node) => [...idStruct(world.mainSync.object
     return pointer && pointer[1] === pointer[2];
   }));
 
+const needsOpenVDB = (modifier) => modifier.kind === 'REMESH' && modifier.values.mode === 'VOXEL';
+// An object's stack as a package can keep it live (world.modifiers.live), or null: one whose modifiers are all Blender's,
+// none needing OpenVDB, which modifiers.wasm lacks, and none reading another ID.
+export function liveStack(world, node) {
+  const stack = world.modifiers.live(node);
+  return stack && !stack.modifiers.some(needsOpenVDB) && !readsOtherIDs(world, node) ? stack : null;
+}
+
 // The channel an animated setting of the stack's `index`th modifier lands in (blend-scene.js Binding.channel).
 export const channelKey = (index, path) => `${index}:${path}`;
 

@@ -50,7 +50,8 @@ export const BRANCH_STATES = [
   ['OFF', 'Off', 'Left out of the package'],
 ];
 // The states each branch offers, by branch id.
-export const BRANCHES = { geometryNodes: ['LIVE', 'BAKED'], compositor: ['LIVE', 'BAKED', 'OFF'] };
+export const BRANCHES = { modifiers: ['LIVE', 'BAKED'], geometryNodes: ['LIVE', 'BAKED'], curves: ['LIVE', 'OFF'], volumes: ['LIVE', 'OFF'],
+  postProcessing: ['LIVE', 'OFF'], compositor: ['LIVE', 'BAKED', 'OFF'] };
 const branchState = (name) => repaired(name, z.nullable(z.enum(BRANCH_STATES.map(([id]) => id))), null);
 const Branch = z.object({
   /** for every instance of the branch */

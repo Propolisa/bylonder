@@ -78,10 +78,13 @@ function unitsTree(values) {
 }
 
 // Why an instance defaults to its state, by branch.
-const DEFAULT_REASONS = { geometryNodes: { LIVE: 'an input or the frame drives it in the page', BAKED: 'nothing in the page drives it, or it is Smooth by Angle' } };
+const DEFAULT_REASONS = {
+  modifiers: { LIVE: 'Live Modifiers runs every stack it can in the page', BAKED: 'JavaScript (.zip) bakes modifier stacks; Live Modifiers runs them' },
+  geometryNodes: { LIVE: 'an input or the frame drives it in the page', BAKED: 'nothing in the page drives it, or it is Smooth by Angle' },
+};
 const stateLabel = (state) => BRANCH_STATES.find(([id]) => id === state)[1];
 // The Branches tree: each branch of the scene (`scene`, branches.js sceneBranches) Live, Baked or Off as it offers, and
-// under a branch with instances (a Geometry Nodes stack) each instance; unset everywhere, each takes its default. None:
+// under a branch with instances (an object's stack) each instance; unset everywhere, each takes its default. None:
 // no row.
 function branchesTree(values, scene) {
   values.branches = {};
@@ -146,7 +149,7 @@ export async function exportDialog(world, format, title) {
   const values = reactive({ eeveeParity: false, hostCompression: false, bakeAnimation: false, target: null, bundle: null, minify: null, controlPanel: null, devTools: null, navigation: null });
   const fields = [{ name: 'eeveeParity', label: 'EEVEE Parity', note: PARITY_NOTE },
     ...(js ? [{ name: 'hostCompression', label: 'Host Compresses Geometry', note: HOST_NOTE }, { name: 'bakeAnimation', label: 'Bake Animation', note: BAKE_NOTE }] : [])];
-  const branches = js ? sceneBranches(world) : {};
+  const branches = js ? sceneBranches(world, { live: format === 'js-live' }) : {};
   const tree = settingsTree(values, js, branches);
   const note = branches.geometryNodes ? await geometryNodesNote() : undefined;
   const host = document.body.appendChild(document.createElement('div'));

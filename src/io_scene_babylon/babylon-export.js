@@ -78,7 +78,7 @@ function uniqueIds(nodes) {
 
 // Rendering pipelines and post-processes on the scene camera, in Babylon's own serialization, with the render effects
 // Bylonder attaches to rendered cameras (render-babylon.js).
-function cameraEffects(world, scene, camera) {
+export function cameraEffects(world, scene, camera) {
   const rendered = world.renderSettings.renderedCameras;
   world.renderSettings.setRenderedCameras([...rendered, camera]);
   try {
