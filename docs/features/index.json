@@ -740,6 +740,7 @@
    "A bundled page still loads Babylon's shaders and the evaluators on demand, one small file each in bundle/: a page makes about 50 to 60 requests before its scene shows, and the package holds about 130 to 190 files.",
    "A bundled package made for WebGPU carries Babylon's GLSL to WGSL compilers (2.7 MB in bundle/webgpu/), which a page fetches only when it creates a WebGPU engine.",
    "A package with area lights carries Babylon's LTC table they read (64 KB in babylon-assets/), as the app serves it, and points Babylon at it unless the page has set its own Tools.AssetBaseUrl.",
+   "A Geometry Nodes stack nothing in the page drives (no input of a value, no tree reading the frame) exports baked, its evaluated mesh without Blender's Geometry Nodes kernels; one with such an input runs live and ships them (about 87 MB).",
    "The package's createEngine is for pages; in Node (the headless SDK) pass a NullEngine to load as before.",
    "The splash's Open from URL downloads only from servers that allow downloads from a web page (CORS); Blender's demo files are served from Bylonder's own copy for that reason."
   ],

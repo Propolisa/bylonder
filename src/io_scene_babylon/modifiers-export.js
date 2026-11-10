@@ -158,12 +158,16 @@ const SOCKETS = { NodeSocketFloat: 'FLOAT', NodeSocketInt: 'INT', NodeSocketBool
 
 // Each object whose shown modifiers are all Geometry Nodes, as entities run by Bylonder's evaluator
 // (runtime/geometry-nodes-evaluator.js), each reading the geometry the one before gives, the first its base mesh with its
-// attributes; its inputs added to `properties`, its graph by key from `graphOf`. A stack with other modifiers stays baked.
-export function geometryNodesEntities(world, properties, bin, graphOf) {
+// attributes; its inputs added to `properties`, its graph by key from `graphOf`. A stack with other modifiers stays baked,
+// and so does one nothing in the page drives, no input of a value and no tree reading the frame (`readsFrame(tree)`):
+// the package then ships no Geometry Nodes kernels for it.
+export function geometryNodesEntities(world, properties, bin, graphOf, readsFrame) {
   const sync = world.mainSync, entities = {};
   for (const node of world.objects) {
     const pointer = sync.objectOf(node), ob = pointer && idStruct(pointer), shown = ob ? [...ob.modifiers].filter((m) => m.show_viewport) : [];
     if (ob?.type !== 'MESH' || !shown.length || !shown.every((m) => m.type === 'NODES' && m.node_group)) continue;
+    const driven = (m) => readsFrame(m.node_group) || [...m.node_group.interface.items_tree].some((item) => item.item_type === 'SOCKET' && item.in_out === 'INPUT' && SOCKETS[item.socket_type]);
+    if (!shown.some(driven)) continue;
     const base = `objects${key(ob.name)}`;
     const modifiers = shown.map((m) => {
       const inputs = { graph: { graph: graphOf(m.node_group) } };

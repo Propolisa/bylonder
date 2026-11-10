@@ -30,6 +30,18 @@ const form = (value) => (isReference(value) ? Object.keys(value).find((key) => k
   : Array.isArray(value) ? 'array' : value === null ? 'null' : typeof value);
 const propertiesOf = (value) => [...new Set([...referencesIn(value)].filter(([ref]) => 'property' in ref).map(([ref]) => ref.property))];
 
+// The Geometry Nodes graphs the IR's entities run, with the groups they nest: a baked stack's tree ships no units.
+function runGraphs({ entities, graphs }) {
+  const run = {};
+  const add = (key) => {
+    if (run[key] || !graphs[key]) return;
+    run[key] = graphs[key];
+    for (const node of graphs[key].nodes) if (node.settings?.node_tree?.id) add(node.settings.node_tree.id);
+  };
+  for (const entity of Object.values(entities)) if (entity.implementation === 'geometry-nodes') add(entity.inputs.graph.graph);
+  return run;
+}
+
 /**
  * The manifest of an IR's units, before `replace` strips them.
  * @param {any} ir
@@ -55,7 +67,7 @@ export function unitManifest(ir, { kernels, blocks = {}, replace = [] } = {}) {
     add(entity.type, unit, { entity: key, id: entity.id, properties: propertiesOf(entity.inputs) });
   }
   const graphIds = (graph) => Object.values(ir.entities).filter((e) => e.inputs?.graph?.graph === graph).map((e) => e.id);
-  for (const [type, nodes] of unitNodes(ir.graphs)) for (const [graph, name] of nodes) {
+  for (const [type, nodes] of unitNodes(runGraphs(ir))) for (const [graph, name] of nodes) {
     const node = ir.graphs[graph].nodes.find((n) => n.name === name), own = node.type === type;
     const sockets = own ? node.sockets : undefined;
     add(type, { kind: 'geometry-node', licence: GPL, files: folderFiles('geometry-nodes'),

@@ -262,10 +262,12 @@ export function exportIR(world, { controls, live, bin, animationGroups = [], cur
   for (const [node, pointer] of objects) if (ids[idKey(idStruct(pointer))]) ids[idKey(idStruct(pointer))].node = node.id;
   if (sync) references.push(...depsgraphReferences(ids, references, sync.blender.relations()));
   const graphs = {};
+  const time = controls.some(({ path }) => path.endsWith('.frame_current'));
+  const readsFrame = (tree) => time && readsTime(writeGraph(tree, idKey(tree)), idKey(tree));
   const entities = sync ? { ...modifierEntities(world, live, controls, bin), ...geometryNodesEntities(world, controls, bin, (tree) => {
     writeGraph(tree, idKey(tree), graphs);
     return idKey(tree);
-  }) } : {};
+  }, readsFrame) } : {};
   const properties = Object.fromEntries(controls.map(({ path, bind, ...property }) => [path, { id: pathID(path), ...property, ...(bind && { bind }) }]));
   if (sync) {
     evaluatedIDs(ids, graphs, entities, sync, bin);
