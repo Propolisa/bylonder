@@ -338,7 +338,8 @@ With Control Panel on (the default), `load` adds a panel of the controls to the 
 OR Apache-2.0): a button at the canvas's top right corner, a few lines loaded with the page, and the panel itself
 (`control-panel-ui.js`, about 10 KB gzipped as bundled) loaded when first opened, drawn in a shadow root with the app's
 theme tokens. It reads `controls()` and the IR: each property carries Blender's UI name, range, step, precision and,
-where known, Blender's default (`controls-export.js` `withUI`), which hides what is at its default. Its View section
+where known, Blender's default (`controls-export.js` `withUI`), which hides what is at its default. Its materials are ordered by how much of the view each covers, from a 64 pixel
+wide drawing of the scene with each material a flat colour (`control-panel-coverage.js`), made only while it is open. Its View section
 drives the exported camera with Babylon's own navigation cameras (`control-panel-camera.js`), and its links open
 Babylon's Inspector, Node Material Editor and Node Render Graph Editor (`dev-tools.js`) from Babylon's CDN or the
 package. In Node there is no panel.

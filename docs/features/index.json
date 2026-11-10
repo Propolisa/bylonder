@@ -722,6 +722,7 @@
    "src/io_scene_babylon/runtime/control-panel-ui.js",
    "src/io_scene_babylon/runtime/control-panel-model.js",
    "src/io_scene_babylon/runtime/control-panel-camera.js",
+   "src/io_scene_babylon/runtime/control-panel-coverage.js",
    "src/io_scene_babylon/runtime/dev-tools.js"
   ],
   "tests": [
@@ -760,6 +761,7 @@
    "The control panel labels a node by its name, not its label, and a property by Blender's name for it (Euler Rotation, where the N panel says Rotation).",
    "Babylon's Inspector and node editors are Babylon's own bundles, which read the page's Babylon from a global: a bundled package holds the whole of Babylon's core (about 3 MB) in bundle/ for them, fetched only when one opens; In the Package does not ship Babylon's GUI, which the Inspector loads from Babylon's CDN.",
    "The control panel's navigation copies the chosen camera's view onto the exported one each frame, so the view transform and compositor stay; a camera's roll is not kept, and Walk finds the floor by casting down from the camera.",
+   "On Screen measures the materials' shares from a 64 pixel wide drawing of the scene, a few times a second while the panel is open: a material smaller than a pixel there shows no share, and a material's share counts where it is drawn, behind transparent ones too.",
    "The Node Material Editor opens in a window of its own, which a browser's popup blocker may stop.",
    "The splash's Open from URL downloads only from servers that allow downloads from a web page (CORS); Blender's demo files are served from Bylonder's own copy for that reason."
   ],

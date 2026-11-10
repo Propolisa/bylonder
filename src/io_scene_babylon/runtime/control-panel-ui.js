@@ -44,6 +44,8 @@ const STYLE = `
 .ghead:hover{background:var(--bl-hover)}
 .ghead .title{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ghead .kind{color:var(--bl-text-off)}
+.share{color:var(--bl-text-off);font-variant-numeric:tabular-nums}
+.order{width:auto;font-weight:400}.order[aria-pressed=true]{background:none;color:var(--bl-link)}
 .tri{width:8px;height:8px;flex:none;background:var(--bl-text-dim);clip-path:polygon(15% 10%,85% 50%,15% 90%);transition:transform .1s}
 [aria-expanded=true]>.tri{transform:rotate(90deg)}
 .dot{width:8px;height:8px;flex:none;border-radius:2px;background:var(--bl-icon-scene)}
@@ -149,7 +151,7 @@ export function createPanel(shadow, blend, { button, place, viewer, ...tools }) 
   const bindOf = (/** @type {string} */ path) => /** @type {Record<string, any> | undefined} */ (blend.ir.properties[path]?.bind);
   const sections = layout(controls, (c) => c.type === 'STRING' && !!bindOf(c.path)?.image);
   const storageKey = `bylonder-control-panel:${location.pathname}`;
-  /** @type {{ open: Record<string, boolean>, all?: boolean, scale?: number }} */
+  /** @type {{ open: Record<string, boolean>, all?: boolean, scale?: number, byScreen?: boolean }} */
   const state = (() => { try { return { open: {}, ...JSON.parse(localStorage.getItem(storageKey) ?? '{}') }; } catch { return { open: {} }; } })();
   const save = () => { try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch { /* storage may be off */ } };
   /** The rows the viewer changed, shown though they are back at Blender's default. @type {Set<string>} */
@@ -423,11 +425,11 @@ export function createPanel(shadow, blend, { button, place, viewer, ...tools }) 
   const allRows = (group) => [...group.rows, ...group.groups.flatMap(allRows)];
 
   // A collapsible header and the content it shows, made when first opened.
-  /** @param {string} key @param {string} title @param {string | undefined} kind @param {boolean} opened @param {() => Node[]} content @param {HTMLElement | null} [extra] */
-  function collapsible(key, title, kind, opened, content, extra = null) {
+  /** @param {string} key @param {string} title @param {string | undefined} kind @param {boolean} opened @param {() => Node[]} content @param {(HTMLElement | null | false)[]} extras */
+  function collapsible(key, title, kind, opened, content, ...extras) {
     const open = state.open[key] ?? opened;
     const head = el('div', { className: 'ghead', role: 'button', tabIndex: 0, 'aria-label': title, 'aria-expanded': String(open) },
-      [el('span', { className: 'tri' }), kind !== undefined && el('span', { className: `dot ${kind}` }), el('span', { className: 'title', textContent: title }), extra]);
+      [el('span', { className: 'tri' }), kind !== undefined && el('span', { className: `dot ${kind}` }), el('span', { className: 'title', textContent: title }), ...extras]);
     const inner = el('div', { className: 'rows' });
     let made = false;
     const toggle = (/** @type {boolean} */ value) => {
@@ -456,13 +458,49 @@ export function createPanel(shadow, blend, { button, place, viewer, ...tools }) 
       onclick: () => editor.open() });
     const path = [...titles, group.title];
     const element = el('div', { className: 'group', 'data-key': group.key });
+    const material = titles.length === 1 && group.kind === 'materials' ? allRows(group).flatMap((r) => r.controls).map((c) => bindOf(c.path)?.material).find((m) => m !== undefined) : undefined;
+    const share = material !== undefined ? el('span', { className: 'share' }) : null;
+    if (share) onScreen.push({ element, material: String(material), share, order: onScreen.length });
     element.append(...collapsible(group.key, group.title, group.kind, siblings <= 6, () => [
       ...group.rows.flatMap((row) => { const made = rowElement(row); for (const m of made) filtered.push({ element: m, rows: [row], titles: path }); return made; }),
       ...group.groups.map((g) => groupElement(g, path, group.groups.length)),
-    ], link));
+    ], share, link));
     filtered.push({ element, rows: allRows(group), titles: path });
     return element;
   }
+
+  // Materials by how much of the view each covers, measured a few times a second while the panel is open
+  // (control-panel-coverage.js), their order held while a field is dragged or typed into; or the scene's order.
+  /** @type {{ element: HTMLElement, material: string, share: HTMLElement, order: number }[]} */
+  const onScreen = [];
+  const byScreen = el('button', { type: 'button', className: 'tool link order', textContent: 'On Screen', title: "Materials by how much of the view each covers; off: the scene's order",
+    'aria-pressed': String(state.byScreen !== false), onclick: () => {
+      state.byScreen = byScreen.getAttribute('aria-pressed') !== 'true';
+      byScreen.setAttribute('aria-pressed', String(state.byScreen));
+      save();
+      measure(!panel.hidden);
+    } });
+  /** @type {Promise<{ dispose(): void }> | null} */
+  let coverage = null;
+  /** @param {Map<string, number>} shares */
+  const sortMaterials = (shares) => {
+    for (const m of onScreen) {
+      const share = shares.get(m.material) ?? 0;
+      m.share.textContent = share >= 0.005 ? `${Math.round(share * 100)}%` : share > 0 ? '<1%' : '';
+    }
+    if (panel.querySelector('.dragging, .editing')) return;
+    const sorted = [...onScreen].sort((a, b) => (shares.get(b.material) ?? 0) - (shares.get(a.material) ?? 0) || a.order - b.order);
+    if (sorted.some((m, i) => m.element.parentElement?.children[i] !== m.element)) for (const m of sorted) m.element.parentElement?.append(m.element);
+  };
+  const measure = (/** @type {boolean} */ on) => {
+    const wanted = on && state.byScreen !== false && onScreen.length > 1;
+    if (wanted && !coverage) coverage = import('./control-panel-coverage.js').then(({ createCoverage }) => createCoverage(blend.scene, sortMaterials));
+    if (!wanted && coverage) {
+      coverage.then((c) => c.dispose());
+      coverage = null;
+      sortMaterials(new Map());
+    }
+  };
 
   const empty = el('div', { className: 'empty', hidden: true });
   // The view: the camera looked through and how the viewer moves it.
@@ -490,7 +528,8 @@ export function createPanel(shadow, blend, { button, place, viewer, ...tools }) 
 
   body.append(...sections.map((section) => {
     const element = el('div', { className: 'section' });
-    element.append(...collapsible(`section ${section.key}`, section.title, undefined, true, () => section.groups.map((g) => groupElement(g, [section.title], section.groups.length))));
+    element.append(...collapsible(`section ${section.key}`, section.title, undefined, true, () => section.groups.map((g) => groupElement(g, [section.title], section.groups.length)),
+      section.key === 'materials' && byScreen));
     filtered.push({ element, rows: section.groups.flatMap(allRows), titles: [section.title] });
     return element;
   }), empty);
@@ -537,6 +576,7 @@ export function createPanel(shadow, blend, { button, place, viewer, ...tools }) 
     place();
     panel.hidden = !open;
     button.setAttribute('aria-expanded', String(open));
+    measure(open);
     if (open) {
       for (const [path, shows] of views) for (const show of shows) show(get(path));
       filter();
@@ -551,5 +591,5 @@ export function createPanel(shadow, blend, { button, place, viewer, ...tools }) 
   });
   // Keys stay with the panel, not the page's camera.
   for (const type of ['keydown', 'keyup', 'wheel']) panel.addEventListener(type, (e) => e.stopPropagation());
-  return { toggle, dispose: () => { blend.onChanged.remove(changed); cancelAnimationFrame(frame); panel.remove(); } };
+  return { toggle, dispose: () => { measure(false); blend.onChanged.remove(changed); cancelAnimationFrame(frame); panel.remove(); } };
 }
