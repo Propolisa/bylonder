@@ -647,7 +647,7 @@
   "id": "import-export",
   "title": "Import and Export",
   "summary": "Bring scenes in and write them out with Blender's own importers and exporters (Wavefront OBJ, Stanford PLY, STL, FBX) and its default add-ons (glTF 2.0, FBX export, Motion Capture, SVG as Curves), through the browser's file dialogs with each format's options.",
-  "expect": "OBJ, PLY, STL, FBX, glTF 2.0, BVH and SVG import and export with Blender's own code and options; the add-ons' entries wait a few seconds for Python the first time File opens, Alembic and USD are greyed out, and an export's extra files download.",
+  "expect": "OBJ, PLY, STL, FBX, glTF 2.0, BVH and SVG import and export with Blender's own code and options; the add-ons' entries wait a few seconds for Python the first time File opens, Alembic and USD are greyed out, and an export's extra files download. File > Export > JavaScript asks which GPU engine its page makes (WebGPU, WebGL 2, or WebGPU where the browser has it).",
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/files/import_export/index.html",
@@ -699,12 +699,18 @@
    "src/editors/io/io-ops.js",
    "src/editors/io/addon-menus.json",
    "tools/blender-port/wasm/patches/gltf_ctypes.patch",
-   "src/draw/mesh-batch-buffers.js"
+   "src/draw/mesh-batch-buffers.js",
+   "src/io_scene_babylon/export-options.js",
+   "src/io_scene_babylon/export-dialog.js",
+   "src/editors/interface/components/ExportDialog.vue",
+   "src/editors/interface/components/SettingRow.vue"
   ],
   "tests": [
    "tests/io-wasm.test.js",
    "tests/io-addons-wasm.test.js",
-   "tests/e2e/smoke.mjs"
+   "tests/e2e/smoke.mjs",
+   "tests/export-options.test.js",
+   "tests/export-package-wasm.test.js"
   ],
   "limits": [
    "Alembic is greyed out until the module is built with C++ exceptions, which its reader relies on.",
@@ -713,6 +719,8 @@
    "glTF's Draco and meshoptimizer compression are not available; their libraries are native ones Bylonder does not build.",
    "The file dialogs are the browser's; an export with several files (an OBJ's .mtl, a .gltf's .bin and textures) saves the first where you choose and downloads the others.",
    "Imported color attributes are kept in Main; Solid shading's Attribute color and the Color Attribute node do not draw them yet.",
+   "File > Export > JavaScript's GPU Engine: a WebGL 2 package still ships the few WebGPU overrides its runtime files import (node material samplers, curves' attributes, the world cube's texture type); they do nothing on WebGL 2.",
+   "The package's createEngine is for pages; in Node (the headless SDK) pass a NullEngine to load as before.",
    "The splash's Open from URL downloads only from servers that allow downloads from a web page (CORS); Blender's demo files are served from Bylonder's own copy for that reason."
   ],
   "page": "docs/features/import-export.md",

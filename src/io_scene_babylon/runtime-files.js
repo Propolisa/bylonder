@@ -38,10 +38,16 @@ export const gplFiles = (files) => withFolders(files).filter((e) => e.folder)
   .flatMap(({ folder, files: own }) => [...Object.entries(own).map(([name, from]) => [`${folder}/${name}`, from]), ...noticeFiles(folder)])
   .concat(text(files).includes(NODE_KERNELS) ? noticeFiles(NODE_KERNELS.split('/')[0]) : [])
   .concat(text(files).includes(AREA_SPECULAR) ? [[AREA_SPECULAR, 'blenkernel/light/area-specular.js'], ...noticeFiles(AREA_SPECULAR.split('/')[0])] : []);
-// Bylonder's overrides of Babylon and WebGPU (src/overrides/), which every package carries in bylonder/overrides/, and
-// how a runtime file imports one there.
-export const OVERRIDE_FILES = ['webgpu/float-world-cube', 'webgpu/derivative-uniformity', 'webgpu/reserved-names', 'webgpu/samplers', 'webgpu/maximum-limits', 'webgpu/missing-attributes', 'webgpu/depth-metric-varyings', 'webgpu/vertex-light-blocks', 'webgpu/pbr-from-glsl', 'babylon/area-light-parse', 'babylon/camera-quaternion', 'babylon/god-rays-parse', 'babylon/pipeline-effects', 'babylon/linear-image-processing', 'babylon/chromatic-aberration-size', 'babylon/geometry-gamma-albedo', 'babylon/environment-probe', 'babylon/srgb-texture-parse'].flatMap((name) => [`${name}.js`, `${name}.d.ts`]);
-export const packageOverrides = () => OVERRIDE_FILES.map((name) => [`bylonder/overrides/${name}`, `overrides/${name}`]);
+// Bylonder's overrides of Babylon and WebGPU (src/overrides/), which a package carries in bylonder/overrides/ when its
+// scene.js or runtime files import them, and how a runtime file imports one there.
+const OVERRIDES = ['webgpu/float-world-cube', 'webgpu/derivative-uniformity', 'webgpu/reserved-names', 'webgpu/samplers', 'webgpu/maximum-limits', 'webgpu/missing-attributes', 'webgpu/depth-metric-varyings', 'webgpu/vertex-light-blocks', 'webgpu/pbr-from-glsl', 'babylon/area-light-parse', 'babylon/camera-quaternion', 'babylon/god-rays-parse', 'babylon/pipeline-effects', 'babylon/linear-image-processing', 'babylon/chromatic-aberration-size', 'babylon/geometry-gamma-albedo', 'babylon/environment-probe', 'babylon/srgb-texture-parse'];
+const declaredOverrides = (names) => names.flatMap((name) => [`${name}.js`, `${name}.d.ts`]);
+export const OVERRIDE_FILES = declaredOverrides(OVERRIDES);
+// The overrides a package's files (scene.js and its runtime files) import: [package path, src/ path].
+export const packageOverrides = (files) => {
+  const code = Object.values(files).filter((data) => typeof data === 'string').join('\n');
+  return declaredOverrides(OVERRIDES.filter((name) => code.includes(`overrides/${name}.js'`))).map((name) => [`bylonder/overrides/${name}`, `overrides/${name}`]);
+};
 export const packagedRuntime = (text) => text.replaceAll("'../../overrides/", "'./overrides/");
 // The blocks library and Bylonder's extensions of Babylon, by package path: runtime/ files a package ships beside its
 // scene.js only when it imports them.

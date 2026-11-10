@@ -10,6 +10,7 @@
 //     --node, --look  only that part (default both); --changed  only the examples the changes since origin/main reach;
 //     --prod  the app from dist/ (npm run build) instead of the dev server; E2E_URL a running app; JOBS Node processes;
 //     LOOK_TIMEOUT  seconds one example's look may take before its row says it hangs (default 600);
+//     EXPORT_OPTIONS  File > Export's options as JSON (export-options.js) the packages are made with;
 //     --fresh  the cached results of the parts run go (a change to the checks themselves), the exports stay.
 import { execFileSync, spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -99,6 +100,7 @@ function keyOf(id) {
   hash.update(String([module?.size, module?.mtimeMs]));
   // Another checkout's app (E2E_URL) exports its own packages.
   hash.update(process.env.E2E_URL ?? '');
+  hash.update(process.env.EXPORT_OPTIONS ?? '');
   return hash.digest('hex').slice(0, 16);
 }
 

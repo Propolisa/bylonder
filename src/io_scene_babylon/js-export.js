@@ -8,6 +8,7 @@ import { AbstractEngine, Animation, Matrix } from '@babylonjs/core';
 import { objectMatrix } from '../runtime/object-transform.js';
 import { CLOCK, sampledGaps, serializeScene } from './babylon-export.js';
 import { exportRuntimes } from '../runtimes/runtimes.js';
+import { TARGETS } from './export-options.js';
 import { exportControls, controlTypes } from './controls-export.js';
 import { exportNodeMaterial, materialKernels } from './node-material-export.js';
 import { fillMaterials, MESH_VALUE } from './runtime/materials.js';
@@ -29,6 +30,17 @@ import { halfFloats } from '../blenkernel/colorband.js';
 
 const CDN = `https://cdn.jsdelivr.net/npm/@babylonjs/core@${AbstractEngine.Version}/+esm`;
 const json = (value) => JSON.stringify(value);
+const TARGET_NAMES = Object.fromEntries(TARGETS.map(([id, label]) => [id, label]));
+// The page's createEngine for each target: WebGPU with the adapter's limits its materials need.
+const WEBGPU_ENGINE = 'WebGPUEngine.CreateAsync(canvas, { ...WEBGPU_OPTIONS, ...options })';
+const ENGINES = {
+  BOTH: `// A WebGPU engine where the browser has WebGPU, else a WebGL 2 one.
+export async function createEngine(canvas, options = {}) {
+  return (await WebGPUEngine.IsSupportedAsync) ? ${WEBGPU_ENGINE} : new Engine(canvas, true, options);
+}`,
+  WEBGPU: `export const createEngine = (canvas, options = {}) => ${WEBGPU_ENGINE};`,
+  WEBGL2: 'export const createEngine = async (canvas, options = {}) => new Engine(canvas, true, options);',
+};
 const number = (v) => +v.toFixed(7);
 const vector = (values) => values.map(number).join(', ');
 
@@ -183,20 +195,21 @@ function greasePencilClock(world, ir, groups) {
 
 // The package's files but the runtime's: scene.js, scene.d.ts, scene.ir.json, scene.bin and images/. With `live`, objects whose
 // modifiers are all Blender's keep them live (modifiers-export.js), run by modifiers.wasm in bylonder-modifiers/. With
-// `bakeAnimation`, what Babylon cannot play as its F-Curve is sampled per frame.
-export async function exportModule(world, { live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false } = {}) {
+// `bakeAnimation`, what Babylon cannot play as its F-Curve is sampled per frame; `target`, the GPU engine its page makes
+// (export-options.js TARGETS).
+export async function exportModule(world, { live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, target = 'BOTH' } = {}) {
   const live = new Map(keepLive ? world.objects.map((node) => [node, world.modifiers.live(node)]).filter(([node, stack]) => stack && !stack.modifiers.some(needsOpenVDB) && !readsOtherIDs(world, node)) : []);
   await world.modifiers.settled();
   // The mapped meshes' geometry is read below: their mapping holds until the module is written.
   const mapped = exportRuntimes(world, { bake: bakeAnimation });
   try {
-    return await moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation });
+    return await moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, target });
   } finally {
     mapped.restore();
   }
 }
 
-async function moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation }) {
+async function moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, target }) {
   const graphs = [], graphOf = materialGraphs(world, graphs);
   const data = await serializeScene(world, { geometry: false, live, mapped, parity, graphOf, bake: bakeAnimation });
   const { scene } = world;
@@ -240,10 +253,9 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   };
   // Written before the module's tables: they add thin instance buffers to scene.bin.
   const objectLines = objects.map(({ entry, mesh }) => `  // ${entry.name}\n  {\n${indent(nodeCode(entry, mesh, geometries, live.get(mesh), bin))}\n  }`).join('\n');
-  const name = world.sceneSettings.state.name || 'Scene';
+  const name = world.sceneSettings.state.name || 'Scene', webgpu = target !== 'WEBGL2', webgl = target !== 'WEBGPU';
   const source = `// ${name}, exported from Bylonder: load(engine) gives it with its controls, createScene(engine, canvas) builds it
-// alone, with Babylon.js ${AbstractEngine.Version}. On WebGPU, create the engine with the adapter's limits, as its materials
-// need: WebGPUEngine.CreateAsync(canvas, { ...WEBGPU_OPTIONS }), from './bylonder/overrides/webgpu/maximum-limits.js'.
+// alone, with Babylon.js ${AbstractEngine.Version}; createEngine(canvas) makes the engine it is exported for: ${TARGET_NAMES[target]}.
 // In a page, map @babylonjs/core to the same version:
 // <script type="importmap">{ "imports": { "@babylonjs/core": "${CDN}" } }</script>${[...gplFolders(irJson), ...(kernels ? [NODE_KERNELS.split('/')[0]] : []), ...(volumes ? [VOLUMES_FILE.split('/')[0]] : [])].map((folder) => `
 // Includes GPL code: ${folder}/, Blender's code (GPL-3.0-or-later, ${folder}/LICENSE.md), loaded only when a control
@@ -252,14 +264,14 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
 import { readBuffers, readBytes } from './bylonder/buffers.js';
 import { worldColor, worldNodes } from './bylonder/world.js';
 import { BlendScene } from './bylonder/blend-scene.js';
-import { derivativeUniformity } from './bylonder/overrides/webgpu/derivative-uniformity.js';
+${webgpu ? `import { derivativeUniformity } from './bylonder/overrides/webgpu/derivative-uniformity.js';
 import { reservedNames } from './bylonder/overrides/webgpu/reserved-names.js';
 import { webgpuSamplers } from './bylonder/overrides/webgpu/samplers.js';
-import { warnUnlessMaximumLimits } from './bylonder/overrides/webgpu/maximum-limits.js';
+import { WEBGPU_OPTIONS, warnUnlessMaximumLimits } from './bylonder/overrides/webgpu/maximum-limits.js';
 import { depthMetricVaryings } from './bylonder/overrides/webgpu/depth-metric-varyings.js';
 import { lightBlocksWhereRead } from './bylonder/overrides/webgpu/vertex-light-blocks.js';
 import { pbrFromGLSL } from './bylonder/overrides/webgpu/pbr-from-glsl.js';
-import { parsePostProcess } from './bylonder/overrides/babylon/god-rays-parse.js';
+` : ''}import { parsePostProcess } from './bylonder/overrides/babylon/god-rays-parse.js';
 import { parsedPipeline } from './bylonder/overrides/babylon/pipeline-effects.js';
 import './bylonder/overrides/babylon/chromatic-aberration-size.js';
 import './bylonder/overrides/babylon/geometry-gamma-albedo.js';
@@ -279,7 +291,7 @@ import { AreaLight } from './bylonder-area-light.js';
 import { parseLight } from './bylonder/overrides/babylon/area-light-parse.js';` : ''}${composited ? `
 import { compositor } from './bylonder-blocks.js';` : ''}${areaSpecular ? `
 import { blenderAreaSpecular } from './${AREA_SPECULAR}';` : ''}
-import { Animation, AnimationGroup, CascadedShadowGenerator, Color3, Color4, CubeTexture, EffectLayer, Geometry, HDRCubeTexture, Light, LinesMesh, Material, Matrix, Mesh, MorphTargetManager, MultiMaterial, Quaternion, ReflectionProbe, Scene, SerializationHelper, ShadowGenerator, Skeleton, SubMesh, TransformNode, Vector3, Camera, ParticleSystem } from '@babylonjs/core';
+import { Animation, AnimationGroup, CascadedShadowGenerator, Color3, Color4, CubeTexture, EffectLayer, ${[webgl && 'Engine', webgpu && 'WebGPUEngine'].filter(Boolean).join(', ')}, Geometry, HDRCubeTexture, Light, LinesMesh, Material, Matrix, Mesh, MorphTargetManager, MultiMaterial, Quaternion, ReflectionProbe, Scene, SerializationHelper, ShadowGenerator, Skeleton, SubMesh, TransformNode, Vector3, Camera, ParticleSystem } from '@babylonjs/core';
 import * as BABYLON from '@babylonjs/core';
 
 // Images and scene.bin sit beside this module.
@@ -322,17 +334,19 @@ const SCREEN_SPACE = {
 
 // Each built scene's IR, world, compositor and scene.bin buffers, which load gives its controls.
 const IRS = new WeakMap(), WORLDS = new WeakMap(), COMPOSITORS = new WeakMap(), SCENE_BUFFERS = new WeakMap();
-export async function load(engine) {
-  warnUnlessMaximumLimits(engine);
+${ENGINES[target]}
+export async function load(engine) {${webgpu ? `
+  warnUnlessMaximumLimits(engine);` : ''}
   const scene = await createScene(engine, engine.getRenderingCanvas());
   return new BlendScene(scene, IRS.get(scene), { root: ROOT, world: WORLDS.get(scene), compositor: COMPOSITORS.get(scene), buffers: SCENE_BUFFERS.get(scene) });
 }
 
-export async function createScene(engine, canvas) {
+export async function createScene(engine, canvas) {${webgpu ? `
   // On WebGPU, GLSL converted to WGSL keeps GLSL's rules, and PBR materials compile from GLSL with their shadows' depth
   // metrics derived in the fragment stage, within WebGPU's 28 values between stages, as in the app.
   if (engine.isWebGPU) pbrFromGLSL();
-  const scene = new Scene(derivativeUniformity(reservedNames(engine.isWebGPU ? depthMetricVaryings(lightBlocksWhereRead(engine)) : engine)));
+  const scene = new Scene(derivativeUniformity(reservedNames(engine.isWebGPU ? depthMetricVaryings(lightBlocksWhereRead(engine)) : engine)));` : `
+  const scene = new Scene(engine);`}
   scene.useRightHandedSystem = SCENE.useRightHandedSystem;
   scene.autoClear = SCENE.autoClear;
   scene.clearColor = Color4.FromArray(SCENE.clearColor);
@@ -361,9 +375,9 @@ export async function createScene(engine, canvas) {
 ${kernels ? `  // Blender's nodes of each material and world, made from the IR's graphs.
   fillMaterials(MATERIALS, ir, kernels);
 ` : ''}  for (const entry of MATERIALS) materials[entry.uniqueId] = Material.Parse(entry, scene, ROOT);
-  if (SCENE.defaultMaterial !== null) scene.defaultMaterial = materials[SCENE.defaultMaterial];
+  if (SCENE.defaultMaterial !== null) scene.defaultMaterial = materials[SCENE.defaultMaterial];${webgpu ? `
   // Node materials' samplers as WebGPU binds them.
-  for (const material of Object.values(materials)) if (material.getClassName() === 'NodeMaterial') webgpuSamplers(material);${meshValued ? `
+  for (const material of Object.values(materials)) if (material.getClassName() === 'NodeMaterial') webgpuSamplers(material);` : ''}${meshValued ? `
   // Each mesh's own texture space, in the materials it shares.
   for (const material of Object.values(materials)) meshValues(material);` : ''}${areaSpecular ? `
   // Lights' specular as EEVEE's, as the app's PBR materials have it.

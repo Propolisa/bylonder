@@ -32,7 +32,7 @@
   --bl-panel:#3d3d3d;--bl-navigation-bar:#181818;--bl-navigation-bar-overflow:#141414;--bl-panel-header:#3d3d3d;--bl-tabs:#1d1d1d;
   --bl-text:#e6e6e6;--bl-text-dim:#a6a6a6;--bl-text-off:#7a7a7a;--bl-link:#71a8ff;
   --bl-widget:#545454;--bl-widget-hi:#656565;--bl-widget-line:#3d3d3d;--bl-field:#1d1d1d;--bl-menu:#282828;--bl-tool:#282828;
-  --bl-select:#4772b3;--bl-list-select:#334d80;--bl-list-active:#3b5689;--bl-hover:#ffffff14;
+  --bl-select:#4772b3;--bl-state-overridden:#19c3c3;--bl-state-blend:50%;--bl-list-select:#334d80;--bl-list-active:#3b5689;--bl-hover:#ffffff14;
   --bl-popup:#181818f2;--bl-popup-line:#242424;
   --bl-obj:#ffaf29;--bl-data:#00d4a3;--bl-mod:#84b8ff;--bl-shading:#ea7581;--bl-scene:#e6e6e6;
   --bl-axis-x:#ff3352;--bl-axis-y:#8bdc00;--bl-axis-z:#2890ff;

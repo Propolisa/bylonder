@@ -8,6 +8,7 @@ import { serializeScene } from './babylon-export.js';
 import { exportModule } from './js-export.js';
 import { gplFiles, packagedRuntime, packageOverrides, packageRuntime } from './runtime-files.js';
 import { MODULES } from './module-files.js';
+import { exportOptions } from './export-options.js';
 
 const runtime = import.meta.glob('./runtime/**/*', { query: '?raw', import: 'default', eager: true });
 const overrides = import.meta.glob('../overrides/**/*', { query: '?raw', import: 'default', eager: true });
@@ -30,7 +31,7 @@ const SOURCES = {
 async function scenePackage(world, options) {
   const files = await exportModule(world, options);
   for (const [path, name] of packageRuntime(files)) files[path] = packagedRuntime(runtime['./runtime/' + name]);
-  for (const [path, from] of packageOverrides()) files[path] = overrides['../' + from];
+  for (const [path, from] of packageOverrides(files)) files[path] = overrides['../' + from];
   for (const [path, from] of gplFiles(files)) files[path] = await SOURCES[from]();
   return Object.fromEntries(Object.entries(files).map(([path, data]) => [path, typeof data === 'string' ? strToU8(data) : data]));
 }
@@ -41,13 +42,12 @@ const FORMATS = {
   'js-live': { extension: 'zip', type: 'application/zip', build: async (world, name, options) => zipSync(await scenePackage(world, { ...options, live: true })) },
 };
 
-// `options` (topbar.js asks for them): { eeveeParity }, materials with Bylonder's EEVEE extensions, as Babylon's blocks;
-// { hostCompression }, a package's scene.bin uncompressed for a host that compresses it; { bakeAnimation }, a package's
-// animation sampled per frame where Babylon cannot play its F-Curves, instead of run as F-Curves in the page.
-export async function exportScene(world, { format, eeveeParity = false, hostCompression = false, bakeAnimation = false }) {
+// `options`: export-options.js ExportOptionsSchema's, which export-dialog.js asks for.
+export async function exportScene(world, { format, ...options }) {
   const { extension, type, build } = FORMATS[format];
   const name = world.sceneSettings.state.name || 'scene';
-  const blob = new Blob([await build(world, name, { parity: eeveeParity, hostCompression, bakeAnimation })], { type });
+  const { eeveeParity, ...rest } = exportOptions(options);
+  const blob = new Blob([await build(world, name, { parity: eeveeParity, ...rest })], { type });
   const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `${name}.${extension}` });
   document.body.append(a);
   a.click();

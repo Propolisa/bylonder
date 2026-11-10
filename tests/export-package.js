@@ -10,11 +10,16 @@ import { gplFiles, packagedRuntime, packageOverrides, packageRuntime } from '../
 const CORE = JSON.stringify(import.meta.resolve('@babylonjs/core'));
 const src = (path) => readFileSync(new URL(`../src/${path}`, import.meta.url));
 
+// The package's files by path, as export.js zips them.
+export function packageFiles(files) {
+  const withRuntime = { ...files, ...Object.fromEntries(packageRuntime(files).map(([path, name]) => [path, packagedRuntime(String(src(`io_scene_babylon/runtime/${name}`)))])) };
+  return { ...withRuntime, ...Object.fromEntries(packageOverrides(withRuntime).map(([path, from]) => [path, src(from)])),
+    ...Object.fromEntries(gplFiles(files).map(([path, from]) => [path, src(from)])) };
+}
+
 // `dir`: where to write it (default a new temporary folder).
 export function writePackage(files, dir = mkdtempSync(join(tmpdir(), 'bylonder-package-'))) {
-  const all = { ...files, ...Object.fromEntries(packageRuntime(files).map(([path, name]) => [path, packagedRuntime(String(src(`io_scene_babylon/runtime/${name}`)))])),
-    ...Object.fromEntries(packageOverrides().map(([path, from]) => [path, src(from)])),
-    ...Object.fromEntries(gplFiles(files).map(([path, from]) => [path, src(from)])) };
+  const all = packageFiles(files);
   for (const [path, data] of Object.entries(all)) {
     mkdirSync(dirname(join(dir, path)), { recursive: true });
     writeFileSync(join(dir, path), /\.m?js$/.test(path) ? String(data).replace(/(['"])@babylonjs\/core\1/g, CORE) : data);

@@ -187,5 +187,7 @@ ${controls.map(({ path, type }) => `  '${path.replace(/['\\]/g, (c) => '\\' + c)
 
 export function load(engine: AbstractEngine): Promise<BlendScene<Controls>>;
 export function createScene(engine: AbstractEngine, canvas?: HTMLCanvasElement | null): Promise<import('@babylonjs/core').Scene>;
+/** The engine the package is exported for: WebGPU, WebGL 2, or WebGPU where the browser has it, else WebGL 2. */
+export function createEngine(canvas: HTMLCanvasElement, options?: object): Promise<AbstractEngine>;
 `;
 }

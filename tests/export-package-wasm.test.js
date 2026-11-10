@@ -24,7 +24,7 @@ import { createMainSync } from '../src/blenkernel/main-sync.js';
 import { babylonMatrix } from '../src/blenkernel/main-view.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
 import { nodeId } from '../src/editors/object/identity.js';
-import { writePackage } from './export-package.js';
+import { packageFiles, writePackage } from './export-package.js';
 
 // The example opened as a project opens it, in a world with the slices the view reads.
 const scene = new Scene(new NullEngine());
@@ -55,6 +55,24 @@ animation.insert([slide], 30, keyLight.position.x + 2);
 const files = await exportModule(world);
 assert.doesNotMatch(files['scene.js'], /bylonder-blocks/, 'a scene without a compositor ships no blocks library');
 assert.ok(files['scene.d.ts'].includes(`'objects["Flywheel"].location[0]': number;`), 'scene.d.ts types the controls');
+// The GPU engine target (export-options.js TARGETS): scene.js makes that engine, and the package ships the WebGPU
+// overrides only for a target with WebGPU. A WebGL 2 package still loads.
+const shipped = (files) => Object.keys(packageFiles(files)).filter((path) => path.startsWith('bylonder/overrides/webgpu/') && path.endsWith('.js'));
+const webgpuOverrides = shipped(files);
+assert.match(files['scene.js'], /IsSupportedAsync\) \? WebGPUEngine\.CreateAsync[^\n]*: new Engine\(/, 'by default the page makes WebGPU where it can, else WebGL 2');
+assert.ok(webgpuOverrides.includes('bylonder/overrides/webgpu/maximum-limits.js'), 'by default the WebGPU overrides ship');
+const webgl2 = await exportModule(world, { target: 'WEBGL2' });
+assert.doesNotMatch(webgl2['scene.js'], /WebGPU|overrides\/webgpu\/(?!float-world-cube|samplers|missing-attributes)/, 'a WebGL 2 page imports no WebGPU code');
+assert.match(webgl2['scene.js'], /createEngine = async \(canvas, options = \{\}\) => new Engine\(canvas, true, options\)/);
+assert.deepEqual(shipped(webgl2).filter((path) => !/float-world-cube|samplers|missing-attributes/.test(path)), [], 'a WebGL 2 package ships only the WebGPU overrides its runtime files import');
+const webgpu = await exportModule(world, { target: 'WEBGPU' });
+assert.match(webgpu['scene.js'], /createEngine = \(canvas, options = \{\}\) => WebGPUEngine\.CreateAsync\(canvas, \{ \.\.\.WEBGPU_OPTIONS, \.\.\.options \}\)/);
+assert.doesNotMatch(webgpu['scene.js'], /new Engine\(/, 'a WebGPU page makes no WebGL engine');
+assert.deepEqual(shipped(webgpu), webgpuOverrides, 'a WebGPU package ships the WebGPU overrides');
+const webgl2Package = writePackage(webgl2);
+assert.ok((await (await import(webgl2Package.url)).load(new NullEngine())).scene.meshes.length, 'a WebGL 2 package loads');
+webgl2Package.remove();
+
 const written = writePackage(files);
 const blend = await (await import(written.url)).load(new NullEngine());
 const page = blend.scene;

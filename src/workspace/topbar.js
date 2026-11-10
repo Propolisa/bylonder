@@ -2,19 +2,7 @@ import { menuButton, openMenu } from '../editors/interface/menu.js';
 import { registerOperators, kw } from '../windowmanager/wm-operators.js';
 import { iconEl, iconButton } from '../editors/interface/icon.js';
 import { fullDate, timeAgo } from './relative-time.js';
-import { propsDialog } from '../editors/interface/props-dialog.js';
 import { listedDemoFiles, openDemoFile, openFromUrl } from './demo-files.js';
-
-const EXPORT_PARITY_NOTE = "Lights materials as Blender's EEVEE does (view vector, second reflection as clearcoat). Off: Babylon's own lighting; Blender's texture nodes still export as one custom block.";
-// A package's Geometry Nodes kernels, with their size where the server states it.
-const geometryNodesNote = async () => {
-  const { geometryNodesKernelsSize } = await import('../io_scene_babylon/module-files.js');
-  const bytes = await geometryNodesKernelsSize();
-  const size = bytes ? ` (${(bytes / 1e6).toFixed(1)} MB as this site serves it)` : '';
-  return `With Geometry Nodes, the package ships Blender's Geometry Nodes kernels${size} in bylonder-geometry-nodes/, GPL-3.0-or-later.`;
-};
-const EXPORT_BAKE_NOTE = "Samples every animated value the page cannot play as its F-Curve at each frame, as Babylon keys. Off: F-Curves Babylon plays exactly stay its keys and the others run as F-Curves in the page; what the page cannot run yet is still sampled, each named in the Info editor.";
-const EXPORT_HOST_NOTE = "scene.bin uncompressed, for a host that serves it with Brotli (most CDNs): about half the size there, about four times it elsewhere. Off: gzipped in the file, the same size on any host.";
 
 export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, newProject, recentProjects, openProject, openBlend, resetApp }) {
   const $ = id => document.getElementById(id);
@@ -58,16 +46,8 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
   const blenderDocs = 'https://docs.blender.org/';
   const URL_PRESETS = { MANUAL: blenderDocs + 'manual/en/latest/', API: blenderDocs + 'api/current/', RELEASE_NOTES: 'https://developer.blender.org/docs/release_notes/' };
   const ids = () => workspaces.map((w) => w.id);
-  // File > Export's options, asked before it writes; EEVEE Parity is off unless chosen for this export. A JavaScript
-  // package's geometry is gzipped in the file unless the host compresses it.
-  const exportAs = async (format, title) => {
-    const fields = [{ name: 'eeveeParity', label: 'EEVEE Parity', value: false, note: EXPORT_PARITY_NOTE }];
-    if (format !== 'babylon') fields.push({ name: 'hostCompression', label: 'Host Compresses Geometry', value: false, note: EXPORT_HOST_NOTE },
-      { name: 'bakeAnimation', label: 'Bake Animation', value: false, note: EXPORT_BAKE_NOTE });
-    const note = format !== 'babylon' ? await geometryNodesNote() : undefined;
-    const options = await propsDialog({ title, confirm: 'Export', fields, note });
-    if (options) send('export', { format, eeveeParity: options.eeveeParity, hostCompression: !!options.hostCompression, bakeAnimation: !!options.bakeAnimation });
-  };
+  // File > Export: the scene window asks for its options (io_scene_babylon/export-dialog.js), then writes.
+  const exportAs = (format, title) => send('export', { format, title });
   const operators = {
     'wm.read_homefile': { keys: () => 'Ctrl N', run: ({ app_template: name = '' }) => (name ? openExample(examples.find((e) => e.title === name)) : click('new-project')()) },
     'wm.open_mainfile': { keys: () => 'Ctrl O', run: ({ filepath }) => (filepath ? openProject(filepath) : chooseBlend()) },

@@ -4,7 +4,7 @@
 // scene's range in both. Each compares the world matrices of the objects, the evaluated meshes' positions and the
 // materials' uniforms. Prints one JSON line: { id, controls, animation, notes }, each check { checked, failures }.
 //   node tests/export-parity/evaluate.mjs <example> [package dir: reused when it holds one, else written there; default a new
-//   temporary folder]
+//   temporary folder]; EXPORT_OPTIONS: File > Export's options as JSON (export-options.js), default none
 import { existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -96,7 +96,7 @@ sync.view();
 const settledApp = async () => { sync.view(); await world.modifiers.settled?.(); };
 await settledApp();
 const scenePath = join(dir, 'scene.js');
-if (!existsSync(scenePath)) writePackage(await exportModule(world, { live: true }), dir);
+if (!existsSync(scenePath)) writePackage(await exportModule(world, { live: true, ...JSON.parse(process.env.EXPORT_OPTIONS || '{}') }), dir);
 const blend = await (await import(pathToFileURL(scenePath).href)).load(new NullEngine());
 await blend.settled();
 const page = blend.scene, notes = [];

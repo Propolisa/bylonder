@@ -93,6 +93,7 @@ import { lassoRegion, circleRegion } from "./editors/space_view3d/view3d-select.
 import { createRNA } from "./makesrna/rna-bylonder.js";
 import { createContext } from "./blenkernel/context.js";
 import { exportScene } from "./io_scene_babylon/export.js";
+import { exportDialog } from "./io_scene_babylon/export-dialog.js";
 import { saveBlend } from "./windowmanager/wm-files.js";
 import { createTextFiles } from "./blenkernel/text-files.js";
 import * as bpyRna from "./python/bpy_rna.js";
@@ -397,7 +398,8 @@ window.addEventListener("message", (e) => {
   if (e.data.type === "render-settings") applyRenderSettings(engine, e.data.payload);
   if (e.data.type === "export") {
     crossingLosses(world.objects, "BABYLON").forEach((loss) => report("WARNING", loss));
-    exportScene(world, e.data.payload).catch((error) => notify("Export failed: " + error.message));
+    const { format, title } = e.data.payload;
+    exportDialog(world, format, title).then((options) => options && exportScene(world, { format, ...options })).catch((error) => notify("Export failed: " + error.message));
   }
   if (e.data.type === "save-blend") {
     crossingLosses(world.objects, "BLENDER").forEach((loss) => report("WARNING", loss));
