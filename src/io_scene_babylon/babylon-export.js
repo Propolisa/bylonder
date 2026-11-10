@@ -192,6 +192,8 @@ function transformAnimations(node, keys, frames, { frameStart, fps }, runs, curv
 
 const ANIMATION_TYPES = { Vector2: Animation.ANIMATIONTYPE_VECTOR2, Vector3: Animation.ANIMATIONTYPE_VECTOR3, Color3: Animation.ANIMATIONTYPE_COLOR3, Color4: Animation.ANIMATIONTYPE_COLOR4, Quaternion: Animation.ANIMATIONTYPE_QUATERNION };
 const read = (object, path) => path.reduce((value, key) => value?.[key], object);
+// Values Babylon's serializer does not write, so the page animates them whole: a component alone has nothing to set.
+const UNWRITTEN = ['lockedTarget'];
 
 // Where a channel lands in the file, as its owner node, the property path on it, the value there and the component the
 // channel sets: its Babylon target's property, a material's through a mesh using it ('material.diffuseColor'), or with
@@ -237,7 +239,7 @@ function bakeAnimations(world, samples, content, live, mapped, transforms, keys,
   for (const { owner, path, value, components, step } of tracks.values()) {
     if (typeof value !== 'number' && !ANIMATION_TYPES[value?.getClassName?.()]) continue;
     // Each component's F-curve exactly, where every one is (exact-keys.js); an Euler rotation drawn as a quaternion is not.
-    const exact = !step && !(path.join('.') === 'rotation' && owner.rotationQuaternion) && components.map(({ component, values, ref }) => values.length === frameEnd - frameStart + 1
+    const exact = !step && !(path.join('.') === 'rotation' && owner.rotationQuaternion) && !UNWRITTEN.includes(path[0]) && components.map(({ component, values, ref }) => values.length === frameEnd - frameStart + 1
       && exactAnimation(`${owner.name} ${path.join('.')}`, [...path, component].filter(Boolean).join('.'), world.animation.track(ref)?.keys, values, { frameStart, fps }));
     if (exact && exact.every(Boolean)) {
       for (const animation of exact) targetedAnimations.push({ animation: animation.serialize(), targetId: owner.id });
