@@ -42,6 +42,25 @@ const FeatureRuntimes = z.object({
   instances: repaired('instances', z.record(z.string(), chosen('instance runtime')), () => ({})),
 });
 
+// A branch of the scene (docs/features/import-export.md): run in the page, its evaluated result frozen into the package,
+// or left out. [identifier, name, description], as an EnumProperty's items.
+export const BRANCH_STATES = [
+  ['LIVE', 'Live', 'Runs in the page, with the code it needs shipped'],
+  ['BAKED', 'Baked', 'Its evaluated result frozen into the package: no code of its own shipped'],
+  ['OFF', 'Off', 'Left out of the package'],
+];
+// The states each branch offers, by branch id.
+export const BRANCHES = { geometryNodes: ['LIVE', 'BAKED'] };
+const branchState = (name) => repaired(name, z.nullable(z.enum(BRANCH_STATES.map(([id]) => id))), null);
+const Branch = z.object({
+  /** for every instance of the branch */
+  state: branchState('state'),
+  /** by instance name (an object's, for a modifier stack) */
+  instances: repaired('instances', z.record(z.string(), branchState('instance state')), () => ({})),
+});
+/** The state File > Export's options set for a branch's instance: set on the instance, else on the branch; null: its default. */
+export const chosenState = (branches, id, instance) => branches?.[id]?.instances?.[instance] ?? branches?.[id]?.state ?? null;
+
 export const ExportOptionsSchema = z.object({
   /** materials with Bylonder's EEVEE extensions, as Babylon's blocks */
   eeveeParity: repaired('eeveeParity', z.boolean(), false),
@@ -69,6 +88,8 @@ export const ExportOptionsSchema = z.object({
   replace: repaired('replace', z.array(z.string()), () => []),
   /** by runtimes.js feature id, overriding `runtime` for that feature and its instances */
   runtimes: repaired('runtimes', z.record(z.string(), repaired('feature runtimes', FeatureRuntimes, () => ({ runtime: null, instances: {} }))), () => ({})),
+  /** by BRANCHES id, each branch's state and its instances' (BRANCH_STATES) */
+  branches: repaired('branches', z.record(z.string(), repaired('branch', Branch, () => ({ state: null, instances: {} }))), () => ({})),
 });
 
 /** The options given, with defaults filled and what does not parse repaired. */

@@ -10,6 +10,7 @@ import { fieldLayout } from '../modifiers/dna-write.js';
 import { idStruct, pointerOf } from '../python/bpy_rna.js';
 import { knob, key } from './controls-export.js';
 import { idKey } from './ir-export.js';
+import { chosenState } from './export-options.js';
 
 // Whether an object's modifiers read another ID (an Array's offset object, a Displace's texture), which the page's
 // polyfill, given the mesh alone, lacks: such a stack stays applied.
@@ -156,23 +157,42 @@ export function modifierEntities(world, live, properties, bin) {
 // suggested.
 const SOCKETS = { NodeSocketFloat: 'FLOAT', NodeSocketInt: 'INT', NodeSocketBool: 'BOOLEAN' };
 
+const valueInputs = (tree) => [...tree.interface.items_tree].filter((item) => item.item_type === 'SOCKET' && item.in_out === 'INPUT' && SOCKETS[item.socket_type]);
+
+// Blender's Smooth by Angle (Object > Shade Auto Smooth), set by its angle alone: baked, it looks the same.
+const smoothByAngle = (tree) => /^Smooth by Angle(\.\d+)?$/.test(tree.name) && valueInputs(tree).every((item) => ['Angle', 'Ignore Sharpness'].includes(item.name));
+
+// A Geometry Nodes stack's state where File > Export's options set none: Live when something in the page drives it, an
+// input of a value or a tree reading the frame (`readsFrame(tree)`), but Baked for Smooth by Angle that nothing animates.
+export function geometryNodesDefault(ob, shown, readsFrame) {
+  if (shown.some((m) => readsFrame(m.node_group))) return 'LIVE';
+  const animated = [...animatedPaths(ob)];
+  const animates = (m) => animated.some((path) => path.startsWith(`modifiers${key(m.name)}`));
+  return shown.some((m) => valueInputs(m.node_group).length && (!smoothByAngle(m.node_group) || animates(m))) ? 'LIVE' : 'BAKED';
+}
+
+// An object's shown modifiers when they are all Geometry Nodes, else null.
+export function geometryNodesStack(pointer) {
+  const ob = pointer && idStruct(pointer), shown = ob ? [...ob.modifiers].filter((m) => m.show_viewport) : [];
+  return ob?.type === 'MESH' && shown.length && shown.every((m) => m.type === 'NODES' && m.node_group) ? { ob, shown } : null;
+}
+
 // Each object whose shown modifiers are all Geometry Nodes, as entities run by Bylonder's evaluator
 // (runtime/geometry-nodes-evaluator.js), each reading the geometry the one before gives, the first its base mesh with its
 // attributes; its inputs added to `properties`, its graph by key from `graphOf`. A stack with other modifiers stays baked,
-// and so does one nothing in the page drives, no input of a value and no tree reading the frame (`readsFrame(tree)`):
+// and so does one the options' `branches` (export-options.js) set Baked or that is Baked by default (geometryNodesDefault):
 // the package then ships no Geometry Nodes kernels for it.
-export function geometryNodesEntities(world, properties, bin, graphOf, readsFrame) {
+export function geometryNodesEntities(world, properties, bin, graphOf, readsFrame, branches) {
   const sync = world.mainSync, entities = {};
   for (const node of world.objects) {
-    const pointer = sync.objectOf(node), ob = pointer && idStruct(pointer), shown = ob ? [...ob.modifiers].filter((m) => m.show_viewport) : [];
-    if (ob?.type !== 'MESH' || !shown.length || !shown.every((m) => m.type === 'NODES' && m.node_group)) continue;
-    const driven = (m) => readsFrame(m.node_group) || [...m.node_group.interface.items_tree].some((item) => item.item_type === 'SOCKET' && item.in_out === 'INPUT' && SOCKETS[item.socket_type]);
-    if (!shown.some(driven)) continue;
+    const pointer = sync.objectOf(node), stack = geometryNodesStack(pointer);
+    if (!stack) continue;
+    const { ob, shown } = stack;
+    if ((chosenState(branches, 'geometryNodes', ob.name) ?? geometryNodesDefault(ob, shown, readsFrame)) !== 'LIVE') continue;
     const base = `objects${key(ob.name)}`;
     const modifiers = shown.map((m) => {
       const inputs = { graph: { graph: graphOf(m.node_group) } };
-      for (const item of m.node_group.interface.items_tree) {
-        if (item.item_type !== 'SOCKET' || item.in_out !== 'INPUT' || !SOCKETS[item.socket_type]) continue;
+      for (const item of valueInputs(m.node_group)) {
         const property = `${base}.modifiers${key(m.name)}.properties.inputs.${item.identifier}.value`;
         properties.push(knob(property, m.properties.inputs[item.identifier].value,
           { type: SOCKETS[item.socket_type], ...(item.min_value !== undefined && { soft_min: item.min_value, soft_max: item.max_value }), suggested: true }));

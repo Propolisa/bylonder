@@ -1,18 +1,18 @@
 // File > Export's options (src/io_scene_babylon/export-options.js): one schema fills their defaults and repairs a value
 // that does not parse to its default with a warning, leaving the others as given.
 import assert from 'node:assert/strict';
-import { exportOptions, TARGETS } from '../src/io_scene_babylon/export-options.js';
+import { chosenState, exportOptions, TARGETS } from '../src/io_scene_babylon/export-options.js';
 import { chosenRuntime } from '../src/runtimes/runtimes.js';
 
 const warnings = [];
 console.warn = (message) => warnings.push(message);
 
-assert.deepEqual(exportOptions(), { eeveeParity: false, hostCompression: false, bakeAnimation: false, bundle: true, minify: true, controlPanel: true, navigation: 'FIXED', navigationModes: {}, devTools: 'CDN', target: 'BOTH', runtime: null, replace: [], runtimes: {} }, 'defaults');
+assert.deepEqual(exportOptions(), { eeveeParity: false, hostCompression: false, bakeAnimation: false, bundle: true, minify: true, controlPanel: true, navigation: 'FIXED', navigationModes: {}, devTools: 'CDN', target: 'BOTH', runtime: null, replace: [], runtimes: {}, branches: {} }, 'defaults');
 assert.deepEqual(TARGETS.map(([id]) => id), ['BOTH', 'WEBGPU', 'WEBGL2'], "the targets' identifiers");
 for (const [id] of TARGETS) assert.equal(exportOptions({ target: id }).target, id, `${id} is kept`);
 
 const repaired = exportOptions({ eeveeParity: true, hostCompression: 'yes', minify: false, target: 'WEBGL1' });
-assert.deepEqual(repaired, { eeveeParity: true, hostCompression: false, bakeAnimation: false, bundle: true, minify: false, controlPanel: true, navigation: 'FIXED', navigationModes: {}, devTools: 'CDN', target: 'BOTH', runtime: null, replace: [], runtimes: {} }, 'bad values repaired, good ones kept');
+assert.deepEqual(repaired, { eeveeParity: true, hostCompression: false, bakeAnimation: false, bundle: true, minify: false, controlPanel: true, navigation: 'FIXED', navigationModes: {}, devTools: 'CDN', target: 'BOTH', runtime: null, replace: [], runtimes: {}, branches: {} }, 'bad values repaired, good ones kept');
 assert.equal(warnings.length, 2, 'one warning per repaired value');
 assert.match(warnings.join('\n'), /target: "WEBGL1" is not valid, "BOTH" used/);
 
@@ -28,4 +28,12 @@ assert.equal(chosenRuntime(runtimes, 'ARMATURE', 'Other'), 'MAPPED', 'inherited 
 assert.equal(chosenRuntime(runtimes, 'IMAGE', 'Wood'), 'NATIVE', 'inherited from the feature');
 assert.equal(chosenRuntime(exportOptions(), 'IMAGE', 'Wood'), null, 'nothing chosen: its own');
 assert.deepEqual(exportOptions({ replace: ['modifier:SIMPLE_DEFORM', 'node:*'] }).replace, ['modifier:SIMPLE_DEFORM', 'node:*'], 'replaced units kept');
-console.log('export options: defaults, targets, runtimes inherited by level, replaced units, and repair ok');
+// Branches: a state set on an instance, else on its branch; null: the branch's default. A bad state is repaired to null.
+warnings.length = 0;
+const branches = exportOptions({ branches: { geometryNodes: { state: 'BAKED', instances: { City: 'LIVE', Bar: 'MAYBE' } } } }).branches;
+assert.deepEqual(branches.geometryNodes, { state: 'BAKED', instances: { City: 'LIVE', Bar: null } });
+assert.equal(warnings.length, 1);
+assert.equal(chosenState(branches, 'geometryNodes', 'City'), 'LIVE', 'set on the instance');
+assert.equal(chosenState(branches, 'geometryNodes', 'Bar'), 'BAKED', 'inherited from the branch');
+assert.equal(chosenState(exportOptions().branches, 'geometryNodes', 'City'), null, 'nothing chosen: its default');
+console.log('export options: defaults, targets, runtimes inherited by level, replaced units, branches, and repair ok');

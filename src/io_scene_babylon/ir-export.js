@@ -255,8 +255,9 @@ function constraintEntities(ids, constraints, time) {
 
 // The package's IR (docs/ir.md): `controls` (controls-export.js) as its properties, with what the `live` stacks and the
 // Geometry Nodes modifiers add; the carried IDs, their node trees, and the computed entities, with the F-Curves and the
-// objects' constraints the page runs (`curves`, `constraints`, live-curves.js).
-export function exportIR(world, { controls, live, bin, animationGroups = [], curves = [], constraints = [] }) {
+// objects' constraints the page runs (`curves`, `constraints`, live-curves.js); `branches`, the export's states of its
+// branches (export-options.js).
+export function exportIR(world, { controls, live, bin, animationGroups = [], curves = [], constraints = [], branches = {} }) {
   const sync = world.mainSync, objects = world.objects.map((node) => [node, sync?.objectOf(node)]).filter(([, pointer]) => pointer);
   const { ids, references } = sync ? exportIDs(rootIDs(objects.map(([, pointer]) => pointer))) : { ids: {}, references: [] };
   for (const [node, pointer] of objects) if (ids[idKey(idStruct(pointer))]) ids[idKey(idStruct(pointer))].node = node.id;
@@ -267,7 +268,7 @@ export function exportIR(world, { controls, live, bin, animationGroups = [], cur
   const entities = sync ? { ...modifierEntities(world, live, controls, bin), ...geometryNodesEntities(world, controls, bin, (tree) => {
     writeGraph(tree, idKey(tree), graphs);
     return idKey(tree);
-  }, readsFrame) } : {};
+  }, readsFrame, branches) } : {};
   const properties = Object.fromEntries(controls.map(({ path, bind, ...property }) => [path, { id: pathID(path), ...property, ...(bind && { bind }) }]));
   if (sync) {
     evaluatedIDs(ids, graphs, entities, sync, bin);

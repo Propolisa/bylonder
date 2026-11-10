@@ -103,7 +103,7 @@ limits:
   - A bundled page still loads Babylon's shaders and the evaluators on demand, one small file each in bundle/: a page makes about 50 to 60 requests before its scene shows, and the package holds about 130 to 190 files.
   - A bundled package made for WebGPU carries Babylon's GLSL to WGSL compilers (2.7 MB in bundle/webgpu/), which a page fetches only when it creates a WebGPU engine.
   - A package with area lights carries Babylon's LTC table they read (64 KB in babylon-assets/), as the app serves it, and points Babylon at it unless the page has set its own Tools.AssetBaseUrl.
-  - A Geometry Nodes stack nothing in the page drives (no input of a value, no tree reading the frame) exports baked, its evaluated mesh without Blender's Geometry Nodes kernels; one with such an input runs live and ships them (about 87 MB).
+  - A Geometry Nodes stack exports Live (run in the page, shipping Blender's Geometry Nodes kernels, about 87 MB) or Baked (its evaluated mesh, no kernels). By default one nothing in the page drives (no input of a value, no tree reading the frame) is Baked, and so is Smooth by Angle unless its angle is animated.
   - The package's createEngine is for pages; in Node (the headless SDK) pass a NullEngine to load as before.
   - The control panel shows the controls the export lists (transforms, visibility, lights, the camera, node inputs, custom properties, modifier and Geometry Nodes inputs); a property the page cannot drive yet is not in it, and enum properties have no controls yet, so its dropdowns choose only an image.
   - The control panel labels a node by its name, not its label, and a property by Blender's name for it (Euler Rotation, where the N panel says Rotation).
