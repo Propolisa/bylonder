@@ -7,6 +7,9 @@ import { applyPBR, principledPBR } from './principled-gltf.js';
 import { declaration, defaults } from '../../nodes/blender/declarations.js';
 
 export const materialId = material => material.metadata?.wbId || material.name;
+// Slots as a MultiMaterial draws them: an empty one with Blender's default surface, as Babylon draws none there and waits
+// for ever on its shadows.
+export const drawnSlots = (scene, list) => list.map(m => m || scene.defaultMaterial);
 const imageFile = /\.(png|jpe?g|webp|gif|bmp|ktx2?|dds|env|hdr)$/i;
 
 // What an object without a material shows: Blender's default surface (material_default_surface_init), a Principled
@@ -27,7 +30,7 @@ export function createMaterialLibrary(world, { commit = () => {}, asset = path =
   const byId = id => all().find(m => materialId(m) === id) || null;
   const meshes = () => world.objects.filter(n => n.getTotalVertices && !deleted(n) && !n.isDisposed());
   // A mesh's slots are drawn on it; any other object's (Curves, Text) are Main's.
-  const slots = mesh => (!mesh.getTotalVertices && world.mainSync?.slots(mesh)) || (mesh.material instanceof MultiMaterial ? [...mesh.material.subMaterials] : mesh.material ? [mesh.material] : Array(mesh.metadata?.wbSlotCount || 0).fill(null));
+  const slots = mesh => (!mesh.getTotalVertices && world.mainSync?.slots(mesh)) || (mesh.material instanceof MultiMaterial ? mesh.material.subMaterials.map(m => (m === scene._defaultMaterial ? null : m)) : mesh.material ? [mesh.material] : Array(mesh.metadata?.wbSlotCount || 0).fill(null));
   const users = material => meshes().reduce((n, mesh) => n + slots(mesh).filter(m => m === material).length, 0) + (material.metadata?.wbFakeUser ? 1 : 0);
   const unique = (name, except) => {
     const taken = new Set(all().filter(m => m !== except).map(m => m.name));
@@ -43,7 +46,7 @@ export function createMaterialLibrary(world, { commit = () => {}, asset = path =
     mesh.metadata = { ...mesh.metadata, wbSlotCount: list.length };
     if (list.length <= 1) { mesh.material = list[0] || null; old?.dispose(false, false); return; }
     const multi = old || new MultiMaterial('__slots ' + nodeId(mesh), scene);
-    multi.subMaterials = list;
+    multi.subMaterials = drawnSlots(scene, list);
     mesh.material = multi;
   };
   // An object Main holds has Main's slots (main-sync.js), drawn back; another has Babylon's.

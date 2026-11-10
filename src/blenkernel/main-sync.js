@@ -36,6 +36,7 @@ import { armatureChanged } from '../draw/overlay-armature.js';
 import { createMainView, babylonMatrix, blenderMatrix, mainPBR, ID_GR, ID_MA, ID_WO, CURVE_TYPES, PROPERTIES, plain, same } from './main-view.js';
 import { ID_RECALC_TRANSFORM, ID_RECALC_SHADING, ID_RECALC_SYNC_TO_EVAL } from '../bmesh/bmesh-wasm.js';
 import { differencesPBR } from './material/principled-gltf.js';
+import { drawnSlots } from './material/library.js';
 
 const TRANSFORM = new Set(['location', 'rotation_mode', 'rotation_euler', 'rotation_quaternion', 'scale']);
 
@@ -169,13 +170,13 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   // blender-port: DNA_object_types.h OB_TYPE_SUPPORT_MATERIAL
   const MATERIAL_TYPES = ['MESH', 'CURVE', 'SURFACE', 'FONT', 'META', 'GREASEPENCIL', 'CURVES', 'POINTCLOUD', 'VOLUME'];
   const hasMaterials = (entry) => MATERIAL_TYPES.includes(entry?.type);
-  const slotsOf = (node) => world.materials?.slots(node) ?? (node.material instanceof MultiMaterial ? node.material.subMaterials : node.material ? [node.material] : []);
+  const slotsOf = (node) => world.materials?.slots(node) ?? (node.material instanceof MultiMaterial ? node.material.subMaterials.map((m) => (m === node.getScene()._defaultMaterial ? null : m)) : node.material ? [node.material] : []);
   const materialFor = (ma) => [...materials].find(([, record]) => record.ma === ma)?.[0] ?? null;
   function setSlots(node, list) {
     if (world.materials) world.materials.drawSlots(node, list);
     else if (list.length > 1) {
       const multi = new MultiMaterial('__slots ' + nodeId(node), node.getScene());
-      multi.subMaterials = list;
+      multi.subMaterials = drawnSlots(node.getScene(), list);
       node.material = multi;
     } else node.material = list[0] ?? null;
   }

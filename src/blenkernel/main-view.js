@@ -25,6 +25,7 @@ import { armatureData } from './armature/armature.js';
 import { armatureChanged } from '../draw/overlay-armature.js';
 import { principledPBR, applyPBR } from './material/principled-gltf.js';
 import { materialType } from './material/schema.js';
+import { drawnSlots } from './material/library.js';
 import { attributesWanted, nodeMaterialFromTree, nodeProperties, outputValues } from '../nodes/blender/shader-nodes.js';
 import { pullEeveeParity } from '../draw/eevee-parity.js';
 import { pullRenderExtensions } from '../draw/render-extension.js';
@@ -715,7 +716,7 @@ export function createMainView(state) {
     for (const ma of drawn) if (ma && !materialFor(ma)) adoptMaterial(ma, world.scene, []);
     const list = drawn.map(materialFor);
     if (world.materials) world.materials.drawSlots(node, list);
-    else if (list.length > 1) node.material = Object.assign(new MultiMaterial('__slots ' + node.name, node.getScene()), { subMaterials: list });
+    else if (list.length > 1) node.material = Object.assign(new MultiMaterial('__slots ' + node.name, node.getScene()), { subMaterials: drawnSlots(node.getScene(), list) });
     else node.material = list[0] ?? null;
   }
   // The active color attribute, which Solid shows in Vertex Paint Mode and with its Attribute color (workbench.js), one
