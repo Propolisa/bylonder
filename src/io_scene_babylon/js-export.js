@@ -244,7 +244,9 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   const objectLines = objects.map(({ entry, mesh }) => `  // ${entry.name}\n  {\n${indent(nodeCode(entry, mesh, geometries, live.get(mesh), bin))}\n  }`).join('\n');
   const name = world.sceneSettings.state.name || 'Scene';
   const source = `// ${name}, exported from Bylonder: load(engine) gives it with its controls, createScene(engine, canvas) builds it
-// alone, with Babylon.js ${AbstractEngine.Version}. In a page, map @babylonjs/core to the same version:
+// alone, with Babylon.js ${AbstractEngine.Version}. On WebGPU, create the engine with the adapter's limits, as its materials
+// need: WebGPUEngine.CreateAsync(canvas, { ...WEBGPU_OPTIONS }), from './bylonder/overrides/webgpu/maximum-limits.js'.
+// In a page, map @babylonjs/core to the same version:
 // <script type="importmap">{ "imports": { "@babylonjs/core": "${CDN}" } }</script>${[...gplFolders(irJson), ...(kernels ? [NODE_KERNELS.split('/')[0]] : []), ...(volumes ? [VOLUMES_FILE.split('/')[0]] : [])].map((folder) => `
 // Includes GPL code: ${folder}/, Blender's code (GPL-3.0-or-later, ${folder}/LICENSE.md), loaded only when a control
 // that needs it is set.`).join('')}${areaSpecular ? `

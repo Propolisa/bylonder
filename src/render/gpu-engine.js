@@ -4,6 +4,7 @@
 // E2E_ENGINE). WebGPU falls back to WebGL 2 where the browser has no adapter.
 import { Engine, WebGPUEngine } from '@babylonjs/core';
 import { depthMetricVaryings } from '../overrides/webgpu/depth-metric-varyings.js';
+import { WEBGPU_OPTIONS } from '../overrides/webgpu/maximum-limits.js';
 import { glslInWorker } from '../overrides/webgpu/glsl-in-worker.js';
 import { pbrFromGLSL } from '../overrides/webgpu/pbr-from-glsl.js';
 import { rejectedPipelines } from '../overrides/webgpu/rejected-pipelines.js';
@@ -25,7 +26,7 @@ export async function createEngine(canvas, options = {}, backend = requestedBack
   if (backend === 'WEBGPU') {
     pbrFromGLSL();
     try {
-      const engine = new WebGPUEngine(canvas, { ...options, enableAllFeatures: true, setMaximumLimits: true, glslangOptions: compiler('glslang'), twgslOptions: compiler('twgsl') });
+      const engine = new WebGPUEngine(canvas, { ...options, ...WEBGPU_OPTIONS, glslangOptions: compiler('glslang'), twgslOptions: compiler('twgsl') });
       await engine.initAsync();
       rejectedPipelines(shortEffectNames(depthMetricVaryings(glslInWorker(engine, { glslang: workerFiles('glslang'), twgsl: workerFiles('twgsl') }))));
       const { features, limits } = engine._device, granted = {};

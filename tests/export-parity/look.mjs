@@ -59,13 +59,14 @@ const PAGE = `<!doctype html><meta charset="utf-8"><title>Exported package</titl
 <script type="module">
 import { Color3, Color4, Engine, StandardMaterial, WebGPUEngine } from '@babylonjs/core';
 import { load } from './scene.js';
+import { WEBGPU_OPTIONS } from './bylonder/overrides/webgpu/maximum-limits.js';
 const errors = [], query = new URLSearchParams(location.search), canvas = document.getElementById('c');
 addEventListener('error', (e) => errors.push(String(e.message)));
 addEventListener('unhandledrejection', (e) => errors.push(String(e.reason?.message ?? e.reason)));
 Object.assign(canvas, { width: +query.get('width'), height: +query.get('height') });
 Object.assign(canvas.style, { width: query.get('width') + 'px', height: query.get('height') + 'px' });
 const engine = query.get('engine') === 'webgpu'
-  ? await WebGPUEngine.CreateAsync(canvas, { glslangOptions: { jsPath: '/webgpu/glslang.js', wasmPath: '/webgpu/glslang.wasm' }, twgslOptions: { jsPath: '/webgpu/twgsl.js', wasmPath: '/webgpu/twgsl.wasm' } })
+  ? await WebGPUEngine.CreateAsync(canvas, { ...WEBGPU_OPTIONS, glslangOptions: { jsPath: '/webgpu/glslang.js', wasmPath: '/webgpu/glslang.wasm' }, twgslOptions: { jsPath: '/webgpu/twgsl.js', wasmPath: '/webgpu/twgsl.wasm' } })
   : new Engine(canvas, true, { preserveDrawingBuffer: true });
 const blend = await load(engine), scene = blend.scene, frame = +query.get('frame');
 scene.materials.forEach((m) => m.onError = (effect, error) => errors.push(m.name + ': ' + error));
