@@ -1,20 +1,33 @@
 // A JavaScript export's package written to a folder as the zip holds it, with the runtime and the folders of Blender's
 // code it loads from src, and its scene.js imported: @babylonjs/core resolves to the installed package, as an
 // import map maps it in a page.
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { gplFiles, packagedModules, packagedRuntime, packageOverrides, packageRuntime } from '../src/io_scene_babylon/runtime-files.js';
+import { appFiles, gplFiles, packagedModules, packagedRuntime, packageOverrides, packageRuntime } from '../src/io_scene_babylon/runtime-files.js';
+import { bundlePackage } from '../src/io_scene_babylon/bundle.js';
 
 const CORE = import.meta.resolve('@babylonjs/core').replace(/index\.js$/, '');
 const src = (path) => readFileSync(new URL(`../src/${path}`, import.meta.url));
 
-// The package's files by path, as export.js zips them.
-export function packageFiles(files) {
+// The files the app serves from public/ (scripts/webgpu-compilers.mjs) that a package ships, empty where the app has
+// not fetched them.
+const appFile = (path) => { const at = new URL(`../public/${path}`, import.meta.url); return existsSync(at) ? readFileSync(at) : new Uint8Array(); };
+const withAppFiles = (files, shipped) => ({ ...shipped, ...Object.fromEntries(appFiles(files).map(([path, from]) => [path, appFile(from)])) });
+
+function modules(files) {
   const withRuntime = { ...files, ...Object.fromEntries(packageRuntime(files).map(([path, name]) => [path, packagedRuntime(String(src(`io_scene_babylon/runtime/${name}`)))])) };
   return packagedModules({ ...withRuntime, ...Object.fromEntries(packageOverrides(withRuntime).map(([path, from]) => [path, src(from)])),
     ...Object.fromEntries(gplFiles(files).map(([path, from]) => [path, src(from)])) });
+}
+
+// The package's files by path, as export.js zips them.
+export const packageFiles = (files) => withAppFiles(files, modules(files));
+
+// The package's files bundled as export.js bundles them, from the installed Babylon and esbuild.
+export async function bundledFiles(files, { minify = true } = {}) {
+  return withAppFiles(files, await bundlePackage(modules(files), { minify, esbuild: await import('esbuild-wasm'), babylon: (path) => readFileSync(new URL(path, CORE), 'utf8') }));
 }
 
 // `dir`: where to write it (default a new temporary folder).

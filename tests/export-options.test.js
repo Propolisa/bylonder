@@ -7,12 +7,12 @@ import { chosenRuntime } from '../src/runtimes/runtimes.js';
 const warnings = [];
 console.warn = (message) => warnings.push(message);
 
-assert.deepEqual(exportOptions(), { eeveeParity: false, hostCompression: false, bakeAnimation: false, target: 'BOTH', runtime: null, replace: [], runtimes: {} }, 'defaults');
+assert.deepEqual(exportOptions(), { eeveeParity: false, hostCompression: false, bakeAnimation: false, bundle: true, minify: true, target: 'BOTH', runtime: null, replace: [], runtimes: {} }, 'defaults');
 assert.deepEqual(TARGETS.map(([id]) => id), ['BOTH', 'WEBGPU', 'WEBGL2'], "the targets' identifiers");
 for (const [id] of TARGETS) assert.equal(exportOptions({ target: id }).target, id, `${id} is kept`);
 
-const repaired = exportOptions({ eeveeParity: true, hostCompression: 'yes', target: 'WEBGL1' });
-assert.deepEqual(repaired, { eeveeParity: true, hostCompression: false, bakeAnimation: false, target: 'BOTH', runtime: null, replace: [], runtimes: {} }, 'bad values repaired, good ones kept');
+const repaired = exportOptions({ eeveeParity: true, hostCompression: 'yes', minify: false, target: 'WEBGL1' });
+assert.deepEqual(repaired, { eeveeParity: true, hostCompression: false, bakeAnimation: false, bundle: true, minify: false, target: 'BOTH', runtime: null, replace: [], runtimes: {} }, 'bad values repaired, good ones kept');
 assert.equal(warnings.length, 2, 'one warning per repaired value');
 assert.match(warnings.join('\n'), /target: "WEBGL1" is not valid, "BOTH" used/);
 

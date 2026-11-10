@@ -1,5 +1,6 @@
 import { activeScene, sceneRecords } from "./scenes.js";
 import { hash } from "./opfs.js";
+import { esbuildService } from "./esbuild.js";
 import { installFailure } from "../overrides/browser/service-worker-install.js";
 export const RUN_CACHE = "babylon-workspace-runs-v1";
 export const APP_BASE = new URL(import.meta.env.BASE_URL, location.href).pathname;
@@ -50,17 +51,9 @@ const mime = (path) =>
     txt: "text/plain",
     glsl: "text/plain",
   })[path.split(".").pop()] || "application/octet-stream";
-let transformer;
 async function transform(content, path) {
   if (!/\.(ts|tsx|jsx)$/.test(path) || path.endsWith(".d.ts")) return content;
-  if (!transformer)
-    transformer = (async () => {
-      const esbuild = await import("esbuild-wasm");
-      const wasm = await import("esbuild-wasm/esbuild.wasm?url");
-      await esbuild.initialize({ wasmURL: wasm.default });
-      return esbuild;
-    })();
-  const service = await transformer;
+  const service = await esbuildService();
   return (
     await service.transform(content, {
       loader: path.split(".").pop(),

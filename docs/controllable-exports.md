@@ -302,16 +302,34 @@ components of its shadows, effect layers and particles. The export writes these 
 Babylon exports or registers and of each member one module adds to another's class (`thinInstanceSetBuffer`). A
 package made for WebGPU or WebGL 2 imports neither engine up front: its `createEngine` loads the one it makes.
 
-A page loads the package in one of two ways:
+File > Export's Bundle setting chooses how a page loads the package:
 
-- **From a CDN, unbundled.** Map Babylon's module paths to the same version, as the header of `scene.js` says:
+- **Bundled (the default).** The export bundles `scene.js` with esbuild, in the browser, into a minified `scene.js` and
+  chunks in `bundle/` that hold the Babylon.js modules the scene uses and the page runtime; shaders and evaluators are
+  chunks that load on demand. A page imports `./scene.js` as it is, with no CDN, import map or bundler. Blender's code
+  (GPL) stays in its own files, each an entry of the same bundle with its leading comments and its folder's notices:
+  only `scene.js` imports it, and no chunk holds any of it; a unit the page replaces is absent from the package, so
+  from the bundle too. A package made for WebGPU carries Babylon's GLSL to WGSL compilers in `bundle/webgpu/`, which
+  its `createEngine` passes to the engine. Babylon's sources come from the app's own site, an archive of the installed
+  `@babylonjs/core` (`babylon-core-<version>.zip`, made by `vite.config.js`), fetched on the first bundled export and kept
+  in the browser's Cache Storage; esbuild's WebAssembly is the app's too. Minify off writes the bundle readable.
+- **Modules.** Bundle off writes the modules as they are. Map Babylon's module paths to the same version, as the header
+  of `scene.js` says:
   `<script type="importmap">{ "imports": { "@babylonjs/core/": "https://cdn.jsdelivr.net/npm/@babylonjs/core@<version>/" } }</script>`.
   The browser fetches each module the scene reaches, about 700 for a typical scene (HTTP/2 serves them in parallel).
-- **Bundled.** With `@babylonjs/core` installed beside the package, bundle `scene.js` into one file and chunks that
-  load on demand (shaders, evaluators):
+  Or, with `@babylonjs/core` installed beside the package, bundle it yourself:
   `npx esbuild scene.js --bundle --splitting --format=esm --minify --external:node:* --outdir=. --entry-names=[name].bundle --chunk-names=bundle/[name]-[hash]`,
-  then import `./scene.bundle.js`. It stays in the package folder, where `scene.js` finds `scene.bin`, `images/` and
-  the folders of Blender's code. The `node:*` imports are the package's Node path, which a page never runs.
+  then import `./scene.bundle.js`. The `node:*` imports are the package's Node path, which a page never runs.
+
+A WebGL 2 page's download, brotli, before `load()` returns (scene.js's imports and the engine's; data is scene.bin, the
+IR and images):
+
+| Example | Modules from a CDN | Bundled |
+| --- | --- | --- |
+| Arrays | 307 requests, 917 KB | 46 requests, 476 KB |
+| Rigged Character | 311 requests, 872 KB | 46 requests, 428 KB |
+| Carousel | 365 requests, 1697 KB | 56 requests, 1175 KB |
+| Volumes | 369 requests, 1013 KB | 62 requests, 492 KB |
 
 The `.babylon` export stays as it is, the snapshot alone.
 

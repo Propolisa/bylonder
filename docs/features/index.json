@@ -647,7 +647,7 @@
   "id": "import-export",
   "title": "Import and Export",
   "summary": "Bring scenes in and write them out with Blender's own importers and exporters (Wavefront OBJ, Stanford PLY, STL, FBX) and its default add-ons (glTF 2.0, FBX export, Motion Capture, SVG as Curves), through the browser's file dialogs with each format's options.",
-  "expect": "OBJ, PLY, STL, FBX, glTF 2.0, BVH and SVG import and export with Blender's own code and options; the add-ons' entries wait a few seconds for Python the first time File opens, Alembic and USD are greyed out, and an export's extra files download. File > Export > JavaScript asks which GPU engine its page makes (WebGPU, WebGL 2, or WebGPU where the browser has it) and which runtime each feature exports with, for the package, a feature or one instance.",
+  "expect": "OBJ, PLY, STL, FBX, glTF 2.0, BVH and SVG import and export with Blender's own code and options; the add-ons' entries wait a few seconds for Python the first time File opens, Alembic and USD are greyed out, and an export's extra files download. File > Export > JavaScript asks which GPU engine its page makes (WebGPU, WebGL 2, or WebGPU where the browser has it) and which runtime each feature exports with, for the package, a feature or one instance, and writes one minified bundle per package that needs no CDN (or ES modules, with Bundle off).",
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/files/import_export/index.html",
@@ -705,6 +705,8 @@
    "src/draw/mesh-batch-buffers.js",
    "src/io_scene_babylon/export-options.js",
    "src/io_scene_babylon/export-dialog.js",
+   "src/io_scene_babylon/bundle.js",
+   "src/io_scene_babylon/babylon-sources.js",
    "src/editors/interface/components/ExportDialog.vue",
    "src/editors/interface/components/SettingRow.vue",
    "src/runtimes/runtimes.js",
@@ -716,6 +718,7 @@
    "tests/e2e/smoke.mjs",
    "tests/export-options.test.js",
    "tests/export-package-wasm.test.js",
+   "tests/export-bundle-wasm.test.js",
    "tests/unit-swap-wasm.test.js",
    "tests/runtimes-armature-wasm.test.js",
    "tests/texture-paint-wasm.test.js"
@@ -733,6 +736,9 @@
    "A runtime a feature does not offer (Babylon (native) for an armature) is reported to the Info editor, and its instances export with their own.",
    "The export's settings are asked each time; they are not saved with the project.",
    "File > Export > JavaScript's Units leaves a replaced unit's code out of the package; the page registers its own (docs/escaping-the-gpl.md). Curves, volumes, the compositor and a material not built from its graph cannot be replaced yet.",
+   "File > Export > JavaScript's Bundle runs esbuild in the browser: the first bundled export downloads Babylon.js's sources from Bylonder's own site (4.4 MB), kept by the browser so later exports bundle offline.",
+   "A bundled page still loads Babylon's shaders and the evaluators on demand, one small file each in bundle/: a page makes about 50 to 60 requests before its scene shows, and the package holds about 130 to 190 files.",
+   "A bundled package made for WebGPU carries Babylon's GLSL to WGSL compilers (2.7 MB in bundle/webgpu/), which a page fetches only when it creates a WebGPU engine.",
    "The package's createEngine is for pages; in Node (the headless SDK) pass a NullEngine to load as before.",
    "The splash's Open from URL downloads only from servers that allow downloads from a web page (CORS); Blender's demo files are served from Bylonder's own copy for that reason."
   ],

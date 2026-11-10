@@ -18,7 +18,7 @@ import { imageFiles } from './image-files.js';
 import { exportCompositor } from './compositor-export.js';
 import { exportIR, idKey } from './ir-export.js';
 import { channels, readsOtherIDs } from './modifiers-export.js';
-import { AREA_SPECULAR, gplFolders, NODE_KERNELS, UNITS_FILE } from './runtime-files.js';
+import { AREA_SPECULAR, CHUNKS, COMPILER_FOLDER, gplFolders, NODE_KERNELS, UNITS_FILE } from './runtime-files.js';
 import { AREA_SPECULAR_UNIT, replaces, stripEntities, stripPieces, unitManifest } from './unit-manifest.js';
 import { CURVES_GLSL_FILE, curvesGlslFile } from './curves-export.js';
 import { exportVolumes, VOLUMES_FILE } from './volumes-export.js';
@@ -33,17 +33,20 @@ import { babylonModule, sideEffectImports } from './babylon-modules.js';
 const CDN = `https://cdn.jsdelivr.net/npm/@babylonjs/core@${AbstractEngine.Version}/`;
 const json = (value) => JSON.stringify(value);
 const TARGET_NAMES = Object.fromEntries(TARGETS.map(([id, label]) => [id, label]));
-// The page's createEngine for each target: WebGPU with the adapter's limits its materials need.
-const WEBGPU_ENGINE = (engine) => `${engine}.CreateAsync(canvas, { ...WEBGPU_OPTIONS, ...options })`;
-const ENGINES = {
-  BOTH: `// A WebGPU engine where the browser has WebGPU, else a WebGL 2 one: the page loads only the engine it makes.
+// The page's createEngine for each target: WebGPU with the adapter's limits its materials need, and in a bundle with the
+// GLSL to WGSL compilers it carries.
+const engines = (bundle) => {
+  const WEBGPU_ENGINE = (engine) => `${engine}.CreateAsync(canvas, { ...WEBGPU_OPTIONS, ${bundle ? '...COMPILERS, ' : ''}...options })`;
+  return {
+    BOTH: `// A WebGPU engine where the browser has WebGPU, else a WebGL 2 one: the page loads only the engine it makes.
 export async function createEngine(canvas, options = {}) {
   const webgpu = globalThis.navigator?.gpu && (await import('@babylonjs/core/Engines/webgpuEngine.js')).WebGPUEngine;
   if (webgpu && (await webgpu.IsSupportedAsync)) return ${WEBGPU_ENGINE('webgpu')};
   return new (await import('@babylonjs/core/Engines/engine.js')).Engine(canvas, true, options);
 }`,
-  WEBGPU: `export const createEngine = (canvas, options = {}) => ${WEBGPU_ENGINE('WebGPUEngine')};`,
-  WEBGL2: 'export const createEngine = async (canvas, options = {}) => new Engine(canvas, true, options);',
+    WEBGPU: `export const createEngine = (canvas, options = {}) => ${WEBGPU_ENGINE('WebGPUEngine')};`,
+    WEBGL2: 'export const createEngine = async (canvas, options = {}) => new Engine(canvas, true, options);',
+  };
 };
 // Where scene.js imports Babylon: the names its code uses, and the modules its data needs registered.
 const BABYLON_IMPORTS = '/* @babylonjs/core imports */';
@@ -242,20 +245,21 @@ function greasePencilClock(world, ir, groups) {
 // modifiers are all Blender's keep them live (modifiers-export.js), run by modifiers.wasm in bylonder-modifiers/. With
 // `bakeAnimation`, what Babylon cannot play as its F-Curve is sampled per frame; `target`, the GPU engine its page makes
 // (export-options.js TARGETS); `runtime`, `runtimes`, the runtimes its features export with (runtimes.js chosenRuntime);
-// `replace`, the type keys of units the page registers itself, which the package ships none of (unit-manifest.js).
-export async function exportModule(world, { live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, target = 'BOTH', runtime = null, runtimes = {}, replace = [] } = {}) {
+// `replace`, the type keys of units the page registers itself, which the package ships none of (unit-manifest.js); `bundle`,
+// whether the package is then bundled (bundle.js).
+export async function exportModule(world, { live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, target = 'BOTH', runtime = null, runtimes = {}, replace = [], bundle = false } = {}) {
   const live = new Map(keepLive ? world.objects.map((node) => [node, world.modifiers.live(node)]).filter(([node, stack]) => stack && !stack.modifiers.some(needsOpenVDB) && !readsOtherIDs(world, node)) : []);
   await world.modifiers.settled();
   // The mapped meshes' geometry is read below: their mapping holds until the module is written.
   const mapped = exportRuntimes(world, { bake: bakeAnimation, runtime, runtimes });
   try {
-    return await moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, target, replace });
+    return await moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, target, replace, bundle });
   } finally {
     mapped.restore();
   }
 }
 
-async function moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, target, replace }) {
+async function moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, target, replace, bundle }) {
   const graphs = [], graphOf = materialGraphs(world, graphs);
   const data = await serializeScene(world, { geometry: false, live, mapped, parity, graphOf, bake: bakeAnimation });
   const { scene } = world;
@@ -314,11 +318,13 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   const objectLines = objects.map(({ entry, mesh }) => `  // ${entry.name}\n  {\n${indent(nodeCode(entry, mesh, geometries, live.get(mesh), bin))}\n  }`).join('\n');
   const name = world.sceneSettings.state.name || 'Scene', webgpu = target !== 'WEBGL2';
   const source = `// ${name}, exported from Bylonder: load(engine) gives it with its controls, createScene(engine, canvas) builds it
-// alone, with Babylon.js ${AbstractEngine.Version}; createEngine(canvas) makes the engine it is exported for: ${TARGET_NAMES[target]}.
+// alone, with Babylon.js ${AbstractEngine.Version}; createEngine(canvas) makes the engine it is exported for: ${TARGET_NAMES[target]}.${bundle ? `
+// Bundled with the Babylon.js modules its scene uses (${CHUNKS}/, Apache-2.0, ${CHUNKS}/LICENSE.md): a page imports it as
+// it is, with no import map, CDN or bundler.` : `
 // It imports Babylon module by module, so a page loads only the modules its scene uses. In a page, map them to the
 // same version: <script type="importmap">{ "imports": { "@babylonjs/core/": "${CDN}" } }</script>
 // or, with @babylonjs/core installed, bundle it beside this module and import ./scene.bundle.js: npx esbuild scene.js --bundle
-// --splitting --format=esm --minify --external:node:* --outdir=. --entry-names=[name].bundle --chunk-names=bundle/[name]-[hash]${[...gplFolders({ 'scene.ir.json': irJson, [UNITS_FILE]: units }), ...(pieces && Object.keys(pieces.pieces).length ? [NODE_KERNELS.split('/')[0]] : []), ...(volumes ? [VOLUMES_FILE.split('/')[0]] : [])].map((folder) => `
+// --splitting --format=esm --minify --external:node:* --outdir=. --entry-names=[name].bundle --chunk-names=bundle/[name]-[hash]`}${[...gplFolders({ 'scene.ir.json': irJson, [UNITS_FILE]: units }), ...(pieces && Object.keys(pieces.pieces).length ? [NODE_KERNELS.split('/')[0]] : []), ...(volumes ? [VOLUMES_FILE.split('/')[0]] : [])].map((folder) => `
 // Includes GPL code: ${folder}/, Blender's code (GPL-3.0-or-later, ${folder}/LICENSE.md), loaded only when a control
 // that needs it is set.`).join('')}${blenderSpecular ? `
 // Includes GPL code: ${AREA_SPECULAR}, Blender's light specular (GPL-3.0-or-later, ${AREA_SPECULAR.split('/')[0]}/LICENSE.md).` : ''}
@@ -395,8 +401,11 @@ const SCREEN_SPACE = {${pipelineTypes.filter((type) => SCREEN_SPACE_PIPELINES[ty
 const PIPELINES = { ${pipelineClasses.join(', ')} };
 ` : ''}
 // Each built scene's IR, world, compositor and scene.bin buffers, which load gives its controls.
-const IRS = new WeakMap(), WORLDS = new WeakMap(), COMPOSITORS = new WeakMap(), SCENE_BUFFERS = new WeakMap();
-${ENGINES[target]}
+const IRS = new WeakMap(), WORLDS = new WeakMap(), COMPOSITORS = new WeakMap(), SCENE_BUFFERS = new WeakMap();${bundle && webgpu ? `
+// Babylon's GLSL to WGSL compilers, which WebGPU needs, in the package.
+const compiler = (name) => ({ jsPath: new URL(\`${COMPILER_FOLDER}/\${name}.js\`, ROOT).href, wasmPath: new URL(\`${COMPILER_FOLDER}/\${name}.wasm\`, ROOT).href });
+const COMPILERS = { glslangOptions: compiler('glslang'), twgslOptions: compiler('twgsl') };` : ''}
+${engines(bundle)[target]}
 export async function load(engine) {${webgpu ? `
   warnUnlessMaximumLimits(engine);` : ''}
   const scene = await createScene(engine, engine.getRenderingCanvas());

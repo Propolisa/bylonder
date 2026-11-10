@@ -34,6 +34,10 @@ export const ExportOptionsSchema = z.object({
   hostCompression: repaired('hostCompression', z.boolean(), false),
   /** a package's animation sampled per frame where Babylon cannot play its F-Curves, instead of run as F-Curves in the page */
   bakeAnimation: repaired('bakeAnimation', z.boolean(), false),
+  /** a package's modules as one bundle with Babylon's (bundle.js), else as ES modules importing Babylon's */
+  bundle: repaired('bundle', z.boolean(), true),
+  /** the bundle minified */
+  minify: repaired('minify', z.boolean(), true),
   /** the GPU engine a package's page creates (TARGETS) */
   target: repaired('target', z.enum(TARGETS.map(([id]) => id)), 'BOTH'),
   /** the runtime every feature instance exports with; null: each its own (docs/runtimes.md) */

@@ -50,26 +50,48 @@ const STATS = String((scene, keep, camera, named = (m) => m.name) => {
 // An object's color in the ID layer: three 3 bit channels, each the middle of its step, so blended edges stay apart.
 const ID_STEP = 32;
 
-// The page that loads a package on the engine its URL names, at a frame, with the canvas at the output's size.
-const PAGE = `<!doctype html><meta charset="utf-8"><title>Exported package</title>
-<link rel="icon" href="data:,">
-<style>html,body{margin:0;background:#000}canvas{display:block}</style>
-<script type="importmap">{ "imports": { "@babylonjs/core/": "/core/" } }</script>
+// The page that loads a package on the engine its URL names, at a frame, with the canvas at the output's size. A package
+// of modules imports Babylon module by module through an import map; a bundled one carries Babylon and its engine,
+// whose classes the page takes from its scene's objects.
+const MODULES = `<script type="importmap">{ "imports": { "@babylonjs/core/": "/core/" } }</script>
 <canvas id="c"></canvas>
 <script type="module">
-// Babylon module by module, as the package imports it: the page loads only what the package needs.
 import { Color3, Color4 } from '@babylonjs/core/Maths/math.color.js';
 import { load } from './scene.js';
 import { WEBGPU_OPTIONS } from './bylonder/overrides/webgpu/maximum-limits.js';
-const errors = [], query = new URLSearchParams(location.search), canvas = document.getElementById('c');
-addEventListener('error', (e) => errors.push(String(e.message)));
-addEventListener('unhandledrejection', (e) => errors.push(String(e.reason?.message ?? e.reason)));
-Object.assign(canvas, { width: +query.get('width'), height: +query.get('height') });
-Object.assign(canvas.style, { width: query.get('width') + 'px', height: query.get('height') + 'px' });
+const query = new URLSearchParams(location.search), canvas = document.getElementById('c');
+size(canvas);
 const engine = query.get('engine') === 'webgpu'
   ? await (await import('@babylonjs/core/Engines/webgpuEngine.js')).WebGPUEngine.CreateAsync(canvas, { ...WEBGPU_OPTIONS, glslangOptions: { jsPath: '/webgpu/glslang.js', wasmPath: '/webgpu/glslang.wasm' }, twgslOptions: { jsPath: '/webgpu/twgsl.js', wasmPath: '/webgpu/twgsl.wasm' } })
   : new (await import('@babylonjs/core/Engines/engine.js')).Engine(canvas, true, { preserveDrawingBuffer: true });
-const blend = await load(engine), scene = blend.scene, frame = +query.get('frame');
+const blend = await load(engine), scene = blend.scene;
+const standardMaterial = async () => (await import('@babylonjs/core/Materials/standardMaterial.js')).StandardMaterial;`;
+const BUNDLED = `<canvas id="c"></canvas>
+<script type="module">
+import { createEngine, load } from './scene.js';
+const query = new URLSearchParams(location.search), canvas = document.getElementById('c');
+size(canvas);
+// The package's createEngine picks WebGPU where the browser has it.
+if (query.get('engine') !== 'webgpu') Object.defineProperty(navigator, 'gpu', { value: undefined });
+const engine = await createEngine(canvas, { preserveDrawingBuffer: true }), blend = await load(engine), scene = blend.scene;
+const Color3 = scene.ambientColor.constructor, Color4 = scene.clearColor.constructor;
+// A bundle without Babylon's StandardMaterial has no ID layer.
+const standardMaterial = async () => { try { return scene.defaultMaterial.constructor; } catch { return null; } };`;
+const pageHtml = (bundled) => `<!doctype html><meta charset="utf-8"><title>Exported package</title>
+<link rel="icon" href="data:,">
+<style>html,body{margin:0;background:#000}canvas{display:block}</style>
+<script>
+var errors = [];
+addEventListener('error', (e) => errors.push(String(e.message)));
+addEventListener('unhandledrejection', (e) => errors.push(String(e.reason?.message ?? e.reason)));
+function size(canvas) {
+  const query = new URLSearchParams(location.search);
+  Object.assign(canvas, { width: +query.get('width'), height: +query.get('height') });
+  Object.assign(canvas.style, { width: query.get('width') + 'px', height: query.get('height') + 'px' });
+}
+</script>
+${bundled ? BUNDLED : MODULES}
+const frame = +query.get('frame');
 scene.materials.forEach((m) => m.onError = (effect, error) => errors.push(m.name + ': ' + error));
 // The app's frame, held: Render Image draws one still.
 for (const group of scene.animationGroups) { group.start(false, 1, frame, frame); group.goToFrame(frame); group.pause(); }
@@ -84,7 +106,8 @@ window.check = {
   // The ID layer: each drawn mesh in a flat color of its own on black, unlit and without post processes. Gives the
   // mesh of each color.
   async idLayer() {
-    const { StandardMaterial } = await import('@babylonjs/core/Materials/standardMaterial.js');
+    const StandardMaterial = await standardMaterial();
+    if (!StandardMaterial) return {};
     Object.assign(scene, { postProcessesEnabled: false, fogEnabled: false, clearColor: new Color4(0, 0, 0, 1) });
     scene.imageProcessingConfiguration.isEnabled = false;
     if (scene.frameGraph) scene.frameGraph = null;
@@ -166,7 +189,7 @@ async function exportPackage(app, dir) {
 
 // The page's side: the package in `served` at `folder`, drawn at the app's size and frame.
 export async function pagePicture(browser, served, { folder, engine, width, height, frame, path, idPath }) {
-  writeFileSync(join(served.root, folder, 'parity.html'), PAGE);
+  writeFileSync(join(served.root, folder, 'parity.html'), pageHtml(existsSync(join(served.root, folder, 'bundle'))));
   const page = await browser.newPage({ viewport: { width, height } }), logs = [];
   served.missing();
   page.on('console', (m) => (m.type() === 'error' || BAD_WARNING.test(m.text())) && logs.push(m.text()));

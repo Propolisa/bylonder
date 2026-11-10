@@ -5,7 +5,9 @@ import { fileURLToPath } from "node:url";
 import { scanImplemented } from "./scripts/blender-coverage.mjs";
 import { blenderIcons } from "./scripts/blender-icons.mjs";
 import { execFileSync } from "node:child_process";
-import { createReadStream } from "node:fs";
+import { createReadStream, readdirSync, readFileSync } from "node:fs";
+import { zipSync } from "fflate";
+import { babylonArchive } from "./src/io_scene_babylon/babylon-sources.js";
 import { demoFile } from "./scripts/demo-files.mjs";
 import pkg from "./package.json" with { type: "json" };
 
@@ -67,6 +69,29 @@ const demoFiles = () => ({
   },
 });
 
+// Babylon's module sources File > Export > JavaScript bundles a package with (io_scene_babylon/babylon-sources.js): the
+// installed @babylonjs/core's modules and licence as one archive beside the app's pages, made once per server or build.
+const babylonSources = () => {
+  const core = fileURLToPath(new URL("./node_modules/@babylonjs/core/", import.meta.url));
+  const { version } = JSON.parse(readFileSync(core + "package.json", "utf8"));
+  const name = babylonArchive(version);
+  let archive;
+  const bytes = () => (archive ??= zipSync(Object.fromEntries(readdirSync(core, { recursive: true }).map((path) => path.replaceAll("\\", "/"))
+    .filter((path) => path.endsWith(".js") || path === "license.md").map((path) => [path, readFileSync(core + path)]))));
+  return {
+    name: "babylon-sources",
+    configureServer(server) {
+      server.middlewares.use(`${server.config.base}${name}`, (req, res) => {
+        res.setHeader("Content-Type", "application/zip");
+        res.end(bytes());
+      });
+    },
+    generateBundle() {
+      this.emitFile({ type: "asset", fileName: name, source: bytes() });
+    },
+  };
+};
+
 // Cross-origin isolation for Blender's threads (SharedArrayBuffer), as the site's service worker gives it
 // (public/workspace-sw.js): every page and file but the docs viewer's page, whose embeds are other sites' pages.
 const isolation = () => ({
@@ -84,7 +109,7 @@ const isolation = () => ({
 
 export default defineConfig({
   base: process.env.BASE_PATH || "/",
-  plugins: [vue(), tailwindcss(), blenderCoverage(), blenderIconSet(), changelog(), demoFiles(), isolation()],
+  plugins: [vue(), tailwindcss(), blenderCoverage(), blenderIconSet(), changelog(), demoFiles(), babylonSources(), isolation()],
   define: { __BYLONDER_VERSION__: JSON.stringify(pkg.version), __BYLONDER_CHANGE__: JSON.stringify(commits()[0] ?? null) },
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
   // Agents' worktrees live under .claude/: their edits must not reload this checkout's pages (a worktree's own server

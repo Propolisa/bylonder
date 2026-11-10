@@ -2,11 +2,13 @@
 // with its types, scene.bin, images/, the page runtime in bylonder/ and the blocks library files it imports (runtime/,
 // MIT OR Apache-2.0); with Live Modifiers, modifiers.wasm in bylonder-modifiers/, and with Geometry Nodes, Blender's
 // Geometry Nodes kernels in bylonder-geometry-nodes/, with curves their blocks in bylonder-curves/ and with volumes the
-// volume passes in bylonder-volumes/ (GPL, runtime-files.js gplFiles).
+// volume passes in bylonder-volumes/ (GPL, runtime-files.js gplFiles). Bundled (the default), its modules are one bundle
+// with Babylon's (bundle.js), made here from the app's own copy of Babylon's sources and esbuild.
+import { AbstractEngine } from '@babylonjs/core';
 import { zipSync, strToU8 } from 'fflate';
 import { serializeScene } from './babylon-export.js';
 import { exportModule } from './js-export.js';
-import { gplFiles, packagedModules, packagedRuntime, packageOverrides, packageRuntime } from './runtime-files.js';
+import { appFiles, gplFiles, packagedModules, packagedRuntime, packageOverrides, packageRuntime } from './runtime-files.js';
 import { MODULES } from './module-files.js';
 import { exportOptions } from './export-options.js';
 
@@ -27,13 +29,26 @@ const SOURCES = {
   ...Object.fromEntries(Object.entries(MODULES).map(([path, url]) => [path, bytes(url)])),
 };
 
+// A file the app serves from public/ (runtime-files.js appFiles).
+async function appFile(path) {
+  const response = await fetch(new URL(path, document.baseURI));
+  if (!response.ok) throw Error(`${path} answered ${response.status}`);
+  return new Uint8Array(await response.arrayBuffer());
+}
+async function bundled(files, minify) {
+  const [{ bundlePackage }, { babylonSources }, { esbuildService }] = await Promise.all([import('./bundle.js'), import('./babylon-sources.js'), import('../workspace/esbuild.js')]);
+  return bundlePackage(files, { minify, esbuild: await esbuildService(), babylon: await babylonSources(AbstractEngine.Version) });
+}
+
 // The package's files as the zip holds them.
 async function scenePackage(world, options) {
   const files = await exportModule(world, options);
   for (const [path, name] of packageRuntime(files)) files[path] = packagedRuntime(runtime['./runtime/' + name]);
   for (const [path, from] of packageOverrides(files)) files[path] = overrides['../' + from];
   for (const [path, from] of gplFiles(files)) files[path] = await SOURCES[from]();
-  return Object.fromEntries(Object.entries(packagedModules(files)).map(([path, data]) => [path, typeof data === 'string' ? strToU8(data) : data]));
+  const modules = packagedModules(files), shipped = options.bundle ? await bundled(modules, options.minify) : modules;
+  for (const [path, from] of appFiles(files)) shipped[path] = await appFile(from);
+  return Object.fromEntries(Object.entries(shipped).map(([path, data]) => [path, typeof data === 'string' ? strToU8(data) : data]));
 }
 
 const FORMATS = {

@@ -25,6 +25,9 @@ const setting = (holder, key, { label, icon, items, inherited, issue = () => nul
   set: (value) => { holder[key] = value; },
 });
 
+// A row's inherited value where no level above sets it.
+const DEFAULT = (value) => () => ({ value, source: 'Default' });
+
 const RUNTIME_ITEMS = Object.entries(RUNTIMES).map(([id, [label, description]]) => [id, label, description]);
 const OWN = { label: 'Per Instance', source: "Each instance's runtime, set in its Runtime panel" };
 // The runtimes tree (docs/runtimes.md): the package's, each feature's with instances in the scene, each instance's. Unset,
@@ -60,7 +63,7 @@ const unitStateOf = (packageState, category, key) => category.units[key] ?? cate
 function unitsTree(values) {
   values.units = {};
   values.unitState = null;
-  const fromAbove = () => (values.unitState ? { value: values.unitState, source: 'Inherited from Units' } : { value: 'BLENDER', source: 'Default' });
+  const fromAbove = () => (values.unitState ? { value: values.unitState, source: 'Inherited from Units' } : DEFAULT('BLENDER')());
   const categories = Object.entries(sceneUnits()).filter(([, units]) => units.length).map(([id, units]) => {
     values.units[id] = { state: null, units: Object.fromEntries(units.map(({ key }) => [key, null])) };
     // Read back through the reactive values, as the tree's rows watch them.
@@ -70,13 +73,21 @@ function unitsTree(values) {
     'icon', { get: () => (unitStateOf(values.unitState, category, key) === 'REPLACED' ? 'FILE_SCRIPT' : 'BLENDER') }));
     return Object.assign(setting(category, 'state', { label, icon, items: UNIT_ITEMS, children, inherited: fromAbove }), { key: id });
   });
-  return setting(values, 'unitState', { label: 'Units', icon: 'BYLONDER', items: UNIT_ITEMS, children: categories, inherited: () => ({ value: 'BLENDER', source: 'Default' }) });
+  return setting(values, 'unitState', { label: 'Units', icon: 'BYLONDER', items: UNIT_ITEMS, children: categories, inherited: DEFAULT('BLENDER') });
 }
 
-// The settings tree: the package's GPU engine (a JavaScript package's), the runtimes, then its units.
+const BUNDLE_ITEMS = [[true, 'Bundled', "One bundle per package with the Babylon.js modules its scene uses: no CDN or bundler needed, Blender's code (GPL) still in its own files"],
+  [false, 'Modules', 'ES modules importing Babylon.js module by module, for an import map or a bundler of your own']];
+const MINIFY_ITEMS = [[true, 'Minified', "The bundle minified, its files' notices kept"], [false, 'Readable', 'The bundle as written, for reading or debugging']];
+// A JavaScript package's Bundle, and whether the bundle is minified.
+const bundleTree = (values) => setting(values, 'bundle', { label: 'Bundle', icon: 'BYLONDER', items: BUNDLE_ITEMS, inherited: DEFAULT(true),
+  children: [setting(values, 'minify', { label: 'Minify', icon: 'BYLONDER', items: MINIFY_ITEMS, inherited: DEFAULT(true),
+    issue: (value) => (value && values.bundle === false ? 'Only a bundle is minified' : null) })] });
+
+// The settings tree: a JavaScript package's GPU engine and bundle, the runtimes, then its units.
 function settingsTree(values, js) {
-  const target = setting(values, 'target', { label: 'GPU Engine', icon: 'BYLONDER', items: TARGETS, inherited: () => ({ value: 'BOTH', source: 'Default' }) });
-  return [...(js ? [target] : []), runtimesTree(values), ...(js ? [unitsTree(values)] : [])];
+  const target = setting(values, 'target', { label: 'GPU Engine', icon: 'BYLONDER', items: TARGETS, inherited: DEFAULT('BOTH') });
+  return [...(js ? [target, bundleTree(values)] : []), runtimesTree(values), ...(js ? [unitsTree(values)] : [])];
 }
 
 // The dialog's values as export options: unset settings left out, the Units tree as the type keys replaced.
@@ -91,7 +102,7 @@ export async function exportDialog(world, format, title) {
     import('../editors/interface/components/tailwind.css'),
   ]);
   const js = format !== 'babylon';
-  const values = reactive({ eeveeParity: false, hostCompression: false, bakeAnimation: false });
+  const values = reactive({ eeveeParity: false, hostCompression: false, bakeAnimation: false, target: null, bundle: null, minify: null });
   const fields = [{ name: 'eeveeParity', label: 'EEVEE Parity', note: PARITY_NOTE },
     ...(js ? [{ name: 'hostCompression', label: 'Host Compresses Geometry', note: HOST_NOTE }, { name: 'bakeAnimation', label: 'Bake Animation', note: BAKE_NOTE }] : [])];
   const tree = settingsTree(values, js);

@@ -75,6 +75,12 @@ export const packagedModules = (files) => Object.fromEntries(Object.entries(file
   const code = deepImports(String(data));
   return [path, path === 'bylonder/scheduler.js' ? shippedEvaluators(code, files) : code];
 }));
+// A bundled package's chunks (bundle.js), and Babylon's GLSL to WGSL compilers a bundled WebGPU page carries.
+export const CHUNKS = 'bundle', COMPILER_FOLDER = `${CHUNKS}/webgpu`;
+// Files the app serves from public/ (scripts/webgpu-compilers.mjs) that a package ships where scene.js names their
+// folder: [package path, the app's path].
+const APP_FILES = ['glslang.js', 'glslang.wasm', 'twgsl.js', 'twgsl.wasm'].map((name) => [`${COMPILER_FOLDER}/${name}`, `webgpu/${name}`]);
+export const appFiles = (files) => APP_FILES.filter(([path]) => String(files['scene.js']).includes(path.slice(0, path.lastIndexOf('/') + 1)));
 // The blocks library and Bylonder's extensions of Babylon, by package path: runtime/ files a package ships beside its
 // scene.js only when it imports them.
 export const BLOCK_FILES = { 'bylonder-blocks.js': 'blocks.js', 'bylonder-view-transform.js': 'view-transform.js', 'bylonder-area-light.js': 'area-light.js' };
