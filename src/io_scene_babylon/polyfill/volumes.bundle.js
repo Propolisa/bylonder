@@ -3,7 +3,7 @@
 import { NullEngine } from "@babylonjs/core";
 
 // src/draw/volume-passes.js
-import { CascadedShadowGenerator, Color4, Constants as Constants2, EffectRenderer, EffectWrapper, Matrix, Mesh, MultiRenderTarget, PostProcess, ShaderStore, Vector3, Vector4, VertexData } from "@babylonjs/core";
+import { CascadedShadowGenerator, Color4, Constants as Constants2, EffectRenderer, EffectWrapper, Matrix, Mesh, MultiRenderTarget, PostProcess, ShaderStore as ShaderStore2, Vector3, Vector4, VertexData } from "@babylonjs/core";
 
 // src/draw/volume-blocks.js
 import { Constants, NodeMaterialBlock, NodeMaterialBlockConnectionPointTypes as T, NodeMaterialBlockTargets as Targets, RegisterClass } from "@babylonjs/core";
@@ -488,6 +488,7 @@ function jitterProjection(m, [dx, dy], width, height, orthographic = false) {
 }
 
 // src/overrides/webgpu/samplers.js
+import { ShaderStore } from "@babylonjs/core";
 function callArguments(text, at) {
   const args = [];
   let depth = 0, start = at;
@@ -622,7 +623,7 @@ var corners = (mesh) => {
 function cameraVolumes(scene, camera, host) {
   const { film = null } = host;
   const engine = scene.getEngine(), renderer = new EffectRenderer(engine);
-  ShaderStore.ShadersStore.blenderVolumeResolveFragmentShader = engineGLSL(engine, RESOLVE);
+  ShaderStore2.ShadersStore.blenderVolumeResolveFragmentShader = engineGLSL(engine, RESOLVE);
   const effect = (name, fragmentShader, uniforms, samplers) => new EffectWrapper({ engine, name, fragmentShader: engineGLSL(engine, fragmentShader), useShaderStore: false, uniforms: [...GRID_UNIFORMS, ...uniforms], samplers });
   const scatters = /* @__PURE__ */ new Map();
   const scatterOf = (shadows) => {
