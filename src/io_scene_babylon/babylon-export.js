@@ -14,6 +14,7 @@ import { channelKey } from './modifiers-export.js';
 import { AREA_LIGHT, rigAreaLights, rigId, rigTransform } from './area-lights.js';
 import { eulerCameras, turnedCameras } from '../overrides/babylon/camera-quaternion.js';
 import { writePostProcesses } from '../overrides/babylon/camera-post-processes.js';
+import '../overrides/babylon/material-unique-id.js';
 
 // The World's skybox is Bylonder's (world-babylon.js) but is what a render shows; the loader rebuilds it.
 const WORLD_SKYBOX = '__worldSkybox';
