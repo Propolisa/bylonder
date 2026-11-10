@@ -392,6 +392,8 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
     setFor(scene.materials, 'doNotSerialize', (m) => !content.materials.has(m)),
     geometry ? () => {} : withoutGeometry(scene.getGeometries()),
     setFor(scene.textures.filter((t) => t instanceof Texture && !t.isRenderTarget), '_forceSerialize', (t) => t._forceSerialize || !portable(t.url ?? '')),
+    // Babylon's serializer leaves out a texture without a name (one made from code, a RawTexture).
+    setFor(scene.textures.filter((t) => t instanceof Texture && !t.isRenderTarget && !t.name), 'name', (t) => `${t.getClassName()} ${t.uniqueId}`),
     // An image of Main's is written from Blender's data (Texture.serialize's data URL buffer), not read back, top row first.
     setFor([...imageData.keys()], '_buffer', (t) => imageData.get(t)),
     setFor([...imageData.keys()], '_invertY', () => true),
