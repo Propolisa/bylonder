@@ -154,14 +154,17 @@ async function lookChecks(ids, keys, engines, { prod }) {
           // A look that hangs (a page or Render Image that never finishes) is that example's row; the next one goes on.
           let timer;
           const hang = new Promise((_, reject) => { timer = setTimeout(() => reject(Error(`hang: no picture within ${LOOK_TIMEOUT / 1000} s`)), LOOK_TIMEOUT); });
+          const look = (async () => {
+            const app = await appPicture(browser, server.url, { id, engine, path: pictures.app, exportTo: !existsSync(join(dir, 'page/scene.js')) && join(dir, 'page') });
+            const page = await pagePicture(browser, served, { folder: `${id}/${keys[id]}/page`, engine, ...app, path: pictures.page, idPath: pictures.ids });
+            const title = `${id}   ${engine === 'webgpu' ? 'WebGPU' : 'WebGL 2'}   frame ${app.frame}`;
+            const metrics = await comparePictures(browser, { ...pictures, legend: page.legend, title }, pictures.side);
+            return { ...metrics, appErrors: app.errors, errors: page.errors, appStats: app.stats, pageStats: page.stats, pictures };
+          })();
+          // A look given up on fails later, when the browser closes under it: that failure is its hang, already reported.
+          look.catch(() => {});
           try {
-            return await Promise.race([hang, (async () => {
-              const app = await appPicture(browser, server.url, { id, engine, path: pictures.app, exportTo: !existsSync(join(dir, 'page/scene.js')) && join(dir, 'page') });
-              const page = await pagePicture(browser, served, { folder: `${id}/${keys[id]}/page`, engine, ...app, path: pictures.page, idPath: pictures.ids });
-              const title = `${id}   ${engine === 'webgpu' ? 'WebGPU' : 'WebGL 2'}   frame ${app.frame}`;
-              const metrics = await comparePictures(browser, { ...pictures, legend: page.legend, title }, pictures.side);
-              return { ...metrics, appErrors: app.errors, errors: page.errors, appStats: app.stats, pageStats: page.stats, pictures };
-            })()]);
+            return await Promise.race([hang, look]);
           } catch (error) {
             return { error: error.message.split('\n')[0].slice(0, 300), pictures };
           } finally {
