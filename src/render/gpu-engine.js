@@ -3,6 +3,7 @@
 // preference keeps in the browser's storage. A `gpu` URL parameter on the app overrides it (the browser tests'
 // E2E_ENGINE). WebGPU falls back to WebGL 2 where the browser has no adapter.
 import { Engine, WebGPUEngine } from '@babylonjs/core';
+import { declarationLists } from '../overrides/webgpu/declaration-lists.js';
 import { depthMetricVaryings } from '../overrides/webgpu/depth-metric-varyings.js';
 import { WEBGPU_OPTIONS } from '../overrides/webgpu/maximum-limits.js';
 import { glslInWorker } from '../overrides/webgpu/glsl-in-worker.js';
@@ -28,7 +29,7 @@ export async function createEngine(canvas, options = {}, backend = requestedBack
     try {
       const engine = new WebGPUEngine(canvas, { ...options, ...WEBGPU_OPTIONS, glslangOptions: compiler('glslang'), twgslOptions: compiler('twgsl') });
       await engine.initAsync();
-      rejectedPipelines(shortEffectNames(depthMetricVaryings(glslInWorker(engine, { glslang: workerFiles('glslang'), twgsl: workerFiles('twgsl') }))));
+      declarationLists(rejectedPipelines(shortEffectNames(depthMetricVaryings(glslInWorker(engine, { glslang: workerFiles('glslang'), twgsl: workerFiles('twgsl') })))));
       const { features, limits } = engine._device, granted = {};
       for (const name in limits) granted[name] = limits[name];
       console.info(`WebGPU device: ${JSON.stringify({ features: [...features], limits: granted })}`);

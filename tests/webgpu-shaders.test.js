@@ -1,8 +1,8 @@
 // Bylonder's shaders as WebGPU compiles them: each processed by Babylon's WebGPU shader processor and converted to WGSL
 // by the glslang and Tint builds the app serves, with no glslang error and nothing in the WGSL that WebGPU rejects (a
 // NaN constant, an explicitly strided array). The floor grid, the volume passes, a Principled (PBR) and a node material
-// drawing hair, lit by an area light, and a shader of the user's naming what WGSL reserves; and every converted GLSL
-// shader keeps GLSL's freedom to take derivatives in any control flow.
+// drawing hair, lit by an area light, a shader of the user's naming what WGSL reserves and one declaring uniforms in
+// lists; and every converted GLSL shader keeps GLSL's freedom to take derivatives in any control flow.
 import assert from 'node:assert/strict';
 import { Scene, FreeCamera, Vector3, MeshBuilder, PBRMaterial, RectAreaLight, EffectWrapper, ShaderMaterial, WebGPUEngine } from '@babylonjs/core';
 import '@babylonjs/core/Shaders/postprocess.vertex.js';
@@ -13,6 +13,8 @@ import { engineGLSL } from '../src/nodes/blender/glsl.js';
 import { pbrFromGLSL } from '../src/overrides/webgpu/pbr-from-glsl.js';
 import { shortEffectNames } from '../src/overrides/webgpu/short-effect-names.js';
 import { derivativeUniformity } from '../src/overrides/webgpu/derivative-uniformity.js';
+import { declarationLists } from '../src/overrides/webgpu/declaration-lists.js';
+import { readFileSync } from 'node:fs';
 import { CurvesPlugin } from '../src/draw/curves.js';
 import { BlenderNodeMaterial, blenderDefaultTree, buildMaterial } from '../src/nodes/blender/shader-nodes.js';
 import '../src/overrides/babylon/area-light-used.js';
@@ -22,7 +24,7 @@ if (!compilersPresent()) {
   console.log('WebGPU shaders: skipped, no public/webgpu compilers (npm run dev or npm run build fetches them)');
   process.exit(0);
 }
-const engine = new WebGPUShaderEngine(await createCompilers());
+const engine = declarationLists(new WebGPUShaderEngine(await createCompilers()));
 const scene = new Scene(engine);
 new FreeCamera('camera', new Vector3(0, 2, -5), scene);
 new RectAreaLight('area', new Vector3(0, 2, 0), 1, 1, scene);
@@ -85,6 +87,17 @@ assert.match(wgsl.fragment, /bl_from/, 'a parameter named from is bl_from in WGS
 assert.doesNotMatch(wgsl.fragment + wgsl.vertex, /\b(from|let|ref)\b\s*:/, 'no WGSL-reserved name declared');
 const effect = Object.values(engine._compiledEffects).find((e) => e.getUniformNames().includes('let'));
 assert.ok(effect?.getSamplers().includes('ref') && effect.getAttributesNames().includes('from'), 'bound by the names it was given');
+
+// The Shader example's wave declares its uniforms in lists (uniform vec3 deep, shallow;), as GLSL allows: each one
+// binds.
+const example = (name) => readFileSync(new URL(`../examples/shader/shaders/${name}`, import.meta.url), 'utf8');
+const wave = new ShaderMaterial('wave', scene, { vertexSource: example('wave.vert.glsl'), fragmentSource: example('wave.frag.glsl') },
+  { attributes: ['position', 'uv'], uniforms: ['worldViewProjection', 'time', 'amplitude', 'frequency', 'deep', 'shallow'] });
+const water = MeshBuilder.CreateGround('Water', {}, scene);
+water.material = wave;
+await compiled('a shader declaring uniforms in lists', () => () => wave.isReady(water));
+const waveWGSL = engine.results.at(-1).wgsl;
+assert.ok(['time', 'amplitude', 'frequency'].every((name) => waveWGSL.vertex.includes(name)) && ['deep', 'shallow'].every((name) => waveWGSL.fragment.includes(name)), 'every listed uniform declared');
 
 // Every converted GLSL shader's WGSL allows derivatives in any control flow (WGSL's derivative_uniformity diagnostic
 // off), as GLSL does.
