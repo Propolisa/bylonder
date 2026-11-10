@@ -9,6 +9,7 @@
 //   node tests/export-parity/matrix.mjs [example ...] [--node] [--look] [--engines webgl2,webgpu] [--changed] [--prod]
 //     --node, --look  only that part (default both); --changed  only the examples the changes since origin/main reach;
 //     --prod  the app from dist/ (npm run build) instead of the dev server; E2E_URL a running app; JOBS Node processes;
+//     LOOK_TIMEOUT  seconds one example's look may take before its row says it hangs (default 600);
 //     --fresh  the cached results of the parts run go (a change to the checks themselves), the exports stay.
 import { execFileSync, spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -132,6 +133,8 @@ async function nodeChecks(id, dir) {
 }
 
 // The browser checks of the examples, one browser and one app server for all, each example's export made once.
+// How long one example's look may take (LOOK_TIMEOUT, in seconds).
+const LOOK_TIMEOUT = (Number(process.env.LOOK_TIMEOUT) || 600) * 1000;
 async function lookChecks(ids, keys, engines, { prod }) {
   const { chromium, startServer } = await import('../e2e/app.mjs');
   const { GL_ARGS } = await import('../e2e/tools.mjs');
@@ -148,14 +151,21 @@ async function lookChecks(ids, keys, engines, { prod }) {
       for (const engine of engines) {
         results[`${id} look-${engine}`] = await cached(join(dir, `look-${engine}.json`), async () => {
           const pictures = Object.fromEntries(['app', 'page', 'ids', 'side'].map((name) => [name, join(dir, `${name}-${engine}.png`)]));
+          // A look that hangs (a page or Render Image that never finishes) is that example's row; the next one goes on.
+          let timer;
+          const hang = new Promise((_, reject) => { timer = setTimeout(() => reject(Error(`hang: no picture within ${LOOK_TIMEOUT / 1000} s`)), LOOK_TIMEOUT); });
           try {
-            const app = await appPicture(browser, server.url, { id, engine, path: pictures.app, exportTo: !existsSync(join(dir, 'page/scene.js')) && join(dir, 'page') });
-            const page = await pagePicture(browser, served, { folder: `${id}/${keys[id]}/page`, engine, ...app, path: pictures.page, idPath: pictures.ids });
-            const title = `${id}   ${engine === 'webgpu' ? 'WebGPU' : 'WebGL 2'}   frame ${app.frame}`;
-            const metrics = await comparePictures(browser, { ...pictures, legend: page.legend, title }, pictures.side);
-            return { ...metrics, appErrors: app.errors, errors: page.errors, appStats: app.stats, pageStats: page.stats, pictures };
+            return await Promise.race([hang, (async () => {
+              const app = await appPicture(browser, server.url, { id, engine, path: pictures.app, exportTo: !existsSync(join(dir, 'page/scene.js')) && join(dir, 'page') });
+              const page = await pagePicture(browser, served, { folder: `${id}/${keys[id]}/page`, engine, ...app, path: pictures.page, idPath: pictures.ids });
+              const title = `${id}   ${engine === 'webgpu' ? 'WebGPU' : 'WebGL 2'}   frame ${app.frame}`;
+              const metrics = await comparePictures(browser, { ...pictures, legend: page.legend, title }, pictures.side);
+              return { ...metrics, appErrors: app.errors, errors: page.errors, appStats: app.stats, pageStats: page.stats, pictures };
+            })()]);
           } catch (error) {
             return { error: error.message.split('\n')[0].slice(0, 300), pictures };
+          } finally {
+            clearTimeout(timer);
           }
         });
         const r = results[`${id} look-${engine}`], verdict = verdictOf(id, r);
