@@ -15,6 +15,7 @@ import { AREA_LIGHT, rigAreaLights, rigId, rigTransform } from './area-lights.js
 import { eulerCameras, turnedCameras } from '../overrides/babylon/camera-quaternion.js';
 import { writePostProcesses } from '../overrides/babylon/camera-post-processes.js';
 import '../overrides/babylon/material-unique-id.js';
+import { serializePipeline } from '../overrides/babylon/pipeline-effects.js';
 
 // The World's skybox is Bylonder's (world-babylon.js) but is what a render shows; the loader rebuilds it.
 const WORLD_SKYBOX = '__worldSkybox';
@@ -85,7 +86,7 @@ function cameraEffects(world, scene, camera) {
     const owned = new Set(pipelines.flatMap((p) => Object.values(p._renderEffects ?? {}).flatMap((e) => e.getPostProcesses(camera) ?? [])));
     // Bylonder's film (render/film.js) stays out.
     return {
-      renderingPipelines: pipelines.map((p) => p.serialize()),
+      renderingPipelines: pipelines.map(serializePipeline),
       postProcesses: (camera._postProcesses ?? []).filter((pp) => pp && !owned.has(pp) && !pp.name.startsWith('__')),
     };
   } finally {

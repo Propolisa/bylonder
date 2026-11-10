@@ -259,6 +259,7 @@ import { depthMetricVaryings } from './bylonder/overrides/webgpu/depth-metric-va
 import { lightBlocksWhereRead } from './bylonder/overrides/webgpu/vertex-light-blocks.js';
 import { pbrFromGLSL } from './bylonder/overrides/webgpu/pbr-from-glsl.js';
 import { parsePostProcess } from './bylonder/overrides/babylon/god-rays-parse.js';
+import { parsedPipeline } from './bylonder/overrides/babylon/pipeline-effects.js';
 import './bylonder/overrides/babylon/chromatic-aberration-size.js';
 import './bylonder/overrides/babylon/geometry-gamma-albedo.js';
 import './bylonder/overrides/babylon/environment-probe.js';
@@ -396,7 +397,7 @@ ${parse('REFLECTION_PROBES', data.reflectionProbes, "ReflectionProbe.Parse(entry
   for (const entry of RENDERING_PIPELINES) {
     const make = SCREEN_SPACE[entry.customType];
     if (make) SerializationHelper.Parse(() => make(entry, scene), entry, scene, ROOT);
-    else BABYLON[entry.customType]?.Parse(entry, scene, ROOT);
+    else parsedPipeline(BABYLON[entry.customType]?.Parse(entry, scene, ROOT), entry);
   }
   for (const entry of POST_PROCESSES) parsePostProcess(entry, scene, ROOT);${volumes ? `
   // EEVEE's volumes, resolved over each camera's render before its other post-processes.
