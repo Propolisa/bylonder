@@ -306,6 +306,13 @@ const SCREEN_SPACE = {
   SSAO2RenderingPipeline: (entry, scene) => new BABYLON.SSAO2RenderingPipeline(entry._name, scene, entry._ratio, undefined, true, BABYLON.Constants.TEXTURETYPE_HALF_FLOAT),
 };
 
+// Post processes Babylon parses as plain ones, built as their class: god rays, with the pass that draws their source.
+const POST_PROCESS_TYPES = {
+  'BABYLON.VolumetricLightScatteringPostProcess': (entry, scene) => new BABYLON.VolumetricLightScatteringPostProcess(entry.name, entry.options,
+    scene.getCameraById(entry.cameraId), scene.getMeshById(entry.mesh), +/NUM_SAMPLES (\\d+)/.exec(entry.defines ?? '')?.[1] || undefined,
+    entry.renderTargetSamplingMode, undefined, entry.reusable, scene),
+};
+
 // Each built scene's IR, world, compositor and scene.bin buffers, which load gives its controls.
 const IRS = new WeakMap(), WORLDS = new WeakMap(), COMPOSITORS = new WeakMap(), SCENE_BUFFERS = new WeakMap();
 export async function load(engine) {
@@ -383,7 +390,11 @@ ${parse('REFLECTION_PROBES', data.reflectionProbes, "ReflectionProbe.Parse(entry
     if (make) SerializationHelper.Parse(() => make(entry, scene), entry, scene, ROOT);
     else BABYLON[entry.customType]?.Parse(entry, scene, ROOT);
   }
-  for (const entry of POST_PROCESSES) PostProcess.Parse(entry, scene, ROOT);${volumes ? `
+  for (const entry of POST_PROCESSES) {
+    const make = POST_PROCESS_TYPES[entry.customType];
+    if (make) SerializationHelper.Parse(() => make(entry, scene), entry, scene, ROOT);
+    else PostProcess.Parse(entry, scene, ROOT);
+  }${volumes ? `
   // EEVEE's volumes, resolved over each camera's render before its other post-processes.
   sceneVolumes(scene, VOLUMES, materials, WORLDS.get(scene)?.box ?? null);` : ''}
 ${data.animationGroups.some((g) => g.targetedAnimations.some((t) => t.animation.property === CLOCK)) ? `  // The frame Babylon's animation keeps where the page's F-Curves are all that moves.

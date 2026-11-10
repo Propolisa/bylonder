@@ -80,7 +80,9 @@ function cameraEffects(world, scene, camera) {
     // Bylonder's film (render/film.js) stays out.
     return {
       renderingPipelines: pipelines.map((p) => p.serialize()),
-      postProcesses: (camera._postProcesses ?? []).filter((pp) => pp && !owned.has(pp) && !pp.name.startsWith('__')).map((pp) => pp.serialize()),
+      // With the defines its effect compiles with (a god rays' samples), which Babylon writes only once they change.
+      postProcesses: (camera._postProcesses ?? []).filter((pp) => pp && !owned.has(pp) && !pp.name.startsWith('__'))
+        .map((pp) => ({ ...pp.serialize(), ...(pp.getEffect()?.defines && { defines: pp.getEffect().defines }) })),
     };
   } finally {
     world.renderSettings.setRenderedCameras(rendered);
@@ -432,7 +434,8 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
   for (const entry of json.cameras) aimed(entry, scene.getCameraByUniqueId(entry.uniqueId));
   extraInfluences(json, scene);
   Object.assign(json, { animationGroups, activeCameraID, renderingPipelines: effects.renderingPipelines, imageProcessingConfiguration: scene.imageProcessingConfiguration.serialize(), producer: { name: 'Bylonder', file: 'scene.babylon' } });
-  json.postProcesses.push(...effects.postProcesses);
+  // The camera's own, in place of the scene's every one Babylon writes: a pipeline's, Bylonder's film, and the camera's again.
+  json.postProcesses = effects.postProcesses;
   await environment(json, scene);
   // The F-Curves the page runs (live-curves.js), for the package's IR, and what it still plays as samples (sampledGaps):
   // neither is part of the file.
