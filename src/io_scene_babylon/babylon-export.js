@@ -359,6 +359,8 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
   // Shadows as a rendered view draws them: each light's casters and every receiver (light-shadows.js setActive), while
   // the lights' metadata, which it reads, is theirs; the views set them back as they next draw.
   world.shadows?.setActive(true, world.renderSettings.state.eevee.shadowRayCount);
+  // The world as a rendered view shows it: a code-built scene's own sky meshes on (runtime/world.js beforeViewRender).
+  world.worlds?.setViewportActive(true, !world.compositor?.drawsScene);
   const effects = camera ? cameraEffects(world, scene, camera) : { renderingPipelines: [], postProcesses: [] };
   const imageData = new Map(scene.textures.filter((t) => t instanceof Texture).map((t) => [t, imageFile(t)]).filter(([, data]) => data));
   // Sampled before the export's flags and metadata are set, which channels read to know they are available.

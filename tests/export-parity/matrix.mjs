@@ -60,7 +60,7 @@ export const KNOWN = {
   'chess look-webgl2': 'the page does not load: this._light.needCube is not a function (a shadow generator on a light of another class)',
   'chess look-webgpu': 'the page does not load: this._light.needCube is not a function',
   'drivers-and-graph-editor look-webgpu': 'the page does not load: this._light.needCube is not a function',
-  'coast look-webgl2': 'the page does not load: an animation targets rotationQuaternion on a node without one, and effects fail to compile',
+  'coast look-webgl2': "7% of pixels agree, mean 35: the sky and its reflection match, the Coast and Sea are lighter than the app's (not yet classified)",
   "coast look-webgpu": "the app itself fails: the Sky material's shader does not compile on WebGPU",
   "arrays look-webgl2": "the railing's metal shading differs (Handrail and Balusters 76% of their pixels), geometry matches",
   'carousel look-webgl2': '53% of pixels agree: not yet classified, rerun once the view transform fix lands',
