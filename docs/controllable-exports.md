@@ -299,7 +299,8 @@ effects, the modules its data needs registered before it parses: each class a `c
 material, a node material's blocks, a texture, a pipeline), each light's and camera's constructor, and the scene
 components of its shadows, effect layers and particles. The export writes these imports from
 `babylon-modules.json` (`scripts/babylon-modules.mjs`, kept current by a test), which names the module of each name
-Babylon exports or registers and of each member one module adds to another's class (`thinInstanceSetBuffer`).
+Babylon exports or registers and of each member one module adds to another's class (`thinInstanceSetBuffer`). A
+package made for WebGPU or WebGL 2 imports neither engine up front: its `createEngine` loads the one it makes.
 
 A page loads the package in one of two ways:
 

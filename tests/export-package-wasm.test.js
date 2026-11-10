@@ -67,7 +67,8 @@ assert.match(packageFiles(files)['scene.js'], /^import '@babylonjs\/core\/Lights
 // overrides only for a target with WebGPU. A WebGL 2 package still loads.
 const shipped = (files) => Object.keys(packageFiles(files)).filter((path) => path.startsWith('bylonder/overrides/webgpu/') && path.endsWith('.js'));
 const webgpuOverrides = shipped(files);
-assert.match(files['scene.js'], /IsSupportedAsync\) \? WebGPUEngine\.CreateAsync[^\n]*: new Engine\(/, 'by default the page makes WebGPU where it can, else WebGL 2');
+assert.match(files['scene.js'], /IsSupportedAsync\)\) return webgpu\.CreateAsync[^\n]*\n[^\n]*new \(await import\('@babylonjs\/core\/Engines\/engine\.js'\)\)\.Engine\(/, 'by default the page makes WebGPU where it can, else WebGL 2');
+assert.doesNotMatch(packageFiles(files)['scene.js'], /^import .*\b(Engine|WebGPUEngine)\b.*from/m, 'and loads only the engine it makes');
 assert.ok(webgpuOverrides.includes('bylonder/overrides/webgpu/maximum-limits.js'), 'by default the WebGPU overrides ship');
 const webgl2 = await exportModule(world, { target: 'WEBGL2' });
 assert.doesNotMatch(webgl2['scene.js'], /WebGPU|overrides\/webgpu\/(?!float-world-cube|samplers|missing-attributes)/, 'a WebGL 2 page imports no WebGPU code');

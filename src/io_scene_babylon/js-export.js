@@ -34,13 +34,15 @@ const CDN = `https://cdn.jsdelivr.net/npm/@babylonjs/core@${AbstractEngine.Versi
 const json = (value) => JSON.stringify(value);
 const TARGET_NAMES = Object.fromEntries(TARGETS.map(([id, label]) => [id, label]));
 // The page's createEngine for each target: WebGPU with the adapter's limits its materials need.
-const WEBGPU_ENGINE = 'WebGPUEngine.CreateAsync(canvas, { ...WEBGPU_OPTIONS, ...options })';
+const WEBGPU_ENGINE = (engine) => `${engine}.CreateAsync(canvas, { ...WEBGPU_OPTIONS, ...options })`;
 const ENGINES = {
-  BOTH: `// A WebGPU engine where the browser has WebGPU, else a WebGL 2 one.
+  BOTH: `// A WebGPU engine where the browser has WebGPU, else a WebGL 2 one: the page loads only the engine it makes.
 export async function createEngine(canvas, options = {}) {
-  return (await WebGPUEngine.IsSupportedAsync) ? ${WEBGPU_ENGINE} : new Engine(canvas, true, options);
+  const webgpu = globalThis.navigator?.gpu && (await import('@babylonjs/core/Engines/webgpuEngine.js')).WebGPUEngine;
+  if (webgpu && (await webgpu.IsSupportedAsync)) return ${WEBGPU_ENGINE('webgpu')};
+  return new (await import('@babylonjs/core/Engines/engine.js')).Engine(canvas, true, options);
 }`,
-  WEBGPU: `export const createEngine = (canvas, options = {}) => ${WEBGPU_ENGINE};`,
+  WEBGPU: `export const createEngine = (canvas, options = {}) => ${WEBGPU_ENGINE('WebGPUEngine')};`,
   WEBGL2: 'export const createEngine = async (canvas, options = {}) => new Engine(canvas, true, options);',
 };
 // Where scene.js imports Babylon: the names its code uses, and the modules its data needs registered.
@@ -73,7 +75,10 @@ const PAGE_MODULES = ['Culling/ray.js'], DEFAULT_MATERIAL = 'Materials/standardM
 const BABYLON_NAMES = ['Animation', 'AnimationGroup', 'Camera', 'CascadedShadowGenerator', 'Color3', 'Color4', 'Constants', 'CubeTexture', 'EffectLayer', 'Engine', 'Geometry', 'HDRCubeTexture', 'Light',
   'LinesMesh', 'Material', 'Matrix', 'Mesh', 'MorphTargetManager', 'MultiMaterial', 'ParticleSystem', 'Quaternion', 'ReflectionProbe', 'Scene', 'SerializationHelper', 'ShadowGenerator', 'Skeleton',
   'SSAO2RenderingPipeline', 'SSRRenderingPipeline', 'SubMesh', 'TransformNode', 'Vector3', 'WebGPUEngine'];
-const usedNames = (code) => BABYLON_NAMES.filter((name) => new RegExp(String.raw`\b${name}\b`).test(code));
+const usedNames = (source) => {
+  const code = source.replace(/^\s*\/\/.*$/gm, '').replace(/"(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*'/g, '""');
+  return BABYLON_NAMES.filter((name) => new RegExp(String.raw`(?<![\w$.])${name}\b`).test(code));
+};
 
 // Babylon's screen-space pipelines, made as scene.js makes them (below), by customType, on the geometry buffer's scene
 // component, which they use without importing it.
@@ -491,7 +496,7 @@ ${data.animationGroups.some((g) => g.targetedAnimations.some((t) => t.animation.
   const unmaterialed = settings.defaultMaterial === null && data.meshes.some((m) => m.materialUniqueId === undefined);
   const geometryBuffer = pipelineTypes.some((type) => SCREEN_SPACE_PIPELINES[type]);
   const babylonImports = `${sideEffectImports([...PAGE_MODULES, ...(unmaterialed ? [DEFAULT_MATERIAL] : []), ...(geometryBuffer ? [GEOMETRY_BUFFER] : []), ...parsedClasses(data), ...Object.entries(COMPONENTS).filter(([key]) => data[key]?.length).map(([, file]) => file)])}
-import { ${[...usedNames(source.replace(/^\s*\/\/.*$/gm, '')), ...pipelineClasses].join(', ')} } from '@babylonjs/core';`;
+import { ${[...usedNames(source), ...pipelineClasses].join(', ')} } from '@babylonjs/core';`;
   // An ES module package in Node too (the headless SDK), needing only Babylon.
   const manifest = { name: name.toLowerCase().replace(/[^a-z0-9-]+/g, '-'), type: 'module', main: 'scene.js', types: 'scene.d.ts', peerDependencies: { '@babylonjs/core': AbstractEngine.Version } };
   return { 'scene.js': source.replace(BABYLON_IMPORTS, babylonImports), 'scene.d.ts': controlTypes(Object.entries(ir.properties).map(([path, { type }]) => ({ path, type }))), 'scene.ir.json': irJson, [UNITS_FILE]: units, ...(kernels && { [NODE_KERNELS]: kernels }), ...(curves && { [CURVES_GLSL_FILE]: curvesGlslFile() }), 'scene.bin': bin.bytes(), 'package.json': `${JSON.stringify(manifest, null, 2)}\n`, ...images };
