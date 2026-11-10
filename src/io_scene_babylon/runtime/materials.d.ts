@@ -1,4 +1,10 @@
 /**
+ * A material's per-mesh values set for each mesh it draws, as the app gives them (a material shared by meshes of other
+ * sizes spans each one's own texture space).
+ * @param {import('@babylonjs/core').Material} material
+ */
+export function meshValues(material: import("@babylonjs/core").Material): void;
+/**
  * `e` of GLSL type `from` as type `to`, as linked sockets convert: a color (vec4) to a value by its luminance, a vector
  * by its mean, a value to all components.
  * @param {string} e @param {string} from @param {string} to
@@ -62,6 +68,8 @@ export function buildNodeMaterial(ir: IR, key: string, scene: Scene, { kernels, 
     name?: string;
     image?: (name: string) => Texture | null;
 }): NodeMaterial;
+/** @typedef {import('./ir.js').IR} IR */
+export const MESH_VALUE: "blender:mesh:";
 export type IR = import("./ir.js").IR;
 export type Graph = import("./ir.js").Graph;
 export type GraphNode = import("./ir.js").GraphNode;

@@ -63,10 +63,9 @@ export const KNOWN = {
   "coast look-webgpu": "the app itself fails: the Sky material's shader does not compile on WebGPU",
   'lumen look-webgl2': "48% of pixels agree: the app's neon follows Lumen's per-frame emission code under motion blur (shutter 0.8), which the page's static emission does not; framing and the lens match",
   'orrery look-webgl2': "78% of pixels agree: the plinth's and floor's reflections and the mechanism's lit parts differ (not yet classified)",
-  'carousel look-webgl2': '53% of pixels agree: not yet classified, rerun once the view transform fix lands',
   'compositor look-webgl2': '14.5% of pixels agree: not yet classified, rerun once the view transform fix lands',
   'geometry-node-editor look-webgl2': '32% of pixels agree: not yet classified, rerun once the view transform fix lands',
-  'geometry-nodes look-webgl2': '28% of pixels agree: not yet classified, rerun once the view transform fix lands',
+  'geometry-nodes look-webgl2': '87% of pixels agree: the page draws no point clouds (the planet's clouds, draw/pointcloud.js in the app)',
   'desk-lamp look-webgl2': 'the page is never ready within 180 s (a material never reports ready)',
   'cube look-webgpu': 'the page is never ready within 180 s (a material never reports ready)',
 };

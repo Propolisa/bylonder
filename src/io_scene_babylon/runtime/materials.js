@@ -14,6 +14,35 @@ import { unitFor } from './units.js';
 import { webgpuSamplers } from '../../overrides/webgpu/samplers.js';
 
 /** @typedef {import('./ir.js').IR} IR */
+
+// The prefix of a material's InputBlocks that carry a per-mesh value (`blender:mesh:$texspace_size`), set by meshValues.
+export const MESH_VALUE = 'blender:mesh:';
+/** @type {Record<string, (mesh: import('@babylonjs/core').AbstractMesh) => number[]>} */
+const MESH_VALUES = {
+  // The texture space Generated coordinates span: the mesh's bounds, center and half size, in Blender's axes.
+  $texspace_location: (mesh) => texspace(mesh)[0],
+  $texspace_size: (mesh) => texspace(mesh)[1],
+};
+/** @param {import('@babylonjs/core').AbstractMesh} mesh */
+function texspace(mesh) {
+  const { minimum: min, maximum: max } = mesh.getBoundingInfo().boundingBox, axes = (/** @type {Vector3} */ v) => [v.x, v.z, v.y];
+  const half = (/** @type {number} */ s) => (s === 0 ? 1 : s > 0 && s < 1e-5 ? 1e-5 : s);
+  return [axes(min.add(max).scale(0.5)), axes(max.subtract(min).scale(0.5)).map(half)];
+}
+/**
+ * A material's per-mesh values set for each mesh it draws, as the app gives them (a material shared by meshes of other
+ * sizes spans each one's own texture space).
+ * @param {import('@babylonjs/core').Material} material
+ */
+export function meshValues(material) {
+  if (!(material instanceof NodeMaterial)) return;
+  const blocks = material.getInputBlocks().filter((b) => b.name.startsWith(MESH_VALUE) && MESH_VALUES[b.name.slice(MESH_VALUE.length)]);
+  if (!blocks.length) return;
+  material.onBindObservable.add((mesh) => {
+    const effect = material.getEffect();
+    for (const block of blocks) effect?.setFloat3(block.associatedVariableName, ...(/** @type {[number, number, number]} */ (MESH_VALUES[block.name.slice(MESH_VALUE.length)](mesh))));
+  });
+}
 /** @typedef {import('./ir.js').Graph} Graph */
 /** @typedef {import('./ir.js').GraphNode} GraphNode */
 /** @typedef {import('@babylonjs/core').Scene} Scene */
@@ -191,7 +220,8 @@ export function fuse(ir, key, { kernels, sources, outputs: wanted, kernel = key 
     if (param.texture !== undefined) return need(`texture:${node.name}:${param.texture}`, type);
     if (param.mesh !== undefined) {
       const matrix = MATRICES[param.mesh];
-      return matrix ? matrix((name) => need(`system:${name}`, 'mat4')) : literal(instance?.mesh?.[param.mesh] ?? 0, type) ?? `${type}(0.0)`;
+      return matrix ? matrix((name) => need(`system:${name}`, 'mat4'))
+        : sources(`mesh:${param.mesh}`, type) ?? literal(instance?.mesh?.[param.mesh] ?? 0, type) ?? `${type}(0.0)`;
     }
     throw Error(`${node.name}: a parameter of no kind`);
   }

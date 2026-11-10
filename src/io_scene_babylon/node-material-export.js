@@ -17,6 +17,7 @@ import { CurvesGeometryBlock, CurvesNormalBlock } from '../draw/curves.js';
 import { glslValue, LUMINANCE } from '../nodes/blender/sockets.js';
 import { imageFile } from '../imbuf/image-textures.js';
 import { pngDataUrl } from '../imbuf/data-url.js';
+import { MESH_VALUE } from './runtime/materials.js';
 
 const GLSL = { [T.Float]: 'float', [T.Vector2]: 'vec2', [T.Vector3]: 'vec3', [T.Vector4]: 'vec4', [T.Color3]: 'vec3', [T.Color4]: 'vec4', [T.Matrix]: 'mat4' };
 const typeName = (type) => T[type];
@@ -49,6 +50,8 @@ const MATERIAL_SETTINGS = ['alphaMode', 'backFaceCulling', 'separateCullingPass'
 // and z (S), and its view looks down -z (F).
 const S = 'mat4(1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0)';
 const F = 'mat4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0)';
+// Per-mesh values the page gives each mesh it draws (runtime/materials.js), as InputBlocks of this name prefix.
+const PAGE_MESH_VALUES = ['$texspace_location', '$texspace_size'];
 const MATRICES = {
   $model: `${S} * bl_world * ${S}`, $model_inverse: `inverse(${S} * bl_world * ${S})`, $viewmat: `${F} * bl_view * ${S}`,
   $viewinv: `inverse(${F} * bl_view * ${S})`, $winmat: `bl_projection * ${F}`,
@@ -285,8 +288,10 @@ function blenderNodes(material, { closure, merge, scene, textures, systemValue, 
     }
     for (const [name, id] of node._meshUniforms ?? []) {
       if (MATRICES[id]) { matrices = true; locals.push(`mat4 ${name} = ${MATRICES[id]};`); continue; }
-      const [type, value] = meshValue(id);
-      locals.push(`${GLSL[type]} ${name} = ${literal(Array.from(mesh ? value(mesh, scene) : type === T.Vector3 ? [0, 0, 0] : [0, 0, 0, 0]))};`);
+      const [type, value] = meshValue(id), given = Array.from(mesh ? value(mesh, scene) : type === T.Vector3 ? [0, 0, 0] : [0, 0, 0, 0]);
+      // The texture space, as a uniform the page sets for each mesh it draws (runtime/materials.js meshValues).
+      if (PAGE_MESH_VALUES.includes(id)) uniforms.push({ name, kind: 'vec3', value: given, path: `${MESH_VALUE}${id}`, source: `mesh:${id}` });
+      else locals.push(`${GLSL[type]} ${name} = ${literal(given)};`);
     }
   }
   // The outputs other blocks read: the closure's values, and data outputs linked to Babylon's blocks.

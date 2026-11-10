@@ -10,7 +10,7 @@ import { CLOCK, sampledGaps, serializeScene } from './babylon-export.js';
 import { exportRuntimes } from '../runtimes/runtimes.js';
 import { exportControls, controlTypes } from './controls-export.js';
 import { exportNodeMaterial, materialKernels } from './node-material-export.js';
-import { fillMaterials } from './runtime/materials.js';
+import { fillMaterials, MESH_VALUE } from './runtime/materials.js';
 import { worldNodes } from '../blenkernel/scene/world-babylon.js';
 import { createSceneBin } from './scene-bin.js';
 import { imageFiles } from './image-files.js';
@@ -226,6 +226,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   greasePencilClock(world, ir, data.animationGroups);
   const kernels = await irMaterials(data.materials, graphs, ir, parity), code = sharedCode(data.materials);
   const curves = Object.values(ir.entities).some((e) => e.implementation === 'curves');
+  const meshValued = data.materials.some((m) => m.blocks?.some((b) => b.name.startsWith(MESH_VALUE)));
   volumes?.dispose();
   parentInstances(objects);
   const parented = [...data.transformNodes, ...data.meshes, ...data.lights, ...data.cameras].filter((e) => e.parentId !== undefined);
@@ -265,8 +266,8 @@ import './bylonder/overrides/babylon/geometry-gamma-albedo.js';
 import './bylonder/overrides/babylon/environment-probe.js';
 import './bylonder/overrides/babylon/srgb-texture-parse.js';
 import { parseCamera } from './bylonder/overrides/babylon/camera-quaternion.js';
-import { orthoScaled } from './bylonder/ortho-scale.js';${kernels ? `
-import { fillMaterials } from './bylonder/materials.js';
+import { orthoScaled } from './bylonder/ortho-scale.js';${kernels || meshValued ? `
+import { ${[kernels && 'fillMaterials', meshValued && 'meshValues'].filter(Boolean).join(', ')} } from './bylonder/materials.js';` : ''}${kernels ? `
 import kernels from './${NODE_KERNELS}';` : ''}${curves ? `
 // The curves blocks the materials drawing curves use, before they are parsed.
 import './${CURVES_GLSL_FILE}';` : ''}${volumes ? `
@@ -362,7 +363,9 @@ ${kernels ? `  // Blender's nodes of each material and world, made from the IR's
 ` : ''}  for (const entry of MATERIALS) materials[entry.uniqueId] = Material.Parse(entry, scene, ROOT);
   if (SCENE.defaultMaterial !== null) scene.defaultMaterial = materials[SCENE.defaultMaterial];
   // Node materials' samplers as WebGPU binds them.
-  for (const material of Object.values(materials)) if (material.getClassName() === 'NodeMaterial') webgpuSamplers(material);${areaSpecular ? `
+  for (const material of Object.values(materials)) if (material.getClassName() === 'NodeMaterial') webgpuSamplers(material);${meshValued ? `
+  // Each mesh's own texture space, in the materials it shares.
+  for (const material of Object.values(materials)) meshValues(material);` : ''}${areaSpecular ? `
   // Lights' specular as EEVEE's, as the app's PBR materials have it.
   for (const material of Object.values(materials)) if (material.getClassName() === 'PBRMaterial') blenderAreaSpecular(material);` : ''}
   // A multi-material's slots by the exported materials' unique ids, as Babylon's loader resolves them after parsing.
