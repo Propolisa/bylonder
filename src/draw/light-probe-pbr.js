@@ -10,14 +10,11 @@ import { ATLAS, CAPTURE, DEFINE, GRIDS, SAMPLERS, volumeProbeFunctions, volumePr
 
 const NAME = 'BlenderLightProbes', SINGLE_SIDED = 'BL_PROBE_SINGLE_SIDED';
 const OFFSET = 'blProbeOffset', CLAMP = 'blProbeClamp', AMBIENT = 'blProbeAmbient', EYE = 'blProbeEye';
+const UNIFORMS = [[OFFSET, 'float', 1], [CLAMP, 'vec2', 2], [EYE, 'vec3', 3], [AMBIENT, 'float', 1]];
 
 let code = null;
 const customCode = () => code ??= {
-  CUSTOM_FRAGMENT_DEFINITIONS: `uniform float ${OFFSET};
-uniform vec2 ${CLAMP};
-uniform vec3 ${EYE};
-uniform float ${AMBIENT};
-#ifdef ${DEFINE}
+  CUSTOM_FRAGMENT_DEFINITIONS: `#ifdef ${DEFINE}
 ${SAMPLERS}#endif
 ${guardedDefinitions(volumeProbeFunctions())}
 float bl_probe_capture_visibility = 0.0;
@@ -73,15 +70,18 @@ class BlenderLightProbesPlugin extends MaterialPluginBase {
     defines[SINGLE_SIDED] = this._material.blenderProbeBackfaceCulling ?? true;
   }
   getSamplers(samplers) { samplers.push(ATLAS, GRIDS); }
-  getUniforms() { return { externalUniforms: [OFFSET, CLAMP, AMBIENT, EYE] }; }
+  // In the material's uniform block (no uniform buffer of their own, of the 12 a WebGPU stage may have).
+  getUniforms() {
+    return { ubo: UNIFORMS.map(([name, type, size]) => ({ name, type, size })), fragment: UNIFORMS.map(([name, type]) => `uniform ${type} ${name};`).join('\n') };
+  }
   hardBindForSubMesh(uniformBuffer, scene, engine, subMesh) {
     const effect = subMesh.effect, capture = probeCapture(scene), textures = volumeProbeTextures(scene, capture);
     if (!effect || !textures || this._material.shaderLanguage !== 0) return;
     effect.setTexture(ATLAS, textures.atlas);
     effect.setTexture(GRIDS, textures.grids);
-    effect.setFloat(OFFSET, ditherOffset(scene));
-    effect.setFloat(AMBIENT, probeAmbient(scene, this._material.reflectionTexture ?? scene.environmentTexture));
-    if (capture) { effect.setFloat2(CLAMP, capture.clampDirect, capture.clampIndirect); effect.setVector3(EYE, capture.eye); }
+    uniformBuffer.updateFloat(OFFSET, ditherOffset(scene));
+    uniformBuffer.updateFloat(AMBIENT, probeAmbient(scene, this._material.reflectionTexture ?? scene.environmentTexture));
+    if (capture) { uniformBuffer.updateFloat2(CLAMP, capture.clampDirect, capture.clampIndirect); uniformBuffer.updateVector3(EYE, capture.eye); }
   }
   getCustomCode(shaderType, shaderLanguage = 0) { return shaderType === 'fragment' && shaderLanguage === 0 ? customCode() : null; }
 }

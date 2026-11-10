@@ -9,8 +9,7 @@ import { DITHER_NOISE, ditherOffset } from '../../render/dither.js';
 
 const NAME = 'BlenderDitheredPBR', DEFINE = 'BL_DITHERED_PBR', OFFSET = 'bl_dither_offset';
 const CODE = {
-  CUSTOM_FRAGMENT_DEFINITIONS: `uniform float ${OFFSET};
-${DITHER_NOISE}
+  CUSTOM_FRAGMENT_DEFINITIONS: `${DITHER_NOISE}
 #ifdef ${DEFINE}
 #define BL_ALPHA_DISCARDS(a) ((a) <= bl_dither(vPositionW, ${OFFSET}))
 #else
@@ -31,9 +30,10 @@ class BlenderDitheredPBRPlugin extends MaterialPluginBase {
   // A WGSL material keeps Babylon's alpha test: Blender's hash is GLSL (overrides/webgpu/pbr-from-glsl.js).
   isCompatible() { return true; }
   prepareDefines(defines, scene, mesh) { defines[DEFINE] = isDithered(this._material); }
-  // Its own uniform, bound at every draw: Babylon's material cache skips a rebind between a frame's draws.
-  getUniforms(shaderLanguage = 0) { return shaderLanguage === 0 ? { externalUniforms: [OFFSET] } : {}; }
-  hardBindForSubMesh(uniformBuffer, scene, engine, subMesh) { if (this._material.shaderLanguage === 0) subMesh.effect?.setFloat(OFFSET, ditherOffset(scene)); }
+  // In the material's uniform block (no uniform buffer of its own, of the 12 a WebGPU stage may have), set at every
+  // draw: Babylon's material cache skips a rebind between a frame's draws.
+  getUniforms(shaderLanguage = 0) { return shaderLanguage === 0 ? { ubo: [{ name: OFFSET, size: 1, type: 'float' }], fragment: `uniform float ${OFFSET};` } : {}; }
+  hardBindForSubMesh(uniformBuffer, scene) { if (this._material.shaderLanguage === 0) uniformBuffer.updateFloat(OFFSET, ditherOffset(scene)); }
   getCustomCode(shaderType, shaderLanguage = 0) { return shaderType === 'fragment' && shaderLanguage === 0 ? CODE : null; }
 }
 
