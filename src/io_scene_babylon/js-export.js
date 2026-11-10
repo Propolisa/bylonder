@@ -256,6 +256,7 @@ import { reservedNames } from './bylonder/overrides/webgpu/reserved-names.js';
 import { webgpuSamplers } from './bylonder/overrides/webgpu/samplers.js';
 import { warnUnlessMaximumLimits } from './bylonder/overrides/webgpu/maximum-limits.js';
 import { depthMetricVaryings } from './bylonder/overrides/webgpu/depth-metric-varyings.js';
+import { lightBlocksWhereRead } from './bylonder/overrides/webgpu/vertex-light-blocks.js';
 import { pbrFromGLSL } from './bylonder/overrides/webgpu/pbr-from-glsl.js';
 import { parsePostProcess } from './bylonder/overrides/babylon/god-rays-parse.js';
 import './bylonder/overrides/babylon/chromatic-aberration-size.js';
@@ -326,7 +327,7 @@ export async function createScene(engine, canvas) {
   // On WebGPU, GLSL converted to WGSL keeps GLSL's rules, and PBR materials compile from GLSL with their shadows' depth
   // metrics derived in the fragment stage, within WebGPU's 28 values between stages, as in the app.
   if (engine.isWebGPU) pbrFromGLSL();
-  const scene = new Scene(derivativeUniformity(reservedNames(engine.isWebGPU ? depthMetricVaryings(engine) : engine)));
+  const scene = new Scene(derivativeUniformity(reservedNames(engine.isWebGPU ? depthMetricVaryings(lightBlocksWhereRead(engine)) : engine)));
   scene.useRightHandedSystem = SCENE.useRightHandedSystem;
   scene.autoClear = SCENE.autoClear;
   scene.clearColor = Color4.FromArray(SCENE.clearColor);
