@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { NullEngine, Scene, MeshBuilder, FreeCamera, ArcRotateCamera, PointLight, PBRMaterial, StandardMaterial, Vector3, AppendSceneAsync, VertexBuffer } from '@babylonjs/core';
+import { NullEngine, Scene, MeshBuilder, FreeCamera, ArcRotateCamera, PointLight, PBRMaterial, CubeTexture, StandardMaterial, Vector3, AppendSceneAsync, VertexBuffer } from '@babylonjs/core';
 import { createModifierSystem } from '../src/modifiers/stack.js';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
 import { registerObjects, bindProperties, registerStore } from '../src/blenkernel/animation/bindings.js';
@@ -115,4 +115,10 @@ assert.ok(hosted['scene.bin'].length > files['scene.bin'].length, 'scene.bin unc
 const writtenHosted = writePackage(hosted);
 await check(await (await import(writtenHosted.url)).createScene(new NullEngine(), null), 'host compression');
 writtenHosted.remove();
+// A code scene's .env environment, which has no six face files, reaches the file (never loaded: Node has no XMLHttpRequest).
+scene.useDelayedTextureLoading = true;
+scene.environmentTexture = Object.assign(new CubeTexture('https://assets.babylonjs.com/environments/environmentSpecular.env', scene, null, false, null, null, null, undefined, true), { delayLoad() {} });
+scene.useDelayedTextureLoading = false;
+const lit = await serializeScene(world);
+assert.equal(lit.environmentTexture, 'https://assets.babylonjs.com/environments/environmentSpecular.env');
 console.log('Export: .babylon and .js reload the evaluated mesh, material, light, camera and animation, without helpers');

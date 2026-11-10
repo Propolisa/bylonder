@@ -104,7 +104,7 @@ async function environment(json, scene) {
   delete json.environmentTexture;
   const probe = scene.reflectionProbes?.find((p) => p.cubeTexture === texture);
   if (probe) json.environmentProbe = probe.name;
-  if (!texture || texture.isRenderTarget || texture._files || !texture.url) return;
+  if (!texture || texture.isRenderTarget || texture._files?.length || !texture.url) return;
   json.environmentTexture = portable(texture.url) ? texture.url : await embedded(texture.url);
   json.environmentTextureRotationY = texture.rotationY;
   if (texture.getClassName() === 'HDRCubeTexture') Object.assign(json, { environmentTextureType: 'BABYLON.HDRCubeTexture', environmentTextureSize: texture.getSize().width });
