@@ -3,6 +3,7 @@ import { withSeededRandom } from '../../overrides/babylon/seeded-random.js';
 import { markImageProcessingDirty } from '../../overrides/babylon/image-processing-dirty.js';
 import { SceneLinearPipeline } from '../../overrides/babylon/scene-linear-pipeline.js';
 import '../../overrides/babylon/chromatic-aberration-size.js';
+import '../../overrides/babylon/environment-probe.js';
 import { createFilm } from '../../render/film.js';
 import { cameraVolumes } from '../../draw/volumes.js';
 import { createDisplayTransform, setDisplaySettings } from '../../render/display-transform.js';
