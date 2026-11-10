@@ -36,6 +36,13 @@ export const PropertySchema = z.object({
   default: z.union([z.number(), z.boolean(), z.string()]),
   soft_min: z.optional(z.number()), soft_max: z.optional(z.number()),
   subtype: z.optional(Name), unit: z.optional(Name), suggested: z.optional(z.boolean()),
+  /** Blender's UI name of the property (a socket's name, a custom property's key) */
+  name: z.optional(Name),
+  /** the value Blender gives it new (RNA's default, a node's socket default), where known */
+  blender_default: z.optional(z.union([z.number(), z.boolean(), z.string()])),
+  hard_min: z.optional(z.number()), hard_max: z.optional(z.number()),
+  /** RNA's step (a hundredth of the value for a float) and display precision */
+  step: z.optional(z.number()), precision: z.optional(z.number()),
   bind: z.optional(Data),
 });
 

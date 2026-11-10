@@ -8,8 +8,8 @@ import { AbstractEngine, Animation, Matrix } from '@babylonjs/core';
 import { objectMatrix } from '../runtime/object-transform.js';
 import { CLOCK, sampledGaps, serializeScene } from './babylon-export.js';
 import { exportRuntimes } from '../runtimes/runtimes.js';
-import { TARGETS } from './export-options.js';
-import { exportControls, controlTypes } from './controls-export.js';
+import { NAVIGATION, TARGETS } from './export-options.js';
+import { exportControls, controlTypes, withUI } from './controls-export.js';
 import { exportNodeMaterial, kernelsFile, materialKernels } from './node-material-export.js';
 import { fillMaterials, MESH_VALUE } from './runtime/materials.js';
 import { worldNodes } from '../blenkernel/scene/world-babylon.js';
@@ -247,19 +247,19 @@ function greasePencilClock(world, ir, groups) {
 // (export-options.js TARGETS); `runtime`, `runtimes`, the runtimes its features export with (runtimes.js chosenRuntime);
 // `replace`, the type keys of units the page registers itself, which the package ships none of (unit-manifest.js); `bundle`,
 // whether the package is then bundled (bundle.js).
-export async function exportModule(world, { live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, target = 'BOTH', runtime = null, runtimes = {}, replace = [], bundle = false } = {}) {
+export async function exportModule(world, { live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, target = 'BOTH', runtime = null, runtimes = {}, replace = [], bundle = false, controlPanel = true, devTools = 'CDN', navigation = 'FIXED', navigationModes = {} } = {}) {
   const live = new Map(keepLive ? world.objects.map((node) => [node, world.modifiers.live(node)]).filter(([node, stack]) => stack && !stack.modifiers.some(needsOpenVDB) && !readsOtherIDs(world, node)) : []);
   await world.modifiers.settled();
   // The mapped meshes' geometry is read below: their mapping holds until the module is written.
   const mapped = exportRuntimes(world, { bake: bakeAnimation, runtime, runtimes });
   try {
-    return await moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, target, replace, bundle });
+    return await moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, target, replace, bundle, controlPanel, devTools, navigation, navigationModes });
   } finally {
     mapped.restore();
   }
 }
 
-async function moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, target, replace, bundle }) {
+async function moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, target, replace, bundle, controlPanel, devTools, navigation, navigationModes }) {
   const graphs = [], graphOf = materialGraphs(world, graphs);
   const data = await serializeScene(world, { geometry: false, live, mapped, parity, graphOf, bake: bakeAnimation });
   const { scene } = world;
@@ -284,7 +284,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   // off, so materials would encode to display themselves: with the view transform, which displays instead, it stays out
   // unless one of its effects is on.
   if (display) data.renderingPipelines = data.renderingPipelines.filter((p) => !(p._name?.startsWith('__display:') && !PIPELINE_EFFECTS.some((e) => p[e])));
-  const controls = [...exportControls(world, data), ...(composited?.knobs ?? [])];
+  const controls = withUI([...exportControls(world, data), ...(composited?.knobs ?? [])]);
   const ir = exportIR(world, { controls, live, bin, animationGroups: data.animationGroups, curves: data.liveCurves, constraints: data.liveConstraints });
   const computed = { ...ir, entities: structuredClone(ir.entities) };
   stripEntities(ir, replace);
@@ -330,7 +330,8 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
 // Includes GPL code: ${AREA_SPECULAR}, Blender's light specular (GPL-3.0-or-later, ${AREA_SPECULAR.split('/')[0]}/LICENSE.md).` : ''}
 import { readBuffers, readBytes } from './bylonder/buffers.js';
 import { worldColor, worldNodes } from './bylonder/world.js';
-import { BlendScene } from './bylonder/blend-scene.js';
+import { BlendScene } from './bylonder/blend-scene.js';${controlPanel ? `
+import { controlPanel } from './bylonder/control-panel.js';` : ''}
 ${webgpu ? `import { derivativeUniformity } from './bylonder/overrides/webgpu/derivative-uniformity.js';
 import { reservedNames } from './bylonder/overrides/webgpu/reserved-names.js';
 import { webgpuSamplers } from './bylonder/overrides/webgpu/samplers.js';
@@ -411,7 +412,10 @@ ${engines(bundle)[target]}
 export async function load(engine) {${webgpu ? `
   warnUnlessMaximumLimits(engine);` : ''}
   const scene = await createScene(engine, engine.getRenderingCanvas());
-  return new BlendScene(scene, IRS.get(scene), { root: ROOT, world: WORLDS.get(scene), compositor: COMPOSITORS.get(scene), buffers: SCENE_BUFFERS.get(scene) });
+  ${controlPanel ? 'const blend = ' : 'return '}new BlendScene(scene, IRS.get(scene), { root: ROOT, world: WORLDS.get(scene), compositor: COMPOSITORS.get(scene), buffers: SCENE_BUFFERS.get(scene) });${controlPanel ? `
+  // The page's control panel, at the canvas's top right corner (none in Node).
+  controlPanel(blend, ${json({ tools: devTools, navigation, offer: NAVIGATION.map(([id]) => id).filter((id) => navigationModes[id] !== false) }).replace('}', ', root: ROOT }')});
+  return blend;` : ''}
 }
 
 export async function createScene(engine, canvas) {${webgpu ? `

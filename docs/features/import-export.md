@@ -2,7 +2,7 @@
 id: import-export
 title: Import and Export
 summary: Bring scenes in and write them out with Blender's own importers and exporters (Wavefront OBJ, Stanford PLY, STL, FBX) and its default add-ons (glTF 2.0, FBX export, Motion Capture, SVG as Curves), through the browser's file dialogs with each format's options.
-expect: OBJ, PLY, STL, FBX, glTF 2.0, BVH and SVG import and export with Blender's own code and options; the add-ons' entries wait a few seconds for Python the first time File opens, Alembic and USD are greyed out, and an export's extra files download. File > Export > JavaScript asks which GPU engine its page makes (WebGPU, WebGL 2, or WebGPU where the browser has it) and which runtime each feature exports with, for the package, a feature or one instance, and writes one minified bundle per package that needs no CDN (or ES modules, with Bundle off).
+expect: OBJ, PLY, STL, FBX, glTF 2.0, BVH and SVG import and export with Blender's own code and options; the add-ons' entries wait a few seconds for Python the first time File opens, Alembic and USD are greyed out, and an export's extra files download. File > Export > JavaScript asks which GPU engine its page makes (WebGPU, WebGL 2, or WebGPU where the browser has it) and which runtime each feature exports with, for the package, a feature or one instance, and writes one minified bundle per package that needs no CDN (or ES modules, with Bundle off). Its page has a control panel at the canvas's top right corner: every control of the scene under Blender's names, dragged and typed as in Blender, hiding what is at Blender's defaults, with the view's navigation and links to Babylon's Inspector and node editors.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/files/import_export/index.html
@@ -25,6 +25,12 @@ media:
   - import-export/export-javascript.png
   - import-export/export-javascript-override.png
   - import-export/export-javascript-units.png
+  - import-export/control-panel-button.png
+  - import-export/control-panel-open.png
+  - import-export/control-panel-drag.gif
+  - import-export/control-panel-search.png
+  - import-export/control-panel-all.png
+  - import-export/control-panel-touch.gif
 ui:
   - TOPBAR_MT_file
   - TOPBAR_MT_file_import*
@@ -62,6 +68,12 @@ code:
   - src/editors/interface/components/SettingRow.vue
   - src/runtimes/runtimes.js
   - src/io_scene_babylon/unit-manifest.js
+  - src/io_scene_babylon/controls-export.js
+  - src/io_scene_babylon/runtime/control-panel.js
+  - src/io_scene_babylon/runtime/control-panel-ui.js
+  - src/io_scene_babylon/runtime/control-panel-model.js
+  - src/io_scene_babylon/runtime/control-panel-camera.js
+  - src/io_scene_babylon/runtime/dev-tools.js
 tests:
   - tests/io-wasm.test.js
   - tests/io-addons-wasm.test.js
@@ -69,6 +81,8 @@ tests:
   - tests/export-options.test.js
   - tests/export-package-wasm.test.js
   - tests/export-bundle-wasm.test.js
+  - tests/control-panel.test.js
+  - tests/export-runtime.test.js
   - tests/unit-swap-wasm.test.js
   - tests/runtimes-armature-wasm.test.js
   - tests/texture-paint-wasm.test.js
@@ -91,6 +105,11 @@ limits:
   - A package with area lights carries Babylon's LTC table they read (64 KB in babylon-assets/), as the app serves it, and points Babylon at it unless the page has set its own Tools.AssetBaseUrl.
   - A Geometry Nodes stack nothing in the page drives (no input of a value, no tree reading the frame) exports baked, its evaluated mesh without Blender's Geometry Nodes kernels; one with such an input runs live and ships them (about 87 MB).
   - The package's createEngine is for pages; in Node (the headless SDK) pass a NullEngine to load as before.
+  - The control panel shows the controls the export lists (transforms, visibility, lights, the camera, node inputs, custom properties, modifier and Geometry Nodes inputs); a property the page cannot drive yet is not in it, and enum properties have no controls yet, so its dropdowns choose only an image.
+  - The control panel labels a node by its name, not its label, and a property by Blender's name for it (Euler Rotation, where the N panel says Rotation).
+  - Babylon's Inspector and node editors are Babylon's own bundles, which read the page's Babylon from a global: a bundled package holds the whole of Babylon's core (about 3 MB) in bundle/ for them, fetched only when one opens; In the Package does not ship Babylon's GUI, which the Inspector loads from Babylon's CDN.
+  - The control panel's navigation copies the chosen camera's view onto the exported one each frame, so the view transform and compositor stay; a camera's roll is not kept, and Walk finds the floor by casting down from the camera.
+  - The Node Material Editor opens in a window of its own, which a browser's popup blocker may stop.
   - The splash's Open from URL downloads only from servers that allow downloads from a web page (CORS); Blender's demo files are served from Bylonder's own copy for that reason.
 ---
 # Import and Export
@@ -163,6 +182,37 @@ Bronze and Marble materials. The steps below take the bust out and import it aga
 
    ![Shader nodes replaced but Principled BSDF](../media/features/import-export/export-javascript-units.png)
 
+9. **The page's control panel.** Open the package's page and move the pointer to the canvas's top right corner (or
+   tap there): a button shows, which opens the control panel. Custom properties come first, then the materials (those
+   you named before Blender's Material.001), each with its nodes, then objects, lights, cameras, the world and the
+   scene, every property under Blender's name for it. What is at Blender's defaults is hidden; All shows it. Control
+   Panel, in the export's settings, turns the panel off.
+
+   ![The button at the corner](../media/features/import-export/control-panel-button.png)
+
+   ![The control panel](../media/features/import-export/control-panel-open.png)
+
+10. **Drag and type.** Drag a number field sideways as in Blender: Shift for precision, Ctrl to snap, Escape to undo
+    the drag. Click it to type a value, with units (20cm) and arithmetic (2 * 3); a rotation is typed in degrees. The
+    arrow keys step it, Backspace resets it to the scene's value, Ctrl C and Ctrl V copy and paste it, Ctrl Shift C
+    copies its data path for the page's own code (`blend.set(path, value)`). A factor is a slider, a colour a swatch
+    with its values under the arrow beside it. Ctrl F searches.
+
+    ![Glow dragged, snapped and undone; Detail dragged](../media/features/import-export/control-panel-drag.gif)
+
+    ![A search](../media/features/import-export/control-panel-search.png)
+
+    ![All, with the properties at Blender's defaults](../media/features/import-export/control-panel-all.png)
+
+11. **View and editors.** View chooses the camera the page looks through, and how you move it: Fixed (the camera as
+    exported), Orbit, Fly (W A S D, E and Q), Walk (at eye height with gravity) and, on a touch screen, Sticks. Navigation,
+    in the export's settings under Control Panel, sets the page's first mode and which are offered. The icon beside an
+    object, a material or the header opens Babylon's Inspector there, or a node material in the Node Material Editor;
+    they load from Babylon's CDN, or from the package with Editors set to In the Package. On a phone one finger scrolls
+    the panel or drags a field sideways, and a pinch scales it.
+
+    ![On a phone: scroll, drag, pinch, then Orbit](../media/features/import-export/control-panel-touch.gif)
+
 ## Project files
 
 - [import-export.py](../../examples/import-export/import-export.py): writes bust.glb with Blender 5.2's glTF exporter,
@@ -176,4 +226,5 @@ Bronze and Marble materials. The steps below take the bust out and import it aga
   [io-addons-wasm.test.js](../../tests/io-addons-wasm.test.js)).
 - [record-import-export.mjs](../../tools/docs/record-import-export.mjs) and
   [record-export-javascript.mjs](../../tools/docs/record-export-javascript.mjs) (on the Rigged Character example):
-  record this page's pictures.
+  record this page's pictures, and [record-control-panel.mjs](../../tools/docs/record-control-panel.mjs) (on the Lava
+  example, with custom properties added) the control panel's.

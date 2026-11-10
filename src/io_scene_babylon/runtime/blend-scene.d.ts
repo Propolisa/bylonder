@@ -92,6 +92,12 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
             subtype?: string | undefined;
             unit?: string | undefined;
             suggested?: boolean | undefined;
+            name?: string | undefined;
+            blender_default?: string | number | boolean | undefined;
+            hard_min?: number | undefined;
+            hard_max?: number | undefined;
+            step?: number | undefined;
+            precision?: number | undefined;
             bind?: Record<string, any> | undefined;
         }>;
         graphs: Record<string, {
@@ -155,6 +161,21 @@ export type Control = {
     subtype?: string | undefined;
     unit?: string | undefined;
     suggested?: boolean | undefined;
+    /**
+     * Blender's UI name (a socket's name, a custom property's key)
+     */
+    name?: string | undefined;
+    /**
+     * the value Blender gives it new, where known
+     */
+    blender_default?: Value | undefined;
+    hard_min?: number | undefined;
+    hard_max?: number | undefined;
+    /**
+     * RNA's step: a hundredth of the value for a float
+     */
+    step?: number | undefined;
+    precision?: number | undefined;
 };
 /**
  * How an object's location, rotation and scale place its node: Blender's rotation mode; the parent inverse matrix

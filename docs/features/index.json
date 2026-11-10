@@ -647,7 +647,7 @@
   "id": "import-export",
   "title": "Import and Export",
   "summary": "Bring scenes in and write them out with Blender's own importers and exporters (Wavefront OBJ, Stanford PLY, STL, FBX) and its default add-ons (glTF 2.0, FBX export, Motion Capture, SVG as Curves), through the browser's file dialogs with each format's options.",
-  "expect": "OBJ, PLY, STL, FBX, glTF 2.0, BVH and SVG import and export with Blender's own code and options; the add-ons' entries wait a few seconds for Python the first time File opens, Alembic and USD are greyed out, and an export's extra files download. File > Export > JavaScript asks which GPU engine its page makes (WebGPU, WebGL 2, or WebGPU where the browser has it) and which runtime each feature exports with, for the package, a feature or one instance, and writes one minified bundle per package that needs no CDN (or ES modules, with Bundle off).",
+  "expect": "OBJ, PLY, STL, FBX, glTF 2.0, BVH and SVG import and export with Blender's own code and options; the add-ons' entries wait a few seconds for Python the first time File opens, Alembic and USD are greyed out, and an export's extra files download. File > Export > JavaScript asks which GPU engine its page makes (WebGPU, WebGL 2, or WebGPU where the browser has it) and which runtime each feature exports with, for the package, a feature or one instance, and writes one minified bundle per package that needs no CDN (or ES modules, with Bundle off). Its page has a control panel at the canvas's top right corner: every control of the scene under Blender's names, dragged and typed as in Blender, hiding what is at Blender's defaults, with the view's navigation and links to Babylon's Inspector and node editors.",
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/files/import_export/index.html",
@@ -670,7 +670,13 @@
    "import-export/export-options.png",
    "import-export/export-javascript.png",
    "import-export/export-javascript-override.png",
-   "import-export/export-javascript-units.png"
+   "import-export/export-javascript-units.png",
+   "import-export/control-panel-button.png",
+   "import-export/control-panel-open.png",
+   "import-export/control-panel-drag.gif",
+   "import-export/control-panel-search.png",
+   "import-export/control-panel-all.png",
+   "import-export/control-panel-touch.gif"
   ],
   "ui": [
    "TOPBAR_MT_file",
@@ -710,7 +716,13 @@
    "src/editors/interface/components/ExportDialog.vue",
    "src/editors/interface/components/SettingRow.vue",
    "src/runtimes/runtimes.js",
-   "src/io_scene_babylon/unit-manifest.js"
+   "src/io_scene_babylon/unit-manifest.js",
+   "src/io_scene_babylon/controls-export.js",
+   "src/io_scene_babylon/runtime/control-panel.js",
+   "src/io_scene_babylon/runtime/control-panel-ui.js",
+   "src/io_scene_babylon/runtime/control-panel-model.js",
+   "src/io_scene_babylon/runtime/control-panel-camera.js",
+   "src/io_scene_babylon/runtime/dev-tools.js"
   ],
   "tests": [
    "tests/io-wasm.test.js",
@@ -719,6 +731,8 @@
    "tests/export-options.test.js",
    "tests/export-package-wasm.test.js",
    "tests/export-bundle-wasm.test.js",
+   "tests/control-panel.test.js",
+   "tests/export-runtime.test.js",
    "tests/unit-swap-wasm.test.js",
    "tests/runtimes-armature-wasm.test.js",
    "tests/texture-paint-wasm.test.js"
@@ -742,6 +756,11 @@
    "A package with area lights carries Babylon's LTC table they read (64 KB in babylon-assets/), as the app serves it, and points Babylon at it unless the page has set its own Tools.AssetBaseUrl.",
    "A Geometry Nodes stack nothing in the page drives (no input of a value, no tree reading the frame) exports baked, its evaluated mesh without Blender's Geometry Nodes kernels; one with such an input runs live and ships them (about 87 MB).",
    "The package's createEngine is for pages; in Node (the headless SDK) pass a NullEngine to load as before.",
+   "The control panel shows the controls the export lists (transforms, visibility, lights, the camera, node inputs, custom properties, modifier and Geometry Nodes inputs); a property the page cannot drive yet is not in it, and enum properties have no controls yet, so its dropdowns choose only an image.",
+   "The control panel labels a node by its name, not its label, and a property by Blender's name for it (Euler Rotation, where the N panel says Rotation).",
+   "Babylon's Inspector and node editors are Babylon's own bundles, which read the page's Babylon from a global: a bundled package holds the whole of Babylon's core (about 3 MB) in bundle/ for them, fetched only when one opens; In the Package does not ship Babylon's GUI, which the Inspector loads from Babylon's CDN.",
+   "The control panel's navigation copies the chosen camera's view onto the exported one each frame, so the view transform and compositor stay; a camera's roll is not kept, and Walk finds the floor by casting down from the camera.",
+   "The Node Material Editor opens in a window of its own, which a browser's popup blocker may stop.",
    "The splash's Open from URL downloads only from servers that allow downloads from a web page (CORS); Blender's demo files are served from Bylonder's own copy for that reason."
   ],
   "page": "docs/features/import-export.md",

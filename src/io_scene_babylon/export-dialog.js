@@ -1,6 +1,6 @@
 // File > Export's options dialog, in the scene window: EEVEE Parity and, for a JavaScript package, its own options, then
 // its settings as a tree (components/ExportDialog.vue). A setting left unset inherits from the level above it.
-import { TARGETS } from './export-options.js';
+import { DEV_TOOLS, NAVIGATION, TARGETS } from './export-options.js';
 import { RUNTIMES, exportChoices, exportIssue } from '../runtimes/runtimes.js';
 import { contextStruct } from '../python/bpy_rna.js';
 import { sceneUnits } from './unit-manifest.js';
@@ -84,10 +84,26 @@ const bundleTree = (values) => setting(values, 'bundle', { label: 'Bundle', icon
   children: [setting(values, 'minify', { label: 'Minify', icon: 'BYLONDER', items: MINIFY_ITEMS, inherited: DEFAULT(true),
     issue: (value) => (value && values.bundle === false ? 'Only a bundle is minified' : null) })] });
 
-// The settings tree: a JavaScript package's GPU engine and bundle, the runtimes, then its units.
+const PANEL_ITEMS = [[true, 'On', "The page shows a panel of the scene's controls behind a button at its canvas's top right corner, loaded when first opened"],
+  [false, 'Off', 'No panel: the page sets its controls from its own code']];
+const OFFER_ITEMS = [[true, 'Offered', 'The panel offers this navigation'], [false, 'Not Offered', 'The panel leaves this navigation out']];
+// The navigation the page opens with, and those the panel offers.
+function navigationTree(values) {
+  values.navigationModes = Object.fromEntries(NAVIGATION.filter(([id]) => id !== 'FIXED').map(([id]) => [id, null]));
+  const modes = values.navigationModes;
+  return setting(values, 'navigation', { label: 'Navigation', icon: 'BYLONDER', items: NAVIGATION, inherited: DEFAULT('FIXED'),
+    issue: (value) => (modes[value] === false ? 'The panel does not offer it' : null),
+    children: NAVIGATION.filter(([id]) => id !== 'FIXED').map(([id, label]) => setting(modes, id, { label, icon: 'BYLONDER', items: OFFER_ITEMS, inherited: DEFAULT(true) })) });
+}
+// A JavaScript package's Control Panel: where its links load Babylon's editors from, and its navigation.
+const panelTree = (values) => setting(values, 'controlPanel', { label: 'Control Panel', icon: 'BYLONDER', items: PANEL_ITEMS, inherited: DEFAULT(true),
+  children: [setting(values, 'devTools', { label: 'Editors', icon: 'BYLONDER', items: DEV_TOOLS, inherited: DEFAULT('CDN'),
+    issue: (value) => (value === 'PACKAGE' && values.controlPanel === false ? 'Only the control panel links to the editors' : null) }), navigationTree(values)] });
+
+// The settings tree: a JavaScript package's GPU engine, bundle and control panel, the runtimes, then its units.
 function settingsTree(values, js) {
   const target = setting(values, 'target', { label: 'GPU Engine', icon: 'BYLONDER', items: TARGETS, inherited: DEFAULT('BOTH') });
-  return [...(js ? [target, bundleTree(values)] : []), runtimesTree(values), ...(js ? [unitsTree(values)] : [])];
+  return [...(js ? [target, bundleTree(values), panelTree(values)] : []), runtimesTree(values), ...(js ? [unitsTree(values)] : [])];
 }
 
 // The dialog's values as export options: unset settings left out, the Units tree as the type keys replaced.
@@ -102,7 +118,7 @@ export async function exportDialog(world, format, title) {
     import('../editors/interface/components/tailwind.css'),
   ]);
   const js = format !== 'babylon';
-  const values = reactive({ eeveeParity: false, hostCompression: false, bakeAnimation: false, target: null, bundle: null, minify: null });
+  const values = reactive({ eeveeParity: false, hostCompression: false, bakeAnimation: false, target: null, bundle: null, minify: null, controlPanel: null, devTools: null, navigation: null });
   const fields = [{ name: 'eeveeParity', label: 'EEVEE Parity', note: PARITY_NOTE },
     ...(js ? [{ name: 'hostCompression', label: 'Host Compresses Geometry', note: HOST_NOTE }, { name: 'bakeAnimation', label: 'Bake Animation', note: BAKE_NOTE }] : [])];
   const tree = settingsTree(values, js);

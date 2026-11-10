@@ -72,6 +72,12 @@ export const PropertySchema: import("zod/mini").ZodMiniObject<{
     subtype: import("zod/mini").ZodMiniOptional<import("zod/mini").ZodMiniString<string>>;
     unit: import("zod/mini").ZodMiniOptional<import("zod/mini").ZodMiniString<string>>;
     suggested: import("zod/mini").ZodMiniOptional<import("zod/mini").ZodMiniBoolean<boolean>>;
+    name: import("zod/mini").ZodMiniOptional<import("zod/mini").ZodMiniString<string>>;
+    blender_default: import("zod/mini").ZodMiniOptional<import("zod/mini").ZodMiniUnion<readonly [import("zod/mini").ZodMiniNumber<number>, import("zod/mini").ZodMiniBoolean<boolean>, import("zod/mini").ZodMiniString<string>]>>;
+    hard_min: import("zod/mini").ZodMiniOptional<import("zod/mini").ZodMiniNumber<number>>;
+    hard_max: import("zod/mini").ZodMiniOptional<import("zod/mini").ZodMiniNumber<number>>;
+    step: import("zod/mini").ZodMiniOptional<import("zod/mini").ZodMiniNumber<number>>;
+    precision: import("zod/mini").ZodMiniOptional<import("zod/mini").ZodMiniNumber<number>>;
     bind: import("zod/mini").ZodMiniOptional<import("zod/mini").ZodMiniRecord<import("zod/mini").ZodMiniString<string>, import("zod/mini").ZodMiniAny>>;
 }, import("zod/v4/core").$strip>;
 export const GraphNodeSchema: import("zod/mini").ZodMiniObject<{
@@ -164,6 +170,12 @@ export const IRSchema: import("zod/mini").ZodMiniObject<{
         subtype?: string | undefined;
         unit?: string | undefined;
         suggested?: boolean | undefined;
+        name?: string | undefined;
+        blender_default?: string | number | boolean | undefined;
+        hard_min?: number | undefined;
+        hard_max?: number | undefined;
+        step?: number | undefined;
+        precision?: number | undefined;
         bind?: Record<string, any> | undefined;
     }>, any, import("zod/v4/core").$ZodTypeInternals<Record<string, {
         id: string | null;
@@ -174,6 +186,12 @@ export const IRSchema: import("zod/mini").ZodMiniObject<{
         subtype?: string | undefined;
         unit?: string | undefined;
         suggested?: boolean | undefined;
+        name?: string | undefined;
+        blender_default?: string | number | boolean | undefined;
+        hard_min?: number | undefined;
+        hard_max?: number | undefined;
+        step?: number | undefined;
+        precision?: number | undefined;
         bind?: Record<string, any> | undefined;
     }>, any>>>;
     graphs: import("zod/mini").ZodMiniDefault<z.ZodMiniType<Record<string, {

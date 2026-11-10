@@ -19,7 +19,7 @@ const BAD_WARNING = /WebGPU uncaptured error|validation/i;
 
 const TYPES = { '.js': 'text/javascript', '.mjs': 'text/javascript', '.html': 'text/html', '.json': 'application/json', '.wasm': 'application/wasm', '.png': 'image/png', '.jpg': 'image/jpeg', '.bin': 'application/octet-stream' };
 // Serves package folders at /<name>/, with Babylon at /core/ and its WebGPU compilers at /webgpu/.
-export function servePackages(dir) {
+export function servePackages(dir, { port = 0, host } = {}) {
   const mounts = [['/core/', join(root, 'node_modules/@babylonjs/core/')], ['/webgpu/', join(root, 'public/webgpu/')], ['/', dir + '/']];
   const missing = [];
   const server = createServer((request, response) => {
@@ -27,9 +27,9 @@ export function servePackages(dir) {
     const [prefix, base] = mounts.find(([p]) => url.startsWith(p)), path = join(base, url.slice(prefix.length));
     if (!existsSync(path) || statSync(path).isDirectory()) return void (missing.push(url), response.writeHead(404).end());
     response.writeHead(200, { 'content-type': TYPES[extname(path)] ?? 'application/octet-stream' }).end(readFileSync(path));
-  }).listen(0);
+  }).listen(port, host);
   // missing(): the paths asked for and not found since the last call.
-  return { root: dir, url: (path) => `http://localhost:${server.address().port}/${path}`, missing: () => missing.splice(0), close: () => server.close() };
+  return { root: dir, url: (path) => `http://localhost:${port || server.address().port}/${path}`, missing: () => missing.splice(0), close: () => server.close() };
 }
 
 // A scene's statistics, run in the app's frame and in the page alike: its drawn meshes (vertices times instances) and

@@ -151,6 +151,28 @@
           "suggested": {
             "type": "boolean"
           },
+          "name": {
+            "type": "string"
+          },
+          "blender_default": {
+            "type": [
+              "number",
+              "boolean",
+              "string"
+            ]
+          },
+          "hard_min": {
+            "type": "number"
+          },
+          "hard_max": {
+            "type": "number"
+          },
+          "step": {
+            "type": "number"
+          },
+          "precision": {
+            "type": "number"
+          },
           "bind": {
             "type": "object",
             "propertyNames": {

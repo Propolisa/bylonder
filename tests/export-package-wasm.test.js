@@ -78,6 +78,15 @@ const webgpu = await exportModule(world, { target: 'WEBGPU' });
 assert.match(webgpu['scene.js'], /createEngine = \(canvas, options = \{\}\) => WebGPUEngine\.CreateAsync\(canvas, \{ \.\.\.WEBGPU_OPTIONS, \.\.\.options \}\)/);
 assert.doesNotMatch(webgpu['scene.js'], /new Engine\(/, 'a WebGPU page makes no WebGL engine');
 assert.deepEqual(shipped(webgpu), webgpuOverrides, 'a WebGPU package ships the WebGPU overrides');
+// The control panel (runtime/control-panel.js): scene.js adds it to the page with the editors' source and navigation
+// chosen, and each control carries what Blender's UI shows of it; with Control Panel off the package ships none of it.
+assert.match(files['scene.js'], /controlPanel\(blend, \{"tools":"CDN","navigation":"FIXED","offer":\["FIXED","ORBIT","FLY","WALK","JOYSTICKS"\], root: ROOT \}\)/);
+assert.ok('bylonder/control-panel-ui.js' in packageFiles(files), 'the panel ships');
+const { name, blender_default, subtype, unit } = JSON.parse(files['scene.ir.json']).properties['objects["Flywheel"].location[0]'];
+assert.deepEqual({ name, blender_default, subtype, unit }, { name: 'Location', blender_default: 0, subtype: 'TRANSLATION', unit: 'LENGTH' }, "a control's UI name and Blender's default");
+const panelless = await exportModule(world, { controlPanel: false, navigationModes: { WALK: false } });
+assert.doesNotMatch(panelless['scene.js'], /control-panel|controlPanel/, 'Control Panel off: no panel');
+assert.ok(!Object.keys(packageFiles(panelless)).some((path) => path.includes('control-panel')), 'and none of its files');
 const webgl2Package = writePackage(webgl2);
 assert.ok((await (await import(webgl2Package.url)).load(new NullEngine())).scene.meshes.length, 'a WebGL 2 package loads');
 webgl2Package.remove();
@@ -200,7 +209,7 @@ blend.set('objects["Steam Cylinder"].location[0]', 3);
 assert.deepEqual(changes, [{ path: 'objects["Steam Cylinder"].location[0]', value: 3 }]);
 assert.equal(blend.get('objects["Steam Cylinder"].location[0]'), 3);
 assert.ok(blend.controls().every((c) => !('bind' in c)), 'controls() describes, without bindings');
-assert.deepEqual(blend.controls().find((c) => c.path === 'objects["Flywheel"]["speed"]'), { path: 'objects["Flywheel"]["speed"]', type: 'FLOAT', default: 2.5, suggested: true }, 'a custom property is a suggested control');
+assert.deepEqual(blend.controls().find((c) => c.path === 'objects["Flywheel"]["speed"]'), { name: 'speed', path: 'objects["Flywheel"]["speed"]', type: 'FLOAT', default: 2.5, suggested: true }, 'a custom property is a suggested control');
 blend.dispose();
 written.remove();
 console.log(`Export package: ${meshes} meshes load bit for bit from scene.bin; transforms, lights, the camera, visibility and custom properties set by path as Main evaluates them`);

@@ -88,7 +88,9 @@ export const appFiles = (files) => APP_FILES.filter(([path]) => String(files['sc
 export const BLOCK_FILES = { 'bylonder-blocks.js': 'blocks.js', 'bylonder-view-transform.js': 'view-transform.js', 'bylonder-area-light.js': 'area-light.js' };
 // The material builder (runtime/materials.js) and the registry it resolves nodes through, for a scene.js that imports it.
 export const MATERIAL_FILES = declared('materials');
+// The control panel (runtime/control-panel.js) and what it loads on first open, for a scene.js that imports it.
+export const PANEL_FILES = declared('control-panel', 'control-panel-ui', 'control-panel-model', 'control-panel-camera', 'dev-tools');
 // The runtime/ files a package with these files ships: [package path, runtime/ file name].
 export const packageRuntime = (files) => [...RUNTIME_FILES, ...evaluatorsOf(files).flatMap((e) => e.runtime),
-  ...(text(files).includes("from './bylonder/materials.js'") ? MATERIAL_FILES : [])].map((name) => [`bylonder/${name}`, name])
+  ...(text(files).includes("from './bylonder/materials.js'") ? MATERIAL_FILES : []), ...(text(files).includes("from './bylonder/control-panel.js'") ? PANEL_FILES : [])].map((name) => [`bylonder/${name}`, name])
   .concat(Object.entries(BLOCK_FILES).filter(([path]) => text(files).includes(`from './${path}'`)));

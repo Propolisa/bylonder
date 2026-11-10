@@ -20,6 +20,12 @@ import { readIR } from './ir.js';
  * @property {string} [subtype]
  * @property {string} [unit]
  * @property {boolean} [suggested]
+ * @property {string} [name] Blender's UI name (a socket's name, a custom property's key)
+ * @property {Value} [blender_default] the value Blender gives it new, where known
+ * @property {number} [hard_min]
+ * @property {number} [hard_max]
+ * @property {number} [step] RNA's step: a hundredth of the value for a float
+ * @property {number} [precision]
  */
 
 /**
