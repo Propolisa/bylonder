@@ -247,6 +247,18 @@ export function dragScale(control) {
 }
 
 /**
+ * How much a finger's swipe across a number field changes the control: a small soft range, half a turn for a rotation,
+ * else the value's own size (at least 300 pixels of a mouse drag), so a swipe moves it usefully on a small screen.
+ * @param {Control} control
+ * @param {number} value
+ */
+export function touchSpan(control, value) {
+  if (isRotation(control)) return Math.PI;
+  const range = softRange(control);
+  return range && range[1] - range[0] <= 100 ? range[1] - range[0] : Math.max(Math.abs(value), dragScale(control) * 300);
+}
+
+/**
  * The increment Ctrl snaps a drag to: 5 degrees for a rotation (1 with Shift); by a small soft range's span a tenth,
  * 1 or 10, else RNA's step (its hundredths, a hundred pixels of drag); a tenth of it with Shift; at least 1 for an integer.
  * @param {Control} control
@@ -303,7 +315,24 @@ export function baseColor(group) {
   return found.find((r) => r.label === 'Base Color') ?? found.find((r) => r.label === 'Color');
 }
 
-/** A color's hex as a color input takes it, from linear components (gamma ones for COLOR_GAMMA). @param {number[]} rgb @param {boolean} gamma */
-export const hexOf = (rgb, gamma) => `#${rgb.slice(0, 3).map((v) => Math.round((gamma ? Math.min(1, Math.max(0, v)) : toDisplay(v)) * 255).toString(16).padStart(2, '0')).join('')}`;
-/** A color input's hex as components. @param {string} hex @param {boolean} gamma */
-export const rgbOf = (hex, gamma) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (gamma ? v : toLinear(v)));
+/** A color component as the screen shows it, from linear (gamma for COLOR_GAMMA). @param {number} v @param {boolean} gamma */
+export const displayOf = (v, gamma) => (gamma ? Math.min(1, Math.max(0, v)) : toDisplay(v));
+/** A color component as stored, from how the screen shows it. @param {number} v @param {boolean} gamma */
+export const storedOf = (v, gamma) => (gamma ? v : toLinear(v));
+/** A color's hex, from its components as stored. @param {number[]} rgb @param {boolean} gamma */
+export const hexOf = (rgb, gamma) => `#${rgb.slice(0, 3).map((v) => Math.round(displayOf(v, gamma) * 255).toString(16).padStart(2, '0')).join('')}`;
+/** A hex color as components to store, or null where it is not one. @param {string} hex @param {boolean} gamma */
+export const rgbOf = (hex, gamma) => (/^#?[\da-f]{6}$/i.test(hex.trim()) ? [0, 2, 4].map((i) => storedOf(parseInt(hex.trim().replace('#', '').slice(i, i + 2), 16) / 255, gamma)) : null);
+
+/** A displayed color's hue, saturation and value, each 0 to 1, as Blender's color picker has them. @param {number[]} rgb */
+export function hsvOf([r, g, b]) {
+  const max = Math.max(r, g, b), d = max - Math.min(r, g, b);
+  const h = d === 0 ? 0 : max === r ? ((g - b) / d + 6) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return [h / 6, max ? d / max : 0, max];
+}
+
+/** A hue, saturation and value as a displayed color. @param {number[]} hsv */
+export function rgbOfHsv([h, s, v]) {
+  const channel = (/** @type {number} */ n) => { const k = (n + h * 6) % 6; return v - v * s * Math.max(0, Math.min(k, 4 - k, 1)); };
+  return [channel(5), channel(3), channel(1)];
+}

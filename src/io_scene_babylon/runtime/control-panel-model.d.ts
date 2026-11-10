@@ -51,6 +51,13 @@ export function softRange(control: Control): number[] | null;
  */
 export function dragScale(control: Control): number;
 /**
+ * How much a finger's swipe across a number field changes the control: a small soft range, half a turn for a rotation,
+ * else the value's own size (at least 300 pixels of a mouse drag), so a swipe moves it usefully on a small screen.
+ * @param {Control} control
+ * @param {number} value
+ */
+export function touchSpan(control: Control, value: number): number;
+/**
  * The increment Ctrl snaps a drag to: 5 degrees for a rotation (1 with Shift); by a small soft range's span a tenth,
  * 1 or 10, else RNA's step (its hundredths, a hundred pixels of drag); a tenth of it with Shift; at least 1 for an integer.
  * @param {Control} control
@@ -79,8 +86,18 @@ export function atDefault(row: Row, value: (path: string) => Value): boolean;
 export function snapped(value: number, step: number): number;
 export function toDisplay(v: number): number;
 export function toLinear(v: number): number;
+/** A color component as the screen shows it, from linear (gamma for COLOR_GAMMA). @param {number} v @param {boolean} gamma */
+export function displayOf(v: number, gamma: boolean): number;
+/** A color component as stored, from how the screen shows it. @param {number} v @param {boolean} gamma */
+export function storedOf(v: number, gamma: boolean): number;
+/** A color's hex, from its components as stored. @param {number[]} rgb @param {boolean} gamma */
 export function hexOf(rgb: number[], gamma: boolean): string;
-export function rgbOf(hex: string, gamma: boolean): number[];
+/** A hex color as components to store, or null where it is not one. @param {string} hex @param {boolean} gamma */
+export function rgbOf(hex: string, gamma: boolean): number[] | null;
+/** A displayed color's hue, saturation and value, each 0 to 1, as Blender's color picker has them. @param {number[]} rgb */
+export function hsvOf([r, g, b]: number[]): number[];
+/** A hue, saturation and value as a displayed color. @param {number[]} hsv */
+export function rgbOfHsv([h, s, v]: number[]): number[];
 export type Control = import("./blend-scene.js").Control;
 export type Value = import("./blend-scene.js").Value;
 export type Widget = "number" | "slider" | "color" | "check" | "text" | "enum";

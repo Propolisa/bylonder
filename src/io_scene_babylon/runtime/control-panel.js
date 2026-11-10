@@ -1,7 +1,8 @@
 // @ts-check
 // SPDX-License-Identifier: MIT OR Apache-2.0
-// A page's control panel: a button at the canvas's top right corner, shown when the pointer comes near the corner, a
-// finger taps there or the keyboard reaches it, that opens the panel (control-panel-ui.js), loaded on first open.
+// A page's control panel: a button at a corner of the canvas, the top right one or the one by the side the panel is
+// docked to, shown when the pointer comes near the corner, a finger taps there or the keyboard reaches it, that opens
+// the panel (control-panel-ui.js), loaded on first open. What the viewer arranged is kept per page.
 
 /**
  * Where the editors the panel links to load from: Babylon's CDN, or the package's `bylonder-dev-tools/`.
@@ -11,6 +12,12 @@
  * @property {string} [root] the package's URL
  * @property {import('./control-panel-camera.js').Navigation} [navigation]
  * @property {import('./control-panel-camera.js').Navigation[]} [offer]
+ */
+
+/**
+ * What the viewer arranged, kept per page; the panel's size in its own pixels.
+ * @typedef {{ open: Record<string, boolean>, all?: boolean, scale?: number, byScreen?: boolean, dock?: Dock, width?: number, height?: number }} PanelState
+ * @typedef {'left' | 'right' | 'top' | 'bottom'} Dock
  */
 
 // How near the corner, in pixels, the pointer shows the button, and how long a tap there keeps it shown.
@@ -29,6 +36,7 @@ export const TOKENS = `--bl-font-family:"Inter","DejaVu Sans",system-ui,-apple-s
 const STYLE = `:host{all:initial;${TOKENS};position:fixed;z-index:2147483000;top:0;left:0;width:0;height:0}
 .toggle{position:fixed;top:var(--top);right:var(--right);display:grid;place-items:center;width:26px;height:26px;padding:0;border:0;border-radius:var(--cp-radius);
   background:var(--bl-header);color:var(--bl-text);box-shadow:inset 0 0 0 1px var(--bl-panel-outline),var(--bl-shadow-menu);cursor:pointer;opacity:0;pointer-events:none;transition:opacity .15s}
+:host([data-dock=left]) .toggle{right:auto;left:var(--left)}:host([data-dock=bottom]) .toggle{top:auto;bottom:var(--bottom)}
 .toggle:hover{background:var(--bl-panel-back)}.toggle svg{width:16px;height:16px}
 .toggle.near,.toggle:focus-visible,.toggle[aria-expanded=true]{opacity:1;pointer-events:auto}
 .toggle:focus-visible{outline:1px solid var(--bl-select);outline-offset:1px}
@@ -50,20 +58,26 @@ export function controlPanel(blend, options = {}) {
   const shadow = host.attachShadow({ mode: 'open' });
   shadow.innerHTML = `<style>${STYLE}</style><button class="toggle" type="button" aria-label="Controls" title="Controls" aria-expanded="false">${ICON}</button>`;
   const button = /** @type {HTMLButtonElement} */ (shadow.querySelector('.toggle'));
+  const storageKey = `bylonder-control-panel:${location.pathname}`;
+  /** @type {PanelState} */
+  const state = (() => { try { return { open: {}, ...JSON.parse(localStorage.getItem(storageKey) ?? '{}') }; } catch { return { open: {} }; } })();
+  const save = () => { try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch { /* storage may be off */ } };
+  host.dataset.dock = state.dock ?? 'right';
 
-  // The canvas's corner and height as the panel and its button are placed by them.
+  // The canvas's visible edges, inset, as the panel and its button are placed by them.
   const place = () => {
     const rect = canvas.getBoundingClientRect(), width = document.documentElement.clientWidth;
     const top = Math.max(rect.top, 0) + 8, bottom = Math.min(rect.bottom, innerHeight) - 8;
-    host.style.setProperty('--top', `${top}px`);
-    host.style.setProperty('--right', `${Math.max(width - rect.right, 0) + 8}px`);
-    host.style.setProperty('--height', `${Math.max(bottom - top, 120)}px`);
+    const left = Math.max(rect.left, 0) + 8, right = Math.min(rect.right, width) - 8;
+    const edges = { top, bottom: innerHeight - bottom, left, right: width - right, height: Math.max(bottom - top, 120), width: Math.max(right - left, 160) };
+    for (const [name, value] of Object.entries(edges)) host.style.setProperty(`--${name}`, `${value}px`);
     return rect;
   };
   place();
+  // Near the button, wherever the panel's side put it.
   const near = (/** @type {PointerEvent} */ e) => {
-    const rect = canvas.getBoundingClientRect();
-    return Math.abs(e.clientX - rect.right) < NEAR && Math.abs(e.clientY - Math.max(rect.top, 0)) < NEAR && e.clientX <= rect.right + 8;
+    const { x, y, width, height } = button.getBoundingClientRect();
+    return Math.abs(e.clientX - x - width / 2) < NEAR && Math.abs(e.clientY - y - height / 2) < NEAR;
   };
   // A tap that shows the button does not also press it.
   let tapped = 0, shownAt = 0;
@@ -90,7 +104,7 @@ export function controlPanel(blend, options = {}) {
   if (options.navigation && options.navigation !== 'FIXED') navigation().then((n) => n.navigate(/** @type {any} */ (options.navigation)));
   /** @type {Promise<{ toggle(open?: boolean): void, dispose(): void }> | null} */
   let panel = null;
-  const open = () => (panel ??= import('./control-panel-ui.js').then(({ createPanel }) => createPanel(shadow, blend, { ...options, button, place, viewer: navigation })));
+  const open = () => (panel ??= import('./control-panel-ui.js').then(({ createPanel }) => createPanel(shadow, blend, { ...options, button, place, viewer: navigation, state, save })));
   button.addEventListener('click', async () => {
     if (performance.now() - shownAt > 350) (await open()).toggle();
   });

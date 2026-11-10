@@ -6,7 +6,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { gzipSync } from 'node:zlib';
-import { atDefault, baseColor, clamp, dragScale, formatValue, hexOf, layout, matches, parsePath, parseValue, rgbOf, seen, snapped, snapStep } from '../src/io_scene_babylon/runtime/control-panel-model.js';
+import { atDefault, baseColor, clamp, dragScale, formatValue, hexOf, hsvOf, layout, matches, parsePath, parseValue, rgbOf, rgbOfHsv, seen, snapped, snapStep, touchSpan } from '../src/io_scene_babylon/runtime/control-panel-model.js';
 import { TOKENS } from '../src/io_scene_babylon/runtime/control-panel.js';
 import { PANEL_FILES, packageRuntime } from '../src/io_scene_babylon/runtime-files.js';
 
@@ -80,6 +80,19 @@ assert.equal(snapStep({ path: 'l', type: 'FLOAT', default: 0, unit: 'LENGTH', st
 // Colors: linear in Blender, display encoded in a swatch.
 assert.equal(hexOf([1, 0.2158605, 0], false), '#ff8000');
 assert.deepEqual(rgbOf('#ff8000', true).map((v) => v.toFixed(3)), ['1.000', '0.502', '0.000']);
+assert.deepEqual(rgbOf('FF8000', true), rgbOf('#ff8000', true), 'a typed hex needs no #');
+assert.equal(rgbOf('#ff80', true), null, 'what is not a hex is null');
+// The picker's hue, saturation and value, and back.
+assert.deepEqual(hsvOf([1, 0.5, 0]), [1 / 12, 1, 1]);
+assert.deepEqual(rgbOfHsv(hsvOf([0.2, 0.4, 0.8])).map((v) => v.toFixed(6)), ['0.200000', '0.400000', '0.800000']);
+assert.deepEqual(hsvOf([0, 0, 0]), [0, 0, 0], 'black has no hue or saturation');
+
+// A finger's swipe across a field: a small soft range, half a turn, else the value's own size or 300 pixels of mouse drag.
+assert.equal(touchSpan(factor, 0.5), 1);
+assert.equal(touchSpan(rotation, 0), Math.PI);
+assert.equal(touchSpan(length, 4), 4);
+assert.equal(touchSpan({ path: 'lens', type: 'FLOAT', default: 50, unit: 'CAMERA', soft_min: 1, soft_max: 5000, step: 100 }, 16), 30, 'a wide soft range moves by steps');
+assert.ok(Math.abs(touchSpan({ path: 'l', type: 'FLOAT', default: 0, step: 1 }, 0) - 0.3) < 1e-12);
 
 // Each material's icon: the colour it shows on screen, averaged as light mixes, from the coverage pass's ids and the
 // frame read at the same size; where it is not seen, its Base Color (or Color), else the plain icon.
@@ -99,6 +112,6 @@ assert.ok(!shipped('').some((path) => path.includes('control-panel')));
 
 // What a page loads: the button at once, the panel when first opened; both small.
 const kb = (...names) => gzipSync(names.map(runtime).join('')).length / 1024;
-assert.ok(kb('control-panel.js') < 3, `the button: ${kb('control-panel.js').toFixed(1)} KB gzipped`);
-assert.ok(kb('control-panel-ui.js', 'control-panel-model.js') < 20, `the panel: ${kb('control-panel-ui.js', 'control-panel-model.js').toFixed(1)} KB gzipped`);
-console.log(`control panel: layout, defaults, units, drag steps, material colours, theme and shipping ok; ${kb('control-panel.js').toFixed(1)} KB, then ${kb('control-panel-ui.js', 'control-panel-model.js').toFixed(1)} KB gzipped`);
+assert.ok(kb('control-panel.js') < 3.5, `the button: ${kb('control-panel.js').toFixed(1)} KB gzipped`);
+assert.ok(kb('control-panel-ui.js', 'control-panel-model.js') < 22, `the panel: ${kb('control-panel-ui.js', 'control-panel-model.js').toFixed(1)} KB gzipped`);
+console.log(`control panel: layout, defaults, units, drag steps, material colours, theme, shipping, picker colours and touch swipes ok; ${kb('control-panel.js').toFixed(1)} KB, then ${kb('control-panel-ui.js', 'control-panel-model.js').toFixed(1)} KB gzipped`);

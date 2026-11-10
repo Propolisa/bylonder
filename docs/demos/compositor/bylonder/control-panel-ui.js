@@ -3,10 +3,12 @@
 // The control panel (control-panel.js opens it): every control of the scene as Blender's properties editor draws one,
 // under its ID and struct (control-panel-model.js), custom properties first, then the materials, then the rest. Rows
 // left at Blender's defaults are hidden until Show All or a search shows them. Number fields drag (Shift: precise,
-// Ctrl: snap, Escape: undo the drag), type (Enter or a click; arithmetic and units) and step with the arrow keys;
-// Backspace resets a field to the scene's value, Ctrl+C and Ctrl+V copy and paste it, Ctrl+Shift+C copies its data path.
-// An ID that one of Babylon's editors shows links to it (dev-tools.js).
-import { atDefault, baseColor, clamp, componentLabel, dragScale, formatValue, hexOf, layout, matches, parseValue, rgbOf, snapped, snapStep, softRange, toDisplay } from './control-panel-model.js';
+// Ctrl: snap, Escape: undo the drag; a finger's swipe across a field covers its soft range, a second finger slows it),
+// type (Enter or a click; arithmetic and units) and step with the arrow keys; Backspace resets a field to the scene's
+// value, Ctrl+C and Ctrl+V copy and paste it, Ctrl+Shift+C copies its data path. A color's picker sets it as it moves.
+// The panel docks to any side of the canvas by its header and resizes from its inner edge. An ID that one of Babylon's
+// editors shows links to it (dev-tools.js).
+import { atDefault, baseColor, clamp, componentLabel, displayOf, dragScale, formatValue, hexOf, hsvOf, layout, matches, parseValue, rgbOf, rgbOfHsv, snapped, snapStep, softRange, storedOf, touchSpan } from './control-panel-model.js';
 
 /** @typedef {import('./control-panel-model.js').Row} Row */
 /** @typedef {import('./control-panel-model.js').Group} Group */
@@ -15,12 +17,33 @@ import { atDefault, baseColor, clamp, componentLabel, dragScale, formatValue, he
 /** @typedef {import('./blend-scene.js').Value} Value */
 
 const STYLE = `
-.panel{--s:var(--cp-scale,1);position:fixed;top:calc((var(--top) + 32px)/var(--s));right:calc(var(--right)/var(--s));zoom:var(--s);display:flex;flex-direction:column;box-sizing:border-box;width:300px;
-  max-width:calc((100vw - 16px)/var(--s));max-height:calc((var(--height) - 32px)/var(--s));touch-action:pan-y;border-radius:var(--cp-radius);background:var(--bl-region);color:var(--bl-text);font:var(--cp-font-size)/1 var(--bl-font-family);
+.panel{--s:var(--cp-scale,1);position:fixed;top:calc((var(--top) + 32px)/var(--s));right:calc(var(--right)/var(--s));zoom:var(--s);display:flex;flex-direction:column;box-sizing:border-box;
+  width:var(--cp-width,300px);max-width:calc(var(--width)/var(--s));max-height:calc((var(--height) - 32px)/var(--s));touch-action:pan-y;border-radius:var(--cp-radius);background:var(--bl-region);color:var(--bl-text);font:var(--cp-font-size)/1 var(--bl-font-family);
   box-shadow:inset 0 0 0 1px var(--bl-panel-outline),var(--bl-shadow-popup);user-select:none;-webkit-user-select:none;overflow:hidden}
 .panel[hidden]{display:none}
+:host([data-dock=left]) .panel{right:auto;left:calc(var(--left)/var(--s))}
+:host([data-dock=top]) .panel,:host([data-dock=bottom]) .panel{left:calc(var(--left)/var(--s));width:auto;height:var(--cp-height,240px)}
+:host([data-dock=bottom]) .panel{top:auto;bottom:calc((var(--bottom) + 32px)/var(--s))}
+:host([data-dock=top]) .body,:host([data-dock=bottom]) .body{column-width:280px;column-gap:4px}
+.panel.moving{opacity:.75}
+.grip{flex:none;width:12px;height:var(--cp-row);cursor:grab;color:var(--bl-text-off);touch-action:none}.grip:hover{color:var(--bl-text)}
+.moving .grip{cursor:grabbing}
+/* Clear of the header, where the grip is. */
+.edge{position:absolute;top:calc(var(--cp-row) + 8px);bottom:0;left:0;width:6px;cursor:ew-resize;touch-action:none}
+:host([data-dock=bottom]) .head{padding-top:var(--edge,6px)}
+.edge::after{content:"";position:absolute;inset:0 auto 0 0;width:2px;background:var(--bl-select);opacity:0;transition:opacity .1s}
+.edge:hover::after,.edge.active::after{opacity:1}
+:host([data-dock=left]) .edge{left:auto;right:0}:host([data-dock=left]) .edge::after{inset:0 0 0 auto}
+:host([data-dock=top]) .edge,:host([data-dock=bottom]) .edge{left:0;right:0;width:auto;height:6px;cursor:ns-resize}
+:host([data-dock=top]) .edge{top:auto}:host([data-dock=top]) .edge::after{inset:auto 0 0 0;width:auto;height:2px}
+:host([data-dock=bottom]) .edge{top:0;bottom:auto}:host([data-dock=bottom]) .edge::after{inset:0 0 auto 0;width:auto;height:2px}
+.preview{position:fixed;top:calc(var(--top) + 32px);right:var(--right);width:min(var(--pw),var(--width));height:calc(var(--height) - 32px);border-radius:var(--cp-radius);
+  background:color-mix(in srgb,var(--bl-select) 25%,transparent);box-shadow:inset 0 0 0 2px var(--bl-select);pointer-events:none;transition:all .12s}
+.preview[data-dock=left]{right:auto;left:var(--left)}
+.preview[data-dock=top],.preview[data-dock=bottom]{left:var(--left);width:auto;height:min(var(--ph),var(--height) - 32px)}
+.preview[data-dock=bottom]{top:auto;bottom:calc(var(--bottom) + 32px)}
 .panel *{box-sizing:border-box}
-.head{display:flex;gap:var(--cp-gap);align-items:center;padding:4px 30px 4px 4px;background:var(--bl-header)}
+.head{display:flex;gap:var(--cp-gap);align-items:center;padding:4px 30px 4px 2px;background:var(--bl-header);touch-action:none}
 .search{flex:1;display:flex;align-items:center;gap:4px;height:var(--cp-row);padding:0 6px;border-radius:calc(var(--cp-row)/2);background:var(--bl-wcol-text);color:var(--bl-text-dim);box-shadow:inset 0 0 0 1px var(--bl-wcol-outline)}
 .search:focus-within{box-shadow:inset 0 0 0 1px var(--bl-select)}
 .search svg{width:12px;height:12px;flex:none}
@@ -87,7 +110,6 @@ select option{background:var(--bl-wcol-menu);color:var(--bl-wcol-menu-item)}
 .swatch .rgb{flex:1;height:100%}
 .swatch .alpha{flex:0 0 30%;height:100%;background:conic-gradient(var(--bl-wcol-num) 25%,var(--bl-text-dim) 0 50%,var(--bl-wcol-num) 0 75%,var(--bl-text-dim) 0) 0 0/8px 8px}
 .swatch .alpha i{display:block;width:100%;height:100%}
-.swatch input{position:absolute;inset:0;opacity:0;pointer-events:none}
 .expand{flex:none;width:var(--cp-row);padding:0;border-radius:var(--cp-radius);background:var(--bl-wcol-num)}
 .expand .tri{margin:auto}
 .segments{display:flex;flex-wrap:wrap;gap:1px}.segments .tool{flex:1;min-width:0;padding:0 2px;border-radius:0}
@@ -98,16 +120,30 @@ select option{background:var(--bl-wcol-menu);color:var(--bl-wcol-menu-item)}
 .menu button{display:flex;justify-content:space-between;gap:16px;height:var(--cp-row);padding:0 10px;border:0;background:none;color:var(--bl-wcol-menu-item);font:inherit;text-align:left;cursor:pointer}
 .menu button:hover,.menu button:focus-visible{background:var(--bl-select);color:var(--bl-wcol-option-item);outline:0}
 .menu kbd{font:inherit;color:var(--bl-text-off)}
-@media (pointer:coarse){.panel{--cp-row:28px}.check input{width:18px;height:18px}}
-@media (prefers-reduced-motion:reduce){.tri{transition:none}.num.invalid{animation:none}}`;
+.picker{position:fixed;z-index:1;display:flex;flex-direction:column;gap:6px;width:200px;padding:8px;border-radius:var(--cp-radius);background:var(--bl-wcol-menu);color:var(--bl-text);
+  font:var(--cp-font-size)/1 var(--bl-font-family);box-shadow:inset 0 0 0 1px var(--bl-panel-outline),var(--bl-shadow-menu);user-select:none;-webkit-user-select:none}
+.sv,.hue{position:relative;border-radius:var(--cp-radius);touch-action:none;cursor:crosshair}
+.sv{height:150px;background:linear-gradient(transparent,#000),linear-gradient(90deg,#fff,hsl(var(--hue) 100% 50%))}
+.hue{height:16px;background:linear-gradient(90deg,red,#ff0,lime,cyan,blue,#f0f,red)}
+.knob{position:absolute;width:12px;height:12px;margin:-6px;border-radius:50%;box-shadow:0 0 0 2px #fff,0 0 0 3px #0008;pointer-events:none}
+.hue .knob{top:50%}
+.picker .text{border-radius:var(--cp-radius)}
+@media (pointer:coarse){.panel{--cp-row:28px;--edge:12px}.check input{width:18px;height:18px}.grip{width:20px}.edge{width:12px}
+  :host([data-dock=top]) .edge,:host([data-dock=bottom]) .edge{width:auto;height:12px}.sv{height:180px}.hue{height:24px}}
+@media (prefers-reduced-motion:reduce){.tri,.preview{transition:none}.num.invalid{animation:none}}`;
 
 // The UI scale a pinch sets, as the app's Resolution Scale (wm-touch.js).
 const SCALE_RANGE = [0.5, 2];
+// The panel's smallest size docked at a side (its width) and at the top or bottom (its height), in its pixels.
+const SMALLEST = { width: 200, height: 100 };
+// How much slower a field drags with Shift or a second finger.
+const PRECISE = 0.1;
 
 // Bylonder's own drawings.
 const SEARCH_ICON = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="5" cy="5" r="3.6"/><path d="m7.7 7.7 3 3" stroke-linecap="round"/></svg>';
 const CLOSE_ICON = '<svg viewBox="0 0 12 12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="m3 3 6 6M9 3 3 9"/></svg>';
-const EDITOR_ICON = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="2" width="4" height="4" rx="1"/><rect x="9" y="8" width="4" height="4" rx="1"/><path d="M5 4h2.5a1.5 1.5 0 0 1 1.5 1.5v4"/></svg>';
+const GRIP_ICON = '<svg viewBox="0 0 12 20" fill="currentColor"><circle cx="4" cy="6" r="1.2"/><circle cx="8" cy="6" r="1.2"/><circle cx="4" cy="10" r="1.2"/><circle cx="8" cy="10" r="1.2"/><circle cx="4" cy="14" r="1.2"/><circle cx="8" cy="14" r="1.2"/></svg>';
+const EDITOR_ICON ='<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="2" width="4" height="4" rx="1"/><rect x="9" y="8" width="4" height="4" rx="1"/><path d="M5 4h2.5a1.5 1.5 0 0 1 1.5 1.5v4"/></svg>';
 
 // Each navigation mode's name and how it moves (control-panel-camera.js).
 const MODES = /** @type {Record<string, [string, string]>} */ ({ FIXED: ['Fixed', 'The camera as exported'], ORBIT: ['Orbit', '<kbd>Drag</kbd> turn <kbd>Wheel</kbd> zoom <kbd>Right drag</kbd> pan'],
@@ -115,6 +151,7 @@ const MODES = /** @type {Record<string, [string, string]>} */ ({ FIXED: ['Fixed'
   JOYSTICKS: ['Sticks', 'Left thumb moves, right thumb looks'] });
 
 const HINTS = { field: '<kbd>Drag</kbd> change <kbd>Ctrl</kbd> snap <kbd>Shift</kbd> precise <kbd>Esc</kbd> undo', drag: '<kbd>Ctrl</kbd> snap <kbd>Shift</kbd> precise <kbd>Esc</kbd> cancel',
+  swipe: '<kbd>Second finger</kbd> slower', dock: 'Drop on a side of the view to dock there <kbd>Esc</kbd> cancel',
   edit: '<kbd>Enter</kbd> confirm <kbd>Esc</kbd> cancel, units and arithmetic work', idle: 'Search with <kbd>Ctrl</kbd> <kbd>F</kbd>, close with <kbd>Esc</kbd>' };
 
 /**
@@ -144,17 +181,14 @@ const copy = (text) => navigator.clipboard?.writeText(text).catch(() => {});
  * @param {ShadowRoot} shadow
  * @param {import('./blend-scene.js').BlendScene} blend
  * @param {import('./control-panel.js').PanelOptions & { button: HTMLButtonElement, place: () => DOMRect,
- *   viewer: () => Promise<ReturnType<import('./control-panel-camera.js').createNavigation>> }} options
+ *   viewer: () => Promise<ReturnType<import('./control-panel-camera.js').createNavigation>>,
+ *   state: import('./control-panel.js').PanelState, save: () => void }} options
  */
-export function createPanel(shadow, blend, { button, place, viewer, ...tools }) {
+export function createPanel(shadow, blend, { button, place, viewer, state, save, ...tools }) {
   const controls = blend.controls();
   const byPath = new Map(controls.map((c) => [c.path, c]));
   const bindOf = (/** @type {string} */ path) => /** @type {Record<string, any> | undefined} */ (blend.ir.properties[path]?.bind);
   const sections = layout(controls, (c) => c.type === 'STRING' && !!bindOf(c.path)?.image);
-  const storageKey = `bylonder-control-panel:${location.pathname}`;
-  /** @type {{ open: Record<string, boolean>, all?: boolean, scale?: number, byScreen?: boolean }} */
-  const state = (() => { try { return { open: {}, ...JSON.parse(localStorage.getItem(storageKey) ?? '{}') }; } catch { return { open: {} }; } })();
-  const save = () => { try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch { /* storage may be off */ } };
   /** The rows the viewer changed, shown though they are back at Blender's default. @type {Set<string>} */
   const touched = new Set();
   /** Each drawn control's update, by path. @type {Map<string, ((value: Value) => void)[]>} */
@@ -171,27 +205,108 @@ export function createPanel(shadow, blend, { button, place, viewer, ...tools }) 
   const inspector = el('button', { type: 'button', className: 'tool', title: "Babylon's Inspector", 'aria-label': "Babylon's Inspector", innerHTML: EDITOR_ICON });
   const body = el('div', { className: 'body' });
   const foot = el('div', { className: 'foot', innerHTML: HINTS.idle });
-  const panel = el('section', { className: 'panel', role: 'dialog', 'aria-label': 'Controls', hidden: true }, [
-    el('div', { className: 'head' }, [el('label', { className: 'search', innerHTML: SEARCH_ICON }, [search]), all, inspector]),
-    body, foot,
-  ]);
+  const grip = el('span', { className: 'grip', title: 'Drag to dock the panel to a side', innerHTML: GRIP_ICON });
+  const head = el('div', { className: 'head' }, [grip, el('label', { className: 'search', innerHTML: SEARCH_ICON }, [search]), all, inspector]);
+  const edge = el('div', { className: 'edge', title: 'Drag to resize' });
+  const panel = el('section', { className: 'panel', role: 'dialog', 'aria-label': 'Controls', hidden: true }, [head, body, foot, edge]);
   const close = el('button', { type: 'button', className: 'tool link', title: 'Close', 'aria-label': 'Close', innerHTML: CLOSE_ICON });
   Object.assign(close.style, { position: 'absolute', top: '6px', right: '6px' });
   panel.append(close);
-  shadow.append(el('style', { textContent: STYLE }), panel);
+  const preview = el('div', { className: 'preview', hidden: true });
+  shadow.append(el('style', { textContent: STYLE }), panel, preview);
   const hint = (/** @type {keyof HINTS} */ kind) => { foot.innerHTML = HINTS[kind]; };
+  const scale = () => state.scale ?? 1;
   const scaled = (/** @type {number} */ value) => panel.style.setProperty('--cp-scale', String(value));
-  scaled(state.scale ?? 1);
-  // Touch, as the app has it (wm-touch.js): one finger scrolls the panel or drags a field sideways, two pinch its scale.
+  scaled(scale());
+  const host = /** @type {HTMLElement} */ (shadow.host);
+  const sized = () => {
+    if (state.width) panel.style.setProperty('--cp-width', `${state.width}px`);
+    if (state.height) panel.style.setProperty('--cp-height', `${state.height}px`);
+  };
+  sized();
+
+  /**
+   * Follows a pointer pressed on an element, captured, until it lifts, is cancelled or Escape undoes what it did.
+   * @param {HTMLElement} element @param {PointerEvent} down
+   * @param {(e: PointerEvent) => void} move @param {(how: 'up' | 'cancel' | 'escape') => void} end
+   */
+  const follow = (element, down, move, end) => {
+    down.preventDefault();
+    element.setPointerCapture(down.pointerId);
+    const stop = (/** @type {'up' | 'cancel' | 'escape'} */ how) => {
+      element.removeEventListener('pointermove', move);
+      element.removeEventListener('pointerup', up);
+      element.removeEventListener('pointercancel', cancel);
+      removeEventListener('keydown', escape, true);
+      if (element.hasPointerCapture(down.pointerId)) element.releasePointerCapture(down.pointerId);
+      end(how);
+    };
+    const up = () => stop('up'), cancel = () => stop('cancel');
+    const escape = (/** @type {KeyboardEvent} */ e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); stop('escape'); } };
+    element.addEventListener('pointermove', move);
+    element.addEventListener('pointerup', up);
+    element.addEventListener('pointercancel', cancel);
+    addEventListener('keydown', escape, true);
+    return stop;
+  };
+
+  // Docking: the header dragged towards a side of the view (the nearest by the view's proportions), previewed where the
+  // panel will be; the button moves to that side's corner (control-panel.js).
+  const sideAt = (/** @type {number} */ x, /** @type {number} */ y) => {
+    const r = place(), dx = (x - r.left - r.width / 2) / r.width, dy = (y - r.top - r.height / 2) / r.height;
+    return Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'top' : 'bottom');
+  };
+  head.addEventListener('pointerdown', (down) => {
+    if (down.button !== 0 || (down.target !== head && !grip.contains(/** @type {Node} */ (down.target)))) return;
+    /** @type {import('./control-panel.js').Dock | null} */
+    let side = null;
+    preview.style.setProperty('--pw', `${(state.width ?? 300) * scale()}px`);
+    preview.style.setProperty('--ph', `${(state.height ?? 240) * scale()}px`);
+    follow(head, down, (e) => {
+      const dx = e.clientX - down.clientX, dy = e.clientY - down.clientY;
+      if (!side && Math.hypot(dx, dy) < 6) return;
+      if (!side) { panel.classList.add('moving'); hint('dock'); preview.hidden = false; }
+      panel.style.translate = `${dx / scale()}px ${dy / scale()}px`;
+      side = sideAt(e.clientX, e.clientY);
+      preview.dataset.dock = side;
+    }, (how) => {
+      panel.classList.remove('moving');
+      panel.style.translate = '';
+      preview.hidden = true;
+      hint('idle');
+      if (how !== 'up' || !side) return;
+      host.dataset.dock = state.dock = side;
+      save();
+    });
+  });
+
+  // Resizing from the edge away from the side the panel is docked to.
+  edge.addEventListener('pointerdown', (down) => {
+    if (down.button !== 0) return;
+    const dock = host.dataset.dock ?? 'right', across = dock === 'left' || dock === 'right' ? 'width' : 'height';
+    const towards = dock === 'right' || dock === 'bottom' ? -1 : 1, start = panel.getBoundingClientRect()[across] / scale();
+    edge.classList.add('active');
+    follow(edge, down, (e) => {
+      const moved = across === 'width' ? e.clientX - down.clientX : e.clientY - down.clientY;
+      state[across] = Math.round(Math.max(SMALLEST[across], start + towards * moved / scale()));
+      sized();
+    }, () => { edge.classList.remove('active'); save(); });
+  });
+
+  // Touch, as the app has it (wm-touch.js): one finger scrolls the panel or drags a field sideways, two pinch its scale;
+  // a second finger while one is on a number field slows its drag instead.
   /** @type {Map<number, { x: number, y: number }>} */
   const fingers = new Map();
   /** @type {{ spread: number, scale: number } | null} */
   let pinch = null;
+  let sliding = false;
   const spread = () => { const [a, b] = [...fingers.values()]; return Math.hypot(a.x - b.x, a.y - b.y) || 1; };
   panel.addEventListener('pointerdown', (e) => {
     if (e.pointerType !== 'touch') return;
+    // The first finger of a gesture: one lifted outside the panel is not still down.
+    if (e.isPrimary) { fingers.clear(); pinch = null; }
     fingers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    if (fingers.size === 2) pinch = { spread: spread(), scale: state.scale ?? 1 };
+    if (fingers.size === 2 && !sliding) pinch = { spread: spread(), scale: scale() };
   }, true);
   panel.addEventListener('pointermove', (e) => {
     if (!fingers.has(e.pointerId)) return;
@@ -258,45 +373,31 @@ export function createPanel(shadow, blend, { button, place, viewer, ...tools }) 
       input.addEventListener('blur', () => finish(true));
     };
     field.addEventListener('pointerdown', (down) => {
-      if (down.button !== 0 || editing) return;
-      down.preventDefault();
+      if (down.button !== 0 || editing || sliding || (down.pointerType === 'touch' && fingers.size > 1)) return;
       field.focus();
-      field.setPointerCapture(down.pointerId);
-      const start = /** @type {number} */ (get(path));
+      const start = /** @type {number} */ (get(path)), touch = down.pointerType === 'touch';
+      sliding = touch;
+      // A finger's swipe across the field covers its soft range, whatever the screen; a mouse moves as in Blender, at the panel's scale.
+      const perPixel = touch ? touchSpan(control, start) / field.getBoundingClientRect().width : dragScale(control) / scale();
       let raw = start, last = down.clientX, travel = 0, dragging = false;
-      const move = (/** @type {PointerEvent} */ e) => {
-        if (pinch) { set(path, start); end(); return; }
+      const stop = follow(field, down, (e) => {
+        if (pinch) { stop('escape'); return; }
         // A finger moving more up or down than sideways scrolls the panel (the browser takes it), not the field.
-        if (!dragging && e.pointerType === 'touch' && Math.abs(e.clientY - down.clientY) > Math.abs(e.clientX - down.clientX)) return;
+        if (!dragging && touch && Math.abs(e.clientY - down.clientY) > Math.abs(e.clientX - down.clientX)) return;
         const dx = e.clientX - last;
         last = e.clientX;
         travel += Math.abs(dx);
         if (!dragging && travel < 3) return;
-        if (!dragging) { dragging = true; field.classList.add('dragging'); hint('drag'); }
-        raw = clamp(raw + dx * dragScale(control) * (e.shiftKey ? 0.1 : 1), control);
+        if (!dragging) { dragging = true; field.classList.add('dragging'); hint(touch ? 'swipe' : 'drag'); }
+        raw = clamp(raw + dx * perPixel * (e.shiftKey || fingers.size > 1 ? PRECISE : 1), control);
         set(path, e.ctrlKey ? snapped(raw, snapStep(control, e.shiftKey)) : raw);
-      };
-      const end = () => {
-        field.removeEventListener('pointermove', move);
-        field.removeEventListener('pointerup', up);
-        field.removeEventListener('pointercancel', end);
-        removeEventListener('keydown', cancel, true);
+      }, (how) => {
+        sliding = false;
         field.classList.remove('dragging');
         hint('field');
-      };
-      const up = () => { end(); if (!dragging) edit(); };
-      const cancel = (/** @type {KeyboardEvent} */ e) => {
-        if (e.key !== 'Escape') return;
-        e.preventDefault();
-        e.stopPropagation();
-        set(path, start);
-        if (field.hasPointerCapture(down.pointerId)) field.releasePointerCapture(down.pointerId);
-        end();
-      };
-      field.addEventListener('pointermove', move);
-      field.addEventListener('pointerup', up);
-      field.addEventListener('pointercancel', end);
-      addEventListener('keydown', cancel, true);
+        if (how === 'escape') set(path, start);
+        if (how === 'up' && !dragging) edit();
+      });
     });
     field.addEventListener('keydown', (e) => {
       if (editing) return;
@@ -331,14 +432,27 @@ export function createPanel(shadow, blend, { button, place, viewer, ...tools }) 
       ['Copy Data Path', 'Ctrl Shift C', () => copy(control.path)],
     ]);
     const menu = el('div', { className: 'menu', role: 'menu' }, items.map(([label, keys, run]) => el('button', { type: 'button', role: 'menuitem', onclick: () => { run(); dismiss(); } }, [label, el('kbd', { textContent: keys })])));
-    Object.assign(menu.style, { left: `${Math.min(e.clientX, innerWidth - 200)}px`, top: `${Math.min(e.clientY, innerHeight - 100)}px` });
-    shadow.append(menu);
+    const dismiss = popup(menu, e.clientX, e.clientY);
     /** @type {HTMLElement} */ (menu.firstElementChild).focus();
-    const away = (/** @type {Event} */ ev) => { if (!ev.composedPath().includes(menu)) dismiss(); };
+  }
+
+  /**
+   * Shows a popup at a point, kept on screen at the panel's scale, until a press elsewhere or Escape dismisses it.
+   * @param {HTMLElement} element @param {number} x @param {number} y
+   */
+  function popup(element, x, y) {
+    const s = scale();
+    element.style.zoom = String(s);
+    shadow.append(element);
+    const { width, height } = element.getBoundingClientRect();
+    Object.assign(element.style, { left: `${Math.max(0, Math.min(x, innerWidth - width - 4)) / s}px`, top: `${Math.max(0, Math.min(y, innerHeight - height - 4)) / s}px` });
+    const away = (/** @type {Event} */ ev) => { if (!ev.composedPath().includes(element)) dismiss(); };
     const keys = (/** @type {KeyboardEvent} */ ev) => { if (ev.key === 'Escape') { ev.stopPropagation(); dismiss(); } };
-    const dismiss = () => { menu.remove(); removeEventListener('pointerdown', away, true); removeEventListener('keydown', keys, true); };
+    const dismiss = () => { element.remove(); removeEventListener('pointerdown', away, true); removeEventListener('keydown', keys, true); };
     addEventListener('pointerdown', away, true);
     addEventListener('keydown', keys, true);
+    for (const type of ['keydown', 'keyup', 'wheel']) element.addEventListener(type, (ev) => ev.stopPropagation());
+    return dismiss;
   }
 
   /** @param {string} path @param {(value: Value) => void} show */
@@ -347,33 +461,76 @@ export function createPanel(shadow, blend, { button, place, viewer, ...tools }) 
     show(get(path));
   }
 
-  // A color's swatch, as Blender draws it (alpha over a checker), which opens the browser's picker, and its components.
+  // A color's swatch, as Blender draws it (alpha over a checker), which opens its picker, and its components.
   /** @param {Row} row */
   function colorWidget(row) {
     const gamma = row.controls[0].subtype === 'COLOR_GAMMA';
     const rgb = el('span', { className: 'rgb' }), alpha = row.controls[3] && el('i');
-    const picker = el('input', { type: 'color', tabIndex: -1, 'aria-hidden': 'true' });
-    const swatch = el('button', { type: 'button', className: 'swatch', title: `${row.label}\n${row.key}`, 'aria-label': row.label }, [rgb, alpha && el('span', { className: 'alpha' }, [alpha]), picker]);
+    const swatch = el('button', { type: 'button', className: 'swatch', title: `${row.label}\n${row.key}`, 'aria-label': row.label }, [rgb, alpha && el('span', { className: 'alpha' }, [alpha])]);
     const components = el('div', { className: 'value', hidden: true }, row.controls.map((c, i) => numberField(c, { slider: true, component: componentLabel(c, i) })));
     const expand = el('button', { type: 'button', className: 'tool expand', title: 'Values', 'aria-label': `${row.label} values`, 'aria-expanded': 'false' }, [el('span', { className: 'tri' })]);
     expand.addEventListener('click', () => { components.hidden = !components.hidden; expand.setAttribute('aria-expanded', String(!components.hidden)); });
     const show = () => {
-      const [r, g, b, a] = row.controls.map((c) => /** @type {number} */ (get(c.path)));
       rgb.style.background = cssOf(row);
-      if (alpha) alpha.style.background = cssOf(row, a);
-      picker.value = hexOf([r, g, b], gamma);
+      if (alpha) alpha.style.background = cssOf(row, Number(get(row.controls[3].path)));
     };
     for (const c of row.controls) watch(c.path, show);
-    swatch.addEventListener('click', () => (picker.showPicker ? picker.showPicker() : picker.click()));
-    picker.addEventListener('input', () => rgbOf(picker.value, gamma).forEach((v, i) => set(row.controls[i].path, v)));
+    swatch.addEventListener('click', () => colorPicker(row, swatch));
     swatch.addEventListener('contextmenu', (e) => contextMenu(e, row.controls[0]));
     return [el('div', { className: 'value inline' }, [swatch, expand]), components];
+  }
+
+  // Blender's color picker of the Square (SV + H) kind: saturation and value in a square over a hue strip, and the hex;
+  // the color is set as they are dragged or typed. Escape during a drag undoes it.
+  /** @param {Row} row @param {HTMLElement} swatch */
+  function colorPicker(row, swatch) {
+    const gamma = row.controls[0].subtype === 'COLOR_GAMMA', rgb = row.controls.slice(0, 3);
+    const stored = () => rgb.map((c) => Number(get(c.path)));
+    let [h, s, v] = hsvOf(stored().map((c) => displayOf(c, gamma)));
+    const svKnob = el('span', { className: 'knob' }), hueKnob = el('span', { className: 'knob' });
+    const square = el('div', { className: 'sv', title: 'Saturation and value' }, [svKnob]), strip = el('div', { className: 'hue', title: 'Hue' }, [hueKnob]);
+    const hex = el('input', { className: 'text', type: 'text', 'aria-label': 'Hex', spellcheck: false, autocapitalize: 'off', enterKeyHint: 'done' });
+    const picker = el('div', { className: 'picker', role: 'dialog', 'aria-label': row.label }, [square, strip, hex]);
+    const draw = () => {
+      square.style.setProperty('--hue', String(h * 360));
+      Object.assign(svKnob.style, { left: `${s * 100}%`, top: `${(1 - v) * 100}%`, background: `rgb(${rgbOfHsv([h, s, v]).map((c) => Math.round(c * 255)).join(' ')})` });
+      hueKnob.style.left = `${h * 100}%`;
+      if (shadow.activeElement !== hex) hex.value = hexOf(stored(), gamma).slice(1).toUpperCase();
+    };
+    const apply = () => { rgbOfHsv([h, s, v]).forEach((c, i) => set(rgb[i].path, storedOf(c, gamma))); draw(); };
+    const unit = (/** @type {number} */ x) => Math.min(1, Math.max(0, x));
+    /** @param {HTMLElement} area @param {(x: number, y: number) => void} pick */
+    const drags = (area, pick) => area.addEventListener('pointerdown', (down) => {
+      if (down.button !== 0) return;
+      const before = stored(), hsv = [h, s, v];
+      const at = (/** @type {PointerEvent} */ e) => { const r = area.getBoundingClientRect(); pick(unit((e.clientX - r.left) / r.width), unit((e.clientY - r.top) / r.height)); apply(); };
+      at(down);
+      follow(area, down, at, (how) => {
+        if (how !== 'escape') return;
+        before.forEach((c, i) => set(rgb[i].path, c));
+        [h, s, v] = hsv;
+        draw();
+      });
+    });
+    drags(square, (x, y) => { s = x; v = 1 - y; });
+    drags(strip, (x) => { h = x; });
+    hex.addEventListener('input', () => {
+      const typed = rgbOf(hex.value, gamma);
+      if (!typed) return;
+      typed.forEach((c, i) => set(rgb[i].path, c));
+      [h, s, v] = hsvOf(typed.map((c) => displayOf(c, gamma)));
+      draw();
+    });
+    draw();
+    const box = swatch.getBoundingClientRect();
+    const dismiss = popup(picker, box.left, box.bottom + 4);
+    hex.addEventListener('keydown', (e) => { if (e.key === 'Enter') { dismiss(); swatch.focus(); } });
   }
 
   /** A color row's value as CSS, display encoded. @param {Row} row @param {number} [alpha] */
   function cssOf(row, alpha) {
     const gamma = row.controls[0].subtype === 'COLOR_GAMMA';
-    const byte = (/** @type {Control} */ c) => { const v = Number(get(c.path)); return Math.round((gamma ? Math.min(1, Math.max(0, v)) : toDisplay(v)) * 255); };
+    const byte = (/** @type {Control} */ c) => Math.round(displayOf(Number(get(c.path)), gamma) * 255);
     return `rgb(${row.controls.slice(0, 3).map(byte).join(' ')}${alpha === undefined ? '' : ` / ${alpha}`})`;
   }
 

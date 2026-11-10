@@ -3,12 +3,15 @@
  * @param {ShadowRoot} shadow
  * @param {import('./blend-scene.js').BlendScene} blend
  * @param {import('./control-panel.js').PanelOptions & { button: HTMLButtonElement, place: () => DOMRect,
- *   viewer: () => Promise<ReturnType<import('./control-panel-camera.js').createNavigation>> }} options
+ *   viewer: () => Promise<ReturnType<import('./control-panel-camera.js').createNavigation>>,
+ *   state: import('./control-panel.js').PanelState, save: () => void }} options
  */
-export function createPanel(shadow: ShadowRoot, blend: import("./blend-scene.js").BlendScene, { button, place, viewer, ...tools }: import("./control-panel.js").PanelOptions & {
+export function createPanel(shadow: ShadowRoot, blend: import("./blend-scene.js").BlendScene, { button, place, viewer, state, save, ...tools }: import("./control-panel.js").PanelOptions & {
     button: HTMLButtonElement;
     place: () => DOMRect;
     viewer: () => Promise<ReturnType<typeof import("./control-panel-camera.js").createNavigation>>;
+    state: import("./control-panel.js").PanelState;
+    save: () => void;
 }): {
     toggle: (open?: boolean) => void;
     dispose: () => void;

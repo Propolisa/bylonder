@@ -22,3 +22,17 @@ export type PanelOptions = {
     navigation?: import("./control-panel-camera.js").Navigation | undefined;
     offer?: import("./control-panel-camera.js").Navigation[] | undefined;
 };
+/**
+ * What the viewer arranged, kept per page: open groups, Show All, the UI scale, the materials' order, the side the
+ * panel is docked to and its size there (in the panel's pixels).
+ */
+export type PanelState = {
+    open: Record<string, boolean>;
+    all?: boolean;
+    scale?: number;
+    byScreen?: boolean;
+    dock?: Dock;
+    width?: number;
+    height?: number;
+};
+export type Dock = "left" | "right" | "top" | "bottom";

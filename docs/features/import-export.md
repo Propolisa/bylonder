@@ -215,8 +215,11 @@ control panel, on WebGL 2, loading Babylon.js from its CDN. [Open the demo](http
     you named before Blender's Material.001), each with its nodes, then objects, lights, cameras, the world and the
     scene, every property under Blender's name for it. On Screen, beside Materials, orders the materials by how much of
     the view each covers, its share beside its name (off: the scene's order). Each material's icon takes the colour
-    it shows on screen, else its Base Color. What is at Blender's defaults is hidden; All shows it. Control Panel, in
-    the export's settings, turns the panel off.
+    it shows on screen, else its Base Color. What is at Blender's defaults is hidden; All shows it. A swatch opens a
+    color picker that changes the scene as you drag. On a touch screen a swipe across a number field covers its range,
+    and a second finger slows it. Drag the grip at the header's left to dock the panel to any side of the view (its
+    button moves to that side's corner), and drag its inner edge to resize it; the page remembers both. Control Panel,
+    in the export's settings, turns the panel off.
 
     ![The button at the corner](../media/features/import-export/control-panel-button.png)
 
