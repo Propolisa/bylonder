@@ -256,6 +256,7 @@ import { reservedNames } from './bylonder/overrides/webgpu/reserved-names.js';
 import { webgpuSamplers } from './bylonder/overrides/webgpu/samplers.js';
 import { warnUnlessMaximumLimits } from './bylonder/overrides/webgpu/maximum-limits.js';
 import { parsePostProcess } from './bylonder/overrides/babylon/god-rays-parse.js';
+import './bylonder/overrides/babylon/chromatic-aberration-size.js';
 import { parseCamera } from './bylonder/overrides/babylon/camera-quaternion.js';${kernels ? `
 import { fillMaterials } from './bylonder/materials.js';
 import kernels from './${NODE_KERNELS}';` : ''}${curves ? `

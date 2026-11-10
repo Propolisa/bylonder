@@ -60,7 +60,7 @@ export const KNOWN = {
   'chess look-webgpu': 'the page does not load: this._light.needCube is not a function',
   'drivers-and-graph-editor look-webgpu': 'the page does not load: this._light.needCube is not a function',
   "coast look-webgpu": "the app itself fails: the Sky material's shader does not compile on WebGPU",
-  'lumen look-webgl2': "42% of pixels agree: the app's Render Image shows the neon lights green only where the page shows their colors (the app's red and blue lost, Lens with chromatic aberration suspected)",
+  'lumen look-webgl2': "41% of pixels agree: the page's neon is brighter, with wider glow and color fringes, than the app's (not yet classified: the example's per-frame emission code, GlowLayer)",
   'orrery look-webgl2': "78% of pixels agree: the plinth's and floor's reflections and the mechanism's lit parts differ (not yet classified)",
   'still-life look-webgl2': '88% of pixels agree, mean 5.3: the Wine Glass (99% of its pixels) and the brass Candlestick differ (not yet classified)',
   'carousel look-webgl2': '53% of pixels agree: not yet classified, rerun once the view transform fix lands',
