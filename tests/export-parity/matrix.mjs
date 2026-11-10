@@ -65,7 +65,7 @@ export const KNOWN = {
   'orrery look-webgl2': "78% of pixels agree: the plinth's and floor's reflections and the mechanism's lit parts differ (not yet classified)",
   'compositor look-webgl2': '14.5% of pixels agree: not yet classified, rerun once the view transform fix lands',
   'geometry-node-editor look-webgl2': '32% of pixels agree: not yet classified, rerun once the view transform fix lands',
-  'geometry-nodes look-webgl2': '87% of pixels agree: the page draws no point clouds (the planet's clouds, draw/pointcloud.js in the app)',
+  'geometry-nodes look-webgl2': '87% of pixels agree: the page draws no point clouds (the planet clouds, draw/pointcloud.js in the app)',
   'desk-lamp look-webgl2': 'the page is never ready within 180 s (a material never reports ready)',
   'cube look-webgpu': 'the page is never ready within 180 s (a material never reports ready)',
 };
