@@ -146,6 +146,8 @@ export async function appPicture(browser, url, { id, engine, path, exportTo }) {
 // File > Export > JavaScript (.zip), unzipped into `dir`.
 async function exportPackage(app, dir) {
   const download = app.page.waitForEvent('download', { timeout: 300000 });
+  // Failed with the app when a step below fails first, its failure that step's.
+  download.catch(() => {});
   await app.page.click('[data-blender="TOPBAR_MT_file"]');
   await app.page.getByRole('menuitem', { name: /^Export/ }).first().hover();
   await app.page.getByRole('menuitem', { name: 'JavaScript (.zip)' }).click();
