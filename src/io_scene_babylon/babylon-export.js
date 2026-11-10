@@ -12,7 +12,7 @@ import { liveConstraints, liveTransform } from './live-curves.js';
 import { report } from '../windowmanager/wm-reports.js';
 import { channelKey } from './modifiers-export.js';
 import { AREA_LIGHT, rigAreaLights, rigId, rigTransform } from './area-lights.js';
-import { eulerCameras } from '../overrides/babylon/camera-quaternion.js';
+import { eulerCameras, turnedCameras } from '../overrides/babylon/camera-quaternion.js';
 import { writePostProcesses } from '../overrides/babylon/camera-post-processes.js';
 
 // The World's skybox is Bylonder's (world-babylon.js) but is what a render shows; the loader rebuilds it.
@@ -320,8 +320,8 @@ function aimed(entry, camera) {
   if (!camera?.lockedTarget || !entry.rotation) return;
   const rotation = new Quaternion();
   camera.getViewMatrix().clone().invert().decompose(undefined, rotation);
-  entry.rotation = rotation.toEulerAngles().asArray();
-  delete entry.rotationQuaternion;
+  entry.rotationQuaternion = rotation.asArray();
+  eulerCameras([entry]);
 }
 
 // A node's own metadata, without Bylonder's (modifier bases, creation records, draw owners).
@@ -433,6 +433,7 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
   json.multiMaterials = kept(json.multiMaterials, scene.multiMaterials, (m) => content.materials.has(m) || content.meshes.some((mesh) => mesh.material === m));
   json.particleSystems = kept(json.particleSystems, scene.particleSystems, (p) => !p.emitter?.getClassName || content.nodes.has(p.emitter));
   for (const entry of json.cameras) aimed(entry, scene.getCameraByUniqueId(entry.uniqueId));
+  turnedCameras(json.cameras, animationGroups);
   extraInfluences(json, scene);
   Object.assign(json, { animationGroups, activeCameraID, defaultMaterialId: content.defaultMaterial?.uniqueId, renderingPipelines: effects.renderingPipelines, imageProcessingConfiguration: scene.imageProcessingConfiguration.serialize(), producer: { name: 'Bylonder', file: 'scene.babylon' } });
   writePostProcesses(json, effects.postProcesses);

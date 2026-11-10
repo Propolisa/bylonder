@@ -215,9 +215,6 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   const display = await displaySettings(world, bin);
   // Area lights as Bylonder's (runtime/area-light.js): lit once parsed, and casting shadows as its Area Light Shadows
   // extension has them.
-  // Cameras their animation turns by quaternion (babylon-export.js transformAnimations), which Babylon's parser leaves out.
-  const turning = new Set((data.animationGroups ?? []).flatMap((g) => g.targetedAnimations).filter((t) => t.animation.property === 'rotationQuaternion').map((t) => t.targetId));
-  const turnedCameras = data.cameras.filter((c) => turning.has(c.id)).map((c) => c.uniqueId);
   const areaLights = data.lights.some((l) => l.type === AREA_LIGHT), areaSpecular = data.materials.some((m) => m.customType === 'BABYLON.PBRMaterial');
   // Bylonder's own pipeline of a rendered view (render-babylon.js SceneLinearPipeline) turns the scene's image processing
   // off, so materials would encode to display themselves: with the view transform, which displays instead, it stays out
@@ -258,8 +255,8 @@ import { derivativeUniformity } from './bylonder/overrides/webgpu/derivative-uni
 import { reservedNames } from './bylonder/overrides/webgpu/reserved-names.js';
 import { webgpuSamplers } from './bylonder/overrides/webgpu/samplers.js';
 import { warnUnlessMaximumLimits } from './bylonder/overrides/webgpu/maximum-limits.js';
-import { parsePostProcess } from './bylonder/overrides/babylon/god-rays-parse.js';${turnedCameras.length ? `
-import { turnByQuaternion } from './bylonder/overrides/babylon/camera-quaternion.js';` : ''}${kernels ? `
+import { parsePostProcess } from './bylonder/overrides/babylon/god-rays-parse.js';
+import { parseCamera } from './bylonder/overrides/babylon/camera-quaternion.js';${kernels ? `
 import { fillMaterials } from './bylonder/materials.js';
 import kernels from './${NODE_KERNELS}';` : ''}${curves ? `
 // The curves blocks the materials drawing curves use, before they are parsed.
@@ -374,8 +371,7 @@ ${geometryLines.join('\n')}
 
   const nodes = {};
 ${objectLines}
-${parse('LIGHTS', data.lights, `nodes[entry.uniqueId] = ${areaLights ? 'parseLight(entry, scene, AreaLight)' : 'Light.Parse(entry, scene)'}`)}${parse('CAMERAS', data.cameras, 'nodes[entry.uniqueId] = Camera.Parse(entry, scene)')}${turnedCameras.length ? `  for (const id of ${json(turnedCameras)}) turnByQuaternion(nodes[id]);
-` : ''}
+${parse('LIGHTS', data.lights, `nodes[entry.uniqueId] = ${areaLights ? 'parseLight(entry, scene, AreaLight)' : 'Light.Parse(entry, scene)'}`)}${parse('CAMERAS', data.cameras, 'nodes[entry.uniqueId] = parseCamera(entry, scene)')}
 ${parented.map((e) => `  nodes[${e.uniqueId}].parent = nodes[${e.parentId}] ?? null;`).join('\n')}${data.lights.some((l) => l.excludedMeshesIds?.length || l.includedOnlyMeshesIds?.length) ? `
   // The meshes each light leaves out or lights alone, by id, as Babylon's loader resolves them once the meshes exist.
   const meshes = (ids) => ids.map((id) => scene.getMeshById(id)).filter(Boolean);

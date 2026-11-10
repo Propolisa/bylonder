@@ -62,7 +62,6 @@ export const KNOWN = {
   "coast look-webgpu": "the app itself fails: the Sky material's shader does not compile on WebGPU",
   'orrery look-webgl2': "78% of pixels agree: the plinth's and floor's reflections and the mechanism's lit parts differ (not yet classified)",
   'still-life look-webgl2': '88% of pixels agree, mean 5.3: the Wine Glass (99% of its pixels) and the brass Candlestick differ (not yet classified)',
-  "arrays look-webgl2": "the railing's metal shading differs (Handrail and Balusters 76% of their pixels), geometry matches",
   'carousel look-webgl2': '53% of pixels agree: not yet classified, rerun once the view transform fix lands',
   'compositor look-webgl2': '14.5% of pixels agree: not yet classified, rerun once the view transform fix lands',
   'framed-print look-webgl2': '72% of pixels agree: not yet classified, rerun once the view transform fix lands',
