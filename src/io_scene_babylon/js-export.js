@@ -259,6 +259,7 @@ import { depthMetricVaryings } from './bylonder/overrides/webgpu/depth-metric-va
 import { pbrFromGLSL } from './bylonder/overrides/webgpu/pbr-from-glsl.js';
 import { parsePostProcess } from './bylonder/overrides/babylon/god-rays-parse.js';
 import './bylonder/overrides/babylon/chromatic-aberration-size.js';
+import './bylonder/overrides/babylon/geometry-gamma-albedo.js';
 import { parseCamera } from './bylonder/overrides/babylon/camera-quaternion.js';${kernels ? `
 import { fillMaterials } from './bylonder/materials.js';
 import kernels from './${NODE_KERNELS}';` : ''}${curves ? `

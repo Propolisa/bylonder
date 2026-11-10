@@ -40,7 +40,7 @@ export const gplFiles = (files) => withFolders(files).filter((e) => e.folder)
   .concat(text(files).includes(AREA_SPECULAR) ? [[AREA_SPECULAR, 'blenkernel/light/area-specular.js'], ...noticeFiles(AREA_SPECULAR.split('/')[0])] : []);
 // Bylonder's overrides of Babylon and WebGPU (src/overrides/), which every package carries in bylonder/overrides/, and
 // how a runtime file imports one there.
-export const OVERRIDE_FILES = ['webgpu/float-world-cube', 'webgpu/derivative-uniformity', 'webgpu/reserved-names', 'webgpu/samplers', 'webgpu/maximum-limits', 'webgpu/missing-attributes', 'webgpu/depth-metric-varyings', 'webgpu/pbr-from-glsl', 'babylon/area-light-parse', 'babylon/camera-quaternion', 'babylon/god-rays-parse', 'babylon/linear-image-processing', 'babylon/chromatic-aberration-size'].flatMap((name) => [`${name}.js`, `${name}.d.ts`]);
+export const OVERRIDE_FILES = ['webgpu/float-world-cube', 'webgpu/derivative-uniformity', 'webgpu/reserved-names', 'webgpu/samplers', 'webgpu/maximum-limits', 'webgpu/missing-attributes', 'webgpu/depth-metric-varyings', 'webgpu/pbr-from-glsl', 'babylon/area-light-parse', 'babylon/camera-quaternion', 'babylon/god-rays-parse', 'babylon/linear-image-processing', 'babylon/chromatic-aberration-size', 'babylon/geometry-gamma-albedo'].flatMap((name) => [`${name}.js`, `${name}.d.ts`]);
 export const packageOverrides = () => OVERRIDE_FILES.map((name) => [`bylonder/overrides/${name}`, `overrides/${name}`]);
 export const packagedRuntime = (text) => text.replaceAll("'../../overrides/", "'./overrides/");
 // The blocks library and Bylonder's extensions of Babylon, by package path: runtime/ files a package ships beside its

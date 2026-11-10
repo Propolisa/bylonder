@@ -3,6 +3,7 @@
 // preference keeps in the browser's storage. A `gpu` URL parameter on the app overrides it (the browser tests'
 // E2E_ENGINE). WebGPU falls back to WebGL 2 where the browser has no adapter.
 import { Engine, WebGPUEngine } from '@babylonjs/core';
+import '../overrides/babylon/geometry-gamma-albedo.js';
 import { declarationLists } from '../overrides/webgpu/declaration-lists.js';
 import { depthMetricVaryings } from '../overrides/webgpu/depth-metric-varyings.js';
 import { WEBGPU_OPTIONS } from '../overrides/webgpu/maximum-limits.js';
