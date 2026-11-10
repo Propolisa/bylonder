@@ -116,6 +116,7 @@ limits:
   - A Baked branch is the scene as exported: a baked stack does not follow the frame or the page's controls, and a baked compositor offers none of its settings as controls.
   - Curves, volumes and post-processing are Live or Off for the whole scene, not per object. Off leaves curves' materials in the package, unused.
   - The package's createEngine is for pages; in Node (the headless SDK) pass a NullEngine to load as before.
+  - With GPU Engine set to WebGPU or WebGL 2, the page's createEngine makes a WebGPU engine wherever the browser has WebGPU and does not fall back to WebGL 2 when its device fails to start (the page stays black); the live demo is exported for WebGL 2 for that reason.
   - The control panel shows the controls the export lists (transforms, visibility, lights, the camera, node inputs, custom properties, modifier and Geometry Nodes inputs); a property the page cannot drive yet is not in it, and enum properties have no controls yet, so its dropdowns choose only an image.
   - The control panel labels a node by its name, not its label, and a property by Blender's name for it (Euler Rotation, where the N panel says Rotation).
   - Babylon's Inspector and node editors are Babylon's own bundles, which read the page's Babylon from a global: a bundled package holds the whole of Babylon's core (about 3 MB) in bundle/ for them, fetched only when one opens; In the Package does not ship Babylon's GUI, which the Inspector loads from Babylon's CDN.
@@ -141,6 +142,9 @@ included.
 The demo, Import and Export, is a gallery: a plinth between two spot lights, and on it a bronze bust brought in
 from the example's [bust.glb](../../examples/import-export/bust.glb), a glTF 2.0 file with the bust's mesh and its
 Bronze and Marble materials. The steps below take the bust out and import it again.
+
+An exported page runs live on this site: the Compositor example's File > Export > JavaScript package, with its
+control panel, on WebGL 2, loading Babylon.js from its CDN. [Open the demo](https://propolisa.github.io/bylonder/docs/demos/compositor/).
 
 ## Steps
 
@@ -257,3 +261,5 @@ Bronze and Marble materials. The steps below take the bust out and import it aga
   examples):
   record this page's pictures, and [record-control-panel.mjs](../../tools/docs/record-control-panel.mjs) (on the Lava
   example, with custom properties added, and the Compositor example for its materials' colours) the control panel's.
+- [export-demo.mjs](../../tools/docs/export-demo.mjs): writes the live demo, the Compositor example's package, to
+  [docs/demos/compositor/](../demos/compositor/index.html).

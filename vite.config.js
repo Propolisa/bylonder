@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { scanImplemented } from "./scripts/blender-coverage.mjs";
 import { blenderIcons } from "./scripts/blender-icons.mjs";
 import { execFileSync } from "node:child_process";
-import { createReadStream, readdirSync, readFileSync } from "node:fs";
+import { createReadStream, readdirSync, readFileSync, statSync } from "node:fs";
 import { zipSync } from "fflate";
 import { babylonArchive } from "./src/io_scene_babylon/babylon-sources.js";
 import { demoFile } from "./scripts/demo-files.mjs";
@@ -92,6 +92,15 @@ const babylonSources = () => {
   };
 };
 
+// The live demos of exported pages (tools/docs/export-demo.mjs), published as they are: built, they would be bundled.
+const demos = () => ({
+  name: "export-demos",
+  generateBundle() {
+    for (const path of readdirSync("docs/demos", { recursive: true }).map((path) => `docs/demos/${path.replaceAll("\\", "/")}`))
+      if (statSync(path).isFile()) this.emitFile({ type: "asset", fileName: path, source: readFileSync(path) });
+  },
+});
+
 // Cross-origin isolation for Blender's threads (SharedArrayBuffer), as the site's service worker gives it
 // (public/workspace-sw.js): every page and file but the docs viewer's page, whose embeds are other sites' pages.
 const isolation = () => ({
@@ -109,7 +118,7 @@ const isolation = () => ({
 
 export default defineConfig({
   base: process.env.BASE_PATH || "/",
-  plugins: [vue(), tailwindcss(), blenderCoverage(), blenderIconSet(), changelog(), demoFiles(), babylonSources(), isolation()],
+  plugins: [vue(), tailwindcss(), blenderCoverage(), blenderIconSet(), changelog(), demoFiles(), babylonSources(), demos(), isolation()],
   define: { __BYLONDER_VERSION__: JSON.stringify(pkg.version), __BYLONDER_CHANGE__: JSON.stringify(commits()[0] ?? null) },
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
   // Agents' worktrees live under .claude/: their edits must not reload this checkout's pages (a worktree's own server

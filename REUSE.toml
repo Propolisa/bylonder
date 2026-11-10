@@ -228,6 +228,26 @@ SPDX-FileCopyrightText = "2026 KubeezCut"
 SPDX-License-Identifier = "MIT"
 
 
+# The live demo of an exported page (docs/demos/, tools/docs/export-demo.mjs): its folders of Blender's code ship their
+# notices (LICENSE.md, COPYING), Zod is bundled with its own, and Babylon.js's area light table is Babylon's.
+[[annotations]]
+path = ["docs/demos/*/bylonder-nodes/**", "docs/demos/*/bylonder-area-specular/**"]
+precedence = "override"
+SPDX-FileCopyrightText = ["Blender Authors", "2026 Chris Stanley"]
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+[[annotations]]
+path = "docs/demos/*/bylonder/zod.js"
+precedence = "override"
+SPDX-FileCopyrightText = "2025 Colin McDonnell"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "docs/demos/*/babylon-assets/**"
+precedence = "override"
+SPDX-FileCopyrightText = "The Babylon.js contributors"
+SPDX-License-Identifier = "Apache-2.0"
+
 # The root license texts GitHub and npm detect (the dual layout), copies of LICENSES/MIT.txt and LICENSES/Apache-2.0.txt.
 [[annotations]]
 path = "LICENSE-MIT"

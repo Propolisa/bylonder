@@ -1,0 +1,106 @@
+{
+  "version": 1,
+  "about": "Bylonder's implementation registry: each Blender unit an export uses, by Blender's identifier, and the implementations a page can run it with, each with its license and fidelity. A key ending in * stands for every identifier with that prefix; a more specific key comes first. Status planned: not built yet.",
+  "units": {
+    "transform": [
+      { "implementation": "page runtime (blend-scene.js) composing location, rotation and scale", "license": "MIT OR Apache-2.0", "fidelity": "exact" }
+    ],
+    "constraint:*": [
+      { "implementation": "Babylon's matrices (runtime/constraints-evaluator.js): an object's Track To, Copy Location, Copy Rotation (all axes, replacing) and Child Of (all channels) in world space at full influence, applied to its node before each frame draws, kept where they give Main's world matrix at every frame", "license": "MIT OR Apache-2.0", "fidelity": "exact" },
+      { "implementation": "Blender's module (the fallback evaluator)", "license": "GPL-2.0-or-later", "fidelity": "exact", "status": "planned" },
+      { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
+    ],
+    "action": [
+      { "implementation": "Babylon AnimationGroup, Hermite keys where they are the F-curve", "license": "Apache-2.0", "fidelity": "exact" },
+      { "implementation": "clean-room F-Curve unit (runtime/fcurve-evaluator.js, drivers/fcurve.js): an object transform's F-Curve Babylon cannot play exactly (rotations, easings, extrapolation, Cycles), its keys in scene.bin; modifiers but Cycles stay baked", "license": "MIT OR Apache-2.0", "fidelity": "exact" },
+      { "implementation": "sampled per frame from Main (Bake Animation, or what the unit does not reproduce)", "license": "data", "fidelity": "baked" }
+    ],
+    "nla": [
+      { "implementation": "Babylon AnimationGroup, an object transform's strip keys moved, scaled and repeated where one track replaces at full influence and the keys are the F-curve", "license": "Apache-2.0", "fidelity": "exact" },
+      { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
+    ],
+    "driver:SINGLE_PROP": [
+      { "implementation": "clean-room driver units (runtime/drivers/, docs/clean-room/), run by the page's scheduler once a control the driver reads is set", "license": "MIT OR Apache-2.0", "fidelity": "exact" },
+      { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
+    ],
+    "driver:TRANSFORMS": [
+      { "implementation": "clean-room driver units (runtime/drivers/, docs/clean-room/), run by the page's scheduler once a control the driver reads is set; rotation readings differ from Blender in about 0.3% of random cases, at float32 branch boundaries", "license": "MIT OR Apache-2.0", "fidelity": "approximate" },
+      { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
+    ],
+    "driver:LOC_DIFF": [
+      { "implementation": "clean-room driver units (runtime/drivers/, docs/clean-room/), run by the page's scheduler once a control the driver reads is set", "license": "MIT OR Apache-2.0", "fidelity": "exact" },
+      { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
+    ],
+    "driver:ROTATION_DIFF": [
+      { "implementation": "clean-room driver units (runtime/drivers/, docs/clean-room/), run by the page's scheduler once a control the driver reads is set; rotation readings differ from Blender in about 0.3% of random cases, at float32 branch boundaries", "license": "MIT OR Apache-2.0", "fidelity": "approximate" },
+      { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
+    ],
+    "driver:CONTEXT_PROP": [
+      { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
+    ],
+    "driver:SCRIPTED": [
+      { "implementation": "clean-room expression unit (runtime/drivers/expression.js); an expression needing Python stays baked", "license": "MIT OR Apache-2.0", "fidelity": "exact" },
+      { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
+    ],
+    "fcurve:driver": [
+      { "implementation": "clean-room F-Curve unit (runtime/drivers/fcurve.js), a driver's own F-Curve; Continuous Acceleration smoothing and modifiers but Cycles stay baked", "license": "MIT OR Apache-2.0", "fidelity": "exact" },
+      { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
+    ],
+    "armature": [
+      { "implementation": "Babylon Skeleton, the pose sampled from Main", "license": "Apache-2.0", "fidelity": "approximate" }
+    ],
+    "shape_keys": [
+      { "implementation": "Babylon MorphTargetManager", "license": "Apache-2.0", "fidelity": "approximate" }
+    ],
+    "modifier:NODES": [
+      { "implementation": "Bylonder's Geometry Nodes evaluator (runtime/geometry-nodes/) over the IR's graph, each node a call into Blender's kernels (bylonder-geometry-nodes/geometry-nodes.wasm) unless a unit is registered for it; its float, integer and boolean inputs set by path; no simulation zones yet", "license": "MIT OR Apache-2.0 (evaluator), GPL-3.0-or-later (kernels)", "fidelity": "exact" },
+      { "implementation": "evaluated mesh and instances", "license": "data", "fidelity": "baked" }
+    ],
+    "modifier:*": [
+      { "implementation": "modifiers.wasm (Live Modifiers), mesh-only types", "license": "GPL-2.0-or-later", "fidelity": "exact" },
+      { "implementation": "evaluated mesh", "license": "data", "fidelity": "baked" }
+    ],
+    "ShaderNodeBsdfPrincipled": [
+      { "implementation": "Babylon PBRMaterial (a material of one Principled BSDF)", "license": "Apache-2.0", "fidelity": "approximate" },
+      { "implementation": "Blender's GLSL in a CustomBlock", "license": "GPL-2.0-or-later", "fidelity": "exact" }
+    ],
+    "ShaderNode*": [
+      { "implementation": "Blender's GLSL in a CustomBlock", "license": "GPL-2.0-or-later", "fidelity": "exact" },
+      { "implementation": "baked textures", "license": "data", "fidelity": "baked", "status": "planned" }
+    ],
+    "CompositorNodeGlare": [
+      { "implementation": "Blender's GLSL made at export on the blocks library's pass block (bylonder-blocks.js); Fog Glow, which reads its highlights back on the CPU, passes its image through", "license": "GPL-2.0-or-later", "fidelity": "approximate" },
+      { "implementation": "Babylon's post-processes", "license": "Apache-2.0", "fidelity": "approximate", "status": "planned" }
+    ],
+    "CompositorNode*": [
+      { "implementation": "Blender's GLSL made at export (a pixel node's code with its values as uniforms, or an operation's recorded plan of passes) on the blocks library's pass block (bylonder-blocks.js, MIT OR Apache-2.0); a value that changes the code or the plan needs Blender's evaluator", "license": "GPL-2.0-or-later", "fidelity": "exact" },
+      { "implementation": "Babylon's post-processes", "license": "Apache-2.0", "fidelity": "approximate", "status": "planned" }
+    ],
+    "light": [
+      { "implementation": "Babylon lights and shadow generators", "license": "Apache-2.0", "fidelity": "approximate" }
+    ],
+    "light:AREA:shadows": [
+      { "implementation": "area light shadows extension (bylonder-area-light.js, the app's Area Light Shadows): a shadow cube from the light's center, as EEVEE's punctual shadow of an area light", "license": "MIT OR Apache-2.0", "fidelity": "approximate" },
+      { "implementation": "Babylon's area light without shadows", "license": "Apache-2.0", "fidelity": "approximate" }
+    ],
+    "world:probe_clamp": [
+      { "implementation": "Babylon's math blocks in the exported world material: the color scaled until its largest component is at most the Sun Threshold, then the indirect clamp, as Blender's manual describes them (https://docs.blender.org/manual/en/5.2/render/eevee/world_settings.html, Sun Threshold; https://docs.blender.org/manual/en/5.2/render/eevee/render_settings/light_paths.html, Clamping); the brightness measure, the largest component, observed in Blender 5.2.3's EEVEE (a world of (8, 2, 1) at Sun Threshold 4 lights a white sphere (3.93, 0.98, 0.49), at indirect clamp 3 (2.93, 0.73, 0.36): the ratio kept, the largest component at the limit)", "license": "MIT", "fidelity": "exact" }
+    ],
+    "volume": [
+      { "implementation": "Bylonder's volumes extension", "license": "GPL-2.0-or-later", "fidelity": "exact", "status": "planned" }
+    ],
+    "view_transform": [
+      { "implementation": "view transform extension (bylonder-view-transform.js): Standard as sRGB's encoding, other views and looks through a lattice of Blender's display processor computed at export (data; the license of Blender's color management files is still to be checked)", "license": "MIT OR Apache-2.0", "fidelity": "exact" },
+      { "implementation": "Babylon's image processing", "license": "Apache-2.0", "fidelity": "approximate" }
+    ],
+    "curves:CURVES": [
+      { "implementation": "Blender's curve shape functions (bylonder-curves/: the app's curves blocks and Blender's GLSL) on Main's curves draw at export, in the curves' material, as the app draws them", "license": "GPL-3.0-or-later", "fidelity": "exact" }
+    ],
+    "grease_pencil:LAYER": [
+      { "implementation": "page runtime (grease-pencil.js): each keyed drawing as Main draws it, strokes as GreasedLine meshes and fills as triangles, the drawing of the last key at or before the frame shown", "license": "MIT OR Apache-2.0", "fidelity": "approximate" }
+    ],
+    "particles": [
+      { "implementation": "per-frame cache", "license": "data", "fidelity": "baked", "status": "planned" }
+    ]
+  }
+}
