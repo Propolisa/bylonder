@@ -60,6 +60,8 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
     scene: import("@babylonjs/core").Scene;
     /** The compositor, a NodeRenderGraph of the blocks library's passes, when the scene composites. */
     compositor: import("@babylonjs/core").NodeRenderGraph | undefined;
+    /** scene.bin's arrays, which the IR's `{ buffer }` inputs name. */
+    buffers: ArrayBufferView<ArrayBufferLike>[];
     /** The scene's IR, as this runtime reads it. */
     ir: {
         schema: "bylonder-ir";
@@ -72,7 +74,7 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
             node?: string | undefined;
             evaluated?: {
                 matrix_world: number[];
-                geometry? /** @type {Knob} */: Record<string, any> | undefined;
+                geometry?: Record<string, any> | undefined;
             } | undefined;
         }>;
         references: {

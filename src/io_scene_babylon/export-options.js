@@ -38,6 +38,8 @@ export const ExportOptionsSchema = z.object({
   target: repaired('target', z.enum(TARGETS.map(([id]) => id)), 'BOTH'),
   /** the runtime every feature instance exports with; null: each its own (docs/runtimes.md) */
   runtime: chosen('runtime'),
+  /** type keys of the units the page registers itself (`modifier:SIMPLE_DEFORM`, `node:ShaderNodeMath`, a key ending in * a prefix), which the package ships none of (unit-manifest.js) */
+  replace: repaired('replace', z.array(z.string()), () => []),
   /** by runtimes.js feature id, overriding `runtime` for that feature and its instances */
   runtimes: repaired('runtimes', z.record(z.string(), repaired('feature runtimes', FeatureRuntimes, () => ({ runtime: null, instances: {} }))), () => ({})),
 });

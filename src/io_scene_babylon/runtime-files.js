@@ -33,11 +33,27 @@ const text = (files) => (typeof files === 'string' ? files : `${files['scene.ir.
 const evaluatorsOf = (files) => Object.entries(EVALUATOR_FILES).filter(([name]) => text(files).includes(`"implementation":"${name}"`)).map(([, e]) => e);
 // The folders of Blender's code a package with these files ships, and their files: [package path, src/ path].
 const withFolders = (files) => [...evaluatorsOf(files), ...(text(files).includes(`${VOLUMES.folder}/`) ? [VOLUMES] : [])];
-export const gplFolders = (files) => withFolders(files).filter((e) => e.folder).map((e) => e.folder);
-export const gplFiles = (files) => withFolders(files).filter((e) => e.folder)
-  .flatMap(({ folder, files: own }) => [...Object.entries(own).map(([name, from]) => [`${folder}/${name}`, from]), ...noticeFiles(folder)])
-  .concat(text(files).includes(NODE_KERNELS) ? noticeFiles(NODE_KERNELS.split('/')[0]) : [])
-  .concat(text(files).includes(AREA_SPECULAR) ? [[AREA_SPECULAR, 'blenkernel/light/area-specular.js'], ...noticeFiles(AREA_SPECULAR.split('/')[0])] : []);
+// The package's manifest of units (unit-manifest.js), beside scene.js.
+export const UNITS_FILE = 'units.json';
+// Whether a GPL file ships: while a unit the manifest does not replace uses it, or always for a package without one.
+const shipping = (files) => {
+  const manifest = typeof files === 'object' && files[UNITS_FILE];
+  if (!manifest) return () => true;
+  const used = new Set(Object.values(JSON.parse(manifest).units).filter((u) => !u.replaced).flatMap((u) => u.files));
+  return (path) => used.has(path);
+};
+const folderPaths = ({ folder, files: own }) => Object.entries(own).map(([name, from]) => [`${folder}/${name}`, from]);
+export const gplFolders = (files) => {
+  const ships = shipping(files);
+  return withFolders(files).filter((e) => e.folder && folderPaths(e).some(([path]) => ships(path))).map((e) => e.folder);
+};
+export const gplFiles = (files) => {
+  const ships = shipping(files);
+  const own = withFolders(files).filter((e) => e.folder).flatMap(folderPaths)
+    .concat(text(files).includes(AREA_SPECULAR) ? [[AREA_SPECULAR, 'blenkernel/light/area-specular.js']] : []).filter(([path]) => ships(path));
+  const kernels = text(files).includes(NODE_KERNELS) && ships(NODE_KERNELS) ? [NODE_KERNELS] : [];
+  return [...own, ...[...new Set([...own.map(([path]) => path), ...kernels].map((path) => path.split('/')[0]))].flatMap(noticeFiles)];
+};
 // Bylonder's overrides of Babylon and WebGPU (src/overrides/), which a package carries in bylonder/overrides/ when its
 // scene.js or runtime files import them, and how a runtime file imports one there.
 const OVERRIDES = ['webgpu/float-world-cube', 'webgpu/derivative-uniformity', 'webgpu/reserved-names', 'webgpu/samplers', 'webgpu/maximum-limits', 'webgpu/missing-attributes', 'webgpu/depth-metric-varyings', 'webgpu/vertex-light-blocks', 'webgpu/pbr-from-glsl', 'babylon/area-light-parse', 'babylon/camera-quaternion', 'babylon/god-rays-parse', 'babylon/pipeline-effects', 'babylon/linear-image-processing', 'babylon/chromatic-aberration-size', 'babylon/geometry-gamma-albedo', 'babylon/environment-probe', 'babylon/srgb-texture-parse'];

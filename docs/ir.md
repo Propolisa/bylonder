@@ -156,7 +156,9 @@ WebAssembly or a worker), registered by type key (`runtime/units.js` `register`)
 scheduler parses the resolved inputs with it first, so a unit's author gets typed inputs with defaults filled, and an
 entity it cannot take is reported by path. An entity runs on the unit registered for its type, else on the
 implementation its package ships, else stays baked. The scheduler awaits each result before what reads it, and
-`settled()` resolves once all have run.
+`settled()` resolves once all have run. A package lists its units in `units.json`, with their licences, files, uses and
+interfaces, and File > Export's Replaced Units leaves out the code of those the page registers itself
+(`docs/escaping-the-gpl.md`).
 
 ## Reading
 

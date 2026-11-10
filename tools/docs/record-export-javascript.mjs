@@ -1,6 +1,6 @@
 // Records docs/features/import-export.md's pictures of File > Export > JavaScript's settings on the Rigged Character
 // example: the dialog with every setting inherited, then the package's runtime set to Babylon (native) and the rig's
-// overridden back to Blender from its context menu.
+// overridden back to Blender from its context menu; then its Units with the shader nodes replaced but one.
 //   usage: node tools/docs/record-export-javascript.mjs
 import { record } from "./record.mjs";
 
@@ -23,4 +23,12 @@ await record("import-export", { example: "rigged-character", node: null }, async
   await app.frame().getByRole("menuitem", { name: "Blender" }).click();
   await r.pause(300);
   await r.shot("export-javascript-override", dialog);
+  await row("Runtime").getByRole("button", { name: "Collapse" }).first().click();
+  await row("Shader Nodes").getByRole("button", { name: /^Shader Nodes:/ }).click();
+  await app.frame().getByRole("menuitem", { name: "Replaced" }).click();
+  await row("Shader Nodes").getByRole("button", { name: "Expand" }).first().click();
+  await row("Principled BSDF").getByRole("button", { name: /^Principled BSDF:/ }).click();
+  await app.frame().getByRole("menuitem", { name: "Blender (GPL)" }).click();
+  await r.pause(300);
+  await r.shot("export-javascript-units", dialog);
 });

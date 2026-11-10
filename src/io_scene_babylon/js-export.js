@@ -10,7 +10,7 @@ import { CLOCK, sampledGaps, serializeScene } from './babylon-export.js';
 import { exportRuntimes } from '../runtimes/runtimes.js';
 import { TARGETS } from './export-options.js';
 import { exportControls, controlTypes } from './controls-export.js';
-import { exportNodeMaterial, materialKernels } from './node-material-export.js';
+import { exportNodeMaterial, kernelsFile, materialKernels } from './node-material-export.js';
 import { fillMaterials, MESH_VALUE } from './runtime/materials.js';
 import { worldNodes } from '../blenkernel/scene/world-babylon.js';
 import { createSceneBin } from './scene-bin.js';
@@ -18,7 +18,8 @@ import { imageFiles } from './image-files.js';
 import { exportCompositor } from './compositor-export.js';
 import { exportIR, idKey } from './ir-export.js';
 import { channels, readsOtherIDs } from './modifiers-export.js';
-import { AREA_SPECULAR, gplFolders, NODE_KERNELS } from './runtime-files.js';
+import { AREA_SPECULAR, gplFolders, NODE_KERNELS, UNITS_FILE } from './runtime-files.js';
+import { AREA_SPECULAR_UNIT, replaces, stripEntities, stripPieces, unitManifest } from './unit-manifest.js';
 import { CURVES_GLSL_FILE, curvesGlslFile } from './curves-export.js';
 import { exportVolumes, VOLUMES_FILE } from './volumes-export.js';
 import { idStruct } from '../python/bpy_rna.js';
@@ -120,8 +121,8 @@ async function worldMaterial(scene, parity, graphOf) {
 }
 
 // The per-node kernels of the materials built from the IR's graphs (runtime-files.js NODE_KERNELS), or null. A material
-// whose nodes the page cannot build from its graph ships its own code instead.
-async function irMaterials(materials, graphs, ir, parity) {
+// whose nodes the page cannot build from its graph ships its own code instead, its name added to `ownCode`.
+async function irMaterials(materials, graphs, ir, parity, ownCode) {
   const source = await materialKernels(graphs, { parity });
   const kernels = source && JSON.parse(source.slice(source.indexOf('export default ') + 'export default '.length).trim().replace(/;$/, ''));
   for (const [material, key] of graphs) {
@@ -132,9 +133,10 @@ async function irMaterials(materials, graphs, ir, parity) {
     } catch (error) {
       console.warn(`${material.name}: built from its own code, not the IR (${error.message})`);
       materials[at] = await exportNodeMaterial(material, { parity });
+      ownCode.push(material.name);
     }
   }
-  return materials.some((entry) => entry.blocks?.some((block) => block.options?.blender)) ? source : null;
+  return materials.some((entry) => entry.blocks?.some((block) => block.options?.blender)) ? kernels : null;
 }
 
 // The IR graph key of each material and world of Blender's nodes (ir-export.js idGraphs), which the page builds them
@@ -196,20 +198,21 @@ function greasePencilClock(world, ir, groups) {
 // The package's files but the runtime's: scene.js, scene.d.ts, scene.ir.json, scene.bin and images/. With `live`, objects whose
 // modifiers are all Blender's keep them live (modifiers-export.js), run by modifiers.wasm in bylonder-modifiers/. With
 // `bakeAnimation`, what Babylon cannot play as its F-Curve is sampled per frame; `target`, the GPU engine its page makes
-// (export-options.js TARGETS); `runtime`, `runtimes`, the runtimes its features export with (runtimes.js chosenRuntime).
-export async function exportModule(world, { live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, target = 'BOTH', runtime = null, runtimes = {} } = {}) {
+// (export-options.js TARGETS); `runtime`, `runtimes`, the runtimes its features export with (runtimes.js chosenRuntime);
+// `replace`, the type keys of units the page registers itself, which the package ships none of (unit-manifest.js).
+export async function exportModule(world, { live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, target = 'BOTH', runtime = null, runtimes = {}, replace = [] } = {}) {
   const live = new Map(keepLive ? world.objects.map((node) => [node, world.modifiers.live(node)]).filter(([node, stack]) => stack && !stack.modifiers.some(needsOpenVDB) && !readsOtherIDs(world, node)) : []);
   await world.modifiers.settled();
   // The mapped meshes' geometry is read below: their mapping holds until the module is written.
   const mapped = exportRuntimes(world, { bake: bakeAnimation, runtime, runtimes });
   try {
-    return await moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, target });
+    return await moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, target, replace });
   } finally {
     mapped.restore();
   }
 }
 
-async function moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, target }) {
+async function moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, target, replace }) {
   const graphs = [], graphOf = materialGraphs(world, graphs);
   const data = await serializeScene(world, { geometry: false, live, mapped, parity, graphOf, bake: bakeAnimation });
   const { scene } = world;
@@ -228,18 +231,29 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   const display = await displaySettings(world, bin);
   // Area lights as Bylonder's (runtime/area-light.js): lit once parsed, and casting shadows as its Area Light Shadows
   // extension has them.
-  const areaLights = data.lights.some((l) => l.type === AREA_LIGHT), areaSpecular = data.materials.some((m) => m.customType === 'BABYLON.PBRMaterial');
+  const pbr = data.materials.filter((m) => m.customType === 'BABYLON.PBRMaterial').length;
+  const areaLights = data.lights.some((l) => l.type === AREA_LIGHT), areaSpecular = pbr > 0, blenderSpecular = areaSpecular && !replaces(replace, AREA_SPECULAR_UNIT);
   // Bylonder's own pipeline of a rendered view (render-babylon.js SceneLinearPipeline) turns the scene's image processing
   // off, so materials would encode to display themselves: with the view transform, which displays instead, it stays out
   // unless one of its effects is on.
   if (display) data.renderingPipelines = data.renderingPipelines.filter((p) => !(p._name?.startsWith('__display:') && !PIPELINE_EFFECTS.some((e) => p[e])));
   const controls = [...exportControls(world, data), ...(composited?.knobs ?? [])];
-  const ir = exportIR(world, { controls, live, bin, animationGroups: data.animationGroups, curves: data.liveCurves, constraints: data.liveConstraints }), irJson = json(ir);
+  const ir = exportIR(world, { controls, live, bin, animationGroups: data.animationGroups, curves: data.liveCurves, constraints: data.liveConstraints });
+  const computed = { ...ir, entities: structuredClone(ir.entities) };
+  stripEntities(ir, replace);
+  const irJson = json(ir);
   sampledGaps(data, ir);
   greasePencilClock(world, ir, data.animationGroups);
-  const kernels = await irMaterials(data.materials, graphs, ir, parity), code = sharedCode(data.materials);
+  const ownCode = [], shipped = await irMaterials(data.materials, graphs, ir, parity, ownCode), code = sharedCode(data.materials);
+  const pieces = stripPieces(ir, shipped, replace), kernels = pieces && kernelsFile(pieces);
   const curves = Object.values(ir.entities).some((e) => e.implementation === 'curves');
   const meshValued = data.materials.some((m) => m.blocks?.some((b) => b.name.startsWith(MESH_VALUE)));
+  const units = json(unitManifest(computed, { kernels: shipped, replace, blocks: {
+    ...(areaSpecular && { [AREA_SPECULAR_UNIT]: { files: [AREA_SPECULAR], interface: { apply: '(material: PBRMaterial) => void' }, use: { materials: pbr } } }),
+    ...(volumes && { 'block:volumes': { files: [VOLUMES_FILE], swappable: false, use: { materials: volumes.materials.length } } }),
+    ...(composited && { 'block:compositor': { files: ['scene.js'], swappable: false, use: { what: "Blender's compositor GLSL made at export, in scene.js" } } }),
+    ...(ownCode.length && { 'block:material_code': { files: ['scene.js'], swappable: false, use: { materials: ownCode } } }),
+  } }));
   volumes?.dispose();
   parentInstances(objects);
   const parented = [...data.transformNodes, ...data.meshes, ...data.lights, ...data.cameras].filter((e) => e.parentId !== undefined);
@@ -257,9 +271,9 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   const source = `// ${name}, exported from Bylonder: load(engine) gives it with its controls, createScene(engine, canvas) builds it
 // alone, with Babylon.js ${AbstractEngine.Version}; createEngine(canvas) makes the engine it is exported for: ${TARGET_NAMES[target]}.
 // In a page, map @babylonjs/core to the same version:
-// <script type="importmap">{ "imports": { "@babylonjs/core": "${CDN}" } }</script>${[...gplFolders(irJson), ...(kernels ? [NODE_KERNELS.split('/')[0]] : []), ...(volumes ? [VOLUMES_FILE.split('/')[0]] : [])].map((folder) => `
+// <script type="importmap">{ "imports": { "@babylonjs/core": "${CDN}" } }</script>${[...gplFolders({ 'scene.ir.json': irJson, [UNITS_FILE]: units }), ...(pieces && Object.keys(pieces.pieces).length ? [NODE_KERNELS.split('/')[0]] : []), ...(volumes ? [VOLUMES_FILE.split('/')[0]] : [])].map((folder) => `
 // Includes GPL code: ${folder}/, Blender's code (GPL-3.0-or-later, ${folder}/LICENSE.md), loaded only when a control
-// that needs it is set.`).join('')}${areaSpecular ? `
+// that needs it is set.`).join('')}${blenderSpecular ? `
 // Includes GPL code: ${AREA_SPECULAR}, Blender's light specular (GPL-3.0-or-later, ${AREA_SPECULAR.split('/')[0]}/LICENSE.md).` : ''}
 import { readBuffers, readBytes } from './bylonder/buffers.js';
 import { worldColor, worldNodes } from './bylonder/world.js';
@@ -290,6 +304,7 @@ import './bylonder/overrides/babylon/linear-image-processing.js';` : ''}${areaLi
 import { AreaLight } from './bylonder-area-light.js';
 import { parseLight } from './bylonder/overrides/babylon/area-light-parse.js';` : ''}${composited ? `
 import { compositor } from './bylonder-blocks.js';` : ''}${areaSpecular ? `
+import { unitFor } from './bylonder/units.js';` : ''}${blenderSpecular ? `
 import { blenderAreaSpecular } from './${AREA_SPECULAR}';` : ''}
 import { Animation, AnimationGroup, CascadedShadowGenerator, Color3, Color4, CubeTexture, EffectLayer, ${[webgl && 'Engine', webgpu && 'WebGPUEngine'].filter(Boolean).join(', ')}, Geometry, HDRCubeTexture, Light, LinesMesh, Material, Matrix, Mesh, MorphTargetManager, MultiMaterial, Quaternion, ReflectionProbe, Scene, SerializationHelper, ShadowGenerator, Skeleton, SubMesh, TransformNode, Vector3, Camera, ParticleSystem } from '@babylonjs/core';
 import * as BABYLON from '@babylonjs/core';
@@ -380,8 +395,9 @@ ${kernels ? `  // Blender's nodes of each material and world, made from the IR's
   for (const material of Object.values(materials)) if (material.getClassName() === 'NodeMaterial') webgpuSamplers(material);` : ''}${meshValued ? `
   // Each mesh's own texture space, in the materials it shares.
   for (const material of Object.values(materials)) meshValues(material);` : ''}${areaSpecular ? `
-  // Lights' specular as EEVEE's, as the app's PBR materials have it.
-  for (const material of Object.values(materials)) if (material.getClassName() === 'PBRMaterial') blenderAreaSpecular(material);` : ''}
+  // Lights' specular as a registered unit gives it${blenderSpecular ? `, else as EEVEE's, as the app's PBR materials have it` : ', else as Babylon lights them'}.
+  const areaSpecular = unitFor('${AREA_SPECULAR_UNIT}')?.apply${blenderSpecular ? ' ?? blenderAreaSpecular' : ''};
+  if (areaSpecular) for (const material of Object.values(materials)) if (material.getClassName() === 'PBRMaterial') areaSpecular(material);` : ''}
   // A multi-material's slots by the exported materials' unique ids, as Babylon's loader resolves them after parsing.
   for (const entry of MULTI_MATERIALS) {
     const multi = materials[entry.uniqueId] = MultiMaterial.ParseMultiMaterial(entry, scene);
@@ -434,5 +450,5 @@ ${data.animationGroups.some((g) => g.targetedAnimations.some((t) => t.animation.
 `;
   // An ES module package in Node too (the headless SDK), needing only Babylon.
   const manifest = { name: name.toLowerCase().replace(/[^a-z0-9-]+/g, '-'), type: 'module', main: 'scene.js', types: 'scene.d.ts', peerDependencies: { '@babylonjs/core': AbstractEngine.Version } };
-  return { 'scene.js': source, 'scene.d.ts': controlTypes(Object.entries(ir.properties).map(([path, { type }]) => ({ path, type }))), 'scene.ir.json': irJson, ...(kernels && { [NODE_KERNELS]: kernels }), ...(curves && { [CURVES_GLSL_FILE]: curvesGlslFile() }), 'scene.bin': bin.bytes(), 'package.json': `${JSON.stringify(manifest, null, 2)}\n`, ...images };
+  return { 'scene.js': source, 'scene.d.ts': controlTypes(Object.entries(ir.properties).map(([path, { type }]) => ({ path, type }))), 'scene.ir.json': irJson, [UNITS_FILE]: units, ...(kernels && { [NODE_KERNELS]: kernels }), ...(curves && { [CURVES_GLSL_FILE]: curvesGlslFile() }), 'scene.bin': bin.bytes(), 'package.json': `${JSON.stringify(manifest, null, 2)}\n`, ...images };
 }

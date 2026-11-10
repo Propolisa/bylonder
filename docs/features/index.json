@@ -669,7 +669,8 @@
    "import-export/export-menu.png",
    "import-export/export-options.png",
    "import-export/export-javascript.png",
-   "import-export/export-javascript-override.png"
+   "import-export/export-javascript-override.png",
+   "import-export/export-javascript-units.png"
   ],
   "ui": [
    "TOPBAR_MT_file",
@@ -706,7 +707,8 @@
    "src/io_scene_babylon/export-dialog.js",
    "src/editors/interface/components/ExportDialog.vue",
    "src/editors/interface/components/SettingRow.vue",
-   "src/runtimes/runtimes.js"
+   "src/runtimes/runtimes.js",
+   "src/io_scene_babylon/unit-manifest.js"
   ],
   "tests": [
    "tests/io-wasm.test.js",
@@ -714,6 +716,7 @@
    "tests/e2e/smoke.mjs",
    "tests/export-options.test.js",
    "tests/export-package-wasm.test.js",
+   "tests/unit-swap-wasm.test.js",
    "tests/runtimes-armature-wasm.test.js",
    "tests/texture-paint-wasm.test.js"
   ],
@@ -729,6 +732,7 @@
    "Grease Pencil drawings export as Blender draws them: Babylon (mapped) chosen for them is reported to the Info editor, as GreasedLine's own settings are not written yet.",
    "A runtime a feature does not offer (Babylon (native) for an armature) is reported to the Info editor, and its instances export with their own.",
    "The export's settings are asked each time; they are not saved with the project.",
+   "File > Export > JavaScript's Units leaves a replaced unit's code out of the package; the page registers its own (docs/escaping-the-gpl.md). Curves, volumes, the compositor and a material not built from its graph cannot be replaced yet.",
    "The package's createEngine is for pages; in Node (the headless SDK) pass a NullEngine to load as before.",
    "The splash's Open from URL downloads only from servers that allow downloads from a web page (CORS); Blender's demo files are served from Bylonder's own copy for that reason."
   ],

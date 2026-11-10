@@ -24,6 +24,7 @@ media:
   - import-export/export-options.png
   - import-export/export-javascript.png
   - import-export/export-javascript-override.png
+  - import-export/export-javascript-units.png
 ui:
   - TOPBAR_MT_file
   - TOPBAR_MT_file_import*
@@ -58,12 +59,14 @@ code:
   - src/editors/interface/components/ExportDialog.vue
   - src/editors/interface/components/SettingRow.vue
   - src/runtimes/runtimes.js
+  - src/io_scene_babylon/unit-manifest.js
 tests:
   - tests/io-wasm.test.js
   - tests/io-addons-wasm.test.js
   - tests/e2e/smoke.mjs
   - tests/export-options.test.js
   - tests/export-package-wasm.test.js
+  - tests/unit-swap-wasm.test.js
   - tests/runtimes-armature-wasm.test.js
   - tests/texture-paint-wasm.test.js
 limits:
@@ -78,6 +81,7 @@ limits:
   - Grease Pencil drawings export as Blender draws them: Babylon (mapped) chosen for them is reported to the Info editor, as GreasedLine's own settings are not written yet.
   - A runtime a feature does not offer (Babylon (native) for an armature) is reported to the Info editor, and its instances export with their own.
   - The export's settings are asked each time; they are not saved with the project.
+  - File > Export > JavaScript's Units leaves a replaced unit's code out of the package; the page registers its own (docs/escaping-the-gpl.md). Curves, volumes, the compositor and a material not built from its graph cannot be replaced yet.
   - The package's createEngine is for pages; in Node (the headless SDK) pass a NullEngine to load as before.
   - The splash's Open from URL downloads only from servers that allow downloads from a web page (CORS); Blender's demo files are served from Bylonder's own copy for that reason.
 ---
@@ -128,7 +132,8 @@ Bronze and Marble materials. The steps below take the bust out and import it aga
 
 6. **Export for Babylon.** File > Export > JavaScript (.zip) writes a package that loads in plain Babylon.js. Below its
    checkboxes, its settings are a tree: GPU Engine, then Runtime with each feature that has a runtime choice and, under
-   each, the scene's instances of it. A setting left unset shows what it inherits greyed, with a linked decorator; hover
+   each, the scene's instances of it, then Units: the scene's units by category, each Blender's code (GPL) or Replaced
+   by a unit your page registers, whose code the package then leaves out ([Escaping the GPL](../escaping-the-gpl.md)). A setting left unset shows what it inherits greyed, with a linked decorator; hover
    it to see where the value comes from. Unset everywhere, each instance exports with its own
    [runtime](../runtimes.md).
 
@@ -140,6 +145,13 @@ Bronze and Marble materials. The steps below take the bust out and import it aga
    in the same menu, or the decorator, makes it inherit again.
 
    ![A package-wide runtime and the rig's override](../media/features/import-export/export-javascript-override.png)
+
+8. **Replace units.** Under Units, set Shader Nodes to Replaced: each shader node inherits it, its icon a script for
+   your own code instead of Blender's logo. Set Principled BSDF back to Blender (GPL). The package leaves out the
+   replaced nodes' code, and your page registers its own units for them
+   ([Escaping the GPL](../escaping-the-gpl.md)).
+
+   ![Shader nodes replaced but Principled BSDF](../media/features/import-export/export-javascript-units.png)
 
 ## Project files
 

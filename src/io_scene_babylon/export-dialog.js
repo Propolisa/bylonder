@@ -3,6 +3,7 @@
 import { TARGETS } from './export-options.js';
 import { RUNTIMES, exportChoices, exportIssue } from '../runtimes/runtimes.js';
 import { contextStruct } from '../python/bpy_rna.js';
+import { sceneUnits } from './unit-manifest.js';
 
 const PARITY_NOTE = "Lights materials as Blender's EEVEE does (view vector, second reflection as clearcoat). Off: Babylon's own lighting; Blender's texture nodes still export as one custom block.";
 const BAKE_NOTE = "Samples every animated value the page cannot play as its F-Curve at each frame, as Babylon keys. Off: F-Curves Babylon plays exactly stay its keys and the others run as F-Curves in the page; what the page cannot run yet is still sampled, each named in the Info editor.";
@@ -49,11 +50,38 @@ function runtimesTree(values) {
   return setting(values, 'runtime', { label: 'Runtime', icon: 'BYLONDER', items: RUNTIME_ITEMS, children: features, inherited: () => OWN });
 }
 
-// The settings tree: the package's GPU engine (a JavaScript package's), then the runtimes.
+// A unit's state: Blender's code (GPL) shipped, or replaced by the page's own unit (docs/escaping-the-gpl.md).
+const UNIT_ITEMS = [['BLENDER', 'Blender (GPL)', "Blender's code, GPL-3.0-or-later, ships in the package"],
+  ['REPLACED', 'Replaced', 'The page registers its own unit for it: the package ships none of its code']];
+const UNIT_CATEGORIES = { modifiers: ['Modifiers', 'MODIFIER'], shader: ['Shader Nodes', 'NODE_MATERIAL'], geometry: ['Geometry Nodes', 'GEOMETRY_NODES'], blocks: ['Blocks', 'LIGHT_AREA'] };
+const unitStateOf = (packageState, category, key) => category.units[key] ?? category.state ?? packageState ?? 'BLENDER';
+// The Units tree (docs/escaping-the-gpl.md): the scene's units by category, each Blender's (GPL) or replaced, unset
+// inheriting from its category and the package; a unit's icon is its code's: Blender's, or the page's own.
+function unitsTree(values) {
+  values.units = {};
+  values.unitState = null;
+  const fromAbove = () => (values.unitState ? { value: values.unitState, source: 'Inherited from Units' } : { value: 'BLENDER', source: 'Default' });
+  const categories = Object.entries(sceneUnits()).filter(([, units]) => units.length).map(([id, units]) => {
+    values.units[id] = { state: null, units: Object.fromEntries(units.map(({ key }) => [key, null])) };
+    // Read back through the reactive values, as the tree's rows watch them.
+    const [label, icon] = UNIT_CATEGORIES[id], category = values.units[id];
+    const children = units.map(({ key, label: name }) => Object.defineProperty(setting(category.units, key, { label: name, items: UNIT_ITEMS,
+      inherited: () => (category.state ? { value: category.state, source: `Inherited from ${label}` } : fromAbove()) }),
+    'icon', { get: () => (unitStateOf(values.unitState, category, key) === 'REPLACED' ? 'FILE_SCRIPT' : 'BLENDER') }));
+    return Object.assign(setting(category, 'state', { label, icon, items: UNIT_ITEMS, children, inherited: fromAbove }), { key: id });
+  });
+  return setting(values, 'unitState', { label: 'Units', icon: 'BYLONDER', items: UNIT_ITEMS, children: categories, inherited: () => ({ value: 'BLENDER', source: 'Default' }) });
+}
+
+// The settings tree: the package's GPU engine (a JavaScript package's), the runtimes, then its units.
 function settingsTree(values, js) {
   const target = setting(values, 'target', { label: 'GPU Engine', icon: 'BYLONDER', items: TARGETS, inherited: () => ({ value: 'BOTH', source: 'Default' }) });
-  return [...(js ? [target] : []), runtimesTree(values)];
+  return [...(js ? [target] : []), runtimesTree(values), ...(js ? [unitsTree(values)] : [])];
 }
+
+// The dialog's values as export options: unset settings left out, the Units tree as the type keys replaced.
+const options = ({ units, unitState, ...values }) => ({ ...JSON.parse(JSON.stringify(values, (key, value) => (value === null ? undefined : value))),
+  ...(units && { replace: [...new Set(Object.values(units).flatMap((category) => Object.keys(category.units).filter((key) => unitStateOf(unitState, category, key) === 'REPLACED')))] }) });
 
 // Asks for a format's export options: resolves to them (export-options.js ExportOptionsSchema), or null when cancelled.
 export async function exportDialog(world, format, title) {
@@ -71,7 +99,7 @@ export async function exportDialog(world, format, title) {
   const host = document.body.appendChild(document.createElement('div'));
   return new Promise((resolve) => {
     const app = createApp({ render: () => h(ExportDialog, { title, fields, values, tree, note,
-      onDone: (ok) => { app.unmount(); host.remove(); resolve(ok ? JSON.parse(JSON.stringify(values, (key, value) => (value === null ? undefined : value))) : null); } }) });
+      onDone: (ok) => { app.unmount(); host.remove(); resolve(ok ? options(values) : null); } }) });
     app.mount(host);
   });
 }

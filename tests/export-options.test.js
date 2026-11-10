@@ -7,12 +7,12 @@ import { chosenRuntime } from '../src/runtimes/runtimes.js';
 const warnings = [];
 console.warn = (message) => warnings.push(message);
 
-assert.deepEqual(exportOptions(), { eeveeParity: false, hostCompression: false, bakeAnimation: false, target: 'BOTH', runtime: null, runtimes: {} }, 'defaults');
+assert.deepEqual(exportOptions(), { eeveeParity: false, hostCompression: false, bakeAnimation: false, target: 'BOTH', runtime: null, replace: [], runtimes: {} }, 'defaults');
 assert.deepEqual(TARGETS.map(([id]) => id), ['BOTH', 'WEBGPU', 'WEBGL2'], "the targets' identifiers");
 for (const [id] of TARGETS) assert.equal(exportOptions({ target: id }).target, id, `${id} is kept`);
 
 const repaired = exportOptions({ eeveeParity: true, hostCompression: 'yes', target: 'WEBGL1' });
-assert.deepEqual(repaired, { eeveeParity: true, hostCompression: false, bakeAnimation: false, target: 'BOTH', runtime: null, runtimes: {} }, 'bad values repaired, good ones kept');
+assert.deepEqual(repaired, { eeveeParity: true, hostCompression: false, bakeAnimation: false, target: 'BOTH', runtime: null, replace: [], runtimes: {} }, 'bad values repaired, good ones kept');
 assert.equal(warnings.length, 2, 'one warning per repaired value');
 assert.match(warnings.join('\n'), /target: "WEBGL1" is not valid, "BOTH" used/);
 
@@ -27,4 +27,5 @@ assert.equal(chosenRuntime(runtimes, 'ARMATURE', 'Rig'), 'BLENDER', 'set on the 
 assert.equal(chosenRuntime(runtimes, 'ARMATURE', 'Other'), 'MAPPED', 'inherited from the package');
 assert.equal(chosenRuntime(runtimes, 'IMAGE', 'Wood'), 'NATIVE', 'inherited from the feature');
 assert.equal(chosenRuntime(exportOptions(), 'IMAGE', 'Wood'), null, 'nothing chosen: its own');
-console.log('export options: defaults, targets, runtimes inherited by level, and repair ok');
+assert.deepEqual(exportOptions({ replace: ['modifier:SIMPLE_DEFORM', 'node:*'] }).replace, ['modifier:SIMPLE_DEFORM', 'node:*'], 'replaced units kept');
+console.log('export options: defaults, targets, runtimes inherited by level, replaced units, and repair ok');

@@ -57,7 +57,8 @@ export function createScheduler(ir, page) {
   const dirty = new Set(), outputs = new Map(), loaded = new Map();
   /** Meshes drawn with the modifier kernel's draw step where the package ships it. @type {import('./mesh.js').Drawing} */
   const drawing = { nodeOf: (id) => ir.ids[id]?.node };
-  if (Object.values(entities).some((e) => e.implementation === 'modifiers')) {
+  // Blender's kernels load only for an entity no registered unit runs.
+  if (Object.values(entities).some((e) => e.implementation === 'modifiers' && !unitFor(e.type))) {
     drawing.meshBuffers = async (mesh) => /** @type {any} */ (await evaluator('modifiers')).draw(mesh);
   }
   if (Object.values(entities).some((e) => e.implementation === 'grease_pencil')) {

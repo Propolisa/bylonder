@@ -361,3 +361,30 @@ export function kindOf(node) {
   if (/^node:(FunctionNode|ShaderNode)/.test(node.type) || CONSTANTS.test(node.type)) return 'function';
   return 'field';
 }
+
+/** What the evaluator runs itself (Scene Time: geometry-nodes-evaluator.js); every other node runs as a unit. */
+const OWN = new Set(['node:NodeGroupInput', 'node:NodeGroupOutput', 'node:GeometryNodeGroup', 'node:GeometryNodeRepeatInput',
+  'node:GeometryNodeRepeatOutput', 'node:GeometryNodeInputSceneTime']);
+
+/**
+ * The nodes of graphs that run as units (a registered one, else Blender's kernels), by type key, each `[graph, node]`:
+ * all but the evaluator's own, a switch only when a link may give it a field to pick by, and the field input nodes an
+ * unlinked input stands for (IMPLICIT).
+ * @param {Record<string, import('../ir.js').Graph>} graphs
+ * @returns {Map<string, [string, string][]>}
+ */
+export function unitNodes(graphs) {
+  /** @type {Map<string, [string, string][]>} */
+  const found = new Map();
+  const add = (/** @type {string} */ type, /** @type {string} */ graph, /** @type {string} */ node) => found.set(type, [...(found.get(type) ?? []), [graph, node]]);
+  for (const [key, graph] of Object.entries(graphs)) {
+    if (graph.type !== 'GEOMETRY') continue;
+    const linked = new Set(graph.links.map(([, , to, input]) => `${to}\0${input}`));
+    for (const node of graph.nodes) {
+      const selector = /** @type {Record<string, string>} */ (SWITCHES)[node.type];
+      if (!OWN.has(node.type) && !(selector && !linked.has(`${node.name}\0${selector}`))) add(node.type, key, node.name);
+      for (const [input, [type]] of Object.entries(IMPLICIT[node.type] ?? {})) if (!linked.has(`${node.name}\0${input}`)) add(type, key, node.name);
+    }
+  }
+  return found;
+}

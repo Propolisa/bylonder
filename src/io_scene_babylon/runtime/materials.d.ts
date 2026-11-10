@@ -124,6 +124,10 @@ export type Kernels = {
             textures?: any[];
         }>;
     }>;
+    /**
+     * node types exported without their piece, for units the page registers
+     */
+    replaced?: string[] | undefined;
 };
 /**
  * What a body reads from outside it, by source key (`geometry:__position`, `value:<node>:<socket>`,

@@ -174,6 +174,8 @@ export class BlendScene {
     this.#world = world;
     /** The compositor, a NodeRenderGraph of the blocks library's passes, when the scene composites. */
     this.compositor = compositor;
+    /** scene.bin's arrays, which the IR's `{ buffer }` inputs name. */
+    this.buffers = buffers;
     /** The scene's IR, as this runtime reads it. */
     this.ir = readIR(ir, { implementations: [...Object.keys(EVALUATORS), ...NATIVE] });
     const knobs = Object.entries(this.ir.properties).map(([path, { id, ...property }]) => /** @type {Knob} */ ({ path, ...property }));

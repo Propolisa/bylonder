@@ -434,12 +434,16 @@ export async function exportNodeKernels(material, key, { parity = false, into = 
 export async function materialKernels(entries, { parity = false } = {}) {
   const into = { functions: {}, pieces: {}, graphs: {} };
   for (const [material, key, { kernel = key, mesh } = {}] of entries) await exportNodeKernels(material, kernel, { parity, into, mesh });
-  if (!Object.keys(into.graphs).length) return null;
-  return `// SPDX-License-Identifier: GPL-3.0-or-later
-// Blender's shader nodes as one GLSL function per node, made by Bylonder's export from Blender's GLSL (LICENSE.md).
-export default ${JSON.stringify(into)};
-`;
+  return Object.keys(into.graphs).length ? kernelsFile(into) : null;
 }
+
+/** Shader kernels as their file: GPL while it holds Blender's GLSL, else the graphs' data alone, every node a unit's. */
+export const kernelsFile = (kernels) => (Object.keys(kernels.pieces).length ? `// SPDX-License-Identifier: GPL-3.0-or-later
+// Blender's shader nodes as one GLSL function per node, made by Bylonder's export from Blender's GLSL (LICENSE.md).
+` : `// SPDX-License-Identifier: MIT OR Apache-2.0
+// The shader graphs' data, each node drawn by a unit the page registers (units.json).
+`) + `export default ${JSON.stringify(kernels)};
+`;
 
 // A texture as Babylon's serialization of one: an image's file (imageFile), a color ramp's table as an 8 bit PNG.
 async function textureJson(texture) {

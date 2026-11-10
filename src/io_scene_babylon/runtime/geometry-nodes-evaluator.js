@@ -7,6 +7,8 @@
 // members.
 import { geometryNodesUnit } from './geometry-nodes/index.js';
 import { createKernels } from './geometry-nodes/kernels.js';
+import { unitNodes } from './geometry-nodes/evaluator.js';
+import { unitFor } from './units.js';
 
 const IDENTITY = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 const keys = (/** @type {any[] | undefined} */ list) => (list ?? []).map((item) => item.id);
@@ -47,11 +49,11 @@ export function idResolver(ir, buffers) {
  * The `modifier:NODES` unit of an IR, its kernels in `exports` (a loaded Geometry Nodes module).
  * @param {import('./ir.js').IR} ir
  * @param {ArrayBufferView[]} buffers
- * @param {import('./geometry-nodes/kernels.js').Exports} exports
+ * @param {import('./geometry-nodes/kernels.js').Exports} [exports] none when units run every node
  */
 export function geometryNodes(ir, buffers, exports) {
   const resolve = idResolver(ir, buffers);
-  return geometryNodesUnit(ir.graphs, { kernels: createKernels(exports, resolve).unit, units: { 'node:GeometryNodeInputSceneTime': sceneTime(ir) }, resolve });
+  return geometryNodesUnit(ir.graphs, { kernels: exports && createKernels(exports, resolve).unit, units: { 'node:GeometryNodeInputSceneTime': sceneTime(ir) }, resolve });
 }
 
 /**
@@ -67,6 +69,8 @@ function sceneTime(ir) {
 
 /** @param {import('./scheduler.js').Page} page @returns {Promise<import('./scheduler.js').Evaluator>} */
 export async function load({ root, ir, buffers }) {
+  // Blender's kernels load only for a node no registered unit runs: a package whose nodes all have units ships none.
+  if ([...unitNodes(ir.graphs).keys()].every((type) => unitFor(type))) return geometryNodes(ir, buffers);
   const { instantiate } = await import(new URL('bylonder-geometry-nodes/kernels.js', root).href);
   return geometryNodes(ir, buffers, await instantiate(new URL('bylonder-geometry-nodes/geometry-nodes.wasm', root)));
 }

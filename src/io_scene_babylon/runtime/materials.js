@@ -70,6 +70,7 @@ export function meshValues(material) {
  * @property {Record<string, string>} functions
  * @property {Record<string, { functions: string[], code: string, params: Param[] }>} pieces
  * @property {Record<string, { output: string, nodes: Record<string, { piece: string, mesh?: Record<string, number[]>, textures?: any[] }> }>} graphs
+ * @property {string[]} [replaced] node types exported without their piece, for units the page registers
  */
 /**
  * What a body reads from outside it, by source key (`geometry:__position`, `value:<node>:<socket>`,
@@ -132,10 +133,29 @@ function pieceFor(node, graph, kernels) {
   const unit = /** @type {Partial<ShaderUnit> | undefined} */ (unitFor(node.type));
   if (unit?.shader) return unit.shader(node);
   const instance = kernels?.graphs[graph]?.nodes[node.name], piece = instance && kernels?.pieces[instance.piece];
+  if (kernels?.replaced?.includes(node.type) && !piece) return unregistered(node, kernels);
   if (!piece || !kernels) throw Error(`no implementation of ${node.type} for "${node.name}"`);
   const functions = Object.fromEntries(piece.functions.map((key) => [key, kernels.functions[key]]));
   return { functions, call: instance.piece, code: piece.code, params: piece.params, instance };
 }
+
+const GLSL = /** @type {Record<string, string>} */ ({ VALUE: 'float', INT: 'float', BOOLEAN: 'float', VECTOR: 'vec3', RGBA: 'vec4', SHADER: 'BlClosure' });
+/**
+ * A node exported for a unit the page did not register: its outputs zero (a closure empty, by the package's closure
+ * functions), reported once.
+ * @param {GraphNode} node @param {Kernels} kernels @returns {Piece}
+ */
+function unregistered(node, kernels) {
+  const call = `bl_unregistered_${node.type.replace(/\W/g, '_')}`, closure = kernels.functions.bl_closure;
+  const sockets = /** @type {{ outputs?: Record<string, string> }} */ (node.sockets ?? {});
+  const params = Object.entries(sockets.outputs ?? {}).filter(([, type]) => GLSL[type] && (type !== 'SHADER' || closure)).map(([output, type]) => ({ type: GLSL[type], output }));
+  if (!warned.has(node.type)) console.warn(`${node.type}: exported for a unit, but none is registered; its outputs are zero`);
+  warned.add(node.type);
+  const zero = (/** @type {string} */ type) => (type === 'BlClosure' ? 'bl_closure_empty()' : literal(0, type));
+  return { functions: closure ? { bl_closure: closure } : {}, call, params,
+    code: [`void ${call}(${params.map((p, i) => `out ${p.type} o${i}`).join(', ')}) {`, ...params.map((p, i) => `  o${i} = ${zero(p.type)};`), '}'].join('\n') };
+}
+const warned = new Set();
 
 // Blender's matrices of the drawn object and view from Babylon's: Blender's axes swap y and z (S), its view looks down
 // -z (F).

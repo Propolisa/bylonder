@@ -19,6 +19,14 @@ export function createEvaluator(graphs: Record<string, import("../ir.js").Graph>
  */
 export function kindOf(node: Node): "function" | "geometry" | "field";
 /**
+ * The nodes of graphs that run as units (a registered one, else Blender's kernels), by type key, each `[graph, node]`:
+ * all but the evaluator's own, a switch only when a link may give it a field to pick by, and the field input nodes an
+ * unlinked input stands for (IMPLICIT).
+ * @param {Record<string, import('../ir.js').Graph>} graphs
+ * @returns {Map<string, [string, string][]>}
+ */
+export function unitNodes(graphs: Record<string, import("../ir.js").Graph>): Map<string, [string, string][]>;
+/**
  * @typedef {import('../ir.js').GraphNode & { sockets?: { inputs: Record<string, string>, outputs: Record<string, string> } }} Node
  * @typedef {import('./geometry.js').Geometry} Geometry
  * @typedef {import('./geometry.js').Component} Component
