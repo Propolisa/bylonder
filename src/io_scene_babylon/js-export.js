@@ -266,7 +266,8 @@ import kernels from './${NODE_KERNELS}';` : ''}${curves ? `
 import './${CURVES_GLSL_FILE}';` : ''}${volumes ? `
 // The volume passes, whose blocks the volume materials use, before they are parsed.
 import { sceneVolumes } from './${VOLUMES_FILE}';` : ''}${display ? `
-import { viewTransform } from './bylonder-view-transform.js';` : ''}${areaLights ? `
+import { viewTransform } from './bylonder-view-transform.js';
+import './bylonder/overrides/babylon/linear-image-processing.js';` : ''}${areaLights ? `
 import { AreaLight } from './bylonder-area-light.js';
 import { parseLight } from './bylonder/overrides/babylon/area-light-parse.js';` : ''}${composited ? `
 import { compositor } from './bylonder-blocks.js';` : ''}${areaSpecular ? `

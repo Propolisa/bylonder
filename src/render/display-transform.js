@@ -5,6 +5,7 @@
 // (nodes/blender/compositor-io.js); both read the scene's display settings, which its render engine sets.
 import { Constants, Effect, EffectWrapper, PostProcess, RawTexture3D } from '@babylonjs/core';
 import { displayExponent } from './view-settings.js';
+import '../overrides/babylon/linear-image-processing.js';
 import { LOG_SIZE, STOPS } from './display-lut.js';
 import { DISPLAY_UNIFORMS, displayTransformShader } from '../io_scene_babylon/runtime/view-transform.js';
 
