@@ -8,7 +8,7 @@ import { AbstractEngine, Animation, Matrix } from '@babylonjs/core';
 import { objectMatrix } from '../runtime/object-transform.js';
 import { CLOCK, sampledGaps, serializeScene } from './babylon-export.js';
 import { exportRuntimes } from '../runtimes/runtimes.js';
-import { NAVIGATION, TARGETS } from './export-options.js';
+import { chosenState, NAVIGATION, TARGETS } from './export-options.js';
 import { exportControls, controlTypes, withUI } from './controls-export.js';
 import { exportNodeMaterial, kernelsFile, materialKernels } from './node-material-export.js';
 import { fillMaterials, MESH_VALUE } from './runtime/materials.js';
@@ -246,20 +246,21 @@ function greasePencilClock(world, ir, groups) {
 // `bakeAnimation`, what Babylon cannot play as its F-Curve is sampled per frame; `target`, the GPU engine its page makes
 // (export-options.js TARGETS); `runtime`, `runtimes`, the runtimes its features export with (runtimes.js chosenRuntime);
 // `replace`, the type keys of units the page registers itself, which the package ships none of (unit-manifest.js); `bundle`,
-// whether the package is then bundled (bundle.js); `branches`, the state of each branch of the scene (export-options.js).
-export async function exportModule(world, { live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, target = 'BOTH', runtime = null, runtimes = {}, replace = [], bundle = false, controlPanel = true, devTools = 'CDN', navigation = 'FIXED', navigationModes = {}, branches = {} } = {}) {
+// whether the package is then bundled (bundle.js); `branchState` and `branches`, the states of the scene's branches
+// (export-options.js chosenState).
+export async function exportModule(world, { live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, target = 'BOTH', runtime = null, runtimes = {}, replace = [], bundle = false, controlPanel = true, devTools = 'CDN', navigation = 'FIXED', navigationModes = {}, branchState = null, branches = {} } = {}) {
   const live = new Map(keepLive ? world.objects.map((node) => [node, world.modifiers.live(node)]).filter(([node, stack]) => stack && !stack.modifiers.some(needsOpenVDB) && !readsOtherIDs(world, node)) : []);
   await world.modifiers.settled();
   // The mapped meshes' geometry is read below: their mapping holds until the module is written.
   const mapped = exportRuntimes(world, { bake: bakeAnimation, runtime, runtimes });
   try {
-    return await moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, branches });
+    return await moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states: { branchState, branches } });
   } finally {
     mapped.restore();
   }
 }
 
-async function moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, branches }) {
+async function moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states }) {
   const graphs = [], graphOf = materialGraphs(world, graphs);
   const data = await serializeScene(world, { geometry: false, live, mapped, parity, graphOf, bake: bakeAnimation });
   const { scene } = world;
@@ -274,7 +275,8 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
     geometries.set(mesh.geometry, `geometries[${geometries.size}]`);
     geometryLines.push(`  ${geometryCode(mesh, bin)},`);
   }
-  const composited = data.cameras.length ? exportCompositor(world) : null;
+  const compositorState = chosenState(states, 'compositor') ?? 'LIVE';
+  const composited = data.cameras.length && compositorState !== 'OFF' ? exportCompositor(world) : null;
   const display = await displaySettings(world, bin);
   // Area lights as Bylonder's (runtime/area-light.js): lit once parsed, and casting shadows as its Area Light Shadows
   // extension has them.
@@ -284,8 +286,9 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   // off, so materials would encode to display themselves: with the view transform, which displays instead, it stays out
   // unless one of its effects is on.
   if (display) data.renderingPipelines = data.renderingPipelines.filter((p) => !(p._name?.startsWith('__display:') && !PIPELINE_EFFECTS.some((e) => p[e])));
-  const controls = withUI([...exportControls(world, data), ...(composited?.knobs ?? [])]);
-  const ir = exportIR(world, { controls, live, bin, animationGroups: data.animationGroups, curves: data.liveCurves, constraints: data.liveConstraints, branches });
+  // Baked, the compositor runs with its settings as exported: none of them a control.
+  const controls = withUI([...exportControls(world, data), ...(compositorState === 'LIVE' ? composited?.knobs ?? [] : [])]);
+  const ir = exportIR(world, { controls, live, bin, animationGroups: data.animationGroups, curves: data.liveCurves, constraints: data.liveConstraints, states });
   const computed = { ...ir, entities: structuredClone(ir.entities) };
   stripEntities(ir, replace);
   const irJson = json(ir);

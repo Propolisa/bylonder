@@ -198,6 +198,9 @@ function animationEntities(ids, properties, time, animationGroups, curves, bin) 
   return entities;
 }
 
+// Whether a node tree, or a group it uses, reads the scene's time.
+export const treeReadsFrame = (tree) => readsTime(writeGraph(tree, idKey(tree)), idKey(tree));
+
 // Whether a graph, or a group it uses, reads the scene's time (a Scene Time node).
 function readsTime(graphs, graphKey, seen = new Set()) {
   if (seen.has(graphKey) || !graphs[graphKey]) return false;
@@ -255,20 +258,20 @@ function constraintEntities(ids, constraints, time) {
 
 // The package's IR (docs/ir.md): `controls` (controls-export.js) as its properties, with what the `live` stacks and the
 // Geometry Nodes modifiers add; the carried IDs, their node trees, and the computed entities, with the F-Curves and the
-// objects' constraints the page runs (`curves`, `constraints`, live-curves.js); `branches`, the export's states of its
-// branches (export-options.js).
-export function exportIR(world, { controls, live, bin, animationGroups = [], curves = [], constraints = [], branches = {} }) {
+// objects' constraints the page runs (`curves`, `constraints`, live-curves.js); `states`, the export's options that set
+// the states of its branches (export-options.js chosenState).
+export function exportIR(world, { controls, live, bin, animationGroups = [], curves = [], constraints = [], states = {} }) {
   const sync = world.mainSync, objects = world.objects.map((node) => [node, sync?.objectOf(node)]).filter(([, pointer]) => pointer);
   const { ids, references } = sync ? exportIDs(rootIDs(objects.map(([, pointer]) => pointer))) : { ids: {}, references: [] };
   for (const [node, pointer] of objects) if (ids[idKey(idStruct(pointer))]) ids[idKey(idStruct(pointer))].node = node.id;
   if (sync) references.push(...depsgraphReferences(ids, references, sync.blender.relations()));
   const graphs = {};
   const time = controls.some(({ path }) => path.endsWith('.frame_current'));
-  const readsFrame = (tree) => time && readsTime(writeGraph(tree, idKey(tree)), idKey(tree));
+  const readsFrame = (tree) => time && treeReadsFrame(tree);
   const entities = sync ? { ...modifierEntities(world, live, controls, bin), ...geometryNodesEntities(world, controls, bin, (tree) => {
     writeGraph(tree, idKey(tree), graphs);
     return idKey(tree);
-  }, readsFrame, branches) } : {};
+  }, readsFrame, states) } : {};
   const properties = Object.fromEntries(controls.map(({ path, bind, ...property }) => [path, { id: pathID(path), ...property, ...(bind && { bind }) }]));
   if (sync) {
     evaluatedIDs(ids, graphs, entities, sync, bin);

@@ -180,15 +180,15 @@ export function geometryNodesStack(pointer) {
 // Each object whose shown modifiers are all Geometry Nodes, as entities run by Bylonder's evaluator
 // (runtime/geometry-nodes-evaluator.js), each reading the geometry the one before gives, the first its base mesh with its
 // attributes; its inputs added to `properties`, its graph by key from `graphOf`. A stack with other modifiers stays baked,
-// and so does one the options' `branches` (export-options.js) set Baked or that is Baked by default (geometryNodesDefault):
-// the package then ships no Geometry Nodes kernels for it.
-export function geometryNodesEntities(world, properties, bin, graphOf, readsFrame, branches) {
+// and so does one the export's `states` (export-options.js chosenState) set Baked or that is Baked by default
+// (geometryNodesDefault): the package then ships no Geometry Nodes kernels for it.
+export function geometryNodesEntities(world, properties, bin, graphOf, readsFrame, states) {
   const sync = world.mainSync, entities = {};
   for (const node of world.objects) {
     const pointer = sync.objectOf(node), stack = geometryNodesStack(pointer);
     if (!stack) continue;
     const { ob, shown } = stack;
-    if ((chosenState(branches, 'geometryNodes', ob.name) ?? geometryNodesDefault(ob, shown, readsFrame)) !== 'LIVE') continue;
+    if ((chosenState(states, 'geometryNodes', ob.name) ?? geometryNodesDefault(ob, shown, readsFrame)) !== 'LIVE') continue;
     const base = `objects${key(ob.name)}`;
     const modifiers = shown.map((m) => {
       const inputs = { graph: { graph: graphOf(m.node_group) } };

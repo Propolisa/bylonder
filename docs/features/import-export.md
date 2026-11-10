@@ -2,7 +2,7 @@
 id: import-export
 title: Import and Export
 summary: Bring scenes in and write them out with Blender's own importers and exporters (Wavefront OBJ, Stanford PLY, STL, FBX) and its default add-ons (glTF 2.0, FBX export, Motion Capture, SVG as Curves), through the browser's file dialogs with each format's options.
-expect: OBJ, PLY, STL, FBX, glTF 2.0, BVH and SVG import and export with Blender's own code and options; the add-ons' entries wait a few seconds for Python the first time File opens, Alembic and USD are greyed out, and an export's extra files download. File > Export > JavaScript asks which GPU engine its page makes (WebGPU, WebGL 2, or WebGPU where the browser has it) and which runtime each feature exports with, for the package, a feature or one instance, and writes one minified bundle per package that needs no CDN (or ES modules, with Bundle off). Its page has a control panel at the canvas's top right corner: every control of the scene under Blender's names, dragged and typed as in Blender, hiding what is at Blender's defaults, with the view's navigation and links to Babylon's Inspector and node editors.
+expect: OBJ, PLY, STL, FBX, glTF 2.0, BVH and SVG import and export with Blender's own code and options; the add-ons' entries wait a few seconds for Python the first time File opens, Alembic and USD are greyed out, and an export's extra files download. File > Export > JavaScript asks which GPU engine its page makes (WebGPU, WebGL 2, or WebGPU where the browser has it) and which runtime each feature exports with, for the package, a feature or one instance, which branches of the scene run in the page, are baked or left out (Geometry Nodes stacks, the compositor), and writes one minified bundle per package that needs no CDN (or ES modules, with Bundle off). Its page has a control panel at the canvas's top right corner: every control of the scene under Blender's names, dragged and typed as in Blender, hiding what is at Blender's defaults, with the view's navigation and links to Babylon's Inspector and node editors.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/files/import_export/index.html
@@ -25,6 +25,7 @@ media:
   - import-export/export-javascript.png
   - import-export/export-javascript-override.png
   - import-export/export-javascript-units.png
+  - import-export/export-javascript-branches.png
   - import-export/control-panel-button.png
   - import-export/control-panel-open.png
   - import-export/control-panel-drag.gif
@@ -62,6 +63,7 @@ code:
   - src/draw/mesh-batch-buffers.js
   - src/io_scene_babylon/export-options.js
   - src/io_scene_babylon/export-dialog.js
+  - src/io_scene_babylon/branches.js
   - src/io_scene_babylon/bundle.js
   - src/io_scene_babylon/babylon-sources.js
   - src/editors/interface/components/ExportDialog.vue
@@ -80,6 +82,7 @@ tests:
   - tests/io-addons-wasm.test.js
   - tests/e2e/smoke.mjs
   - tests/export-options.test.js
+  - tests/export-branches-wasm.test.js
   - tests/export-package-wasm.test.js
   - tests/export-bundle-wasm.test.js
   - tests/control-panel.test.js
@@ -105,6 +108,8 @@ limits:
   - A bundled package made for WebGPU carries Babylon's GLSL to WGSL compilers (2.7 MB in bundle/webgpu/), which a page fetches only when it creates a WebGPU engine.
   - A package with area lights carries Babylon's LTC table they read (64 KB in babylon-assets/), as the app serves it, and points Babylon at it unless the page has set its own Tools.AssetBaseUrl.
   - A Geometry Nodes stack exports Live (run in the page, shipping Blender's Geometry Nodes kernels, about 87 MB) or Baked (its evaluated mesh, no kernels). By default one nothing in the page drives (no input of a value, no tree reading the frame) is Baked, and so is Smooth by Angle unless its angle is animated.
+  - A Baked branch is the scene as exported: a baked stack does not follow the frame or the page's controls, and a baked compositor offers none of its settings as controls.
+  - Branches covers Geometry Nodes stacks and the compositor; volumes, curves, post-processing and Blender's modifier stacks are not in it yet.
   - The package's createEngine is for pages; in Node (the headless SDK) pass a NullEngine to load as before.
   - The control panel shows the controls the export lists (transforms, visibility, lights, the camera, node inputs, custom properties, modifier and Geometry Nodes inputs); a property the page cannot drive yet is not in it, and enum properties have no controls yet, so its dropdowns choose only an image.
   - The control panel labels a node by its name, not its label, and a property by Blender's name for it (Euler Rotation, where the N panel says Rotation).
@@ -162,7 +167,8 @@ Bronze and Marble materials. The steps below take the bust out and import it aga
 6. **Export for Babylon.** File > Export > JavaScript (.zip) writes a package that loads in plain Babylon.js. Below its
    checkboxes, its settings are a tree: GPU Engine; Bundle, on by default, which writes one minified bundle with the
    Babylon.js modules the scene uses, so the page needs no CDN, import map or bundler (Off: ES modules importing
-   Babylon module by module), and under it Minify; then Runtime with each feature that has a runtime choice and, under
+   Babylon module by module), and under it Minify; Control Panel; Branches, which step 9 shows; then Runtime with each
+   feature that has a runtime choice and, under
    each, the scene's instances of it, then Units: the scene's units by category, each Blender's code (GPL) or Replaced
    by a unit your page registers, whose code the package then leaves out ([Escaping the GPL](../escaping-the-gpl.md)). A setting left unset shows what it inherits greyed, with a linked decorator; hover
    it to see where the value comes from. Unset everywhere, each instance exports with its own
@@ -184,19 +190,27 @@ Bronze and Marble materials. The steps below take the bust out and import it aga
 
    ![Shader nodes replaced but Principled BSDF](../media/features/import-export/export-javascript-units.png)
 
-9. **The page's control panel.** Open the package's page and move the pointer to the canvas's top right corner (or
-   tap there): a button shows, which opens the control panel. Custom properties come first, then the materials (those
-   you named before Blender's Material.001), each with its nodes, then objects, lights, cameras, the world and the
-   scene, every property under Blender's name for it. On Screen, beside Materials, orders the materials by how much of
-   the view each covers, its share beside its name (off: the scene's order). What is at Blender's defaults is hidden;
-   All shows it. Control
-   Panel, in the export's settings, turns the panel off.
+9. **Branches.** Open the Compositor example and File > Export > JavaScript. Branches lists the parts of the scene a
+   package can run in its page (Live), freeze to their evaluated result (Baked, no code of their own shipped) or leave
+   out (Off): Geometry Nodes, with each object's stack under it, and the Compositor. Unset, each takes its default,
+   hover it to see why: a stack an input or the frame drives is Live; one nothing drives, and Smooth by Angle, are
+   Baked, so this package ships none of Blender's Geometry Nodes kernels (87 MB). Set Upstairs Bar to Live to run its
+   Smooth by Angle in the page, and Compositor to Baked: it still composites, with none of its settings as controls.
 
-   ![The button at the corner](../media/features/import-export/control-panel-button.png)
+   ![Branches: Upstairs Bar Live, the compositor Baked](../media/features/import-export/export-javascript-branches.png)
 
-   ![The control panel](../media/features/import-export/control-panel-open.png)
+10. **The page's control panel.** Open the package's page and move the pointer to the canvas's top right corner (or
+    tap there): a button shows, which opens the control panel. Custom properties come first, then the materials (those
+    you named before Blender's Material.001), each with its nodes, then objects, lights, cameras, the world and the
+    scene, every property under Blender's name for it. On Screen, beside Materials, orders the materials by how much of
+    the view each covers, its share beside its name (off: the scene's order). What is at Blender's defaults is hidden;
+    All shows it. Control Panel, in the export's settings, turns the panel off.
 
-10. **Drag and type.** Drag a number field sideways as in Blender: Shift for precision, Ctrl to snap, Escape to undo
+    ![The button at the corner](../media/features/import-export/control-panel-button.png)
+
+    ![The control panel](../media/features/import-export/control-panel-open.png)
+
+11. **Drag and type.** Drag a number field sideways as in Blender: Shift for precision, Ctrl to snap, Escape to undo
     the drag. Click it to type a value, with units (20cm) and arithmetic (2 * 3); a rotation is typed in degrees. The
     arrow keys step it, Backspace resets it to the scene's value, Ctrl C and Ctrl V copy and paste it, Ctrl Shift C
     copies its data path for the page's own code (`blend.set(path, value)`). A factor is a slider, a colour a swatch
@@ -208,7 +222,7 @@ Bronze and Marble materials. The steps below take the bust out and import it aga
 
     ![All, with the properties at Blender's defaults](../media/features/import-export/control-panel-all.png)
 
-11. **View and editors.** View chooses the camera the page looks through, and how you move it: Fixed (the camera as
+12. **View and editors.** View chooses the camera the page looks through, and how you move it: Fixed (the camera as
     exported), Orbit, Fly (W A S D, E and Q), Walk (at eye height with gravity) and, on a touch screen, Sticks. Navigation,
     in the export's settings under Control Panel, sets the page's first mode and which are offered. The icon beside an
     object, a material or the header opens Babylon's Inspector there, or a node material in the Node Material Editor;
@@ -229,6 +243,7 @@ Bronze and Marble materials. The steps below take the bust out and import it aga
   the tests compare with ([io-wasm.test.js](../../tests/io-wasm.test.js),
   [io-addons-wasm.test.js](../../tests/io-addons-wasm.test.js)).
 - [record-import-export.mjs](../../tools/docs/record-import-export.mjs) and
-  [record-export-javascript.mjs](../../tools/docs/record-export-javascript.mjs) (on the Rigged Character example):
+  [record-export-javascript.mjs](../../tools/docs/record-export-javascript.mjs) (on the Rigged Character and Compositor
+  examples):
   record this page's pictures, and [record-control-panel.mjs](../../tools/docs/record-control-panel.mjs) (on the Lava
   example, with custom properties added) the control panel's.

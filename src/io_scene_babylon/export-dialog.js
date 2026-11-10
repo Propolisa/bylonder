@@ -1,6 +1,7 @@
 // File > Export's options dialog, in the scene window: EEVEE Parity and, for a JavaScript package, its own options, then
 // its settings as a tree (components/ExportDialog.vue). A setting left unset inherits from the level above it.
-import { DEV_TOOLS, NAVIGATION, TARGETS } from './export-options.js';
+import { BRANCH_STATES, BRANCHES, DEV_TOOLS, NAVIGATION, TARGETS } from './export-options.js';
+import { BRANCH_ROWS, sceneBranches } from './branches.js';
 import { RUNTIMES, exportChoices, exportIssue } from '../runtimes/runtimes.js';
 import { contextStruct } from '../python/bpy_rna.js';
 import { sceneUnits } from './unit-manifest.js';
@@ -9,12 +10,12 @@ const PARITY_NOTE = "Lights materials as Blender's EEVEE does (view vector, seco
 const BAKE_NOTE = "Samples every animated value the page cannot play as its F-Curve at each frame, as Babylon keys. Off: F-Curves Babylon plays exactly stay its keys and the others run as F-Curves in the page; what the page cannot run yet is still sampled, each named in the Info editor.";
 const HOST_NOTE = "scene.bin uncompressed, for a host that serves it with Brotli (most CDNs): about half the size there, about four times it elsewhere. Off: gzipped in the file, the same size on any host.";
 
-// A package's Geometry Nodes kernels, with their size where the server states it.
+// What a Geometry Nodes stack set Live ships: Blender's kernels, with their size where the server states it.
 async function geometryNodesNote() {
   const { geometryNodesKernelsSize } = await import('./module-files.js');
   const bytes = await geometryNodesKernelsSize();
   const size = bytes ? ` (${(bytes / 1e6).toFixed(1)} MB as this site serves it)` : '';
-  return `With Geometry Nodes, the package ships Blender's Geometry Nodes kernels${size} in bylonder-geometry-nodes/, GPL-3.0-or-later.`;
+  return `With a Geometry Nodes stack Live, the package ships Blender's Geometry Nodes kernels${size} in bylonder-geometry-nodes/, GPL-3.0-or-later.`;
 }
 
 // A tree row of a setting kept at `key` of `holder` (null: unset). `inherited()`: { value, label?, source, issue? } it
@@ -76,6 +77,30 @@ function unitsTree(values) {
   return setting(values, 'unitState', { label: 'Units', icon: 'BYLONDER', items: UNIT_ITEMS, children: categories, inherited: DEFAULT('BLENDER') });
 }
 
+// Why an instance defaults to its state, by branch.
+const DEFAULT_REASONS = { geometryNodes: { LIVE: 'an input or the frame drives it in the page', BAKED: 'nothing in the page drives it, or it is Smooth by Angle' } };
+const stateLabel = (state) => BRANCH_STATES.find(([id]) => id === state)[1];
+// The Branches tree: each branch of the scene (`scene`, branches.js sceneBranches) Live, Baked or Off as it offers, and
+// under a branch with instances (a Geometry Nodes stack) each instance; unset everywhere, each takes its default. None:
+// no row.
+function branchesTree(values, scene) {
+  values.branches = {};
+  values.branchState = null;
+  const rows = BRANCH_ROWS.filter(([id]) => scene[id]).map(([id, label, icon]) => {
+    const { state: own, instances = [] } = scene[id];
+    values.branches[id] = { state: null, instances: Object.fromEntries(instances.map(({ name }) => [name, null])) };
+    const set = values.branches[id], items = BRANCH_STATES.filter(([state]) => BRANCHES[id].includes(state));
+    const issue = (state) => (BRANCHES[id].includes(state) ? null : `${label} cannot be ${stateLabel(state)}: it keeps its default`);
+    const fromAll = () => values.branchState && { value: values.branchState, source: 'Inherited from Branches', issue: issue(values.branchState) };
+    const children = instances.map(({ name, state }) => setting(set.instances, name, { label: name, icon: 'OUTLINER_OB_MESH', items, issue,
+      inherited: () => (set.state ? { value: set.state, source: `Inherited from ${label}` } : fromAll() || { value: state, source: `Default: ${DEFAULT_REASONS[id][state]}` }) }));
+    return Object.assign(setting(set, 'state', { label, icon, items, issue, children,
+      inherited: () => fromAll() || (own ? DEFAULT(own)() : { label: 'Per Object', source: "Each object's default" }) }), { key: id });
+  });
+  return rows.length ? setting(values, 'branchState', { label: 'Branches', icon: 'BYLONDER', items: BRANCH_STATES, children: rows,
+    inherited: () => ({ label: 'Per Branch', source: "Each branch's default" }) }) : null;
+}
+
 const BUNDLE_ITEMS = [[true, 'Bundled', "One bundle per package with the Babylon.js modules its scene uses: no CDN or bundler needed, Blender's code (GPL) still in its own files"],
   [false, 'Modules', 'ES modules importing Babylon.js module by module, for an import map or a bundler of your own']];
 const MINIFY_ITEMS = [[true, 'Minified', "The bundle minified, its files' notices kept"], [false, 'Readable', 'The bundle as written, for reading or debugging']];
@@ -100,10 +125,10 @@ const panelTree = (values) => setting(values, 'controlPanel', { label: 'Control 
   children: [setting(values, 'devTools', { label: 'Editors', icon: 'BYLONDER', items: DEV_TOOLS, inherited: DEFAULT('CDN'),
     issue: (value) => (value === 'PACKAGE' && values.controlPanel === false ? 'Only the control panel links to the editors' : null) }), navigationTree(values)] });
 
-// The settings tree: a JavaScript package's GPU engine, bundle and control panel, the runtimes, then its units.
-function settingsTree(values, js) {
+// The settings tree: a JavaScript package's GPU engine, bundle, control panel and branches, the runtimes, then its units.
+function settingsTree(values, js, branches) {
   const target = setting(values, 'target', { label: 'GPU Engine', icon: 'BYLONDER', items: TARGETS, inherited: DEFAULT('BOTH') });
-  return [...(js ? [target, bundleTree(values), panelTree(values)] : []), runtimesTree(values), ...(js ? [unitsTree(values)] : [])];
+  return [...(js ? [target, bundleTree(values), panelTree(values), branchesTree(values, branches)] : []), runtimesTree(values), ...(js ? [unitsTree(values)] : [])].filter(Boolean);
 }
 
 // The dialog's values as export options: unset settings left out, the Units tree as the type keys replaced.
@@ -121,8 +146,9 @@ export async function exportDialog(world, format, title) {
   const values = reactive({ eeveeParity: false, hostCompression: false, bakeAnimation: false, target: null, bundle: null, minify: null, controlPanel: null, devTools: null, navigation: null });
   const fields = [{ name: 'eeveeParity', label: 'EEVEE Parity', note: PARITY_NOTE },
     ...(js ? [{ name: 'hostCompression', label: 'Host Compresses Geometry', note: HOST_NOTE }, { name: 'bakeAnimation', label: 'Bake Animation', note: BAKE_NOTE }] : [])];
-  const tree = settingsTree(values, js);
-  const note = js ? await geometryNodesNote() : undefined;
+  const branches = js ? sceneBranches(world) : {};
+  const tree = settingsTree(values, js, branches);
+  const note = branches.geometryNodes ? await geometryNodesNote() : undefined;
   const host = document.body.appendChild(document.createElement('div'));
   return new Promise((resolve) => {
     const app = createApp({ render: () => h(ExportDialog, { title, fields, values, tree, note,

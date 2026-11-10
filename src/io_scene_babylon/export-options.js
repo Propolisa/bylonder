@@ -50,7 +50,7 @@ export const BRANCH_STATES = [
   ['OFF', 'Off', 'Left out of the package'],
 ];
 // The states each branch offers, by branch id.
-export const BRANCHES = { geometryNodes: ['LIVE', 'BAKED'] };
+export const BRANCHES = { geometryNodes: ['LIVE', 'BAKED'], compositor: ['LIVE', 'BAKED', 'OFF'] };
 const branchState = (name) => repaired(name, z.nullable(z.enum(BRANCH_STATES.map(([id]) => id))), null);
 const Branch = z.object({
   /** for every instance of the branch */
@@ -58,8 +58,12 @@ const Branch = z.object({
   /** by instance name (an object's, for a modifier stack) */
   instances: repaired('instances', z.record(z.string(), branchState('instance state')), () => ({})),
 });
-/** The state File > Export's options set for a branch's instance: set on the instance, else on the branch; null: its default. */
-export const chosenState = (branches, id, instance) => branches?.[id]?.instances?.[instance] ?? branches?.[id]?.state ?? null;
+/** The state File > Export's options set for a branch's instance: set on the instance, else on the branch, else for every
+ * branch (`branchState`); null: its default, also when the state chosen is one the branch does not offer. */
+export function chosenState({ branchState = null, branches = {} }, id, instance) {
+  const set = branches[id], state = set?.instances?.[instance] ?? set?.state ?? branchState;
+  return BRANCHES[id].includes(state) ? state : null;
+}
 
 export const ExportOptionsSchema = z.object({
   /** materials with Bylonder's EEVEE extensions, as Babylon's blocks */
@@ -88,7 +92,9 @@ export const ExportOptionsSchema = z.object({
   replace: repaired('replace', z.array(z.string()), () => []),
   /** by runtimes.js feature id, overriding `runtime` for that feature and its instances */
   runtimes: repaired('runtimes', z.record(z.string(), repaired('feature runtimes', FeatureRuntimes, () => ({ runtime: null, instances: {} }))), () => ({})),
-  /** by BRANCHES id, each branch's state and its instances' (BRANCH_STATES) */
+  /** the state of every branch (BRANCH_STATES); null: each its own */
+  branchState: branchState('branchState'),
+  /** by BRANCHES id, overriding `branchState` for that branch, each branch's state and its instances' (BRANCH_STATES) */
   branches: repaired('branches', z.record(z.string(), repaired('branch', Branch, () => ({ state: null, instances: {} }))), () => ({})),
 });
 
