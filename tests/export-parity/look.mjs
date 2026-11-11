@@ -94,7 +94,8 @@ ${bundled ? BUNDLED : MODULES}
 const frame = +query.get('frame');
 scene.materials.forEach((m) => m.onError = (effect, error) => errors.push(m.name + ': ' + error));
 // The app's frame, held: Render Image draws one still.
-for (const group of scene.animationGroups) { group.start(false, 1, frame, frame); group.goToFrame(frame); group.pause(); }
+blend.playhead.pause();
+blend.playhead.seek(frame);
 await blend.settled();
 engine.runRenderLoop(() => scene.render());
 window.check = {

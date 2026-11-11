@@ -164,11 +164,35 @@ export const CollectionSchema: import("zod/mini").ZodMiniObject<{
         indirect_only: boolean;
     }>, any>>>;
 }, import("zod/v4/core").$strip>;
-/** The scene the page shows: its ID, its scene collection (the collections' root) and the view layer it draws. */
+/** The scene's time as Blender's Scene holds it: the frame shown, the range played, its frame rate (fps / fps_base) and whether playback loops. */
+export const TimeSchema: import("zod/mini").ZodMiniObject<{
+    frame_current: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNumber<number>>;
+    frame_start: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNumber<number>>;
+    frame_end: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNumber<number>>;
+    fps: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNumber<number>>;
+    fps_base: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNumber<number>>;
+    loop: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniBoolean<boolean>>;
+}, import("zod/v4/core").$strip>;
+/** The scene the page shows: its ID, its scene collection (the collections' root), the view layer it draws and its time. */
 export const SceneSchema: import("zod/mini").ZodMiniObject<{
     id: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNullable<import("zod/mini").ZodMiniString<string>>>;
     collection: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNullable<import("zod/mini").ZodMiniString<string>>>;
     view_layer: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNullable<import("zod/mini").ZodMiniString<string>>>;
+    time: import("zod/mini").ZodMiniDefault<z.ZodMiniType<{
+        frame_current: number;
+        frame_start: number;
+        frame_end: number;
+        fps: number;
+        fps_base: number;
+        loop: boolean;
+    }, any, import("zod/v4/core").$ZodTypeInternals<{
+        frame_current: number;
+        frame_start: number;
+        frame_end: number;
+        fps: number;
+        fps_base: number;
+        loop: boolean;
+    }, any>>>;
 }, import("zod/v4/core").$strip>;
 export const IR_SCHEMA: "bylonder-ir";
 export const IR_VERSION: 1;
@@ -179,10 +203,26 @@ export const IRSchema: import("zod/mini").ZodMiniObject<{
         id: string | null;
         collection: string | null;
         view_layer: string | null;
+        time: {
+            frame_current: number;
+            frame_start: number;
+            frame_end: number;
+            fps: number;
+            fps_base: number;
+            loop: boolean;
+        };
     }, any, import("zod/v4/core").$ZodTypeInternals<{
         id: string | null;
         collection: string | null;
         view_layer: string | null;
+        time: {
+            frame_current: number;
+            frame_start: number;
+            frame_end: number;
+            fps: number;
+            fps_base: number;
+            loop: boolean;
+        };
     }, any>>>;
     ids: import("zod/mini").ZodMiniDefault<z.ZodMiniType<Record<string, {
         type: string;
@@ -466,6 +506,7 @@ export type Mesh = z.infer<typeof MeshSchema>;
 export type Points = z.infer<typeof PointsSchema>;
 export type Instances = z.infer<typeof InstancesSchema>;
 export type Geometry = z.infer<typeof GeometrySchema>;
+export type Time = z.infer<typeof TimeSchema>;
 export type Collection = z.infer<typeof CollectionSchema>;
 /**
  * A reference an entity's input may hold, resolved before a unit runs.

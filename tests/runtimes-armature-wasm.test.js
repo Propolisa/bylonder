@@ -235,8 +235,11 @@ await blend.settled();
 const built = blend.scene;
 written.remove();
 assert.equal(built.getMeshByName('Body').skeleton.name, 'Rig');
-built.animationGroups[0].pause();
-for (const frame of [6, 16]) assert.ok(loadedError(built, frame) < PRECISION, `the .js export at frame ${frame} skins as Main deforms (${loadedError(built, frame)})`);
+blend.playhead.pause();
+for (const frame of [6, 16]) {
+  blend.playhead.seek(frame);
+  assert.ok(loadedError(built, frame) < PRECISION, `the .js export at frame ${frame} skins as Main deforms (${loadedError(built, frame)})`);
+}
 built.getEngine().dispose();
 
 // Back to Blender: Main's evaluated mesh drawn as before, no skeleton left.

@@ -34,6 +34,8 @@ media:
   - import-export/control-panel-all.png
   - import-export/control-panel-collections.png
   - import-export/control-panel-collections.gif
+  - import-export/control-panel-timeline.png
+  - import-export/control-panel-timeline.gif
   - import-export/control-panel-touch.gif
 ui:
   - TOPBAR_MT_file
@@ -76,6 +78,7 @@ code:
   - src/io_scene_babylon/controls-export.js
   - src/io_scene_babylon/collections-export.js
   - src/io_scene_babylon/runtime/collections.js
+  - src/io_scene_babylon/runtime/playhead.js
   - src/io_scene_babylon/runtime/control-panel.js
   - src/io_scene_babylon/runtime/control-panel-ui.js
   - src/io_scene_babylon/runtime/control-panel-model.js
@@ -97,6 +100,7 @@ tests:
   - tests/control-panel.test.js
   - tests/export-runtime.test.js
   - tests/collections-sdk-wasm.test.js
+  - tests/playhead.test.js
   - tests/unit-swap-wasm.test.js
   - tests/runtimes-armature-wasm.test.js
   - tests/texture-paint-wasm.test.js
@@ -126,6 +130,7 @@ limits:
   - Babylon's Inspector and node editors are Babylon's own bundles, which read the page's Babylon from a global: a bundled package holds the whole of Babylon's core (about 3 MB) in bundle/ for them, fetched only when one opens. With Editors set to In the Package, the package holds the editors and Babylon's GUI in bylonder-dev-tools/ (about 7 MB), and they open offline.
   - The control panel's navigation copies the chosen camera's view onto the exported one each frame, so the view transform and compositor stay; a camera's roll is not kept, and Walk finds the floor by casting down from the camera.
   - On Screen measures the materials' shares from a 64 pixel wide drawing of the scene, a few times a second while the panel is open: a material smaller than a pixel there shows no share, and a material's share counts where it is drawn, behind transparent ones too. A material's icon colour is the average of the frame's pixels there, at the same size, so it mixes its lit and shaded sides; where it is not seen, the icon shows its Base Color (or Color) if it has one as a control, else the plain icon.
+  - An exported page plays the scene's frames on one clock through sub-frames, smoother than Blender's whole frames; its playhead's snap shows whole frames. Particle systems pause with it but do not seek.
   - The Node Material Editor opens in a window of its own, which a browser's popup blocker may stop.
   - The splash's Open from URL downloads only from servers that allow downloads from a web page (CORS); Blender's demo files are served from Bylonder's own copy for that reason.
 ---
@@ -253,12 +258,17 @@ control panel, on WebGL 2, loading Babylon.js from its CDN. [Open the demo](http
 
     ![Rain hidden by its eye, then the panel filtered to Street](../media/features/import-export/control-panel-collections.gif)
 
-12. **View and editors.** View chooses the camera the page looks through, and how you move it: Fixed (the camera as
+12. **View and editors.** View plays and pauses the scene's frames, and its slider scrubs them, on the page's one
+    clock: everything that moves with the frame follows it. It chooses the camera the page looks through, and how you move it: Fixed (the camera as
     exported), Orbit, Fly (W A S D, E and Q), Walk (at eye height with gravity) and, on a touch screen, Sticks. Navigation,
     in the export's settings under Control Panel, sets the page's first mode and which are offered. The icon beside an
     object, a material or the header opens Babylon's Inspector there, or a node material in the Node Material Editor;
     they load from Babylon's CDN, or from the package with Editors set to In the Package. On a phone one finger scrolls
     the panel or drags a field sideways, and a pinch scales it.
+
+    ![The timeline in View](../media/features/import-export/control-panel-timeline.png)
+
+    ![The rain paused, scrubbed to the last frame, then played](../media/features/import-export/control-panel-timeline.gif)
 
     ![On a phone: scroll, drag, pinch, then Orbit](../media/features/import-export/control-panel-touch.gif)
 

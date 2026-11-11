@@ -19,12 +19,12 @@ assert.ok(files['scene.js'].includes('"name":"Grease Pencil"'), 'a scene animate
 
 const written = writePackage(files);
 const blend = await (await import(written.url)).load(new NullEngine());
-const page = blend.scene, group = page.animationGroups[0], node = scene.transformNodes.find((n) => sync.objectOf(n) && n.metadata?.wbType === 'GREASEPENCIL');
+const page = blend.scene, node = scene.transformNodes.find((n) => sync.objectOf(n) && n.metadata?.wbType === 'GREASEPENCIL');
 const shown = (layer) => page.getTransformNodeById(`${node.name}/grease_pencil/${layer}`)?.getChildMeshes(true).filter((m) => m.isEnabled()) ?? [];
-group.pause();
+blend.playhead.pause();
 let checked = 0;
 for (const frame of [1, 2, 5, 12, 13, 24]) {
-  group.goToFrame(frame);
+  blend.playhead.seek(frame);
   page.render();
   await blend.settled();
   sync.frameChanged(frame);

@@ -102,7 +102,8 @@ await blend.settled();
 const page = blend.scene, notes = [];
 // The page held at the scene's frame and drawn: Babylon poses a skeleton's bones only when a frame renders.
 const held = idStruct(sync.blender.scene).frame_current;
-for (const group of page.animationGroups) { group.start(false, 1, held, held); group.goToFrame(held); group.pause(); }
+blend.playhead.pause();
+blend.playhead.seek(held);
 page.render();
 const result = { id, baseline: compare(scene, page, sync), controls: { checked: 0, failures: [] }, animation: { checked: 0, failures: [] }, notes };
 
@@ -127,13 +128,8 @@ for (const control of sample) {
 // Animation: the scene's first, middle and last frames and one between, through the frame control.
 const frameControl = blend.controls().find((c) => c.path.endsWith('.frame_current'));
 const { frameStart, frameEnd } = world.animation.time.state;
-const group = page.animationGroups[0];
-if (frameControl && (group || Object.values(blend.ir.entities).some((e) => e.inputs?.frame))) {
+if (frameControl && (page.animationGroups.length || Object.values(blend.ir.entities).some((e) => e.inputs?.frame))) {
   for (const frame of [...new Set([frameStart, Math.round(frameStart + (frameEnd - frameStart) * 0.37), Math.round((frameStart + frameEnd) / 2), frameEnd])]) {
-    group?.start(false, 1, frame, frame);
-    group?.goToFrame(frame);
-    // Held there: a playing group steps on with the time each drawn frame takes.
-    group?.pause();
     blend.set(frameControl.path, frame);
     // A frame drawn: Babylon's animation sets the channels it plays, which run what reads them.
     page.render();
@@ -145,7 +141,6 @@ if (frameControl && (group || Object.values(blend.ir.entities).some((e) => e.inp
     result.animation.checked++;
     const diff = compare(scene, page, sync);
     if (diff.length) result.animation.failures.push(`frame ${frame}: ${diff.slice(0, 3).join('; ')}${diff.length > 3 ? ` (+${diff.length - 3})` : ''}`);
-    group?.stop();
   }
 } else notes.push('no animation');
 blend.dispose();

@@ -35,11 +35,9 @@ async function check(type) {
   const written = writePackage(files);
   const blend = await (await import(written.url)).load(new NullEngine());
   await blend.settled();
-  const page = blend.scene, group = page.animationGroups[0], frameControl = blend.controls().find((c) => c.path.endsWith('.frame_current'));
+  const page = blend.scene, frameControl = blend.controls().find((c) => c.path.endsWith('.frame_current'));
+  blend.playhead.pause();
   for (const frame of FRAMES) {
-    group.start(false, 1, frame, frame);
-    group.goToFrame(frame);
-    group.pause();
     blend.set(frameControl.path, frame);
     page.render();
     await blend.settled();
@@ -47,7 +45,6 @@ async function check(type) {
     sync.frameChanged(frame);
     const drawn = page.getNodeById('Ground').computeWorldMatrix(true).asArray(), main = babylonMatrix(sync.blender.transform(sync.objectOf(world.scene.getNodeById('Ground'))).matrix_world).asArray();
     assert.ok(drawn.every((v, i) => Math.abs(v - main[i]) < 1e-4), `${type} at frame ${frame}: ${drawn.map((v) => v.toFixed(3))}, Main ${main.map((v) => v.toFixed(3))}`);
-    group.stop();
   }
   console.log(`${type}: the Ground follows the Box as Main evaluates it at ${FRAMES.length} frames`);
   blend.dispose();

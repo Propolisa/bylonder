@@ -74,9 +74,8 @@ const fs = process.getBuiltinModule('fs/promises'), readFile = fs.readFile;
 fs.readFile = (path, ...rest) => (wasmReads += String(path).endsWith('modifiers.wasm'), readFile(path, ...rest));
 const blend = await (await import(written.url)).load(new NullEngine());
 const built = blend.scene;
-const group = built.animationGroups[0];
-group.pause();
-group.goToFrame(1);
+blend.playhead.pause();
+blend.playhead.seek(1);
 built.render();
 await blend.settled();
 assert.equal(wasmReads, 0, 'no stack runs before a setting changes: the page draws the applied geometry');
@@ -96,7 +95,7 @@ for (const cube of cubes) {
 assert.equal(wasmReads, 1, 'one module runs every stack');
 
 // Frame 20: the animation group sets the thickness through its channel, the stack runs again, and the result is Bylonder's.
-group.goToFrame(20);
+blend.playhead.seek(20);
 built.render();
 await blend.settled();
 animation.seek(20);

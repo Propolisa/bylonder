@@ -7,6 +7,7 @@
 //     --colours the materials' icons in the colours they show on screen, on the Compositor example, only
 //     --collections the Collections view on the Compositor example: a collection hidden by its eye, the panel filtered
 //               to what one holds, only
+//     --timeline the View section's timeline on the Compositor example: paused, scrubbed, played, only
 //     --serve   exports and serves the page, printing its URL, until stopped (for working on the panel); EXAMPLE another
 //               example, PORT and HOST where (default any port on localhost)
 //     BUNDLE=0  the package as ES modules, with an import map
@@ -23,8 +24,8 @@ const root = fileURLToPath(new URL('../..', import.meta.url));
 const MEDIA = join(root, 'docs/media/features/import-export');
 // Pictures go where the owner follows them too: the main checkout's .shots/ beside a worktree, else this one's.
 const SHOTS = join(existsSync(join(root, '../bylonder/.shots')) ? join(root, '../bylonder/.shots') : join(root, '.shots'), 'control-panel');
-const COLOURS = process.argv.includes('--colours'), COLLECTIONS = process.argv.includes('--collections');
-const EXAMPLE = process.env.EXAMPLE ?? (COLOURS || COLLECTIONS ? 'compositor' : 'lava');
+const COLOURS = process.argv.includes('--colours'), COLLECTIONS = process.argv.includes('--collections'), TIMELINE = process.argv.includes('--timeline');
+const EXAMPLE = process.env.EXAMPLE ?? (COLOURS || COLLECTIONS || TIMELINE ? 'compositor' : 'lava');
 // Custom properties the page's author would have added, by object (or the scene).
 const CUSTOM = EXAMPLE !== 'lava' ? {} : { Sphere: { Glow: 0.75, Spin: true, Turns: 3 }, scene: { Speed: 2 } };
 // Bundled, as File > Export writes a package by default, unless BUNDLE=0.
@@ -168,6 +169,34 @@ if (COLOURS) {
   });
   if (!(await shown('Rain'))) throw new Error('the Rain collection did not show again');
   await page.close();
+} else if (TIMELINE) {
+  const { page, panel, toggle, pause, shot, gif } = await open(await browser.newContext({ viewport: SIZE, deviceScaleFactor: 1 }));
+  const frame = () => page.evaluate(() => window.blend.playhead.frame);
+  const play = panel.locator('.timeline .tool'), scrub = panel.locator('.timeline .scrub');
+  await page.mouse.move(SIZE.width - 30, 30, { steps: 8 });
+  await toggle.click();
+  await play.locator('.icon[style*="--icon"]').waitFor();
+  const playing = await frame();
+  await pause(500);
+  if (!(await frame() > playing)) throw new Error('the playhead does not play');
+  await gif('timeline', null, 720, async () => {
+    await pause(800);
+    await play.click();
+    const held = await frame();
+    await pause(600);
+    if (await frame() !== held) throw new Error('Pause did not hold the frame');
+    const box = await scrub.boundingBox();
+    await page.mouse.move(box.x + 4, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width - 4, box.y + box.height / 2, { steps: 40 });
+    await page.mouse.up();
+    const end = await page.evaluate(() => window.blend.playhead.end);
+    if (Math.abs(await frame() - end) > 1) throw new Error(`scrubbing to the end shows frame ${await frame()}, not ${end}`);
+    await shot('timeline', panel);
+    await play.click();
+    await pause(1500);
+  });
+  await page.close();
 } else if (!process.argv.includes('--mobile')) {
   const { page, panel, toggle, pause, shot, gif, value } = await open(await browser.newContext({ viewport: SIZE, deviceScaleFactor: 1 }));
   // The button shows as the pointer nears the corner; the panel opens on it.
@@ -214,7 +243,7 @@ if (COLOURS) {
 
 // On a phone: a tap at the corner shows the button, one finger scrolls the panel or drags a field sideways, two pinch
 // the panel's scale; with Orbit chosen, a finger outside the panel turns the view.
-if (!COLOURS && !COLLECTIONS) {
+if (!COLOURS && !COLLECTIONS && !TIMELINE) {
   const { page, panel, toggle, pause, gif, value } = await open(await browser.newContext({ viewport: PHONE, deviceScaleFactor: 2, isMobile: true, hasTouch: true }));
   const cdp = await page.context().newCDPSession(page);
   const touch = (type, points) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: points.map(([x, y], id) => ({ x, y, id })) });

@@ -54,7 +54,16 @@ Blender evaluated them at export.
 ## Scene and collections
 
 `scene` names what the page shows: `id`, the scene's ID key, `collection`, its scene collection's key (the root of
-`collections`), and `view_layer`, the view layer it draws (the first one used for rendering).
+`collections`), `view_layer`, the view layer it draws (the first one used for rendering), and `time`, the scene's time
+as Blender's Scene holds it:
+
+```json
+"time": { "frame_current": 1, "frame_start": 1, "frame_end": 120, "fps": 24, "fps_base": 1, "loop": true }
+```
+
+The page's playhead (`runtime/playhead.js`) plays it: from `frame_current`, over `frame_start` to `frame_end` at
+`fps / fps_base` frames per second, looping unless `loop` is false (Bylonder's own; Blender's playback always loops).
+Babylon's animation groups and every entity reading `frame_current` follow it. Omitted, it takes Blender's defaults.
 
 `collections` holds the scene's collections by ID key, the scene collection (`GR:Scene Collection`) included, each with
 its members and metadata as Blender's outliner shows them:

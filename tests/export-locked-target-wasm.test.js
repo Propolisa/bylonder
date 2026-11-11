@@ -26,9 +26,9 @@ animation.seek(1);
 
 const written = writePackage(await exportModule(world));
 const blend = await (await import(written.url)).load(new NullEngine());
-const page = blend.scene.getCameraByName('Camera'), group = blend.scene.animationGroups[0];
-group.start(false, 1, 20, 20);
-group.goToFrame(20);
+const page = blend.scene.getCameraByName('Camera');
+blend.playhead.pause();
+blend.playhead.seek(20);
 assert.ok(Math.abs(page.lockedTarget?.x - 4) < 1e-3, 'the page looks at the last key');
 blend.dispose();
 written.remove();

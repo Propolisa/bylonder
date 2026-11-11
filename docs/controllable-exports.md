@@ -118,6 +118,9 @@ blend.collections();                                  // the collection tree: [{
 blend.objectsIn('Lane');                              // ['OB:Rain', ...], with its child collections' ({ recursive: false }: its own)
 blend.collectionsOf('Rain');                          // ['GR:Lane', ...]
 blend.showCollection('Lane', false);                  // the outliner's eye; { children: true } as Shift does
+blend.playhead.pause();                               // the scene's one clock: play(), pause(), seek(12.5), frame, playing
+blend.playhead.snap = true;                           // whole frames only, as Blender's Frame Dropping shows them
+blend.playhead.keepRealTime(group);                   // an AnimationGroup or particle system left on Babylon's own clock
 blend.dispose();
 ```
 
@@ -144,6 +147,14 @@ types. `controls()` fields are named as Blender's RNA names them.
   as Blender resolves an object linked to several collections; the page shows what both Blender's viewport and its
   render show, so Hide in Viewport and Disable in Renders both hide. Hiding hides a mesh alone, not its children, as
   Blender does. `nodeOf(key)` gives an object's Babylon node.
+- Time is one clock, the playhead (`runtime/playhead.js`), from the IR's `scene.time` (`docs/ir.md`, Scene and
+  collections). It starts at the scene's current frame and plays when the scene animates, advancing by the time each
+  drawn frame takes at the scene's frame rate (`fps / fps_base`), through sub-frames so motion is smooth at any display
+  rate (`snap` for whole frames). At the end it holds the last frame for a whole frame and loops to the first, or stops
+  when the scene does not loop. Every started AnimationGroup is held paused and set to its frame, what reads the frame
+  (F-Curves, drivers, Geometry Nodes, Grease Pencil frames) runs at it, and particle systems pause with it. The frame
+  control (`scenes["Scene"].frame_current`) shows its whole frame and seeks it when set. An effect kept on real time
+  plays on Babylon's own clock instead.
 - Interop: a pair of FlowGraph blocks (Get and Set Bylonder Property) calls `get` and `set`, so a user's own FlowGraph
   or glTF interactivity drives the same knobs. Nothing else is FlowGraph's.
 
@@ -351,7 +362,7 @@ OR Apache-2.0): a button at the canvas's top right corner, a few lines loaded wi
 theme tokens. It reads `controls()` and the IR: each property carries Blender's UI name, range, step, precision and,
 where known, Blender's default (`controls-export.js` `withUI`), which hides what is at its default. Its materials are ordered by how much of the view each covers, from a 64 pixel
 wide drawing of the scene with each material a flat colour (`control-panel-coverage.js`), made only while it is open. Its View section
-drives the exported camera with Babylon's own navigation cameras (`control-panel-camera.js`), and its links open
+plays, pauses and scrubs the playhead, and drives the exported camera with Babylon's own navigation cameras (`control-panel-camera.js`), and its links open
 Babylon's Inspector, Node Material Editor and Node Render Graph Editor (`dev-tools.js`) from Babylon's CDN or the
 package. In Node there is no panel.
 

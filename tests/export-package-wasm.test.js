@@ -81,7 +81,8 @@ assert.doesNotMatch(webgpu['scene.js'], /new Engine\(/, 'a WebGPU page makes no 
 assert.deepEqual(shipped(webgpu), webgpuOverrides, 'a WebGPU package ships the WebGPU overrides');
 // The control panel (runtime/control-panel.js): scene.js adds it to the page with the editors' source and navigation
 // chosen, and each control carries what Blender's UI shows of it; with Control Panel off the package ships none of it.
-assert.match(files['scene.js'], /controlPanel\(blend, \{"tools":"CDN","navigation":"FIXED","offer":\["FIXED","ORBIT","FLY","WALK","JOYSTICKS"\], root: ROOT \}\)/);
+// An animated scene's panel has a timeline, in Blender's icons.
+assert.match(files['scene.js'], /controlPanel\(blend, \{"tools":"CDN","navigation":"FIXED","offer":\["FIXED","ORBIT","FLY","WALK","JOYSTICKS"\], root: ROOT, icons: /);
 assert.ok('bylonder/control-panel-ui.js' in packageFiles(files), 'the panel ships');
 assert.ok(!Object.keys(packageFiles(files)).some((path) => path.startsWith('bylonder-dev-tools/')), 'Editors from the CDN: none in the package');
 const offlineEditors = Object.keys(packageFiles(await exportModule(world, { devTools: 'PACKAGE' })));
@@ -165,11 +166,10 @@ function setBoth(name, property, index, value) {
 const group = page.animationGroups[0], current = animation.time.frame;
 assert.ok(group.targetedAnimations.some((t) => t.target.name === 'Key Light rig'), 'the rig is animated');
 for (const frame of [1, 15, 30, current]) {
-  group.start(false, 1, frame, frame);
-  group.goToFrame(frame);
+  blend.playhead.pause();
+  blend.playhead.seek(frame);
   sync.frameChanged(frame);
   lit('Key Light');
-  group.stop();
 }
 for (const name of ['Steam Cylinder', 'Governor Cap', 'Camera', 'Key Light', 'Rim Light', 'Governor Ball']) {
   if (!node(name)) continue;

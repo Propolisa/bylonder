@@ -1,3 +1,6 @@
+// The scene's time as the IR holds it (docs/ir.md, Scene and collections), from the app's scene time (scene/time.js).
+const sceneTime = ({ frameCurrent, frameStart, frameEnd, fps, fpsBase, loop }) => ({ frame_current: frameCurrent, frame_start: frameStart, frame_end: frameEnd, fps, fps_base: fpsBase, loop });
+
 // The package's IR (docs/ir.md): the carried IDs with their RNA data and the references between them, the properties,
 // the node graphs and the computed entities, as plain data for scene.ir.json.
 import { blendData, idStruct, pointerOf } from '../python/bpy_rna.js';
@@ -289,6 +292,6 @@ export function exportIR(world, { controls, collections = null, live, bin, anima
   }
   // What the page computes from is offered to authors.
   for (const entity of Object.values(entities)) if (entity.implementation) for (const [ref] of referencesIn(entity.inputs)) if ('property' in ref) properties[ref.property].suggested = true;
-  return { schema: IR_SCHEMA, version: IR_VERSION, scene: collections?.scene ?? { id: null, collection: null, view_layer: null }, ids,
+  return { schema: IR_SCHEMA, version: IR_VERSION, scene: { ...(collections?.scene ?? { id: null, collection: null, view_layer: null }), time: sceneTime(world.animation.time.state) }, ids,
     collections: collections?.collections ?? {}, references, properties, graphs, entities, order: entityOrder(entities) };
 }

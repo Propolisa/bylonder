@@ -4,7 +4,8 @@
 // bpy.data (`objects["Cube"].location[0]`) whose value the page sets, and which lands on the Babylon objects it binds to.
 import { Matrix, Observable, Quaternion, Texture, Vector3 } from '@babylonjs/core';
 import { createScheduler, EVALUATORS, NATIVE } from './scheduler.js';
-import { readIR } from './ir.js';
+import { readIR, referencesIn } from './ir.js';
+import { createPlayhead } from './playhead.js';
 import { collectionKey, collectionTree, objectsIn, showing } from './collections.js';
 
 /** @typedef {number | boolean | string} Value */
@@ -201,11 +202,19 @@ export class BlendScene {
     const knobs = Object.entries(this.ir.properties).map(([path, { id, ...property }]) => /** @type {Knob} */ ({ path, ...property }));
     this.#knobs = new Map(knobs.map((knob) => [knob.path, knob]));
     this.#values = new Map(knobs.map((knob) => [knob.path, knob.default]));
+    /** The scene's one clock: its frame, which the animation and what reads the frame follow. */
+    this.playhead = createPlayhead(scene, this.ir.scene.time);
+    const frameControl = knobs.find((knob) => knob.bind?.frame)?.path;
+    // The frame control shows the playhead's whole frame, as Blender's frame_current does.
+    if (frameControl) this.playhead.onChanged.add(({ frame }) => {
+      if (Math.floor(frame) === this.#values.get(frameControl)) return;
+      this.#values.set(frameControl, Math.floor(frame));
+      this.onChanged.notifyObservers({ path: frameControl, value: Math.floor(frame) });
+    });
     this.#scheduler = Object.keys(this.ir.entities).length ? createScheduler(this.ir, { scene, root, ir: this.ir, buffers, controls: {
       get: (path) => this.#values.get(path),
       write: (path, value) => this.#write(path, value),
-      // The animation's frame while it plays, else the frame control's.
-      frame: () => scene.animationGroups[0]?.animatables[0]?.masterFrame ?? /** @type {number} */ ([...this.#values].find(([p]) => p.endsWith('.frame_current'))?.[1] ?? 1),
+      frame: () => this.playhead.frame,
     } }) : null;
     this.#channels(knobs);
     for (const { path, bind } of knobs) if (bind?.collection) {
@@ -213,6 +222,14 @@ export class BlendScene {
       this.#flags.set(`${bind.collection} ${flag}`, path);
     }
     this.#hiddenAtExport = new Set([...showing(this.ir, (key, flag) => this.#flag(key, flag))].filter(([, shown]) => !shown).map(([object]) => object));
+    if (this.#animated()) this.playhead.play();
+  }
+
+  /** Whether the scene moves with its frame: a range of frames, and an animation or what reads the frame. */
+  #animated() {
+    const { frame_start, frame_end } = this.ir.scene.time;
+    return frame_end > frame_start && (this.scene.animationGroups.length > 0
+      || Object.values(this.ir.entities).some((e) => [...referencesIn(e.inputs)].some(([ref]) => 'property' in ref && ref.property.endsWith('.frame_current'))));
   }
 
   /** The objects their collections hid at export. */
@@ -392,6 +409,7 @@ export class BlendScene {
   /** Disposes of the scene. */
   dispose() {
     this.#scheduler?.dispose();
+    this.playhead.dispose();
     this.onChanged.clear();
     this.scene.dispose();
   }
@@ -454,7 +472,7 @@ export class BlendScene {
       return;
     }
     if (bind.frame) {
-      for (const group of this.scene.animationGroups) group.goToFrame(/** @type {number} */ (value));
+      this.playhead.seek(/** @type {number} */ (value));
       return;
     }
     if (bind.material !== undefined && bind.property) {

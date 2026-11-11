@@ -56,12 +56,10 @@ async function check(id, { bake = false, elastic = false, slide = false } = {}) 
   // Meshes Babylon deforms: morph targets (shape keys) and skeletons (armatures).
   const deformed = scene.meshes.filter((m) => sync.objectOf(m) && (page.getMeshById(m.name)?.morphTargetManager || page.getMeshById(m.name)?.skeleton));
   assert.ok(meshes.length || deformed.length, `${id}: animated meshes`);
-  group.stop();
+  blend.playhead.pause();
   for (const frame of EXAMPLES[id]) {
-    group.start(false, 1, frame, frame);
-    group.goToFrame(frame);
     // A frame drawn, held there: Babylon's animation sets what it plays, the page runs what reads it, the skeletons pose.
-    group.pause();
+    blend.playhead.seek(frame);
     page.render();
     await blend.settled();
     sync.frameChanged(frame);
@@ -77,7 +75,6 @@ async function check(id, { bake = false, elastic = false, slide = false } = {}) 
       for (let c = 0; c < evaluated.corners_num; c++) error = Math.max(error, ...[0, 2, 1].map((axis, k) => Math.abs(drawn[c * 3 + k] - p[corners[c] * 3 + axis])));
       assert.ok(error < 1e-4, `${id} ${mesh.name} at frame ${frame}: drawn off Main's evaluated mesh by ${error}`);
     }
-    group.stop();
   }
   const keys = group.targetedAnimations.map((t) => t.animation.getKeys().length);
   console.log(`${id}${bake ? ' (Bake Animation)' : elastic ? ' (Elastic)' : slide ? ' (Slide)' : ''}: ${meshes.length} meshes and ${deformed.length} deformed at ${EXAMPLES[id].length} frames as Main; ${keys.length} tracks, ${keys.reduce((a, b) => a + b, 0)} keys, ${live.length} F-Curves run live`);

@@ -70,6 +70,14 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
             id: string | null;
             collection: string | null;
             view_layer: string | null;
+            time: {
+                frame_current: number;
+                frame_start: number;
+                frame_end: number;
+                fps: number;
+                fps_base: number;
+                loop: boolean;
+            };
         };
         ids: Record<string, {
             type: string;
@@ -145,6 +153,21 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
             implementation?: string | undefined;
         }>;
         order: string[];
+    };
+    /** The scene's one clock: its frame, which the animation and what reads the frame follow. */
+    playhead: {
+        readonly frame: number;
+        readonly playing: boolean;
+        start: number;
+        end: number;
+        fps: number;
+        snap: boolean;
+        onChanged: Observable<import("./playhead.js").PlayheadState>;
+        play(): void;
+        pause(): void;
+        seek(frame: number): void;
+        keepRealTime(effect: import("./playhead.js").Effect, on?: boolean): void;
+        dispose(): void;
     };
     /** The scene's collections from its scene collection down, in the outliner's order, with their flags as set. @returns {CollectionInfo[]} */
     collections(): CollectionInfo[];

@@ -14,7 +14,15 @@
       "default": {
         "id": null,
         "collection": null,
-        "view_layer": null
+        "view_layer": null,
+        "time": {
+          "frame_current": 1,
+          "frame_start": 1,
+          "frame_end": 250,
+          "fps": 24,
+          "fps_base": 1,
+          "loop": true
+        }
       },
       "type": "object",
       "properties": {
@@ -38,6 +46,43 @@
             "string",
             "null"
           ]
+        },
+        "time": {
+          "default": {
+            "frame_current": 1,
+            "frame_start": 1,
+            "frame_end": 250,
+            "fps": 24,
+            "fps_base": 1,
+            "loop": true
+          },
+          "type": "object",
+          "properties": {
+            "frame_current": {
+              "default": 1,
+              "type": "number"
+            },
+            "frame_start": {
+              "default": 1,
+              "type": "number"
+            },
+            "frame_end": {
+              "default": 250,
+              "type": "number"
+            },
+            "fps": {
+              "default": 24,
+              "type": "number"
+            },
+            "fps_base": {
+              "default": 1,
+              "type": "number"
+            },
+            "loop": {
+              "default": true,
+              "type": "boolean"
+            }
+          }
         }
       }
     },

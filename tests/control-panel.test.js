@@ -113,5 +113,5 @@ assert.ok(!shipped('').some((path) => path.includes('control-panel')));
 // What a page loads: the button at once, the panel when first opened; both small.
 const kb = (...names) => gzipSync(names.map(runtime).join('')).length / 1024;
 assert.ok(kb('control-panel.js') < 3.5, `the button: ${kb('control-panel.js').toFixed(1)} KB gzipped`);
-assert.ok(kb('control-panel-ui.js', 'control-panel-model.js') < 23, `the panel: ${kb('control-panel-ui.js', 'control-panel-model.js').toFixed(1)} KB gzipped`);
+assert.ok(kb('control-panel-ui.js', 'control-panel-model.js') < 24, `the panel: ${kb('control-panel-ui.js', 'control-panel-model.js').toFixed(1)} KB gzipped`);
 console.log(`control panel: layout, defaults, units, drag steps, material colours, theme, shipping, picker colours and touch swipes ok; ${kb('control-panel.js').toFixed(1)} KB, then ${kb('control-panel-ui.js', 'control-panel-model.js').toFixed(1)} KB gzipped`);

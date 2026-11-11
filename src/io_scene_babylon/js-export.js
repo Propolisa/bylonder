@@ -317,11 +317,13 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   const pieces = stripPieces(ir, shipped, replace), kernels = pieces && kernelsFile(pieces);
   const curves = Object.values(ir.entities).some((e) => e.implementation === 'curves');
   const meshValued = data.materials.some((m) => m.blocks?.some((b) => b.name.startsWith(MESH_VALUE)));
-  // The panel's Collections view, for a scene with collections, in Blender's icons unless a unit replaces them.
-  const panelIcons = controlPanel && Object.keys(collected?.collections ?? {}).length > 1, blenderIcons = panelIcons && !replaces(replace, PANEL_ICONS_UNIT);
+  // The panel's Collections view, for a scene with collections, and its timeline, for a scene with frames to play, in
+  // Blender's icons unless a unit replaces them.
+  const timeline = ir.scene.time.frame_end > ir.scene.time.frame_start && controls.some((c) => c.bind?.frame);
+  const panelIcons = controlPanel && (Object.keys(collected?.collections ?? {}).length > 1 || timeline), blenderIcons = panelIcons && !replaces(replace, PANEL_ICONS_UNIT);
   const units = json(unitManifest(computed, { kernels: shipped, replace, blocks: {
     ...(areaSpecular && { [AREA_SPECULAR_UNIT]: { files: [AREA_SPECULAR], interface: { apply: '(material: PBRMaterial) => void' }, use: { materials: pbr } } }),
-    ...(panelIcons && { [PANEL_ICONS_UNIT]: { files: [PANEL_ICONS], interface: { icons: 'Record<string, [svg: string, width: number, height: number]>' }, use: { what: "the control panel's Collections view" } } }),
+    ...(panelIcons && { [PANEL_ICONS_UNIT]: { files: [PANEL_ICONS], interface: { icons: 'Record<string, [svg: string, width: number, height: number]>' }, use: { what: "the control panel's Collections view and timeline" } } }),
     ...(volumes && { 'block:volumes': { files: [VOLUMES_FILE], swappable: false, use: { materials: volumes.materials.length } } }),
     ...(composited && { 'block:compositor': { files: ['scene.js'], swappable: false, use: { what: "Blender's compositor GLSL made at export, in scene.js" } } }),
     ...(ownCode.length && { 'block:material_code': { files: ['scene.js'], swappable: false, use: { materials: ownCode } } }),
@@ -523,7 +525,8 @@ ${pipelineTypes.length ? `  for (const entry of RENDERING_PIPELINES) {
   sceneVolumes(scene, VOLUMES, materials, WORLDS.get(scene)?.box ?? null);` : ''}
 ${data.animationGroups.some((g) => g.targetedAnimations.some((t) => t.animation.property === CLOCK)) ? `  // The frame Babylon's animation keeps where the page's F-Curves are all that moves.
   for (const entry of ANIMATION_GROUPS) for (const { animation, targetId } of entry.targetedAnimations) if (animation.property === '${CLOCK}') scene.getNodeById(targetId).${CLOCK} = entry.from;
-` : ''}  for (const entry of ANIMATION_GROUPS) AnimationGroup.Parse(entry, scene).play(entry.loopAnimation);${display ? `
+` : ''}  // Started and held: the page's playhead (playhead.js) sets them to its frame.
+  for (const entry of ANIMATION_GROUPS) AnimationGroup.Parse(entry, scene).start(entry.loopAnimation).pause();${display ? `
   // Displayed as Blender's rendered view: scene linear, ${composited ? 'composited, ' : ''}then the view transform.
   const camera = scene.activeCamera;
   if (camera) {
