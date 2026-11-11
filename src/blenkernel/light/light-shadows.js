@@ -11,7 +11,7 @@ import { filmSample } from '../../render/film.js';
 import { halton } from '../../render/sampling.js';
 import { BLENDER_FORWARD, evaluatedMatrix, setEvaluatedMatrix } from '../../runtime/object-transform.js';
 import { setRenderList } from '../../overrides/babylon/render-list.js';
-import { SHADOW_MAP } from '../../overrides/babylon/lit-side-normal-bias.js';
+import { BIAS_PER_METER, SHADOW_MAP } from '../../overrides/babylon/lit-side-normal-bias.js';
 
 const MAP_SIZE = 2048;
 // A soft sun's filter samples by the scene's shadow Rays: 1, 2, 3 or more.
@@ -76,7 +76,9 @@ function createGenerator(light, type) {
   }
   else if (type === 'SUN') softSun(light, generator);
   else Object.assign(generator, { usePercentageCloserFiltering: true, filteringQuality: ShadowGenerator.QUALITY_HIGH });
-  Object.assign(generator, { bias: 0.002, normalBias: 0.02, customShaderOptions: { shaderName: SHADOW_MAP } });
+  // An area light's shadow, drawn from its center without its shape's softness, keeps a fixed normal bias.
+  const perMeter = type === 'POINT' || type === 'SPOT';
+  Object.assign(generator, { bias: 0.002, normalBias: perMeter ? NORMAL_BIAS_PER_METER : 0.02, customShaderOptions: { shaderName: SHADOW_MAP, defines: perMeter ? [BIAS_PER_METER] : [] } });
   drawAgainUntilComplete(generator);
   return generator;
 }
@@ -102,11 +104,11 @@ function softSun(light, generator) {
 }
 
 // Babylon's depth of a local light's shadow spans the camera's clip range unless the light has its own, and its bias is
-// a share of that range; its normal bias is per meter from the light (lit-side-normal-bias.js).
+// a share of that range.
 function fitRange(light, generator) {
   const { near, far } = shadowRange(lightRecord(light));
   Object.assign(light, { shadowMinZ: near, shadowMaxZ: far });
-  Object.assign(generator, { bias: DEPTH_BIAS / (near + far), normalBias: NORMAL_BIAS_PER_METER });
+  generator.bias = DEPTH_BIAS / (near + far);
 }
 
 // Moves a point or spot light within its radius for the film's sample while its shadow map and the view draw, and back

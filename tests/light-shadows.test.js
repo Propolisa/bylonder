@@ -9,6 +9,7 @@ import { createFilm, filmJitter } from '../src/render/film.js';
 import { evaluatedMatrix, setEvaluatedMatrix } from '../src/runtime/object-transform.js';
 import { Matrix, ShadowGenerator } from '@babylonjs/core';
 import { areaLightShadows } from '../src/blenkernel/light/area-light.js';
+import { BIAS_PER_METER } from '../src/overrides/babylon/lit-side-normal-bias.js';
 
 const engine = new NullEngine();
 // A NullEngine compiles no shader: every caster's shadow shader counts as ready.
@@ -29,6 +30,8 @@ const shadows = createLightShadows(scene);
 shadows.setActive(true);
 assert.deepEqual(shadows.generators.map((g) => g.getLight().name), ['Sun', 'Panel'], 'a shadow generator for the sun and the area light');
 assert.ok(panel.needCube(), "an area light's shadow is a cube from its center");
+const panelShadow = shadows.generators.find((g) => g.getLight() === panel);
+assert.ok(panelShadow.normalBias === 0.02 && !panelShadow.customShaderOptions.defines.length, 'its normal bias is fixed, not per meter from its center');
 areaLightShadows.set(scene, false);
 shadows.setActive(true);
 assert.deepEqual(shadows.generators.map((g) => g.getLight().name), ['Sun'], 'none for the area light with Area Light Shadows off');
@@ -94,6 +97,7 @@ const doorShadow = shadows.generators.find((g) => g.getLight() === door);
 assert.equal(door.shadowMaxZ, Math.sqrt(120));
 const biasMeters = doorShadow.bias * (door.shadowMinZ + door.shadowMaxZ);
 assert.ok(biasMeters > 0.001 && biasMeters < 0.02, `the depth bias is ${biasMeters} m`);
+assert.deepEqual(doorShadow.customShaderOptions.defines, [BIAS_PER_METER], 'its normal bias is per meter from the light');
 // Soft shadows: a film's samples after the first see the light from points within its radius (EEVEE's sphere light),
 // the first (all a moving view shows) from its center.
 assert.equal(shadowJitter(0, 0.1), null, 'the first sample keeps the light still');
