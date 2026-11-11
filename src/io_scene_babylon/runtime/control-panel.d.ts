@@ -23,8 +23,7 @@ export type PanelOptions = {
     offer?: import("./control-panel-camera.js").Navigation[] | undefined;
 };
 /**
- * What the viewer arranged, kept per page: open groups, Show All, the UI scale, the materials' order, the side the
- * panel is docked to and its size there (in the panel's pixels).
+ * What the viewer arranged, kept per page; the panel's size in its own pixels.
  */
 export type PanelState = {
     open: Record<string, boolean>;
@@ -35,4 +34,7 @@ export type PanelState = {
     width?: number;
     height?: number;
 };
+/**
+ * What the viewer arranged, kept per page; the panel's size in its own pixels.
+ */
 export type Dock = "left" | "right" | "top" | "bottom";

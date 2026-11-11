@@ -80,24 +80,20 @@ export function seen(ids: ArrayLike<number>, shown: ArrayLike<number>): Map<numb
  * @returns {Row | undefined}
  */
 export function baseColor(group: Group): Row | undefined;
+/** A displayed color's hue, saturation and value, each 0 to 1, as Blender's color picker has them. @param {number[]} rgb */
+export function hsvOf([r, g, b]: number[]): number[];
+/** A hue, saturation and value as a displayed color. @param {number[]} hsv */
+export function rgbOfHsv([h, s, v]: number[]): number[];
 export function labelOf(control: Control): string;
 export function componentLabel(control: Control, index: number): string;
 export function atDefault(row: Row, value: (path: string) => Value): boolean;
 export function snapped(value: number, step: number): number;
 export function toDisplay(v: number): number;
 export function toLinear(v: number): number;
-/** A color component as the screen shows it, from linear (gamma for COLOR_GAMMA). @param {number} v @param {boolean} gamma */
 export function displayOf(v: number, gamma: boolean): number;
-/** A color component as stored, from how the screen shows it. @param {number} v @param {boolean} gamma */
 export function storedOf(v: number, gamma: boolean): number;
-/** A color's hex, from its components as stored. @param {number[]} rgb @param {boolean} gamma */
 export function hexOf(rgb: number[], gamma: boolean): string;
-/** A hex color as components to store, or null where it is not one. @param {string} hex @param {boolean} gamma */
 export function rgbOf(hex: string, gamma: boolean): number[] | null;
-/** A displayed color's hue, saturation and value, each 0 to 1, as Blender's color picker has them. @param {number[]} rgb */
-export function hsvOf([r, g, b]: number[]): number[];
-/** A hue, saturation and value as a displayed color. @param {number[]} hsv */
-export function rgbOfHsv([h, s, v]: number[]): number[];
 export type Control = import("./blend-scene.js").Control;
 export type Value = import("./blend-scene.js").Value;
 export type Widget = "number" | "slider" | "color" | "check" | "text" | "enum";
