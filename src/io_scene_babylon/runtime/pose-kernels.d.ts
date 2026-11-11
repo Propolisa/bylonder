@@ -2,9 +2,11 @@
  * A solver on loaded kernels (polyfill/constraints.js loadConstraints): each bone's Babylon local matrix after the
  * rig's constraints, by the skeleton's index.
  * @param {any} kernels
- * @returns {(pose: KernelPose) => Map<number, Matrix>}
+ * @returns {((pose: KernelPose) => Map<number, Matrix>) & { segments?: (spec: any, bone: string) => number[][] }}
  */
-export function kernelSolve(kernels: any): (pose: KernelPose) => Map<number, Matrix>;
+export function kernelSolve(kernels: any): ((pose: KernelPose) => Map<number, Matrix>) & {
+    segments?: (spec: any, bone: string) => number[][];
+};
 /**
  * The page's implementation: pose-constraints.js on the package's kernels, loaded from `bylonder-constraints/`.
  * @param {import('./scheduler.js').Page} page
@@ -23,6 +25,8 @@ export type KernelPose = {
     space: Matrix;
     kernels: any;
     influences?: Record<string, number[]>;
+    shapes?: Record<string, Record<string, number>>;
+    segments?: string[];
     nodeWorld: (id: string) => Matrix | null;
     frame?: number;
 };

@@ -143,13 +143,20 @@ function worldControls(scene) {
 // An armature's pose bones, where one skeleton of the file draws it (armature.js): each bone's location, rotation and
 // scale pose its Babylon Bone (blend-scene.js posedBone); an Axis Angle rotation is not composed. Its custom properties
 // and its constraints' influences, which the page's constraints and drivers read, too.
+// A pose bone's own B-Bone shape (Bone Properties > Bendy Bones), by path: what the constraint kernels bend its segments
+// by, which an animation sets.
+export const BBONE_SHAPE = ['bbone_curveinx', 'bbone_curveinz', 'bbone_curveoutx', 'bbone_curveoutz', 'bbone_rollin', 'bbone_rollout',
+  'bbone_easein', 'bbone_easeout', 'bbone_scalein', 'bbone_scaleout'];
+export const bboneShape = (pose) => BBONE_SHAPE.flatMap((name) => (typeof pose[name] === 'number' ? [[name, pose[name]]] : [...pose[name]].map((v, i) => [`${name}[${i}]`, v])));
+
 function poseControls(ob, skeletons) {
   const drawn = skeletons.filter((s) => s.id === ob.name || s.id.startsWith(`${ob.name} `));
   if (drawn.length !== 1) return [];
   return [...ob.pose.bones].flatMap((pose) => {
     const base = `objects${key(ob.name)}.pose.bones${key(pose.name)}`;
     return [...transformControls(base, pose, pose.rotation_mode !== 'AXIS_ANGLE' && { node: `${drawn[0].id} ${pose.name}`, transform: { mode: pose.rotation_mode } }),
-      ...customProperties(pose, base), ...[...pose.constraints].map((c) => knob(`${base}.constraints${key(c.name)}.influence`, c.influence, { type: 'FLOAT', subtype: 'FACTOR' }))];
+      ...customProperties(pose, base), ...[...pose.constraints].map((c) => knob(`${base}.constraints${key(c.name)}.influence`, c.influence, { type: 'FLOAT', subtype: 'FACTOR' })),
+      ...(ob.data.bones.get(pose.name).bbone_segments > 1 ? bboneShape(pose).map(([path, v]) => knob(`${base}.${path}`, v, { type: 'FLOAT' })) : [])];
   });
 }
 

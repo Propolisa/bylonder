@@ -3,17 +3,19 @@
 // The `pose-kernels` implementation of `constraints:POSE` entities: an armature's pose after its bone constraints by
 // Blender's kernels (bylonder-constraints/: constraints.wasm and its loader, GPL), evaluated as Main's depsgraph
 // evaluates it, run by pose-constraints.js in place of its own solvers: the same inputs, with the rig as the export
-// read it (`kernels`, rig-export.js) in place of the stacks, and its constraints' influences by bone as the page's
-// controls set them. A constraint type with a unit registered for
+// read it (`kernels`, rig-export.js) in place of the stacks, and its constraints' influences and its B-Bones' own
+// shapes (`shapes`, by path) by bone as the page's controls set them. A constraint type with a unit registered for
 // `constraint:<TYPE>` (units.js) runs on it in Blender's place: given the owner's and its targets' matrices in the
-// constraint's spaces (Blender's, column-major) and its settings by RNA name, it gives the owner's (`matrix`).
+// constraint's spaces (Blender's, column-major) and its settings by RNA name, it gives the owner's (`matrix`). The
+// segment joints (`bone#k`) of the B-Bones in `segments` are posed by their segments as the kernels shape them.
 import { Matrix } from '@babylonjs/core';
 import { unitFor } from './units.js';
 import { swapped } from './constraints-evaluator.js';
 
 /**
  * @typedef {{ bones: { name: string, parent: number, rest: Matrix }[], locals: Matrix[], mesh: Matrix, space: Matrix,
- *   kernels: any, influences?: Record<string, number[]>, nodeWorld: (id: string) => Matrix | null, frame?: number }} KernelPose
+ *   kernels: any, influences?: Record<string, number[]>, shapes?: Record<string, Record<string, number>>, segments?: string[],
+ *   nodeWorld: (id: string) => Matrix | null, frame?: number }} KernelPose
  */
 
 const IDENTITY = Matrix.Identity().asArray();
@@ -24,7 +26,7 @@ const babylon = (/** @type {ArrayLike<number>} */ m, /** @type {number} */ at) =
  * A solver on loaded kernels (polyfill/constraints.js loadConstraints): each bone's Babylon local matrix after the
  * rig's constraints, by the skeleton's index.
  * @param {any} kernels
- * @returns {(pose: KernelPose) => Map<number, Matrix>}
+ * @returns {((pose: KernelPose) => Map<number, Matrix>) & { segments?: (spec: any, bone: string) => number[][] }}
  */
 export function kernelSolve(kernels) {
   /** Each rig the kernels hold, by the spec it was made from, with its constraint types. */
@@ -39,11 +41,15 @@ export function kernelSolve(kernels) {
       handed.set(type, unit);
     }
   };
-  return ({ bones, locals, mesh, space, kernels: spec, influences = {}, nodeWorld, frame = 0 }) => {
+  /** @param {KernelPose} pose */
+  const solve = ({ bones, locals, mesh, space, kernels: spec, influences = {}, shapes = {}, segments: shaped = [], nodeWorld, frame = 0 }) => {
     if (!rigs.has(spec)) rigs.set(spec, { rig: kernels.rig(spec), types: new Set(spec.bones.flatMap((/** @type {any} */ b) => b.constraints.map((/** @type {any} */ c) => c.type))) });
     const { rig, types } = rigs.get(spec);
     handUnits(types);
-    spec.bones.forEach((/** @type {any} */ b, /** @type {number} */ i) => influences[b.name]?.forEach((/** @type {number} */ v, /** @type {number} */ k) => rig.influence(i, k, v)));
+    spec.bones.forEach((/** @type {any} */ b, /** @type {number} */ i) => {
+      influences[b.name]?.forEach((/** @type {number} */ v, /** @type {number} */ k) => rig.influence(i, k, v));
+      if (shapes[b.name]) rig.pose(i, shapes[b.name]);
+    });
     const index = new Map(bones.map((b, i) => [b.name, i]));
     const order = spec.bones.map((/** @type {any} */ b) => index.get(b.name) ?? -1);
     const channels = new Float32Array(order.length * 16);
@@ -58,8 +64,21 @@ export function kernelSolve(kernels) {
       const own = babylon(posed, k * 16), parent = at.get(bones[i].parent);
       result.set(i, parent === undefined ? swapped(own).multiply(space) : swapped(own.multiply(Matrix.Invert(babylon(posed, parent * 16)))));
     }
+    // The segment joints (`bone#k`, children of the bone) of each B-Bone the export found the kernels shape as Main
+    // does: each at its segment's matrix in the bone's space.
+    const segments = new Map();
+    bones.forEach(({ name, parent }, i) => {
+      const [, bone, k] = /^(.*)#(\d+)$/.exec(name) ?? [], at = shaped.includes(bone) && bones[parent]?.name === bone ? spec.bones.findIndex((/** @type {any} */ b) => b.name === bone) : -1;
+      if (at < 0) return;
+      if (!segments.has(at)) segments.set(at, rig.bboneSegments(at).matrices);
+      const matrix = segments.get(at)[Number(k)];
+      if (matrix) result.set(i, swapped(Matrix.FromArray(matrix)));
+    });
     return result;
   };
+  /** A B-Bone's segments after the last solve of a rig: its segments' matrices in its rest space. @param {any} spec @param {string} bone */
+  solve.segments = (spec, bone) => rigs.get(spec)?.rig.bboneSegments(spec.bones.findIndex((/** @type {any} */ b) => b.name === bone)).matrices;
+  return solve;
 }
 
 /**

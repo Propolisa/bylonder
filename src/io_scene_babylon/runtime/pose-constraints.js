@@ -316,18 +316,19 @@ function posedByControls(controls, id, name, mode, bone) {
  * Runs an armature's bone constraints before each frame draws, from each bone's own pose: what the page or its
  * animation last set, else what it had before the constraints last moved it.
  * @param {Record<string, any>} inputs `skeleton`, `mesh`, `space`, `bones` (`length`, `mode`, `own` by name) and
- * `constraints` by bone, or the rig Blender's kernels take (`kernels`) and its constraints' `influences` by bone, and the frame
+ * `constraints` by bone, or the rig Blender's kernels take (`kernels`), its constraints' `influences` and B-Bones'
+ * `shapes` by bone and the B-Bones whose `segments` they shape, and the frame
  * @param {any} entity
  * @param {{ scene: import('@babylonjs/core').Scene, controls: { get(path: string): any } }} page
  * @param {(pose: any) => Map<number, Matrix>} solve
  */
 function attach(inputs, entity, page, solve) {
   const scene = page.scene, list = listOf(scene).poses, found = list.find((/** @type {any} */ e) => e.entity === entity);
-  if (found) { Object.assign(found, { stacks: inputs.constraints, influences: inputs.influences, frame: inputs.frame }); return {}; }
+  if (found) { Object.assign(found, { stacks: inputs.constraints, influences: inputs.influences, shapes: inputs.shapes, frame: inputs.frame }); return {}; }
   const skeleton = scene.getSkeletonById(inputs.skeleton), mesh = scene.getMeshById(inputs.mesh);
   if (!skeleton || !mesh) return {};
   const bones = skeleton.bones, entry = { entity, skeleton, mesh, scene, solve, space: Matrix.FromArray(inputs.space), stacks: inputs.constraints,
-    kernels: inputs.kernels, influences: inputs.influences, frame: inputs.frame,
+    kernels: inputs.kernels, influences: inputs.influences, shapes: inputs.shapes, segments: inputs.segments, frame: inputs.frame,
     shape: bones.map((bone) => ({ name: bone.name, parent: bone.getParent() ? bones.indexOf(/** @type {any} */ (bone.getParent())) : -1, rest: bone.getRestMatrix(),
       length: inputs.bones[bone.name]?.length ?? 0, mode: inputs.bones[bone.name]?.mode ?? 'QUATERNION' })),
     own: new Map(), placed: new Map() };
@@ -395,7 +396,7 @@ function apply(entry) {
     return entry.own.get(i) ?? current;
   });
   const moved = entry.solve({ bones: entry.shape, locals, mesh: entry.mesh.computeWorldMatrix(true), space: entry.space, stacks: entry.stacks,
-    kernels: entry.kernels, influences: entry.influences, frame: entry.frame,
+    kernels: entry.kernels, influences: entry.influences, shapes: entry.shapes, segments: entry.segments, frame: entry.frame,
     nodeWorld: (/** @type {string} */ id) => entry.scene.getNodeById(id)?.computeWorldMatrix(true) ?? null });
   entry.placed.clear();
   for (const [i, local] of moved) {

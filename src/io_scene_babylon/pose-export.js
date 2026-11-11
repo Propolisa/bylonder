@@ -6,7 +6,7 @@ import { solvePose } from './runtime/pose-constraints.js';
 import { kernelSolve } from './runtime/pose-kernels.js';
 import { loadConstraints } from './polyfill/constraints.js';
 import { rigOf } from './rig-export.js';
-import { key } from './controls-export.js';
+import { bboneShape, key } from './controls-export.js';
 
 // Blender's kernels, loaded once an export needs them (prepareKernels); none where they cannot load.
 let kernels = null, loading = null;
@@ -71,6 +71,10 @@ export const ownMatrix = (pose, bone) => posedBone({ mode: pose.rotation_mode },
 // the page sets them.
 const influence = (arm, bone, c) => ({ property: `objects${key(arm.name)}.pose.bones${key(bone)}.constraints${key(c.name)}.influence` });
 const influenced = (arm, stacks) => Object.fromEntries(Object.entries(stacks).map(([bone, list]) => [bone, list.map((c) => ({ ...c, influence: influence(arm, bone, c) }))]));
+// A rig's B-Bones' own shapes for the kernels, by bone, by path: read from their controls (`property` paths), else from
+// Main as it is now.
+const shapes = (arm, read = (path) => ({ property: `objects${key(arm.name)}.pose.bones${path}` })) => Object.fromEntries([...arm.data.bones]
+  .filter((b) => b.bbone_segments > 1).map((b) => [b.name, Object.fromEntries(bboneShape(arm.pose.bones.get(b.name)).map(([path, v]) => [path, read(`${key(b.name)}.${path}`, v)]))]));
 // A rig's influences for the kernels, by bone, in its constraints' order.
 const influences = (arm, rig) => Object.fromEntries(rig.bones.filter((b) => b.constraints.length).map((b) => [b.name, b.constraints.map((c) => influence(arm, b.name, c))]));
 
@@ -95,6 +99,8 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
   const shape = bones.map((bone, i) => ({ name: bone.name, parent: bone.getParent() ? bones.indexOf(bone.getParent()) : -1, rest: bone.getRestMatrix(),
     length: arm.data.bones.get(bone.name).length, mode: poses[i].rotation_mode }));
   const moved = new Set(), owns = new Map(bones.map((bone) => [bone, []]));
+  // The B-Bones whose segments the kernels shape as Main does at every frame checked.
+  const shaped = new Set(rig ? [...arm.data.bones].filter((b) => b.bbone_segments > 1).map((b) => b.name) : []);
   let checked = 0, held = true;
   return {
     moved,
@@ -103,16 +109,21 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
       const locals = bones.map((bone, i) => ownMatrix(poses[i], bone));
       bones.forEach((bone, i) => owns.get(bone).push(locals[i]));
       const current = rig && Object.fromEntries(rig.bones.filter((b) => b.constraints.length).map((b) => [b.name, [...arm.pose.bones.get(b.name).constraints].map((c) => c.influence)]));
-      const result = solve({ bones: shape, locals, mesh: meshWorld(), space: skeleton.space, stacks, kernels: rig, influences: current, nodeWorld });
+      const result = solve({ bones: shape, locals, mesh: meshWorld(), space: skeleton.space, stacks, kernels: rig, influences: current,
+        shapes: rig && shapes(arm, (path, v) => v), nodeWorld });
       for (const [i, local] of result) {
         moved.add(bones[i]);
         held &&= close(local, evaluated[i]);
+      }
+      for (const name of shaped) {
+        const pose = arm.pose.bones.get(name), ours = solve.segments(rig, name);
+        if (!ours.every((m, k) => Array.from(pose.bbone_segment_matrix(k, false)).every((v, j) => Math.abs(v - m[j]) <= TOLERANCE))) shaped.delete(name);
       }
       checked++;
     },
     entity: () => (checked && held ? {
       skeleton: skeleton.id, mesh: mesh.id, space: skeleton.space.asArray(), constraints: influenced(arm, stacks),
-      ...(rig && { kernels: rig, influences: influences(arm, rig) }),
+      ...(rig && { kernels: rig, influences: influences(arm, rig), shapes: shapes(arm), segments: [...shaped] }),
       bones: Object.fromEntries(shape.map(({ name, length, mode }, i) => [name, { length, mode, ...(moved.has(bones[i]) && { own: ownMatrix(poses[i], bones[i]).asArray() }) }])),
     } : null),
   };

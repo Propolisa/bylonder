@@ -4,7 +4,8 @@
 // the page on Blender's kernels (bylonder-constraints/), not sampled; moving an IK target or its pole through the page's controls moves the rig. Its controls (an
 // IK/FK switch and a Breathe slider, custom properties that drivers read) and its elbow's corrective shape key, driven by
 // the posed arm's angle, morph and pose the skinned body as Main does. Its tail, a B-Bone, bends by the joints of its
-// segments, sampled from Main. A pose set as the page loads, before the constraints attach, holds.
+// segments, which the kernels shape, as does an arm the IK solver moves. A pose set as the page loads, before the
+// constraints attach, holds.
 import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -28,6 +29,7 @@ const ir = JSON.parse(files['scene.ir.json']);
 const entity = Object.values(ir.entities).find((e) => e.type === 'constraints:POSE');
 assert.equal(entity?.implementation, 'pose-kernels', 'the page runs the rig constraints on Blender kernels');
 assert.deepEqual(entity.inputs.kernels.bones.filter((b) => b.constraints.length).map((b) => b.name).sort(), ['forearm.L', 'forearm.R', 'hand.L', 'hand.R', 'head', 'shin.L', 'shin.R']);
+assert.deepEqual(entity.inputs.segments, ['tail'], 'the kernels bend the tail, its animated B-Bone shape fed from its controls');
 const groups = JSON.parse(/const ANIMATION_GROUPS = (.*);\n/.exec(files['scene.js'])[1]);
 const sampled = groups.flatMap((g) => g.targetedAnimations).filter((t) => /^Rig /.test(t.targetId) && t.animation.keys.length > 1).map((t) => t.targetId);
 const joints = Array.from({ length: 9 }, (_, k) => `Rig tail#${k}`);
@@ -125,3 +127,27 @@ console.log('Export pose constraints: a pose set as the page loads holds once it
 early.dispose();
 blend.dispose();
 written.remove();
+
+// A B-Bone the IK solver moves (the right arm given 4 segments): its segment joints bend with its handles as Main bends
+// them when the page moves the IK target, not as the samples had them.
+for (const name of ['upper_arm.R', 'forearm.R']) rig.data.bones.get(name).bbone_segments = 4;
+handTarget.location[0] = handTarget.location[2] = pole.location[0] = 0;
+sync.frameChanged(frame);
+sync.view();
+const bent = writePackage(await exportModule(world)), arms = await (await import(bent.url)).load(new NullEngine());
+await arms.settled();
+arms.playhead.pause();
+const armsSkeleton = arms.scene.getSkeletonById('Rig'), armsBody = arms.scene.getMeshById(entity.inputs.mesh);
+const armsAbsolute = (bone) => (bone.getParent() ? bone._matrix.multiply(armsAbsolute(bone.getParent())) : bone._matrix.multiply(armsBody.computeWorldMatrix(true)));
+for (const [path, value] of [[frameControl.path, frame], ...moves.slice(0, 2).map(([p, v]) => [p, v])]) arms.set(path, value);
+for (let i = 0; i < 2; i++) { arms.scene.render(); await arms.settled(); }
+moves.slice(0, 2).forEach(([, value, setMain]) => setMain(value));
+sync.frameChanged(frame);
+const segmentError = Math.max(...['upper_arm.R', 'forearm.R'].flatMap((name) => Array.from({ length: 5 }, (_, k) => {
+  const theirs = main().get(`${name}#${k}`), ours = armsAbsolute(armsSkeleton.bones.find((b) => b.name === `${name}#${k}`));
+  return Math.max(...theirs.asArray().map((v, i) => Math.abs(v - ours.asArray()[i])));
+})));
+assert.ok(segmentError < TOLERANCE, `a constraint-driven B-Bone's segments follow the IK target (off by ${segmentError})`);
+console.log('Export pose constraints: a B-Bone the IK solver moves bends its segments as Main does');
+arms.dispose();
+bent.remove();
