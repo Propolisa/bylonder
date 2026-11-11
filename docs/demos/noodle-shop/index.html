@@ -4,14 +4,33 @@
 <title>Noodle Shop</title>
 <link rel="icon" href="data:,">
 <style>
-html,body{margin:0;height:100%;background:#05060a;overflow:hidden;font:16px/1.4 system-ui,sans-serif;color:#f4e9dc}
+:root{--ink:#f6ead8;--paper:#2b1b12e0;--lantern:#f2b56b;--size:clamp(15px,2.6vmin,28px);--spring:cubic-bezier(.3,1.7,.5,1)}
+html,body{margin:0;height:100%;background:#05060a;overflow:hidden;font:var(--size)/1.35 system-ui,sans-serif;color:var(--ink)}
 canvas{display:block;width:100%;height:100%;outline:0;touch-action:none}
-#say{position:fixed;left:50%;bottom:8%;transform:translateX(-50%);padding:.5em 1em;font-size:clamp(16px,2.6vmin,30px);border-radius:8px;background:#0009;text-align:center;pointer-events:none}
-#say:empty{display:none}
-#act{position:fixed;right:24px;bottom:22%;z-index:6;width:64px;height:64px;border:2px solid #fff8;border-radius:50%;background:#0009;color:inherit;font:600 24px system-ui,sans-serif;touch-action:none}
+svg{width:1.4em;height:1.4em;flex:none;fill:none;stroke:var(--lantern);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+#say{position:fixed;left:50%;bottom:clamp(14px,6vmin,56px);display:flex;align-items:center;gap:.55em;max-width:calc(100vw - 32px);box-sizing:border-box;padding:.5em .8em;border-radius:.9em;background:var(--paper);box-shadow:0 .25em 1em #0009,inset 0 0 0 1px #f2b56b55;pointer-events:none;translate:-50% .8em;opacity:0;transition:translate .4s var(--spring),opacity .25s}
+#say.on{translate:-50% 0;opacity:1}
+kbd{font:700 .8em system-ui,sans-serif;padding:.15em .5em;border-radius:.35em;background:var(--ink);color:#2b1b12;box-shadow:0 .18em 0 #a7825d}
+#act{position:fixed;z-index:6;right:clamp(16px,6vmin,48px);bottom:clamp(90px,24vmin,200px);display:grid;place-items:center;width:clamp(60px,15vmin,88px);aspect-ratio:1;border:2px solid var(--lantern);border-radius:50%;background:var(--paper);box-shadow:0 .3em 1em #0009;touch-action:none;scale:.5;opacity:0;pointer-events:none;transition:scale .35s var(--spring),opacity .2s}
+#act.on{scale:1;opacity:1;pointer-events:auto}
+#act:active{scale:.85;transition-duration:.06s}
+#act svg{width:55%;height:55%}
+@media not (pointer:coarse){#act{display:none}}
+#title{position:fixed;inset:0 0 auto;z-index:7;padding:clamp(24px,9vh,96px) 16px clamp(48px,14vh,140px);text-align:center;pointer-events:none;background:linear-gradient(#000c,#0006 60%,#0000);opacity:0;transition:opacity 1.8s}
+#title.on{opacity:1}
+#title.low{top:auto;bottom:0;padding:clamp(48px,14vh,140px) 16px clamp(24px,9vh,96px);background:linear-gradient(#0000,#0006 40%,#000c)}
+h1{margin:0;font:400 clamp(30px,8vmin,84px)/1.1 Georgia,serif;letter-spacing:.05em;color:var(--lantern);text-shadow:0 0 .6em #f2b56b66}
+#title p{margin:.6em auto 0;max-width:24em;opacity:.85}
+#title small{display:block;margin-top:.8em;font-size:max(11px,.6em);opacity:.6}
+#title a{color:inherit;pointer-events:auto}
+#drops{position:fixed;inset:0;opacity:0;pointer-events:none;background:radial-gradient(1.4vmin 1.9vmin at 18% 30%,#fff3,#fff1 70%,#0000),radial-gradient(1vmin 1.3vmin at 72% 22%,#fff3,#fff1 70%,#0000),radial-gradient(1.8vmin 2.3vmin at 60% 70%,#fff2,#fff1 70%,#0000),radial-gradient(.8vmin 1vmin at 35% 80%,#fff3,#0000);animation:drip 6s linear infinite}
+@keyframes drip{to{translate:0 4vmin}}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01s!important;animation:none!important}}
 </style>
 <script type="importmap">{ "imports": { "@babylonjs/core/": "https://cdn.jsdelivr.net/npm/@babylonjs/core@8.32.0/" } }</script>
 <canvas id="c"></canvas>
-<div id="say">Loading the lane...</div>
-<button id="act" hidden>E</button>
+<div id="drops"></div>
+<div id="title" class="on"><h1>Akari Noodle House</h1><p id="line">Loading the lane...</p><small>Rain: "Light Rain Falls on Awning" by ultradust, CC BY 4.0. Music and other sounds CC0, see <a href="sounds/CREDITS.md">credits</a>.</small></div>
+<div id="say"></div>
+<button id="act" aria-label="Act"></button>
 <script type="module" src="./game.js"></script>

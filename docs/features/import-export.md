@@ -343,11 +343,19 @@ control panel, on WebGL 2, loading Babylon.js from its CDN. [Open the demo](http
 
     The [Noodle Shop](https://propolisa.github.io/bylonder/docs/demos/noodle-shop/) is a small game made this way, in
     [game.js](../demos/noodle-shop/game.js): the Compositor example exported twice. The lane is the scene without the
-    woman on a tea break, Scope Scene, so `load(engine)` builds it as the export shows it, with its world, view
-    transform, compositor and camera, which the game moves to follow her. She is Scope Selected Objects with Animations
-    set to Clips, added with `load({ scene })`: her Walk, Sit, Idle and Sip actions play as her controller's clips, and
-    the cup parented to her hand's bone stays in her hand. Walk with W A S D, press E by the stool to sit, again to buy
-    a tea and to sip it; on a phone, the left thumb walks, the right looks and the E button acts.
+    woman on a tea break, Scope Scene, built by `load(engine)` with its world, view transform, compositor and camera.
+    She is Scope Selected Objects with Animations set to Clips, added with `load({ scene })`; her actions play as her
+    controller's clips, and the cup parented to her hand's bone stays in her hand.
+
+    ```js
+    const { scene } = await loadLane(engine);
+    const girl = await loadGirl({ scene });
+    girl.play('Sit', { loop: false }).onAnimationGroupEndObservable.addOnce(() => girl.play('Idle'));
+    ```
+
+    Walk with W A S D and drag to look, or on a phone with the left and right thumbs; when a prompt shows, press E or
+    tap the button: sit, buy a tea, sip it, and go home. Its sounds are listed in
+    [sounds/CREDITS.md](../demos/noodle-shop/sounds/CREDITS.md).
 
     ![The Noodle Shop](../media/features/import-export/noodle-shop.gif)
 
