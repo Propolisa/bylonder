@@ -97,8 +97,10 @@ export const CollectionSchema = z.object({
 export const TimeSchema = z.object({
   frame_current: z._default(z.number(), 1), frame_start: z._default(z.number(), 1), frame_end: z._default(z.number(), 250),
   fps: z._default(z.number(), 24), fps_base: z._default(z.number(), 1), loop: z._default(z.boolean(), true),
+  /** keys per second of each object whose animation groups hold baked (sampled) keys, by object name */
+  sample_rates: fresh(z.record(Name, z.number().check(z.refine((rate) => rate > 0))), () => ({})),
 });
-const TIME = () => ({ frame_current: 1, frame_start: 1, frame_end: 250, fps: 24, fps_base: 1, loop: true });
+const TIME = () => ({ frame_current: 1, frame_start: 1, frame_end: 250, fps: 24, fps_base: 1, loop: true, sample_rates: {} });
 
 /** The scene the page shows: its ID, its scene collection (the collections' root), the view layer it draws and its time. */
 export const SceneSchema = z.object({

@@ -4,7 +4,8 @@
 // (rotations, easings), and samples elsewhere (drivers, NLA, constraints), or samples wherever Babylon cannot play it
 // with Bake Animation. A location eased with Elastic runs live. Meshes deformed by shape keys and armatures are drawn by
 // Babylon's morph targets and skeletons where Main evaluates them. The NLA example with its Hop and Turn tracks muted,
-// its Slide strip alone moving the box, plays that strip's keys as Babylon's.
+// its Slide strip alone moving the box, plays that strip's keys as Babylon's. Sampled at half the frame rate, what is
+// sampled keys every second frame, named with its rate in the IR, and Babylon's interpolation between stays near Main.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -23,7 +24,7 @@ const EXAMPLES = { 'drivers-and-graph-editor': [1, 7, 13, 30, 61, 96], nla: [1, 
 // with Elastic.
 const ELASTIC = 'compositor';
 
-async function check(id, { bake = false, elastic = false, slide = false } = {}) {
+async function check(id, { bake = false, elastic = false, slide = false, half = false } = {}) {
   const { world, scene, sync } = openExample(id);
   if (slide) for (const track of blendData().objects.get('Box').animation_data.nla_tracks) track.mute = track.name !== 'Slide';
   sync.view();
@@ -34,7 +35,8 @@ async function check(id, { bake = false, elastic = false, slide = false } = {}) 
     fc.keyframe_points[0].interpolation = 'ELASTIC';
     eased = `OB:${ob.name}/animation/location[${fc.array_index}]`;
   }
-  const files = await exportModule(world, { bakeAnimation: bake });
+  const { fps, frameStart } = world.animation.time.state, rate = half ? fps / 2 : fps;
+  const files = await exportModule(world, { bakeAnimation: bake, ...(half && { sampleRate: { rate } }) });
   const ir = JSON.parse(files['scene.ir.json']), live = Object.entries(ir.entities).filter(([, e]) => e.implementation === 'fcurve');
   if (bake) assert.equal(live.length, 0, `${id}: with Bake Animation, no F-Curve runs in the page`);
   // Material inputs the Compositor example animates (an ad's mapping, lights' emission) run on the unit too.
@@ -56,36 +58,49 @@ async function check(id, { bake = false, elastic = false, slide = false } = {}) 
   // Meshes Babylon deforms: morph targets (shape keys) and skeletons (armatures).
   const deformed = scene.meshes.filter((m) => sync.objectOf(m) && (page.getMeshById(m.name)?.morphTargetManager || page.getMeshById(m.name)?.skeleton));
   assert.ok(meshes.length || deformed.length, `${id}: animated meshes`);
+  if (half) {
+    const sampled = Object.keys(ir.scene.time.sample_rates);
+    assert.ok(sampled.length && sampled.every((name) => ir.scene.time.sample_rates[name] === rate), `${id}: sampled objects named at ${rate} per second (${JSON.stringify(ir.scene.time.sample_rates)})`);
+    const frames = group.targetedAnimations.flatMap((t) => t.animation.getKeys().map((k) => k.frame)).filter((f) => !Number.isInteger((f - frameStart) / 2));
+    assert.ok(frames.every((f) => f === group.to || f === Math.round(f)), `${id}: keys off the half-rate grid are only exact keys' or the last frame's`);
+  }
+  // At half the rate, the frames between keys too.
+  const checked = half ? EXAMPLES[id].flatMap((f) => [f, f + 1]) : EXAMPLES[id];
+  // Main at a frame: each animated mesh's world matrix, and each deformed one's corners (Babylon's axes).
+  const mainAt = (frame) => {
+    sync.frameChanged(frame);
+    const corners = (mesh) => {
+      const evaluated = sync.blender.evaluatedMesh(sync.objectOf(mesh)), p = evaluated.vert_positions, verts = evaluated.corner_verts;
+      return Array.from({ length: evaluated.corners_num * 3 }, (_, i) => p[verts[Math.floor(i / 3)] * 3 + [0, 2, 1][i % 3]]);
+    };
+    return [...meshes.map((m) => babylonMatrix(sync.blender.transform(sync.objectOf(m)).matrix_world).asArray()), ...deformed.map(corners)];
+  };
   blend.playhead.pause();
-  for (const frame of EXAMPLES[id]) {
+  for (const frame of checked) {
     // A frame drawn, held there: Babylon's animation sets what it plays, the page runs what reads it, the skeletons pose.
     blend.playhead.seek(frame);
     page.render();
     await blend.settled();
-    sync.frameChanged(frame);
-    for (const mesh of meshes) {
-      const drawn = page.getMeshById(mesh.name).computeWorldMatrix(true).asArray(), main = babylonMatrix(sync.blender.transform(sync.objectOf(mesh)).matrix_world).asArray();
-      assert.ok(drawn.every((v, i) => Math.abs(v - main[i]) < 1e-4), `${id} ${mesh.name} at frame ${frame}: ${drawn.map((v) => v.toFixed(3))}, Main ${main.map((v) => v.toFixed(3))}`);
-    }
-    // Each corner as drawn (morphed and skinned on the CPU as the GPU does) where Main's evaluated mesh puts its vertex.
-    for (const mesh of deformed) {
-      const evaluated = sync.blender.evaluatedMesh(sync.objectOf(mesh)), p = evaluated.vert_positions, corners = evaluated.corner_verts;
-      const drawn = page.getMeshById(mesh.name).getPositionData(true, true);
-      let error = 0;
-      for (let c = 0; c < evaluated.corners_num; c++) error = Math.max(error, ...[0, 2, 1].map((axis, k) => Math.abs(drawn[c * 3 + k] - p[corners[c] * 3 + axis])));
-      assert.ok(error < 1e-4, `${id} ${mesh.name} at frame ${frame}: drawn off Main's evaluated mesh by ${error}`);
-    }
+    // Each mesh's world matrix, and each corner as drawn (morphed and skinned on the CPU as the GPU does).
+    const drawn = [...meshes.map((m) => page.getMeshById(m.name).computeWorldMatrix(true).asArray()), ...deformed.map((m) => [...page.getMeshById(m.name).getPositionData(true, true)])];
+    // Between two keys, Babylon's interpolation may round off what moves in between, by up to how far it moves.
+    const between = half && (frame - frameStart) % 2 ? [mainAt(frame - 1), mainAt(frame + 1)] : null;
+    const main = mainAt(frame);
+    [...meshes, ...deformed].forEach((mesh, m) => {
+      const off = drawn[m].map((v, i) => Math.abs(v - main[m][i]) - (between ? Math.abs(between[1][m][i] - between[0][m][i]) : 0));
+      assert.ok(off.every((d) => d < 1e-4), `${id} ${mesh.name} at frame ${frame}: drawn off Main by ${Math.max(...off)} more than allowed`);
+    });
   }
   const keys = group.targetedAnimations.map((t) => t.animation.getKeys().length);
-  console.log(`${id}${bake ? ' (Bake Animation)' : elastic ? ' (Elastic)' : slide ? ' (Slide)' : ''}: ${meshes.length} meshes and ${deformed.length} deformed at ${EXAMPLES[id].length} frames as Main; ${keys.length} tracks, ${keys.reduce((a, b) => a + b, 0)} keys, ${live.length} F-Curves run live`);
+  console.log(`${id}${bake ? ' (Bake Animation)' : elastic ? ' (Elastic)' : slide ? ' (Slide)' : half ? ' (half rate)' : ''}: ${meshes.length} meshes and ${deformed.length} deformed at ${checked.length} frames as Main; ${keys.length} tracks, ${keys.reduce((a, b) => a + b, 0)} keys, ${live.length} F-Curves run live`);
   blend.dispose();
   written.remove();
 }
 
 const [example, mode] = process.argv.slice(2);
-if (example) await check(example, { bake: mode === 'bake', elastic: mode === 'elastic', slide: mode === 'slide' });
+if (example) await check(example, { bake: mode === 'bake', elastic: mode === 'elastic', slide: mode === 'slide', half: mode === 'half' });
 else {
-  const runs = [...Object.keys(EXAMPLES).map((id) => [id]), [ELASTIC, 'elastic'], ['nla', 'slide'], ['drivers-and-graph-editor', 'bake']];
+  const runs = [...Object.keys(EXAMPLES).map((id) => [id]), [ELASTIC, 'elastic'], ['nla', 'slide'], ['drivers-and-graph-editor', 'bake'], ['nla', 'half'], ['desk-lamp', 'half']];
   for (const args of runs) process.stdout.write(execFileSync(process.execPath, [fileURLToPath(import.meta.url), ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] }).split('\n').filter((l) => !l.startsWith('BJS')).join('\n'));
   console.log('Export animation: meshes play where Main evaluates them at each checked frame, with exact keys where the F-curve is the motion and F-Curves Babylon cannot play run live');
 }

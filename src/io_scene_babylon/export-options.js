@@ -66,6 +66,16 @@ export function chosenState({ branchState = null, branches = {} }, id, instance)
   return BRANCHES[id].includes(state) ? state : null;
 }
 
+// Keys per second a baked animation is sampled at (sampling.js), or null: inherited from the level above, the scene's
+// frame rate at the top.
+const rate = (name) => repaired(name, z.nullable(z.number().check(z.positive())), null);
+const SampleRate = z.object({
+  /** for every animated object */
+  rate: rate('rate'),
+  /** by object name */
+  instances: repaired('instances', z.record(z.string(), rate('instance rate')), () => ({})),
+});
+
 export const ExportOptionsSchema = z.object({
   /** materials with Bylonder's EEVEE extensions, as Babylon's blocks */
   eeveeParity: repaired('eeveeParity', z.boolean(), false),
@@ -73,6 +83,8 @@ export const ExportOptionsSchema = z.object({
   hostCompression: repaired('hostCompression', z.boolean(), false),
   /** a package's animation sampled per frame where Babylon cannot play its F-Curves, instead of run as F-Curves in the page */
   bakeAnimation: repaired('bakeAnimation', z.boolean(), false),
+  /** keys per second of what is baked (sampled), for every object and by object name; unset, the scene's frame rate */
+  sampleRate: repaired('sampleRate', SampleRate, () => ({ rate: null, instances: {} })),
   /** a package's modules as one bundle with Babylon's (bundle.js), else as ES modules importing Babylon's */
   bundle: repaired('bundle', z.boolean(), true),
   /** the bundle minified */

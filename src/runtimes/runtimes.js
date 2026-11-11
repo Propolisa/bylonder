@@ -7,6 +7,7 @@
 import { __class__, __kwargtrans__ } from '../bl_py/org.transcrypt.__runtime__.js';
 import { registerClass, defineAssignedProperties, pointerOf, contextStruct } from '../python/bpy_rna.js';
 import { report } from '../windowmanager/wm-reports.js';
+import { exportSampling } from '../io_scene_babylon/sampling.js';
 
 export const RUNTIMES = {
   BLENDER: ['Blender', "Blender's settings, evaluated by Blender"],
@@ -21,7 +22,8 @@ export const APPROXIMATION = 'APPROXIMATION', FALLBACK = 'FALLBACK';
 // runtimes (the identifiers it offers), settings (its Babylon-only settings, bpy.props by name), poll(struct),
 // issues(struct): [{ kind, setting, message }], instances(context): the structs it evaluates, evaluates(entry),
 // evaluate(view), instanceLabel(struct) (its name in lists, default the struct's), exported (the runtimes its export writes as such; default all it offers), export(world, { bake,
-// runtime(struct): the runtime an instance exports with }): { issues, animations, curves?, gaps?, restore } }.
+// runtime(struct): the runtime an instance exports with, sampling: the frames it samples at (sampling.js) }): { issues,
+// animations, curves?, gaps?, restore } }.
 const features = [];
 export function registerRuntime(feature) {
   features.push(feature);
@@ -50,10 +52,10 @@ function reportIssues(title, issues) {
 // Export (io_scene_babylon): every feature's instances mapped into Babylon for the file (those in Blender for its
 // duration), their issues reported, and Babylon animations of what Blender's animation system drives that the mapping
 // makes (a skeleton's bones). Without `bake`, F-Curves a package's page runs instead (live-curves.js) go in `curves`,
-// and what is still sampled in `gaps`. `choice`: File > Export's runtime options (export-options.js), each instance on its
+// and what is still sampled in `gaps`; `sampling`, the frames it samples at (io_scene_babylon/sampling.js). `choice`: File > Export's runtime options (export-options.js), each instance on its
 // own runtime where they choose none. Returns { animations: [{ animation, target }], curves, gaps, restore() }.
-export function exportRuntimes(world, { bake = true, ...choice } = {}) {
-  const results = features.map((feature) => feature.export(world, { bake, runtime: exportedRuntime(feature, choice) }));
+export function exportRuntimes(world, { bake = true, sampling = world.animation && exportSampling(world.animation.time.state), ...choice } = {}) {
+  const results = features.map((feature) => feature.export(world, { bake, sampling, runtime: exportedRuntime(feature, choice) }));
   for (const { title, issues } of results.flatMap((r) => r.reports)) reportIssues(title, issues);
   return { animations: results.flatMap((r) => r.animations), curves: results.flatMap((r) => r.curves ?? []), gaps: results.flatMap((r) => r.gaps ?? []),
     restore: () => results.forEach((r) => r.restore()) };

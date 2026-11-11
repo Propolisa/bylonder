@@ -277,10 +277,9 @@ export function createAnimationModel(onChange = () => {}, { time = createSceneTi
     changed() { changed(); },
     edited() { curves = null; evaluate(); onChange(api.serialize()); },
     mute(ref) { const t = trackFor(ref); if (t) { t.fcurve.flag ^= FCURVE.MUTED; changed(); evaluate(); commit(); } },
-    // Each animated channel's values, as the channel takes them, at every frame of the scene range from `start`.
-    sample() {
-      const [start, end] = [time.state.frameStart, time.state.frameEnd];
-      return liveTracks().map(({ track, channel }) => ({ channel, start, values: Array.from(track.fcurve.sample(start, 1, end - start + 1), (v) => fromCurve(track.ref, v, track.factor, channel.get())) }));
+    // Each animated channel's values, as the channel takes them, at each of `frames`.
+    sample(frames) {
+      return liveTracks().map(({ track, channel }) => ({ channel, values: frames.map((frame) => fromCurve(track.ref, track.fcurve.sample(frame, 1, 1)[0], track.factor, channel.get())) }));
     },
     // A Babylon AnimationGroup sampling each F-Curve at every frame of the scene range.
     toAnimationGroup(scene, groupName = name) {

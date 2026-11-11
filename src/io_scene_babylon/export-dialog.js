@@ -3,7 +3,7 @@
 import { BRANCH_STATES, BRANCHES, DEV_TOOLS, NAVIGATION, TARGETS } from './export-options.js';
 import { BRANCH_ROWS, sceneBranches } from './branches.js';
 import { RUNTIMES, exportChoices, exportIssue } from '../runtimes/runtimes.js';
-import { contextStruct } from '../python/bpy_rna.js';
+import { contextStruct, idStruct } from '../python/bpy_rna.js';
 import { sceneUnits } from './unit-manifest.js';
 
 const PARITY_NOTE = "Lights materials as Blender's EEVEE does (view vector, second reflection as clearcoat). Off: Babylon's own lighting; Blender's texture nodes still export as one custom block.";
@@ -104,6 +104,24 @@ function branchesTree(values, scene) {
     inherited: () => ({ label: 'Per Branch', source: "Each branch's default" }) }) : null;
 }
 
+// The rates offered, as multiples of the scene's frame rate.
+const RATE_MULTIPLES = [[2, 'Two keys per frame, for slow motion or a page that plays faster than the scene'], [1, 'A key per frame'],
+  [1 / 2, 'A key every second frame'], [1 / 4, 'A key every fourth frame']];
+// What can be baked: objects with animation data, constraints or animated shape keys.
+const animated = (ob) => !!ob.animation_data || ob.constraints.length > 0 || !!ob.data?.shape_keys?.animation_data;
+// The Sample Rate tree: keys per second of what is baked (sampling.js), for every object and per animated object; unset,
+// the scene's frame rate.
+function sampleRateTree(values, world) {
+  const { fps } = world.animation.time.state, label = (rate) => `${+rate.toFixed(3)} per Second`;
+  const items = RATE_MULTIPLES.map(([multiple, description]) => [fps * multiple, label(fps * multiple), description]);
+  values.sampleRate = { rate: null, instances: {} };
+  const set = values.sampleRate, scene = () => ({ value: fps, label: label(fps), source: "Default: the scene's frame rate" });
+  const fromAll = () => (set.rate ? { value: set.rate, label: label(set.rate), source: 'Inherited from Sample Rate' } : scene());
+  const objects = world.objects.filter((node) => world.mainSync?.objectOf(node) && animated(idStruct(world.mainSync.objectOf(node))));
+  const children = objects.map((node) => setting(set.instances, node.name, { label: node.name, icon: 'OUTLINER_OB_MESH', items, inherited: fromAll }));
+  return setting(set, 'rate', { label: 'Sample Rate', icon: 'BYLONDER', items, children, inherited: scene });
+}
+
 const BUNDLE_ITEMS = [[true, 'Bundled', "One bundle per package with the Babylon.js modules its scene uses: no CDN or bundler needed, Blender's code (GPL) still in its own files"],
   [false, 'Modules', 'ES modules importing Babylon.js module by module, for an import map or a bundler of your own']];
 const MINIFY_ITEMS = [[true, 'Minified', "The bundle minified, its files' notices kept"], [false, 'Readable', 'The bundle as written, for reading or debugging']];
@@ -128,10 +146,11 @@ const panelTree = (values) => setting(values, 'controlPanel', { label: 'Control 
   children: [setting(values, 'devTools', { label: 'Editors', icon: 'BYLONDER', items: DEV_TOOLS, inherited: DEFAULT('CDN'),
     issue: (value) => (value === 'PACKAGE' && values.controlPanel === false ? 'Only the control panel links to the editors' : null) }), navigationTree(values)] });
 
-// The settings tree: a JavaScript package's GPU engine, bundle, control panel and branches, the runtimes, then its units.
-function settingsTree(values, js, branches) {
+// The settings tree: a JavaScript package's GPU engine, bundle, control panel and branches, the sample rate, the runtimes,
+// then its units.
+function settingsTree(values, js, branches, world) {
   const target = setting(values, 'target', { label: 'GPU Engine', icon: 'BYLONDER', items: TARGETS, inherited: DEFAULT('BOTH') });
-  return [...(js ? [target, bundleTree(values), panelTree(values), branchesTree(values, branches)] : []), runtimesTree(values), ...(js ? [unitsTree(values)] : [])].filter(Boolean);
+  return [...(js ? [target, bundleTree(values), panelTree(values), branchesTree(values, branches)] : []), sampleRateTree(values, world), runtimesTree(values), ...(js ? [unitsTree(values)] : [])].filter(Boolean);
 }
 
 // The dialog's values as export options: unset settings left out, the Units tree as the type keys replaced.
@@ -150,7 +169,7 @@ export async function exportDialog(world, format, title) {
   const fields = [{ name: 'eeveeParity', label: 'EEVEE Parity', note: PARITY_NOTE },
     ...(js ? [{ name: 'hostCompression', label: 'Host Compresses Geometry', note: HOST_NOTE }, { name: 'bakeAnimation', label: 'Bake Animation', note: BAKE_NOTE }] : [])];
   const branches = js ? sceneBranches(world, { live: format === 'js-live' }) : {};
-  const tree = settingsTree(values, js, branches);
+  const tree = settingsTree(values, js, branches, world);
   const note = branches.geometryNodes ? await geometryNodesNote() : undefined;
   const host = document.body.appendChild(document.createElement('div'));
   return new Promise((resolve) => {

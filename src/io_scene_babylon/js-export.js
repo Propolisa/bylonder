@@ -8,6 +8,7 @@ import { AbstractEngine, Animation, Matrix } from '@babylonjs/core';
 import { objectMatrix } from '../runtime/object-transform.js';
 import { CLOCK, sampledGaps, serializeScene } from './babylon-export.js';
 import { exportRuntimes } from '../runtimes/runtimes.js';
+import { exportSampling } from './sampling.js';
 import { chosenState, NAVIGATION, TARGETS } from './export-options.js';
 import { exportControls, controlTypes, sceneOf, withUI } from './controls-export.js';
 import { exportCollections } from './collections-export.js';
@@ -259,27 +260,29 @@ function greasePencilClock(world, ir, groups) {
 
 // The package's files but the runtime's: scene.js, scene.d.ts, scene.ir.json, scene.bin and images/. With `live` (the
 // Modifiers branch's default state), objects whose modifiers are all Blender's keep them live (modifiers-export.js), run
-// by modifiers.wasm in bylonder-modifiers/. With `bakeAnimation`, what Babylon cannot play as its F-Curve is sampled per frame; `target`, the GPU engine its page makes
+// by modifiers.wasm in bylonder-modifiers/. With `bakeAnimation`, what Babylon cannot play as its F-Curve is sampled; `sampleRate`, the keys per
+// second of what is sampled (export-options.js), a key per frame unset; `target`, the GPU engine its page makes
 // (export-options.js TARGETS); `runtime`, `runtimes`, the runtimes its features export with (runtimes.js chosenRuntime);
 // `replace`, the type keys of units the page registers itself, which the package ships none of (unit-manifest.js); `bundle`,
 // whether the package is then bundled (bundle.js); `branchState` and `branches`, the states of the scene's branches
 // (export-options.js chosenState).
-export async function exportModule(world, { live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, target = 'BOTH', runtime = null, runtimes = {}, replace = [], bundle = false, controlPanel = true, devTools = 'CDN', navigation = 'FIXED', navigationModes = {}, branchState = null, branches = {} } = {}) {
+export async function exportModule(world, { live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, target = 'BOTH', runtime = null, runtimes = {}, replace = [], bundle = false, controlPanel = true, devTools = 'CDN', navigation = 'FIXED', navigationModes = {}, branchState = null, branches = {}, sampleRate = {} } = {}) {
   const states = { branchState, branches }, stackState = (node) => chosenState(states, 'modifiers', node.name) ?? (keepLive ? 'LIVE' : 'BAKED');
   const live = new Map(world.objects.filter((node) => stackState(node) === 'LIVE').map((node) => [node, liveStack(world, node)]).filter(([, stack]) => stack));
   await world.modifiers.settled();
   // The mapped meshes' geometry is read below: their mapping holds until the module is written.
-  const mapped = exportRuntimes(world, { bake: bakeAnimation, runtime, runtimes });
+  const sampling = exportSampling(world.animation.time.state, sampleRate);
+  const mapped = exportRuntimes(world, { bake: bakeAnimation, runtime, runtimes, sampling });
   try {
-    return await moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states });
+    return await moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states, sampling });
   } finally {
     mapped.restore();
   }
 }
 
-async function moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states }) {
+async function moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states, sampling }) {
   const graphs = [], graphOf = materialGraphs(world, graphs);
-  const data = await serializeScene(world, { geometry: false, live, mapped, parity, graphOf, bake: bakeAnimation });
+  const data = await serializeScene(world, { geometry: false, live, mapped, parity, graphOf, bake: bakeAnimation, sampling });
   if (chosenState(states, 'postProcessing') === 'OFF') Object.assign(data, { renderingPipelines: [], postProcesses: [] });
   const { scene } = world;
   const worldEntry = await worldMaterial(scene, parity, graphOf);
@@ -307,7 +310,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   // Baked, the compositor runs with its settings as exported: none of them a control.
   const collected = world.mainSync ? exportCollections(sceneOf(world.mainSync)) : null;
   const controls = withUI([...exportControls(world, data), ...(collected?.controls ?? []), ...(compositorState === 'LIVE' ? composited?.knobs ?? [] : [])]);
-  const ir = exportIR(world, { controls, collections: collected, live, bin, animationGroups: data.animationGroups, curves: data.liveCurves, constraints: data.liveConstraints, states });
+  const ir = exportIR(world, { controls, collections: collected, live, bin, animationGroups: data.animationGroups, sampleRates: data.sampleRates, curves: data.liveCurves, constraints: data.liveConstraints, states });
   const computed = { ...ir, entities: structuredClone(ir.entities) };
   stripEntities(ir, replace);
   const irJson = json(ir);
@@ -526,6 +529,8 @@ ${pipelineTypes.length ? `  for (const entry of RENDERING_PIPELINES) {
   sceneVolumes(scene, VOLUMES, materials, WORLDS.get(scene)?.box ?? null);` : ''}
 ${data.animationGroups.some((g) => g.targetedAnimations.some((t) => t.animation.property === CLOCK)) ? `  // The frame Babylon's animation keeps where the page's F-Curves are all that moves.
   for (const entry of ANIMATION_GROUPS) for (const { animation, targetId } of entry.targetedAnimations) if (animation.property === '${CLOCK}') scene.getNodeById(targetId).${CLOCK} = entry.from;
+` : ''}${data.animationGroups.some((g) => g.targetedAnimations.some((t) => t.animation.dataType === Animation.ANIMATIONTYPE_MATRIX)) ? `  // Bones' poses interpolated between their keys, as between frames and on a grid sparser than the frames.
+  Animation.AllowMatricesInterpolation = true;
 ` : ''}  // Started and held: the page's playhead (playhead.js) sets them to its frame.
   for (const entry of ANIMATION_GROUPS) AnimationGroup.Parse(entry, scene).start(entry.loopAnimation).pause();${display ? `
   // Displayed as Blender's rendered view: scene linear, ${composited ? 'composited, ' : ''}then the view transform.

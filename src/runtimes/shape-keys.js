@@ -183,8 +183,8 @@ function evaluate(view) {
 const issues = (key) => [...(issuesByKey.get(address(key)) ?? []).filter((i) => !i.silent), NORMALS(key)];
 
 // Export: every mesh's keys as morph targets, those on Blender for the export's duration, with the influences' animation
-// at each frame where the keys are animated.
-function exportShapeKeys(world) {
+// where the keys are animated.
+function exportShapeKeys(world, { sampling }) {
   const view = lastView;
   if (!view || !world.mainSync) return { reports: [], animations: [], restore() {} };
   const temporary = [], mapped = [];
@@ -204,7 +204,7 @@ function exportShapeKeys(world) {
   }
   return {
     reports: mapped.map(({ key }) => ({ title: `${key.name}: exported`, issues: [NORMALS(key)] })),
-    animations: influenceAnimations(world, mapped),
+    animations: influenceAnimations(world, mapped, sampling),
     restore() {
       exporting.clear();
       for (const [entry, state] of temporary) unmorph(view, entry, state);
@@ -215,30 +215,33 @@ function exportShapeKeys(world) {
 const curveKeys = (fc) => fc && [...fc.keyframe_points].map((k) => ({ frame: k.co[0], value: k.co[1], interpolation: k.interpolation,
   handle_left: [k.handle_left[0], k.handle_left[1]], handle_right: [k.handle_right[0], k.handle_right[1]] }));
 
-function influenceAnimations(world, mapped) {
+// The influences, as Main evaluates them at the sampling's frames (sampling.js): each target's F-Curve's keys where they are
+// the influence exactly at each whole frame, else keyed on its object's grid.
+function influenceAnimations(world, mapped, sampling) {
   const animated = mapped.filter(({ key }) => key.animation_data);
   const sync = world.mainSync, { fps, frameStart, frameEnd } = world.animation.time.state, current = world.animation.time.frame;
   if (!animated.length || frameEnd <= frameStart) return [];
   const keys = new Map();
   // Each target's own F-Curve, which Babylon plays where its keys are the influence exactly (exact-keys.js).
   const curves = new Map();
-  for (let frame = frameStart; frame <= frameEnd; frame++) {
+  for (const frame of sampling.frames) {
     sync.frameChanged(frame);
     for (const { ob, key, state } of animated) {
       influences(ob, key, state.targets.map((t) => t.name)).forEach((value, i) => {
         const target = state.manager.getTarget(i);
         if (!keys.has(target)) keys.set(target, []);
-        keys.get(target).push({ frame, value });
+        keys.get(target).push({ frame, value, ob: ob.name });
         if (!curves.has(target)) curves.set(target, actionFCurves(key.animation_data).find((fc) => fc.data_path === `key_blocks["${target.name}"].value`));
       });
     }
   }
   sync.frameChanged(current);
   return [...keys].map(([target, list]) => {
-    const exact = exactAnimation(`${target.name} influence`, 'influence', curveKeys(curves.get(target)), list.map((k) => k.value), { frameStart, fps });
+    const exact = exactAnimation(`${target.name} influence`, 'influence', curveKeys(curves.get(target)), list.filter((k) => Number.isInteger(k.frame)).map((k) => k.value), { frameStart, fps });
     if (exact) return { animation: exact, target };
     const animation = new Animation(`${target.name} influence`, 'influence', fps, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CYCLE);
-    animation.setKeys(list);
+    const keeps = sampling.keeps(list[0].ob);
+    animation.setKeys(list.filter(({ frame }) => keeps(frame)).map(({ frame, value }) => ({ frame, value })));
     return { animation, target };
   });
 }

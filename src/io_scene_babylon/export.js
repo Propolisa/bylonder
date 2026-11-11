@@ -8,6 +8,7 @@
 import { AbstractEngine } from '@babylonjs/core';
 import { zipSync, strToU8 } from 'fflate';
 import { serializeScene } from './babylon-export.js';
+import { exportSampling } from './sampling.js';
 import { exportModule } from './js-export.js';
 import { appFiles, gplFiles, packagedModules, packagedRuntime, packageOverrides, packageRuntime } from './runtime-files.js';
 import { MODULES } from './module-files.js';
@@ -55,7 +56,7 @@ async function scenePackage(world, options) {
 }
 
 const FORMATS = {
-  babylon: { extension: 'babylon', type: 'application/json', build: async (world, name, { parity, runtime, runtimes }) => JSON.stringify(await serializeScene(world, { parity, runtime, runtimes })) },
+  babylon: { extension: 'babylon', type: 'application/json', build: async (world, name, { parity, runtime, runtimes, sampleRate }) => JSON.stringify(await serializeScene(world, { parity, runtime, runtimes, sampling: exportSampling(world.animation.time.state, sampleRate) })) },
   js: { extension: 'zip', type: 'application/zip', build: async (world, name, options) => zipSync(await scenePackage(world, options)) },
   'js-live': { extension: 'zip', type: 'application/zip', build: async (world, name, options) => zipSync(await scenePackage(world, { ...options, live: true })) },
 };

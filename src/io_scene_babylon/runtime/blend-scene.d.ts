@@ -77,6 +77,7 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
                 fps: number;
                 fps_base: number;
                 loop: boolean;
+                sample_rates: Record<string, number>;
             };
         };
         ids: Record<string, {

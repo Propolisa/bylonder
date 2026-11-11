@@ -21,7 +21,8 @@
           "frame_end": 250,
           "fps": 24,
           "fps_base": 1,
-          "loop": true
+          "loop": true,
+          "sample_rates": {}
         }
       },
       "type": "object",
@@ -54,7 +55,8 @@
             "frame_end": 250,
             "fps": 24,
             "fps_base": 1,
-            "loop": true
+            "loop": true,
+            "sample_rates": {}
           },
           "type": "object",
           "properties": {
@@ -81,6 +83,16 @@
             "loop": {
               "default": true,
               "type": "boolean"
+            },
+            "sample_rates": {
+              "default": {},
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {
+                "type": "number"
+              }
             }
           }
         }

@@ -8,6 +8,7 @@ import { exportRuntimes } from '../runtimes/runtimes.js';
 import { imageFile } from '../imbuf/image-textures.js';
 import { exportNodeMaterial } from './node-material-export.js';
 import { exactAnimation, stripKeys } from './exact-keys.js';
+import { exportSampling } from './sampling.js';
 import { liveConstraints, liveTransform } from './live-curves.js';
 import { report } from '../windowmanager/wm-reports.js';
 import { channelKey } from './modifiers-export.js';
@@ -134,16 +135,16 @@ function evaluatedTransform(sync, node) {
   return node instanceof Camera ? { position, rotationQuaternion } : { position, rotationQuaternion, scaling };
 }
 const TRANSFORM = ['position', 'rotation', 'rotationQuaternion', 'scaling', 'direction'];
-// Each placed object's evaluated transform and each animated channel's evaluated value at every frame of the scene
-// range, as Blender's animation system evaluates the frames (its actions, NLA strips, drivers and constraints, or a
-// parent's); the frame shown is evaluated again after. `refs`: channels whose owner has animation data; `checks`:
+// Each placed object's evaluated transform and each animated channel's evaluated value at each of the sampling's frames
+// (sampling.js), as Blender's animation system evaluates the frames (its actions, NLA strips, drivers and constraints,
+// or a parent's); the frame shown is evaluated again after. `refs`: channels whose owner has animation data; `checks`:
 // constraint stacks the page may apply (live-curves.js liveConstraints), checked at each frame.
-function evaluatedFrames(world, nodes, refs, checks) {
+function evaluatedFrames(world, nodes, refs, checks, sampling) {
   const sync = world.mainSync, { frameStart, frameEnd } = world.animation.time.state, current = world.animation.time.frame;
   const moves = (node) => { const ob = idStruct(sync.objectOf(node)); return !!ob.animation_data || ob.constraints.length > 0; };
   if (frameEnd <= frameStart || (!nodes.some(moves) && !refs.length)) return { transforms: null, channels: new Map() };
   const transforms = new Map(nodes.map((node) => [node, []])), channels = new Map(refs.map((ref) => [ref, []]));
-  for (let frame = frameStart; frame <= frameEnd; frame++) {
+  for (const frame of sampling.frames) {
     sync.frameChanged(frame);
     for (const node of nodes) transforms.get(node).push(evaluatedTransform(sync, node));
     for (const ref of refs) channels.get(ref).push(world.animation.evaluated(ref));
@@ -172,11 +173,14 @@ function transformKeys(world, nodes) {
   };
   return new Map(nodes.map((node) => [node, Object.fromEntries(TRANSFORM_PATHS.map((path) => [path, keysOf(node, path)]))]));
 }
-// The animations of the transforms that change over the range: a position or scale whose changing components are their
-// F-curves exactly (exact-keys.js) as one float animation each; else, with `runs` (live-curves.js), F-Curves the page
-// runs, added to `curves`; else every transform sampled at each frame, named in `gaps` when the page could have run it.
-function transformAnimations(node, keys, frames, { frameStart, fps }, runs, curves, gaps) {
-  const changes = (key) => frames.some((t) => !t[key].equalsWithEpsilon(frames[0][key], 1e-6));
+// The animations of the transforms that change over the range, from their values at the sampling's frames: a position
+// or scale whose changing components are their F-curves exactly (exact-keys.js) as one float animation each; else, with
+// `runs` (live-curves.js), F-Curves the page runs, added to `curves`; else every transform keyed on the node's grid,
+// named in `gaps` when the page could have run it.
+function transformAnimations(node, keys, sampled, { frameStart, fps }, sampling, runs, curves, gaps) {
+  const changes = (key) => sampled.some((t) => !t[key].equalsWithEpsilon(sampled[0][key], 1e-6));
+  // Exact keys and the page's F-Curves are checked at each whole frame.
+  const frames = sampled.filter((_, i) => Number.isInteger(sampling.frames[i]));
   return Object.keys(frames[0]).filter(changes).flatMap((key) => {
     if (key === 'position' || key === 'scaling') {
       const moving = ['x', 'y', 'z'].filter((c) => frames.some((t) => Math.abs(t[key][c] - frames[0][key][c]) > 1e-6));
@@ -190,7 +194,8 @@ function transformAnimations(node, keys, frames, { frameStart, fps }, runs, curv
     }
     if (runs) gaps.push({ message: `${node.name} ${key}: its F-Curves are not all that moves it (NLA, drivers, constraints, F-modifiers but Cycles) or the unit misses Main` });
     const animation = new Animation(node.name + ' ' + key, key, fps, ANIMATION_TYPES[frames[0][key].getClassName()], Animation.ANIMATIONLOOPMODE_CYCLE);
-    animation.setKeys(frames.map((t, i) => ({ frame: frameStart + i, value: t[key] })));
+    const keeps = sampling.keeps(node.name);
+    animation.setKeys(sampling.frames.map((frame, i) => ({ frame, value: sampled[i][key] })).filter(({ frame }) => keeps(frame)));
     return [animation];
   });
 }
@@ -219,14 +224,15 @@ function animationTarget(channel, content, live) {
   return { owner, path: (owner === target ? [] : ['material']).concat(base), value: read(target, base), component: compound ? parts.at(-1) : null };
 }
 
-// Each animated channel with a place in the file (animationTarget), sampled at every frame of the scene range, and the
-// runtimes' animations (`mapped`, a skeleton's bones). Channels without one (stores, modifier settings unless they are
-// live, depthOfField) stay out. With `curves`, an object's transform F-Curves the page runs go there instead, and what
-// is still sampled goes in `gaps`.
-function bakeAnimations(world, samples, content, live, mapped, transforms, keys, curves, gaps) {
+// Each animated channel with a place in the file (animationTarget), from its values at the sampling's frames
+// (sampling.js), and the runtimes' animations (`mapped`, a skeleton's bones). Channels without one (stores, modifier
+// settings unless they are live, depthOfField) stay out. With `curves`, an object's transform F-Curves the page runs go
+// there instead, and what is still sampled goes in `gaps`.
+function bakeAnimations(world, samples, content, live, mapped, transforms, keys, sampling, curves, gaps) {
   const { fps, frameStart, frameEnd } = world.animation.time.state;
+  const whole = (values) => values.filter((_, i) => Number.isInteger(sampling.frames[i]));
   const tracks = new Map();
-  for (const { channel, start, values } of samples) {
+  for (const { channel, values } of samples) {
     const at = animationTarget(channel, content, live);
     if (!at || (transforms?.has(at.owner) && TRANSFORM.includes(at.path[0]))) continue;
     const key = at.owner.uniqueId + ':' + at.path.join('.');
@@ -234,37 +240,39 @@ function bakeAnimations(world, samples, content, live, mapped, transforms, keys,
     const track = tracks.get(key);
     // A boolean animates as 0 and 1, held from key to key.
     track.step ||= typeof values[0] === 'boolean';
-    track.components.push({ component: at.component, start, ref: world.animation.ref(channel.id, channel.path), values: values.map((v) => (typeof v === 'boolean' ? +v : v)) });
+    track.components.push({ component: at.component, ref: world.animation.ref(channel.id, channel.path), values: values.map((v) => (typeof v === 'boolean' ? +v : v)) });
   }
   const targetedAnimations = mapped.map(({ animation, target }) => ({ animation: animation.serialize(), targetId: target.id }));
   for (const [node, frames] of transforms ?? []) {
     const runs = curves && liveTransform(world.mainSync, node);
-    for (const animation of transformAnimations(node, keys.get(node), frames, { frameStart, fps }, runs, curves, gaps))targetedAnimations.push({ animation: animation.serialize(), targetId: node instanceof RectAreaLight ? rigId(node.id) : node.id });
+    for (const animation of transformAnimations(node, keys.get(node), frames, { frameStart, fps }, sampling, runs, curves, gaps)) targetedAnimations.push({ animation: animation.serialize(), targetId: node instanceof RectAreaLight ? rigId(node.id) : node.id });
   }
   for (const { owner, path, value, components, step } of tracks.values()) {
     if (typeof value !== 'number' && !ANIMATION_TYPES[value?.getClassName?.()]) continue;
     // Each component's F-curve exactly, where every one is (exact-keys.js); an Euler rotation drawn as a quaternion is not.
-    const exact = !step && !(path.join('.') === 'rotation' && owner.rotationQuaternion) && !UNWRITTEN.includes(path[0]) && components.map(({ component, values, ref }) => values.length === frameEnd - frameStart + 1
-      && exactAnimation(`${owner.name} ${path.join('.')}`, [...path, component].filter(Boolean).join('.'), world.animation.track(ref)?.keys, values, { frameStart, fps }));
+    const exact = !step && !(path.join('.') === 'rotation' && owner.rotationQuaternion) && !UNWRITTEN.includes(path[0]) && components.map(({ component, values, ref }) => exactAnimation(`${owner.name} ${path.join('.')}`, [...path, component].filter(Boolean).join('.'), world.animation.track(ref)?.keys, whole(values), { frameStart, fps }));
     if (exact && exact.every(Boolean)) {
       for (const animation of exact) targetedAnimations.push({ animation: animation.serialize(), targetId: owner.id });
       continue;
     }
     const quaternion = path.join('.') === 'rotation' && owner.rotationQuaternion;
-    const frames = Array.from({ length: frameEnd - frameStart + 1 }, (_, i) => {
-      const frame = frameStart + i;
+    const frames = sampling.frames.map((frame, i) => {
       let sample = typeof value === 'number' ? value : value.clone();
-      for (const { component, start, values } of components) {
-        const v = values[frame - start];
+      for (const { component, values } of components) {
+        const v = values[i];
         if (typeof v !== 'number') continue;
         if (component) sample[component] = v; else sample = v;
       }
       return { frame, value: quaternion ? Quaternion.FromEulerVector(sample) : sample, ...(step && { interpolation: AnimationKeyInterpolation.STEP }) };
     });
+    // A value held from key to key is keyed at each whole frame it changes at; one interpolated, on its object's grid.
+    const keeps = !step && sampling.keeps(owner.name);
+    const kept = step ? frames.filter(({ frame }) => Number.isInteger(frame)).filter((key, i, held) => i === 0 || key.value !== held[i - 1].value)
+      : frames.filter(({ frame }) => keeps(frame));
     const property = quaternion ? 'rotationQuaternion' : path.join('.');
     const type = quaternion ? Animation.ANIMATIONTYPE_QUATERNION : typeof value === 'number' ? Animation.ANIMATIONTYPE_FLOAT : ANIMATION_TYPES[value.getClassName()];
     const animation = new Animation(owner.name + ' ' + property, property, fps, type, Animation.ANIMATIONLOOPMODE_CYCLE);
-    animation.setKeys(frames);
+    animation.setKeys(kept);
     targetedAnimations.push({ animation: animation.serialize(), targetId: owner.id });
     gaps?.push({ message: `${owner.name} ${property}: no F-Curve the page runs sets it`, sampled: targetedAnimations.at(-1) });
   }
@@ -339,12 +347,13 @@ const authoredMetadata = (node) => {
 // (node-material-export.js), with Bylonder's EEVEE extensions when `parity`.
 // `graphOf` gives a material's IR graph key, for a package whose page builds its nodes from the IR. `bake: false` is for a
 // package whose page runs F-Curves Babylon cannot play exactly. `runtime`, `runtimes`: the runtimes chosen for the export
-// (export-options.js).
-export async function serializeScene(world, { geometry = true, live = null, mapped = null, parity = false, graphOf = () => null, bake = true, runtime = null, runtimes: chosen = {} } = {}) {
+// (export-options.js); `sampling`, the frames what is baked is sampled at (sampling.js), a key per frame unset.
+export async function serializeScene(world, { geometry = true, live = null, mapped = null, parity = false, graphOf = () => null, bake = true, runtime = null, runtimes: chosen = {}, sampling = null } = {}) {
   await world.modifiers.settled();
-  const runtimes = mapped ?? exportRuntimes(world, { bake, runtime, runtimes: chosen });
+  sampling ??= exportSampling(world.animation.time.state);
+  const runtimes = mapped ?? exportRuntimes(world, { bake, runtime, runtimes: chosen, sampling });
   try {
-    return await serializeMapped(world, { geometry, live, mapped: runtimes, parity, graphOf, bake });
+    return await serializeMapped(world, { geometry, live, mapped: runtimes, parity, graphOf, bake, sampling });
   } finally {
     if (!mapped) runtimes.restore();
   }
@@ -360,7 +369,7 @@ function shadowsOf(world, content) {
   return generators.filter((g) => lights.has(g.getLight().name)).map((g) => ({ ...g.serialize(), lightId: lights.get(g.getLight().name).id, customShaderOptions: g.customShaderOptions }));
 }
 
-async function serializeMapped(world, { geometry, live, mapped, parity, graphOf, bake }) {
+async function serializeMapped(world, { geometry, live, mapped, parity, graphOf, bake, sampling }) {
   const { scene } = world;
   const camera = world.sceneSettings.camera() ?? scene.activeCamera;
   const content = exportedContent(scene);
@@ -372,18 +381,18 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
   const effects = camera ? cameraEffects(world, scene, camera) : { renderingPipelines: [], postProcesses: [] };
   const imageData = new Map(scene.textures.filter((t) => t instanceof Texture).map((t) => [t, imageFile(t)]).filter(([, data]) => data));
   // Sampled before the export's flags and metadata are set, which channels read to know they are available.
-  const samples = world.animation.sample(), liveIds = live && new Map([...live].map(([node, stack]) => [nodeId(node), [node, stack]]));
+  const samples = world.animation.sample(sampling.frames), liveIds = live && new Map([...live].map(([node, stack]) => [nodeId(node), [node, stack]]));
   // Objects' evaluated transforms too, while their metadata, which evaluating a frame reads, is theirs.
   const objects = placed(world, content.nodes), refs = world.mainSync ? animatedChannels(world, content, liveIds) : [];
   // Without Bake Animation, an object's constraints the page applies where they give Main's world matrix at every frame.
   const nodeOf = (ob) => objects.find((node) => idStruct(world.mainSync.objectOf(node)).name === ob.name);
   const stacks = bake || !world.mainSync ? new Map() : new Map(objects.map((node) => [node, liveConstraints(world.mainSync, node, nodeOf)]).filter(([, stack]) => stack));
-  const evaluated = objects.length || refs.length ? evaluatedFrames(world, objects, refs, [...stacks.values()]) : { transforms: null, channels: new Map() };
+  const evaluated = objects.length || refs.length ? evaluatedFrames(world, objects, refs, [...stacks.values()], sampling) : { transforms: null, channels: new Map() };
   for (const [node, stack] of stacks) if (!stack.entity()) stacks.delete(node);
-  const { frameStart } = world.animation.time.state, keys = transformKeys(world, objects);
+  const keys = transformKeys(world, objects);
   // A channel Main evaluates is its value at each frame (its NLA strips and drivers too), not its F-curve's.
   const sampled = [...samples.filter(({ channel }) => !evaluated.channels.has(world.animation.ref(channel.id, channel.path))),
-    ...[...evaluated.channels].map(([ref, values]) => ({ channel: world.animation.channels.get(ref), start: frameStart, values }))];
+    ...[...evaluated.channels].map(([ref, values]) => ({ channel: world.animation.channels.get(ref), values }))];
   // A constrained object the page places is written at its own transform, which its constraints start from.
   const transforms = new Map(objects.map((node) => [node.uniqueId, stacks.has(node) ? { position: stacks.get(node).own.position, rotationQuaternion: stacks.get(node).own.rotation, scaling: stacks.get(node).own.scaling }
     : evaluatedTransform(world.mainSync, node)]));
@@ -413,7 +422,7 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
     // The serializer reads the scene synchronously; only texture readbacks finish later.
     pending = SceneSerializer.SerializeAsync(scene);
     shadowGenerators = shadowsOf(world, content);
-    animationGroups = bakeAnimations(world, sampled, content, liveIds, mapped.animations, evaluated.transforms, keys, curves, gaps);
+    animationGroups = bakeAnimations(world, sampled, content, liveIds, mapped.animations, evaluated.transforms, keys, sampling, curves, gaps);
     activeCameraID = camera?.id;
     constraints = [...stacks.values()].map((stack) => stack.entity());
   } finally {
@@ -445,6 +454,7 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
   await environment(json, scene);
   // The F-Curves the page runs (live-curves.js), for the package's IR, and what it still plays as samples (sampledGaps):
   // neither is part of the file.
-  Object.defineProperties(json, { liveCurves: { value: curves ?? [] }, liveConstraints: { value: constraints }, sampledAnimation: { value: gaps ?? [] } });
+  // The rate of each object whose animation is baked, for the IR's time.
+  Object.defineProperties(json, { liveCurves: { value: curves ?? [] }, liveConstraints: { value: constraints }, sampledAnimation: { value: gaps ?? [] }, sampleRates: { value: sampling.rates() } });
   return json;
 }

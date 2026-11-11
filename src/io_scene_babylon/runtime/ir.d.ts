@@ -172,6 +172,7 @@ export const TimeSchema: import("zod/mini").ZodMiniObject<{
     fps: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNumber<number>>;
     fps_base: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNumber<number>>;
     loop: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniBoolean<boolean>>;
+    sample_rates: import("zod/mini").ZodMiniDefault<z.ZodMiniType<Record<string, number>, any, import("zod/v4/core").$ZodTypeInternals<Record<string, number>, any>>>;
 }, import("zod/v4/core").$strip>;
 /** The scene the page shows: its ID, its scene collection (the collections' root), the view layer it draws and its time. */
 export const SceneSchema: import("zod/mini").ZodMiniObject<{
@@ -185,6 +186,7 @@ export const SceneSchema: import("zod/mini").ZodMiniObject<{
         fps: number;
         fps_base: number;
         loop: boolean;
+        sample_rates: Record<string, number>;
     }, any, import("zod/v4/core").$ZodTypeInternals<{
         frame_current: number;
         frame_start: number;
@@ -192,6 +194,7 @@ export const SceneSchema: import("zod/mini").ZodMiniObject<{
         fps: number;
         fps_base: number;
         loop: boolean;
+        sample_rates: Record<string, number>;
     }, any>>>;
 }, import("zod/v4/core").$strip>;
 export const IR_SCHEMA: "bylonder-ir";
@@ -210,6 +213,7 @@ export const IRSchema: import("zod/mini").ZodMiniObject<{
             fps: number;
             fps_base: number;
             loop: boolean;
+            sample_rates: Record<string, number>;
         };
     }, any, import("zod/v4/core").$ZodTypeInternals<{
         id: string | null;
@@ -222,6 +226,7 @@ export const IRSchema: import("zod/mini").ZodMiniObject<{
             fps: number;
             fps_base: number;
             loop: boolean;
+            sample_rates: Record<string, number>;
         };
     }, any>>>;
     ids: import("zod/mini").ZodMiniDefault<z.ZodMiniType<Record<string, {

@@ -304,12 +304,12 @@ function issues(arm) {
   return mapping.issues.filter((i) => !i.silent);
 }
 
-// The pose at each frame as matrix animations of a mapping's bones, read from Main as Blender's animation system
-// evaluates it; one key when nothing animates the armature. Babylon interpolates matrix keys only with
-// Animation.AllowMatricesInterpolation; at each frame they are exact. Without `bake`, a bone of an armature drawn by one
-// skeleton whose F-Curves give its pose (live-curves.js livePose) is posed by the page instead: its F-Curves go in
+// The pose as matrix animations of a mapping's bones, read from Main as Blender's animation system evaluates it, keyed
+// on the armature's grid (sampling.js); one key when nothing animates the armature. The page interpolates matrix keys
+// (Animation.AllowMatricesInterpolation). Without `bake`, a bone of an armature drawn by one skeleton whose F-Curves give
+// its pose (live-curves.js livePose, checked at each whole frame) is posed by the page instead: its F-Curves go in
 // `curves`, and each bone still sampled while it moves in `gaps`.
-function poseAnimations(world, mappings, bake) {
+function poseAnimations(world, mappings, bake, sampling) {
   const sync = world.mainSync, { fps, frameStart, frameEnd } = world.animation.time.state, current = world.animation.time.frame;
   const animated = (arm) => !!arm.animation_data || [...arm.pose.bones].some((bone) => bone.constraints.length);
   const keys = new Map(), owners = new Map();
@@ -323,19 +323,21 @@ function poseAnimations(world, mappings, bake) {
     }
   };
   if (mappings.some((m) => animated(m.arm)) && frameEnd > frameStart) {
-    for (let frame = frameStart; frame <= frameEnd; frame++) { sync.frameChanged(frame); sample(frame); }
+    for (const frame of sampling.frames) { sync.frameChanged(frame); sample(frame); }
     sync.frameChanged(current);
   } else sample(current);
   const curves = [], gaps = [];
   const animations = [...keys].flatMap(([bone, list]) => {
     const { arm, skeletons } = owners.get(bone);
-    const live = !bake && skeletons.size === 1 && livePose(arm, arm.pose.bones.get(bone.name), bone, list.map((k) => k.value), list[0].frame);
+    const whole = list.filter((k) => Number.isInteger(k.frame));
+    const live = !bake && skeletons.size === 1 && livePose(arm, arm.pose.bones.get(bone.name), bone, whole.map((k) => k.value), whole[0].frame);
     if (live) curves.push(...live);
     if (live?.length) return [];
     const moves = list.some((k) => !k.value.equalsWithEpsilon(list[0].value, 1e-6));
     if (!bake && moves) gaps.push({ message: `${arm.name} ${bone.name}: its pose is not its F-Curves alone (constraints, IK, NLA, drivers, inheritance, several skeletons) or the unit misses Main` });
     const animation = new Animation(`${bone.id} pose`, BONE_MATRIX, fps, Animation.ANIMATIONTYPE_MATRIX, Animation.ANIMATIONLOOPMODE_CYCLE);
-    animation.setKeys(moves ? list : list.slice(0, 1));
+    const keeps = moves && sampling.keeps(arm.name);
+    animation.setKeys(moves ? list.filter(({ frame }) => keeps(frame)) : list.slice(0, 1));
     return [{ animation, target: bone }];
   });
   return { animations, curves, gaps };
@@ -343,7 +345,7 @@ function poseAnimations(world, mappings, bake) {
 
 // Export: every armature mapped, those on Blender for the export's duration (their meshes skinned, then drawn as
 // Blender evaluated them again), with their issues and their pose's animation.
-function exportArmatures(world, { bake }) {
+function exportArmatures(world, { bake, sampling }) {
   const view = lastView;
   if (!view || !world.mainSync) return { reports: [], animations: [], restore() {} };
   const entries = [...view.entries()], meshes = entries.filter((e) => e.type === 'MESH').map((e) => idStruct(e.ob)), byOb = new Map(entries.map((e) => [e.ob, e]));
@@ -357,7 +359,7 @@ function exportArmatures(world, { bake }) {
     temporary.push(state);
     mappings.push(state.mapping);
   }
-  const { animations, curves, gaps } = poseAnimations(world, mappings, bake);
+  const { animations, curves, gaps } = poseAnimations(world, mappings, bake, sampling);
   for (const state of temporary) {
     drawSkins({ ...view, world: { animation: { playing: true } } }, state, (key) => view.blender.mesh(key));
     for (const key of state.applied.keys()) exporting.add(key);

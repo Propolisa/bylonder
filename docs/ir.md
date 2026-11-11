@@ -65,6 +65,13 @@ The page's playhead (`runtime/playhead.js`) plays it: from `frame_current`, over
 `fps / fps_base` frames per second, looping unless `loop` is false (Bylonder's own; Blender's playback always loops).
 Babylon's animation groups and every entity reading `frame_current` follow it. Omitted, it takes Blender's defaults.
 
+`sample_rates` names each object whose animation the package bakes (samples) into its animation groups, with the
+keys per second it was sampled at (File > Export's Sample Rate; the scene's frame rate unless set lower or higher):
+`{ "Lamp": 12 }`. Its keys lie on Blender's frame grid, `frame_start + k * fps / rate` through `frame_end`, and Babylon
+interpolates between them: floats, vectors and colors linearly, rotations and bone matrices spherically. A value held
+from key to key (a boolean) is keyed at each whole frame it changes at, whatever the rate. Exact keys (an F-curve
+Babylon plays as it is) and F-Curves the page runs are not sampled and are not named.
+
 `collections` holds the scene's collections by ID key, the scene collection (`GR:Scene Collection`) included, each with
 its members and metadata as Blender's outliner shows them:
 
