@@ -347,8 +347,25 @@ assert.equal(bodyData.show_only_shape_key, false);
 assert.ok(![...blendData().objects].some((ob) => ob.name.endsWith('(rest)')), 'the applied rests are removed');
 bodyData.modifiers.remove(mirror);
 bodyData.modifiers.remove(mask);
+// A Subdivision Surface after the Armature is applied before it, an approximation the export reports with the vertex
+// counts: the subdivided rest skins as Main deforms it at the rest pose.
+const subdivision = Object.assign(bodyData.modifiers.new('Subdivision', 'SUBSURF'), { levels: 1 });
 blender.tag(bodyOb, 2);
 sync.view();
+reports.length = 0;
+const subdivided = await serializeScene(world);
+assert.equal(subdivided.meshes.find((m) => m.name === 'Body').skeletonId, 'Rig', 'the body with a Subdivision after its Armature is skinned');
+assert.ok(reports.some((r) => r.type === 'INFO' && /Body: Subdivision applied before Armature \(\d+ vertices skinned as \d+\)/.test(r.message)), JSON.stringify(reports.map((r) => r.message)));
+const smooth = new Scene(new NullEngine());
+await AppendSceneAsync('data:' + JSON.stringify(subdivided), smooth);
+smooth.animationGroups[0].start(false);
+smooth.animationGroups[0].pause();
+assert.ok(loadedError(smooth, 1) < PRECISION, `the subdivided rest at the rest pose is Main's (${loadedError(smooth, 1)})`);
+smooth.getEngine().dispose();
+bodyData.modifiers.remove(subdivision);
+blender.tag(bodyOb, 2);
+sync.view();
+
 
 // File > Export's runtime choice (export-options.js): Babylon (mapped) chosen for the rig exports as on Blender, through
 // the mapping (docs/runtimes.md, Export); Babylon (native), which an armature does not offer, is reported and the rig

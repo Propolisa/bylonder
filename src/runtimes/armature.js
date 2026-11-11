@@ -213,6 +213,9 @@ export function mapArmature(arm, scene) {
         skins.set(key, skin);
       }
       issues.push(...meshApproximations(ob, arm, modifier).filter((i) => !issues.some((j) => j.setting === i.setting)), ...skinIssues(ob, skin));
+      const rest = rests.get(key);
+      for (const name of rest?.nearly ?? []) issues.push(issue(APPROXIMATION, ob, `modifiers["${name}"]`, `${name} applied before Armature (${rest.vertices[0]} vertices skinned as ${rest.vertices[1]})`));
+      for (const name of rest?.driven ?? []) issues.push(issue(APPROXIMATION, ob, `modifiers["${name}"]`, `${name} applied as its drivers set it now`));
       if (dualQuaternions && scaledBones(bones)) issues.push(issue(APPROXIMATION, ob, `modifiers["${modifier.name}"].use_deform_preserve_volume`, 'Preserve Volume of scaled bones: their scale blends linearly'));
     }
     for (const [id, skeleton] of skeletons) if (!used.has(skeleton)) { skeleton.dispose(); skeletons.delete(id); }
