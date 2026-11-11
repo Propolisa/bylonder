@@ -132,7 +132,7 @@ const DrawBuffers *mesh_draw_buffers(const Scene &scene, Object &object, Mesh &m
   /* port-override: normals as 16-bit snorm, as Blender's HQ normals give them: Babylon has no 10_10_10_2 vertex type. */
   gpu::GCaps.use_hq_normals_workaround = true;
   cache.cd_used = {};
-  if (const StringRef uv = mesh.active_or_default_uv_map_name(); !uv.is_empty()) {
+  if (const StringRef uv = shading_uv_map_name(mesh); !uv.is_empty()) {
     cache.cd_used.uv.add(uv);
   }
   Vector<VBOType> vbos = {VBOType::Position, VBOType::CornerNormal, VBOType::UVs};
@@ -148,7 +148,7 @@ const DrawBuffers *mesh_draw_buffers(const Scene &scene, Object &object, Mesh &m
     vbos.append(VBOType(int8_t(VBOType::Attr0) + i));
   }
   if (what & DRAW_TANGENTS) {
-    if (const StringRef uv = mesh.active_or_default_uv_map_name(); !uv.is_empty()) {
+    if (const StringRef uv = shading_uv_map_name(mesh); !uv.is_empty()) {
       cache.cd_used.tan.add(uv);
       vbos.append(VBOType::Tangents);
     }

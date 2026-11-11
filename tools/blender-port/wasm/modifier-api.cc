@@ -231,7 +231,7 @@ void blender::mesh_extraction(const Mesh &evaluated, ExtractionHeader &h)
     values.materialize(kept);
     h.flags[flag] = kept.data();
   }
-  const VArray<float2> uvs = *mesh->attributes().lookup<float2>(mesh->active_or_default_uv_map_name(), bke::AttrDomain::Corner);
+  const VArray<float2> uvs = *mesh->attributes().lookup<float2>(shading_uv_map_name(*mesh), bke::AttrDomain::Corner);
   if (uvs && uvs.is_span()) {
     h.uvs = reinterpret_cast<float(*)[2]>(const_cast<float2 *>(uvs.get_internal_span().data()));
   }

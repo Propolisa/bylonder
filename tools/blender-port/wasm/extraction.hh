@@ -11,6 +11,14 @@
 
 namespace blender {
 
+/* The UV map a material's image textures read with nothing linked into their Vector: the render one, as EEVEE's
+ * (mesh_cd_calc_used_gpu_layers), else the active one. */
+inline StringRef shading_uv_map_name(const Mesh &mesh)
+{
+  const StringRef render = mesh.default_uv_map_name();
+  return render.is_empty() ? StringRef(mesh.active_or_default_uv_map_name()) : render;
+}
+
 /* The boolean attributes BM_mesh_bm_from_me reads and BM_mesh_bm_to_me writes. */
 enum MeshFlag { SELECT_VERT, HIDE_VERT, SELECT_EDGE, HIDE_EDGE, UV_SEAM, SHARP_EDGE, SELECT_POLY, HIDE_POLY, SHARP_FACE, FLAGS_NUM };
 
