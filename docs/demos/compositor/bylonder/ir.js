@@ -93,18 +93,26 @@ export const CollectionSchema = z.object({
   view_layers: fresh(z.record(Name, LayerCollectionSchema), () => ({})),
 });
 
-/** The scene the page shows: its ID, its scene collection (the collections' root) and the view layer it draws. */
+/** The scene's time as Blender's Scene holds it: the frame shown, the range played, its frame rate (fps / fps_base) and whether playback loops. */
+export const TimeSchema = z.object({
+  frame_current: z._default(z.number(), 1), frame_start: z._default(z.number(), 1), frame_end: z._default(z.number(), 250),
+  fps: z._default(z.number(), 24), fps_base: z._default(z.number(), 1), loop: z._default(z.boolean(), true),
+});
+const TIME = () => ({ frame_current: 1, frame_start: 1, frame_end: 250, fps: 24, fps_base: 1, loop: true });
+
+/** The scene the page shows: its ID, its scene collection (the collections' root), the view layer it draws and its time. */
 export const SceneSchema = z.object({
   id: z._default(z.nullable(Name), null),
   collection: z._default(z.nullable(Name), null),
   view_layer: z._default(z.nullable(Name), null),
+  time: fresh(TimeSchema, TIME),
 });
 
 export const IR_SCHEMA = 'bylonder-ir', IR_VERSION = 1;
 export const IRSchema = z.object({
   schema: z.literal(IR_SCHEMA),
   version: z.literal(IR_VERSION),
-  scene: fresh(SceneSchema, () => ({ id: null, collection: null, view_layer: null })),
+  scene: fresh(SceneSchema, () => ({ id: null, collection: null, view_layer: null, time: TIME() })),
   ids: fresh(z.record(matching(/^[A-Z]{2,3}:/), IDSchema), () => ({})),
   collections: fresh(z.record(Name, CollectionSchema), () => ({})),
   references: fresh(z.array(IDReferenceSchema), () => []),
@@ -143,6 +151,7 @@ export const GeometrySchema = z.object({ mesh: z.optional(MeshSchema), points: z
  * @typedef {z.infer<typeof PointsSchema>} Points
  * @typedef {z.infer<typeof InstancesSchema>} Instances
  * @typedef {z.infer<typeof GeometrySchema>} Geometry
+ * @typedef {z.infer<typeof TimeSchema>} Time
  * @typedef {z.infer<typeof CollectionSchema>} Collection
  * @typedef {z.infer<typeof LayerCollectionSchema>} LayerCollection
  * A reference an entity's input may hold, resolved before a unit runs.

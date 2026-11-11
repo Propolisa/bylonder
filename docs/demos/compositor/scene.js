@@ -2331,7 +2331,8 @@ export async function createScene(engine, canvas) {
     else parsedPipeline(PIPELINES[entry.customType]?.Parse(entry, scene, ROOT), entry);
   }
 
-  for (const entry of ANIMATION_GROUPS) AnimationGroup.Parse(entry, scene).play(entry.loopAnimation);
+  // Started and held: the page's playhead (playhead.js) sets them to its frame.
+  for (const entry of ANIMATION_GROUPS) AnimationGroup.Parse(entry, scene).start(entry.loopAnimation).pause();
   // Displayed as Blender's rendered view: scene linear, composited, then the view transform.
   const camera = scene.activeCamera;
   if (camera) {

@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // Drawing IR geometry in Babylon, for every entity that gives it (a modifier, Geometry Nodes): a mesh as draw buffers,
 // one vertex per face corner in Babylon's axes, on the node's mesh, a submesh per material; instances as thin instances
-// of their references' meshes; points as a point cloud; a Grease Pencil layer's drawing and curves under their object's
-// node. Where no kernel draws a mesh, each face is a fan of triangles, a smooth face with its vertices' normals (its
+// of their references' meshes; points as a point cloud; a Grease Pencil layer's drawing, curves and point clouds under
+// their object's node. Where no kernel draws a mesh, each face is a fan of triangles, a smooth face with its vertices' normals (its
 // faces' normals weighted by their corner angles), a sharp one (`sharp_face`) with its own.
 import '@babylonjs/core/Meshes/thinInstanceMesh.js';
 import { Matrix } from '@babylonjs/core/Maths/math.vector.js';
@@ -16,9 +16,11 @@ import { SubMesh } from '@babylonjs/core/Meshes/subMesh.js';
  */
 /**
  * How geometry is drawn: a mesh's draw buffers (a kernel's, else `triangulate`), and the Babylon node an ID draws as.
- * A Grease Pencil layer's drawing and curves, under their object's node (grease-pencil.js drawLayer, curves.js drawCurves).
+ * A Grease Pencil layer's drawing, curves and point clouds, under their object's node (grease-pencil.js drawLayer, curves.js
+ * drawCurves, pointclouds.js drawPointCloud).
  * @typedef {{ meshBuffers?(mesh: import('./ir.js').Mesh): DrawBuffers | Promise<DrawBuffers>, nodeOf?(id: string): string | undefined,
- *   greasePencil?(node: string, layer: any): Promise<void>, curves?(node: string, curves: any): Promise<void> }} Drawing
+ *   greasePencil?(node: string, layer: any): Promise<void>, curves?(node: string, curves: any): Promise<void>,
+ *   pointcloud?(node: string, cloud: any): Promise<void> }} Drawing
  */
 
 /** @param {ArrayLike<number>} p @param {number} a @param {number} b */
@@ -107,6 +109,16 @@ function part(parent, name) {
   return mesh;
 }
 
+// Points as the point cloud drawing takes them: 4 floats each, the position (Blender's axes) and radius, and their
+// material by name. A point without a radius has Blender's default, 0.05.
+/** @param {import('./geometry-nodes/geometry.js').Points} points */
+const pointCloudOf = ({ positions, attributes, materials }) => {
+  const radius = attributes?.radius?.data, data = new Float32Array(positions.length / 3 * 4);
+  for (let i = 0; i < positions.length / 3; i++) data.set([positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2], radius?.[i] ?? 0.05], i * 4);
+  const id = materials?.[0]?.id;
+  return { points: data, matrix: Matrix.Identity().asArray(), material: id ? id.slice(id.indexOf(':') + 1) : null, name: 'points' };
+};
+
 // Blender's axes to Babylon's: swaps Y and Z.
 const SWAP = Matrix.FromArray([1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1]);
 
@@ -117,9 +129,10 @@ const SWAP = Matrix.FromArray([1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1]);
  * @param {any} value
  * @param {Drawing} [drawing]
  */
-export async function drawGeometry(scene, node, value, { meshBuffers = triangulate, nodeOf = () => undefined, greasePencil, curves } = {}) {
+export async function drawGeometry(scene, node, value, { meshBuffers = triangulate, nodeOf = () => undefined, greasePencil, curves, pointcloud } = {}) {
   if (value.grease_pencil) return greasePencil?.(node, value.grease_pencil);
   if (value.curves) return curves?.(node, value.curves);
+  if (value.pointcloud) return pointcloud?.(node, value.pointcloud);
   const target = /** @type {Mesh | null} */ (scene.getMeshById(node));
   if (!target || target.isDisposed()) return;
   if (value.positions) return setBuffers(target, value);
@@ -131,7 +144,8 @@ export async function drawGeometry(scene, node, value, { meshBuffers = triangula
     else if (child.hasThinInstances) child.setEnabled(false);
   }
   setBuffers(target, mesh ? await meshBuffers(mesh) : { positions: new Float32Array(), normals: new Float32Array(), indices: new Uint32Array() }, slotOf(target, mesh?.materials));
-  if (points) {
+  if (points && pointcloud) await pointcloud(node, pointCloudOf(points));
+  else if (points) {
     const cloud = part(target, 'points'), p = points.positions;
     cloud.setVerticesData('position', Float32Array.from(p, (_, i) => p[i - (i % 3) + [0, 2, 1][i % 3]]), false);
     if (cloud.material) cloud.material = Object.assign(cloud.material.clone(`${cloud.id}/material`) ?? cloud.material, { pointsCloud: true });

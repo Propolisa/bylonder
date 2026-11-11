@@ -7,7 +7,8 @@
 // type (Enter or a click; arithmetic and units) and step with the arrow keys; Backspace resets a field to the scene's
 // value, Ctrl+C and Ctrl+V copy and paste it, Ctrl+Shift+C copies its data path. A color's picker sets it as it moves.
 // The panel docks to any side of the canvas by its header and resizes from its inner edge. An ID that one of Babylon's
-// editors shows links to it (dev-tools.js). The Collections view is the outliner's tree of the scene's collections with
+// editors shows links to it (dev-tools.js). The View section plays, pauses and scrubs the scene's time (playhead.js),
+// and picks the camera and how the viewer moves it. The Collections view is the outliner's tree of the scene's collections with
 // their Exclude checkbox, eye and Disable in Renders, in Blender's icons where the package has them (unit block:icons),
 // else in the panel's own; a collection's name filters the panel to what its objects use.
 import { atDefault, baseColor, clamp, componentLabel, displayOf, dragScale, formatValue, hexOf, hsvOf, layout, matches, parsePath, parseValue, rgbOf, rgbOfHsv, snapped, snapStep, softRange, storedOf, touchSpan } from './control-panel-model.js';
@@ -139,6 +140,8 @@ select option{background:var(--bl-wcol-menu);color:var(--bl-wcol-menu-item)}
 .coll .name .icon{margin:0}.coll .count{margin-left:auto;color:var(--bl-text-off);font-variant-numeric:tabular-nums}
 .coll .flag{flex:none;width:var(--cp-row);height:var(--cp-row);padding:0;border:0;border-radius:var(--cp-radius);background:none;color:var(--bl-text);cursor:pointer}
 .coll .flag:hover{background:var(--bl-hover)}.coll .flag[aria-pressed=false]{color:var(--bl-text-off)}
+.timeline{flex-direction:row;align-items:center;gap:6px}.timeline .scrub{flex:1;min-width:0;margin:0;accent-color:var(--bl-select)}
+.timeline .frame{min-width:4ch;text-align:right;font-variant-numeric:tabular-nums;color:var(--bl-text-dim)}
 .icon{display:block;width:16px;height:16px;margin:auto;flex:none;background:currentColor;-webkit-mask:var(--icon) center/var(--mask) no-repeat;mask:var(--icon) center/var(--mask) no-repeat}
 @media (pointer:coarse){.panel{--cp-row:28px;--edge:12px}.check input{width:18px;height:18px}.grip{width:20px}.edge{width:12px}
   :host([data-dock=top]) .edge,:host([data-dock=bottom]) .edge{width:auto;height:12px}.sv{height:180px}.hue{height:24px}}
@@ -163,6 +166,8 @@ const OWN_ICONS = /** @type {Record<string, [string, number, number]>} */ (Objec
   checkbox_hlt: '<rect x="2.5" y="2.5" width="11" height="11" rx="2"/>',
   checkbox_dehlt: '<rect x="3" y="3" width="10" height="10" rx="2" fill="none" stroke="#000" stroke-width="1.3"/>',
   restrict_render_off: '<path d="M2 5.5h8.5v6H2zM10.5 8l3.5-2.5v6z" fill="none" stroke="#000" stroke-width="1.3"/>',
+  play: '<path d="M4.5 2.5v11l9-5.5z"/>',
+  pause: '<path d="M4 2.5h3v11H4zM9 2.5h3v11H9z"/>',
   restrict_render_on: '<path d="M2 5.5h8.5v6H2zM10.5 8l3.5-2.5v6zM1.5 14l13-11" fill="none" stroke="#000" stroke-width="1.3"/>',
 }).map(([name, paths]) => [name, [`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">${paths}</svg>`, 1600, 1600]])));
 const EDITOR_ICON ='<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="2" width="4" height="4" rx="1"/><rect x="9" y="8" width="4" height="4" rx="1"/><path d="M5 4h2.5a1.5 1.5 0 0 1 1.5 1.5v4"/></svg>';
@@ -706,7 +711,35 @@ export function createPanel(shadow, blend, { button, place, viewer, state, save,
   /** Whether a row is of an ID the scoped collection's objects use. @param {Row} row */
   const inScope = (row) => !scope || scope.paths.has(parsePath(row.key)?.idPath ?? '');
   const empty = el('div', { className: 'empty', hidden: true });
-  // The view: the camera looked through and how the viewer moves it.
+  // Blender's icons where the package has them (unit block:icons), else the panel's own.
+  const icons = (tools.icons?.() ?? Promise.resolve(undefined)).then((found) => found ?? OWN_ICONS, () => OWN_ICONS);
+  const icon = (/** @type {string} */ name, /** @type {string} */ color = '') => {
+    const span = el('span', { className: 'icon' });
+    if (color) span.style.color = color;
+    icons.then((all) => {
+      const found = all[name] ?? OWN_ICONS[name];
+      if (found) span.style.cssText += `--icon:url("data:image/svg+xml,${encodeURIComponent(found[0])}");--mask:${found[1] / 16}% ${found[2] / 16}%`;
+    });
+    return span;
+  };
+  // The timeline: the playhead's play and pause, and its frame, which the slider scrubs.
+  const { playhead } = blend, animated = controls.some((c) => bindOf(c.path)?.frame) && playhead.end > playhead.start;
+  const playButton = el('button', { type: 'button', className: 'tool', 'aria-label': 'Play' }, [icon('play')]);
+  playButton.addEventListener('click', () => (playhead.playing ? playhead.pause() : playhead.play()));
+  const scrub = el('input', { type: 'range', className: 'scrub', min: String(playhead.start), max: String(playhead.end), step: 'any', 'aria-label': 'Frame',
+    oninput: () => playhead.seek(Number(scrub.value)) });
+  const frameShown = el('span', { className: 'frame' });
+  let showing = /** @type {boolean | null} */ (null);
+  const showTime = () => {
+    scrub.value = String(playhead.frame);
+    frameShown.textContent = String(Math.floor(playhead.frame));
+    if (showing === playhead.playing) return;
+    showing = playhead.playing;
+    playButton.setAttribute('aria-label', showing ? 'Pause' : 'Play');
+    playButton.title = showing ? 'Pause' : 'Play';
+    playButton.firstElementChild?.replaceWith(icon(showing ? 'pause' : 'play'));
+  };
+  // The view: the scene's time, the camera looked through and how the viewer moves it.
   const offered = (tools.offer ?? Object.keys(MODES)).filter((m) => m !== 'JOYSTICKS' || matchMedia('(pointer: coarse)').matches);
   const cameras = blend.scene.cameras.filter((c) => c.name !== '__navigation');
   const segments = el('div', { className: 'segments', role: 'radiogroup', 'aria-label': 'Navigation' }, offered.map((mode) => el('button', {
@@ -721,25 +754,18 @@ export function createPanel(shadow, blend, { button, place, viewer, state, save,
     for (const b of Array.from(segments.children)) b.setAttribute('aria-checked', String(b.textContent === MODES.FIXED[0]));
   } }, cameras.map((c, i) => el('option', { value: String(i), textContent: c.name, selected: c === blend.scene.activeCamera })));
   const viewSection = el('div', { className: 'section' });
-  if (cameras.length && offered.length > 1) {
+  const navigable = cameras.length > 0 && offered.length > 1;
+  if (navigable || animated) {
+    if (animated) showTime();
     viewSection.append(...collapsible('section view', 'View', undefined, true, () => [
-      chooser && el('div', { className: 'row' }, [el('span', { className: 'label', textContent: 'Camera' }), el('div', { className: 'value' }, [chooser])]),
-      el('div', { className: 'row' }, [el('div', { className: 'value' }, [segments])]),
+      animated && el('div', { className: 'row' }, [el('div', { className: 'value timeline' }, [playButton, scrub, frameShown])]),
+      navigable && chooser && el('div', { className: 'row' }, [el('span', { className: 'label', textContent: 'Camera' }), el('div', { className: 'value' }, [chooser])]),
+      navigable && el('div', { className: 'row' }, [el('div', { className: 'value' }, [segments])]),
     ].filter((n) => !!n).map((n) => /** @type {Node} */ (n))));
     body.append(viewSection);
   }
 
-  // The Collections view: the scene collection's children down, as the outliner lists them, in Blender's icons.
-  const icons = (tools.icons?.() ?? Promise.resolve(undefined)).then((found) => found ?? OWN_ICONS, () => OWN_ICONS);
-  const icon = (/** @type {string} */ name, /** @type {string} */ color = '') => {
-    const span = el('span', { className: 'icon' });
-    if (color) span.style.color = color;
-    icons.then((all) => {
-      const found = all[name] ?? OWN_ICONS[name];
-      if (found) span.style.cssText += `--icon:url("data:image/svg+xml,${encodeURIComponent(found[0])}");--mask:${found[1] / 16}% ${found[2] / 16}%`;
-    });
-    return span;
-  };
+  // The Collections view: the scene collection's children down, as the outliner lists them.
   /** The path of a collection's flag control that `which` picks. @param {string} key @param {(path: string) => boolean} which */
   const flagOf = (key, which) => controls.find((c) => bindOf(c.path)?.collection === key && which(c.path))?.path;
   const collectionRows = blend.collections().filter((c) => c.parent !== null).map((c) => {
@@ -821,7 +847,11 @@ export function createPanel(shadow, blend, { button, place, viewer, state, save,
 
   // Values set elsewhere (the page, the animation) shown once a frame.
   const dirty = new Set();
-  let frame = 0;
+  let frame = 0, timeShown = 0;
+  const timed = playhead.onChanged.add(() => {
+    if (panel.hidden || !animated) return;
+    timeShown ||= requestAnimationFrame(() => { timeShown = 0; showTime(); });
+  });
   const changed = blend.onChanged.add(({ path }) => {
     if (!panel.hidden && collectionPaths.has(path)) showCollections();
     if (panel.hidden || !views.has(path)) return;
@@ -840,6 +870,7 @@ export function createPanel(shadow, blend, { button, place, viewer, state, save,
     measure(open);
     if (open) {
       for (const [path, shows] of views) for (const show of shows) show(get(path));
+      if (animated) showTime();
       showCollections();
       filter();
       search.focus({ preventScroll: true });
@@ -853,5 +884,5 @@ export function createPanel(shadow, blend, { button, place, viewer, state, save,
   });
   // Keys stay with the panel, not the page's camera.
   for (const type of ['keydown', 'keyup', 'wheel']) panel.addEventListener(type, (e) => e.stopPropagation());
-  return { toggle, dispose: () => { measure(false); blend.onChanged.remove(changed); cancelAnimationFrame(frame); panel.remove(); } };
+  return { toggle, dispose: () => { measure(false); blend.onChanged.remove(changed); playhead.onChanged.remove(timed); cancelAnimationFrame(frame); cancelAnimationFrame(timeShown); panel.remove(); } };
 }
