@@ -164,6 +164,38 @@ export const CollectionSchema: import("zod/mini").ZodMiniObject<{
         indirect_only: boolean;
     }>, any>>>;
 }, import("zod/v4/core").$strip>;
+/** A marker: a named frame, the scene's (timeline_markers) or an action's (pose_markers, at the action's frames). */
+export const MarkerSchema: import("zod/mini").ZodMiniObject<{
+    name: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniString<string>>;
+    frame: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNumber<number>>;
+}, import("zod/v4/core").$strip>;
+/**
+ * An action exported as a clip (an animation group of its own, named by the action): its frame range, and how the first
+ * NLA strip using it plays it, its blending (REPLACE, ADD, or COMBINE played as ADD), influence, speed (1 / its scale) and
+ * repeat; its pose markers.
+ */
+export const ClipSchema: import("zod/mini").ZodMiniObject<{
+    action: import("zod/mini").ZodMiniString<string>;
+    frame_start: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNumber<number>>;
+    frame_end: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNumber<number>>;
+    blend: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniEnum<{
+        REPLACE: "REPLACE";
+        ADD: "ADD";
+        SUBTRACT: "SUBTRACT";
+        MULTIPLY: "MULTIPLY";
+        COMBINE: "COMBINE";
+    }>>;
+    influence: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNumber<number>>;
+    speed: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNumber<number>>;
+    repeat: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNumber<number>>;
+    markers: import("zod/mini").ZodMiniDefault<z.ZodMiniType<{
+        name: string;
+        frame: number;
+    }[], any, import("zod/v4/core").$ZodTypeInternals<{
+        name: string;
+        frame: number;
+    }[], any>>>;
+}, import("zod/v4/core").$strip>;
 /** The scene's time as Blender's Scene holds it: the frame shown, the range played, its frame rate (fps / fps_base) and whether playback loops. */
 export const TimeSchema: import("zod/mini").ZodMiniObject<{
     frame_current: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNumber<number>>;
@@ -173,6 +205,38 @@ export const TimeSchema: import("zod/mini").ZodMiniObject<{
     fps_base: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNumber<number>>;
     loop: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniBoolean<boolean>>;
     sample_rates: import("zod/mini").ZodMiniDefault<z.ZodMiniType<Record<string, number>, any, import("zod/v4/core").$ZodTypeInternals<Record<string, number>, any>>>;
+    clips: import("zod/mini").ZodMiniDefault<z.ZodMiniType<Record<string, {
+        action: string;
+        frame_start: number;
+        frame_end: number;
+        blend: "REPLACE" | "ADD" | "SUBTRACT" | "MULTIPLY" | "COMBINE";
+        influence: number;
+        speed: number;
+        repeat: number;
+        markers: {
+            name: string;
+            frame: number;
+        }[];
+    }>, any, import("zod/v4/core").$ZodTypeInternals<Record<string, {
+        action: string;
+        frame_start: number;
+        frame_end: number;
+        blend: "REPLACE" | "ADD" | "SUBTRACT" | "MULTIPLY" | "COMBINE";
+        influence: number;
+        speed: number;
+        repeat: number;
+        markers: {
+            name: string;
+            frame: number;
+        }[];
+    }>, any>>>;
+    markers: import("zod/mini").ZodMiniDefault<z.ZodMiniType<{
+        name: string;
+        frame: number;
+    }[], any, import("zod/v4/core").$ZodTypeInternals<{
+        name: string;
+        frame: number;
+    }[], any>>>;
 }, import("zod/v4/core").$strip>;
 /** The scene the page shows: its ID, its scene collection (the collections' root), the view layer it draws and its time. */
 export const SceneSchema: import("zod/mini").ZodMiniObject<{
@@ -187,6 +251,23 @@ export const SceneSchema: import("zod/mini").ZodMiniObject<{
         fps_base: number;
         loop: boolean;
         sample_rates: Record<string, number>;
+        clips: Record<string, {
+            action: string;
+            frame_start: number;
+            frame_end: number;
+            blend: "REPLACE" | "ADD" | "SUBTRACT" | "MULTIPLY" | "COMBINE";
+            influence: number;
+            speed: number;
+            repeat: number;
+            markers: {
+                name: string;
+                frame: number;
+            }[];
+        }>;
+        markers: {
+            name: string;
+            frame: number;
+        }[];
     }, any, import("zod/v4/core").$ZodTypeInternals<{
         frame_current: number;
         frame_start: number;
@@ -195,6 +276,23 @@ export const SceneSchema: import("zod/mini").ZodMiniObject<{
         fps_base: number;
         loop: boolean;
         sample_rates: Record<string, number>;
+        clips: Record<string, {
+            action: string;
+            frame_start: number;
+            frame_end: number;
+            blend: "REPLACE" | "ADD" | "SUBTRACT" | "MULTIPLY" | "COMBINE";
+            influence: number;
+            speed: number;
+            repeat: number;
+            markers: {
+                name: string;
+                frame: number;
+            }[];
+        }>;
+        markers: {
+            name: string;
+            frame: number;
+        }[];
     }, any>>>;
 }, import("zod/v4/core").$strip>;
 export const IR_SCHEMA: "bylonder-ir";
@@ -214,6 +312,23 @@ export const IRSchema: import("zod/mini").ZodMiniObject<{
             fps_base: number;
             loop: boolean;
             sample_rates: Record<string, number>;
+            clips: Record<string, {
+                action: string;
+                frame_start: number;
+                frame_end: number;
+                blend: "REPLACE" | "ADD" | "SUBTRACT" | "MULTIPLY" | "COMBINE";
+                influence: number;
+                speed: number;
+                repeat: number;
+                markers: {
+                    name: string;
+                    frame: number;
+                }[];
+            }>;
+            markers: {
+                name: string;
+                frame: number;
+            }[];
         };
     }, any, import("zod/v4/core").$ZodTypeInternals<{
         id: string | null;
@@ -227,6 +342,23 @@ export const IRSchema: import("zod/mini").ZodMiniObject<{
             fps_base: number;
             loop: boolean;
             sample_rates: Record<string, number>;
+            clips: Record<string, {
+                action: string;
+                frame_start: number;
+                frame_end: number;
+                blend: "REPLACE" | "ADD" | "SUBTRACT" | "MULTIPLY" | "COMBINE";
+                influence: number;
+                speed: number;
+                repeat: number;
+                markers: {
+                    name: string;
+                    frame: number;
+                }[];
+            }>;
+            markers: {
+                name: string;
+                frame: number;
+            }[];
         };
     }, any>>>;
     ids: import("zod/mini").ZodMiniDefault<z.ZodMiniType<Record<string, {
@@ -512,6 +644,8 @@ export type Points = z.infer<typeof PointsSchema>;
 export type Instances = z.infer<typeof InstancesSchema>;
 export type Geometry = z.infer<typeof GeometrySchema>;
 export type Time = z.infer<typeof TimeSchema>;
+export type Clip = z.infer<typeof ClipSchema>;
+export type Marker = z.infer<typeof MarkerSchema>;
 export type Collection = z.infer<typeof CollectionSchema>;
 /**
  * A reference an entity's input may hold, resolved before a unit runs.

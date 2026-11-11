@@ -13,10 +13,11 @@ function grid(frameStart, frameEnd, step) {
 /**
  * The export's sampling over the scene range at `fps`: `rate` for every object, `instances` by object name; unset, the
  * scene's frame rate (a key per frame).
- * Returns { frames, keeps(name), rates() }: every frame Main is evaluated at, ascending; a test of whether a frame is on
- * the grid of an object whose animation is baked; and the rate of each such object, by name.
+ * Returns { range, frames, keeps(name), rates(), over(range) }: the range sampled; every frame Main is evaluated at,
+ * ascending; a test of whether a frame is on the grid of an object whose animation is baked; the rate of each such
+ * object, by name; and the same sampling over another range (an action's), whose baked objects it names too.
  */
-export function exportSampling({ frameStart, frameEnd, fps }, { rate = null, instances = {} } = {}) {
+export function exportSampling({ frameStart, frameEnd, fps }, { rate = null, instances = {} } = {}, baked = new Set()) {
   const rateOf = (name) => instances[name] ?? rate ?? fps;
   const grids = new Map();
   const gridOf = (r) => {
@@ -24,8 +25,8 @@ export function exportSampling({ frameStart, frameEnd, fps }, { rate = null, ins
     return grids.get(r);
   };
   const frames = [...new Set([fps, rate, ...Object.values(instances)].filter((r) => r > 0).flatMap((r) => [...gridOf(r)]))].sort((a, b) => a - b);
-  const baked = new Set();
   return {
+    range: { frameStart, frameEnd, fps },
     frames,
     keeps(name) {
       baked.add(name);
@@ -33,5 +34,6 @@ export function exportSampling({ frameStart, frameEnd, fps }, { rate = null, ins
       return (frame) => set.has(frame);
     },
     rates: () => Object.fromEntries([...baked].sort().map((name) => [name, rateOf(name)])),
+    over: (range) => exportSampling({ fps, ...range }, { rate, instances }, baked),
   };
 }

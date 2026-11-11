@@ -31,6 +31,13 @@ export const NAVIGATION = [
   ['JOYSTICKS', 'Joysticks', "Flies with two virtual thumb sticks (Babylon's VirtualJoysticksCamera), offered on touch screens"],
 ];
 
+// What the animation exports as: [identifier, name, description]. Clips are Blender's glTF exporter's Actions mode.
+export const ANIMATIONS = [
+  ['TIMELINE', 'Timeline', "The scene's animation as Blender plays it (actions, NLA, drivers, constraints) in one group, which the page's playhead plays"],
+  ['CLIPS', 'Clips', "A group per action, named by it and evaluated alone over its frame range, played by your code (blend.play('Walk')), as a .glb's actions are"],
+  ['BOTH', 'Both', "The timeline's group, and a group per action: a clip playing takes its targets from the timeline"],
+];
+
 // `fallback`: the default, or a function making it (a fresh object each time).
 const repaired = (name, schema, fallback) => {
   const made = () => (typeof fallback === 'function' ? fallback() : fallback);
@@ -91,6 +98,8 @@ export const ExportOptionsSchema = z.object({
   hostCompression: repaired('hostCompression', z.boolean(), false),
   /** a package's animation sampled per frame where Babylon cannot play its F-Curves, instead of run as F-Curves in the page */
   bakeAnimation: repaired('bakeAnimation', z.boolean(), false),
+  /** what the animation exports as (ANIMATIONS): the timeline's group, a group per action (clips), or both */
+  animations: repaired('animations', z.enum(ANIMATIONS.map(([id]) => id)), 'TIMELINE'),
   /** keys per second of what is baked (sampled), for every object and by object name; unset, the scene's frame rate */
   sampleRate: repaired('sampleRate', SampleRate, () => ({ rate: null, instances: {} })),
   /** a package's modules as one bundle with Babylon's (bundle.js), else as ES modules importing Babylon's; unset, bundled for the Scene, not for Selected Objects, which load into a page's own Babylon */

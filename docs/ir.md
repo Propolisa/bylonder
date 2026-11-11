@@ -72,6 +72,22 @@ interpolates between them: floats, vectors and colors linearly, rotations and bo
 from key to key (a boolean) is keyed at each whole frame it changes at, whatever the rate. Exact keys (an F-curve
 Babylon plays as it is) and F-Curves the page runs are not sampled and are not named.
 
+`clips` holds the actions exported as clips (File > Export's Animations set to Clips or Both), by name: each is an
+animation group of its own named by the action, as Blender's glTF exporter names a .glb's animations, its keys moved to
+start at 0 (`frame_start` is the action's first frame). The first NLA strip playing the action gives how the clip plays:
+`blend` (REPLACE, or ADD and COMBINE, both played as additive groups), `influence` (the group's weight), `speed` (one
+over the strip's scale) and `repeat` (the times `play` plays it); an action used only assigned plays as REPLACE at
+influence 1. `markers` are the action's pose markers, at the action's frames. The group's metadata is
+`{ bylonder: { clip: true, action, frame_start } }`; the playhead leaves it alone, and `runtime/clips.js` plays it on
+Babylon's clock.
+
+```json
+"clips": { "Hop": { "action": "Hop", "frame_start": 1, "frame_end": 16, "blend": "ADD", "influence": 1, "speed": 1, "repeat": 3, "markers": [{ "name": "Peak", "frame": 8 }] } }
+```
+
+`markers` holds the scene's timeline markers, `[{ "name": "Step", "frame": 10 }]`, which the SDK's `onMarker` tells
+as the playhead plays past them.
+
 `collections` holds the scene's collections by ID key, the scene collection (`GR:Scene Collection`) included, each with
 its members and metadata as Blender's outliner shows them:
 

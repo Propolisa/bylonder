@@ -1,7 +1,8 @@
 // Records docs/features/import-export.md's pictures of File > Export > JavaScript's settings on the Rigged Character
 // example: the dialog with every setting inherited, then the package's runtime set to Babylon (native) and the rig's
 // overridden back to Blender from its context menu; then its Units with the shader nodes replaced but one. On the
-// Compositor example, its Branches with Upstairs Bar's Smooth by Angle set Live and the compositor Baked.
+// Compositor example, its Branches with Upstairs Bar's Smooth by Angle set Live and the compositor Baked. On the
+// Nonlinear Animation example, Animations set to Clips.
 //   usage: node tools/docs/record-export-javascript.mjs
 import { record } from "./record.mjs";
 
@@ -48,4 +49,12 @@ await record("import-export", { example: "compositor", node: null }, async (r) =
   await choose(app, row, "Compositor", "Baked");
   await r.pause(300);
   await r.shot("export-javascript-branches", row("Branches"));
+});
+
+await record("import-export", { example: "nla", node: null }, async (r) => {
+  const { app } = r;
+  const { dialog, row } = await openDialog(app);
+  await choose(app, row, "Animations", "Clips");
+  await r.pause(300);
+  await r.shot("export-javascript-clips", dialog);
 });

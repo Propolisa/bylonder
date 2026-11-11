@@ -23,7 +23,8 @@ export const APPROXIMATION = 'APPROXIMATION', FALLBACK = 'FALLBACK';
 // issues(struct): [{ kind, setting, message }], instances(context): the structs it evaluates, evaluates(entry),
 // evaluate(view), instanceLabel(struct) (its name in lists, default the struct's), exported (the runtimes its export writes as such; default all it offers), export(world, { bake,
 // runtime(struct): the runtime an instance exports with, sampling: the frames it samples at (sampling.js) }): { issues,
-// animations, curves?, gaps?, restore } }.
+// animations, curves?, gaps?, clip?(sampling, owns), restore } }, `clip` sampling the animations of the instances whose
+// owner ID `owns` holds over another sampling (an action's, clip-export.js).
 const features = [];
 export function registerRuntime(feature) {
   features.push(feature);
@@ -53,11 +54,12 @@ function reportIssues(title, issues) {
 // duration), their issues reported, and Babylon animations of what Blender's animation system drives that the mapping
 // makes (a skeleton's bones). Without `bake`, F-Curves a package's page runs instead (live-curves.js) go in `curves`,
 // and what is still sampled in `gaps`; `sampling`, the frames it samples at (io_scene_babylon/sampling.js). `choice`: File > Export's runtime options (export-options.js), each instance on its
-// own runtime where they choose none. Returns { animations: [{ animation, target }], curves, gaps, restore() }.
+// own runtime where they choose none. Returns { animations: [{ animation, target }], curves, gaps, clip(sampling, owns), restore() }.
 export function exportRuntimes(world, { bake = true, sampling = world.animation && exportSampling(world.animation.time.state), ...choice } = {}) {
   const results = features.map((feature) => feature.export(world, { bake, sampling, runtime: exportedRuntime(feature, choice) }));
   for (const { title, issues } of results.flatMap((r) => r.reports)) reportIssues(title, issues);
   return { animations: results.flatMap((r) => r.animations), curves: results.flatMap((r) => r.curves ?? []), gaps: results.flatMap((r) => r.gaps ?? []),
+    clip: (clipSampling, owns) => results.flatMap((r) => r.clip?.(clipSampling, owns) ?? []),
     restore: () => results.forEach((r) => r.restore()) };
 }
 

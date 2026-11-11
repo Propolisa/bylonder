@@ -22,7 +22,9 @@
           "fps": 24,
           "fps_base": 1,
           "loop": true,
-          "sample_rates": {}
+          "sample_rates": {},
+          "clips": {},
+          "markers": []
         }
       },
       "type": "object",
@@ -56,7 +58,9 @@
             "fps": 24,
             "fps_base": 1,
             "loop": true,
-            "sample_rates": {}
+            "sample_rates": {},
+            "clips": {},
+            "markers": []
           },
           "type": "object",
           "properties": {
@@ -92,6 +96,89 @@
               },
               "additionalProperties": {
                 "type": "number"
+              }
+            },
+            "clips": {
+              "default": {},
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "string"
+                  },
+                  "frame_start": {
+                    "default": 1,
+                    "type": "number"
+                  },
+                  "frame_end": {
+                    "default": 1,
+                    "type": "number"
+                  },
+                  "blend": {
+                    "default": "REPLACE",
+                    "type": "string",
+                    "enum": [
+                      "REPLACE",
+                      "ADD",
+                      "SUBTRACT",
+                      "MULTIPLY",
+                      "COMBINE"
+                    ]
+                  },
+                  "influence": {
+                    "default": 1,
+                    "type": "number"
+                  },
+                  "speed": {
+                    "default": 1,
+                    "type": "number"
+                  },
+                  "repeat": {
+                    "default": 1,
+                    "type": "number"
+                  },
+                  "markers": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "default": "",
+                          "type": "string"
+                        },
+                        "frame": {
+                          "default": 0,
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "action"
+                ]
+              }
+            },
+            "markers": {
+              "default": [],
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "default": "",
+                    "type": "string"
+                  },
+                  "frame": {
+                    "default": 0,
+                    "type": "number"
+                  }
+                }
               }
             }
           }

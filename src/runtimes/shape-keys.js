@@ -10,7 +10,7 @@ import { blenderModule } from '../bmesh/bmesh-wasm.js';
 import { modifierStack } from '../modifiers/stack.js';
 import { mesh_batch_cache_corner_buffers, mesh_batch_cache_flat } from '../draw/mesh-batch-buffers.js';
 import { registerRuntime, runtimeOf, APPROXIMATION, FALLBACK } from './runtimes.js';
-import { exactAnimation } from '../io_scene_babylon/exact-keys.js';
+import { exactAnimation, fcurveKeys } from '../io_scene_babylon/exact-keys.js';
 import { actionFCurves } from '../io_scene_babylon/ir-export.js';
 
 const address = (struct) => pointerOf(struct)?.[2] ?? 0;
@@ -205,21 +205,19 @@ function exportShapeKeys(world, { sampling }) {
   return {
     reports: mapped.map(({ key }) => ({ title: `${key.name}: exported`, issues: [NORMALS(key)] })),
     animations: influenceAnimations(world, mapped, sampling),
+    clip: (clipSampling, owns) => influenceAnimations(world, mapped.filter(({ key }) => owns(key)), clipSampling),
     restore() {
       exporting.clear();
       for (const [entry, state] of temporary) unmorph(view, entry, state);
     },
   };
 }
-// An F-Curve's keys as exact-keys.js reads them, or null.
-const curveKeys = (fc) => fc && [...fc.keyframe_points].map((k) => ({ frame: k.co[0], value: k.co[1], interpolation: k.interpolation,
-  handle_left: [k.handle_left[0], k.handle_left[1]], handle_right: [k.handle_right[0], k.handle_right[1]] }));
 
 // The influences, as Main evaluates them at the sampling's frames (sampling.js): each target's F-Curve's keys where they are
 // the influence exactly at each whole frame, else keyed on its object's grid.
 function influenceAnimations(world, mapped, sampling) {
   const animated = mapped.filter(({ key }) => key.animation_data);
-  const sync = world.mainSync, { fps, frameStart, frameEnd } = world.animation.time.state, current = world.animation.time.frame;
+  const sync = world.mainSync, { fps, frameStart, frameEnd } = sampling.range, current = world.animation.time.frame;
   if (!animated.length || frameEnd <= frameStart) return [];
   const keys = new Map();
   // Each target's own F-Curve, which Babylon plays where its keys are the influence exactly (exact-keys.js).
@@ -237,7 +235,7 @@ function influenceAnimations(world, mapped, sampling) {
   }
   sync.frameChanged(current);
   return [...keys].map(([target, list]) => {
-    const exact = exactAnimation(`${target.name} influence`, 'influence', curveKeys(curves.get(target)), list.filter((k) => Number.isInteger(k.frame)).map((k) => k.value), { frameStart, fps });
+    const exact = exactAnimation(`${target.name} influence`, 'influence', fcurveKeys(curves.get(target)), list.filter((k) => Number.isInteger(k.frame)).map((k) => k.value), { frameStart, fps });
     if (exact) return { animation: exact, target };
     const animation = new Animation(`${target.name} influence`, 'influence', fps, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CYCLE);
     const keeps = sampling.keeps(list[0].ob);

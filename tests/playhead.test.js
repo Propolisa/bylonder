@@ -87,7 +87,7 @@ near(once.frame, 1, 'and plays again from the start');
 once.dispose();
 playhead.dispose();
 
-assert.deepEqual(readIR({ schema: 'bylonder-ir', version: 1 }).scene.time, { frame_current: 1, frame_start: 1, frame_end: 250, fps: 24, fps_base: 1, loop: true, sample_rates: {} },
+assert.deepEqual(readIR({ schema: 'bylonder-ir', version: 1 }).scene.time, { frame_current: 1, frame_start: 1, frame_end: 250, fps: 24, fps_base: 1, loop: true, sample_rates: {}, clips: {}, markers: [] },
   "an IR without the scene's time reads Blender's defaults");
 scene.dispose();
 engine.dispose();

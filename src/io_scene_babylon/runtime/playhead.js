@@ -6,7 +6,8 @@
 // the start, the last frame held for a whole frame as Blender's screen_animation_step does, or stops there. Each started
 // animation group is held paused and set to the frame; a particle system pauses with it. An effect kept on real time
 // plays on Babylon's own clock instead. A target with a time offset (`offsetOf`, a collection's) plays its animation
-// that many frames later, its frame wrapped into the range as the playhead loops, else held at its ends.
+// that many frames later, its frame wrapped into the range as the playhead loops, else held at its ends. A clip (an
+// action's group, clips.js) plays on Babylon's own clock, and a target a clip claims is left to it.
 import { Observable, Scene } from '@babylonjs/core';
 
 /** @typedef {import('@babylonjs/core').AnimationGroup | import('@babylonjs/core').IParticleSystem} Effect */
@@ -42,9 +43,9 @@ export function createPlayhead(scene, time) {
     if (frame === applied) return;
     applied = frame;
     for (const group of scene.animationGroups) {
-      if (!group.isStarted || realTime.has(group)) continue;
+      if (!group.isStarted || realTime.has(group) || group.metadata?.bylonder?.clip) continue;
       if (group.isPlaying) group.pause();
-      for (const animatable of group.animatables) animatable.goToFrame(shifted(frame, playhead.offsetOf(animatable.target)), true);
+      for (const animatable of group.animatables) if (!playhead.claimed(animatable.target)) animatable.goToFrame(shifted(frame, playhead.offsetOf(animatable.target)), true);
     }
     onChanged.notifyObservers({ frame, playing });
   };
@@ -83,6 +84,8 @@ export function createPlayhead(scene, time) {
     fps: time.fps / time.fps_base,
     /** The frames a target's animation is offset by (later); 0 unless set. @type {(target: any) => number} */
     offsetOf: () => 0,
+    /** Whether a clip playing sets a target, which the playhead then leaves alone. @type {(target: any) => boolean} */
+    claimed: () => false,
     /** The frame shown by what is offset by `offset` frames. @param {number} offset */
     frameAt: (offset) => shifted(shown(), offset),
     /** Sets the groups to the frame again, after offsets changed. */

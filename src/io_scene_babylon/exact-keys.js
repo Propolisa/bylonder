@@ -70,6 +70,10 @@ export function exactAnimation(name, property, keys, samples, { frameStart, fps 
   return null;
 }
 
+/** An F-Curve's keys as exactAnimation reads them, or null. */
+export const fcurveKeys = (fc) => fc && [...fc.keyframe_points].map((k) => ({ frame: k.co[0], value: k.co[1], interpolation: k.interpolation,
+  handle_left: [k.handle_left[0], k.handle_left[1]], handle_right: [k.handle_right[0], k.handle_right[1]] }));
+
 // A channel's keys (`data_path`, `array_index`) as an ID's NLA plays them where Babylon can: one track holding it, its
 // strips action clips that replace at full influence (no blend in or out, no animated influence or time, not reversed,
 // a whole number of repeats), and no action on top setting it. Each strip's keys are moved to its frames, scaled and

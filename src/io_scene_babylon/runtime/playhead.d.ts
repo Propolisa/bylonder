@@ -16,6 +16,8 @@ export function createPlayhead(scene: import("@babylonjs/core").Scene, time: imp
     fps: number;
     /** The frames a target's animation is offset by (later); 0 unless set. @type {(target: any) => number} */
     offsetOf: (target: any) => number;
+    /** Whether a clip playing sets a target, which the playhead then leaves alone. @type {(target: any) => boolean} */
+    claimed: (target: any) => boolean;
     /** The frame shown by what is offset by `offset` frames. @param {number} offset */
     frameAt: (offset: number) => number;
     /** Sets the groups to the frame again, after offsets changed. */

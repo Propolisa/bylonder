@@ -6,6 +6,7 @@ import { Matrix, Observable, Quaternion, Texture, Vector3 } from '@babylonjs/cor
 import { createScheduler, EVALUATORS, NATIVE } from './scheduler.js';
 import { readIR, referencesIn } from './ir.js';
 import { createPlayhead } from './playhead.js';
+import { createClips, isClip } from './clips.js';
 import { collectionKey, collectionTree, objectsIn, showing } from './collections.js';
 
 /** @typedef {number | boolean | string} Value */
@@ -211,6 +212,9 @@ export class BlendScene {
     this.#values = new Map(knobs.map((knob) => [knob.path, knob.default]));
     /** The scene's one clock: its frame, which the animation and what reads the frame follow. */
     this.playhead = createPlayhead(scene, this.ir.scene.time);
+    this.#clips = createClips(scene, this.ir.scene.time, this.playhead);
+    /** Told of each marker passed: the scene's as the playhead plays past it, an action's as its clip does. */
+    this.onMarker = this.#clips.onMarker;
     const frameControl = knobs.find((knob) => knob.bind?.frame)?.path;
     // The frame control shows the playhead's whole frame, as Blender's frame_current does.
     if (frameControl) this.playhead.onChanged.add(({ frame }) => {
@@ -238,8 +242,49 @@ export class BlendScene {
   /** Whether the scene moves with its frame: a range of frames, and an animation or what reads the frame. */
   #animated() {
     const { frame_start, frame_end } = this.ir.scene.time;
-    return frame_end > frame_start && (this.scene.animationGroups.length > 0
+    return frame_end > frame_start && (this.scene.animationGroups.some((group) => !isClip(group))
       || Object.values(this.ir.entities).some((e) => [...referencesIn(e.inputs)].some(([ref]) => 'property' in ref && ref.property.endsWith('.frame_current'))));
+  }
+
+  /** @type {ReturnType<typeof createClips>} */
+  #clips;
+
+  /**
+   * The clips (docs/ir.md, Clips): an animation group per Blender action exported with Animations set to Clips or Both,
+   * named by the action, each with Babylon's group.
+   */
+  clips() {
+    return this.#clips.list();
+  }
+
+  /**
+   * Plays a clip from its start on Babylon's clock, as a .glb's animation group plays.
+   * @param {string} name
+   * @param {import('./clips.js').PlayOptions} [options]
+   */
+  play(name, options) {
+    return this.#clips.play(name, options);
+  }
+
+  /** Stops a clip. @param {string} name */
+  stop(name) {
+    this.#clips.stop(name);
+  }
+
+  /** Sets a clip's weight, its share where clips blend. @param {string} name @param {number} weight */
+  setWeight(name, weight) {
+    this.#clips.setWeight(name, weight);
+  }
+
+  /**
+   * Fades from one clip to another over `seconds`; resolves when done.
+   * @param {string} from
+   * @param {string} to
+   * @param {number} seconds
+   * @param {import('./clips.js').PlayOptions} [options] how `to` plays
+   */
+  crossFade(from, to, seconds, options) {
+    return this.#clips.crossFade(from, to, seconds, options);
   }
 
   /** The objects their collections hid at export. */
@@ -462,6 +507,7 @@ export class BlendScene {
   /** Disposes of the scene. */
   dispose() {
     this.#scheduler?.dispose();
+    this.#clips.dispose();
     this.playhead.dispose();
     this.onChanged.clear();
     this.#disposeContent();

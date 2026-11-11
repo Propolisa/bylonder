@@ -265,8 +265,8 @@ function constraintEntities(ids, constraints, time) {
 // Geometry Nodes modifiers add; the carried IDs, their node trees, and the computed entities, with the F-Curves and the
 // objects' constraints the page runs (`curves`, `constraints`, live-curves.js); `collections`, the scene's and its
 // collections (collections-export.js); `states`, the export's options that set
-// the states of its branches (export-options.js chosenState).
-export function exportIR(world, { controls, collections = null, live, bin, animationGroups = [], sampleRates = {}, curves = [], constraints = [], states = {} }) {
+// the states of its branches (export-options.js chosenState); `clips` and `markers`, the scene time's (runtime/ir.js TimeSchema).
+export function exportIR(world, { controls, collections = null, live, bin, animationGroups = [], sampleRates = {}, clips = {}, markers = [], curves = [], constraints = [], states = {} }) {
   const sync = world.mainSync, objects = world.objects.map((node) => [node, sync?.objectOf(node)]).filter(([, pointer]) => pointer);
   const { ids, references } = sync ? exportIDs(rootIDs(objects.map(([, pointer]) => pointer))) : { ids: {}, references: [] };
   for (const [node, pointer] of objects) if (ids[idKey(idStruct(pointer))]) ids[idKey(idStruct(pointer))].node = node.id;
@@ -292,6 +292,6 @@ export function exportIR(world, { controls, collections = null, live, bin, anima
   }
   // What the page computes from is offered to authors.
   for (const entity of Object.values(entities)) if (entity.implementation) for (const [ref] of referencesIn(entity.inputs)) if ('property' in ref) properties[ref.property].suggested = true;
-  return { schema: IR_SCHEMA, version: IR_VERSION, scene: { ...(collections?.scene ?? { id: null, collection: null, view_layer: null }), time: { ...sceneTime(world.animation.time.state), sample_rates: sampleRates } }, ids,
+  return { schema: IR_SCHEMA, version: IR_VERSION, scene: { ...(collections?.scene ?? { id: null, collection: null, view_layer: null }), time: { ...sceneTime(world.animation.time.state), sample_rates: sampleRates, clips, markers } }, ids,
     collections: collections?.collections ?? {}, references, properties, graphs, entities, order: entityOrder(entities) };
 }

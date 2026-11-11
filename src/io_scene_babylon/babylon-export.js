@@ -7,7 +7,10 @@ import { deleted, nodeId } from '../editors/object/identity.js';
 import { exportRuntimes } from '../runtimes/runtimes.js';
 import { imageFile } from '../imbuf/image-textures.js';
 import { exportNodeMaterial } from './node-material-export.js';
-import { exactAnimation, stripKeys } from './exact-keys.js';
+import { exactAnimation, fcurveKeys, stripKeys } from './exact-keys.js';
+import { actionClips, additive, clipGroup, ownedBy, withAction } from './clip-export.js';
+import { actionFCurves } from './ir-export.js';
+import { sceneOf } from './controls-export.js';
 import { exportSampling } from './sampling.js';
 import { liveConstraints, liveTransform } from './live-curves.js';
 import { report } from '../windowmanager/wm-reports.js';
@@ -143,7 +146,7 @@ const TRANSFORM = ['position', 'rotation', 'rotationQuaternion', 'scaling', 'dir
 // or a parent's); the frame shown is evaluated again after. `refs`: channels whose owner has animation data; `checks`:
 // constraint stacks the page may apply (live-curves.js liveConstraints), checked at each frame.
 function evaluatedFrames(world, nodes, refs, checks, sampling) {
-  const sync = world.mainSync, { frameStart, frameEnd } = world.animation.time.state, current = world.animation.time.frame;
+  const sync = world.mainSync, { frameStart, frameEnd } = sampling.range, current = world.animation.time.frame;
   const moves = (node) => { const ob = idStruct(sync.objectOf(node)); return !!ob.animation_data || ob.constraints.length > 0; };
   if (frameEnd <= frameStart || (!nodes.some(moves) && !refs.length)) return { transforms: null, channels: new Map() };
   const transforms = new Map(nodes.map((node) => [node, []])), channels = new Map(refs.map((ref) => [ref, []]));
@@ -164,13 +167,15 @@ function animatedChannels(world, content, live) {
     && !!idStruct(animation.ownerOf(ref))?.animation_data).map(([ref]) => ref);
 }
 // The keys of each transform channel of objects (`position.x`), as their actions hold them, or as their NLA strips play
-// them (exact-keys.js stripKeys); read while the objects' metadata, which names their channels, is theirs.
+// them (exact-keys.js stripKeys), or with `clip` as the action assigned to each plays them alone; read while the objects'
+// metadata, which names their channels, is theirs.
 const TRANSFORM_PATHS = ['position', 'scaling'].flatMap((key) => ['x', 'y', 'z'].map((c) => `${key}.${c}`));
 // Blender's property and index of each, Babylon's y being Blender's z.
 const BLENDER_CHANNELS = { position: 'location', scaling: 'scale', x: 0, y: 2, z: 1 };
-function transformKeys(world, nodes) {
+function transformKeys(world, nodes, { clip = false } = {}) {
   const keysOf = (node, path) => {
     const animation = idStruct(world.mainSync.objectOf(node)).animation_data, [key, c] = path.split('.');
+    if (clip) return fcurveKeys(actionFCurves(animation).find((fc) => fc.data_path === BLENDER_CHANNELS[key] && fc.array_index === BLENDER_CHANNELS[c]));
     if (animation?.nla_tracks.length) return stripKeys(animation, BLENDER_CHANNELS[key], BLENDER_CHANNELS[c]);
     return world.animation.track(world.animation.ref('object:' + nodeId(node), path))?.keys;
   };
@@ -203,6 +208,26 @@ function transformAnimations(node, keys, sampled, { frameStart, fps }, sampling,
   });
 }
 
+// An animation group per action the scene's objects and shape keys use (clip-export.js): each action evaluated alone over
+// its frame range and sampled as the scene's range is, `nodes`' transforms and the runtimes' animations (`mapped`); additive
+// clips as deltas. Gives the clips with { animations: [{ animation, target }] }, those that animate something.
+function sampledClips(world, nodes, mapped, sampling) {
+  const sync = world.mainSync, objectOf = (node) => idStruct(sync.objectOf(node));
+  const ids = [...sceneOf(sync).objects].flatMap((ob) => [ob, ob.data?.shape_keys]).filter((id) => id?.animation_data);
+  const clips = actionClips(ids).map((clip) => {
+    const owns = ownedBy(clip.ids), owned = nodes.filter((node) => owns(objectOf(node))), isAdditive = clip.blend !== 'REPLACE';
+    const range = sampling.over({ frameStart: clip.frame_start, frameEnd: clip.frame_end });
+    const animations = withAction(clip.ids, clip.action, () => {
+      const { transforms } = evaluatedFrames(world, owned, [], [], range), keys = transformKeys(world, owned, { clip: true });
+      return [...[...(transforms ?? [])].flatMap(([node, frames]) => transformAnimations(node, keys.get(node), frames, range.range, range).map((animation) => ({ animation, target: node }))),
+        ...mapped.clip(range, owns)];
+    }, { additive: isAdditive });
+    return { ...clip, animations: animations.map(({ animation, target }) => ({ animation: isAdditive ? additive(animation, target) : animation, target })) };
+  });
+  sync.frameChanged(world.animation.time.frame);
+  return clips.filter((clip) => clip.animations.length);
+}
+
 const ANIMATION_TYPES = { Vector2: Animation.ANIMATIONTYPE_VECTOR2, Vector3: Animation.ANIMATIONTYPE_VECTOR3, Color3: Animation.ANIMATIONTYPE_COLOR3, Color4: Animation.ANIMATIONTYPE_COLOR4, Quaternion: Animation.ANIMATIONTYPE_QUATERNION };
 const read = (object, path) => path.reduce((value, key) => value?.[key], object);
 // Values Babylon's serializer does not write, so the page animates them whole: a component alone has nothing to set.
@@ -232,7 +257,7 @@ function animationTarget(channel, content, live) {
 // settings unless they are live, depthOfField) stay out. With `curves`, an object's transform F-Curves the page runs go
 // there instead, and what is still sampled goes in `gaps`.
 function bakeAnimations(world, samples, content, live, mapped, transforms, keys, sampling, curves, gaps) {
-  const { fps, frameStart, frameEnd } = world.animation.time.state;
+  const { fps, frameStart, frameEnd } = sampling.range;
   const whole = (values) => values.filter((_, i) => Number.isInteger(sampling.frames[i]));
   const tracks = new Map();
   for (const { channel, values } of samples) {
@@ -350,13 +375,14 @@ const authoredMetadata = (node) => {
 // (node-material-export.js), with Bylonder's EEVEE extensions when `parity`.
 // `graphOf` gives a material's IR graph key, for a package whose page builds its nodes from the IR. `bake: false` is for a
 // package whose page runs F-Curves Babylon cannot play exactly. `runtime`, `runtimes`: the runtimes chosen for the export
-// (export-options.js); `sampling`, the frames what is baked is sampled at (sampling.js), a key per frame unset.
-export async function serializeScene(world, { geometry = true, live = null, mapped = null, parity = false, graphOf = () => null, bake = true, runtime = null, runtimes: chosen = {}, sampling = null, only = null } = {}) {
+// (export-options.js); `sampling`, the frames what is baked is sampled at (sampling.js), a key per frame unset;
+// `animations`, the timeline's animation group, an animation group per action (clips) or both (export-options.js ANIMATIONS).
+export async function serializeScene(world, { geometry = true, live = null, mapped = null, parity = false, graphOf = () => null, bake = true, runtime = null, runtimes: chosen = {}, sampling = null, only = null, animations = 'TIMELINE' } = {}) {
   await world.modifiers.settled();
   sampling ??= exportSampling(world.animation.time.state);
   const runtimes = mapped ?? exportRuntimes(world, { bake, runtime, runtimes: chosen, sampling });
   try {
-    return await serializeMapped(world, { geometry, live, mapped: runtimes, parity, graphOf, bake, sampling, only });
+    return await serializeMapped(world, { geometry, live, mapped: runtimes, parity, graphOf, bake, sampling, only, animations });
   } finally {
     if (!mapped) runtimes.restore();
   }
@@ -372,7 +398,7 @@ function shadowsOf(world, content) {
   return generators.filter((g) => lights.has(g.getLight().name)).map((g) => ({ ...g.serialize(), lightId: lights.get(g.getLight().name).id, customShaderOptions: g.customShaderOptions }));
 }
 
-async function serializeMapped(world, { geometry, live, mapped, parity, graphOf, bake, sampling, only }) {
+async function serializeMapped(world, { geometry, live, mapped, parity, graphOf, bake, sampling, only, animations }) {
   const { scene } = world;
   // An asset brings no camera, so none of a camera's effects.
   const camera = only ? null : world.sceneSettings.camera() ?? scene.activeCamera;
@@ -393,6 +419,7 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
   const stacks = bake || !world.mainSync ? new Map() : new Map(objects.map((node) => [node, liveConstraints(world.mainSync, node, nodeOf)]).filter(([, stack]) => stack));
   const evaluated = objects.length || refs.length ? evaluatedFrames(world, objects, refs, [...stacks.values()], sampling) : { transforms: null, channels: new Map() };
   for (const [node, stack] of stacks) if (!stack.entity()) stacks.delete(node);
+  const clips = animations !== 'TIMELINE' && world.mainSync ? sampledClips(world, objects, mapped, sampling) : [], timeline = animations !== 'CLIPS';
   const keys = transformKeys(world, objects);
   // A channel Main evaluates is its value at each frame (its NLA strips and drivers too), not its F-curve's.
   const sampled = [...samples.filter(({ channel }) => !evaluated.channels.has(world.animation.ref(channel.id, channel.path))),
@@ -420,13 +447,14 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
     uniqueIds(content.nodes),
   ];
   let pending, animationGroups, activeCameraID, shadowGenerators, constraints;
-  // The runtimes' (a skeleton's bones) first.
-  const curves = bake || !world.mainSync ? null : [...mapped.curves], gaps = curves && [...mapped.gaps];
+  // The runtimes' (a skeleton's bones) first; none without the timeline, which they play on.
+  const curves = bake || !world.mainSync ? null : timeline ? [...mapped.curves] : [], gaps = curves && (timeline ? [...mapped.gaps] : []);
   try {
     // The serializer reads the scene synchronously; only texture readbacks finish later.
     pending = SceneSerializer.SerializeAsync(scene);
     shadowGenerators = shadowsOf(world, content);
-    animationGroups = bakeAnimations(world, sampled, content, liveIds, mapped.animations, evaluated.transforms, keys, sampling, curves, gaps);
+    animationGroups = [...(timeline ? bakeAnimations(world, sampled, content, liveIds, mapped.animations, evaluated.transforms, keys, sampling, curves, gaps) : []),
+      ...clips.map((clip) => clipGroup(clip, clip.animations.map(({ animation, target }) => ({ animation: animation.serialize(), targetId: target instanceof RectAreaLight ? rigId(target.id) : target.id }))))];
     activeCameraID = camera?.id;
     constraints = [...stacks.values()].map((stack) => stack.entity());
   } finally {
@@ -459,6 +487,6 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
   // The F-Curves the page runs (live-curves.js), for the package's IR, and what it still plays as samples (sampledGaps):
   // neither is part of the file.
   // The rate of each object whose animation is baked, for the IR's time.
-  Object.defineProperties(json, { liveCurves: { value: curves ?? [] }, liveConstraints: { value: constraints }, sampledAnimation: { value: gaps ?? [] }, sampleRates: { value: sampling.rates() } });
+  Object.defineProperties(json, { clips: { value: clips }, liveCurves: { value: curves ?? [] }, liveConstraints: { value: constraints }, sampledAnimation: { value: gaps ?? [] }, sampleRates: { value: sampling.rates() } });
   return json;
 }

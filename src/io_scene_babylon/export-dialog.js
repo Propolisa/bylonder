@@ -1,6 +1,6 @@
 // File > Export's options dialog, in the scene window: EEVEE Parity and, for a JavaScript package, its own options, then
 // its settings as a tree (components/ExportDialog.vue). A setting left unset inherits from the level above it.
-import { BRANCH_STATES, BRANCHES, DEV_TOOLS, NAVIGATION, SCOPES, TARGETS } from './export-options.js';
+import { ANIMATIONS, BRANCH_STATES, BRANCHES, DEV_TOOLS, NAVIGATION, SCOPES, TARGETS } from './export-options.js';
 import { BRANCH_ROWS, sceneBranches } from './branches.js';
 import { RUNTIMES, exportChoices, exportIssue } from '../runtimes/runtimes.js';
 import { contextStruct, idStruct } from '../python/bpy_rna.js';
@@ -148,12 +148,13 @@ const panelTree = (values) => setting(values, 'controlPanel', { label: 'Control 
   children: [setting(values, 'devTools', { label: 'Editors', icon: 'BYLONDER', items: DEV_TOOLS, inherited: DEFAULT('CDN'),
     issue: (value) => (value === 'PACKAGE' && values.controlPanel === false ? 'Only the control panel links to the editors' : null) }), navigationTree(values)] });
 
-// The settings tree: a JavaScript package's scope, GPU engine, bundle, control panel and branches, the sample rate, the runtimes,
+// The settings tree: a JavaScript package's scope, GPU engine, bundle, control panel and branches, the animations, the sample rate, the runtimes,
 // then its units.
 function settingsTree(values, js, branches, world) {
   const scope = setting(values, 'scope', { label: 'Scope', icon: 'BYLONDER', items: SCOPES, inherited: DEFAULT('SCENE') });
   const target = setting(values, 'target', { label: 'GPU Engine', icon: 'BYLONDER', items: TARGETS, inherited: DEFAULT('BOTH') });
-  return [...(js ? [scope, target, bundleTree(values), panelTree(values), branchesTree(values, branches)] : []), sampleRateTree(values, world), runtimesTree(values), ...(js ? [unitsTree(values)] : [])].filter(Boolean);
+  const animations = setting(values, 'animations', { label: 'Animations', icon: 'BYLONDER', items: ANIMATIONS, inherited: DEFAULT('TIMELINE') });
+  return [...(js ? [scope, target, bundleTree(values), panelTree(values), branchesTree(values, branches)] : []), animations, sampleRateTree(values, world), runtimesTree(values), ...(js ? [unitsTree(values)] : [])].filter(Boolean);
 }
 
 // The dialog's values as export options: unset settings left out, the Units tree as the type keys replaced.
@@ -168,7 +169,7 @@ export async function exportDialog(world, format, title) {
     import('../editors/interface/components/tailwind.css'),
   ]);
   const js = format !== 'babylon';
-  const values = reactive({ eeveeParity: false, hostCompression: false, bakeAnimation: false, scope: null, target: null, bundle: null, minify: null, controlPanel: null, devTools: null, navigation: null });
+  const values = reactive({ eeveeParity: false, hostCompression: false, bakeAnimation: false, scope: null, target: null, animations: null, bundle: null, minify: null, controlPanel: null, devTools: null, navigation: null });
   const fields = [{ name: 'eeveeParity', label: 'EEVEE Parity', note: PARITY_NOTE },
     ...(js ? [{ name: 'hostCompression', label: 'Host Compresses Geometry', note: HOST_NOTE }, { name: 'bakeAnimation', label: 'Bake Animation', note: BAKE_NOTE }] : [])];
   const branches = js ? sceneBranches(world, { live: format === 'js-live' }) : {};

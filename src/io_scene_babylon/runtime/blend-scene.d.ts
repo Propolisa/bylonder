@@ -82,6 +82,23 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
                 fps_base: number;
                 loop: boolean;
                 sample_rates: Record<string, number>;
+                clips: Record<string, {
+                    action: string;
+                    frame_start: number;
+                    frame_end: number;
+                    blend: "REPLACE" | "ADD" | "SUBTRACT" | "MULTIPLY" | "COMBINE";
+                    influence: number;
+                    speed: number;
+                    repeat: number;
+                    markers: {
+                        name: string;
+                        frame: number;
+                    }[];
+                }>;
+                markers: {
+                    name: string;
+                    frame: number;
+                }[];
             };
         };
         ids: Record<string, {
@@ -167,6 +184,7 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
         end: number;
         fps: number;
         offsetOf: (target: any) => number;
+        claimed: (target: any) => boolean;
         frameAt: (offset: number) => number;
         refresh(): void;
         snap: boolean;
@@ -177,6 +195,34 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
         keepRealTime(effect: import("./playhead.js").Effect, on?: boolean): void;
         dispose(): void;
     };
+    /** Told of each marker passed: the scene's as the playhead plays past it, an action's as its clip does. */
+    onMarker: Observable<import("./clips.js").MarkerEvent>;
+    /**
+     * The clips (docs/ir.md, Clips): an animation group per Blender action exported with Animations set to Clips or Both,
+     * named by the action, each with Babylon's group.
+     */
+    clips(): {
+        name: string;
+        group: import("@babylonjs/core").AnimationGroup;
+    }[];
+    /**
+     * Plays a clip from its start on Babylon's clock, as a .glb's animation group plays.
+     * @param {string} name
+     * @param {import('./clips.js').PlayOptions} [options]
+     */
+    play(name: string, options?: import("./clips.js").PlayOptions): import("@babylonjs/core").AnimationGroup;
+    /** Stops a clip. @param {string} name */
+    stop(name: string): void;
+    /** Sets a clip's weight, its share where clips blend. @param {string} name @param {number} weight */
+    setWeight(name: string, weight: number): void;
+    /**
+     * Fades from one clip to another over `seconds`; resolves when done.
+     * @param {string} from
+     * @param {string} to
+     * @param {number} seconds
+     * @param {import('./clips.js').PlayOptions} [options] how `to` plays
+     */
+    crossFade(from: string, to: string, seconds: number, options?: import("./clips.js").PlayOptions): Promise<void>;
     /**
      * The frames an object (by key or name) plays its animation later: its collections' time offsets added up from the
      * scene collection down. An object in several collections takes the first of them in the outliner's order, depth

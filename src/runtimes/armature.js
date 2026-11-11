@@ -315,7 +315,7 @@ function issues(arm) {
 // its pose (live-curves.js livePose, checked at each whole frame) is posed by the page instead: its F-Curves go in
 // `curves`, and each bone still sampled while it moves in `gaps`.
 function poseAnimations(world, mappings, bake, sampling) {
-  const sync = world.mainSync, { fps, frameStart, frameEnd } = world.animation.time.state, current = world.animation.time.frame;
+  const sync = world.mainSync, { fps, frameStart, frameEnd } = sampling.range, current = world.animation.time.frame;
   const animated = (arm) => !!arm.animation_data || [...arm.pose.bones].some((bone) => bone.constraints.length);
   const keys = new Map(), owners = new Map();
   const sample = (frame) => {
@@ -372,6 +372,7 @@ function exportArmatures(world, { bake, sampling }) {
   return {
     reports: mappings.map((m) => ({ title: `${m.arm.name}: exported`, issues: m.issues.filter((i) => !i.silent) })),
     animations, curves, gaps,
+    clip: (sampling, owns) => poseAnimations(world, mappings.filter((m) => owns(m.arm)), true, sampling).animations,
     restore() {
       exporting.clear();
       for (const state of temporary) {
