@@ -204,9 +204,10 @@ function exportShapeKeys(world, { sampling, rests }) {
     }
     mapped.push({ entry, ob, key, state });
   }
+  const sampled = influenceAnimations(world, mapped, sampling);
   return {
     reports: mapped.map(({ key }) => ({ title: `${key.name}: exported`, issues: [NORMALS(key)] })),
-    animations: influenceAnimations(world, mapped, sampling),
+    get animations() { return sampled(); },
     clip: (clipSampling, owns) => influenceAnimations(world, mapped.filter(({ key }) => owns(key)), clipSampling),
     restore() {
       exporting.clear();
@@ -215,17 +216,17 @@ function exportShapeKeys(world, { sampling, rests }) {
   };
 }
 
-// The influences, as Main evaluates them at the sampling's frames (sampling.js): each target's F-Curve's keys where they are
-// the influence exactly at each whole frame, else keyed on its object's grid.
+// The influences, as Main evaluates them at the sampling's frames in its pass over them (sampling.js sample): each
+// target's F-Curve's keys where they are the influence exactly at each whole frame, else keyed on its object's grid.
+// Gives a function that returns them once the pass ran.
 function influenceAnimations(world, mapped, sampling) {
   const animated = mapped.filter(({ key }) => key.animation_data);
-  const sync = world.mainSync, { fps, frameStart, frameEnd } = sampling.range, current = world.animation.time.frame;
-  if (!animated.length || frameEnd <= frameStart) return [];
+  const { fps, frameStart, frameEnd } = sampling.range;
+  if (!animated.length || frameEnd <= frameStart) return () => [];
   const keys = new Map();
   // Each target's own F-Curve, which Babylon plays where its keys are the influence exactly (exact-keys.js).
   const curves = new Map();
-  for (const frame of sampling.frames) {
-    sync.frameChanged(frame);
+  sampling.sample((frame) => {
     for (const { ob, key, state } of animated) {
       influences(ob, key, state.targets.map((t) => t.name)).forEach((value, i) => {
         const target = state.manager.getTarget(i);
@@ -234,16 +235,16 @@ function influenceAnimations(world, mapped, sampling) {
         if (!curves.has(target)) curves.set(target, actionFCurves(key.animation_data).find((fc) => fc.data_path === `key_blocks["${target.name}"].value`));
       });
     }
-  }
-  sync.frameChanged(current);
-  return [...keys].map(([target, list]) => {
+  });
+  let made;
+  return () => (made ??= [...keys].map(([target, list]) => {
     const exact = exactAnimation(`${target.name} influence`, 'influence', fcurveKeys(curves.get(target)), list.filter((k) => Number.isInteger(k.frame)).map((k) => k.value), { frameStart, fps });
     if (exact) return { animation: exact, target };
     const animation = new Animation(`${target.name} influence`, 'influence', fps, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CYCLE);
     const keeps = sampling.keeps(list[0].ob);
     animation.setKeys(list.filter(({ frame }) => keeps(frame)).map(({ frame, value }) => ({ frame, value })));
     return { animation, target };
-  });
+  }));
 }
 
 registerRuntime({

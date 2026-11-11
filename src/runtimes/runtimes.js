@@ -25,7 +25,9 @@ export const APPROXIMATION = 'APPROXIMATION', FALLBACK = 'FALLBACK';
 // evaluate(view), instanceLabel(struct) (its name in lists, default the struct's), exported (the runtimes its export writes as such; default all it offers), export(world, { bake,
 // runtime(struct): the runtime an instance exports with, sampling: the frames it samples at (sampling.js) }): { issues,
 // animations, curves?, gaps?, clip?(sampling, owns), restore } }, `clip` sampling the animations of the instances whose
-// owner ID `owns` holds over another sampling (an action's, clip-export.js).
+// owner ID `owns` holds over another sampling (an action's, clip-export.js) and giving a function that returns them. What
+// a feature samples it reads in the sampling's one pass over the frames (sampling.sample): its animations, curves, gaps
+// and constraints are read after that pass.
 const features = [];
 export function registerRuntime(feature) {
   features.push(feature);
@@ -59,8 +61,12 @@ function reportIssues(title, issues) {
 export function exportRuntimes(world, { bake = true, sampling = world.animation && exportSampling(world.animation.time.state), ...choice } = {}) {
   const rests = appliedRests(), results = features.map((feature) => feature.export(world, { bake, sampling, rests, runtime: exportedRuntime(feature, choice) }));
   for (const { title, issues } of results.flatMap((r) => r.reports)) reportIssues(title, issues);
-  return { animations: results.flatMap((r) => r.animations), curves: results.flatMap((r) => r.curves ?? []), gaps: results.flatMap((r) => r.gaps ?? []), constraints: results.flatMap((r) => r.constraints ?? []),
-    clip: (clipSampling, owns) => results.flatMap((r) => r.clip?.(clipSampling, owns) ?? []),
+  const all = (key) => results.flatMap((r) => r[key] ?? []);
+  return { get animations() { return all('animations'); }, get curves() { return all('curves'); }, get gaps() { return all('gaps'); }, get constraints() { return all('constraints'); },
+    clip(clipSampling, owns) {
+      const clips = results.map((r) => r.clip?.(clipSampling, owns));
+      return () => clips.flatMap((animations) => animations?.() ?? []);
+    },
     boneParent: (ob) => results.map((r) => r.boneParent?.(ob)).find(Boolean) ?? null,
     restore: () => { results.forEach((r) => r.restore()); rests.dispose(); } };
 }

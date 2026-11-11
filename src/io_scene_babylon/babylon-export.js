@@ -159,20 +159,20 @@ function boneParents(sync, nodes, mapped, content) {
 const TRANSFORM = ['position', 'rotation', 'rotationQuaternion', 'scaling', 'direction'];
 // Each placed object's evaluated transform and each animated channel's evaluated value at each of the sampling's frames
 // (sampling.js), as Blender's animation system evaluates the frames (its actions, NLA strips, drivers and constraints,
-// or a parent's); the frame shown is evaluated again after. `refs`: channels whose owner has animation data; `checks`:
-// constraint stacks the page may apply (live-curves.js liveConstraints), checked at each frame.
+// or a parent's), in the one pass over the frames that also samples what the runtimes read (sampling.sample); the frame
+// shown is evaluated again after. `refs`: channels whose owner has animation data; `checks`: constraint stacks the page
+// may apply (live-curves.js liveConstraints), checked at each frame.
 function evaluatedFrames(world, nodes, refs, checks, sampling) {
-  const sync = world.mainSync, { frameStart, frameEnd } = sampling.range, current = world.animation.time.frame;
+  const sync = world.mainSync, { frameStart, frameEnd } = sampling.range;
   const moves = (node) => { const ob = idStruct(sync.objectOf(node)); return !!ob.animation_data || ob.constraints.length > 0; };
-  if (frameEnd <= frameStart || (!nodes.some(moves) && !refs.length)) return { transforms: null, channels: new Map() };
-  const transforms = new Map(nodes.map((node) => [node, []])), channels = new Map(refs.map((ref) => [ref, []]));
-  for (const frame of sampling.frames) {
-    sync.frameChanged(frame, { draw: false });
+  const sampled = frameEnd > frameStart && (nodes.some(moves) || refs.length > 0);
+  const transforms = sampled ? new Map(nodes.map((node) => [node, []])) : null, channels = new Map(sampled ? refs.map((ref) => [ref, []]) : []);
+  if (sampled) sampling.sample(() => {
     for (const node of nodes) transforms.get(node).push(evaluatedTransform(sync, node));
     for (const ref of refs) channels.get(ref).push(world.animation.evaluated(ref));
     for (const stack of checks) stack.check();
-  }
-  sync.frameChanged(current);
+  });
+  sampling.evaluate(sync, world.animation.time.frame);
   return { transforms, channels: new Map([...channels].filter(([, values]) => values.every((v) => v !== undefined))) };
 }
 // The channels with a place in the file whose value Main evaluates and whose owner is animated (an action or NLA
@@ -252,9 +252,9 @@ function sampledClips(world, nodes, mapped, sampling) {
     const owns = ownedBy(clip.ids), owned = nodes.filter((node) => owns(objectOf(node))), isAdditive = clip.blend !== 'REPLACE';
     const range = sampling.over({ frameStart: clip.frame_start, frameEnd: clip.frame_end });
     const animations = withAction(clip.ids, clip.action, () => {
-      const { transforms } = evaluatedFrames(world, owned, [], [], range), keys = transformKeys(world, owned, { clip: true });
+      const runtimes = mapped.clip(range, owns), { transforms } = evaluatedFrames(world, owned, [], [], range), keys = transformKeys(world, owned, { clip: true });
       return [...[...(transforms ?? [])].flatMap(([node, frames]) => transformAnimations(node, keys.get(node), frames, range.range, range).map((animation) => ({ animation, target: node }))),
-        ...mapped.clip(range, owns)];
+        ...runtimes()];
     }, { additive: isAdditive });
     return { ...clip, animations: animations.filter(skins).map(({ animation, target }) => ({ animation: isAdditive ? additive(animation, target) : animation, target })) };
   });
@@ -453,7 +453,7 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
   const nodeOf = (ob) => objects.find((node) => idStruct(world.mainSync.objectOf(node)).name === ob.name);
   const stacks = bake || !world.mainSync ? new Map() : new Map(objects.map((node) => [node, liveConstraints(world.mainSync, node, nodeOf)]).filter(([, stack]) => stack));
   const bones = onBones && world.mainSync ? boneParents(world.mainSync, objects, mapped, content) : new Map();
-  const evaluated = objects.length || refs.length ? evaluatedFrames(world, objects, refs, [...stacks.values()], sampling) : { transforms: null, channels: new Map() };
+  const evaluated = world.mainSync ? evaluatedFrames(world, objects, refs, [...stacks.values()], sampling) : { transforms: null, channels: new Map() };
   for (const [node, stack] of stacks) if (!stack.entity()) stacks.delete(node);
   const clips = animations !== 'TIMELINE' && world.mainSync ? sampledClips(world, objects, mapped, sampling) : [], timeline = animations !== 'CLIPS';
   const keys = transformKeys(world, objects);
