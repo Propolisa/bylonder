@@ -97,6 +97,8 @@ const usedNames = (source) => {
 // Babylon's screen-space pipelines, made as scene.js makes them (below), by customType, on the geometry buffer's scene
 // component, which they use without importing it.
 const GEOMETRY_BUFFER = 'Rendering/geometryBufferRendererSceneComponent.js';
+// The scene's depth renderer, which the pipelines with depth of field or ambient occlusion turn on through the scene.
+const DEPTH_RENDERER = 'Rendering/depthRendererSceneComponent.js', DEPTH_PIPELINES = ['DefaultRenderingPipeline', 'LensRenderingPipeline', 'SSAORenderingPipeline'];
 const SCREEN_SPACE_PIPELINES = {
   SSRRenderingPipeline: '(entry, scene) => new SSRRenderingPipeline(entry._name, scene, undefined, true, Constants.TEXTURETYPE_HALF_FLOAT)',
   SSAO2RenderingPipeline: '(entry, scene) => new SSAO2RenderingPipeline(entry._name, scene, entry._ratio, undefined, true, Constants.TEXTURETYPE_HALF_FLOAT)',
@@ -534,7 +536,7 @@ ${data.animationGroups.some((g) => g.targetedAnimations.some((t) => t.animation.
 `;
   const unmaterialed = settings.defaultMaterial === null && data.meshes.some((m) => m.materialUniqueId === undefined);
   const geometryBuffer = pipelineTypes.some((type) => SCREEN_SPACE_PIPELINES[type]);
-  const babylonImports = `${sideEffectImports([...PAGE_MODULES, ...(unmaterialed ? [DEFAULT_MATERIAL] : []), ...(geometryBuffer ? [GEOMETRY_BUFFER] : []), ...parsedClasses(data), ...Object.entries(COMPONENTS).filter(([key]) => data[key]?.length).map(([, file]) => file)])}
+  const babylonImports = `${sideEffectImports([...PAGE_MODULES, ...(unmaterialed ? [DEFAULT_MATERIAL] : []), ...(geometryBuffer ? [GEOMETRY_BUFFER] : []), ...(pipelineTypes.some((type) => DEPTH_PIPELINES.includes(type)) ? [DEPTH_RENDERER] : []), ...parsedClasses(data), ...Object.entries(COMPONENTS).filter(([key]) => data[key]?.length).map(([, file]) => file)])}
 import { ${[...usedNames(source), ...pipelineClasses].join(', ')} } from '@babylonjs/core';`;
   // An ES module package in Node too (the headless SDK), needing only Babylon.
   const manifest = { name: name.toLowerCase().replace(/[^a-z0-9-]+/g, '-'), type: 'module', main: 'scene.js', types: 'scene.d.ts', peerDependencies: { '@babylonjs/core': AbstractEngine.Version } };
