@@ -83,10 +83,10 @@ export function createScheduler(ir, page) {
     readers.get(key)?.forEach(mark);
   };
 
-  /** @param {string} name @returns {Evaluator | Promise<Evaluator>} */
+  /** An implementation, a Promise while it loads, or null where it failed to load (its entities stay as baked). @param {string} name @returns {Evaluator | Promise<Evaluator> | null} */
   const evaluator = (name) => {
-    if (!loaded.has(name)) loaded.set(name, EVALUATORS[name](page).then((module) => (loaded.set(name, module), module)));
-    return loaded.get(name);
+    if (!loaded.has(name)) loaded.set(name, EVALUATORS[name](page).then((module) => (loaded.set(name, module), module), (error) => { loaded.set(name, null); throw error; }));
+    return loaded.get(name) ?? null;
   };
   /** The unit or shipped implementation an entity runs with, a Promise while it loads, or null: baked. @param {string} key */
   const implementation = (key) => {
