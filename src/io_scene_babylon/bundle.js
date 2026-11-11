@@ -33,7 +33,9 @@ const notice = (code) => /^(?:\/\/.*\n)*/.exec(code)[0];
  * @babylonjs/core's file at `path` (`Engines/engine.js`); `esbuild`: esbuild's API, initialized.
  */
 export async function bundlePackage(files, { minify = true, babylon, esbuild }) {
-  const gpl = new Set(gplFiles(files).map(([path]) => path).filter(isModule));
+  // Blender's code: every module in a folder of it, those made at export (the curves' GLSL, the nodes' kernels) too.
+  const folders = new Set(gplFiles(files).map(([path]) => path.split('/')[0]));
+  const gpl = new Set(Object.keys(files).filter((path) => isModule(path) && folders.has(path.split('/')[0])));
   const plugin = { name: 'package', setup(build) {
     build.onResolve({ filter: /.*/ }, ({ path, importer, namespace, kind }) => {
       if (kind === 'entry-point') return { path, namespace: 'package' };
@@ -41,9 +43,9 @@ export async function bundlePackage(files, { minify = true, babylon, esbuild }) 
       if (path.startsWith(CORE)) return { path: path.slice(CORE.length), namespace: 'babylon' };
       if (!path.startsWith('.')) throw Error(`${importer}: ${path} is neither the package's nor Babylon's`);
       const target = joined(importer, path);
-      // scene.js imports Blender's code where it sits beside it, the bundle's scene.js too: kept as an import of that file.
+      // scene.js and Blender's code import Blender's code where it sits beside them, in the bundle too: kept as an import of that file.
       if (namespace === 'package' && gpl.has(target)) {
-        if (importer !== 'scene.js') throw Error(`${importer} imports ${target}: only scene.js imports Blender's code`);
+        if (importer !== 'scene.js' && !gpl.has(importer)) throw Error(`${importer} imports ${target}: only scene.js and Blender's code import Blender's code`);
         return { path, external: true };
       }
       return { path: target, namespace };

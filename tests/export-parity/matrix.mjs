@@ -64,6 +64,7 @@ export const KNOWN = {
   'geometry-node-editor look-webgl2': '32% of pixels agree: not yet classified, rerun once the view transform fix lands',
   'rendering look-webgl2': "88.6% of pixels agree: the app's glass carafe is grainy",
   'volumes look-webgl2': "82% of pixels agree: blocky noise in the app's fog",
+  'hair-dynamics look-webgl2': "22% of pixels agree: the app's tentacles are wider and brighter than the page's, and the water's pattern behind is offset",
   'geometry-nodes look-webgl2': '87% of pixels agree: the page draws no point clouds (the planet clouds, draw/pointcloud.js in the app)',
   'cube look-webgpu': 'the page is never ready within 180 s (a material never reports ready)',
 };
