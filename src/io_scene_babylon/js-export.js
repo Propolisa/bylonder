@@ -350,6 +350,8 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   sampledGaps(data, ir);
   greasePencilClock(world, ir, data.animationGroups, timelineGroups.length > 0);
   const ownCode = [], shipped = await irMaterials(data.materials, graphs, ir, parity, ownCode), code = sharedCode(data.materials);
+  // Materials made again from their own code carry their images inline: moved to files as the others' were.
+  imageFiles({ materials: data.materials.filter((m) => ownCode.includes(m.name)) }, images);
   const pieces = stripPieces(ir, shipped, replace), kernels = pieces && kernelsFile(pieces);
   const curves = Object.values(ir.entities).some((e) => e.implementation === 'curves');
   const meshValued = data.materials.some((m) => m.blocks?.some((b) => b.name.startsWith(MESH_VALUE)));

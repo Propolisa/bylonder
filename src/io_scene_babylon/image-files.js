@@ -9,15 +9,26 @@ function decoded(dataUrl) {
   return { type, bytes: Uint8Array.from(atob(data), (c) => c.charCodeAt(0)) };
 }
 
-// Every texture of `data` (the serialized scene) moved to a file; gives the files by path.
-export function imageFiles(data) {
-  const files = {}, byUrl = new Map();
+// A file's identity by its length and FNV-1a hash, so an image met again under another data URL is written once.
+function digest(bytes) {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < bytes.length; i++) hash = Math.imul(hash ^ bytes[i], 0x01000193);
+  return `${bytes.length}:${hash >>> 0}`;
+}
+
+// Every texture of `data` (the serialized scene) moved to a file; gives the files by path. With `files`, those made
+// before (by an earlier call, for materials made since) are added to, numbered on.
+export function imageFiles(data, files = {}) {
+  const byUrl = new Map(), byBytes = new Map(Object.entries(files).map(([path, bytes]) => [digest(bytes), path]));
   const file = (dataUrl) => {
     if (byUrl.has(dataUrl)) return byUrl.get(dataUrl);
     const image = decoded(dataUrl);
     if (!image) return null;
-    const path = `images/${byUrl.size}.${EXTENSIONS[image.type] ?? 'bin'}`;
+    const same = byBytes.get(digest(image.bytes));
+    if (same) { byUrl.set(dataUrl, same); return same; }
+    const path = `images/${Object.keys(files).length}.${EXTENSIONS[image.type] ?? 'bin'}`;
     files[path] = image.bytes;
+    byBytes.set(digest(image.bytes), path);
     byUrl.set(dataUrl, path);
     return path;
   };
