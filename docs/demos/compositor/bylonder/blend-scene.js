@@ -8,6 +8,7 @@ import { Texture } from '@babylonjs/core/Materials/Textures/texture.js';
 import { createScheduler, EVALUATORS, NATIVE } from './scheduler.js';
 import { readIR, referencesIn } from './ir.js';
 import { createPlayhead } from './playhead.js';
+import { createClips, isClip } from './clips.js';
 import { collectionKey, collectionTree, objectsIn, showing } from './collections.js';
 
 /** @typedef {number | boolean | string} Value */
@@ -67,8 +68,10 @@ import { collectionKey, collectionTree, objectsIn, showing } from './collections
  * @property {Transform} [transform]
  * @property {'viewport' | 'render'} [hide]
  * @property {number} [lens]
+ * @property {string} [morph] a morph target's name in its node's MorphTargetManager, whose influence it sets
  * @property {string} [channel] the key in its node's `metadata.bylonderChannels` the scene's animation sets it through
- * @property {string} [collection] a collection's visibility flag: the key of the collection it hides
+ * @property {string} [collection] a collection's visibility flag or time offset: the key of the collection it sets
+ * @property {boolean} [offset] a collection's time offset (Bylonder's own): frames its objects' animation plays later
  */
 
 /**
@@ -180,19 +183,25 @@ export class BlendScene {
   /** @type {{ set(color: number[]): void } | undefined} */
   #world;
 
+  /** @type {() => void} */
+  #disposeContent;
+
 
   /**
    * @param {import('@babylonjs/core').Scene} scene
    * @param {any} ir the scene's IR (scene.ir.json), read with readIR
    * @param {{ root?: string, world?: { set(color: number[]): void }, compositor?: import('@babylonjs/core').NodeRenderGraph,
-   *   buffers?: ArrayBufferView[] }} [options]
+   *   buffers?: ArrayBufferView[], entries?: import('./asset.js').Entries, dispose?: () => void }} [options]
    * the package's URL, which relative image URLs resolve against, the world of one color its background controls set
-   * (world.js), the compositor its pass controls set (bylonder-blocks.js), and scene.bin's buffers, which its entities
-   * read
+   * (world.js), the compositor its pass controls set (bylonder-blocks.js), scene.bin's buffers, which its entities
+   * read; loaded into a scene of the page's own, what was added there and what removes it (asset.js)
    */
-  constructor(scene, ir, { root = '', world, compositor, buffers = [] } = {}) {
-    /** Babylon's scene. */
+  constructor(scene, ir, { root = '', world, compositor, buffers = [], entries, dispose = () => scene.dispose() } = {}) {
+    /** Babylon's scene: loaded into a scene of the page's own, a view of it that holds what was loaded alone. */
     this.scene = scene;
+    /** Loaded into a scene of the page's own: what was added there, as ImportMeshAsync gives a .glb's (meshes[0] the root). */
+    this.entries = entries;
+    this.#disposeContent = dispose;
     this.#root = root;
     this.#world = world;
     /** The compositor, a NodeRenderGraph of the blocks library's passes, when the scene composites. */
@@ -206,6 +215,9 @@ export class BlendScene {
     this.#values = new Map(knobs.map((knob) => [knob.path, knob.default]));
     /** The scene's one clock: its frame, which the animation and what reads the frame follow. */
     this.playhead = createPlayhead(scene, this.ir.scene.time);
+    this.#clips = createClips(scene, this.ir.scene.time, this.playhead);
+    /** Told of each marker passed: the scene's as the playhead plays past it, an action's as its clip does. */
+    this.onMarker = this.#clips.onMarker;
     const frameControl = knobs.find((knob) => knob.bind?.frame)?.path;
     // The frame control shows the playhead's whole frame, as Blender's frame_current does.
     if (frameControl) this.playhead.onChanged.add(({ frame }) => {
@@ -216,10 +228,13 @@ export class BlendScene {
     this.#scheduler = Object.keys(this.ir.entities).length ? createScheduler(this.ir, { scene, root, ir: this.ir, buffers, controls: {
       get: (path) => this.#values.get(path),
       write: (path, value) => this.#write(path, value),
-      frame: () => this.playhead.frame,
+      frame: (/** @type {string | undefined} */ id) => this.playhead.frameAt(id ? this.#idOffset(id) : 0),
     } }) : null;
     this.#channels(knobs);
-    for (const { path, bind } of knobs) if (bind?.collection) {
+    for (const { path, bind } of knobs) if (bind?.offset) this.#offsetPaths.set(/** @type {string} */ (bind.collection), path);
+    this.playhead.offsetOf = (/** @type {any} */ target) => this.#targetOffsets.get(target) ?? 0;
+    this.#retime();
+    for (const { path, bind } of knobs) if (bind?.collection && !bind.offset) {
       const flag = path.endsWith('.exclude') ? 'exclude' : path.endsWith('.hide_render') ? 'hide_render' : path.includes('.layer_collection') ? 'layer_hide_viewport' : 'hide_viewport';
       this.#flags.set(`${bind.collection} ${flag}`, path);
     }
@@ -230,13 +245,97 @@ export class BlendScene {
   /** Whether the scene moves with its frame: a range of frames, and an animation or what reads the frame. */
   #animated() {
     const { frame_start, frame_end } = this.ir.scene.time;
-    return frame_end > frame_start && (this.scene.animationGroups.length > 0
+    return frame_end > frame_start && (this.scene.animationGroups.some((group) => !isClip(group))
       || Object.values(this.ir.entities).some((e) => [...referencesIn(e.inputs)].some(([ref]) => 'property' in ref && ref.property.endsWith('.frame_current'))));
+  }
+
+  /** @type {ReturnType<typeof createClips>} */
+  #clips;
+
+  /**
+   * The clips (docs/ir.md, Clips): an animation group per Blender action exported with Animations set to Clips or Both,
+   * named by the action, each with Babylon's group.
+   */
+  clips() {
+    return this.#clips.list();
+  }
+
+  /**
+   * Plays a clip from its start on Babylon's clock, as a .glb's animation group plays.
+   * @param {string} name
+   * @param {import('./clips.js').PlayOptions} [options]
+   */
+  play(name, options) {
+    return this.#clips.play(name, options);
+  }
+
+  /** Stops a clip. @param {string} name */
+  stop(name) {
+    this.#clips.stop(name);
+  }
+
+  /** Sets a clip's weight, its share where clips blend. @param {string} name @param {number} weight */
+  setWeight(name, weight) {
+    this.#clips.setWeight(name, weight);
+  }
+
+  /**
+   * Fades from one clip to another over `seconds`; resolves when done.
+   * @param {string} from
+   * @param {string} to
+   * @param {number} seconds
+   * @param {import('./clips.js').PlayOptions} [options] how `to` plays
+   */
+  crossFade(from, to, seconds, options) {
+    return this.#clips.crossFade(from, to, seconds, options);
   }
 
   /** The objects their collections hid at export. */
   /** @type {Set<string>} */
   #hiddenAtExport;
+
+  /** The path of each collection's time offset, by key. @type {Map<string, string>} */
+  #offsetPaths = new Map();
+  /** Each object's time offset by key, and each animated Babylon target's. @type {Map<string, number>} */
+  #objectOffsets = new Map();
+  /** @type {Map<any, number>} */
+  #targetOffsets = new Map();
+
+  /**
+   * The frames an object (by key or name) plays its animation later: its collections' time offsets added up from the
+   * scene collection down. An object in several collections takes the first of them in the outliner's order, depth
+   * first.
+   * @param {string} object
+   */
+  timeOffsetOf(object) {
+    return this.#objectOffsets.get(this.ir.ids[object] ? object : `OB:${object}`) ?? 0;
+  }
+
+  /** An ID's time offset: an object's, or that of the first object using it (its mesh, shape keys, armature). @param {string} id */
+  #idOffset(id) {
+    if (this.#objectOffsets.has(id)) return /** @type {number} */ (this.#objectOffsets.get(id));
+    const user = this.ir.references.find((r) => r.to === id && this.#objectOffsets.has(r.from));
+    return user ? /** @type {number} */ (this.#objectOffsets.get(user.from)) : 0;
+  }
+
+  /** Each object's and animated target's time offset, as the collections' controls set them. */
+  #retime() {
+    const sums = new Map();
+    this.#objectOffsets.clear();
+    for (const { key, parent } of collectionTree(this.ir)) {
+      const path = this.#offsetPaths.get(key), sum = (parent === null ? 0 : sums.get(parent)) + (path ? Number(this.#values.get(path)) : 0);
+      sums.set(key, sum);
+      for (const object of this.ir.collections[key].objects) if (!this.#objectOffsets.has(object)) this.#objectOffsets.set(object, sum);
+    }
+    // A node's animation, and its skeleton's bones and morph targets, follow its object.
+    this.#targetOffsets.clear();
+    for (const [object, offset] of this.#objectOffsets) {
+      const node = /** @type {any} */ (this.nodeOf(object));
+      if (!offset || !node) continue;
+      const manager = node.morphTargetManager;
+      for (const target of [node, ...(node.skeleton?.bones ?? []), ...Array.from({ length: manager?.numTargets ?? 0 }, (_, i) => manager.getTarget(i))]) this.#targetOffsets.set(target, offset);
+    }
+  }
 
   /** The path of each collection's visibility flag, by `<key> <flag>`. @type {Map<string, string>} */
   #flags = new Map();
@@ -411,9 +510,10 @@ export class BlendScene {
   /** Disposes of the scene. */
   dispose() {
     this.#scheduler?.dispose();
+    this.#clips.dispose();
     this.playhead.dispose();
     this.onChanged.clear();
-    this.scene.dispose();
+    this.#disposeContent();
   }
 
   /**
@@ -463,6 +563,13 @@ export class BlendScene {
       this.#world?.set([0, 1, 2].map((i) => /** @type {number} */ (this.#values.get(`${inputs}[0].default_value[${i}]`)) * strength));
       return;
     }
+    if (bind.offset) {
+      // The animation and what reads the frame show the frames the new offsets give.
+      this.#retime();
+      this.playhead.refresh();
+      this.#scheduler?.retimed();
+      return;
+    }
     if (bind.collection) {
       this.#showObjects(objectsIn(this.ir, bind.collection));
       return;
@@ -497,6 +604,9 @@ export class BlendScene {
       const object = Object.keys(this.ir.ids).find((k) => this.ir.ids[k].node === bind.node);
       if (object) this.#showObjects([object]);
       else hide(node, this.#hidden(path.slice(0, path.lastIndexOf('.'))));
+    } else if (bind.morph !== undefined) {
+      const target = node.morphTargetManager?.getTargetByName(bind.morph);
+      if (target) target.influence = value;
     } else if (bind.lens !== undefined) {
       node.fov = 2 * Math.atan(bind.lens / /** @type {number} */ (value));
     } else if (bind.property) {

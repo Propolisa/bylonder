@@ -798,6 +798,10 @@ def seated(name, model, x, y, facing, seat, palette=None, floor=0.0, rigged=Fals
     if rigged:
         rig.name = f'{name} Rig'
         rig.matrix_world = placement @ rig.matrix_world
+        # Up until her soles rest on the floor, the seat below her (made from what this returns) as high.
+        lift = Matrix.Translation((0, 0, floor - min(co.z for co in shape(body))))
+        placement = lift @ placement
+        rig.matrix_world = lift @ rig.matrix_world
     else:
         body.matrix_world = placement
         bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
@@ -812,14 +816,19 @@ def seated(name, model, x, y, facing, seat, palette=None, floor=0.0, rigged=Fals
 
 
 
-def key_pose(rig, frame, rotations, bones=None):
-    """Keys the rotation of each of `bones` (all, unset) at `frame`: `rotations` by bone name, rest where it has none."""
+def key_pose(rig, frame, rotations, bones=None, keyed=None):
+    """Keys the rotation of each of `bones` (all, unset) at `frame`: `rotations` by bone name, rest where it has none;
+    a quaternion on the side of the bone's last key in `keyed`, so its F-curves turn the short way between keys."""
     for bone in rig.pose.bones:
         if bones is not None and bone.name not in bones:
             continue
         path = 'rotation_quaternion' if bone.rotation_mode == 'QUATERNION' else 'rotation_euler'
-        rest = Quaternion() if path == 'rotation_quaternion' else Euler()
-        setattr(bone, path, rotations.get(bone.name, rest))
+        rotation = rotations.get(bone.name, Quaternion() if path == 'rotation_quaternion' else Euler()).copy()
+        if path == 'rotation_quaternion' and keyed is not None:
+            if bone.name in keyed:
+                rotation.make_compatible(keyed[bone.name])
+            keyed[bone.name] = rotation
+        setattr(bone, path, rotation)
         bone.keyframe_insert(path, frame=frame)
         if bone.name == 'Hips':
             bone.location = rotations.get('Hips location', Vector())
@@ -833,11 +842,23 @@ def rotations(rig):
                                                                           else bone.rotation_euler).copy() for bone in pose}}
 
 
+def face(rig, facing):
+    """Turns her hips about the vertical so that she faces `facing` degrees from facing -Y (her left towards +X)."""
+    world, hips = rig.matrix_world, rig.pose.bones['Hips']
+    bpy.context.view_layer.update()
+    left = (world @ rig.pose.bones['LeftUpLeg'].head - world @ rig.pose.bones['RightUpLeg'].head).xy
+    pivot = (world @ hips.matrix).translation
+    turn = Matrix.Translation(pivot) @ Matrix.Rotation(math.radians(facing) - math.atan2(left.y, left.x), 4, 'Z') @ Matrix.Translation(-pivot)
+    hips.matrix = world.inverted() @ turn @ world @ hips.matrix
+    bpy.context.view_layer.update()
+
+
 def stride(rig, facing, phase):
-    """Her walk's pose `phase` radians into a stride (0: feet together, arms down), from the rig's rest; facing as she
-    is turned (`facing` degrees from facing -Y)."""
+    """Poses her `phase` radians into a stride (0: feet together, arms down), from the rig's rest turned to face as she
+    sits (`facing` degrees from facing -Y): her rest faces elsewhere."""
     for bone in rig.pose.bones:
         bone.matrix_basis.identity()
+    face(rig, facing)
     turn, swing = Matrix.Rotation(math.radians(facing), 3, 'Z'), math.sin(phase)
     ahead = lambda angle, out=0.0: turn @ Vector((out, -math.sin(angle), -math.cos(angle)))
     directions = []
@@ -849,34 +870,76 @@ def stride(rig, facing, phase):
                        (f'{side}Arm', ahead(arm, 0.15 * sign)), (f'{side}ForeArm', ahead(arm + 0.3, 0.08 * sign)),
                        (f'{side}Hand', ahead(arm + 0.3, 0.08 * sign))]
     posed(rig, directions)
-    return rotations(rig)
 
 
-def girl_actions(rig, facing, sip):
+def soles(body):
+    """Her lowest vertices (within 3 cm of the lowest), as posed."""
+    points = shape(body)
+    low = min(co.z for co in points)
+    return [co for co in points if co.z < low + 0.03]
+
+
+def planted(rig, body, spot, feet=False):
+    """Moves her hips so her soles touch the floor (z 0) and, with `feet`, so their middle is over `spot` (x, y), else
+    so the hips are."""
+    hips = rig.pose.bones['Hips']
+    world = rig.matrix_world @ hips.matrix
+    low = soles(body)
+    at = sum((co for co in low), Vector()) / len(low) if feet else world.translation
+    hips.matrix = rig.matrix_world.inverted() @ Matrix.Translation((spot.x - at.x, spot.y - at.y, -min(co.z for co in low))) @ world
+    bpy.context.view_layer.update()
+
+
+def girl_actions(rig, body, facing, sip):
     """Her four actions, made from her seated pose (as the rig holds it), `sip` (the sipping bones' rotations) and her
     rig's rest: Idle (1 to 121, the chest rising and falling), Sip (1 to 65, the cup up and down), Walk (a stride, 1 to
-    21) and Sit (1 to 19, from standing to seated)."""
+    21) and Sit (1 to 25, from standing to seated). The rig's origin is moved to the floor under her seated feet, where
+    a game stands her: she walks in place over it with her soles on the floor, and sits down keeping her feet on it."""
+    feet = soles(body)
+    spot = sum((co for co in feet), Vector()) / len(feet)
+    spot.z = 0
+    hips = rig.pose.bones['Hips']
+    seated_hips = rig.matrix_world @ hips.matrix
+    rig.matrix_world = Matrix.Translation(spot - rig.matrix_world.translation) @ rig.matrix_world
+    hips.matrix = rig.matrix_world.inverted() @ seated_hips
+    bpy.context.view_layer.update()
     seated_pose = rotations(rig)
     data = rig.animation_data_create()
     for track in list(data.nla_tracks):
         data.nla_tracks.remove(track)
 
     def action(name, keys):
-        data.action = bpy.data.actions.new(name)
+        data.action, keyed = bpy.data.actions.new(name), {}
         for frame, pose, bones in keys:
-            key_pose(rig, frame, pose, bones)
+            key_pose(rig, frame, pose, bones, keyed)
         made, data.action = data.action, None
         return made
+
+    def walking(phase):
+        stride(rig, facing, phase)
+        planted(rig, body, spot)
+        return rotations(rig)
+
+    def sitting(t):
+        """Her pose `t` of the way from standing to seated, her feet kept where they are."""
+        for bone in rig.pose.bones:
+            start, end = standing[bone.name], seated_pose[bone.name]
+            if bone.rotation_mode == 'QUATERNION':
+                bone.rotation_quaternion = start.slerp(end, t)
+            else:
+                bone.rotation_euler = Euler([a + (b - a) * t for a, b in zip(start, end)], bone.rotation_mode)
+        planted(rig, body, spot, feet=True)
+        return rotations(rig)
 
     breath = dict(seated_pose, Spine2=seated_pose['Spine2'] @ Quaternion((1, 0, 0), math.radians(1.5)))
     idle = action('Idle', [(1, seated_pose, None), (61, breath, None), (121, seated_pose, None)])
     sipping = action('Sip', [(frame, dict(seated_pose, **(sip if up else {})), set(sip)) for frame, up in ((1, False), (23, True), (43, True), (65, False))])
-    walk = action('Walk', [(1 + 20 * k / 8, stride(rig, facing, math.tau * k / 8), None) for k in range(9)])
-    standing = stride(rig, facing, 0.0)
-    sit_down = action('Sit', [(1, standing, None), (19, seated_pose, None)])
+    walk = action('Walk', [(1 + 20 * k / 8, walking(math.tau * k / 8), None) for k in range(9)])
+    standing = walking(0.0)
+    sit_down = action('Sit', [(1, standing, None), *((1 + 6 * k, sitting(k / 4), None) for k in range(1, 4)), (25, seated_pose, None)])
     for bone in rig.pose.bones:
         setattr(bone, 'rotation_quaternion' if bone.rotation_mode == 'QUATERNION' else 'rotation_euler', seated_pose[bone.name])
-    rig.pose.bones['Hips'].location = seated_pose['Hips location']
+    hips.location = seated_pose['Hips location']
     return idle, sipping, walk, sit_down
 
 
@@ -1561,7 +1624,7 @@ for child, parent, bone in ((tea_cup, drinker_rig, 'LeftHand'), (tea_steam, tea_
     child.matrix_world = matrix
 # Her actions, each a clip of its own: Idle (she breathes slowly as she sits), Sip (the cup to her lips), and Walk and
 # Sit for a game to play. The scene plays Idle twice a loop and, once a loop, Sip over it, as NLA strips.
-idle, sipping, walk, sit_down = girl_actions(drinker_rig, 140, sip)
+idle, sipping, walk, sit_down = girl_actions(drinker_rig, drinker, 140, sip)
 girl_track('Idle', idle, 1).strips[0].repeat = 2
 girl_track('Sip', sipping, 150).strips[0].extrapolation = 'NOTHING'
 for action in (walk, sit_down):

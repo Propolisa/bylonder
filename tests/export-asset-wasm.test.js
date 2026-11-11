@@ -27,6 +27,20 @@ try {
   assert.equal(scene.lights.length, 0, "none of the scene's lights");
   assert.equal(scene.environmentTexture, null, "none of the scene's settings");
 
+  // Her cup, parented to her hand's bone, hangs from the bone: where Blender places it as she sips, under a moved root too.
+  const cup = (blend) => blend.entries.meshes.find((m) => m.name === 'Tea Cup');
+  assert.equal(cup(girl).parent.name, 'LeftHand', 'the cup hangs from her hand');
+  girl.entries.root.position.set(3, 0, -2);
+  for (const frame of [1, 180]) {
+    sync.frameChanged(frame);
+    girl.playhead.seek(frame);
+    girl.entries.skeletons[0].prepare(true);
+    for (const mesh of girl.entries.meshes) mesh.computeWorldMatrix(true);
+    const placed = cup(girl).getWorldMatrix().multiply(girl.entries.root.getWorldMatrix().clone().invert());
+    assert.ok(placed.getTranslation().subtract(sync.worldMatrix(node('Tea Cup')).getTranslation()).length() < 1e-3, `the cup in her hand at frame ${frame}`);
+  }
+  girl.entries.root.position.set(0, 0, 0);
+
   // A copy in a container, and one hung from a node of the page's own: each its own objects and controller.
   const container = await loadAssetContainer(scene);
   assert.equal(scene.meshes.length, names.length, 'a container holds its copy out of the scene');
@@ -46,6 +60,7 @@ try {
   assert.notEqual(body(twin).skeleton, body(container.blend).skeleton, 'a skeleton of its own');
   assert.equal(twin.scene.getMeshById('Tea Break'), body(twin));
   assert.equal(twin.entries.animationGroups.length, 1);
+  assert.equal(cup(twin).parent, body(twin).skeleton.bones[cup(container.blend).parent.getIndex()], "a copy's cup hangs from its own hand");
 
   const mirrored = new Scene(new NullEngine());
   mirrored.useRightHandedSystem = true;

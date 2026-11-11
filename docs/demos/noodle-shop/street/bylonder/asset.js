@@ -95,6 +95,9 @@ function assetRoot(scene) {
   return root;
 }
 
+// A node hung from a bone (attachToBone), as an object parented to a bone is: no descendant of the root.
+const onBone = (/** @type {Node} */ node) => node.parent?.getClassName() === 'Bone';
+
 /**
  * What one load added to a scene, as ImportMeshAsync gives a .glb's: meshes[0] is the root.
  * @typedef {Content & { root: import('@babylonjs/core').TransformNode }} Entries
@@ -122,6 +125,7 @@ export function addAsset(scene, build, { root = null, controller }) {
   const dispose = () => {
     for (const group of content.animationGroups) group.dispose();
     for (const system of content.particleSystems) system.dispose();
+    for (const node of [...content.meshes, ...content.transformNodes].filter(onBone)) node.dispose();
     for (const skeleton of content.skeletons) skeleton.dispose();
     top.dispose(false, true);
   };
@@ -141,8 +145,15 @@ export function cloneAsset(entries, { root = null, controller }) {
   const scene = entries.root.getScene(), source = new AssetContainer(scene);
   for (const list of LISTS) lists(/** @type {any} */ (source))[list]?.push(...entries[list]);
   const made = source.instantiateModelsToScene((name) => name, false, { doNotInstantiate: true });
-  const top = /** @type {any} */ (made.rootNodes[0]), ids = new Map([entries.root, ...entries.root.getDescendants(false)].map((n) => [n.name, n.id]));
-  const nodes = [top, ...top.getDescendants(false)];
+  const top = /** @type {any} */ (made.rootNodes[0]), ids = new Map(entries.meshes.concat(entries.transformNodes).map((n) => [n.name, n.id]));
+  const nodes = [top, ...top.getDescendants(false)], /** @type {Node[]} */ onBones = [];
+  // Nodes on bones, with what hangs from them, hung from the copy's bones.
+  for (const node of [...entries.meshes, ...entries.transformNodes].filter(onBone)) {
+    const bone = node.parent, skeleton = made.skeletons[entries.skeletons.indexOf(bone.getSkeleton())];
+    const copy = node.clone(node.name, null), skinned = nodes.find((n) => n.name === node._transformToBoneReferal?.name);
+    onBones.push(copy.attachToBone(skeleton.bones[bone.getIndex()], skinned));
+    nodes.push(copy, ...copy.getDescendants(false));
+  }
   for (const node of nodes) node.id = ids.get(node.name) ?? node.id;
   // Held at their frame by the copy's playhead, as the loaded ones are; clips wait to be played.
   for (const group of made.animationGroups) if (!isClip(group)) group.start(group.loopAnimation).pause();
@@ -153,6 +164,7 @@ export function cloneAsset(entries, { root = null, controller }) {
   const dispose = () => {
     made.animationGroups.forEach((group) => group.dispose());
     made.skeletons.forEach((skeleton) => skeleton.dispose());
+    onBones.forEach((node) => node.dispose());
     top.dispose();
   };
   return controller(scoped(scene, /** @type {Content} */ (content)), /** @type {Entries} */ ({ ...content, root: top }), dispose);

@@ -306,7 +306,7 @@ export async function exportModule(whole, { scope = 'SCENE', selected = [], live
 
 async function moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, animations, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states, sampling }) {
   const graphs = [], graphOf = materialGraphs(world, graphs), asset = !!world.only;
-  const data = await serializeScene(world, { geometry: false, live, mapped, parity, graphOf, bake: bakeAnimation, sampling, only: world.only, animations });
+  const data = await serializeScene(world, { geometry: false, live, mapped, parity, graphOf, bake: bakeAnimation, sampling, only: world.only, animations, onBones: true });
   if (chosenState(states, 'postProcessing') === 'OFF') Object.assign(data, { renderingPipelines: [], postProcesses: [] });
   // Selected objects bring none of the scene's settings: its world, environment, effect layers or volumes.
   if (asset) Object.assign(data, { environmentTexture: undefined, effectLayers: [] });
@@ -361,6 +361,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   volumes?.dispose();
   parentInstances(objects);
   const parented = [...data.transformNodes, ...data.meshes, ...data.lights, ...data.cameras].filter((e) => e.parentId !== undefined);
+  const onBones = [...data.transformNodes, ...data.meshes].filter((e) => e.parentBone);
   const pipelineTypes = [...new Set(data.renderingPipelines.map((p) => p.customType))];
   const pipelineClasses = pipelineTypes.filter((type) => !SCREEN_SPACE_PIPELINES[type] && babylonModule(type));
   const parse = (name, list, code) => (list?.length ? `  for (const entry of ${name}) ${code};\n` : '');
@@ -581,7 +582,9 @@ ${geometryLines.join('\n')}
   const nodes = {};
 ${objectLines}
 ${parse('LIGHTS', data.lights, `nodes[entry.uniqueId] = ${areaLights ? 'parseLight(entry, scene, AreaLight)' : 'Light.Parse(entry, scene)'}`)}${parse('CAMERAS', data.cameras, 'nodes[entry.uniqueId] = orthoScaled(parseCamera(entry, scene))')}
-${parented.map((e) => `  nodes[${e.uniqueId}].parent = nodes[${e.parentId}] ?? null;`).join('\n')}${data.lights.some((l) => l.excludedMeshesIds?.length || l.includedOnlyMeshesIds?.length) ? `
+${parented.map((e) => `  nodes[${e.uniqueId}].parent = nodes[${e.parentId}] ?? null;`).join('\n')}${onBones.length ? `
+  // Objects parented to bones, hung from them as the bones' meshes are skinned.
+${onBones.map((e) => `  nodes[${e.uniqueId}].attachToBone(lookup.getSkeletonById(${json(e.parentBone.skeletonId)}).bones[${e.parentBone.index}], nodes[${e.parentBone.meshId}]);`).join('\n')}` : ''}${data.lights.some((l) => l.excludedMeshesIds?.length || l.includedOnlyMeshesIds?.length) ? `
   // The meshes each light leaves out or lights alone, by id, as Babylon's loader resolves them once the meshes exist.
   const meshes = (ids) => ids.map((id) => lookup.getMeshById(id)).filter(Boolean);
   for (const entry of LIGHTS) {

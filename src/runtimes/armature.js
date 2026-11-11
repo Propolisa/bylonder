@@ -377,6 +377,17 @@ function poseAnimations(world, mappings, bake, sampling, scene) {
   return { animations, curves, gaps, constraints };
 }
 
+// An object parented to a bone of a mapped armature, as the page hangs it from that bone (attachToBone): the bone of
+// the skeleton skinning a mesh, that mesh's node, and the bone's world matrix at the frame Main is on.
+function boneParent(mappings, ob, byOb) {
+  const mapping = ob.parent_type === 'BONE' && mappings.find((m) => address(m.arm) === address(ob.parent));
+  for (const [key, skin] of mapping ? mapping.skins : []) {
+    const bone = skin.skeleton.bones.find((b) => b.name === ob.parent_bone), mesh = byOb.get(key)?.node;
+    if (bone && mesh) return { bone, mesh, world: matrix(mapping.arm.pose.bones.get(bone.name).matrix).multiply(matrix(mapping.arm.matrix_world)) };
+  }
+  return null;
+}
+
 // Export: every armature mapped, those on Blender for the export's duration (their meshes skinned, then drawn as
 // Blender evaluated them again), with their issues and their pose's animation.
 function exportArmatures(world, { bake, sampling }) {
@@ -403,6 +414,7 @@ function exportArmatures(world, { bake, sampling }) {
     reports: mappings.map((m) => ({ title: `${m.arm.name}: exported`, issues: m.issues.filter((i) => !i.silent) })),
     animations, curves, gaps, constraints,
     clip: (sampling, owns) => poseAnimations(world, mappings.filter((m) => owns(m.arm)), true, sampling).animations,
+    boneParent: (ob) => boneParent(mappings, ob, byOb),
     restore() {
       exporting.clear();
       for (const state of temporary) {

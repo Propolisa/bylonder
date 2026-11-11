@@ -367,25 +367,20 @@ const subtract = (a, b) => combine([[a, 1], [b, -1]]);
 /** Solves form_k = 0 for the free unknowns, pinned ones fixed. @param {(Linear | null)[]} equations @param {(number | null)[]} pinned */
 function solveLinear(equations, pinned) {
   const count = pinned.length;
-  const matrix = [], rhs = [];
-  for (let k = 0; k < count; k++) {
-    const row = new Array(count).fill(0);
-    const form = equations[k];
-    if (pinned[k] !== null || !form) {
-      row[k] = 1;
-      matrix.push(row);
-      rhs.push(pinned[k] ?? 0);
-      continue;
-    }
+  // Each row as its nonzero coefficients by unknown, its right-hand side at `count`: a curve's equations link a key to
+  // its neighbors only, so a long curve's system stays sparse.
+  const rows = equations.map((form, k) => {
+    if (pinned[k] !== null || !form) return new Map([[k, 1], [count, pinned[k] ?? 0]]);
+    const row = new Map();
     let constantPart = form.constant;
     for (const [index, coefficient] of form.terms) {
       if (pinned[index] !== null) constantPart += coefficient * /** @type {number} */ (pinned[index]);
-      else row[index] += coefficient;
+      else row.set(index, (row.get(index) ?? 0) + coefficient);
     }
-    matrix.push(row);
-    rhs.push(-constantPart);
-  }
-  return gaussSolve(matrix, rhs);
+    for (const [index, value] of row) if (value === 0) row.delete(index);
+    return row.set(count, -constantPart);
+  });
+  return gaussSolve(rows, count);
 }
 
 /** AUTO_CLAMPED range of a solved interior key (handles at thirds), or null. @param {FCurve} curve @param {number} i @param {string} side */
@@ -417,22 +412,44 @@ function placeSolvedHandles(curve, i, side, slope, cyclic) {
 /** @param {Key} key */
 const hasClampedSide = (key) => key.leftType === 'AUTO_CLAMPED' || key.rightType === 'AUTO_CLAMPED';
 
-/** @param {number[][]} matrix @param {number[]} rhs */
-function gaussSolve(matrix, rhs) {
-  const n = rhs.length;
-  const m = matrix.map((row, i) => [...row, rhs[i]]);
+/** Gaussian elimination with partial pivoting over sparse rows (unknown to coefficient, `n` to the right-hand side); an
+ * unknown without a pivot is 0. @param {Map<number, number>[]} rows @param {number} n */
+function gaussSolve(rows, n) {
+  /** @type {Set<number>[]} the rows with a coefficient for each unknown */
+  const rowsOf = Array.from({ length: n }, () => new Set());
+  rows.forEach((row, r) => { for (const c of row.keys()) if (c < n) rowsOf[c].add(r); });
+  const used = new Array(rows.length).fill(false), pivotOf = new Array(n).fill(-1);
   for (let col = 0; col < n; col++) {
-    let pivot = col;
-    for (let r = col + 1; r < n; r++) if (Math.abs(m[r][col]) > Math.abs(m[pivot][col])) pivot = r;
-    [m[col], m[pivot]] = [m[pivot], m[col]];
-    if (m[col][col] === 0) continue;
-    for (let r = 0; r < n; r++) {
-      if (r === col || m[r][col] === 0) continue;
-      const factor = m[r][col] / m[col][col];
-      for (let c = col; c <= n; c++) m[r][c] -= factor * m[col][c];
+    let pivot = -1, best = 0;
+    for (const r of rowsOf[col]) if (!used[r] && Math.abs(/** @type {number} */ (rows[r].get(col))) > best) [pivot, best] = [r, Math.abs(/** @type {number} */ (rows[r].get(col)))];
+    if (pivot < 0) continue;
+    used[pivot] = true;
+    pivotOf[col] = pivot;
+    const source = rows[pivot], lead = /** @type {number} */ (source.get(col));
+    for (const r of [...rowsOf[col]]) {
+      if (used[r]) continue;
+      const row = rows[r], factor = /** @type {number} */ (row.get(col)) / lead;
+      for (const [c, v] of source) {
+        const value = c === col ? 0 : (row.get(c) ?? 0) - factor * v;
+        if (value !== 0) {
+          if (c < n) rowsOf[c].add(r);
+          row.set(c, value);
+        } else {
+          if (c < n) rowsOf[c].delete(r);
+          row.delete(c);
+        }
+      }
     }
   }
-  return m.map((row, i) => (row[i] === 0 ? 0 : row[n] / row[i]));
+  const x = new Array(n).fill(0);
+  for (let col = n - 1; col >= 0; col--) {
+    if (pivotOf[col] < 0) continue;
+    const row = rows[pivotOf[col]];
+    let sum = row.get(n) ?? 0;
+    for (const [c, v] of row) if (c !== col && c < n) sum -= v * x[c];
+    x[col] = sum / /** @type {number} */ (row.get(col));
+  }
+  return x;
 }
 
 // Evaluation

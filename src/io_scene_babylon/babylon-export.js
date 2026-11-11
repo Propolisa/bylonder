@@ -1,6 +1,6 @@
 // File > Export > Babylon (.babylon): the scene as Babylon's SceneSerializer writes it, from the evaluated scene, as
 // Blender's glTF exporter exports the evaluated depsgraph (docs/blender-boundary.md, Export for Babylon).
-import { Animation, AnimationKeyInterpolation, Camera, GetClass, Light, Quaternion, RectAreaLight, SceneSerializer, Texture, Vector3, VertexBuffer } from '@babylonjs/core';
+import { Animation, AnimationKeyInterpolation, Camera, GetClass, Light, Quaternion, RectAreaLight, SceneSerializer, Texture, TransformNode, Vector3, VertexBuffer } from '@babylonjs/core';
 import { evaluatedMatrix, setEvaluatedMatrix, BLENDER_FORWARD } from '../runtime/object-transform.js';
 import { idStruct } from '../python/bpy_rna.js';
 import { deleted, nodeId } from '../editors/object/identity.js';
@@ -139,6 +139,21 @@ function evaluatedTransform(sync, node) {
   const matrix = node instanceof Camera ? node.getViewMatrix(true).clone().invert() : sync.worldMatrix(node);
   (toParent ? matrix.multiply(toParent) : matrix).decompose(scaling, rotationQuaternion, position);
   return node instanceof Camera ? { position, rotationQuaternion } : { position, rotationQuaternion, scaling };
+}
+// An object parented to a bone of a skeleton the export writes (runtimes' boneParent) hangs from the bone in the page,
+// as Blender's glTF exporter parents it to the bone's joint: its transform relative to the bone, which then moves it,
+// its own animation none. A mesh or empty (Babylon attaches transform nodes); a light or camera is still sampled. Gives
+// { bone, mesh, transform } by node.
+function boneParents(sync, nodes, mapped, content) {
+  const on = new Map();
+  for (const node of nodes.filter((n) => n instanceof TransformNode)) {
+    const ob = idStruct(sync.objectOf(node)), parent = !ob.animation_data && !ob.constraints.length && mapped.boneParent?.(ob);
+    if (!parent || !content.nodes.has(parent.mesh)) continue;
+    const position = new Vector3(), rotationQuaternion = new Quaternion(), scaling = new Vector3();
+    sync.worldMatrix(node).multiply(parent.world.clone().invert()).decompose(scaling, rotationQuaternion, position);
+    on.set(node, { ...parent, transform: { position, rotationQuaternion, scaling } });
+  }
+  return on;
 }
 const TRANSFORM = ['position', 'rotation', 'rotationQuaternion', 'scaling', 'direction'];
 // Each placed object's evaluated transform and each animated channel's evaluated value at each of the sampling's frames
@@ -376,13 +391,14 @@ const authoredMetadata = (node) => {
 // `graphOf` gives a material's IR graph key, for a package whose page builds its nodes from the IR. `bake: false` is for a
 // package whose page runs F-Curves Babylon cannot play exactly. `runtime`, `runtimes`: the runtimes chosen for the export
 // (export-options.js); `sampling`, the frames what is baked is sampled at (sampling.js), a key per frame unset;
-// `animations`, the timeline's animation group, an animation group per action (clips) or both (export-options.js ANIMATIONS).
-export async function serializeScene(world, { geometry = true, live = null, mapped = null, parity = false, graphOf = () => null, bake = true, runtime = null, runtimes: chosen = {}, sampling = null, only = null, animations = 'TIMELINE' } = {}) {
+// `animations`, the timeline's animation group, an animation group per action (clips) or both (export-options.js ANIMATIONS);
+// `onBones`, objects parented to bones written to hang from them (boneParents), for a page that attaches them.
+export async function serializeScene(world, { geometry = true, live = null, mapped = null, parity = false, graphOf = () => null, bake = true, runtime = null, runtimes: chosen = {}, sampling = null, only = null, animations = 'TIMELINE', onBones = false } = {}) {
   await world.modifiers.settled();
   sampling ??= exportSampling(world.animation.time.state);
   const runtimes = mapped ?? exportRuntimes(world, { bake, runtime, runtimes: chosen, sampling });
   try {
-    return await serializeMapped(world, { geometry, live, mapped: runtimes, parity, graphOf, bake, sampling, only, animations });
+    return await serializeMapped(world, { geometry, live, mapped: runtimes, parity, graphOf, bake, sampling, only, animations, onBones });
   } finally {
     if (!mapped) runtimes.restore();
   }
@@ -398,7 +414,7 @@ function shadowsOf(world, content) {
   return generators.filter((g) => lights.has(g.getLight().name)).map((g) => ({ ...g.serialize(), lightId: lights.get(g.getLight().name).id, customShaderOptions: g.customShaderOptions }));
 }
 
-async function serializeMapped(world, { geometry, live, mapped, parity, graphOf, bake, sampling, only, animations }) {
+async function serializeMapped(world, { geometry, live, mapped, parity, graphOf, bake, sampling, only, animations, onBones }) {
   const { scene } = world;
   // An asset brings no camera, so none of a camera's effects.
   const camera = only ? null : world.sceneSettings.camera() ?? scene.activeCamera;
@@ -417,6 +433,7 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
   // Without Bake Animation, an object's constraints the page applies where they give Main's world matrix at every frame.
   const nodeOf = (ob) => objects.find((node) => idStruct(world.mainSync.objectOf(node)).name === ob.name);
   const stacks = bake || !world.mainSync ? new Map() : new Map(objects.map((node) => [node, liveConstraints(world.mainSync, node, nodeOf)]).filter(([, stack]) => stack));
+  const bones = onBones && world.mainSync ? boneParents(world.mainSync, objects, mapped, content) : new Map();
   const evaluated = objects.length || refs.length ? evaluatedFrames(world, objects, refs, [...stacks.values()], sampling) : { transforms: null, channels: new Map() };
   for (const [node, stack] of stacks) if (!stack.entity()) stacks.delete(node);
   const clips = animations !== 'TIMELINE' && world.mainSync ? sampledClips(world, objects, mapped, sampling) : [], timeline = animations !== 'CLIPS';
@@ -426,8 +443,8 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
     ...[...evaluated.channels].map(([ref, values]) => ({ channel: world.animation.channels.get(ref), values }))];
   // A constrained object the page places is written at its own transform, which its constraints start from.
   const transforms = new Map(objects.map((node) => [node.uniqueId, stacks.has(node) ? { position: stacks.get(node).own.position, rotationQuaternion: stacks.get(node).own.rotation, scaling: stacks.get(node).own.scaling }
-    : evaluatedTransform(world.mainSync, node)]));
-  for (const node of stacks.keys()) evaluated.transforms?.delete(node);
+    : bones.get(node)?.transform ?? evaluatedTransform(world.mainSync, node)]));
+  for (const node of [...stacks.keys(), ...bones.keys()]) evaluated.transforms?.delete(node);
   // Taken after the frames are evaluated, which redraw what the view draws per frame (a Grease Pencil's strokes).
   const all = [...scene.meshes, ...scene.transformNodes, ...scene.lights, ...scene.cameras];
   const restores = [
@@ -463,6 +480,10 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
   const json = await pending;
   if (shadowGenerators) json.shadowGenerators = shadowGenerators;
   rigAreaLights(json, transforms);
+  for (const [node, { bone, mesh }] of bones) {
+    const entry = json.meshes.find((e) => e.uniqueId === node.uniqueId) ?? json.transformNodes?.find((e) => e.uniqueId === node.uniqueId);
+    if (entry) entry.parentBone = { skeletonId: bone.getSkeleton().id, index: bone.getIndex(), meshId: mesh.uniqueId };
+  }
   for (const entry of [...json.meshes, ...(json.transformNodes ?? []), ...json.lights, ...json.cameras]) {
     const transform = transforms.get(entry.uniqueId);
     if (!transform || entry.type === AREA_LIGHT) continue;

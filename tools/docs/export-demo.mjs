@@ -1,8 +1,9 @@
 // Writes the live demo of an exported page to docs/demos/<example>/, which the site publishes (vite.config.js): the
 // example's File > Export > JavaScript package with the control panel, as ES modules loading Babylon.js from its CDN,
 // pinned to the exported version, so the committed files hold only the scene and Bylonder's runtime. WebGL 2 only, so it
-// shows where a WebGPU device fails to start. A game (GAMES) gets its packages instead, exported with Scope Selected
-// Objects, which its own page (index.html, game.js) loads into its scene.
+// shows where a WebGPU device fails to start. A game (GAMES) gets its packages instead, which its own page (index.html,
+// game.js) loads: its player's objects with Scope Selected Objects and their actions as clips, then the scene without
+// them, with its world, camera, view transform and compositor.
 //   usage: node tools/docs/export-demo.mjs [example or game]  (default compositor)
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -10,11 +11,10 @@ import { fileURLToPath } from 'node:url';
 import { openExample } from '../../tests/open-example.js';
 import { packageFiles } from '../../tests/export-package.js';
 import { exportModule } from '../../src/io_scene_babylon/js-export.js';
+import { blendData, idStruct } from '../../src/python/bpy_rna.js';
 
-// The tea break's woman, as the noodle shop's player with her actions as clips, and the rest of the lane but its camera.
-const GIRL = ['Tea Break', 'Tea Cup', 'Tea Steam Card', 'Tea Steam Emitter'];
-const GAMES = { 'noodle-shop': { example: 'compositor', clips: ['girl'], packages: { girl: (objects) => objects.filter((n) => GIRL.includes(n.name)),
-  street: (objects) => objects.filter((n) => !GIRL.includes(n.name) && n.name !== 'Tea Break Rig' && !n.getClassName().endsWith('Camera')) } } };
+// The tea break's woman, as the noodle shop's player, and the lane she walks.
+const GAMES = { 'noodle-shop': { example: 'compositor', player: ['girl', ['Tea Break', 'Tea Cup', 'Tea Steam Card', 'Tea Steam Emitter']], scene: 'street' } };
 
 const NAME = process.argv[2] ?? 'compositor', game = GAMES[NAME];
 const dir = fileURLToPath(new URL(`../../docs/demos/${NAME}/`, import.meta.url));
@@ -34,10 +34,13 @@ function write(folder, files) {
 }
 
 if (game) {
-  for (const [name, selected] of Object.entries(game.packages)) {
-    const animations = game.clips.includes(name) ? 'CLIPS' : 'TIMELINE';
-    write(join(dir, name), packageFiles(await exportModule(world, { ...OPTIONS, scope: 'SELECTED', selected: selected(world.objects), animations })));
-  }
+  const [player, names] = game.player, selected = world.objects.filter((n) => names.includes(n.name));
+  write(join(dir, player), packageFiles(await exportModule(world, { ...OPTIONS, scope: 'SELECTED', selected, animations: 'CLIPS' })));
+  // The scene with the player's objects deleted, as she brings her own.
+  const data = blendData(sync.blender.C), rigs = selected.map((n) => idStruct(sync.objectOf(n)).parent?.name).filter(Boolean);
+  for (const name of new Set([...names, ...rigs])) data.objects.remove(data.objects.get(name));
+  sync.view();
+  write(join(dir, game.scene), packageFiles(await exportModule(world, OPTIONS)));
 } else {
   const files = write(dir, packageFiles(await exportModule(world, OPTIONS)));
   const babylon = String(files['scene.js']).match(/"(https:\/\/cdn\.jsdelivr\.net\/npm\/@babylonjs\/core@[\d.]+\/)"/)[1];

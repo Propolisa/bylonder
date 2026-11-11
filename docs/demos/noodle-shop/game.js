@@ -1,140 +1,163 @@
-// The noodle shop: walk down the lane as the woman from the Compositor example, sit, buy a tea and sip it. The lane and
-// she are two packages exported from Bylonder with Scope Selected Objects (tools/docs/export-demo.mjs noodle-shop),
-// loaded into this page's own scene as .glb files are.
-import { Engine } from '@babylonjs/core/Engines/engine.js';
-import { Scene } from '@babylonjs/core/scene.js';
-import { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera.js';
-import { HemisphericLight } from '@babylonjs/core/Lights/hemisphericLight.js';
-import { GlowLayer } from '@babylonjs/core/Layers/glowLayer.js';
+// The noodle shop: walk down the lane as the woman from the Compositor example, sit, buy a tea and sip it. Two packages
+// exported from Bylonder (tools/docs/export-demo.mjs noodle-shop): the lane, the scene with its world, camera, view
+// transform and compositor, loaded as the page's scene; she, Scope Selected Objects with her actions as clips, added to it.
+import { Quaternion, Vector3 } from '@babylonjs/core/Maths/math.vector.js';
+import { Ray } from '@babylonjs/core/Culling/ray.js';
+import { Camera } from '@babylonjs/core/Cameras/camera.js';
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode.js';
-import { Color3, Color4 } from '@babylonjs/core/Maths/math.color.js';
-import { Vector3 } from '@babylonjs/core/Maths/math.vector.js';
-import { ImportMeshAsync } from '@babylonjs/core/Loading/sceneLoader.js';
 import { VirtualJoystick } from '@babylonjs/core/Misc/virtualJoystick.js';
-import './street/bylonder/scene-loader.js';
-import { load } from './girl/scene.js';
+import { createEngine, load as loadLane } from './street/scene.js';
+import { load as loadGirl } from './girl/scene.js';
 
 const canvas = document.getElementById('c'), say = (text) => { document.getElementById('say').textContent = text; };
-const engine = new Engine(canvas, true), scene = new Scene(engine);
-scene.clearColor = new Color4(0.02, 0.025, 0.05, 1);
-Object.assign(scene, { fogMode: Scene.FOGMODE_EXP2, fogDensity: 0.04, fogColor: new Color3(0.05, 0.05, 0.09) });
-scene.imageProcessingConfiguration.toneMappingEnabled = true;
-new HemisphericLight('sky', new Vector3(0, 1, 0), scene).intensity = 0.25;
-new GlowLayer('neon', scene).intensity = 0.6;
-
-// The lane through Babylon's SceneLoader, as a .glb; she with her controller, to pose and play her.
-await ImportMeshAsync('./street/scene.bylonder', scene);
-const girl = await load({ scene });
-const part = (name) => girl.entries.meshes.find((m) => m.name === name);
+const engine = await createEngine(canvas), lane = await loadLane(engine), { scene } = lane, camera = scene.activeCamera;
+camera.detachControl();
+const girl = await loadGirl({ scene }), part = (name) => girl.entries.meshes.find((m) => m.name === name);
 const tea = [part('Tea Cup'), part('Tea Steam Card')];
 tea.forEach((m) => m.setEnabled(false));
 
-// She hangs from `player`, set where she sits on the stool, facing as she sits; walking lifts her by `lift`.
-const SEAT = new Vector3(0.37, 0, 0.63), SEAT_YAW = Math.atan2(-0.643, -0.766), LIFT = 0.95;
-const player = new TransformNode('player', scene), lift = new TransformNode('lift', scene);
-lift.parent = player;
-player.position.copyFrom(SEAT);
-player.rotation.y = SEAT_YAW;
+// She is placed as in the lane's scene (her root unturned), her rig's origin on the floor where her feet are when she
+// sits: where she stands to sit, facing away from the stool (SEAT, her hips at the end of Sit). `player` carries her
+// from there, facing its +Z.
+girl.entries.root.rotationQuaternion = Quaternion.Identity();
+const sat = girl.play('Sit', { loop: false });
+sat.goToFrame(sat.to);
+girl.entries.skeletons[0].prepare(true);
+scene.meshes.forEach((m) => m.computeWorldMatrix(true));
+const SPOT = part('Tea Break Rig').getAbsolutePosition().clone(), SEAT = girl.entries.skeletons[0].bones[0].getAbsolutePosition(part('Tea Break'));
+const SPOT_YAW = Math.atan2(SPOT.x - SEAT.x, SPOT.z - SEAT.z);
+girl.stop('Sit');
+const player = new TransformNode('player', scene);
+player.position.copyFrom(SPOT);
+player.rotation.y = SPOT_YAW;
 player.computeWorldMatrix(true);
-girl.entries.root.setParent(lift);
+girl.entries.root.setParent(player);
+const herself = new Set([...girl.entries.meshes]);
 
-const camera = new ArcRotateCamera('follow', Math.PI / 2, 1.15, 3.2, SEAT.add(new Vector3(0, 1, 0)), scene);
-camera.attachControl(canvas, true);
-Object.assign(camera, { lowerRadiusLimit: 2, upperRadiusLimit: 8, upperBetaLimit: 1.45, minZ: 0.05 });
-
-// Her clips, actions of her rig: Walk (a stride from feet together), Sit (from standing to seated), Idle (breathing as
-// she sits) and Sip. Walking lifts her by LIFT, as her rig stands where she sits; sitting lowers her as Sit plays.
-const SIT_TIME = 0.75;
-const walk = girl.play('Walk', { loop: true });
-let state = 'walking', sipping = false, sips = 0, nearStool = false, sitting = 0;
-const standStill = () => { walk.pause(); walk.goToFrame(walk.from); };
-const sit = () => {
-  state = 'seated';
-  sitting = SIT_TIME;
-  player.position.copyFrom(SEAT);
-  player.rotation.y = SEAT_YAW;
+// Her clips: Walk (a stride in place, 2.2 m a cycle), Sit (standing to seated, her feet kept), Idle (seated) and Sip.
+const PACE = 0.7, SPEED = 2.2 * PACE / (20 / 24);
+let state = 'walking', busy = false, sips = 0;
+const walk = girl.play('Walk', { speed: PACE });
+const still = () => { walk.pause(); walk.goToFrame(walk.from); };
+const once = (name, options, then) => girl.play(name, { loop: false, ...options }).onAnimationGroupEndObservable.addOnce(then);
+function sit() {
+  state = 'sitting';
+  say(`${press} to buy a tea`);
   girl.stop('Walk');
-  girl.play('Sit', { loop: false }).onAnimationGroupEndObservable.addOnce(() => state === 'seated' && girl.play('Idle', { loop: true }));
-};
-const sip = () => {
-  sipping = true;
+  once('Sit', {}, () => { state = 'seated'; girl.play('Idle'); });
+}
+function stand() {
+  state = 'standing';
+  ['Idle', 'Sip'].forEach((name) => girl.stop(name));
+  once('Sit', { speed: -1.5 }, () => { state = 'walking'; girl.play('Walk', { speed: PACE }); still(); });
+}
+function sip() {
+  busy = true;
   girl.stop('Idle');
-  girl.play('Sip', { loop: false }).onAnimationGroupEndObservable.addOnce(() => {
-    sipping = false;
-    if (state !== 'seated') return;
+  once('Sip', {}, () => {
+    busy = false;
     sips++;
     say(sips < 3 ? `Ahh. ${press} to sip again` : 'Warm. The rain sounds nice tonight.');
-    girl.play('Idle', { loop: true });
+    girl.play('Idle');
   });
-};
-const stand = () => {
-  state = 'walking';
-  nearStool = sipping = false;
-  sitting = 0;
-  ['Sit', 'Idle', 'Sip'].forEach((name) => girl.stop(name));
-  girl.play('Walk', { loop: true });
-  standStill();
-  lift.position.y = LIFT;
-};
-stand();
-player.position.set(8, 0, 1.3);
-player.rotation.y = -Math.PI / 2;
+}
+function act() {
+  if (state === 'walking' && near()) return (state = 'arriving');
+  if (state !== 'seated' || busy) return;
+  if (!tea[0].isEnabled()) return tea.forEach((m) => m.setEnabled(true)), say(`A hot tea, 300 yen. ${press} to sip`);
+  sip();
+  say('');
+}
+const near = () => Vector3.Distance(player.position, SPOT) < 1.2;
+player.position.set(-3, 0, -1.4);
+player.rotation.y = Math.PI / 2;
+still();
 
 const keys = new Set();
 addEventListener('keydown', (e) => { keys.add(e.code); ambience(); if (e.code === 'KeyE') act(); });
 addEventListener('keyup', (e) => keys.delete(e.code));
-// On a touch screen, Babylon's thumb sticks (as the export's Joysticks navigation): the left walks, the right looks; and
-// the E button.
+// On a touch screen, Babylon's thumb sticks: the left walks, the right looks; and the E button.
 const touch = matchMedia('(pointer: coarse)').matches, press = touch ? 'Tap E' : 'Press E';
 const [walkStick, lookStick] = touch ? [true, false].map((left) => new VirtualJoystick(left, { limitToContainer: true })) : [];
-const stickOf = (stick) => (stick?.pressed ? stick.deltaPosition : Vector3.ZeroReadOnly);
+const stick = (s) => (s?.pressed ? s.deltaPosition : Vector3.ZeroReadOnly);
 if (touch) {
   const button = document.getElementById('act');
   button.hidden = false;
   button.addEventListener('pointerdown', (e) => { e.stopPropagation(); ambience(); act(); });
 }
-function act() {
-  if (state === 'walking' && near()) return sit(), say(`${press} to buy a tea`);
-  if (state === 'seated' && !tea[0].isEnabled()) return tea.forEach((m) => m.setEnabled(true)), say(`A hot tea, 300 yen. ${press} to sip`);
-  if (state === 'seated' && !sipping && !sitting) sip(), say('');
+// Dragging looks round her.
+let yaw = Math.PI / 2, pitch = 0.1, dragging = null;
+canvas.addEventListener('pointerdown', (e) => { if (!touch) dragging = [e.clientX, e.clientY]; });
+addEventListener('pointerup', () => { dragging = null; });
+addEventListener('pointermove', (e) => {
+  if (!dragging) return;
+  looked = performance.now();
+  yaw += (e.clientX - dragging[0]) * 0.005;
+  pitch = Math.min(1.1, Math.max(-0.1, pitch + (e.clientY - dragging[1]) * 0.004));
+  dragging = [e.clientX, e.clientY];
+});
+
+const turn = (from, to, rate) => from + (Math.atan2(Math.sin(to - from), Math.cos(to - from)) * Math.min(1, rate));
+// The camera: behind her over her shoulder, or seated, from beside the window to see her face, cup and stool; eased
+// from one to the other, pulled in at once in front of whatever is between her and it or beside that line, and kept in
+// the lane; the same height of view in portrait, a little further back.
+const solid = (mesh) => mesh.isPickable && mesh.isVisible && mesh.isEnabled() && !herself.has(mesh) && mesh.visibility === 1 && !mesh.material?.needAlphaBlending?.();
+const SEATED_VIEW = SPOT_YAW - 2, AT_SEAT = Vector3.Lerp(SPOT, SEAT, 0.5).addInPlace(new Vector3(0, 0.8, 0));
+const target = player.position.add(new Vector3(0, 1.35, 0));
+let distance = 3, looked = 0;
+function follow(dt) {
+  const portrait = engine.getRenderHeight() > engine.getRenderWidth(), seated = state === 'sitting' || state === 'seated';
+  Object.assign(camera, { fovMode: Camera.FOVMODE_VERTICAL_FIXED, fov: portrait ? 1 : 0.75 });
+  if (seated && performance.now() - looked > 2000) {
+    yaw = turn(yaw, SEATED_VIEW, dt * 1.5);
+    pitch += (0.35 - pitch) * Math.min(1, dt * 1.5);
+  }
+  const ease = Math.min(1, dt * 3);
+  Vector3.LerpToRef(target, seated ? AT_SEAT : player.position.add(new Vector3(0, 1.35, 0)), ease, target);
+  const back = new Vector3(-Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), -Math.cos(yaw) * Math.cos(pitch)), side = new Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
+  const wanted = (seated ? 1.9 : 3) * (portrait ? 1.3 : 1);
+  const room = Math.min(...[-0.7, 0, 0.7].map((offset) => {
+    const end = target.add(back.scale(wanted)).addInPlace(side.scale(offset)), toward = end.subtract(target), length = toward.length();
+    const hit = scene.pickWithRay(new Ray(target, toward.scaleInPlace(1 / length), length + 0.3), solid);
+    return hit?.hit ? Math.max(1, (hit.distance - 0.3) * (wanted / length)) : wanted;
+  }));
+  distance = room < distance ? room : distance + (room - distance) * ease;
+  camera.position.copyFrom(target.add(back.scale(distance)));
+  // Inside the lane, off the shop fronts and below the lanterns hanging from them.
+  camera.position.z = Math.min(Math.max(camera.position.z, -3.9), -1.7);
+  camera.position.y = Math.min(camera.position.y, 1.9);
+  camera.setTarget(target);
 }
-const near = () => Vector3.Distance(player.position, SEAT) < 1.2;
 
 scene.onBeforeRenderObservable.add(() => {
-  const dt = engine.getDeltaTime() / 1000, ahead = camera.target.subtract(camera.position);
-  ahead.y = 0;
-  ahead.normalize();
-  const right = Vector3.Cross(Vector3.Up(), ahead), move = Vector3.Zero();
-  if (keys.has('KeyW') || keys.has('ArrowUp')) move.addInPlace(ahead);
-  if (keys.has('KeyS') || keys.has('ArrowDown')) move.subtractInPlace(ahead);
-  if (keys.has('KeyD') || keys.has('ArrowRight')) move.addInPlace(right);
-  if (keys.has('KeyA') || keys.has('ArrowLeft')) move.subtractInPlace(right);
-  const thumb = stickOf(walkStick), look = stickOf(lookStick);
-  move.addInPlace(ahead.scale(thumb.y)).addInPlace(right.scale(thumb.x));
-  camera.inertialAlphaOffset -= look.x * dt * 0.1;
-  camera.inertialBetaOffset += look.y * dt * 0.05;
+  const dt = Math.min(engine.getDeltaTime() / 1000, 0.1), look = stick(lookStick), thumb = stick(walkStick);
+  if (lookStick?.pressed) looked = performance.now();
+  yaw += look.x * dt * 2;
+  pitch = Math.min(1.1, Math.max(-0.1, pitch - look.y * dt));
+  const ahead = new Vector3(Math.sin(yaw), 0, Math.cos(yaw)), right = new Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
+  const axis = (plus, minus) => +plus.some((k) => keys.has(k)) - +minus.some((k) => keys.has(k));
+  const move = ahead.scale(axis(['KeyW', 'ArrowUp'], ['KeyS', 'ArrowDown']) + thumb.y).addInPlace(right.scale(axis(['KeyD', 'ArrowRight'], ['KeyA', 'ArrowLeft']) + thumb.x));
   const moving = move.lengthSquared() > 0.01;
-  if (moving && state === 'seated') stand(), say('');
-  if (state === 'walking') {
+  if (moving && state === 'seated' && !busy) stand(), say('');
+  if (state === 'arriving') {
+    // A few steps to where she sits from, turning to have the stool behind her.
+    const to = SPOT.subtract(player.position), left = to.length();
+    player.position.addInPlace(to.scale(Math.min(1, (SPEED * dt) / Math.max(left, 1e-6))));
+    player.rotation.y = turn(player.rotation.y, left > 0.15 ? Math.atan2(to.x, to.z) : SPOT_YAW, dt * 8);
+    if (!walk.isPlaying) walk.play(true);
+    if (left < 0.01 && Math.abs(turn(player.rotation.y, SPOT_YAW, 1) - player.rotation.y) < 0.05) sit();
+  } else if (state === 'walking') {
     if (moving) {
-      player.position.addInPlace(move.scale(1.4 * dt / Math.max(1, move.length())));
+      player.position.addInPlace(move.scale((SPEED * dt) / Math.max(1, move.length())));
       // The lane between the shop fronts.
-      player.position.x = Math.min(Math.max(player.position.x, -20), 12);
-      player.position.z = Math.min(Math.max(player.position.z, 0.35), 4);
-      player.rotation.y = Math.atan2(move.x, move.z);
+      player.position.x = Math.min(Math.max(player.position.x, -24), 12);
+      player.position.z = Math.min(Math.max(player.position.z, -3.9), -0.25);
+      player.rotation.y = turn(player.rotation.y, Math.atan2(move.x, move.z), dt * 10);
       if (!walk.isPlaying) walk.play(true);
-    } else if (walk.isPlaying) standStill();
-    if (!sipping && near() !== nearStool) say((nearStool = near()) ? `${press} to sit` : '');
+    } else if (walk.isPlaying) still();
+    say(near() ? `${press} to sit` : '');
   }
-  if (sitting > 0) {
-    sitting = Math.max(0, sitting - dt);
-    const t = sitting / SIT_TIME;
-    lift.position.y = LIFT * t * t * (3 - 2 * t);
-  }
-  // Closer while she sits.
-  const seated = state === 'seated';
-  camera.target.copyFrom(Vector3.Lerp(camera.target, player.position.add(new Vector3(0, seated ? 0.7 : 1, 0)), 0.08));
-  camera.radius += ((seated ? 2 : 3.2) - camera.radius) * 0.05;
+  follow(dt);
 });
 
 // Rain on the awnings: brown noise, quiet, once a key is pressed (browsers start sound on a gesture).

@@ -54,7 +54,8 @@ async function check(id, { bake = false, elastic = false, slide = false, half = 
   const blend = await (await import(written.url)).load(new NullEngine());
   const page = blend.scene, group = page.animationGroups[0];
   const animated = new Set([...group.targetedAnimations.map((t) => t.target), ...live.map(([, e]) => page.getNodeById(ir.properties[e.outputs.value.property].bind.node))]);
-  const meshes = scene.meshes.filter((m) => sync.objectOf(m) && animated.has(page.getMeshById(m.name)));
+  // Animated meshes, and those hung from bones (objects parented to bones), which the bones move.
+  const meshes = scene.meshes.filter((m) => sync.objectOf(m) && (animated.has(page.getMeshById(m.name)) || page.getMeshById(m.name)?.parent?.getClassName() === 'Bone'));
   // Meshes Babylon deforms: morph targets (shape keys) and skeletons (armatures).
   const deformed = scene.meshes.filter((m) => sync.objectOf(m) && (page.getMeshById(m.name)?.morphTargetManager || page.getMeshById(m.name)?.skeleton));
   assert.ok(meshes.length || deformed.length, `${id}: animated meshes`);

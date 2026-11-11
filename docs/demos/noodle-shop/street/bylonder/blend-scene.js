@@ -68,6 +68,7 @@ import { collectionKey, collectionTree, objectsIn, showing } from './collections
  * @property {Transform} [transform]
  * @property {'viewport' | 'render'} [hide]
  * @property {number} [lens]
+ * @property {string} [morph] a morph target's name in its node's MorphTargetManager, whose influence it sets
  * @property {string} [channel] the key in its node's `metadata.bylonderChannels` the scene's animation sets it through
  * @property {string} [collection] a collection's visibility flag or time offset: the key of the collection it sets
  * @property {boolean} [offset] a collection's time offset (Bylonder's own): frames its objects' animation plays later
@@ -603,6 +604,9 @@ export class BlendScene {
       const object = Object.keys(this.ir.ids).find((k) => this.ir.ids[k].node === bind.node);
       if (object) this.#showObjects([object]);
       else hide(node, this.#hidden(path.slice(0, path.lastIndexOf('.'))));
+    } else if (bind.morph !== undefined) {
+      const target = node.morphTargetManager?.getTargetByName(bind.morph);
+      if (target) target.influence = value;
     } else if (bind.lens !== undefined) {
       node.fov = 2 * Math.atan(bind.lens / /** @type {number} */ (value));
     } else if (bind.property) {

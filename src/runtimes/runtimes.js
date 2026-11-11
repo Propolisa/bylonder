@@ -60,6 +60,7 @@ export function exportRuntimes(world, { bake = true, sampling = world.animation 
   for (const { title, issues } of results.flatMap((r) => r.reports)) reportIssues(title, issues);
   return { animations: results.flatMap((r) => r.animations), curves: results.flatMap((r) => r.curves ?? []), gaps: results.flatMap((r) => r.gaps ?? []), constraints: results.flatMap((r) => r.constraints ?? []),
     clip: (clipSampling, owns) => results.flatMap((r) => r.clip?.(clipSampling, owns) ?? []),
+    boneParent: (ob) => results.map((r) => r.boneParent?.(ob)).find(Boolean) ?? null,
     restore: () => results.forEach((r) => r.restore()) };
 }
 

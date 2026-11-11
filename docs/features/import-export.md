@@ -325,14 +325,16 @@ control panel, on WebGL 2, loading Babylon.js from its CDN. [Open the demo](http
     await ImportMeshAsync('girl.glb', scene);         await ImportMeshAsync('girl/scene.bylonder', scene);
     // or, with its controller:                       import { load } from './girl/scene.js';
                                                       const girl = await load({ scene, root: player });
-                                                      girl.playhead.seek(150);
+                                                      girl.play('Walk');
     ```
 
-    The [Noodle Shop](https://propolisa.github.io/bylonder/docs/demos/noodle-shop/) is a small game made this way, about
-    150 lines in [game.js](../demos/noodle-shop/game.js): the Compositor example's lane and its woman on a tea break,
-    exported as two packages and loaded into a plain Babylon.js scene. Walk with W A S D, press E by the stool to sit,
-    again to buy a tea and to sip it; on a phone, the left thumb walks, the right looks and the E button acts. Her walk
-    is the page's own, her sip the package's animation, played by her controller.
+    The [Noodle Shop](https://propolisa.github.io/bylonder/docs/demos/noodle-shop/) is a small game made this way, in
+    [game.js](../demos/noodle-shop/game.js): the Compositor example exported twice. The lane is the scene without the
+    woman on a tea break, Scope Scene, so `load(engine)` builds it as the export shows it, with its world, view
+    transform, compositor and camera, which the game moves to follow her. She is Scope Selected Objects with Animations
+    set to Clips, added with `load({ scene })`: her Walk, Sit, Idle and Sip actions play as her controller's clips, and
+    the cup parented to her hand's bone stays in her hand. Walk with W A S D, press E by the stool to sit, again to buy
+    a tea and to sip it; on a phone, the left thumb walks, the right looks and the E button acts.
 
     ![The Noodle Shop](../media/features/import-export/noodle-shop.gif)
 
