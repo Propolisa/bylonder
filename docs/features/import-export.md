@@ -2,7 +2,7 @@
 id: import-export
 title: Import and Export
 summary: Bring scenes in and write them out with Blender's own importers and exporters (Wavefront OBJ, Stanford PLY, STL, FBX) and its default add-ons (glTF 2.0, FBX export, Motion Capture, SVG as Curves), through the browser's file dialogs with each format's options.
-expect: OBJ, PLY, STL, FBX, glTF 2.0, BVH and SVG import and export with Blender's own code and options; the add-ons' entries wait a few seconds for Python the first time File opens, Alembic and USD are greyed out, and an export's extra files download. File > Export > JavaScript asks which GPU engine its page makes (WebGPU, WebGL 2, or WebGPU where the browser has it) and which runtime each feature exports with, for the package, a feature or one instance, which branches of the scene run in the page, are baked or left out (modifier and Geometry Nodes stacks, curves, volumes, post-processing, the compositor), and writes one minified bundle per package that needs no CDN (or ES modules, with Bundle off). Its page has a control panel at the canvas's top right corner: every control of the scene under Blender's names, dragged and typed as in Blender, hiding what is at Blender's defaults, with the view's navigation and links to Babylon's Inspector and node editors.
+expect: OBJ, PLY, STL, FBX, glTF 2.0, BVH and SVG import and export with Blender's own code and options; the add-ons' entries wait a few seconds for Python the first time File opens, Alembic and USD are greyed out, and an export's extra files download. File > Export > JavaScript asks which GPU engine its page makes (WebGPU, WebGL 2, or WebGPU where the browser has it) and which runtime each feature exports with, for the package, a feature or one instance, which branches of the scene run in the page, are baked or left out (modifier and Geometry Nodes stacks, curves, volumes, post-processing, the compositor), and writes one minified bundle per package that needs no CDN (or ES modules, with Bundle off). With Scope set to Selected Objects it writes the selection alone, which load({ scene }) adds to a Babylon scene of yours under `__root__` as a .glb loads, with SceneLoader and AssetContainer copies too. Its page has a control panel at the canvas's top right corner: every control of the scene under Blender's names, dragged and typed as in Blender, hiding what is at Blender's defaults, with the view's navigation and links to Babylon's Inspector and node editors.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/files/import_export/index.html
@@ -28,6 +28,7 @@ media:
   - import-export/export-javascript-branches.png
   - import-export/control-panel-button.png
   - import-export/control-panel-open.png
+  - import-export/noodle-shop.gif
   - import-export/control-panel-material-colours.png
   - import-export/control-panel-drag.gif
   - import-export/control-panel-search.png
@@ -68,6 +69,8 @@ code:
   - src/draw/mesh-batch-buffers.js
   - src/io_scene_babylon/export-options.js
   - src/io_scene_babylon/sampling.js
+  - src/io_scene_babylon/runtime/asset.js
+  - src/io_scene_babylon/runtime/scene-loader.js
   - src/io_scene_babylon/export-dialog.js
   - src/io_scene_babylon/branches.js
   - src/io_scene_babylon/bundle.js
@@ -99,6 +102,7 @@ tests:
   - tests/export-package-wasm.test.js
   - tests/export-bundle-wasm.test.js
   - tests/control-panel.test.js
+  - tests/export-asset-wasm.test.js
   - tests/export-runtime.test.js
   - tests/collections-sdk-wasm.test.js
   - tests/playhead.test.js
@@ -125,6 +129,8 @@ limits:
   - A Geometry Nodes stack exports Live (run in the page, shipping Blender's Geometry Nodes kernels, about 87 MB) or Baked (its evaluated mesh, no kernels). By default one nothing in the page drives (no input of a value, no tree reading the frame) is Baked, and so is Smooth by Angle unless its angle is animated.
   - A Baked branch is the scene as exported: a baked stack does not follow the frame or the page's controls, and a baked compositor offers none of its settings as controls.
   - Curves, volumes and post-processing are Live or Off for the whole scene, not per object. Off leaves curves' materials in the package, unused.
+  - Selected Objects loaded into a scene of yours take its lighting, image processing and engine as they are: Bylonder's WebGPU overrides and the scene's view transform come only with load(engine). Constraints the page runs work in the world of the scene they were exported from, so under a moved `__root__` they place their objects as if it were not there. Curves, point clouds and Geometry Nodes the page draws are not under `__root__` yet.
+  - instantiate() copies share materials and geometry, as a .glb's do: a material control or a live modifier on one copy changes them all, and particle systems are not copied.
   - The package's createEngine is for pages; in Node (the headless SDK) pass a NullEngine to load as before.
   - The control panel shows the controls the export lists (transforms, visibility, lights, the camera, node inputs, custom properties, modifier and Geometry Nodes inputs); a property the page cannot drive yet is not in it, and enum properties have no controls yet, so its dropdowns choose only an image.
   - The control panel labels a node by its name, not its label, and a property by Blender's name for it (Euler Rotation, where the N panel says Rotation).
@@ -274,6 +280,34 @@ control panel, on WebGL 2, loading Babylon.js from its CDN. [Open the demo](http
 
     ![On a phone: scroll, drag, pinch, then Orbit](../media/features/import-export/control-panel-touch.gif)
 
+13. **Use it in a game.** Set Scope, at the top of the settings, to Selected Objects: the package holds the selected
+    objects and what they need (the parents that place them, their meshes, materials, images, skeletons and
+    animation), without the scene's world, camera effects, compositor or collections, and Bundle defaults to off, so
+    it loads with your page's own Babylon.js. Its `load` is the one a whole scene has: given an engine, it builds the
+    scene in a scene of its own; given `{ scene }`, it adds the objects to yours, as a .glb loads, under a node
+    `__root__` turned as glTF's loader turns its root, and `{ scene, root }` hangs that from a node of yours. Both give
+    the same controller, with what was added in `blend.entries` (`meshes[0]` is `__root__`) and a playhead of its own.
+    `loadAssetContainer(scene)` gives an AssetContainer whose `instantiate()` makes copies as `instantiateModelsToScene`
+    does, sharing geometry, materials and textures, each with its own controller. Imported once, the package's
+    `bylonder/scene-loader.js` lets Babylon's SceneLoader take its `scene.bylonder` file.
+
+    ```js
+    // A .glb                                         // A Bylonder package, Scope Selected Objects
+    import '@babylonjs/loaders/glTF';                 import './girl/bylonder/scene-loader.js';
+    await ImportMeshAsync('girl.glb', scene);         await ImportMeshAsync('girl/scene.bylonder', scene);
+    // or, with its controller:                       import { load } from './girl/scene.js';
+                                                      const girl = await load({ scene, root: player });
+                                                      girl.playhead.seek(150);
+    ```
+
+    The [Noodle Shop](https://propolisa.github.io/bylonder/docs/demos/noodle-shop/) is a small game made this way, about
+    150 lines in [game.js](../demos/noodle-shop/game.js): the Compositor example's lane and its woman on a tea break,
+    exported as two packages and loaded into a plain Babylon.js scene. Walk with W A S D, press E by the stool to sit,
+    again to buy a tea and to sip it; her walk is the page's own, her sip the package's animation, played by her
+    controller.
+
+    ![The Noodle Shop](../media/features/import-export/noodle-shop.gif)
+
 ## Project files
 
 - [import-export.py](../../examples/import-export/import-export.py): writes bust.glb with Blender 5.2's glTF exporter,
@@ -291,4 +325,6 @@ control panel, on WebGL 2, loading Babylon.js from its CDN. [Open the demo](http
   record this page's pictures, and [record-control-panel.mjs](../../tools/docs/record-control-panel.mjs) (on the Lava
   example, with custom properties added, and the Compositor example for its materials' colours) the control panel's.
 - [export-demo.mjs](../../tools/docs/export-demo.mjs): writes the live demo, the Compositor example's package, to
-  [docs/demos/compositor/](../demos/compositor/index.html).
+  [docs/demos/compositor/](../demos/compositor/index.html), and the Noodle Shop's two packages to
+  [docs/demos/noodle-shop/](../demos/noodle-shop/index.html), whose page and [game.js](../demos/noodle-shop/game.js)
+  are written by hand.
