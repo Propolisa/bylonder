@@ -34,6 +34,7 @@ export function exampleBlend(id) {
   return blends.includes(`${id}.blend`) ? new URL(`${id}.blend`, dir) : blends.length === 1 ? new URL(blends[0], dir) : null;
 }
 
+// `id`: an example's, or a .blend file's path.
 export function openExample(id) {
   // NullEngine has no GL to upload an image's pixels to.
   const engine = Object.assign(new NullEngine(), { updateTextureData() {} }), scene = new Scene(engine);
@@ -41,7 +42,7 @@ export function openExample(id) {
   const objects = Object.assign([], { scene });
   const world = { scene, objects, animation };
   const opening = createMainSync({ rna: createRNA({ world: { scene, objects: [] } }), ids: animation.ids });
-  objects.push(...opening.readBlend(readFileSync(exampleBlend(id)), scene).nodes);
+  objects.push(...opening.readBlend(readFileSync(id.endsWith('.blend') ? id : exampleBlend(id)), scene).nodes);
   let camera = scene.activeCamera;
   world.sceneSettings = createSceneSettings(world, { cameras: { list: () => scene.cameras, get: () => camera, set: (c) => { camera = c; } } });
   world.renderSettings = createRenderSettings(world);

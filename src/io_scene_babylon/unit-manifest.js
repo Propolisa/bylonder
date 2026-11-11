@@ -71,7 +71,7 @@ export function unitManifest(ir, { kernels, blocks = {}, replace = [] } = {}) {
     add(entity.type, unit, { entity: key, id: entity.id, properties: propertiesOf(entity.inputs) });
     // A rig on Blender's kernels: each constraint type a unit of its own (runtime/pose-kernels.js), given the owner's
     // and its targets' matrices in the constraint's spaces and its settings, giving the owner's.
-    for (const type of new Set((entity.inputs.kernels?.bones ?? []).flatMap((b) => b.constraints.map((c) => c.type)))) {
+    for (const type of entity.inputs.types ?? []) {
       add(`constraint:${type}`, { kind: 'constraint', implementation, licence: GPL, files: folderFiles(implementation),
         interface: { inputs: { owner: 'array', targets: 'array', settings: 'object' }, outputs: ['matrix'] } }, { entity: key, id: entity.id, properties: [] });
     }

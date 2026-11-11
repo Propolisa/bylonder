@@ -253,13 +253,18 @@ function evaluatedIDs(ids, graphs, entities, sync, bin) {
   }
 }
 
+// A rig the constraint kernels run, compiled once at export: its spec as JSON in scene.bin, which the page parses once
+// and the scheduler hands over as it is (a buffer) each time the pose runs, and its constraint types.
+const compiledRig = (rig, bin) => ({ kernels: { buffer: bin.add(new TextEncoder().encode(JSON.stringify(rig))) },
+  types: [...new Set(rig.bones.flatMap((b) => b.constraints.map((c) => c.type)))] });
+
 // An object's constraints the page applies to its node each frame, after what places it (`constraints:OBJECT`), by the
 // node's id; an armature's bone constraints the page runs on its skeleton (`constraints:POSE`), by its node's.
-function constraintEntities(ids, constraints, time) {
+function constraintEntities(ids, constraints, time, bin) {
   const idOf = new Map(Object.entries(ids).filter(([, id]) => id.node !== undefined).map(([k, id]) => [id.node, k]));
   const frame = time && { frame: { property: time } };
   return Object.fromEntries(constraints.flatMap((c) => {
-    if (c.pose) return idOf.has(c.armature) ? [[`${idOf.get(c.armature)}/constraints/pose`, { type: 'constraints:POSE', id: idOf.get(c.armature), inputs: { ...c.pose, ...frame }, outputs: {}, implementation: c.pose.kernels ? 'pose-kernels' : 'pose' }]] : [];
+    if (c.pose) return idOf.has(c.armature) ? [[`${idOf.get(c.armature)}/constraints/pose`, { type: 'constraints:POSE', id: idOf.get(c.armature), inputs: { ...c.pose, ...frame, ...(c.pose.kernels && compiledRig(c.pose.kernels, bin)) }, outputs: {}, implementation: c.pose.kernels ? 'pose-kernels' : 'pose' }]] : [];
     return idOf.has(c.node) ? [[`${idOf.get(c.node)}/constraints/object`, { type: 'constraints:OBJECT', id: idOf.get(c.node), inputs: { ...c, ...frame }, outputs: {}, implementation: 'constraints' }]] : [];
   }));
 }
@@ -291,7 +296,7 @@ export function exportIR(world, { controls, collections = null, live, bin, anima
     for (const entity of Object.values(entities)) if (time && entity.type === 'modifier:NODES' && readsTime(graphs, entity.inputs.graph.graph)) entity.inputs.frame = { property: time };
     Object.assign(entities, driverEntities(properties, skeletons), animationEntities(ids, properties, time, animationGroups, curves, bin),
       greasePencilEntities(world, objects.map(([node]) => node), bin, time),
-      chosenState(states, 'curves') === 'OFF' ? {} : curvesEntities(world, objects.map(([node]) => node), bin), constraintEntities(ids, constraints, time));
+      chosenState(states, 'curves') === 'OFF' ? {} : curvesEntities(world, objects.map(([node]) => node), bin), constraintEntities(ids, constraints, time, bin));
     Object.assign(entities, pointCloudEntities(world, objects.map(([node]) => node), bin));
   }
   // What the page computes from is offered to authors.
