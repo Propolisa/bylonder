@@ -1,0 +1,20 @@
+{"file": "ball_in_grass", "counts": {}, "details": {}}
+{"file": "bike_ride", "counts": {}, "details": {}}
+{"file": "chocolate_donut", "counts": {"TRACK_TO": 3}, "details": {"object:TRACK_TO": 3}}
+{"file": "cloth_tear", "counts": {"TRACK_TO": 1}, "details": {"object:TRACK_TO": 1}}
+{"file": "cozy_kitchen", "counts": {}, "details": {}}
+{"file": "gaku", "counts": {}, "details": {}}
+{"file": "gizmo_array", "counts": {}, "details": {}}
+{"file": "impact_fracture", "counts": {}, "details": {}}
+{"file": "mandelbrot_grow", "counts": {}, "details": {}}
+{"file": "mr_elephant", "counts": {}, "details": {}}
+{"file": "pasta_planet", "counts": {}, "details": {}}
+{"file": "pizza_delivery", "counts": {"COPY_LOCATION": 6, "COPY_ROTATION": 4, "IK": 4, "CHILD_OF": 3}, "details": {"object:COPY_LOCATION": 3, "bone:COPY_LOCATION": 3, "bone:COPY_ROTATION": 4, "bone:IK": 4, "bone:CHILD_OF": 3}}
+{"file": "race_spaceship", "counts": {}, "details": {}}
+{"file": "radial_tiling", "counts": {}, "details": {}}
+{"file": "raycast_lines", "counts": {}, "details": {}}
+{"file": "repeat_zone_fractal_raymarch", "counts": {}, "details": {}}
+{"file": "sdf_mixer", "counts": {}, "details": {}}
+{"file": "skeleton_arm_xray", "counts": {"IK": 3, "COPY_ROTATION": 11, "LIMIT_ROTATION": 9}, "details": {"bone:IK": 3, "bone:COPY_ROTATION": 11, "bone:LIMIT_ROTATION": 9}}
+{"file": "wasp_bot", "counts": {}, "details": {}}
+{"file": "rigify_human", "counts": {"COPY_TRANSFORMS": 168, "STRETCH_TO": 144, "COPY_LOCATION": 82, "ARMATURE": 9, "COPY_SCALE": 45, "DAMPED_TRACK": 34, "COPY_ROTATION": 33, "IK": 8, "LIMIT_DISTANCE": 4, "LIMIT_ROTATION": 6}, "details": {"bone:COPY_TRANSFORMS": 168, "bone:STRETCH_TO": 144, "bone:COPY_LOCATION": 82, "bone:ARMATURE": 9, "bone:COPY_SCALE": 45, "bone:DAMPED_TRACK": 34, "bone:COPY_ROTATION": 33, "bone:IK": 8, "bone:LIMIT_DISTANCE": 4, "bone:LIMIT_ROTATION": 6}}

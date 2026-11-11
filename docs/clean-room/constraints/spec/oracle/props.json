@@ -1,0 +1,3976 @@
+{
+ "CAMERA_SOLVER": {
+  "is_override_data": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override"
+  },
+  "owner_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space that owner is evaluated in"
+  },
+  "target_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL",
+    "LOCAL_OWNER_ORIENT"
+   ],
+   "description": "Space that target is evaluated in"
+  },
+  "space_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for Custom Space"
+  },
+  "space_subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mute": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Enable/Disable Constraint"
+  },
+  "enabled": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use the results of this constraint"
+  },
+  "influence": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Amount of influence constraint will have on the final solution"
+  },
+  "clip": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Movie Clip to get tracking data from"
+  },
+  "use_active_clip": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use active clip defined in scene"
+  }
+ },
+ "FOLLOW_TRACK": {
+  "is_override_data": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override"
+  },
+  "owner_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space that owner is evaluated in"
+  },
+  "target_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL",
+    "LOCAL_OWNER_ORIENT"
+   ],
+   "description": "Space that target is evaluated in"
+  },
+  "space_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for Custom Space"
+  },
+  "space_subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mute": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Enable/Disable Constraint"
+  },
+  "enabled": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use the results of this constraint"
+  },
+  "influence": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Amount of influence constraint will have on the final solution"
+  },
+  "clip": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Movie Clip to get tracking data from"
+  },
+  "track": {
+   "value": "",
+   "type": "STRING",
+   "description": "Movie tracking track to follow"
+  },
+  "use_active_clip": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use active clip defined in scene"
+  },
+  "use_3d_position": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Use 3D position of track to parent to"
+  },
+  "object": {
+   "value": "",
+   "type": "STRING",
+   "description": "Movie tracking object to follow (if empty, camera object is used)"
+  },
+  "camera": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Camera to which motion is parented (if empty active scene camera is used)"
+  },
+  "depth_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object used to define depth in camera space by projecting onto surface of this object"
+  },
+  "frame_method": {
+   "value": "STRETCH",
+   "type": "ENUM",
+   "items": [
+    "STRETCH",
+    "FIT",
+    "CROP"
+   ],
+   "description": "How the footage fits in the camera frame"
+  },
+  "use_undistorted_position": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Parent to undistorted position of 2D track"
+  }
+ },
+ "OBJECT_SOLVER": {
+  "is_override_data": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override"
+  },
+  "owner_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space that owner is evaluated in"
+  },
+  "target_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL",
+    "LOCAL_OWNER_ORIENT"
+   ],
+   "description": "Space that target is evaluated in"
+  },
+  "space_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for Custom Space"
+  },
+  "space_subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mute": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Enable/Disable Constraint"
+  },
+  "enabled": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use the results of this constraint"
+  },
+  "influence": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Amount of influence constraint will have on the final solution"
+  },
+  "clip": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Movie Clip to get tracking data from"
+  },
+  "use_active_clip": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use active clip defined in scene"
+  },
+  "set_inverse_pending": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Set to true to request recalculation of the inverse matrix"
+  },
+  "object": {
+   "value": "",
+   "type": "STRING",
+   "description": "Movie tracking object to follow"
+  },
+  "camera": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Camera to which motion is parented (if empty active scene camera is used)"
+  }
+ },
+ "COPY_LOCATION": {
+  "is_override_data": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override"
+  },
+  "owner_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space that owner is evaluated in"
+  },
+  "target_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL",
+    "LOCAL_OWNER_ORIENT"
+   ],
+   "description": "Space that target is evaluated in"
+  },
+  "space_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for Custom Space"
+  },
+  "space_subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mute": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Enable/Disable Constraint"
+  },
+  "enabled": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use the results of this constraint"
+  },
+  "influence": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Amount of influence constraint will have on the final solution"
+  },
+  "head_tail": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Target along length of bone: Head is 0, Tail is 1"
+  },
+  "use_bbone_shape": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Follow shape of B-Bone segments when calculating Head/Tail position"
+  },
+  "target": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Target object"
+  },
+  "subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "use_x": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Copy the target's X location"
+  },
+  "use_y": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Copy the target's Y location"
+  },
+  "use_z": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Copy the target's Z location"
+  },
+  "invert_x": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Invert the X location"
+  },
+  "invert_y": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Invert the Y location"
+  },
+  "invert_z": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Invert the Z location"
+  },
+  "use_offset": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Add original location into copied location"
+  }
+ },
+ "COPY_ROTATION": {
+  "is_override_data": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override"
+  },
+  "owner_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space that owner is evaluated in"
+  },
+  "target_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL",
+    "LOCAL_OWNER_ORIENT"
+   ],
+   "description": "Space that target is evaluated in"
+  },
+  "space_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for Custom Space"
+  },
+  "space_subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mute": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Enable/Disable Constraint"
+  },
+  "enabled": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use the results of this constraint"
+  },
+  "influence": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Amount of influence constraint will have on the final solution"
+  },
+  "target": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Target object"
+  },
+  "subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "use_x": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Copy the target's X rotation"
+  },
+  "use_y": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Copy the target's Y rotation"
+  },
+  "use_z": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Copy the target's Z rotation"
+  },
+  "invert_x": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Invert the X rotation"
+  },
+  "invert_y": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Invert the Y rotation"
+  },
+  "invert_z": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Invert the Z rotation"
+  },
+  "euler_order": {
+   "value": "AUTO",
+   "type": "ENUM",
+   "items": [
+    "AUTO",
+    "XYZ",
+    "XZY",
+    "YXZ",
+    "YZX",
+    "ZXY",
+    "ZYX"
+   ],
+   "description": "Explicitly specify the euler rotation order"
+  },
+  "mix_mode": {
+   "value": "REPLACE",
+   "type": "ENUM",
+   "items": [
+    "REPLACE",
+    "ADD",
+    "BEFORE",
+    "AFTER",
+    "OFFSET"
+   ],
+   "description": "Specify how the copied and existing rotations are combined"
+  },
+  "use_offset": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "DEPRECATED: Add original rotation into copied rotation"
+  }
+ },
+ "COPY_SCALE": {
+  "is_override_data": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override"
+  },
+  "owner_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space that owner is evaluated in"
+  },
+  "target_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL",
+    "LOCAL_OWNER_ORIENT"
+   ],
+   "description": "Space that target is evaluated in"
+  },
+  "space_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for Custom Space"
+  },
+  "space_subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mute": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Enable/Disable Constraint"
+  },
+  "enabled": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use the results of this constraint"
+  },
+  "influence": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Amount of influence constraint will have on the final solution"
+  },
+  "target": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Target object"
+  },
+  "subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "use_x": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Copy the target's X scale"
+  },
+  "use_y": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Copy the target's Y scale"
+  },
+  "use_z": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Copy the target's Z scale"
+  },
+  "power": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Raise the target's scale to the specified power"
+  },
+  "use_make_uniform": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Redistribute the copied change in volume equally between the three axes of the owner"
+  },
+  "use_offset": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Combine original scale with copied scale"
+  },
+  "use_add": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Use addition instead of multiplication to combine scale (2.7 compatibility)"
+  }
+ },
+ "COPY_TRANSFORMS": {
+  "is_override_data": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override"
+  },
+  "owner_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space that owner is evaluated in"
+  },
+  "target_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL",
+    "LOCAL_OWNER_ORIENT"
+   ],
+   "description": "Space that target is evaluated in"
+  },
+  "space_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for Custom Space"
+  },
+  "space_subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mute": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Enable/Disable Constraint"
+  },
+  "enabled": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use the results of this constraint"
+  },
+  "influence": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Amount of influence constraint will have on the final solution"
+  },
+  "head_tail": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Target along length of bone: Head is 0, Tail is 1"
+  },
+  "use_bbone_shape": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Follow shape of B-Bone segments when calculating Head/Tail position"
+  },
+  "target": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Target object"
+  },
+  "subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "remove_target_shear": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Remove shear from the target transformation before combining"
+  },
+  "mix_mode": {
+   "value": "REPLACE",
+   "type": "ENUM",
+   "items": [
+    "REPLACE",
+    "BEFORE_FULL",
+    "BEFORE",
+    "BEFORE_SPLIT",
+    "AFTER_FULL",
+    "AFTER",
+    "AFTER_SPLIT"
+   ],
+   "description": "Specify how the copied and existing transformations are combined"
+  }
+ },
+ "LIMIT_DISTANCE": {
+  "is_override_data": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override"
+  },
+  "owner_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space that owner is evaluated in"
+  },
+  "target_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL",
+    "LOCAL_OWNER_ORIENT"
+   ],
+   "description": "Space that target is evaluated in"
+  },
+  "space_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for Custom Space"
+  },
+  "space_subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mute": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Enable/Disable Constraint"
+  },
+  "enabled": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use the results of this constraint"
+  },
+  "influence": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Amount of influence constraint will have on the final solution"
+  },
+  "head_tail": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Target along length of bone: Head is 0, Tail is 1"
+  },
+  "use_bbone_shape": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Follow shape of B-Bone segments when calculating Head/Tail position"
+  },
+  "target": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Target object"
+  },
+  "subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "distance": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Radius of limiting sphere"
+  },
+  "limit_mode": {
+   "value": "LIMITDIST_INSIDE",
+   "type": "ENUM",
+   "items": [
+    "LIMITDIST_INSIDE",
+    "LIMITDIST_OUTSIDE",
+    "LIMITDIST_ONSURFACE"
+   ],
+   "description": "Distances in relation to sphere of influence to allow"
+  },
+  "use_transform_limit": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Transforms are affected by this constraint as well"
+  }
+ },
+ "LIMIT_LOCATION": {
+  "is_override_data": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override"
+  },
+  "owner_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space that owner is evaluated in"
+  },
+  "target_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL",
+    "LOCAL_OWNER_ORIENT"
+   ],
+   "description": "Space that target is evaluated in"
+  },
+  "space_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for Custom Space"
+  },
+  "space_subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mute": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Enable/Disable Constraint"
+  },
+  "enabled": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use the results of this constraint"
+  },
+  "influence": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Amount of influence constraint will have on the final solution"
+  },
+  "use_min_x": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Use the minimum X value"
+  },
+  "use_min_y": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Use the minimum Y value"
+  },
+  "use_min_z": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Use the minimum Z value"
+  },
+  "use_max_x": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Use the maximum X value"
+  },
+  "use_max_y": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Use the maximum Y value"
+  },
+  "use_max_z": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Use the maximum Z value"
+  },
+  "min_x": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Lowest X value to allow"
+  },
+  "min_y": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Lowest Y value to allow"
+  },
+  "min_z": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Lowest Z value to allow"
+  },
+  "max_x": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Highest X value to allow"
+  },
+  "max_y": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Highest Y value to allow"
+  },
+  "max_z": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Highest Z value to allow"
+  },
+  "use_transform_limit": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Transform tools are affected by this constraint as well"
+  }
+ },
+ "LIMIT_ROTATION": {
+  "is_override_data": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override"
+  },
+  "owner_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space that owner is evaluated in"
+  },
+  "target_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL",
+    "LOCAL_OWNER_ORIENT"
+   ],
+   "description": "Space that target is evaluated in"
+  },
+  "space_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for Custom Space"
+  },
+  "space_subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mute": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Enable/Disable Constraint"
+  },
+  "enabled": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use the results of this constraint"
+  },
+  "influence": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Amount of influence constraint will have on the final solution"
+  },
+  "use_limit_x": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Use the minimum X value"
+  },
+  "use_limit_y": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Use the minimum Y value"
+  },
+  "use_limit_z": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Use the minimum Z value"
+  },
+  "min_x": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -1000.0,
+    1000.0
+   ],
+   "description": "Lower X angle bound"
+  },
+  "min_y": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -1000.0,
+    1000.0
+   ],
+   "description": "Lower Y angle bound"
+  },
+  "min_z": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -1000.0,
+    1000.0
+   ],
+   "description": "Lower Z angle bound"
+  },
+  "max_x": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -1000.0,
+    1000.0
+   ],
+   "description": "Upper X angle bound"
+  },
+  "max_y": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -1000.0,
+    1000.0
+   ],
+   "description": "Upper Y angle bound"
+  },
+  "max_z": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -1000.0,
+    1000.0
+   ],
+   "description": "Upper Z angle bound"
+  },
+  "euler_order": {
+   "value": "AUTO",
+   "type": "ENUM",
+   "items": [
+    "AUTO",
+    "XYZ",
+    "XZY",
+    "YXZ",
+    "YZX",
+    "ZXY",
+    "ZYX"
+   ],
+   "description": "Explicitly specify the euler rotation order"
+  },
+  "use_transform_limit": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Transform tools are affected by this constraint as well"
+  },
+  "use_legacy_behavior": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Use the old semi-broken behavior that does not understand that rotations loop around"
+  }
+ },
+ "LIMIT_SCALE": {
+  "is_override_data": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override"
+  },
+  "owner_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space that owner is evaluated in"
+  },
+  "target_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL",
+    "LOCAL_OWNER_ORIENT"
+   ],
+   "description": "Space that target is evaluated in"
+  },
+  "space_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for Custom Space"
+  },
+  "space_subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mute": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Enable/Disable Constraint"
+  },
+  "enabled": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use the results of this constraint"
+  },
+  "influence": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Amount of influence constraint will have on the final solution"
+  },
+  "use_min_x": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Use the minimum X value"
+  },
+  "use_min_y": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Use the minimum Y value"
+  },
+  "use_min_z": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Use the minimum Z value"
+  },
+  "use_max_x": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Use the maximum X value"
+  },
+  "use_max_y": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Use the maximum Y value"
+  },
+  "use_max_z": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Use the maximum Z value"
+  },
+  "min_x": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -1000.0,
+    1000.0
+   ],
+   "description": "Lowest X value to allow"
+  },
+  "min_y": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -1000.0,
+    1000.0
+   ],
+   "description": "Lowest Y value to allow"
+  },
+  "min_z": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -1000.0,
+    1000.0
+   ],
+   "description": "Lowest Z value to allow"
+  },
+  "max_x": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -1000.0,
+    1000.0
+   ],
+   "description": "Highest X value to allow"
+  },
+  "max_y": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -1000.0,
+    1000.0
+   ],
+   "description": "Highest Y value to allow"
+  },
+  "max_z": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -1000.0,
+    1000.0
+   ],
+   "description": "Highest Z value to allow"
+  },
+  "use_transform_limit": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Transform tools are affected by this constraint as well"
+  }
+ },
+ "MAINTAIN_VOLUME": {
+  "is_override_data": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override"
+  },
+  "owner_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space that owner is evaluated in"
+  },
+  "target_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL",
+    "LOCAL_OWNER_ORIENT"
+   ],
+   "description": "Space that target is evaluated in"
+  },
+  "space_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for Custom Space"
+  },
+  "space_subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mute": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Enable/Disable Constraint"
+  },
+  "enabled": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use the results of this constraint"
+  },
+  "influence": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Amount of influence constraint will have on the final solution"
+  },
+  "free_axis": {
+   "value": "SAMEVOL_Y",
+   "type": "ENUM",
+   "items": [
+    "SAMEVOL_X",
+    "SAMEVOL_Y",
+    "SAMEVOL_Z"
+   ],
+   "description": "The free scaling axis of the object"
+  },
+  "mode": {
+   "value": "STRICT",
+   "type": "ENUM",
+   "items": [
+    "STRICT",
+    "UNIFORM",
+    "SINGLE_AXIS"
+   ],
+   "description": "The way the constraint treats original non-free axis scaling"
+  },
+  "volume": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    3.4028234663852886e+38
+   ],
+   "description": "Volume of the bone at rest"
+  }
+ },
+ "TRANSFORM": {
+  "is_override_data": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override"
+  },
+  "owner_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space that owner is evaluated in"
+  },
+  "target_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL",
+    "LOCAL_OWNER_ORIENT"
+   ],
+   "description": "Space that target is evaluated in"
+  },
+  "space_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for Custom Space"
+  },
+  "space_subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mute": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Enable/Disable Constraint"
+  },
+  "enabled": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use the results of this constraint"
+  },
+  "influence": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Amount of influence constraint will have on the final solution"
+  },
+  "target": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Target object"
+  },
+  "subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "map_from": {
+   "value": "LOCATION",
+   "type": "ENUM",
+   "items": [
+    "LOCATION",
+    "ROTATION",
+    "SCALE"
+   ],
+   "description": "The transformation type to use from the target"
+  },
+  "map_to": {
+   "value": "LOCATION",
+   "type": "ENUM",
+   "items": [
+    "LOCATION",
+    "ROTATION",
+    "SCALE"
+   ],
+   "description": "The transformation type to affect on the constrained object"
+  },
+  "map_to_x_from": {
+   "value": "X",
+   "type": "ENUM",
+   "items": [
+    "X",
+    "Y",
+    "Z"
+   ],
+   "description": "The source axis constrained object's X axis uses"
+  },
+  "map_to_y_from": {
+   "value": "Y",
+   "type": "ENUM",
+   "items": [
+    "X",
+    "Y",
+    "Z"
+   ],
+   "description": "The source axis constrained object's Y axis uses"
+  },
+  "map_to_z_from": {
+   "value": "Z",
+   "type": "ENUM",
+   "items": [
+    "X",
+    "Y",
+    "Z"
+   ],
+   "description": "The source axis constrained object's Z axis uses"
+  },
+  "use_motion_extrapolate": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Extrapolate ranges"
+  },
+  "from_rotation_mode": {
+   "value": "AUTO",
+   "type": "ENUM",
+   "items": [
+    "AUTO",
+    "XYZ",
+    "XZY",
+    "YXZ",
+    "YZX",
+    "ZXY",
+    "ZYX",
+    "QUATERNION",
+    "SWING_TWIST_X",
+    "SWING_TWIST_Y",
+    "SWING_TWIST_Z"
+   ],
+   "description": "Specify the type of rotation channels to use"
+  },
+  "to_euler_order": {
+   "value": "AUTO",
+   "type": "ENUM",
+   "items": [
+    "AUTO",
+    "XYZ",
+    "XZY",
+    "YXZ",
+    "YZX",
+    "ZXY",
+    "ZYX"
+   ],
+   "description": "Explicitly specify the output euler rotation order"
+  },
+  "from_min_x": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Bottom range of X axis source motion"
+  },
+  "from_min_y": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Bottom range of Y axis source motion"
+  },
+  "from_min_z": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Bottom range of Z axis source motion"
+  },
+  "from_max_x": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Top range of X axis source motion"
+  },
+  "from_max_y": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Top range of Y axis source motion"
+  },
+  "from_max_z": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Top range of Z axis source motion"
+  },
+  "to_min_x": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Bottom range of X axis destination motion"
+  },
+  "to_min_y": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Bottom range of Y axis destination motion"
+  },
+  "to_min_z": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Bottom range of Z axis destination motion"
+  },
+  "to_max_x": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Top range of X axis destination motion"
+  },
+  "to_max_y": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Top range of Y axis destination motion"
+  },
+  "to_max_z": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Top range of Z axis destination motion"
+  },
+  "mix_mode": {
+   "value": "ADD",
+   "type": "ENUM",
+   "items": [
+    "REPLACE",
+    "ADD"
+   ],
+   "description": "Specify how to combine the new location with original"
+  },
+  "from_min_x_rot": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Bottom range of X axis source motion"
+  },
+  "from_min_y_rot": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Bottom range of Y axis source motion"
+  },
+  "from_min_z_rot": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Bottom range of Z axis source motion"
+  },
+  "from_max_x_rot": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Top range of X axis source motion"
+  },
+  "from_max_y_rot": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Top range of Y axis source motion"
+  },
+  "from_max_z_rot": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Top range of Z axis source motion"
+  },
+  "to_min_x_rot": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Bottom range of X axis destination motion"
+  },
+  "to_min_y_rot": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Bottom range of Y axis destination motion"
+  },
+  "to_min_z_rot": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Bottom range of Z axis destination motion"
+  },
+  "to_max_x_rot": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Top range of X axis destination motion"
+  },
+  "to_max_y_rot": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Top range of Y axis destination motion"
+  },
+  "to_max_z_rot": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Top range of Z axis destination motion"
+  },
+  "mix_mode_rot": {
+   "value": "ADD",
+   "type": "ENUM",
+   "items": [
+    "REPLACE",
+    "ADD",
+    "BEFORE",
+    "AFTER"
+   ],
+   "description": "Specify how to combine the new rotation with original"
+  },
+  "from_min_x_scale": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Bottom range of X axis source motion"
+  },
+  "from_min_y_scale": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Bottom range of Y axis source motion"
+  },
+  "from_min_z_scale": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Bottom range of Z axis source motion"
+  },
+  "from_max_x_scale": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Top range of X axis source motion"
+  },
+  "from_max_y_scale": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Top range of Y axis source motion"
+  },
+  "from_max_z_scale": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Top range of Z axis source motion"
+  },
+  "to_min_x_scale": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Bottom range of X axis destination motion"
+  },
+  "to_min_y_scale": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Bottom range of Y axis destination motion"
+  },
+  "to_min_z_scale": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Bottom range of Z axis destination motion"
+  },
+  "to_max_x_scale": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Top range of X axis destination motion"
+  },
+  "to_max_y_scale": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Top range of Y axis destination motion"
+  },
+  "to_max_z_scale": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Top range of Z axis destination motion"
+  },
+  "mix_mode_scale": {
+   "value": "REPLACE",
+   "type": "ENUM",
+   "items": [
+    "REPLACE",
+    "MULTIPLY"
+   ],
+   "description": "Specify how to combine the new scale with original"
+  }
+ },
+ "TRANSFORM_CACHE": {
+  "is_override_data": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override"
+  },
+  "owner_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space that owner is evaluated in"
+  },
+  "target_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL",
+    "LOCAL_OWNER_ORIENT"
+   ],
+   "description": "Space that target is evaluated in"
+  },
+  "space_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for Custom Space"
+  },
+  "space_subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mute": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Enable/Disable Constraint"
+  },
+  "enabled": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use the results of this constraint"
+  },
+  "influence": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Amount of influence constraint will have on the final solution"
+  },
+  "cache_file": {
+   "value": null,
+   "type": "POINTER"
+  },
+  "object_path": {
+   "value": "",
+   "type": "STRING",
+   "description": "Path to the object in the Alembic archive used to lookup the transform matrix"
+  }
+ },
+ "CLAMP_TO": {
+  "is_override_data": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override"
+  },
+  "owner_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space that owner is evaluated in"
+  },
+  "target_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL",
+    "LOCAL_OWNER_ORIENT"
+   ],
+   "description": "Space that target is evaluated in"
+  },
+  "space_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for Custom Space"
+  },
+  "space_subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mute": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Enable/Disable Constraint"
+  },
+  "enabled": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use the results of this constraint"
+  },
+  "influence": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Amount of influence constraint will have on the final solution"
+  },
+  "target": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Target Object (Curves only)"
+  },
+  "main_axis": {
+   "value": "CLAMPTO_AUTO",
+   "type": "ENUM",
+   "items": [
+    "CLAMPTO_AUTO",
+    "CLAMPTO_X",
+    "CLAMPTO_Y",
+    "CLAMPTO_Z"
+   ],
+   "description": "Main axis of movement"
+  },
+  "use_cyclic": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Treat curve as cyclic curve (no clamping to curve bounding box)"
+  }
+ },
+ "DAMPED_TRACK": {
+  "is_override_data": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override"
+  },
+  "owner_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space that owner is evaluated in"
+  },
+  "target_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL",
+    "LOCAL_OWNER_ORIENT"
+   ],
+   "description": "Space that target is evaluated in"
+  },
+  "space_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for Custom Space"
+  },
+  "space_subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mute": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Enable/Disable Constraint"
+  },
+  "enabled": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use the results of this constraint"
+  },
+  "influence": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Amount of influence constraint will have on the final solution"
+  },
+  "head_tail": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Target along length of bone: Head is 0, Tail is 1"
+  },
+  "use_bbone_shape": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Follow shape of B-Bone segments when calculating Head/Tail position"
+  },
+  "target": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Target object"
+  },
+  "subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "track_axis": {
+   "value": "TRACK_Y",
+   "type": "ENUM",
+   "items": [
+    "TRACK_X",
+    "TRACK_Y",
+    "TRACK_Z",
+    "TRACK_NEGATIVE_X",
+    "TRACK_NEGATIVE_Y",
+    "TRACK_NEGATIVE_Z"
+   ],
+   "description": "Axis that points to the target object"
+  }
+ },
+ "IK": {
+  "is_override_data": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override"
+  },
+  "owner_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space that owner is evaluated in"
+  },
+  "target_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL",
+    "LOCAL_OWNER_ORIENT"
+   ],
+   "description": "Space that target is evaluated in"
+  },
+  "space_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for Custom Space"
+  },
+  "space_subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mute": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Enable/Disable Constraint"
+  },
+  "enabled": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use the results of this constraint"
+  },
+  "influence": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Amount of influence constraint will have on the final solution"
+  },
+  "target": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Target object"
+  },
+  "subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "iterations": {
+   "value": 500,
+   "type": "INT",
+   "range": [
+    0,
+    10000
+   ],
+   "description": "Maximum number of solving iterations"
+  },
+  "pole_target": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for pole rotation"
+  },
+  "pole_subtarget": {
+   "value": "",
+   "type": "STRING"
+  },
+  "pole_angle": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.1415927410125732,
+    3.1415927410125732
+   ],
+   "description": "Pole rotation offset"
+  },
+  "weight": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.009999999776482582,
+    1.0
+   ],
+   "description": "For Tree-IK: Weight of position control for this target"
+  },
+  "orient_weight": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.009999999776482582,
+    1.0
+   ],
+   "description": "For Tree-IK: Weight of orientation control for this target"
+  },
+  "chain_count": {
+   "value": 0,
+   "type": "INT",
+   "range": [
+    0,
+    255
+   ],
+   "description": "How many bones are included in the IK effect - 0 uses all bones"
+  },
+  "use_tail": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Include bone's tail as last element in chain"
+  },
+  "reference_axis": {
+   "value": "BONE",
+   "type": "ENUM",
+   "items": [
+    "BONE",
+    "TARGET"
+   ],
+   "description": "Constraint axis Lock options relative to Bone or Target reference"
+  },
+  "use_location": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Chain follows position of target"
+  },
+  "lock_location_x": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Constraint position along X axis"
+  },
+  "lock_location_y": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Constraint position along Y axis"
+  },
+  "lock_location_z": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Constraint position along Z axis"
+  },
+  "use_rotation": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Chain follows rotation of target"
+  },
+  "lock_rotation_x": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Constraint rotation along X axis"
+  },
+  "lock_rotation_y": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Constraint rotation along Y axis"
+  },
+  "lock_rotation_z": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Constraint rotation along Z axis"
+  },
+  "use_stretch": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Enable IK Stretching"
+  },
+  "ik_type": {
+   "value": "COPY_POSE",
+   "type": "ENUM",
+   "items": [
+    "COPY_POSE",
+    "DISTANCE"
+   ]
+  },
+  "limit_mode": {
+   "value": "LIMITDIST_INSIDE",
+   "type": "ENUM",
+   "items": [
+    "LIMITDIST_INSIDE",
+    "LIMITDIST_OUTSIDE",
+    "LIMITDIST_ONSURFACE"
+   ],
+   "description": "Distances in relation to sphere of influence to allow"
+  },
+  "distance": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    100.0
+   ],
+   "description": "Radius of limiting sphere"
+  }
+ },
+ "LOCKED_TRACK": {
+  "is_override_data": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override"
+  },
+  "owner_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space that owner is evaluated in"
+  },
+  "target_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL",
+    "LOCAL_OWNER_ORIENT"
+   ],
+   "description": "Space that target is evaluated in"
+  },
+  "space_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for Custom Space"
+  },
+  "space_subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mute": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Enable/Disable Constraint"
+  },
+  "enabled": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use the results of this constraint"
+  },
+  "influence": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Amount of influence constraint will have on the final solution"
+  },
+  "head_tail": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Target along length of bone: Head is 0, Tail is 1"
+  },
+  "use_bbone_shape": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Follow shape of B-Bone segments when calculating Head/Tail position"
+  },
+  "target": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Target object"
+  },
+  "subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "track_axis": {
+   "value": "TRACK_Y",
+   "type": "ENUM",
+   "items": [
+    "TRACK_X",
+    "TRACK_Y",
+    "TRACK_Z",
+    "TRACK_NEGATIVE_X",
+    "TRACK_NEGATIVE_Y",
+    "TRACK_NEGATIVE_Z"
+   ],
+   "description": "Axis that points to the target object"
+  },
+  "lock_axis": {
+   "value": "LOCK_Z",
+   "type": "ENUM",
+   "items": [
+    "LOCK_X",
+    "LOCK_Y",
+    "LOCK_Z"
+   ],
+   "description": "Axis that points upward"
+  }
+ },
+ "SPLINE_IK": {
+  "is_override_data": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override"
+  },
+  "owner_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space that owner is evaluated in"
+  },
+  "target_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL",
+    "LOCAL_OWNER_ORIENT"
+   ],
+   "description": "Space that target is evaluated in"
+  },
+  "space_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for Custom Space"
+  },
+  "space_subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mute": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Enable/Disable Constraint"
+  },
+  "enabled": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use the results of this constraint"
+  },
+  "influence": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Amount of influence constraint will have on the final solution"
+  },
+  "target": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Curve that controls this relationship"
+  },
+  "chain_count": {
+   "value": 1,
+   "type": "INT",
+   "range": [
+    1,
+    255
+   ],
+   "description": "How many bones are included in the chain"
+  },
+  "joint_bindings": {
+   "value": [],
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "(EXPERIENCED USERS ONLY) The relative positions of the joints along the chain, as percentages"
+  },
+  "use_chain_offset": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Offset the entire chain relative to the root joint"
+  },
+  "use_even_divisions": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Ignore the relative lengths of the bones when fitting to the curve"
+  },
+  "use_curve_radius": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Average radius of the endpoints is used to tweak the X and Z Scaling of the bones, on top of XZ Scale mode"
+  },
+  "xz_scale_mode": {
+   "value": "NONE",
+   "type": "ENUM",
+   "items": [
+    "NONE",
+    "BONE_ORIGINAL",
+    "INVERSE_PRESERVE",
+    "VOLUME_PRESERVE"
+   ],
+   "description": "Method used for determining the scaling of the X and Z axes of the bones"
+  },
+  "y_scale_mode": {
+   "value": "FIT_CURVE",
+   "type": "ENUM",
+   "items": [
+    "NONE",
+    "FIT_CURVE",
+    "BONE_ORIGINAL"
+   ],
+   "description": "Method used for determining the scaling of the Y axis of the bones, on top of the shape and scaling of the curve itself"
+  },
+  "use_original_scale": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Apply volume preservation over the original scaling"
+  },
+  "bulge": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    100.0
+   ],
+   "description": "Factor between volume variation and stretching"
+  },
+  "use_bulge_min": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Use lower limit for volume variation"
+  },
+  "use_bulge_max": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Use upper limit for volume variation"
+  },
+  "bulge_min": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Minimum volume stretching factor"
+  },
+  "bulge_max": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    1.0,
+    100.0
+   ],
+   "description": "Maximum volume stretching factor"
+  },
+  "bulge_smooth": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Strength of volume stretching clamping"
+  }
+ },
+ "STRETCH_TO": {
+  "is_override_data": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override"
+  },
+  "owner_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space that owner is evaluated in"
+  },
+  "target_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL",
+    "LOCAL_OWNER_ORIENT"
+   ],
+   "description": "Space that target is evaluated in"
+  },
+  "space_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for Custom Space"
+  },
+  "space_subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mute": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Enable/Disable Constraint"
+  },
+  "enabled": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use the results of this constraint"
+  },
+  "influence": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Amount of influence constraint will have on the final solution"
+  },
+  "head_tail": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Target along length of bone: Head is 0, Tail is 1"
+  },
+  "use_bbone_shape": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Follow shape of B-Bone segments when calculating Head/Tail position"
+  },
+  "target": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Target object"
+  },
+  "subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "volume": {
+   "value": "VOLUME_XZX",
+   "type": "ENUM",
+   "items": [
+    "VOLUME_XZX",
+    "VOLUME_X",
+    "VOLUME_Z",
+    "NO_VOLUME"
+   ],
+   "description": "Maintain the object's volume as it stretches"
+  },
+  "keep_axis": {
+   "value": "SWING_Y",
+   "type": "ENUM",
+   "items": [
+    "PLANE_X",
+    "PLANE_Z",
+    "SWING_Y"
+   ],
+   "description": "The rotation type and axis order to use"
+  },
+  "rest_length": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1000.0
+   ],
+   "description": "Length at rest position"
+  },
+  "bulge": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    100.0
+   ],
+   "description": "Factor between volume variation and stretching"
+  },
+  "use_bulge_min": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Use lower limit for volume variation"
+  },
+  "use_bulge_max": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Use upper limit for volume variation"
+  },
+  "bulge_min": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Minimum volume stretching factor"
+  },
+  "bulge_max": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    1.0,
+    100.0
+   ],
+   "description": "Maximum volume stretching factor"
+  },
+  "bulge_smooth": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Strength of volume stretching clamping"
+  }
+ },
+ "TRACK_TO": {
+  "is_override_data": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override"
+  },
+  "owner_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space that owner is evaluated in"
+  },
+  "target_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL",
+    "LOCAL_OWNER_ORIENT"
+   ],
+   "description": "Space that target is evaluated in"
+  },
+  "space_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for Custom Space"
+  },
+  "space_subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mute": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Enable/Disable Constraint"
+  },
+  "enabled": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use the results of this constraint"
+  },
+  "influence": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Amount of influence constraint will have on the final solution"
+  },
+  "head_tail": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Target along length of bone: Head is 0, Tail is 1"
+  },
+  "use_bbone_shape": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Follow shape of B-Bone segments when calculating Head/Tail position"
+  },
+  "target": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Target object"
+  },
+  "subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "track_axis": {
+   "value": "TRACK_NEGATIVE_Z",
+   "type": "ENUM",
+   "items": [
+    "TRACK_X",
+    "TRACK_Y",
+    "TRACK_Z",
+    "TRACK_NEGATIVE_X",
+    "TRACK_NEGATIVE_Y",
+    "TRACK_NEGATIVE_Z"
+   ],
+   "description": "Axis that points to the target object"
+  },
+  "up_axis": {
+   "value": "UP_Y",
+   "type": "ENUM",
+   "items": [
+    "UP_X",
+    "UP_Y",
+    "UP_Z"
+   ],
+   "description": "Axis that points upward"
+  },
+  "use_target_z": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Target's Z axis, not World Z axis, will constrain the Up direction"
+  }
+ },
+ "ACTION": {
+  "is_override_data": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override"
+  },
+  "owner_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space that owner is evaluated in"
+  },
+  "target_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL",
+    "LOCAL_OWNER_ORIENT"
+   ],
+   "description": "Space that target is evaluated in"
+  },
+  "space_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for Custom Space"
+  },
+  "space_subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mute": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Enable/Disable Constraint"
+  },
+  "enabled": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use the results of this constraint"
+  },
+  "influence": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Amount of influence constraint will have on the final solution"
+  },
+  "target": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Target object"
+  },
+  "subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mix_mode": {
+   "value": "AFTER",
+   "type": "ENUM",
+   "items": [
+    "REPLACE",
+    "BEFORE_FULL",
+    "BEFORE",
+    "BEFORE_SPLIT",
+    "AFTER_FULL",
+    "AFTER",
+    "AFTER_SPLIT"
+   ],
+   "description": "Specify how existing transformations and the action channels are combined"
+  },
+  "transform_channel": {
+   "value": "LOCATION_X",
+   "type": "ENUM",
+   "items": [
+    "LOCATION_X",
+    "LOCATION_Y",
+    "LOCATION_Z",
+    "ROTATION_X",
+    "ROTATION_Y",
+    "ROTATION_Z",
+    "SCALE_X",
+    "SCALE_Y",
+    "SCALE_Z"
+   ],
+   "description": "Transformation channel from the target that is used to key the Action"
+  },
+  "action": {
+   "value": null,
+   "type": "POINTER",
+   "description": "The constraining action"
+  },
+  "action_slot_handle": {
+   "value": 0,
+   "type": "INT",
+   "range": [
+    -2147483648,
+    2147483647
+   ],
+   "description": "A number that identifies which sub-set of the Action is considered to be for this Action Constraint"
+  },
+  "last_slot_identifier": {
+   "value": "",
+   "type": "STRING",
+   "description": "The identifier of the most recently assigned action slot. The slot identifies which sub-set of the Action is considered to be for this constraint, and its identifier is used to find the right slot when assigning an Action."
+  },
+  "action_slot": {
+   "value": null,
+   "type": "POINTER",
+   "description": "The slot identifies which sub-set of the Action is considered to be for this strip, and its name is used to find the right slot when assigning another Action"
+  },
+  "action_suitable_slots": {
+   "value": "bpy_prop_collection",
+   "type": "COLLECTION",
+   "description": "The list of action slots suitable for this NLA strip"
+  },
+  "use_bone_object_action": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Bones only: apply the object's transformation channels of the action to the constrained bone, instead of bone's channels"
+  },
+  "frame_start": {
+   "value": 0,
+   "type": "INT",
+   "range": [
+    -1048574,
+    1048574
+   ],
+   "description": "First frame of the Action to use"
+  },
+  "frame_end": {
+   "value": 0,
+   "type": "INT",
+   "range": [
+    -1048574,
+    1048574
+   ],
+   "description": "Last frame of the Action to use"
+  },
+  "max": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -1000.0,
+    1000.0
+   ],
+   "description": "Maximum value for target channel range"
+  },
+  "min": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -1000.0,
+    1000.0
+   ],
+   "description": "Minimum value for target channel range"
+  },
+  "eval_time": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Interpolates between Action Start and End frames"
+  },
+  "use_eval_time": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Interpolate between Action Start and End frames, with the Evaluation Time slider instead of the Target object/bone"
+  }
+ },
+ "ARMATURE": {
+  "is_override_data": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override"
+  },
+  "owner_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space that owner is evaluated in"
+  },
+  "target_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL",
+    "LOCAL_OWNER_ORIENT"
+   ],
+   "description": "Space that target is evaluated in"
+  },
+  "space_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for Custom Space"
+  },
+  "space_subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mute": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Enable/Disable Constraint"
+  },
+  "enabled": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use the results of this constraint"
+  },
+  "influence": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Amount of influence constraint will have on the final solution"
+  },
+  "targets": {
+   "value": "bpy_prop_collection",
+   "type": "COLLECTION",
+   "description": "Target Bones"
+  },
+  "use_deform_preserve_volume": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Deform rotation interpolation with quaternions"
+  },
+  "use_bone_envelopes": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Multiply weights by envelope for all bones, instead of acting like Vertex Group based blending. The specified weights are still used, and only the listed bones are considered."
+  },
+  "use_current_location": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Use the current bone location for envelopes and choosing B-Bone segments instead of rest position"
+  }
+ },
+ "CHILD_OF": {
+  "is_override_data": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override"
+  },
+  "owner_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space that owner is evaluated in"
+  },
+  "target_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL",
+    "LOCAL_OWNER_ORIENT"
+   ],
+   "description": "Space that target is evaluated in"
+  },
+  "space_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for Custom Space"
+  },
+  "space_subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mute": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Enable/Disable Constraint"
+  },
+  "enabled": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use the results of this constraint"
+  },
+  "influence": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Amount of influence constraint will have on the final solution"
+  },
+  "target": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Target object"
+  },
+  "subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "use_location_x": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use X Location of Parent"
+  },
+  "use_location_y": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use Y Location of Parent"
+  },
+  "use_location_z": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use Z Location of Parent"
+  },
+  "use_rotation_x": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use X Rotation of Parent"
+  },
+  "use_rotation_y": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use Y Rotation of Parent"
+  },
+  "use_rotation_z": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use Z Rotation of Parent"
+  },
+  "use_scale_x": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use X Scale of Parent"
+  },
+  "use_scale_y": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use Y Scale of Parent"
+  },
+  "use_scale_z": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use Z Scale of Parent"
+  },
+  "set_inverse_pending": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Set to true to request recalculation of the inverse matrix"
+  },
+  "inverse_matrix": {
+   "value": [
+    [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     1.2662602970693632e+16,
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   ],
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Transformation matrix to apply before"
+  }
+ },
+ "FLOOR": {
+  "is_override_data": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override"
+  },
+  "owner_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space that owner is evaluated in"
+  },
+  "target_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL",
+    "LOCAL_OWNER_ORIENT"
+   ],
+   "description": "Space that target is evaluated in"
+  },
+  "space_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for Custom Space"
+  },
+  "space_subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mute": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Enable/Disable Constraint"
+  },
+  "enabled": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use the results of this constraint"
+  },
+  "influence": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Amount of influence constraint will have on the final solution"
+  },
+  "target": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Target object"
+  },
+  "subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "floor_location": {
+   "value": "FLOOR_Z",
+   "type": "ENUM",
+   "items": [
+    "FLOOR_X",
+    "FLOOR_Y",
+    "FLOOR_Z",
+    "FLOOR_NEGATIVE_X",
+    "FLOOR_NEGATIVE_Y",
+    "FLOOR_NEGATIVE_Z"
+   ],
+   "description": "Location of target that object will not pass through"
+  },
+  "use_rotation": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Use the target's rotation to determine floor"
+  },
+  "offset": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Offset of floor from object origin"
+  }
+ },
+ "FOLLOW_PATH": {
+  "is_override_data": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override"
+  },
+  "owner_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space that owner is evaluated in"
+  },
+  "target_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL",
+    "LOCAL_OWNER_ORIENT"
+   ],
+   "description": "Space that target is evaluated in"
+  },
+  "space_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for Custom Space"
+  },
+  "space_subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mute": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Enable/Disable Constraint"
+  },
+  "enabled": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use the results of this constraint"
+  },
+  "influence": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Amount of influence constraint will have on the final solution"
+  },
+  "target": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Target Curve object"
+  },
+  "offset": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -1048574.0,
+    1048574.0
+   ],
+   "description": "Offset from the position corresponding to the time frame"
+  },
+  "offset_factor": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Percentage value defining target position along length of curve"
+  },
+  "forward_axis": {
+   "value": "FORWARD_Y",
+   "type": "ENUM",
+   "items": [
+    "FORWARD_X",
+    "FORWARD_Y",
+    "FORWARD_Z",
+    "TRACK_NEGATIVE_X",
+    "TRACK_NEGATIVE_Y",
+    "TRACK_NEGATIVE_Z"
+   ],
+   "description": "Axis that points forward along the path"
+  },
+  "up_axis": {
+   "value": "UP_Z",
+   "type": "ENUM",
+   "items": [
+    "UP_X",
+    "UP_Y",
+    "UP_Z"
+   ],
+   "description": "Axis that points upward"
+  },
+  "use_curve_follow": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Object will follow the heading and banking of the curve"
+  },
+  "use_fixed_location": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Object will stay locked to a single point somewhere along the length of the curve regardless of time"
+  },
+  "use_curve_radius": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Object is scaled by the curve radius"
+  }
+ },
+ "GEOMETRY_ATTRIBUTE": {
+  "is_override_data": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override"
+  },
+  "owner_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space that owner is evaluated in"
+  },
+  "target_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL",
+    "LOCAL_OWNER_ORIENT"
+   ],
+   "description": "Space that target is evaluated in"
+  },
+  "space_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for Custom Space"
+  },
+  "space_subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mute": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Enable/Disable Constraint"
+  },
+  "enabled": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use the results of this constraint"
+  },
+  "influence": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Amount of influence constraint will have on the final solution"
+  },
+  "target": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Target geometry object"
+  },
+  "attribute_name": {
+   "value": "position",
+   "type": "STRING",
+   "description": "Name of the attribute to retrieve the transform from"
+  },
+  "domain": {
+   "value": "POINT",
+   "type": "ENUM",
+   "items": [
+    "POINT",
+    "EDGE",
+    "FACE",
+    "FACE_CORNER",
+    "CURVE",
+    "INSTANCE"
+   ],
+   "description": "Attribute domain"
+  },
+  "apply_target_transform": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Apply the target object's world transform on top of the attribute's transform"
+  },
+  "data_type": {
+   "value": "VECTOR",
+   "type": "ENUM",
+   "items": [
+    "VECTOR",
+    "QUATERNION",
+    "FLOAT4X4"
+   ],
+   "description": "Select data type of attribute"
+  },
+  "sample_index": {
+   "value": 0,
+   "type": "INT",
+   "range": [
+    0,
+    2147483647
+   ],
+   "description": "Sample Index"
+  },
+  "mix_loc": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Mix Location"
+  },
+  "mix_rot": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Mix Rotation"
+  },
+  "mix_scl": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Mix Scale"
+  },
+  "mix_mode": {
+   "value": "REPLACE",
+   "type": "ENUM",
+   "items": [
+    "REPLACE",
+    "BEFORE_FULL",
+    "BEFORE_SPLIT",
+    "AFTER_FULL",
+    "AFTER_SPLIT"
+   ],
+   "description": "Specify how the copied and existing transformations are combined"
+  }
+ },
+ "PIVOT": {
+  "is_override_data": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override"
+  },
+  "owner_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space that owner is evaluated in"
+  },
+  "target_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL",
+    "LOCAL_OWNER_ORIENT"
+   ],
+   "description": "Space that target is evaluated in"
+  },
+  "space_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for Custom Space"
+  },
+  "space_subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mute": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Enable/Disable Constraint"
+  },
+  "enabled": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use the results of this constraint"
+  },
+  "influence": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Amount of influence constraint will have on the final solution"
+  },
+  "head_tail": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Target along length of bone: Head is 0, Tail is 1"
+  },
+  "use_bbone_shape": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Follow shape of B-Bone segments when calculating Head/Tail position"
+  },
+  "target": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Target Object, defining the position of the pivot when defined"
+  },
+  "subtarget": {
+   "value": "",
+   "type": "STRING"
+  },
+  "use_relative_location": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Offset will be an absolute point in space instead of relative to the target"
+  },
+  "offset": {
+   "value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "type": "FLOAT",
+   "range": [
+    -3.4028234663852886e+38,
+    3.4028234663852886e+38
+   ],
+   "description": "Offset of pivot from target (when set), or from owner's location (when Fixed Position is off), or the absolute pivot point"
+  },
+  "rotation_range": {
+   "value": "NX",
+   "type": "ENUM",
+   "items": [
+    "ALWAYS_ACTIVE",
+    "NX",
+    "NY",
+    "NZ",
+    "X",
+    "Y",
+    "Z"
+   ],
+   "description": "Rotation range on which pivoting should occur"
+  }
+ },
+ "SHRINKWRAP": {
+  "is_override_data": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override"
+  },
+  "owner_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space that owner is evaluated in"
+  },
+  "target_space": {
+   "value": "WORLD",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL",
+    "LOCAL_OWNER_ORIENT"
+   ],
+   "description": "Space that target is evaluated in"
+  },
+  "space_object": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Object for Custom Space"
+  },
+  "space_subtarget": {
+   "value": "",
+   "type": "STRING",
+   "description": "Armature bone, mesh or lattice vertex group, ..."
+  },
+  "mute": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Enable/Disable Constraint"
+  },
+  "enabled": {
+   "value": true,
+   "type": "BOOLEAN",
+   "description": "Use the results of this constraint"
+  },
+  "influence": {
+   "value": 1.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    1.0
+   ],
+   "description": "Amount of influence constraint will have on the final solution"
+  },
+  "target": {
+   "value": null,
+   "type": "POINTER",
+   "description": "Target Mesh object"
+  },
+  "shrinkwrap_type": {
+   "value": "NEAREST_SURFACE",
+   "type": "ENUM",
+   "items": [
+    "NEAREST_SURFACE",
+    "PROJECT",
+    "NEAREST_VERTEX",
+    "TARGET_PROJECT"
+   ],
+   "description": "Select type of shrinkwrap algorithm for target position"
+  },
+  "wrap_mode": {
+   "value": "ON_SURFACE",
+   "type": "ENUM",
+   "items": [
+    "ON_SURFACE",
+    "INSIDE",
+    "OUTSIDE",
+    "OUTSIDE_SURFACE",
+    "ABOVE_SURFACE"
+   ],
+   "description": "Select how to constrain the object to the target surface"
+  },
+  "distance": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    3.4028234663852886e+38
+   ],
+   "description": "Distance to Target"
+  },
+  "project_axis": {
+   "value": "POS_Z",
+   "type": "ENUM",
+   "items": [
+    "POS_X",
+    "POS_Y",
+    "POS_Z",
+    "NEG_X",
+    "NEG_Y",
+    "NEG_Z"
+   ],
+   "description": "Axis constrain to"
+  },
+  "project_axis_space": {
+   "value": "LOCAL",
+   "type": "ENUM",
+   "items": [
+    "WORLD",
+    "CUSTOM",
+    "POSE",
+    "LOCAL_WITH_PARENT",
+    "LOCAL"
+   ],
+   "description": "Space for the projection axis"
+  },
+  "project_limit": {
+   "value": 0.0,
+   "type": "FLOAT",
+   "range": [
+    0.0,
+    3.4028234663852886e+38
+   ],
+   "description": "Limit the distance used for projection (zero disables)"
+  },
+  "use_project_opposite": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Project in both specified and opposite directions"
+  },
+  "cull_face": {
+   "value": "OFF",
+   "type": "ENUM",
+   "items": [
+    "OFF",
+    "FRONT",
+    "BACK"
+   ],
+   "description": "Stop vertices from projecting to a face on the target when facing towards/away"
+  },
+  "use_invert_cull": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "When projecting in the opposite direction invert the face cull mode"
+  },
+  "use_track_normal": {
+   "value": false,
+   "type": "BOOLEAN",
+   "description": "Align the specified axis to the surface normal"
+  },
+  "track_axis": {
+   "value": "TRACK_X",
+   "type": "ENUM",
+   "items": [
+    "TRACK_X",
+    "TRACK_Y",
+    "TRACK_Z",
+    "TRACK_NEGATIVE_X",
+    "TRACK_NEGATIVE_Y",
+    "TRACK_NEGATIVE_Z"
+   ],
+   "description": "Axis that is aligned to the normal"
+  }
+ }
+}
