@@ -1,8 +1,9 @@
 // File > Export > Babylon (.babylon) and JavaScript (.zip), run in the scene window. JavaScript is a package: scene.js
 // with its types, scene.bin, images/, the page runtime in bylonder/ and the blocks library files it imports (runtime/,
 // MIT OR Apache-2.0); with Live Modifiers, modifiers.wasm in bylonder-modifiers/, and with Geometry Nodes, Blender's
-// Geometry Nodes kernels in bylonder-geometry-nodes/, with curves their blocks in bylonder-curves/ and with volumes the
-// volume passes in bylonder-volumes/ (GPL, runtime-files.js gplFiles). Bundled (the default), its modules are one bundle
+// Geometry Nodes kernels in bylonder-geometry-nodes/, with curves their blocks in bylonder-curves/, with point clouds
+// their drawing in bylonder-pointclouds/ and with volumes the volume passes in bylonder-volumes/ (GPL, runtime-files.js
+// gplFiles). Bundled (the default), its modules are one bundle
 // with Babylon's (bundle.js), made here from the app's own copy of Babylon's sources and esbuild.
 import { AbstractEngine } from '@babylonjs/core';
 import { zipSync, strToU8 } from 'fflate';
@@ -22,6 +23,7 @@ const SOURCES = {
   'io_scene_babylon/polyfill/modifiers-worker.bundle.js': text(() => import('./polyfill/modifiers-worker.bundle.js?raw')),
   'io_scene_babylon/polyfill/geometry-nodes-kernels.bundle.js': text(() => import('./polyfill/geometry-nodes-kernels.bundle.js?raw')),
   'draw/curves-blocks.js': text(() => import('../draw/curves-blocks.js?raw')),
+  'draw/pointcloud.js': text(() => import('../draw/pointcloud.js?raw')),
   'io_scene_babylon/polyfill/volumes.bundle.js': text(() => import('./polyfill/volumes.bundle.js?raw')),
   'blenkernel/light/area-specular.js': text(() => import('../blenkernel/light/area-specular.js?raw')),
   'io_scene_babylon/panel-icons.js': text(() => import('./panel-icons.js?raw')),

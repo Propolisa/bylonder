@@ -18,7 +18,7 @@ const FIXED = new Set(['curves']);
 /** Blender's code an implementation ships beside its folder's files, at export. */
 const MADE = { curves: ['bylonder-curves/glsl.js'] };
 /** The implementations whose code is Blender's. */
-const GPL_IMPLEMENTATIONS = new Set(['modifiers', 'curves']);
+const GPL_IMPLEMENTATIONS = new Set(['modifiers', 'curves', 'pointcloud']);
 
 /** Whether `replace` (type keys, a key ending in * a prefix, as the registry matches them) covers a type. */
 export const replaces = (replace, type) => replace.some((key) => key === type || (key.endsWith('*') && type.startsWith(key.slice(0, -1))));

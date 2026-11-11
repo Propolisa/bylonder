@@ -8,6 +8,7 @@ import { baseMesh, geometryNodesEntities, modifierEntities } from './modifiers-e
 import { ID_OB } from '../blenkernel/main-evaluated.js';
 import { greasePencilEntities } from './grease-pencil-export.js';
 import { curvesEntities } from './curves-export.js';
+import { pointCloudEntities } from './pointclouds-export.js';
 import { chosenState } from './export-options.js';
 import { entityOrder, IR_SCHEMA, IR_VERSION, referencesIn } from './runtime/ir.js';
 
@@ -284,6 +285,7 @@ export function exportIR(world, { controls, collections = null, live, bin, anima
     Object.assign(entities, driverEntities(properties), animationEntities(ids, properties, time, animationGroups, curves, bin),
       greasePencilEntities(world, objects.map(([node]) => node), bin, time),
       chosenState(states, 'curves') === 'OFF' ? {} : curvesEntities(world, objects.map(([node]) => node), bin), constraintEntities(ids, constraints, time));
+    Object.assign(entities, pointCloudEntities(world, objects.map(([node]) => node), bin));
   }
   // What the page computes from is offered to authors.
   for (const entity of Object.values(entities)) if (entity.implementation) for (const [ref] of referencesIn(entity.inputs)) if ('property' in ref) properties[ref.property].suggested = true;

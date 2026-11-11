@@ -22,6 +22,7 @@ export const EVALUATOR_FILES = {
     files: { 'kernels.js': 'io_scene_babylon/polyfill/geometry-nodes-kernels.bundle.js', 'geometry-nodes.wasm': GEOMETRY_NODES_KERNELS } },
   grease_pencil: { runtime: declared('grease-pencil') },
   curves: { runtime: declared('curves'), folder: 'bylonder-curves', files: { 'curves.js': 'draw/curves-blocks.js' } },
+  pointcloud: { runtime: declared('pointclouds'), folder: 'bylonder-pointclouds', files: { 'pointcloud.js': 'draw/pointcloud.js' } },
 };
 // GPL's notice and text in a folder of a package: [package path, src/ path].
 export const noticeFiles = (folder) => Object.entries(NOTICE).map(([name, from]) => [`${folder}/${name}`, from]);

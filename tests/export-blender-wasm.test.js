@@ -50,7 +50,8 @@ WebAssembly.instantiate = (module, ...rest) => {
 const written = writePackage(files);
 const blend = await (await import(written.url)).load(new NullEngine());
 const page = blend.scene;
-const evaluated = () => page.getMeshById('Planet').getChildMeshes(true).some((m) => m.id.startsWith('Planet/'));
+// The parts Geometry Nodes draws in the page; the clouds the export baked (`Planet/pointcloud/0`) are drawn at load.
+const evaluated = () => page.getMeshById('Planet').getChildMeshes(true).some((m) => m.id.startsWith('Planet/') && !/\/pointcloud\/\d+$/.test(m.id));
 
 // Controls on fast paths: a transform, a light, the frame. The planet stays as the export baked it.
 blend.set('objects["Planet"].location[2]', 0.5);

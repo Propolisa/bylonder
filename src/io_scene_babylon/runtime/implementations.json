@@ -96,6 +96,9 @@
     "curves:CURVES": [
       { "implementation": "Blender's curve shape functions (bylonder-curves/: the app's curves blocks and Blender's GLSL) on Main's curves draw at export, in the curves' material, as the app draws them", "license": "GPL-3.0-or-later", "fidelity": "exact" }
     ],
+    "pointcloud:POINTCLOUD": [
+      { "implementation": "Blender's point cloud drawing (bylonder-pointclouds/: the app's, after draw_pointcloud_lib.glsl) on the points Main's instances hold at export, a sphere at each point in the point cloud's material, as the app draws them", "license": "GPL-3.0-or-later", "fidelity": "exact" }
+    ],
     "grease_pencil:LAYER": [
       { "implementation": "page runtime (grease-pencil.js): each keyed drawing as Main draws it, strokes as GreasedLine meshes and fills as triangles, the drawing of the last key at or before the frame shown", "license": "MIT OR Apache-2.0", "fidelity": "approximate" }
     ],
