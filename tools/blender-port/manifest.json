@@ -343,6 +343,37 @@
         "intern/eigen/intern",
         "extern/wcwidth"
       ]
+    },
+    "constraints/constraints.wasm": {
+      "api": ["constraint-api.cc", "pose-depsgraph.cc", "constraints-only.cc", "no-depsgraph.cc"],
+      "check": "tools/blender-port/check-constraints.mjs",
+      "dependencies": {
+        "eigen": {"url": "https://gitlab.com/libeigen/eigen/-/archive/8a1083e9bf41b91fdea6546681f806154efdc25a/eigen-8a1083e9bf41b91fdea6546681f806154efdc25a.tar.gz",
+                  "tag": "8a1083e9", "sha256": "cc28a84fdec496c6777596350ea805519bf10f717d21044ae6ba3dd562183a26"}
+      },
+      "libraries": [
+        {"path": "source/blender/blenkernel/intern/constraint.cc", "includes": ["source/blender/ikplugin"]},
+        {"path": "source/blender/blenkernel/intern/action.cc", "includes": ["source/blender/ikplugin"]},
+        {"path": "source/blender/blenkernel/intern/armature.cc", "includes": ["source/blender/ikplugin"]},
+        {"path": "source/blender/blenkernel/intern/armature_update.cc", "includes": ["source/blender/ikplugin"]},
+        "source/blender/blenkernel/intern/anim_path.cc",
+        "source/blender/blenkernel/intern/anim_visualization.cc",
+        "source/blender/blenkernel/intern/armature_deform.cc",
+        "source/blender/blenkernel/intern/fcurve_driver.cc",
+        "source/blender/blenkernel/intern/curve.cc",
+        {"path": "source/blender/ikplugin/intern", "defines": ["WITH_IK_SOLVER", "WITH_IK_ITASC"], "includes": ["source/blender/ikplugin", "intern/iksolver/extern", "intern/itasc"]},
+        {"path": "intern/iksolver/intern", "includes": ["intern/iksolver/extern"]},
+        "intern/itasc",
+        "intern/itasc/kdl",
+        "intern/itasc/kdl/utilities",
+        "source/blender/blentranslation/intern",
+        {"path": "source/blender/blenlib/intern", "exclude": ["delaunay_2d.cc", "string_utf8.cc"]},
+        {"path": "source/blender/blenlib/intern/string_utf8.cc", "flags": ["-funsigned-char"]},
+        {"path": "source/blender/blenlib/intern/delaunay_2d.cc", "includes": ["wasm/fstream"]},
+        "intern/guardedalloc/intern",
+        "intern/clog",
+        "intern/eigen/intern"
+      ]
     }
   },
   "units": {

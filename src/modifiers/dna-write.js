@@ -14,7 +14,7 @@ export const fieldLayout = (located, prop) => ({
 // Writes a value into a field at a struct's address: a bit of a flag field, an element of an array, an enum by its
 // item's identifier, a name, or a number.
 function writeField(view, address, layout, value, index) {
-  const { offset, size, kind, signed, bit, bitset, negative, boolean, items, length } = layout;
+  const { offset, size, kind, signed, bit, bitset, negative, boolean, items, length, bitflag } = layout;
   const at = address + offset + (bitset ? 0 : index * size);
   // A name (a vertex group's): its UTF-8 bytes in the field's characters, the rest zero.
   if (typeof value === 'string' && !items) {
@@ -29,6 +29,11 @@ function writeField(view, address, layout, value, index) {
     const mask = bitset ? bit << index : bit, on = negative ? !value : value;
     const word = view[`get${type}`](at, true);
     return view[`set${type}`](at, on ? word | mask : word & ~mask, true);
+  }
+  // An enum Blender stores as bits of a flag field (RNA_def_property_enum_bitflag_sdna): its items' bits alone.
+  if (items && bitflag) {
+    const mask = Object.values(items).reduce((m, v) => m | v, 0);
+    return view[`set${type}`](at, (view[`get${type}`](at, true) & ~mask) | items[value], true);
   }
   view[`set${type}`](at, items ? items[value] : Number(value), true);
 }
@@ -47,13 +52,14 @@ export function writeValues(view, address, layouts, values) {
 
 // A field's value at a struct's address, as writeField writes it.
 function readField(view, address, layout, index) {
-  const { offset, size, kind, signed, bit, bitset, negative, boolean, items } = layout;
+  const { offset, size, kind, signed, bit, bitset, negative, boolean, items, bitflag } = layout;
   const at = address + offset + (bitset ? 0 : index * size);
   const type = { 1: signed ? 'Int8' : 'Uint8', 2: signed ? 'Int16' : 'Uint16', 4: signed ? 'Int32' : 'Uint32' }[size];
   if (kind === 'float') return view.getFloat32(at, true);
   const word = view[`get${type}`](at, true);
   if (bit !== undefined && boolean) return !!(word & (bitset ? bit << index : bit)) !== !!negative;
-  return items ? Object.keys(items).find((id) => items[id] === word) ?? null : word;
+  const masked = items && bitflag ? word & Object.values(items).reduce((m, v) => m | v, 0) : word;
+  return items ? Object.keys(items).find((id) => items[id] === masked) ?? null : word;
 }
 
 // The settings at paths (as writeValues takes them) that a struct at an address holds.

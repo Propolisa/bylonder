@@ -240,7 +240,8 @@ class, Blender where only Blender's code can do it.
 | `animation` | Native | AnimationGroup at the scene's time | With the page |
 | `material` | Native | NodeMaterial InputBlock values and textures | With the page (bindings only) |
 | `skin`, `morph` | Native | Bone local matrices, target influences from pose and Key values without constraints | With the page |
-| `pose` | Mapped | An armature's bone constraints (IK of one or two bones, Damped Track, Track To, Copy Rotation, Limit Rotation) on its skeleton before each frame draws (MIT OR Apache-2.0) | With the page |
+| `pose-kernels` | Blender kernels | An armature's bone constraints on its skeleton before each frame draws, by `constraints.wasm` as Main's depsgraph evaluates them; each type swappable through `constraint:<TYPE>` units | With the page |
+| `pose` | Mapped | An armature's bone constraints the kernels do not cover (IK of one or two bones, Damped Track, Track To, Copy Rotation, Limit Rotation) on its skeleton before each frame draws (MIT OR Apache-2.0) | With the page |
 | `driver` | Mapped | Driver expressions, variables and the driver's F-curve, as clean-room units (MIT OR Apache-2.0) | On the first set of a knob a driver reads |
 | `modifiers` | Blender | Mesh-only stacks in `modifiers.wasm`'s worker | On the first set of a modifier setting |
 | `geometry-nodes` | Mapped, Blender kernels | Geometry Nodes modifiers: Bylonder's evaluator over the IR graph, each node a call into `geometry-nodes.wasm` unless a unit is registered for it | On the first set of an input the modifier reads |

@@ -1,11 +1,13 @@
 // The JavaScript export's bone constraints against Blender's: the Rigged Character's rig (IK arms and legs with pole
 // targets, a head that Damped Track and Limit Rotation turn toward an empty, hands that copy their IK targets'
 // rotation), exported and loaded, takes the pose Main evaluates at frames of its animation with the constraints run in
-// the page, not sampled; moving an IK target or its pole through the page's controls moves the rig. Its controls (an
+// the page on Blender's kernels (bylonder-constraints/), not sampled; moving an IK target or its pole through the page's controls moves the rig. Its controls (an
 // IK/FK switch and a Breathe slider, custom properties that drivers read) and its elbow's corrective shape key, driven by
 // the posed arm's angle, morph and pose the skinned body as Main does. Its tail, a B-Bone, bends by the joints of its
 // segments, sampled from Main. A pose set as the page loads, before the constraints attach, holds.
 import assert from 'node:assert/strict';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { Matrix, NullEngine } from '@babylonjs/core';
 import { babylonMatrix } from '../src/blenkernel/main-view.js';
 import { blendData } from '../src/python/bpy_rna.js';
@@ -24,14 +26,15 @@ sync.view();
 const files = await exportModule(world);
 const ir = JSON.parse(files['scene.ir.json']);
 const entity = Object.values(ir.entities).find((e) => e.type === 'constraints:POSE');
-assert.equal(entity?.implementation, 'pose', 'the page runs the rig\'s constraints');
-assert.deepEqual(Object.keys(entity.inputs.constraints).sort(), ['forearm.L', 'forearm.R', 'hand.L', 'hand.R', 'head', 'shin.L', 'shin.R']);
+assert.equal(entity?.implementation, 'pose-kernels', 'the page runs the rig constraints on Blender kernels');
+assert.deepEqual(entity.inputs.kernels.bones.filter((b) => b.constraints.length).map((b) => b.name).sort(), ['forearm.L', 'forearm.R', 'hand.L', 'hand.R', 'head', 'shin.L', 'shin.R']);
 const groups = JSON.parse(/const ANIMATION_GROUPS = (.*);\n/.exec(files['scene.js'])[1]);
 const sampled = groups.flatMap((g) => g.targetedAnimations).filter((t) => /^Rig /.test(t.targetId) && t.animation.keys.length > 1).map((t) => t.targetId);
 const joints = Array.from({ length: 9 }, (_, k) => `Rig tail#${k}`);
 assert.deepEqual(sampled, joints, "no bone is sampled, only the tail's segment joints");
 
 const written = writePackage(files);
+assert.ok(existsSync(join(written.dir, 'bylonder-constraints/constraints.wasm')), 'the package ships the kernels');
 const blend = await (await import(written.url)).load(new NullEngine());
 await blend.settled();
 const page = blend.scene, frameControl = blend.controls().find((c) => c.path.endsWith('.frame_current'));

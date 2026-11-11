@@ -1,8 +1,17 @@
-// An armature's bone constraints as the page runs them (runtime/pose-constraints.js): read from RNA where the page has
-// a solver for each, and kept only where the page's pose is the one Main evaluated at every frame the export samples.
+// An armature's bone constraints as the page runs them (runtime/pose-constraints.js): on Blender's kernels
+// (constraints.wasm, runtime/pose-kernels.js) where they cover the rig, else on the page's own solvers where it has one
+// for each constraint; kept only where the page's pose is the one Main evaluated at every frame the export samples.
 import { posedBone } from './runtime/blend-scene.js';
 import { solvePose } from './runtime/pose-constraints.js';
+import { kernelSolve } from './runtime/pose-kernels.js';
+import { loadConstraints } from './polyfill/constraints.js';
+import { rigOf } from './rig-export.js';
 import { key } from './controls-export.js';
+
+// Blender's kernels, loaded once an export needs them (prepareKernels); none where they cannot load.
+let kernels = null, loading = null;
+export const prepareKernels = () => (loading ??= loadConstraints(new URL('../constraints/constraints.wasm', import.meta.url))
+  .then((loaded) => { kernels = kernelSolve(loaded); }, () => {}));
 
 const AXES = ['x', 'y', 'z'];
 // The spaces the page converts between, for a bone and for an object target.
@@ -60,22 +69,28 @@ export const ownMatrix = (pose, bone) => posedBone({ mode: pose.rotation_mode },
 
 // The constraints with their influences read from their controls (controls-export.js poseControls), so that a driver or
 // the page sets them.
-const influenced = (arm, stacks) => Object.fromEntries(Object.entries(stacks).map(([bone, list]) => [bone, list.map((c) => ({ ...c,
-  influence: { property: `objects${key(arm.name)}.pose.bones${key(bone)}.constraints${key(c.name)}.influence` } }))]));
+const influence = (arm, bone, c) => ({ property: `objects${key(arm.name)}.pose.bones${key(bone)}.constraints${key(c.name)}.influence` });
+const influenced = (arm, stacks) => Object.fromEntries(Object.entries(stacks).map(([bone, list]) => [bone, list.map((c) => ({ ...c, influence: influence(arm, bone, c) }))]));
+// A rig's influences for the kernels, by bone, in its constraints' order.
+const influences = (arm, rig) => Object.fromEntries(rig.bones.filter((b) => b.constraints.length).map((b) => [b.name, b.constraints.map((c) => influence(arm, b.name, c))]));
 
 const close = (a, b) => a.asArray().every((v, i) => Math.abs(v - b.asArray()[i]) <= TOLERANCE);
 
-// For an armature drawn by one skeleton, its bone constraints as the page runs them: `check(evaluated)` compares the
+// For an armature drawn by one skeleton, its bone constraints as the page runs them (on the kernels when an export has
+// prepared them and they cover the rig, its skeleton holding every bone): `check(evaluated)` compares the
 // page's pose with Main's at the frame Main is on (`evaluated`: each bone's local matrix as the skeleton holds it),
 // recording each bone's own matrix; `entity()` the IR entity's inputs once every check held, else null, the bones'
 // own matrices those of the frame Main is on then; `moved`, the bones the constraints move, and `own(bone)` a bone's
 // own matrices at the frames checked. `meshWorld()` gives the skinned mesh's
 // world matrix and `nodeWorld(id)` a node's, at the frame Main is on.
 export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, nodeWorld }) {
-  const stacks = poseStacks(arm, nodeOf);
-  if (!stacks) return null;
   // The armature's own bones, without its B-Bones' segment joints after them.
-  const bones = skeleton.bones.slice(0, skeleton.armatureBones), poses = bones.map((bone) => arm.pose.bones.get(bone.name));
+  const bones = skeleton.bones.slice(0, skeleton.armatureBones);
+  const targetOf = (ob, bone) => { const node = !bone && nodeOf(ob); return node ? { node: node.id } : undefined; };
+  const rig = kernels && bones.length === arm.data.bones.length && rigOf(arm, [...arm.data.bones].map((b) => b.name), targetOf);
+  const stacks = rig ? {} : poseStacks(arm, nodeOf);
+  if (!rig && !stacks) return null;
+  const solve = rig ? kernels : solvePose, poses = bones.map((bone) => arm.pose.bones.get(bone.name));
   if (poses.some((pose) => !pose || pose.rotation_mode === 'AXIS_ANGLE')) return null;
   const shape = bones.map((bone, i) => ({ name: bone.name, parent: bone.getParent() ? bones.indexOf(bone.getParent()) : -1, rest: bone.getRestMatrix(),
     length: arm.data.bones.get(bone.name).length, mode: poses[i].rotation_mode }));
@@ -87,7 +102,8 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
     check(evaluated) {
       const locals = bones.map((bone, i) => ownMatrix(poses[i], bone));
       bones.forEach((bone, i) => owns.get(bone).push(locals[i]));
-      const result = solvePose({ bones: shape, locals, mesh: meshWorld(), space: skeleton.space, stacks, nodeWorld });
+      const current = rig && Object.fromEntries(rig.bones.filter((b) => b.constraints.length).map((b) => [b.name, [...arm.pose.bones.get(b.name).constraints].map((c) => c.influence)]));
+      const result = solve({ bones: shape, locals, mesh: meshWorld(), space: skeleton.space, stacks, kernels: rig, influences: current, nodeWorld });
       for (const [i, local] of result) {
         moved.add(bones[i]);
         held &&= close(local, evaluated[i]);
@@ -96,6 +112,7 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
     },
     entity: () => (checked && held ? {
       skeleton: skeleton.id, mesh: mesh.id, space: skeleton.space.asArray(), constraints: influenced(arm, stacks),
+      ...(rig && { kernels: rig, influences: influences(arm, rig) }),
       bones: Object.fromEntries(shape.map(({ name, length, mode }, i) => [name, { length, mode, ...(moved.has(bones[i]) && { own: ownMatrix(poses[i], bones[i]).asArray() }) }])),
     } : null),
   };

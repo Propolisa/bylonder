@@ -14,6 +14,9 @@ names, as Clang parses the RNA definition files for the module's wasm32 target.
   `from`, that pointer's offset in the base struct), and the names of the RNA functions each property has (`funcs`:
   get, set, range, length, update), which the module compiles from rna_fcurve.cc's runtime part (wasm/rna-fcurve.cc).
   A property with functions and no DNA field of its own is kept with its type and array length (`computed`).
+- src/makesrna/dna-constraints.json: the constraints (rna_constraint.cc), a type's own properties in the struct its
+  Constraint's `data` points to (`from`), and the bones, pose bones, pose and armature (rna_armature.cc, rna_pose.cc),
+  for JS to write a rig and its constraints into the constraint kernels module (constraints.wasm).
 - src/makesrna/dna-textures.json: a Texture of each type (rna_texture.cc: CloudsTexture and the others, all a Tex), for
   JS to read and write textures in the module.
 - src/makesrna/dna-data.json: the data the scene sync writes into Main by RNA name (main-sync.js): lights, cameras,
@@ -50,6 +53,16 @@ OUTPUTS = {
                                     'FModifierEnvelopeControlPoint', 'FModifierCycles', 'FModifierLimits', 'FModifierNoise',
                                     'FModifierStepped', 'FModifierSmooth'], 'detail': True, 'funcs': True,
                         'computed': True, 'enum_files': ['rna_curve.cc', 'rna_ID.cc']},
+    'dna-constraints.json': {'files': ['rna_constraint.cc', 'rna_armature.cc', 'rna_pose.cc'],
+                             'functions': lambda name: name.startswith('rna_def_') or name.startswith('RNA_def_'),
+                             'structs': ['Constraint', 'ConstraintTarget', 'ConstraintTargetBone', 'ChildOfConstraint', 'ArmatureConstraint',
+                                         'KinematicConstraint', 'TrackToConstraint', 'CopyLocationConstraint', 'CopyRotationConstraint',
+                                         'CopyScaleConstraint', 'MaintainVolumeConstraint', 'CopyTransformsConstraint', 'FloorConstraint',
+                                         'ActionConstraint', 'LockedTrackConstraint', 'FollowPathConstraint', 'StretchToConstraint',
+                                         'ClampToConstraint', 'TransformConstraint', 'LimitLocationConstraint', 'LimitRotationConstraint',
+                                         'LimitScaleConstraint', 'LimitDistanceConstraint', 'ShrinkwrapConstraint', 'DampedTrackConstraint',
+                                         'SplineIKConstraint', 'PivotConstraint', 'Bone', 'PoseBone', 'Pose', 'Armature'], 'detail': True,
+                             'shared': {'PoseBone': 'Bone'}},
     'dna-textures.json': {'files': ['rna_texture.cc'], 'functions': lambda name: name == 'RNA_def_texture', 'structs': None, 'detail': True},
     'dna-data.json': {'files': ['rna_light.cc', 'rna_camera.cc', 'rna_material.cc', 'rna_world.cc', 'rna_scene.cc', 'rna_color.cc'],
                       'functions': lambda name: name.startswith('rna_def_') or name.startswith('RNA_def_'),
@@ -122,6 +135,10 @@ def field(struct, path):
             offset += int(index.rstrip(']')) * type.get_size()
     length = type.get_array_size() if type.kind == ci.TypeKind.CONSTANTARRAY else None
     element = (type.get_array_element_type() if length else type).get_canonical()
+    # A matrix (float[4][4]): its elements in memory order, as RNA reads them.
+    while element.kind == ci.TypeKind.CONSTANTARRAY:
+        length *= element.get_array_size()
+        element = element.get_array_element_type().get_canonical()
     kind = ('pointer' if element.kind == ci.TypeKind.POINTER else 'float' if element.kind in (ci.TypeKind.FLOAT, ci.TypeKind.DOUBLE)
             else 'struct' if element.kind == ci.TypeKind.RECORD else 'int')
     signed = element.kind in (ci.TypeKind.CHAR_S, ci.TypeKind.SCHAR, ci.TypeKind.SHORT, ci.TypeKind.INT, ci.TypeKind.LONG,
@@ -257,13 +274,28 @@ def write(tree, args, output, spec):
             # No DNA field of its own: a property whose functions compute it, kept only with those where asked.
             if located is None and not (spec.get('computed') and prop.get('funcs')):
                 continue
-            props[identifier] = {**(located or {}), **{k: prop[k] for k in keys if k in prop}}
+            props[identifier] = {**(located or {}), **{k: prop[k] for k in keys if k in prop},
+                                 # A field of another struct than the RNA struct's (a constraint type's head_tail, bConstraint's).
+                                 **({'struct': prop['struct']} if prop.get('struct', sdna) != sdna else {})}
             # An RNA array over consecutive scalar fields (a light's r, g, b) has RNA's length.
             if spec['detail'] and prop.get('array') and located and 'length' not in located and located['kind'] not in ('struct', 'pointer'):
                 props[identifier]['length'] = prop['array']
         base = found.get(definition.get('base'), {})
         origin = {'base': definition['base'], 'from': field(records[base['sdna']], definition['from'])['offset']} if 'from' in definition else {}
         out[rna] = {'sdna': sdna, 'size': records[sdna].get_size(), **origin, 'properties': props}
+    # Properties another file's helper defines on a struct too (rna_def_bone_curved_common, from rna_armature.cc, on
+    # PoseBone in rna_pose.cc), which a file's walk does not reach: the other struct's whose field this struct has.
+    for rna, other in spec.get('shared', {}).items():
+        sdna = out.get(rna, {}).get('sdna')
+        for identifier, prop in found.get(other, {}).get('properties', {}).items():
+            if identifier in out[rna]['properties'] or 'struct' in prop or not prop.get('field'):
+                continue
+            try:
+                located = field(records[sdna], prop['field'])
+            except (StopIteration, ValueError):
+                continue
+            keys = ('bit', 'bitset', 'negative', 'bitflag') + (('type', 'items') if spec['detail'] else ())
+            out[rna]['properties'][identifier] = {**located, **{k: prop[k] for k in keys if k in prop}}
     path = os.path.join(convert.REPO, 'src', 'makesrna', output)
     json.dump(out, open(path, 'w'), indent=1)
     print(f'{os.path.relpath(path, convert.REPO)}: {len(out)} structs, {sum(len(s["properties"]) for s in out.values())} properties')

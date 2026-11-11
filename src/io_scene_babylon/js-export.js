@@ -10,6 +10,7 @@ import { CLOCK, sampledGaps, serializeScene } from './babylon-export.js';
 import { irClips, isClip } from './clip-export.js';
 import { exportRuntimes } from '../runtimes/runtimes.js';
 import { exportSampling } from './sampling.js';
+import { prepareKernels } from './pose-export.js';
 import { chosenState, NAVIGATION, TARGETS } from './export-options.js';
 import { exportControls, controlTypes, sceneOf, withUI } from './controls-export.js';
 import { exportCollections } from './collections-export.js';
@@ -296,6 +297,7 @@ export async function exportModule(whole, { scope = 'SCENE', selected = [], live
   const states = { branchState, branches }, stackState = (node) => chosenState(states, 'modifiers', node.name) ?? (keepLive ? 'LIVE' : 'BAKED');
   const live = new Map(world.objects.filter((node) => stackState(node) === 'LIVE').map((node) => [node, liveStack(world, node)]).filter(([, stack]) => stack));
   await world.modifiers.settled();
+  await prepareKernels();
   // The mapped meshes' geometry is read below: their mapping holds until the module is written.
   const sampling = exportSampling(world.animation.time.state, sampleRate);
   const mapped = exportRuntimes(world, { bake: bakeAnimation, runtime, runtimes, sampling });

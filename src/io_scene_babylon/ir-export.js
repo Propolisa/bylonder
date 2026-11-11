@@ -259,7 +259,7 @@ function constraintEntities(ids, constraints, time) {
   const idOf = new Map(Object.entries(ids).filter(([, id]) => id.node !== undefined).map(([k, id]) => [id.node, k]));
   const frame = time && { frame: { property: time } };
   return Object.fromEntries(constraints.flatMap((c) => {
-    if (c.pose) return idOf.has(c.armature) ? [[`${idOf.get(c.armature)}/constraints/pose`, { type: 'constraints:POSE', id: idOf.get(c.armature), inputs: { ...c.pose, ...frame }, outputs: {}, implementation: 'pose' }]] : [];
+    if (c.pose) return idOf.has(c.armature) ? [[`${idOf.get(c.armature)}/constraints/pose`, { type: 'constraints:POSE', id: idOf.get(c.armature), inputs: { ...c.pose, ...frame }, outputs: {}, implementation: c.pose.kernels ? 'pose-kernels' : 'pose' }]] : [];
     return idOf.has(c.node) ? [[`${idOf.get(c.node)}/constraints/object`, { type: 'constraints:OBJECT', id: idOf.get(c.node), inputs: { ...c, ...frame }, outputs: {}, implementation: 'constraints' }]] : [];
   }));
 }

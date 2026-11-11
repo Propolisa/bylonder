@@ -2,14 +2,15 @@
 // (src/io_scene_babylon/polyfill/worker.js) into modifiers-worker.bundle.js, which Live Modifiers exports ship next to
 // modifiers.wasm, and the Geometry Nodes kernels' loader (polyfill/geometry-nodes.js) into
 // geometry-nodes-kernels.bundle.js, shipped next to geometry-nodes.wasm, and the volume passes (polyfill/volumes.js) into
-// volumes.bundle.js, Babylon left to the page's import map.
+// volumes.bundle.js, and the constraint kernels' loader (polyfill/constraints.js) into constraints-kernels.bundle.js,
+// shipped next to constraints.wasm, Babylon left to the page's import map.
 // usage: node scripts/modifiers-polyfill.mjs [--check]
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { build } from 'esbuild-wasm';
 
 const dir = new URL('../src/io_scene_babylon/polyfill/', import.meta.url);
-export const BUNDLES = { 'modifiers-worker.bundle.js': 'worker.js', 'geometry-nodes-kernels.bundle.js': 'geometry-nodes.js', 'volumes.bundle.js': 'volumes.js' };
+export const BUNDLES = { 'modifiers-worker.bundle.js': 'worker.js', 'constraints-kernels.bundle.js': 'constraints.js', 'geometry-nodes-kernels.bundle.js': 'geometry-nodes.js', 'volumes.bundle.js': 'volumes.js' };
 
 export async function bundle(name) {
   const entry = BUNDLES[name];

@@ -18,7 +18,7 @@ const FIXED = new Set(['curves']);
 /** Blender's code an implementation ships beside its folder's files, at export. */
 const MADE = { curves: ['bylonder-curves/glsl.js'] };
 /** The implementations whose code is Blender's. */
-const GPL_IMPLEMENTATIONS = new Set(['modifiers', 'curves', 'pointcloud']);
+const GPL_IMPLEMENTATIONS = new Set(['modifiers', 'curves', 'pointcloud', 'pose-kernels']);
 
 /** Whether `replace` (type keys, a key ending in * a prefix, as the registry matches them) covers a type. */
 export const replaces = (replace, type) => replace.some((key) => key === type || (key.endsWith('*') && type.startsWith(key.slice(0, -1))));
@@ -67,6 +67,12 @@ export function unitManifest(ir, { kernels, blocks = {}, replace = [] } = {}) {
       ...(FIXED.has(implementation) && { swappable: false }),
       interface: { inputs: Object.fromEntries(Object.entries(entity.inputs).map(([name, value]) => [name, form(value)])), outputs: Object.keys(entity.outputs) } };
     add(entity.type, unit, { entity: key, id: entity.id, properties: propertiesOf(entity.inputs) });
+    // A rig on Blender's kernels: each constraint type a unit of its own (runtime/pose-kernels.js), given the owner's
+    // and its targets' matrices in the constraint's spaces and its settings, giving the owner's.
+    for (const type of new Set((entity.inputs.kernels?.bones ?? []).flatMap((b) => b.constraints.map((c) => c.type)))) {
+      add(`constraint:${type}`, { kind: 'constraint', implementation, licence: GPL, files: folderFiles(implementation),
+        interface: { inputs: { owner: 'array', targets: 'array', settings: 'object' }, outputs: ['matrix'] } }, { entity: key, id: entity.id, properties: [] });
+    }
   }
   const graphIds = (graph) => Object.values(ir.entities).filter((e) => e.inputs?.graph?.graph === graph).map((e) => e.id);
   for (const [type, nodes] of unitNodes(runGraphs(ir))) for (const [graph, name] of nodes) {

@@ -28,6 +28,7 @@ export const EVALUATORS = {
   fcurve: () => import('./fcurve-evaluator.js'),
   constraints: (page) => import('./constraints-evaluator.js').then((module) => module.load(page)),
   pose: (page) => import('./pose-constraints.js').then((module) => module.load(page)),
+  'pose-kernels': (page) => import('./pose-kernels.js').then((module) => module.load(page)),
   modifiers: (page) => import('./modifiers-evaluator.js').then((module) => module.load(page)),
   'geometry-nodes': (page) => import('./geometry-nodes-evaluator.js').then((module) => module.load(page)),
   grease_pencil: () => import('./grease-pencil.js'),
@@ -38,7 +39,6 @@ export const EVALUATORS = {
 const UNBAKED = ['curves', 'pointcloud'];
 /** What Babylon runs itself (`native`: an F-Curve its AnimationGroup plays), which the scheduler leaves to it unless a unit takes over. */
 export const NATIVE = ['native'];
-
 const isTime = (/** @type {string} */ path) => path.endsWith('.frame_current');
 
 /**

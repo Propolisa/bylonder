@@ -1,0 +1,4312 @@
+{
+ "ActionConstraint": {
+  "sdna": "bActionConstraint",
+  "size": 368,
+  "base": "Constraint",
+  "from": 8,
+  "properties": {
+   "target": {
+    "offset": 0,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "subtarget": {
+    "offset": 304,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "type": "STRING"
+   },
+   "mix_mode": {
+    "offset": 28,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "custom": true,
+    "type": "ENUM",
+    "items": [
+     [
+      6,
+      "REPLACE"
+     ],
+     [
+      3,
+      "BEFORE_FULL"
+     ],
+     [
+      2,
+      "BEFORE"
+     ],
+     [
+      5,
+      "BEFORE_SPLIT"
+     ],
+     [
+      0,
+      "AFTER_FULL"
+     ],
+     [
+      1,
+      "AFTER"
+     ],
+     [
+      4,
+      "AFTER_SPLIT"
+     ]
+    ]
+   },
+   "transform_channel": {
+    "offset": 4,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      20,
+      "LOCATION_X"
+     ],
+     [
+      21,
+      "LOCATION_Y"
+     ],
+     [
+      22,
+      "LOCATION_Z"
+     ],
+     [
+      0,
+      "ROTATION_X"
+     ],
+     [
+      1,
+      "ROTATION_Y"
+     ],
+     [
+      2,
+      "ROTATION_Z"
+     ],
+     [
+      10,
+      "SCALE_X"
+     ],
+     [
+      11,
+      "SCALE_Y"
+     ],
+     [
+      12,
+      "SCALE_Z"
+     ]
+    ]
+   },
+   "action": {
+    "offset": 36,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true,
+    "type": "POINTER"
+   },
+   "action_slot_handle": {
+    "offset": 40,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "custom": true,
+    "type": "INT"
+   },
+   "last_slot_identifier": {
+    "offset": 44,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 258,
+    "type": "STRING"
+   },
+   "use_bone_object_action": {
+    "offset": 24,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "frame_start": {
+    "offset": 8,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "frame_end": {
+    "offset": 12,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "max": {
+    "offset": 20,
+    "size": 4,
+    "kind": "float",
+    "custom": true,
+    "type": "FLOAT"
+   },
+   "min": {
+    "offset": 16,
+    "size": 4,
+    "kind": "float",
+    "custom": true,
+    "type": "FLOAT"
+   },
+   "eval_time": {
+    "offset": 32,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_eval_time": {
+    "offset": 24,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   }
+  }
+ },
+ "Armature": {
+  "sdna": "bArmature",
+  "size": 508,
+  "properties": {
+   "pose_position": {
+    "offset": 392,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bitflag": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "POSE"
+     ],
+     [
+      1,
+      "REST"
+     ]
+    ]
+   },
+   "display_type": {
+    "offset": 396,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "OCTAHEDRAL"
+     ],
+     [
+      1,
+      "STICK"
+     ],
+     [
+      2,
+      "BBONE"
+     ],
+     [
+      3,
+      "ENVELOPE"
+     ],
+     [
+      4,
+      "WIRE"
+     ]
+    ]
+   },
+   "show_axes": {
+    "offset": 392,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   },
+   "axes_position": {
+    "offset": 500,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "show_names": {
+    "offset": 392,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8,
+    "type": "BOOLEAN"
+   },
+   "use_mirror_x": {
+    "offset": 392,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256,
+    "type": "BOOLEAN"
+   },
+   "show_bone_custom_shapes": {
+    "offset": 392,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1024,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "show_bone_colors": {
+    "offset": 392,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2048,
+    "type": "BOOLEAN"
+   }
+  }
+ },
+ "ArmatureConstraint": {
+  "sdna": "bArmatureConstraint",
+  "size": 16,
+  "base": "Constraint",
+  "from": 8,
+  "properties": {
+   "targets": {
+    "offset": 8,
+    "size": 8,
+    "kind": "struct",
+    "type": null
+   },
+   "use_deform_preserve_volume": {
+    "offset": 0,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "use_bone_envelopes": {
+    "offset": 0,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "use_current_location": {
+    "offset": 0,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   }
+  }
+ },
+ "Bone": {
+  "sdna": "Bone",
+  "size": 440,
+  "properties": {
+   "parent": {
+    "offset": 20,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "name": {
+    "offset": 32,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true,
+    "type": "STRING"
+   },
+   "color": {
+    "offset": 168,
+    "size": 24,
+    "kind": "struct",
+    "custom": true,
+    "type": "POINTER"
+   },
+   "display_type": {
+    "offset": 164,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      -1,
+      "ARMATURE_DEFINED"
+     ],
+     [
+      0,
+      "OCTAHEDRAL"
+     ],
+     [
+      1,
+      "STICK"
+     ],
+     [
+      2,
+      "BBONE"
+     ],
+     [
+      3,
+      "ENVELOPE"
+     ],
+     [
+      4,
+      "WIRE"
+     ]
+    ]
+   },
+   "use_connect": {
+    "offset": 160,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "custom": true,
+    "type": "BOOLEAN"
+   },
+   "use_inherit_rotation": {
+    "offset": 160,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 512,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "use_envelope_multiply": {
+    "offset": 160,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2048,
+    "type": "BOOLEAN"
+   },
+   "use_deform": {
+    "offset": 160,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4096,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "inherit_scale": {
+    "offset": 192,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "FULL"
+     ],
+     [
+      1,
+      "FIX_SHEAR"
+     ],
+     [
+      5,
+      "ALIGNED"
+     ],
+     [
+      2,
+      "AVERAGE"
+     ],
+     [
+      3,
+      "NONE"
+     ],
+     [
+      4,
+      "NONE_LEGACY"
+     ]
+    ]
+   },
+   "use_local_location": {
+    "offset": 160,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4194304,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "use_relative_parent": {
+    "offset": 160,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8388608,
+    "type": "BOOLEAN"
+   },
+   "show_wire": {
+    "offset": 160,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 131072,
+    "type": "BOOLEAN"
+   },
+   "use_cyclic_offset": {
+    "offset": 160,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 262144,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "hide_select": {
+    "offset": 160,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2097152,
+    "type": "BOOLEAN"
+   },
+   "envelope_distance": {
+    "offset": 288,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "envelope_weight": {
+    "offset": 292,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "head_radius": {
+    "offset": 308,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "tail_radius": {
+    "offset": 312,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "bbone_segments": {
+    "offset": 404,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "bbone_mapping_mode": {
+    "offset": 406,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "STRAIGHT"
+     ],
+     [
+      1,
+      "CURVED"
+     ]
+    ]
+   },
+   "bbone_x": {
+    "offset": 296,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "bbone_z": {
+    "offset": 304,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "bbone_handle_type_start": {
+    "offset": 414,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "AUTO"
+     ],
+     [
+      1,
+      "ABSOLUTE"
+     ],
+     [
+      2,
+      "RELATIVE"
+     ],
+     [
+      3,
+      "TANGENT"
+     ]
+    ]
+   },
+   "bbone_custom_handle_start": {
+    "offset": 424,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true,
+    "type": "POINTER"
+   },
+   "bbone_handle_use_scale_start": {
+    "offset": 420,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "bitset": 3,
+    "type": "BOOLEAN"
+   },
+   "bbone_handle_use_ease_start": {
+    "offset": 420,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8,
+    "type": "BOOLEAN"
+   },
+   "bbone_handle_type_end": {
+    "offset": 415,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "AUTO"
+     ],
+     [
+      1,
+      "ABSOLUTE"
+     ],
+     [
+      2,
+      "RELATIVE"
+     ],
+     [
+      3,
+      "TANGENT"
+     ]
+    ]
+   },
+   "bbone_custom_handle_end": {
+    "offset": 428,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true,
+    "type": "POINTER"
+   },
+   "bbone_handle_use_scale_end": {
+    "offset": 422,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "bitset": 3,
+    "type": "BOOLEAN"
+   },
+   "bbone_handle_use_ease_end": {
+    "offset": 422,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8,
+    "type": "BOOLEAN"
+   },
+   "bbone_rollin": {
+    "offset": 316,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "bbone_rollout": {
+    "offset": 320,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_endroll_as_inroll": {
+    "offset": 416,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "bbone_curveinx": {
+    "offset": 324,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "bbone_curveinz": {
+    "offset": 328,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "bbone_curveoutx": {
+    "offset": 332,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "bbone_curveoutz": {
+    "offset": 336,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "bbone_easein": {
+    "offset": 340,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "bbone_easeout": {
+    "offset": 344,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_scale_easing": {
+    "offset": 416,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "bbone_scalein": {
+    "offset": 364,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT"
+   },
+   "bbone_scaleout": {
+    "offset": 376,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT"
+   },
+   "hide": {
+    "offset": 160,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1024,
+    "type": "BOOLEAN",
+    "icon": 32,
+    "consecutive": -1
+   },
+   "matrix": {
+    "offset": 124,
+    "size": 4,
+    "kind": "float",
+    "length": 9,
+    "type": "FLOAT"
+   },
+   "matrix_local": {
+    "offset": 220,
+    "size": 4,
+    "kind": "float",
+    "length": 16,
+    "type": "FLOAT"
+   },
+   "tail": {
+    "offset": 112,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT"
+   },
+   "tail_local": {
+    "offset": 208,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT"
+   },
+   "head": {
+    "offset": 100,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT"
+   },
+   "head_local": {
+    "offset": 196,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT"
+   },
+   "length": {
+    "offset": 300,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   }
+  }
+ },
+ "ChildOfConstraint": {
+  "sdna": "bChildOfConstraint",
+  "size": 140,
+  "base": "Constraint",
+  "from": 8,
+  "properties": {
+   "target": {
+    "offset": 0,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "subtarget": {
+    "offset": 76,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "type": "STRING"
+   },
+   "use_location_x": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "use_location_y": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "use_location_z": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   },
+   "use_rotation_x": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8,
+    "type": "BOOLEAN"
+   },
+   "use_rotation_y": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "type": "BOOLEAN"
+   },
+   "use_rotation_z": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32,
+    "type": "BOOLEAN"
+   },
+   "use_scale_x": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 64,
+    "type": "BOOLEAN"
+   },
+   "use_scale_y": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 128,
+    "type": "BOOLEAN"
+   },
+   "use_scale_z": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256,
+    "type": "BOOLEAN"
+   },
+   "set_inverse_pending": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 512,
+    "type": "BOOLEAN"
+   },
+   "inverse_matrix": {
+    "offset": 12,
+    "size": 4,
+    "kind": "float",
+    "length": 16,
+    "type": "FLOAT"
+   }
+  }
+ },
+ "ClampToConstraint": {
+  "sdna": "bClampToConstraint",
+  "size": 12,
+  "base": "Constraint",
+  "from": 8,
+  "properties": {
+   "target": {
+    "offset": 0,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true,
+    "type": "POINTER"
+   },
+   "main_axis": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "CLAMPTO_AUTO"
+     ],
+     [
+      1,
+      "CLAMPTO_X"
+     ],
+     [
+      2,
+      "CLAMPTO_Y"
+     ],
+     [
+      3,
+      "CLAMPTO_Z"
+     ]
+    ]
+   },
+   "use_cyclic": {
+    "offset": 8,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   }
+  }
+ },
+ "Constraint": {
+  "sdna": "bConstraint",
+  "size": 168,
+  "properties": {
+   "name": {
+    "offset": 88,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true,
+    "type": "STRING"
+   },
+   "type": {
+    "offset": 12,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      27,
+      "CAMERA_SOLVER"
+     ],
+     [
+      26,
+      "FOLLOW_TRACK"
+     ],
+     [
+      28,
+      "OBJECT_SOLVER"
+     ],
+     [
+      9,
+      "COPY_LOCATION"
+     ],
+     [
+      8,
+      "COPY_ROTATION"
+     ],
+     [
+      10,
+      "COPY_SCALE"
+     ],
+     [
+      23,
+      "COPY_TRANSFORMS"
+     ],
+     [
+      14,
+      "LIMIT_DISTANCE"
+     ],
+     [
+      6,
+      "LIMIT_LOCATION"
+     ],
+     [
+      5,
+      "LIMIT_ROTATION"
+     ],
+     [
+      7,
+      "LIMIT_SCALE"
+     ],
+     [
+      24,
+      "MAINTAIN_VOLUME"
+     ],
+     [
+      19,
+      "TRANSFORM"
+     ],
+     [
+      29,
+      "TRANSFORM_CACHE"
+     ],
+     [
+      18,
+      "CLAMP_TO"
+     ],
+     [
+      21,
+      "DAMPED_TRACK"
+     ],
+     [
+      3,
+      "IK"
+     ],
+     [
+      13,
+      "LOCKED_TRACK"
+     ],
+     [
+      22,
+      "SPLINE_IK"
+     ],
+     [
+      15,
+      "STRETCH_TO"
+     ],
+     [
+      2,
+      "TRACK_TO"
+     ],
+     [
+      12,
+      "ACTION"
+     ],
+     [
+      30,
+      "ARMATURE"
+     ],
+     [
+      1,
+      "CHILD_OF"
+     ],
+     [
+      16,
+      "FLOOR"
+     ],
+     [
+      4,
+      "FOLLOW_PATH"
+     ],
+     [
+      31,
+      "GEOMETRY_ATTRIBUTE"
+     ],
+     [
+      25,
+      "PIVOT"
+     ],
+     [
+      20,
+      "SHRINKWRAP"
+     ]
+    ]
+   },
+   "is_override_data": {
+    "offset": 14,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2048,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "owner_space": {
+    "offset": 16,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "custom": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "WORLD"
+     ],
+     [
+      5,
+      "CUSTOM"
+     ],
+     [
+      2,
+      "POSE"
+     ],
+     [
+      3,
+      "LOCAL_WITH_PARENT"
+     ],
+     [
+      1,
+      "LOCAL"
+     ]
+    ]
+   },
+   "target_space": {
+    "offset": 17,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "custom": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "WORLD"
+     ],
+     [
+      5,
+      "CUSTOM"
+     ],
+     [
+      2,
+      "POSE"
+     ],
+     [
+      3,
+      "LOCAL_WITH_PARENT"
+     ],
+     [
+      1,
+      "LOCAL"
+     ],
+     [
+      6,
+      "LOCAL_OWNER_ORIENT"
+     ]
+    ]
+   },
+   "space_object": {
+    "offset": 20,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "space_subtarget": {
+    "offset": 24,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "type": "STRING"
+   },
+   "mute": {
+    "offset": 14,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 512,
+    "type": "BOOLEAN",
+    "icon": 16,
+    "consecutive": -1
+   },
+   "enabled": {
+    "offset": 14,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 512,
+    "negative": true,
+    "type": "BOOLEAN",
+    "icon": 15,
+    "consecutive": 1
+   },
+   "show_expanded": {
+    "offset": 18,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 0,
+    "type": "BOOLEAN",
+    "icon": 33,
+    "consecutive": 1
+   },
+   "is_valid": {
+    "offset": 14,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "active": {
+    "offset": 14,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "type": "BOOLEAN"
+   },
+   "influence": {
+    "offset": 152,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "error_location": {
+    "offset": 160,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "error_rotation": {
+    "offset": 164,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   }
+  }
+ },
+ "ConstraintTarget": {
+  "sdna": "bConstraintTarget",
+  "size": 156,
+  "properties": {
+   "target": {
+    "offset": 8,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "subtarget": {
+    "offset": 12,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "type": "STRING"
+   }
+  }
+ },
+ "ConstraintTargetBone": {
+  "sdna": "bConstraintTarget",
+  "size": 156,
+  "properties": {
+   "target": {
+    "offset": 8,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true,
+    "type": "POINTER"
+   },
+   "subtarget": {
+    "offset": 12,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "type": "STRING"
+   },
+   "weight": {
+    "offset": 148,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   }
+  }
+ },
+ "CopyLocationConstraint": {
+  "sdna": "bLocateLikeConstraint",
+  "size": 76,
+  "base": "Constraint",
+  "from": 8,
+  "properties": {
+   "head_tail": {
+    "offset": 156,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "struct": "bConstraint"
+   },
+   "use_bbone_shape": {
+    "offset": 14,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1024,
+    "type": "BOOLEAN",
+    "struct": "bConstraint"
+   },
+   "target": {
+    "offset": 0,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "subtarget": {
+    "offset": 12,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "type": "STRING"
+   },
+   "use_x": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "use_y": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "use_z": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   },
+   "invert_x": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "type": "BOOLEAN"
+   },
+   "invert_y": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32,
+    "type": "BOOLEAN"
+   },
+   "invert_z": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 64,
+    "type": "BOOLEAN"
+   },
+   "use_offset": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 128,
+    "type": "BOOLEAN"
+   }
+  }
+ },
+ "CopyRotationConstraint": {
+  "sdna": "bRotateLikeConstraint",
+  "size": 76,
+  "base": "Constraint",
+  "from": 8,
+  "properties": {
+   "target": {
+    "offset": 0,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "subtarget": {
+    "offset": 12,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "type": "STRING"
+   },
+   "use_x": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "use_y": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "use_z": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   },
+   "invert_x": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "type": "BOOLEAN"
+   },
+   "invert_y": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32,
+    "type": "BOOLEAN"
+   },
+   "invert_z": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 64,
+    "type": "BOOLEAN"
+   },
+   "euler_order": {
+    "offset": 8,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "AUTO"
+     ],
+     [
+      1,
+      "XYZ"
+     ],
+     [
+      2,
+      "XZY"
+     ],
+     [
+      3,
+      "YXZ"
+     ],
+     [
+      4,
+      "YZX"
+     ],
+     [
+      5,
+      "ZXY"
+     ],
+     [
+      6,
+      "ZYX"
+     ]
+    ]
+   },
+   "mix_mode": {
+    "offset": 9,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "REPLACE"
+     ],
+     [
+      2,
+      "ADD"
+     ],
+     [
+      3,
+      "BEFORE"
+     ],
+     [
+      4,
+      "AFTER"
+     ],
+     [
+      1,
+      "OFFSET"
+     ]
+    ]
+   }
+  }
+ },
+ "CopyScaleConstraint": {
+  "sdna": "bSizeLikeConstraint",
+  "size": 76,
+  "base": "Constraint",
+  "from": 8,
+  "properties": {
+   "target": {
+    "offset": 0,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "subtarget": {
+    "offset": 12,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "type": "STRING"
+   },
+   "use_x": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "use_y": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "use_z": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   },
+   "power": {
+    "offset": 8,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_make_uniform": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32,
+    "type": "BOOLEAN"
+   },
+   "use_offset": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8,
+    "type": "BOOLEAN"
+   },
+   "use_add": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "negative": true,
+    "type": "BOOLEAN"
+   }
+  }
+ },
+ "CopyTransformsConstraint": {
+  "sdna": "bTransLikeConstraint",
+  "size": 76,
+  "base": "Constraint",
+  "from": 8,
+  "properties": {
+   "head_tail": {
+    "offset": 156,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "struct": "bConstraint"
+   },
+   "use_bbone_shape": {
+    "offset": 14,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1024,
+    "type": "BOOLEAN",
+    "struct": "bConstraint"
+   },
+   "target": {
+    "offset": 0,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "subtarget": {
+    "offset": 12,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "type": "STRING"
+   },
+   "remove_target_shear": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "mix_mode": {
+    "offset": 8,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "REPLACE"
+     ],
+     [
+      5,
+      "BEFORE_FULL"
+     ],
+     [
+      1,
+      "BEFORE"
+     ],
+     [
+      3,
+      "BEFORE_SPLIT"
+     ],
+     [
+      6,
+      "AFTER_FULL"
+     ],
+     [
+      2,
+      "AFTER"
+     ],
+     [
+      4,
+      "AFTER_SPLIT"
+     ]
+    ]
+   }
+  }
+ },
+ "DampedTrackConstraint": {
+  "sdna": "bDampTrackConstraint",
+  "size": 76,
+  "base": "Constraint",
+  "from": 8,
+  "properties": {
+   "head_tail": {
+    "offset": 156,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "struct": "bConstraint"
+   },
+   "use_bbone_shape": {
+    "offset": 14,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1024,
+    "type": "BOOLEAN",
+    "struct": "bConstraint"
+   },
+   "target": {
+    "offset": 0,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "subtarget": {
+    "offset": 12,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "type": "STRING"
+   },
+   "track_axis": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "TRACK_X"
+     ],
+     [
+      1,
+      "TRACK_Y"
+     ],
+     [
+      2,
+      "TRACK_Z"
+     ],
+     [
+      3,
+      "TRACK_NEGATIVE_X"
+     ],
+     [
+      4,
+      "TRACK_NEGATIVE_Y"
+     ],
+     [
+      5,
+      "TRACK_NEGATIVE_Z"
+     ]
+    ]
+   }
+  }
+ },
+ "FloorConstraint": {
+  "sdna": "bMinMaxConstraint",
+  "size": 84,
+  "base": "Constraint",
+  "from": 8,
+  "properties": {
+   "target": {
+    "offset": 0,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "subtarget": {
+    "offset": 16,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "type": "STRING"
+   },
+   "floor_location": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "FLOOR_X"
+     ],
+     [
+      1,
+      "FLOOR_Y"
+     ],
+     [
+      2,
+      "FLOOR_Z"
+     ],
+     [
+      3,
+      "FLOOR_NEGATIVE_X"
+     ],
+     [
+      4,
+      "FLOOR_NEGATIVE_Y"
+     ],
+     [
+      5,
+      "FLOOR_NEGATIVE_Z"
+     ]
+    ]
+   },
+   "use_rotation": {
+    "offset": 12,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   },
+   "offset": {
+    "offset": 8,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   }
+  }
+ },
+ "FollowPathConstraint": {
+  "sdna": "bFollowPathConstraint",
+  "size": 20,
+  "base": "Constraint",
+  "from": 8,
+  "properties": {
+   "target": {
+    "offset": 0,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true,
+    "type": "POINTER"
+   },
+   "offset": {
+    "offset": 4,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "offset_factor": {
+    "offset": 8,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "forward_axis": {
+    "offset": 16,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "FORWARD_X"
+     ],
+     [
+      1,
+      "FORWARD_Y"
+     ],
+     [
+      2,
+      "FORWARD_Z"
+     ],
+     [
+      3,
+      "TRACK_NEGATIVE_X"
+     ],
+     [
+      4,
+      "TRACK_NEGATIVE_Y"
+     ],
+     [
+      5,
+      "TRACK_NEGATIVE_Z"
+     ]
+    ]
+   },
+   "up_axis": {
+    "offset": 18,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "UP_X"
+     ],
+     [
+      1,
+      "UP_Y"
+     ],
+     [
+      2,
+      "UP_Z"
+     ]
+    ]
+   },
+   "use_curve_follow": {
+    "offset": 12,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "use_fixed_location": {
+    "offset": 12,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "use_curve_radius": {
+    "offset": 12,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   }
+  }
+ },
+ "KinematicConstraint": {
+  "sdna": "bKinematicConstraint",
+  "size": 176,
+  "base": "Constraint",
+  "from": 8,
+  "properties": {
+   "target": {
+    "offset": 0,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "subtarget": {
+    "offset": 12,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "type": "STRING"
+   },
+   "iterations": {
+    "offset": 4,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "pole_target": {
+    "offset": 76,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "pole_subtarget": {
+    "offset": 80,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "type": "STRING"
+   },
+   "pole_angle": {
+    "offset": 144,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "weight": {
+    "offset": 148,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "orient_weight": {
+    "offset": 152,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "chain_count": {
+    "offset": 8,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "use_tail": {
+    "offset": 6,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "reference_axis": {
+    "offset": 6,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bitflag": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "BONE"
+     ],
+     [
+      16384,
+      "TARGET"
+     ]
+    ]
+   },
+   "use_location": {
+    "offset": 6,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 32,
+    "type": "BOOLEAN"
+   },
+   "lock_location_x": {
+    "offset": 6,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 256,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "lock_location_y": {
+    "offset": 6,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 512,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "lock_location_z": {
+    "offset": 6,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1024,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "use_rotation": {
+    "offset": 6,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "lock_rotation_x": {
+    "offset": 6,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2048,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "lock_rotation_y": {
+    "offset": 6,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4096,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "lock_rotation_z": {
+    "offset": 6,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8192,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "use_stretch": {
+    "offset": 6,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "type": "BOOLEAN"
+   },
+   "ik_type": {
+    "offset": 168,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "custom": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "COPY_POSE"
+     ],
+     [
+      1,
+      "DISTANCE"
+     ]
+    ]
+   },
+   "limit_mode": {
+    "offset": 170,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "LIMITDIST_INSIDE"
+     ],
+     [
+      1,
+      "LIMITDIST_OUTSIDE"
+     ],
+     [
+      2,
+      "LIMITDIST_ONSURFACE"
+     ]
+    ]
+   },
+   "distance": {
+    "offset": 172,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   }
+  }
+ },
+ "LimitDistanceConstraint": {
+  "sdna": "bDistLimitConstraint",
+  "size": 84,
+  "base": "Constraint",
+  "from": 8,
+  "properties": {
+   "head_tail": {
+    "offset": 156,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "struct": "bConstraint"
+   },
+   "use_bbone_shape": {
+    "offset": 14,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1024,
+    "type": "BOOLEAN",
+    "struct": "bConstraint"
+   },
+   "target": {
+    "offset": 0,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "subtarget": {
+    "offset": 4,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "type": "STRING"
+   },
+   "distance": {
+    "offset": 68,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "limit_mode": {
+    "offset": 78,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "LIMITDIST_INSIDE"
+     ],
+     [
+      1,
+      "LIMITDIST_OUTSIDE"
+     ],
+     [
+      2,
+      "LIMITDIST_ONSURFACE"
+     ]
+    ]
+   },
+   "use_transform_limit": {
+    "offset": 76,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   }
+  }
+ },
+ "LimitLocationConstraint": {
+  "sdna": "bLocLimitConstraint",
+  "size": 28,
+  "base": "Constraint",
+  "from": 8,
+  "properties": {
+   "use_min_x": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "use_min_y": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   },
+   "use_min_z": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "type": "BOOLEAN"
+   },
+   "use_max_x": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "use_max_y": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8,
+    "type": "BOOLEAN"
+   },
+   "use_max_z": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 32,
+    "type": "BOOLEAN"
+   },
+   "min_x": {
+    "offset": 0,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "min_y": {
+    "offset": 8,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "min_z": {
+    "offset": 16,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "max_x": {
+    "offset": 4,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "max_y": {
+    "offset": 12,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "max_z": {
+    "offset": 20,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_transform_limit": {
+    "offset": 26,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   }
+  }
+ },
+ "LimitRotationConstraint": {
+  "sdna": "bRotLimitConstraint",
+  "size": 32,
+  "base": "Constraint",
+  "from": 8,
+  "properties": {
+   "use_limit_x": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "use_limit_y": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "use_limit_z": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   },
+   "min_x": {
+    "offset": 0,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "min_y": {
+    "offset": 8,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "min_z": {
+    "offset": 16,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "max_x": {
+    "offset": 4,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "max_y": {
+    "offset": 12,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "max_z": {
+    "offset": 20,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "euler_order": {
+    "offset": 28,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "AUTO"
+     ],
+     [
+      1,
+      "XYZ"
+     ],
+     [
+      2,
+      "XZY"
+     ],
+     [
+      3,
+      "YXZ"
+     ],
+     [
+      4,
+      "YZX"
+     ],
+     [
+      5,
+      "ZXY"
+     ],
+     [
+      6,
+      "ZYX"
+     ]
+    ]
+   },
+   "use_transform_limit": {
+    "offset": 26,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "use_legacy_behavior": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8,
+    "type": "BOOLEAN"
+   }
+  }
+ },
+ "LimitScaleConstraint": {
+  "sdna": "bSizeLimitConstraint",
+  "size": 28,
+  "base": "Constraint",
+  "from": 8,
+  "properties": {
+   "use_min_x": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "use_min_y": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   },
+   "use_min_z": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "type": "BOOLEAN"
+   },
+   "use_max_x": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "use_max_y": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8,
+    "type": "BOOLEAN"
+   },
+   "use_max_z": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 32,
+    "type": "BOOLEAN"
+   },
+   "min_x": {
+    "offset": 0,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "min_y": {
+    "offset": 8,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "min_z": {
+    "offset": 16,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "max_x": {
+    "offset": 4,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "max_y": {
+    "offset": 12,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "max_z": {
+    "offset": 20,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_transform_limit": {
+    "offset": 26,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   }
+  }
+ },
+ "LockedTrackConstraint": {
+  "sdna": "bLockTrackConstraint",
+  "size": 76,
+  "base": "Constraint",
+  "from": 8,
+  "properties": {
+   "head_tail": {
+    "offset": 156,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "struct": "bConstraint"
+   },
+   "use_bbone_shape": {
+    "offset": 14,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1024,
+    "type": "BOOLEAN",
+    "struct": "bConstraint"
+   },
+   "target": {
+    "offset": 0,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "subtarget": {
+    "offset": 12,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "type": "STRING"
+   },
+   "track_axis": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "TRACK_X"
+     ],
+     [
+      1,
+      "TRACK_Y"
+     ],
+     [
+      2,
+      "TRACK_Z"
+     ],
+     [
+      3,
+      "TRACK_NEGATIVE_X"
+     ],
+     [
+      4,
+      "TRACK_NEGATIVE_Y"
+     ],
+     [
+      5,
+      "TRACK_NEGATIVE_Z"
+     ]
+    ]
+   },
+   "lock_axis": {
+    "offset": 8,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "LOCK_X"
+     ],
+     [
+      1,
+      "LOCK_Y"
+     ],
+     [
+      2,
+      "LOCK_Z"
+     ]
+    ]
+   }
+  }
+ },
+ "MaintainVolumeConstraint": {
+  "sdna": "bSameVolumeConstraint",
+  "size": 8,
+  "base": "Constraint",
+  "from": 8,
+  "properties": {
+   "free_axis": {
+    "offset": 0,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "SAMEVOL_X"
+     ],
+     [
+      1,
+      "SAMEVOL_Y"
+     ],
+     [
+      2,
+      "SAMEVOL_Z"
+     ]
+    ]
+   },
+   "mode": {
+    "offset": 1,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "STRICT"
+     ],
+     [
+      1,
+      "UNIFORM"
+     ],
+     [
+      2,
+      "SINGLE_AXIS"
+     ]
+    ]
+   },
+   "volume": {
+    "offset": 4,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   }
+  }
+ },
+ "PivotConstraint": {
+  "sdna": "bPivotConstraint",
+  "size": 84,
+  "base": "Constraint",
+  "from": 8,
+  "properties": {
+   "head_tail": {
+    "offset": 156,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "struct": "bConstraint"
+   },
+   "use_bbone_shape": {
+    "offset": 14,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1024,
+    "type": "BOOLEAN",
+    "struct": "bConstraint"
+   },
+   "target": {
+    "offset": 0,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "subtarget": {
+    "offset": 4,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "type": "STRING"
+   },
+   "use_relative_location": {
+    "offset": 82,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "offset": {
+    "offset": 68,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT"
+   },
+   "rotation_range": {
+    "offset": 80,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      -1,
+      "ALWAYS_ACTIVE"
+     ],
+     [
+      0,
+      "NX"
+     ],
+     [
+      1,
+      "NY"
+     ],
+     [
+      2,
+      "NZ"
+     ],
+     [
+      3,
+      "X"
+     ],
+     [
+      4,
+      "Y"
+     ],
+     [
+      5,
+      "Z"
+     ]
+    ]
+   }
+  }
+ },
+ "Pose": {
+  "sdna": "bPose",
+  "size": 104,
+  "properties": {
+   "ik_solver": {
+    "offset": 60,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "custom": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "LEGACY"
+     ],
+     [
+      1,
+      "ITASC"
+     ]
+    ]
+   },
+   "use_mirror_x": {
+    "offset": 16,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 512,
+    "type": "BOOLEAN"
+   },
+   "use_mirror_relative": {
+    "offset": 16,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1024,
+    "type": "BOOLEAN"
+   },
+   "use_auto_ik": {
+    "offset": 16,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 256,
+    "type": "BOOLEAN"
+   }
+  }
+ },
+ "PoseBone": {
+  "sdna": "bPoseChannel",
+  "size": 920,
+  "properties": {
+   "constraints": {
+    "offset": 16,
+    "size": 8,
+    "kind": "struct",
+    "custom": true,
+    "type": null
+   },
+   "name": {
+    "offset": 24,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true,
+    "type": "STRING"
+   },
+   "parent": {
+    "offset": 104,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "child": {
+    "offset": 108,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "location": {
+    "offset": 184,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT"
+   },
+   "scale": {
+    "offset": 196,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT"
+   },
+   "rotation_quaternion": {
+    "offset": 220,
+    "size": 4,
+    "kind": "float",
+    "length": 4,
+    "type": "FLOAT"
+   },
+   "rotation_euler": {
+    "offset": 208,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT"
+   },
+   "rotation_mode": {
+    "offset": 252,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "custom": true,
+    "type": "ENUM",
+    "items": []
+   },
+   "bbone_custom_handle_start": {
+    "offset": 724,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "bbone_custom_handle_end": {
+    "offset": 728,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "matrix_channel": {
+    "offset": 260,
+    "size": 4,
+    "kind": "float",
+    "length": 16,
+    "type": "FLOAT"
+   },
+   "matrix": {
+    "offset": 324,
+    "size": 4,
+    "kind": "float",
+    "length": 16,
+    "custom": true,
+    "type": "FLOAT"
+   },
+   "head": {
+    "offset": 580,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT"
+   },
+   "tail": {
+    "offset": 592,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT"
+   },
+   "lock_ik_x": {
+    "offset": 90,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN",
+    "icon": 41,
+    "consecutive": 1
+   },
+   "lock_ik_y": {
+    "offset": 90,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN",
+    "icon": 41,
+    "consecutive": 1
+   },
+   "lock_ik_z": {
+    "offset": 90,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN",
+    "icon": 41,
+    "consecutive": 1
+   },
+   "use_ik_limit_x": {
+    "offset": 90,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8,
+    "type": "BOOLEAN"
+   },
+   "use_ik_limit_y": {
+    "offset": 90,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "type": "BOOLEAN"
+   },
+   "use_ik_limit_z": {
+    "offset": 90,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 32,
+    "type": "BOOLEAN"
+   },
+   "use_ik_rotation_control": {
+    "offset": 90,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 64,
+    "type": "BOOLEAN"
+   },
+   "use_ik_linear_control": {
+    "offset": 90,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 128,
+    "type": "BOOLEAN"
+   },
+   "ik_min_x": {
+    "offset": 604,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "ik_max_x": {
+    "offset": 616,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "ik_min_y": {
+    "offset": 608,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "ik_max_y": {
+    "offset": 620,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "ik_min_z": {
+    "offset": 612,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "ik_max_z": {
+    "offset": 624,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "ik_stiffness_x": {
+    "offset": 628,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "ik_stiffness_y": {
+    "offset": 632,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "ik_stiffness_z": {
+    "offset": 636,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "ik_stretch": {
+    "offset": 640,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "ik_rotation_weight": {
+    "offset": 644,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "ik_linear_weight": {
+    "offset": 648,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "custom_shape": {
+    "offset": 132,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true,
+    "type": "POINTER"
+   },
+   "custom_shape_scale_xyz": {
+    "offset": 144,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT"
+   },
+   "custom_shape_translation": {
+    "offset": 156,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT"
+   },
+   "custom_shape_rotation_euler": {
+    "offset": 168,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT"
+   },
+   "use_transform_at_custom_shape": {
+    "offset": 88,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "type": "BOOLEAN"
+   },
+   "use_transform_around_custom_shape": {
+    "offset": 88,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 32,
+    "type": "BOOLEAN"
+   },
+   "use_custom_shape_bone_size": {
+    "offset": 98,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "hide": {
+    "offset": 98,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN",
+    "icon": 32,
+    "consecutive": -1
+   },
+   "select": {
+    "offset": 88,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 64,
+    "type": "BOOLEAN",
+    "icon": 32,
+    "consecutive": -1
+   },
+   "custom_shape_transform": {
+    "offset": 136,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true,
+    "type": "POINTER"
+   },
+   "custom_shape_wire_width": {
+    "offset": 180,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "color": {
+    "offset": 744,
+    "size": 24,
+    "kind": "struct",
+    "type": "POINTER"
+   },
+   "lock_location": {
+    "offset": 92,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "bitset": 3,
+    "type": "BOOLEAN",
+    "icon": 41,
+    "consecutive": 1
+   },
+   "lock_rotation": {
+    "offset": 92,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8,
+    "bitset": 3,
+    "type": "BOOLEAN",
+    "icon": 41,
+    "consecutive": 1
+   },
+   "lock_rotation_w": {
+    "offset": 92,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 512,
+    "type": "BOOLEAN",
+    "icon": 41,
+    "consecutive": 1
+   },
+   "lock_rotations_4d": {
+    "offset": 92,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1024,
+    "type": "BOOLEAN"
+   },
+   "lock_scale": {
+    "offset": 92,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 64,
+    "bitset": 3,
+    "type": "BOOLEAN",
+    "icon": 41,
+    "consecutive": 1
+   },
+   "use_connect": {
+    "offset": 88,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "type": "BOOLEAN"
+   },
+   "use_inherit_rotation": {
+    "offset": 88,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 512,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "use_envelope_multiply": {
+    "offset": 88,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2048,
+    "type": "BOOLEAN"
+   },
+   "use_deform": {
+    "offset": 88,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4096,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "use_local_location": {
+    "offset": 88,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4194304,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "use_relative_parent": {
+    "offset": 88,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8388608,
+    "type": "BOOLEAN"
+   },
+   "show_wire": {
+    "offset": 88,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 131072,
+    "type": "BOOLEAN"
+   },
+   "use_cyclic_offset": {
+    "offset": 88,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 262144,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "hide_select": {
+    "offset": 88,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2097152,
+    "type": "BOOLEAN"
+   },
+   "bbone_rollin": {
+    "offset": 652,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "bbone_rollout": {
+    "offset": 656,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "bbone_curveinx": {
+    "offset": 660,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "bbone_curveinz": {
+    "offset": 664,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "bbone_curveoutx": {
+    "offset": 668,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "bbone_curveoutz": {
+    "offset": 672,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "bbone_easein": {
+    "offset": 676,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "bbone_easeout": {
+    "offset": 680,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "bbone_scalein": {
+    "offset": 700,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT"
+   },
+   "bbone_scaleout": {
+    "offset": 712,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT"
+   }
+  }
+ },
+ "ShrinkwrapConstraint": {
+  "sdna": "bShrinkwrapConstraint",
+  "size": 20,
+  "base": "Constraint",
+  "from": 8,
+  "properties": {
+   "target": {
+    "offset": 0,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true,
+    "type": "POINTER"
+   },
+   "shrinkwrap_type": {
+    "offset": 8,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "NEAREST_SURFACE"
+     ],
+     [
+      1,
+      "PROJECT"
+     ],
+     [
+      2,
+      "NEAREST_VERTEX"
+     ],
+     [
+      3,
+      "TARGET_PROJECT"
+     ]
+    ]
+   },
+   "wrap_mode": {
+    "offset": 16,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": []
+   },
+   "distance": {
+    "offset": 4,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "project_axis": {
+    "offset": 10,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": []
+   },
+   "project_axis_space": {
+    "offset": 11,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "custom": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "WORLD"
+     ],
+     [
+      5,
+      "CUSTOM"
+     ],
+     [
+      2,
+      "POSE"
+     ],
+     [
+      3,
+      "LOCAL_WITH_PARENT"
+     ],
+     [
+      1,
+      "LOCAL"
+     ]
+    ]
+   },
+   "project_limit": {
+    "offset": 12,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_project_opposite": {
+    "offset": 17,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "cull_face": {
+    "offset": 17,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "custom": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "OFF"
+     ],
+     [
+      8,
+      "FRONT"
+     ],
+     [
+      16,
+      "BACK"
+     ]
+    ]
+   },
+   "use_invert_cull": {
+    "offset": 17,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "use_track_normal": {
+    "offset": 17,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   },
+   "track_axis": {
+    "offset": 18,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "TRACK_X"
+     ],
+     [
+      1,
+      "TRACK_Y"
+     ],
+     [
+      2,
+      "TRACK_Z"
+     ],
+     [
+      3,
+      "TRACK_NEGATIVE_X"
+     ],
+     [
+      4,
+      "TRACK_NEGATIVE_Y"
+     ],
+     [
+      5,
+      "TRACK_NEGATIVE_Z"
+     ]
+    ]
+   }
+  }
+ },
+ "SplineIKConstraint": {
+  "sdna": "bSplineIKConstraint",
+  "size": 40,
+  "base": "Constraint",
+  "from": 8,
+  "properties": {
+   "target": {
+    "offset": 0,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true,
+    "type": "POINTER"
+   },
+   "chain_count": {
+    "offset": 10,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "use_chain_offset": {
+    "offset": 12,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "use_even_divisions": {
+    "offset": 12,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8,
+    "type": "BOOLEAN"
+   },
+   "use_curve_radius": {
+    "offset": 12,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "xz_scale_mode": {
+    "offset": 14,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "NONE"
+     ],
+     [
+      1,
+      "BONE_ORIGINAL"
+     ],
+     [
+      2,
+      "INVERSE_PRESERVE"
+     ],
+     [
+      3,
+      "VOLUME_PRESERVE"
+     ]
+    ]
+   },
+   "y_scale_mode": {
+    "offset": 16,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "NONE"
+     ],
+     [
+      1,
+      "FIT_CURVE"
+     ],
+     [
+      2,
+      "BONE_ORIGINAL"
+     ]
+    ]
+   },
+   "use_original_scale": {
+    "offset": 12,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 128,
+    "type": "BOOLEAN"
+   },
+   "bulge": {
+    "offset": 24,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_bulge_min": {
+    "offset": 12,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 32,
+    "type": "BOOLEAN"
+   },
+   "use_bulge_max": {
+    "offset": 12,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 64,
+    "type": "BOOLEAN"
+   },
+   "bulge_min": {
+    "offset": 28,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "bulge_max": {
+    "offset": 32,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "bulge_smooth": {
+    "offset": 36,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   }
+  }
+ },
+ "StretchToConstraint": {
+  "sdna": "bStretchToConstraint",
+  "size": 100,
+  "base": "Constraint",
+  "from": 8,
+  "properties": {
+   "head_tail": {
+    "offset": 156,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "struct": "bConstraint"
+   },
+   "use_bbone_shape": {
+    "offset": 14,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1024,
+    "type": "BOOLEAN",
+    "struct": "bConstraint"
+   },
+   "target": {
+    "offset": 0,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "subtarget": {
+    "offset": 36,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "type": "STRING"
+   },
+   "volume": {
+    "offset": 8,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "VOLUME_XZX"
+     ],
+     [
+      1,
+      "VOLUME_X"
+     ],
+     [
+      2,
+      "VOLUME_Z"
+     ],
+     [
+      3,
+      "NO_VOLUME"
+     ]
+    ]
+   },
+   "keep_axis": {
+    "offset": 12,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "PLANE_X"
+     ],
+     [
+      2,
+      "PLANE_Z"
+     ],
+     [
+      1,
+      "SWING_Y"
+     ]
+    ]
+   },
+   "rest_length": {
+    "offset": 16,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "bulge": {
+    "offset": 20,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_bulge_min": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "use_bulge_max": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "bulge_min": {
+    "offset": 24,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "bulge_max": {
+    "offset": 28,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "bulge_smooth": {
+    "offset": 32,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   }
+  }
+ },
+ "TrackToConstraint": {
+  "sdna": "bTrackToConstraint",
+  "size": 84,
+  "base": "Constraint",
+  "from": 8,
+  "properties": {
+   "head_tail": {
+    "offset": 156,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "struct": "bConstraint"
+   },
+   "use_bbone_shape": {
+    "offset": 14,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1024,
+    "type": "BOOLEAN",
+    "struct": "bConstraint"
+   },
+   "target": {
+    "offset": 0,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "subtarget": {
+    "offset": 20,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "type": "STRING"
+   },
+   "track_axis": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "TRACK_X"
+     ],
+     [
+      1,
+      "TRACK_Y"
+     ],
+     [
+      2,
+      "TRACK_Z"
+     ],
+     [
+      3,
+      "TRACK_NEGATIVE_X"
+     ],
+     [
+      4,
+      "TRACK_NEGATIVE_Y"
+     ],
+     [
+      5,
+      "TRACK_NEGATIVE_Z"
+     ]
+    ]
+   },
+   "up_axis": {
+    "offset": 8,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "UP_X"
+     ],
+     [
+      1,
+      "UP_Y"
+     ],
+     [
+      2,
+      "UP_Z"
+     ]
+    ]
+   },
+   "use_target_z": {
+    "offset": 12,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   }
+  }
+ },
+ "TransformConstraint": {
+  "sdna": "bTransformConstraint",
+  "size": 228,
+  "base": "Constraint",
+  "from": 8,
+  "properties": {
+   "target": {
+    "offset": 0,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "subtarget": {
+    "offset": 4,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "type": "STRING"
+   },
+   "map_from": {
+    "offset": 68,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "LOCATION"
+     ],
+     [
+      1,
+      "ROTATION"
+     ],
+     [
+      2,
+      "SCALE"
+     ]
+    ]
+   },
+   "map_to": {
+    "offset": 70,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "LOCATION"
+     ],
+     [
+      1,
+      "ROTATION"
+     ],
+     [
+      2,
+      "SCALE"
+     ]
+    ]
+   },
+   "map_to_x_from": {
+    "offset": 72,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": []
+   },
+   "map_to_y_from": {
+    "offset": 73,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": []
+   },
+   "map_to_z_from": {
+    "offset": 74,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": []
+   },
+   "use_motion_extrapolate": {
+    "offset": 75,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "from_rotation_mode": {
+    "offset": 76,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": []
+   },
+   "to_euler_order": {
+    "offset": 77,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "AUTO"
+     ],
+     [
+      1,
+      "XYZ"
+     ],
+     [
+      2,
+      "XZY"
+     ],
+     [
+      3,
+      "YXZ"
+     ],
+     [
+      4,
+      "YZX"
+     ],
+     [
+      5,
+      "ZXY"
+     ],
+     [
+      6,
+      "ZYX"
+     ]
+    ]
+   },
+   "from_min_x": {
+    "offset": 84,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "from_min_y": {
+    "offset": 88,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "from_min_z": {
+    "offset": 92,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "from_max_x": {
+    "offset": 96,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "from_max_y": {
+    "offset": 100,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "from_max_z": {
+    "offset": 104,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "to_min_x": {
+    "offset": 108,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "to_min_y": {
+    "offset": 112,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "to_min_z": {
+    "offset": 116,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "to_max_x": {
+    "offset": 120,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "to_max_y": {
+    "offset": 124,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "to_max_z": {
+    "offset": 128,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "mix_mode": {
+    "offset": 78,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      1,
+      "REPLACE"
+     ],
+     [
+      0,
+      "ADD"
+     ]
+    ]
+   },
+   "from_min_x_rot": {
+    "offset": 132,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "from_min_y_rot": {
+    "offset": 136,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "from_min_z_rot": {
+    "offset": 140,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "from_max_x_rot": {
+    "offset": 144,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "from_max_y_rot": {
+    "offset": 148,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "from_max_z_rot": {
+    "offset": 152,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "to_min_x_rot": {
+    "offset": 156,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "to_min_y_rot": {
+    "offset": 160,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "to_min_z_rot": {
+    "offset": 164,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "to_max_x_rot": {
+    "offset": 168,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "to_max_y_rot": {
+    "offset": 172,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "to_max_z_rot": {
+    "offset": 176,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "mix_mode_rot": {
+    "offset": 79,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      1,
+      "REPLACE"
+     ],
+     [
+      0,
+      "ADD"
+     ],
+     [
+      2,
+      "BEFORE"
+     ],
+     [
+      3,
+      "AFTER"
+     ]
+    ]
+   },
+   "from_min_x_scale": {
+    "offset": 180,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "from_min_y_scale": {
+    "offset": 184,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "from_min_z_scale": {
+    "offset": 188,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "from_max_x_scale": {
+    "offset": 192,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "from_max_y_scale": {
+    "offset": 196,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "from_max_z_scale": {
+    "offset": 200,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "to_min_x_scale": {
+    "offset": 204,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "to_min_y_scale": {
+    "offset": 208,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "to_min_z_scale": {
+    "offset": 212,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "to_max_x_scale": {
+    "offset": 216,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "to_max_y_scale": {
+    "offset": 220,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "to_max_z_scale": {
+    "offset": 224,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "mix_mode_scale": {
+    "offset": 80,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "REPLACE"
+     ],
+     [
+      1,
+      "MULTIPLY"
+     ]
+    ]
+   }
+  }
+ }
+}

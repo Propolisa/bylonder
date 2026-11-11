@@ -475,7 +475,7 @@ function moduleMesh(x, createMesh) {
 
 // src/modifiers/dna-write.js
 function writeField(view, address, layout, value, index) {
-  const { offset, size: size2, kind, signed, bit, bitset, negative, boolean, items, length } = layout;
+  const { offset, size: size2, kind, signed, bit, bitset, negative, boolean, items, length, bitflag } = layout;
   const at = address + offset + (bitset ? 0 : index * size2);
   if (typeof value === "string" && !items) {
     const field = new Uint8Array(view.buffer, view.byteOffset + at, length);
@@ -489,6 +489,10 @@ function writeField(view, address, layout, value, index) {
     const mask = bitset ? bit << index : bit, on = negative ? !value : value;
     const word = view[`get${type}`](at, true);
     return view[`set${type}`](at, on ? word | mask : word & ~mask, true);
+  }
+  if (items && bitflag) {
+    const mask = Object.values(items).reduce((m, v) => m | v, 0);
+    return view[`set${type}`](at, view[`get${type}`](at, true) & ~mask | items[value], true);
   }
   view[`set${type}`](at, items ? items[value] : Number(value), true);
 }

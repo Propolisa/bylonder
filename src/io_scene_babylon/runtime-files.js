@@ -9,13 +9,17 @@ const NOTICE = { 'LICENSE.md': 'io_scene_babylon/blender-code.LICENSE.md', COPYI
 // Stopgap: the scene module stands in as a package's Geometry Nodes kernels (its gn_* entry points, one node a call)
 // until a module of their own is built; point this at it to swap.
 export const GEOMETRY_NODES_KERNELS = 'bmesh/bmesh.wasm';
+// The clean-room driver units (runtime/drivers/), which the driver and pose implementations run.
+const DRIVER_UNITS = ['driver', 'expression', 'fcurve', 'float32', 'rotation-reading'].flatMap((n) => declared(`drivers/${n}`));
 // Each implementation an IR's entities name: its runtime/ files, in bylonder/ when an entity runs on it, and the folder
 // of Blender's code it loads, its files from src/ (GPL-3.0-or-later).
 export const EVALUATOR_FILES = {
-  driver: { runtime: [...declared('driver-evaluator'), ...['driver', 'expression', 'fcurve', 'float32', 'rotation-reading'].flatMap((n) => declared(`drivers/${n}`))] },
+  driver: { runtime: [...declared('driver-evaluator'), ...DRIVER_UNITS] },
   fcurve: { runtime: [...declared('fcurve-evaluator'), ...declared('drivers/fcurve')] },
   constraints: { runtime: declared('constraints-evaluator') },
-  pose: { runtime: [...declared('pose-constraints', 'constraints-evaluator'), ...['driver', 'expression', 'fcurve', 'float32', 'rotation-reading'].flatMap((n) => declared(`drivers/${n}`))] },
+  pose: { runtime: [...declared('pose-constraints', 'constraints-evaluator'), ...DRIVER_UNITS] },
+  'pose-kernels': { runtime: [...declared('pose-kernels', 'pose-constraints', 'constraints-evaluator'), ...DRIVER_UNITS], folder: 'bylonder-constraints',
+    files: { 'constraints.js': 'io_scene_babylon/polyfill/constraints-kernels.bundle.js', 'constraints.wasm': 'constraints/constraints.wasm' } },
   modifiers: { runtime: declared('modifiers-evaluator'), folder: 'bylonder-modifiers',
     files: { 'modifiers-worker.js': 'io_scene_babylon/polyfill/modifiers-worker.bundle.js', 'modifiers.wasm': 'modifiers/modifiers.wasm' } },
   'geometry-nodes': { runtime: [...declared('geometry-nodes-evaluator'), ...['index', 'evaluator', 'geometry', 'convert', 'kernels'].flatMap((n) => declared(`geometry-nodes/${n}`))],
