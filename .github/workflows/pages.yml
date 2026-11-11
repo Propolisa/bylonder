@@ -60,7 +60,8 @@ jobs:
         with:
           path: .tools/playwright
           key: playwright-chromium-${{ hashFiles('package-lock.json') }}
-      - run: npx playwright install --with-deps chromium
+      # apt and the browser download fail at times on GitHub's runners; retry as npm ci does.
+      - run: for i in 1 2 3; do npx playwright install --with-deps chromium && exit 0; sleep 30; done; exit 1
       - run: npm run module
       - run: npm test
       # Files Babylon loads from its CDNs, served by the app (scripts/babylon-assets.mjs), pinned by hash.
