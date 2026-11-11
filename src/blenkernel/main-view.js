@@ -15,7 +15,7 @@ import { CurveObject } from './curve/curve.js';
 import { mesh_batch_cache_apply } from '../draw/mesh-batch-cache.js';
 import { asObject, setEvaluatedMatrix } from '../runtime/object-transform.js';
 import { ID_RECALC_GEOMETRY, ID_RECALC_SHADING, ID_RECALC_SYNC_TO_EVAL, ID_RECALC_ALL } from '../bmesh/bmesh-wasm.js';
-import { Camera, Color3, FreeCamera, Material, Matrix, Mesh, MultiMaterial, PBRMaterial, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
+import { Camera, Color3, FreeCamera, Material, Matrix, Mesh, MultiMaterial, PBRMaterial, RenderTargetTexture, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
 import { particleShapeMesh, particleShapeMaterial, hairOverlay, particleEditOverlay } from '../draw/overlay-particle.js';
 import { drawPointClouds } from '../draw/pointcloud.js';
 import { paintWeightOverlay } from '../draw/overlay-paint-weight.js';
@@ -535,6 +535,7 @@ export function createMainView(state) {
       // Rendered views accumulate their samples again (render/film.js), as EEVEE's viewport does after an update.
       world.renderSettings?.resetFilms?.();
       world.shadows?.changed();
+      if (redrawProbesDrawnOnce(world.scene)) world.views?.wake();
       state.evaluated();
     }
   }
@@ -601,7 +602,14 @@ export function createMainView(state) {
     const shown = drawPointClouds(scene, clouds, pointClouds, materialFor);
     for (const [key, mesh] of pointClouds) if (!shown.has(key)) { mesh.dispose(); pointClouds.delete(key); }
   }
-  // An instanced light lights at each instance, as Blender's do: a light of its settings at each instance's matrix.
+  // A scene's own reflection probes drawn once (Babylon's REFRESHRATE_RENDER_ONCE) draw again after Main changes, which
+// can change what they show after their first drawing (Orrery's studio strips); whether there are any.
+function redrawProbesDrawnOnce(scene) {
+  const probes = (scene.reflectionProbes ?? []).filter((probe) => !probe.name.startsWith('__') && probe.refreshRate === RenderTargetTexture.REFRESHRATE_RENDER_ONCE);
+  probes.forEach((probe) => probe.cubeTexture.resetRefreshCounter());
+  return probes.length > 0;
+}
+// An instanced light lights at each instance, as Blender's do: a light of its settings at each instance's matrix.
   const instanceLights = new Map(); // source light -> its instances' lights
   function drawLightInstances(scene, lights) {
     for (const [source, made] of instanceLights) if (!lights.has(source)) { made.forEach((light) => light.dispose()); instanceLights.delete(source); }
