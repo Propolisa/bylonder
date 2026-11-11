@@ -29,7 +29,8 @@ A small ramen bar, 麺屋 灯 (Menya Akari, "the noodle house of the lamp"), in 
   below 6.5 m only), ripples spread in the puddles, the airship bobs and the fog banks drift, and the camera breathes a
   few centimeters. The woman keeps her rig, hidden in the viewport as an animator leaves it: her chest rises with each
   breath and once a loop she lifts the cup (bone parented to her hand) for a sip; the diner in the window lifts the
-  chopsticks. Steam is particles emitted from well before frame 1, so it is already rising at the start; its puffs are
+  chopsticks. Her rig's actions are Idle and Sip, which NLA strips play on the timeline, and Walk and Sit on muted
+  tracks, for File > Export > JavaScript with Animations set to Clips (the Noodle Shop game plays all four). Steam is particles emitted from well before frame 1, so it is already rising at the start; its puffs are
   random, so the steam changes slightly at the loop's seam.
 - **Compositor.** Render Layers, Glare (Fog Glow), Lens Distortion with a little Dispersion, a Color Balance grade and
   a vignette (an Ellipse Mask, blurred, multiplied over the image) into the Group Output; a Viewer shows the result.

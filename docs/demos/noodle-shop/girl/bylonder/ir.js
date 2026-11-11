@@ -93,12 +93,33 @@ export const CollectionSchema = z.object({
   view_layers: fresh(z.record(Name, LayerCollectionSchema), () => ({})),
 });
 
+/** A marker: a named frame, the scene's (timeline_markers) or an action's (pose_markers, at the action's frames). */
+export const MarkerSchema = z.object({ name: z._default(z.string(), ''), frame: z._default(z.number(), 0) });
+/**
+ * An action exported as a clip (an animation group of its own, named by the action): its frame range, and how the first
+ * NLA strip using it plays it, its blending (REPLACE, ADD, or COMBINE played as ADD), influence, speed (1 / its scale) and
+ * repeat; its pose markers.
+ */
+export const ClipSchema = z.object({
+  action: Name,
+  frame_start: z._default(z.number(), 1), frame_end: z._default(z.number(), 1),
+  blend: z._default(z.enum(['REPLACE', 'ADD', 'SUBTRACT', 'MULTIPLY', 'COMBINE']), 'REPLACE'),
+  influence: z._default(z.number(), 1), speed: z._default(z.number().check(z.refine((speed) => speed > 0)), 1), repeat: z._default(z.number(), 1),
+  markers: fresh(z.array(MarkerSchema), () => []),
+});
+
 /** The scene's time as Blender's Scene holds it: the frame shown, the range played, its frame rate (fps / fps_base) and whether playback loops. */
 export const TimeSchema = z.object({
   frame_current: z._default(z.number(), 1), frame_start: z._default(z.number(), 1), frame_end: z._default(z.number(), 250),
   fps: z._default(z.number(), 24), fps_base: z._default(z.number(), 1), loop: z._default(z.boolean(), true),
+  /** keys per second of each object whose animation groups hold baked (sampled) keys, by object name */
+  sample_rates: fresh(z.record(Name, z.number().check(z.refine((rate) => rate > 0))), () => ({})),
+  /** the actions exported as clips, by name */
+  clips: fresh(z.record(Name, ClipSchema), () => ({})),
+  /** the scene's markers */
+  markers: fresh(z.array(MarkerSchema), () => []),
 });
-const TIME = () => ({ frame_current: 1, frame_start: 1, frame_end: 250, fps: 24, fps_base: 1, loop: true });
+const TIME = () => ({ frame_current: 1, frame_start: 1, frame_end: 250, fps: 24, fps_base: 1, loop: true, sample_rates: {}, clips: {}, markers: [] });
 
 /** The scene the page shows: its ID, its scene collection (the collections' root), the view layer it draws and its time. */
 export const SceneSchema = z.object({
@@ -152,6 +173,8 @@ export const GeometrySchema = z.object({ mesh: z.optional(MeshSchema), points: z
  * @typedef {z.infer<typeof InstancesSchema>} Instances
  * @typedef {z.infer<typeof GeometrySchema>} Geometry
  * @typedef {z.infer<typeof TimeSchema>} Time
+ * @typedef {z.infer<typeof ClipSchema>} Clip
+ * @typedef {z.infer<typeof MarkerSchema>} Marker
  * @typedef {z.infer<typeof CollectionSchema>} Collection
  * @typedef {z.infer<typeof LayerCollectionSchema>} LayerCollection
  * A reference an entity's input may hold, resolved before a unit runs.

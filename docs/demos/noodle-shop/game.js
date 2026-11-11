@@ -8,7 +8,7 @@ import { HemisphericLight } from '@babylonjs/core/Lights/hemisphericLight.js';
 import { GlowLayer } from '@babylonjs/core/Layers/glowLayer.js';
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode.js';
 import { Color3, Color4 } from '@babylonjs/core/Maths/math.color.js';
-import { Quaternion, Vector3 } from '@babylonjs/core/Maths/math.vector.js';
+import { Vector3 } from '@babylonjs/core/Maths/math.vector.js';
 import { ImportMeshAsync } from '@babylonjs/core/Loading/sceneLoader.js';
 import { VirtualJoystick } from '@babylonjs/core/Misc/virtualJoystick.js';
 import './street/bylonder/scene-loader.js';
@@ -26,7 +26,6 @@ new GlowLayer('neon', scene).intensity = 0.6;
 await ImportMeshAsync('./street/scene.bylonder', scene);
 const girl = await load({ scene });
 const part = (name) => girl.entries.meshes.find((m) => m.name === name);
-const [skeleton] = girl.entries.skeletons, bone = (name) => skeleton.bones.find((b) => b.name === name);
 const tea = [part('Tea Cup'), part('Tea Steam Card')];
 tea.forEach((m) => m.setEnabled(false));
 
@@ -43,36 +42,39 @@ const camera = new ArcRotateCamera('follow', Math.PI / 2, 1.15, 3.2, SEAT.add(ne
 camera.attachControl(canvas, true);
 Object.assign(camera, { lowerRadiusLimit: 2, upperRadiusLimit: 8, upperBetaLimit: 1.45, minZ: 0.05 });
 
-// A walk of her own: legs and arms swing from her rig's rest pose, as the package has no walk.
-const rest = new Map(skeleton.bones.map((b) => [b, Quaternion.FromRotationMatrix(b.getRestMatrix())]));
-const turn = (name, angle) => bone(name).setRotationQuaternion(rest.get(bone(name)).multiply(Quaternion.RotationAxis(Vector3.Right(), angle)));
-function walkPose(phase, speed) {
-  skeleton.returnToRest();
-  const swing = Math.sin(phase) * 0.55 * speed;
-  turn('LeftUpLeg', swing); turn('RightUpLeg', -swing);
-  turn('LeftLeg', -Math.max(0, -Math.sin(phase)) * 0.9 * speed); turn('RightLeg', -Math.max(0, Math.sin(phase)) * 0.9 * speed);
-  turn('LeftArm', -1.25 - swing * 0.4); turn('RightArm', -1.25 + swing * 0.4);
-  lift.position.y = LIFT + Math.abs(Math.cos(phase)) * 0.03 * speed;
-}
-
-// Seated, she breathes (frames 1 to 140 of the lane's loop) and, asked, sips (150 to 214) from her cup.
-let state = 'walking', sipping = false, sips = 0, phase = 0, nearStool = false;
-girl.playhead.onChanged.add(({ frame }) => {
-  if (sipping && frame >= 214) { sipping = false; sips++; say(sips < 3 ? `Ahh. ${press} to sip again` : 'Warm. The rain sounds nice tonight.'); }
-  if (!sipping && frame > 140) girl.playhead.seek(1);
-});
+// Her clips, actions of her rig: Walk (a stride from feet together), Sit (from standing to seated), Idle (breathing as
+// she sits) and Sip. Walking lifts her by LIFT, as her rig stands where she sits; sitting lowers her as Sit plays.
+const SIT_TIME = 0.75;
+const walk = girl.play('Walk', { loop: true });
+let state = 'walking', sipping = false, sips = 0, nearStool = false, sitting = 0;
+const standStill = () => { walk.pause(); walk.goToFrame(walk.from); };
 const sit = () => {
   state = 'seated';
+  sitting = SIT_TIME;
   player.position.copyFrom(SEAT);
   player.rotation.y = SEAT_YAW;
-  lift.position.y = 0;
-  girl.playhead.seek(1);
-  girl.playhead.play();
+  girl.stop('Walk');
+  girl.play('Sit', { loop: false }).onAnimationGroupEndObservable.addOnce(() => state === 'seated' && girl.play('Idle', { loop: true }));
+};
+const sip = () => {
+  sipping = true;
+  girl.stop('Idle');
+  girl.play('Sip', { loop: false }).onAnimationGroupEndObservable.addOnce(() => {
+    sipping = false;
+    if (state !== 'seated') return;
+    sips++;
+    say(sips < 3 ? `Ahh. ${press} to sip again` : 'Warm. The rain sounds nice tonight.');
+    girl.play('Idle', { loop: true });
+  });
 };
 const stand = () => {
   state = 'walking';
-  nearStool = false;
-  girl.playhead.pause();
+  nearStool = sipping = false;
+  sitting = 0;
+  ['Sit', 'Idle', 'Sip'].forEach((name) => girl.stop(name));
+  girl.play('Walk', { loop: true });
+  standStill();
+  lift.position.y = LIFT;
 };
 stand();
 player.position.set(8, 0, 1.3);
@@ -94,7 +96,7 @@ if (touch) {
 function act() {
   if (state === 'walking' && near()) return sit(), say(`${press} to buy a tea`);
   if (state === 'seated' && !tea[0].isEnabled()) return tea.forEach((m) => m.setEnabled(true)), say(`A hot tea, 300 yen. ${press} to sip`);
-  if (state === 'seated' && !sipping) { sipping = true; girl.playhead.seek(150); say(''); }
+  if (state === 'seated' && !sipping && !sitting) sip(), say('');
 }
 const near = () => Vector3.Distance(player.position, SEAT) < 1.2;
 
@@ -107,8 +109,8 @@ scene.onBeforeRenderObservable.add(() => {
   if (keys.has('KeyS') || keys.has('ArrowDown')) move.subtractInPlace(ahead);
   if (keys.has('KeyD') || keys.has('ArrowRight')) move.addInPlace(right);
   if (keys.has('KeyA') || keys.has('ArrowLeft')) move.subtractInPlace(right);
-  const walk = stickOf(walkStick), look = stickOf(lookStick);
-  move.addInPlace(ahead.scale(walk.y)).addInPlace(right.scale(walk.x));
+  const thumb = stickOf(walkStick), look = stickOf(lookStick);
+  move.addInPlace(ahead.scale(thumb.y)).addInPlace(right.scale(thumb.x));
   camera.inertialAlphaOffset -= look.x * dt * 0.1;
   camera.inertialBetaOffset += look.y * dt * 0.05;
   const moving = move.lengthSquared() > 0.01;
@@ -120,10 +122,14 @@ scene.onBeforeRenderObservable.add(() => {
       player.position.x = Math.min(Math.max(player.position.x, -20), 12);
       player.position.z = Math.min(Math.max(player.position.z, 0.35), 4);
       player.rotation.y = Math.atan2(move.x, move.z);
-      phase += dt * 8;
-    }
-    walkPose(phase, moving ? 1 : 0);
+      if (!walk.isPlaying) walk.play(true);
+    } else if (walk.isPlaying) standStill();
     if (!sipping && near() !== nearStool) say((nearStool = near()) ? `${press} to sit` : '');
+  }
+  if (sitting > 0) {
+    sitting = Math.max(0, sitting - dt);
+    const t = sitting / SIT_TIME;
+    lift.position.y = LIFT * t * t * (3 - 2 * t);
   }
   // Closer while she sits.
   const seated = state === 'seated';

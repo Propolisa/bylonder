@@ -11,9 +11,9 @@ import { openExample } from '../../tests/open-example.js';
 import { packageFiles } from '../../tests/export-package.js';
 import { exportModule } from '../../src/io_scene_babylon/js-export.js';
 
-// The tea break's woman, as the noodle shop's player, and the rest of the lane but its camera.
+// The tea break's woman, as the noodle shop's player with her actions as clips, and the rest of the lane but its camera.
 const GIRL = ['Tea Break', 'Tea Cup', 'Tea Steam Card', 'Tea Steam Emitter'];
-const GAMES = { 'noodle-shop': { example: 'compositor', packages: { girl: (objects) => objects.filter((n) => GIRL.includes(n.name)),
+const GAMES = { 'noodle-shop': { example: 'compositor', clips: ['girl'], packages: { girl: (objects) => objects.filter((n) => GIRL.includes(n.name)),
   street: (objects) => objects.filter((n) => !GIRL.includes(n.name) && n.name !== 'Tea Break Rig' && !n.getClassName().endsWith('Camera')) } } };
 
 const NAME = process.argv[2] ?? 'compositor', game = GAMES[NAME];
@@ -34,7 +34,10 @@ function write(folder, files) {
 }
 
 if (game) {
-  for (const [name, selected] of Object.entries(game.packages)) write(join(dir, name), packageFiles(await exportModule(world, { ...OPTIONS, scope: 'SELECTED', selected: selected(world.objects) })));
+  for (const [name, selected] of Object.entries(game.packages)) {
+    const animations = game.clips.includes(name) ? 'CLIPS' : 'TIMELINE';
+    write(join(dir, name), packageFiles(await exportModule(world, { ...OPTIONS, scope: 'SELECTED', selected: selected(world.objects), animations })));
+  }
 } else {
   const files = write(dir, packageFiles(await exportModule(world, OPTIONS)));
   const babylon = String(files['scene.js']).match(/"(https:\/\/cdn\.jsdelivr\.net\/npm\/@babylonjs\/core@[\d.]+\/)"/)[1];

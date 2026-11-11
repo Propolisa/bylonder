@@ -6,6 +6,7 @@
 import { AssetContainer } from '@babylonjs/core/assetContainer.js';
 import { Mesh } from '@babylonjs/core/Meshes/mesh.js';
 import { Quaternion } from '@babylonjs/core/Maths/math.vector.js';
+import { isClip } from './clips.js';
 
 /** @typedef {import('@babylonjs/core').Scene} Scene */
 /** @typedef {import('@babylonjs/core').Node} Node */
@@ -30,7 +31,8 @@ const newest = (list, test) => { for (let i = list.length - 1; i >= 0; i--) if (
  * @param {Scene} scene
  */
 function newestFirst(scene) {
-  const nodes = () => [...scene.meshes, ...scene.transformNodes, ...scene.lights, ...scene.cameras];
+  // Bones too, as Scene.getNodeById finds them: a skeleton's animation targets its bones by id.
+  const nodes = () => [...scene.meshes, ...scene.transformNodes, ...scene.lights, ...scene.cameras, ...scene.skeletons.flatMap((s) => s.bones)];
   /** @param {string} id */
   const morphTarget = (id) => {
     for (const manager of [...scene.morphTargetManagers].reverse()) for (let i = 0; i < manager.numTargets; i++) if (manager.getTarget(i).id === id) return manager.getTarget(i);
@@ -71,7 +73,7 @@ function lookups(scene, own) {
  * @param {Content} content
  */
 function scoped(scene, content) {
-  const nodes = [...content.meshes, ...content.transformNodes, ...content.lights, ...content.cameras];
+  const nodes = [...content.meshes, ...content.transformNodes, ...content.lights, ...content.cameras, ...content.skeletons.flatMap((s) => s.bones)];
   /** @param {any[]} list */
   const byId = (list) => (/** @type {string} */ id) => list.find((n) => n.id === id) ?? null;
   return lookups(scene, {
@@ -142,8 +144,8 @@ export function cloneAsset(entries, { root = null, controller }) {
   const top = /** @type {any} */ (made.rootNodes[0]), ids = new Map([entries.root, ...entries.root.getDescendants(false)].map((n) => [n.name, n.id]));
   const nodes = [top, ...top.getDescendants(false)];
   for (const node of nodes) node.id = ids.get(node.name) ?? node.id;
-  // Held at their frame by the copy's playhead, as the loaded ones are.
-  for (const group of made.animationGroups) group.start(group.loopAnimation).pause();
+  // Held at their frame by the copy's playhead, as the loaded ones are; clips wait to be played.
+  for (const group of made.animationGroups) if (!isClip(group)) group.start(group.loopAnimation).pause();
   top.parent = root;
   const content = { ...Object.fromEntries(LISTS.map((list) => [list, []])), meshes: nodes.filter((n) => n.getClassName().endsWith('Mesh')),
     transformNodes: nodes.filter((n) => n.getClassName() === 'TransformNode'), materials: entries.materials, multiMaterials: entries.multiMaterials,
