@@ -6,7 +6,8 @@ import { CascadedShadowGenerator, Constants, LinesMesh, Matrix, RenderTargetText
 import { drawAgainUntilComplete } from '../../overrides/babylon/shadow-map-complete.js';
 import { influenceRadius, isBlenderLight, lightRecord } from './light-home.js';
 import { areaLightShadows } from './area-light.js';
-import { createLightReach, lightsMeshes } from './light-reach.js';
+import './clustered-lights.js';
+import { createLightReach, lightsMeshes } from '../../overrides/babylon/light-reach.js';
 import { filmSample } from '../../render/film.js';
 import { halton } from '../../render/sampling.js';
 import { BLENDER_FORWARD, evaluatedMatrix, setEvaluatedMatrix } from '../../runtime/object-transform.js';
@@ -168,28 +169,17 @@ function cascadeState(scene, generator) {
     engine.getRenderWidth(), engine.getRenderHeight(), box.minimumWorld.asArray().join(), box.maximumWorld.asArray().join()].join();
 }
 
-// warn(message): a Warning report, for a mesh more lights reach than its material takes (light-reach.js).
+// warn(message): a Warning report, for a mesh more lights reach than its material takes (overrides/babylon/light-reach.js).
 export function createLightShadows(scene, { warn } = {}) {
   const generators = new Map(); // light -> { generator, type }
   const jitter = jitterPerSample(scene);
-  let counted = '', drawn = false, evaluated = 0;
-  // Every light lights every material, as in Blender (Babylon's materials take 4 unless told more), up to what a vertex
-  // shader holds: a uniform block per light besides the scene's, mesh's and material's (and one spare).
-  const engine = scene.getEngine(), gl = engine._gl;
-  const blocks = engine.currentLimits?.maxUniformBuffersPerShaderStage ?? gl?.getParameter(gl.MAX_VERTEX_UNIFORM_BLOCKS) ?? 12;
-  // Past that, each mesh takes the lights that reach it, the strongest first, as EEVEE culls lights by their reach.
-  const reach = createLightReach(scene, warn);
-  const lightAll = () => {
-    const count = Math.min(scene.lights.length, blocks - 4), key = `${count}:${scene.materials.length}`;
-    if (key !== counted) {
-      counted = key;
-      for (const material of scene.materials) if (material.maxSimultaneousLights < count) material.maxSimultaneousLights = count;
-    }
-    reach.update(count);
-  };
+  let drawn = false, evaluated = 0;
+  // Every material takes as many lights as its shader holds, each mesh the Blender lights that reach it, the strongest
+  // first, as EEVEE culls lights by their reach (overrides/babylon/light-reach.js, as exported pages do).
+  const reach = createLightReach(scene, { owns: isBlenderLight, warn });
   const casting = (record) => record?.use_shadow && (CASTS.includes(record.type) || (record.type === 'AREA' && areaLightShadows.enabled(scene)));
   const sync = () => {
-    lightAll();
+    reach.update();
     for (const [light, entry] of generators) {
       const record = lightRecord(light);
       if (light.isDisposed() || !casting(record) || record.type !== entry.type) { entry.generator.dispose(); generators.delete(light); }

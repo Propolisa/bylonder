@@ -74,7 +74,7 @@ export const gplFiles = (files) => {
 };
 // Bylonder's overrides of Babylon and WebGPU (src/overrides/), which a package carries in bylonder/overrides/ when its
 // scene.js or runtime files import them, and how a runtime file imports one there.
-const OVERRIDES = ['webgpu/float-world-cube', 'webgpu/derivative-uniformity', 'webgpu/reserved-names', 'webgpu/samplers', 'webgpu/maximum-limits', 'webgpu/missing-attributes', 'webgpu/depth-metric-varyings', 'webgpu/vertex-light-blocks', 'webgpu/pbr-from-glsl', 'babylon/area-light-parse', 'babylon/pbr-block-area-lights', 'babylon/camera-quaternion', 'babylon/god-rays-parse', 'babylon/pipeline-effects', 'babylon/linear-image-processing', 'babylon/chromatic-aberration-size', 'babylon/geometry-gamma-albedo', 'babylon/environment-probe', 'babylon/lit-side-normal-bias', 'babylon/srgb-texture-parse'];
+const OVERRIDES = ['webgpu/float-world-cube', 'webgpu/derivative-uniformity', 'webgpu/reserved-names', 'webgpu/samplers', 'webgpu/maximum-limits', 'webgpu/missing-attributes', 'webgpu/depth-metric-varyings', 'webgpu/vertex-light-blocks', 'webgpu/pbr-from-glsl', 'babylon/area-light-parse', 'babylon/pbr-block-area-lights', 'babylon/camera-quaternion', 'babylon/god-rays-parse', 'babylon/pipeline-effects', 'babylon/linear-image-processing', 'babylon/chromatic-aberration-size', 'babylon/geometry-gamma-albedo', 'babylon/environment-probe', 'babylon/lit-side-normal-bias', 'babylon/srgb-texture-parse', 'babylon/light-reach', 'babylon/clustered-lights'];
 const declaredOverrides = (names) => names.flatMap((name) => [`${name}.js`, `${name}.d.ts`]);
 export const OVERRIDE_FILES = declaredOverrides(OVERRIDES);
 // The overrides a package's files (scene.js and its runtime files) import: [package path, src/ path].

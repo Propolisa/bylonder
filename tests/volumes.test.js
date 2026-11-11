@@ -188,7 +188,7 @@ const fragment = async (material) => {
   assert.equal(inside.getTotalVertices(), 64 * 4, 'every slice of the grid holds fog');
   const clips = inside.getVerticesData('blFroxelClip');
   assert.ok(Math.min(...clips.filter((_, i) => i % 4 === 0)) === -1 && Math.max(...clips.filter((_, i) => i % 4 === 0)) === 1, 'over the whole atlas');
-  // A light that light-reach.js limits to other meshes' surfaces still lights the volume; one Material Preview leaves
+  // A light that overrides/babylon/light-reach.js limits to other meshes' surfaces still lights the volume; one Material Preview leaves
   // out by its layer mask does not.
   const lantern = createLight('Lantern', 'POINT', { energy: 30 }, scene), studio = createLight('Studio', 'POINT', { energy: 30 }, scene);
   lantern.includedOnlyMeshes = [MeshBuilder.CreateBox('Post', {}, scene)];

@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
-import { NullEngine } from '@babylonjs/core';
+import { ClusteredLightContainer, MeshBuilder, NullEngine, PointLight, Vector3 } from '@babylonjs/core';
 import { openExample } from './open-example.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
 import { compositorLosses } from '../src/io_scene_babylon/compositor-export.js';
@@ -17,8 +17,6 @@ const { world, sync, scene } = openExample('compositor');
 sync.view();
 // Nothing here depends on the frames sampled: three keep the export to seconds.
 world.animation.time.configure({ frameStart: 1, frameEnd: 3 });
-// Bylonder's light reach (light-reach.js) keeps a light off meshes it does not reach, as Babylon's excluded meshes.
-scene.getLightByName('Door Light').excludedMeshes = [scene.getMeshByName('Road')];
 const files = await exportModule(world);
 const constant = (name) => JSON.parse(new RegExp(`const ${name} = (.*);`).exec(files['scene.js'])[1]);
 assert.ok(files['bylonder-blocks.js'] === undefined, 'exportModule leaves the runtime files to the package');
@@ -58,11 +56,40 @@ console.log(JSON.stringify(graph.attachedBlocks.map((b) => [b.name, b.getClassNa
 
   // Controls: a uniform and an uploaded value set by their Blender paths, without a rebuild.
   const blend = await (await import(written.url)).load(new NullEngine());
-  // Lights as the app draws them: a point light has no direction (Babylon would draw its shadow as a spot's), and each
-  // light leaves out the meshes Bylonder's light reach keeps it off, resolved once the meshes exist.
+  // Lights as the app draws them: a point light has no direction (Babylon would draw its shadow as a spot's).
   const lights = constant('LIGHTS');
   assert.ok(lights.filter((l) => l.type === 0).every((l) => !l.direction), 'point lights carry no direction');
-  assert.deepEqual(blend.scene.getLightByName('Door Light').excludedMeshes.map((m) => m.name), ['Road'], 'the Door Light leaves out the mesh it does not reach');
+  // Its 16 lights as EEVEE draws them, with no cap per material: each material takes as many as a shader holds (8 here)
+  // and each mesh the lights that reach it, the strongest at it first (overrides/babylon/light-reach.js), not the first 4.
+  const page = blend.scene, lit = page.meshes.filter((m) => m.material && m.getTotalVertices() > 0);
+  assert.equal(page.lights.length, 16);
+  assert.ok(page.materials.filter((m) => 'maxSimultaneousLights' in m).every((m) => m.maxSimultaneousLights === 8), 'every material takes 8 lights');
+  const active = (mesh) => Math.min(mesh.lightSources.length, mesh.material.maxSimultaneousLights ?? 4);
+  assert.ok(lit.every((m) => m.lightSources.length <= 8), 'no mesh has more lights than its material binds');
+  assert.ok(lit.filter((m) => active(m) > 4).length > lit.length / 2, `most meshes take more than 4 lights (${lit.map(active).join(' ')})`);
+  const door = page.getLightByName('Door Light'), nearest = lit.reduce((a, b) => (Vector3.Distance(a.getBoundingInfo().boundingSphere.centerWorld, door.position)
+    <= Vector3.Distance(b.getBoundingInfo().boundingSphere.centerWorld, door.position) ? a : b));
+  assert.ok(nearest.lightSources.includes(door), `the Door Light lights "${nearest.name}", the mesh nearest it, though 15 lights come before it`);
+  // A game's lights: one of its own lights every mesh, one bound to a mesh lights it alone, both before the scene's.
+  const lantern = new PointLight('Lantern', new Vector3(0, 1, 0), page), rim = new PointLight('Rim', new Vector3(0, 2, 0), page);
+  const hero = MeshBuilder.CreateBox('Hero', { size: 1 }, page);
+  hero.material = page.materials.find((m) => m.getClassName() === 'NodeMaterial');
+  rim.includedOnlyMeshes = [hero];
+  page.render();
+  assert.ok(lit.every((m) => m.lightSources.slice(0, m.material.maxSimultaneousLights).includes(lantern)), "the page's own light lights every mesh");
+  assert.ok(hero.lightSources.slice(0, 8).includes(rim) && hero.lightSources.slice(0, 8).includes(lantern), 'a light bound to a mesh lights it, with the scene full of lights');
+  assert.ok(!lit.some((m) => m.lightSources.includes(rim)), 'and no other mesh');
+  // Clustered Lights, as an engine with clusters (here a batch size as WebGL 2 gives) draws them: the point lights
+  // without shadows in one container, none left out, and a light control still sets its light.
+  ClusteredLightContainer._GetEngineBatchSize = () => 32;
+  const clustered = await (await import(written.url)).load(new NullEngine());
+  const container = clustered.scene.lights.find((l) => l instanceof ClusteredLightContainer);
+  const own = clustered.scene.lights.filter((l) => l !== container), shadowless = (l) => !l.getShadowGenerator();
+  assert.ok(container?.lights.length && !own.some((l) => l.getClassName() === 'PointLight' && shadowless(l)), `every point light without a shadow is clustered (${container?.lights.length}), ${own.length} lights besides`);
+  const lamp = container.lights[0], [power, { bind }] = Object.entries(JSON.parse(files['scene.ir.json']).properties).find(([, p]) => p.bind?.node === lamp.name && p.bind.property === 'intensity');
+  clustered.set(power, 200);
+  assert.equal(lamp.intensity, 200 * bind.factor, `${power} sets the clustered ${lamp.name}`);
+  assert.equal(clustered.nodeOf(`OB:${lamp.name}`), lamp, 'nodeOf finds a clustered light');
   // A joined object's material slots: its multi-material holds each slot's material, not Babylon's default.
   const slots = blend.scene.getMeshByName('Shop Front').material;
   assert.deepEqual(slots.subMaterials.map((m) => m?.name), constant('MULTI_MATERIALS').find((m) => m.name === slots.name).materials, "the Shop Front's slots hold its materials");

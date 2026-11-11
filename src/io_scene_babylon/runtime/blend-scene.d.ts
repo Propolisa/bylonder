@@ -244,7 +244,7 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
     /** The collections an object (by key or name) is linked to. @param {string} object */
     collectionsOf(object: string): string[];
     /** The Babylon node an object (by key) draws as, if any. @param {string} object */
-    nodeOf(object: string): import("@babylonjs/core").Nullable<import("@babylonjs/core").Node>;
+    nodeOf(object: string): import("@babylonjs/core").Node | null;
     /**
      * Shows or hides a collection (by key or name) in the view layer drawn, as the outliner's eye does: what it holds
      * shows only where it and the collections holding it show. With `children`, its child collections too, as Shift does.

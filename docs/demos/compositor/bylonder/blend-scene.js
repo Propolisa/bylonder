@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // A scene exported from Bylonder, with its controls: the IR's properties (docs/ir.md), each a Blender RNA path from
 // bpy.data (`objects["Cube"].location[0]`) whose value the page sets, and which lands on the Babylon objects it binds to.
+import { BoundingInfo } from '@babylonjs/core/Culling/boundingInfo.js';
 import { Matrix, Quaternion, Vector3 } from '@babylonjs/core/Maths/math.vector.js';
 import { Observable } from '@babylonjs/core/Misc/observable.js';
 import { Texture } from '@babylonjs/core/Materials/Textures/texture.js';
 import { createScheduler, EVALUATORS, NATIVE } from './scheduler.js';
+import { nodeById } from './overrides/babylon/clustered-lights.js';
 import { readIR, referencesIn } from './ir.js';
 import { createPlayhead } from './playhead.js';
 import { createClips, isClip } from './clips.js';
@@ -218,6 +220,11 @@ export class BlendScene {
     this.playhead = createPlayhead(scene, this.ir.scene.time);
     // Meshes the export skins with dual quaternions (Preserve Volume, armature.js).
     for (const mesh of scene.meshes) if (mesh.metadata?.bylonderDualQuaternions) useDualQuaternionSkinning(mesh, true);
+    // A skinned mesh's bounds over its clips' poses (armature.js clipBounds), so it is culled where it can be.
+    for (const mesh of scene.meshes) {
+      const bounds = mesh.metadata?.bylonderBounds;
+      if (bounds) mesh.setBoundingInfo(new BoundingInfo(Vector3.FromArray(bounds[0]), Vector3.FromArray(bounds[1])));
+    }
     this.#clips = createClips(scene, this.ir.scene.time, this.playhead);
     /** Told of each marker passed: the scene's as the playhead plays past it, an action's as its clip does. */
     this.onMarker = this.#clips.onMarker;
@@ -396,7 +403,7 @@ export class BlendScene {
   /** The Babylon node an object (by key) draws as, if any. @param {string} object */
   nodeOf(object) {
     const node = this.ir.ids[object]?.node;
-    return node === undefined ? null : this.scene.getNodeById(node);
+    return node === undefined ? null : nodeById(this.scene, node);
   }
 
   /**
@@ -476,7 +483,7 @@ export class BlendScene {
    */
   #channels(knobs) {
     for (const { path, default: initial, bind } of knobs) {
-      const holder = bind?.channel !== undefined && /** @type {any} */ (this.scene.getNodeById(bind.node ?? ''))?.metadata?.bylonderChannels;
+      const holder = bind?.channel !== undefined && /** @type {any} */ (nodeById(this.scene, bind.node ?? ''))?.metadata?.bylonderChannels;
       if (!holder) continue;
       Object.defineProperty(holder, /** @type {string} */ (bind?.channel), {
         get: () => this.#values.get(path),
@@ -533,6 +540,15 @@ export class BlendScene {
     return texture;
   }
 
+  /** The paths of a vector's components (`…location[0]`), made once: a bone is placed every frame. @type {Map<string, string[]>} */
+  #vectors = new Map();
+  /** @param {string} base @param {string} name @param {number} count */
+  #paths(base, name, count) {
+    const key = `${base}.${name}`;
+    if (!this.#vectors.has(key)) this.#vectors.set(key, Array.from({ length: count }, (_, i) => `${key}[${i}]`));
+    return /** @type {string[]} */ (this.#vectors.get(key));
+  }
+
   /**
    * Places a node by the part of its object's transform a control at `path` sets (location, rotation or scale): the
    * rest of the node stays as it is, which Babylon's animation may be playing. A bone is posed by all three.
@@ -542,7 +558,7 @@ export class BlendScene {
    */
   #place(node, path, transform) {
     const base = path.slice(0, path.lastIndexOf('.')), part = path.slice(base.length + 1).replace(/\[\d+\]$/, '');
-    const vector = (/** @type {string} */ name, /** @type {number} */ count) => Array.from({ length: count }, (_, i) => /** @type {number} */ (this.#values.get(`${base}.${name}[${i}]`) ?? 1));
+    const vector = (/** @type {string} */ name, /** @type {number} */ count) => this.#paths(base, name, count).map((key) => /** @type {number} */ (this.#values.get(key) ?? 1));
     if (node.getRestMatrix) {
       node._matrix = posedBone(transform, vector, node.getRestMatrix());
       return;
@@ -601,7 +617,7 @@ export class BlendScene {
       else if (block) block.value['xyzw'[bind.component ?? 0]] = value;
       return;
     }
-    const node = /** @type {any} */ (bind.node === undefined ? this.scene : this.scene.getNodeById(bind.node));
+    const node = /** @type {any} */ (bind.node === undefined ? this.scene : nodeById(this.scene, bind.node));
     if (!node) return;
     if (bind.transform) {
       this.#place(node, path, bind.transform);

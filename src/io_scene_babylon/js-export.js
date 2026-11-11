@@ -31,6 +31,8 @@ import { exportVolumes, VOLUMES_FILE } from './volumes-export.js';
 import { idStruct } from '../python/bpy_rna.js';
 import { displayExponent } from '../render/view-settings.js';
 import { AREA_LIGHT } from './area-lights.js';
+import { clusteredLights } from '../blenkernel/light/clustered-lights.js';
+import { lightRecord } from '../blenkernel/light/light-home.js';
 import { LOG_SIZE, STOPS } from '../render/display-lut.js';
 import { colorManagementFiles } from '../imbuf/colormanagement.js';
 import { halfFloats } from '../blenkernel/colorband.js';
@@ -336,6 +338,10 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   // extension has them.
   const pbr = data.materials.filter((m) => m.customType === 'BABYLON.PBRMaterial').length;
   const areaLights = data.lights.some((l) => l.type === AREA_LIGHT), areaSpecular = pbr > 0, blenderSpecular = areaSpecular && !replaces(replace, AREA_SPECULAR_UNIT);
+  // More lights than any device's material takes (8 at least) drawn in clusters (Clustered Lights), but where the page's
+  // volumes, which read the scene's lights, would lose them; a light with a Custom Distance kept out where there is room.
+  const clustered = !asset && !volumes && data.lights.length > 8 && clusteredLights.enabled(scene)
+    && data.lights.filter((l) => lightRecord(scene.getLightByName(l.name))?.use_custom_distance).map((l) => l.uniqueId);
   // Bylonder's own pipeline of a rendered view (render-babylon.js SceneLinearPipeline) turns the scene's image processing
   // off, so materials would encode to display themselves: with the view transform, which displays instead, it stays out
   // unless one of its effects is on.
@@ -421,6 +427,8 @@ import './bylonder/overrides/babylon/chromatic-aberration-size.js';
 ` : ''}import './bylonder/overrides/babylon/geometry-gamma-albedo.js';
 import './bylonder/overrides/babylon/environment-probe.js';
 import './bylonder/overrides/babylon/srgb-texture-parse.js';
+import { lightBudget, reachLights } from './bylonder/overrides/babylon/light-reach.js';${clustered ? `
+import { clusterLights } from './bylonder/overrides/babylon/clustered-lights.js';` : ''}
 import { parseCamera } from './bylonder/overrides/babylon/camera-quaternion.js';
 import { orthoScaled } from './bylonder/ortho-scale.js';${kernels || meshValued ? `
 import { ${[kernels && 'fillMaterials', meshValued && 'meshValues'].filter(Boolean).join(', ')} } from './bylonder/materials.js';` : ''}${kernels ? `
@@ -492,20 +500,33 @@ ${engines(bundle)[target]}
 // The scene with its controller: load(engine) builds it in a scene of its own, as the page does, with the scene's
 // settings${controlPanel ? ' and the control panel' : ''}; load({ scene, root }) adds its objects to a scene of yours, as a .glb's are, under
 // a root of their own, "__root__" (bylonder/asset.js), itself under \`root\` (a node of yours) if given, with none of the
-// scene's settings; load({ instance, root }) copies what a load added, sharing its geometry, materials and textures.
+// scene's settings; load({ instance, root }) copies what a load added, sharing its geometry, materials and textures. A
+// load resolves once the scene's shaders are compiled.
 export async function load(target) {
   if (target.scene || target.instance) {
     const { ir, buffers } = target.instance ?? await readData(), options = { root: target.root,
       controller: (view, entries, dispose) => new BlendScene(view, ir, { root: ROOT, buffers, entries, dispose }) };
-    return target.instance ? cloneAsset(target.instance.entries, options) : addAsset(target.scene, (into, lookup) => addObjects(into, { ir, buffers }, lookup), options);
+    if (target.instance) return cloneAsset(target.instance.entries, options);
+    const added = addAsset(target.scene, (into, lookup) => addObjects(into, { ir, buffers }, lookup), options);
+    await shadersCompiled(target.scene);
+    return added;
   }
   const engine = target;${webgpu ? `
   warnUnlessMaximumLimits(engine);` : ''}
   const scene = await createScene(engine, engine.getRenderingCanvas());
+  await shadersCompiled(scene);
   ${controlPanel ? 'const blend = ' : 'return '}new BlendScene(scene, IRS.get(scene), { root: ROOT, world: WORLDS.get(scene), compositor: COMPOSITORS.get(scene), buffers: SCENE_BUFFERS.get(scene) });${controlPanel ? `
   // The page's control panel, at the canvas's top right corner (none in Node).
   controlPanel(blend, ${json({ tools: devTools, navigation, offer: NAVIGATION.map(([id]) => id).filter((id) => navigationModes[id] !== false) }).replace('}', `, root: ROOT${panelIcons ? `, icons: () => Promise.resolve(unitFor('${PANEL_ICONS_UNIT}')?.icons${blenderIcons ? ` ?? import('./${PANEL_ICONS}').then((m) => m.default)` : ''})` : ''} }`)});
   return blend;` : ''}
+}
+
+// Once the scene's shaders are compiled, so that a page's first frames do not stall on them: a frame drawn (its time
+// held) sets what each material compiles for. At once without a canvas (Node's Null engine compiles nothing).
+async function shadersCompiled(scene) {
+  if (!scene.getEngine().getRenderingCanvas() || !scene.activeCamera) return;
+  scene.render(true, true);
+  await scene.whenReadyAsync(true);
 }
 
 // The objects in an AssetContainer, as LoadAssetContainerAsync gives a .glb's: instantiate() loads a copy with its own controller.
@@ -617,7 +638,15 @@ ${onBones.map((e) => `  nodes[${e.uniqueId}].attachToBone(lookup.getSkeletonById
     if (entry.includedOnlyMeshesIds?.length) light.includedOnlyMeshes = meshes(entry.includedOnlyMeshesIds);
   }` : ''}
 
-${parse('REFLECTION_PROBES', data.reflectionProbes, "ReflectionProbe.Parse(entry, scene, ROOT)")}${parse('SHADOW_GENERATORS', data.shadowGenerators, "Object.assign((entry.className === 'CascadedShadowGenerator' ? CascadedShadowGenerator : ShadowGenerator).Parse(entry, lookup), { customShaderOptions: entry.customShaderOptions })")}${parse('PARTICLE_SYSTEMS', data.particleSystems, "ParticleSystem.Parse(entry, scene, ROOT)")}${data.animationGroups.some((g) => g.targetedAnimations.some((t) => t.animation.property === CLOCK)) ? `  // The frame Babylon's animation keeps where the page's F-Curves are all that moves.
+${parse('REFLECTION_PROBES', data.reflectionProbes, "ReflectionProbe.Parse(entry, scene, ROOT)")}${parse('SHADOW_GENERATORS', data.shadowGenerators, "Object.assign((entry.className === 'CascadedShadowGenerator' ? CascadedShadowGenerator : ShadowGenerator).Parse(entry, lookup), { customShaderOptions: entry.customShaderOptions })")}  // Every material takes as many lights as its shader holds, each mesh the package's lights that reach it, the strongest
+  // first (EEVEE has no cap); lights the page adds come first where they light.
+  const lights = LIGHTS.map((entry) => nodes[entry.uniqueId]);${clustered ? `
+  // Its point and spot lights in clusters where it has more lights than a material takes, as EEVEE has no cap; a light
+  // with a Custom Distance out of them while there is room, as a cluster cuts it only per screen tile.
+  const exact = new Set(${json(clustered)}.map((id) => nodes[id])), cut = clusterLights(scene, lights, lightBudget(scene.getEngine()), (light) => exact.has(light))?.cutPerTile;
+  if (cut?.length) console.warn(\`Clustered with their Custom Distance cut per screen tile: \${cut.map((light) => light.name).join(', ')}\`);` : ''}
+  reachLights(scene, lights);
+${parse('PARTICLE_SYSTEMS', data.particleSystems, "ParticleSystem.Parse(entry, scene, ROOT)")}${data.animationGroups.some((g) => g.targetedAnimations.some((t) => t.animation.property === CLOCK)) ? `  // The frame Babylon's animation keeps where the page's F-Curves are all that moves.
   for (const entry of ANIMATION_GROUPS) for (const { animation, targetId } of entry.targetedAnimations) if (animation.property === '${CLOCK}') lookup.getNodeById(targetId).${CLOCK} = entry.from;
 ` : ''}${data.animationGroups.some((g) => g.targetedAnimations.some((t) => t.animation.dataType === Animation.ANIMATIONTYPE_MATRIX)) ? `  // Bones' poses interpolated between their keys, as between frames and on a grid sparser than the frames.
   Animation.AllowMatricesInterpolation = true;

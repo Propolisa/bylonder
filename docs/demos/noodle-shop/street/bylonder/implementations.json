@@ -11,6 +11,10 @@
       { "implementation": "Babylon's matrices (runtime/constraints-evaluator.js): an object's Track To, Copy Location, Copy Rotation (all axes, replacing) and Child Of (all channels) in world space at full influence, applied to its node before each frame draws, kept where they give Main's world matrix at every frame", "license": "MIT OR Apache-2.0", "fidelity": "exact" },
       { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
     ],
+    "bbone:SEGMENTS": [
+      { "implementation": "Blender's constraint kernels (bylonder-constraints/, BKE_pchan_bbone_segments_cache_compute after the pose solve): a B-Bone's segment joints on a rig the kernels run, shaped as Blender shapes them where the export found them to match", "license": "GPL-2.0-or-later", "fidelity": "exact" },
+      { "implementation": "sampled per frame from Main", "license": "data", "fidelity": "baked" }
+    ],
     "action": [
       { "implementation": "Babylon AnimationGroup, Hermite keys where they are the F-curve", "license": "Apache-2.0", "fidelity": "exact" },
       { "implementation": "clean-room F-Curve unit (runtime/fcurve-evaluator.js, drivers/fcurve.js): an object transform's F-Curve Babylon cannot play exactly (rotations, easings, extrapolation, Cycles), its keys in scene.bin; modifiers but Cycles stay baked", "license": "MIT OR Apache-2.0", "fidelity": "exact" },

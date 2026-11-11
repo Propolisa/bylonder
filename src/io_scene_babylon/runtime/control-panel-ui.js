@@ -13,6 +13,7 @@
 // else in the panel's own; a collection's name filters the panel to what its objects use.
 import { atDefault, baseColor, clamp, componentLabel, displayOf, dragScale, formatValue, hexOf, hsvOf, layout, matches, parsePath, parseValue, rgbOf, rgbOfHsv, snapped, snapStep, softRange, storedOf, touchSpan } from './control-panel-model.js';
 import { idsIn } from './collections.js';
+import { nodeById } from '../../overrides/babylon/clustered-lights.js';
 
 /** @typedef {import('./control-panel-model.js').Row} Row */
 /** @typedef {import('./control-panel-model.js').Group} Group */
@@ -611,7 +612,7 @@ export function createPanel(shadow, blend, { button, place, viewer, state, save,
       if (found?.getClassName() === 'NodeMaterial') return { title: 'Node Material Editor', open: () => dev().then((d) => d.editMaterial(/** @type {any} */ (found), tools)) };
       if (found) return { title: 'Inspector', open: () => dev().then((d) => d.inspect(scene, found, tools)) };
     }
-    const target = node !== undefined && (scene.getNodeById(node) ?? scene.getLightById(node) ?? scene.getCameraById(node));
+    const target = node !== undefined && nodeById(scene, node);
     if (target) return { title: 'Inspector', open: () => dev().then((d) => d.inspect(scene, target, tools)) };
     return null;
   }

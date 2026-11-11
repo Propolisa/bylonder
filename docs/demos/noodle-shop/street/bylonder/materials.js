@@ -15,7 +15,6 @@ import { InputBlock } from '@babylonjs/core/Materials/Node/Blocks/Input/inputBlo
 import { NodeMaterial } from '@babylonjs/core/Materials/Node/nodeMaterial.js';
 import { NodeMaterialBlockConnectionPointTypes as T } from '@babylonjs/core/Materials/Node/Enums/nodeMaterialBlockConnectionPointTypes.js';
 import { NodeMaterialSystemValues as System } from '@babylonjs/core/Materials/Node/Enums/nodeMaterialSystemValues.js';
-import { PBRMetallicRoughnessBlock } from '@babylonjs/core/Materials/Node/Blocks/PBR/pbrMetallicRoughnessBlock.js';
 import { RawTexture } from '@babylonjs/core/Materials/Textures/rawTexture.js';
 import { ScaleBlock } from '@babylonjs/core/Materials/Node/Blocks/scaleBlock.js';
 import { Texture } from '@babylonjs/core/Materials/Textures/texture.js';
@@ -24,6 +23,7 @@ import { Vector3, Vector4 } from '@babylonjs/core/Maths/math.vector.js';
 import { VertexOutputBlock } from '@babylonjs/core/Materials/Node/Blocks/Vertex/vertexOutputBlock.js';
 import { unitFor } from './units.js';
 import { webgpuSamplers } from './overrides/webgpu/samplers.js';
+import { AreaLitPBRBlock } from './overrides/babylon/pbr-block-area-lights.js';
 
 /** @typedef {import('./ir.js').IR} IR */
 
@@ -396,7 +396,7 @@ function surface(material, nodes, geometry) {
   const worldPosition = transform(geo('__position'), geo('__world'));
   const vertex = new VertexOutputBlock('blender:vertexOutput');
   transform(worldPosition, geo('__viewProjection')).connectTo(vertex.vector);
-  const pbr = Object.assign(new PBRMetallicRoughnessBlock('blender:surface'), { baseDiffuseModel: Constants.MATERIAL_DIFFUSE_MODEL_LAMBERT });
+  const pbr = Object.assign(new AreaLitPBRBlock('blender:surface'), { baseDiffuseModel: Constants.MATERIAL_DIFFUSE_MODEL_LAMBERT });
   worldPosition.connectTo(pbr.worldPosition);
   transform(geo('__normal'), geo('__world'), 0).connectTo(pbr.worldNormal);
   geo('__view').connectTo(pbr.view);

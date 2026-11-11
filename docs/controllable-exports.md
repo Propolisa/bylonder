@@ -147,6 +147,8 @@ types. `controls()` fields are named as Blender's RNA names them.
   as Blender resolves an object linked to several collections; the page shows what both Blender's viewport and its
   render show, so Hide in Viewport and Disable in Renders both hide. Hiding hides a mesh alone, not its children, as
   Blender does. `nodeOf(key)` gives an object's Babylon node.
+- Lights drawn in clusters (the Clustered Lights setting) are not in Babylon's `scene.lights`, so
+  `scene.getLightByName` misses them: find them with `nodeOf(key)`, or turn Clustered Lights off before exporting.
 - Time is one clock, the playhead (`runtime/playhead.js`), from the IR's `scene.time` (`docs/ir.md`, Scene and
   collections). It starts at the scene's current frame and plays when the scene animates, advancing by the time each
   drawn frame takes at the scene's frame rate (`fps / fps_base`), through sub-frames so motion is smooth at any display

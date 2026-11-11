@@ -4,6 +4,7 @@
 // bpy.data (`objects["Cube"].location[0]`) whose value the page sets, and which lands on the Babylon objects it binds to.
 import { BoundingInfo, Matrix, Observable, Quaternion, Texture, Vector3 } from '@babylonjs/core';
 import { createScheduler, EVALUATORS, NATIVE } from './scheduler.js';
+import { nodeById } from '../../overrides/babylon/clustered-lights.js';
 import { readIR, referencesIn } from './ir.js';
 import { createPlayhead } from './playhead.js';
 import { createClips, isClip } from './clips.js';
@@ -399,7 +400,7 @@ export class BlendScene {
   /** The Babylon node an object (by key) draws as, if any. @param {string} object */
   nodeOf(object) {
     const node = this.ir.ids[object]?.node;
-    return node === undefined ? null : this.scene.getNodeById(node);
+    return node === undefined ? null : nodeById(this.scene, node);
   }
 
   /**
@@ -479,7 +480,7 @@ export class BlendScene {
    */
   #channels(knobs) {
     for (const { path, default: initial, bind } of knobs) {
-      const holder = bind?.channel !== undefined && /** @type {any} */ (this.scene.getNodeById(bind.node ?? ''))?.metadata?.bylonderChannels;
+      const holder = bind?.channel !== undefined && /** @type {any} */ (nodeById(this.scene, bind.node ?? ''))?.metadata?.bylonderChannels;
       if (!holder) continue;
       Object.defineProperty(holder, /** @type {string} */ (bind?.channel), {
         get: () => this.#values.get(path),
@@ -613,7 +614,7 @@ export class BlendScene {
       else if (block) block.value['xyzw'[bind.component ?? 0]] = value;
       return;
     }
-    const node = /** @type {any} */ (bind.node === undefined ? this.scene : this.scene.getNodeById(bind.node));
+    const node = /** @type {any} */ (bind.node === undefined ? this.scene : nodeById(this.scene, bind.node));
     if (!node) return;
     if (bind.transform) {
       this.#place(node, path, bind.transform);

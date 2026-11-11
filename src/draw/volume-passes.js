@@ -446,7 +446,7 @@ function reach(domains) {
 }
 
 // Whether a light lights a domain's volume: by its layer mask (Material Preview's studio lighting leaves the scene's
-// lights out by it), not by the meshes it is limited to, which light-reach.js chooses for surfaces' light budgets.
+// lights out by it), not by the meshes it is limited to, which overrides/babylon/light-reach.js chooses for surfaces' light budgets.
 const lights = (light, domain) => !light.includeOnlyWithLayerMask || !!(light.includeOnlyWithLayerMask & domain.layerMask);
 // The lights that light the domains.
 export function packLights(scene, camera, domains, lightRecord) {

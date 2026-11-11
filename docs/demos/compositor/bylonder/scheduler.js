@@ -7,7 +7,7 @@
 // animation plays the baked samples, and the scheduler writes the live value after them each frame, running again
 // what reads the frame.
 import { runUnit, unitFor } from './units.js';
-import { dataAt, isReference, referencesIn } from './ir.js';
+import { dataAt, holdsReference, isReference, referencesIn } from './ir.js';
 import { drawGeometry } from './mesh.js';
 
 /**
@@ -26,8 +26,7 @@ import { drawGeometry } from './mesh.js';
 export const EVALUATORS = {
   fcurve: () => import('./fcurve-evaluator.js'),
 };
-/** What a package draws only by running it: its export bakes none of it. */
-const UNBAKED = ['curves', 'pointcloud'];
+const UNBAKED = ['curves', 'pointcloud']; // What a package draws only by running it: its export bakes none of it.
 /** What Babylon runs itself (`native`: an F-Curve its AnimationGroup plays), which the scheduler leaves to it unless a unit takes over. */
 export const NATIVE = ['native'];
 const isTime = (/** @type {string} */ path) => path.endsWith('.frame_current');
@@ -38,11 +37,10 @@ const isTime = (/** @type {string} */ path) => path.endsWith('.frame_current');
  */
 export function createScheduler(ir, page) {
   const { scene, controls } = page, { entities } = ir;
-  /** @type {Map<string, string[]>} */
-  const readers = new Map();
-  /** @type {string[]} */
-  const timed = [];
-  for (const [key, entity] of Object.entries(entities)) for (const [ref] of referencesIn(entity.inputs)) {
+  // Each entity's references, found once: its inputs are walked again only where they hold one.
+  const readers = /** @type {Map<string, string[]>} */ (new Map()), timed = /** @type {string[]} */ ([]);
+  const references = new Map(Object.entries(entities).map(([key, entity]) => [key, [...referencesIn(entity.inputs)].map(([ref]) => ref)]));
+  for (const [key, refs] of references) for (const ref of refs) {
     const from = 'property' in ref ? ref.property : 'entity' in ref ? ref.entity : null;
     if (from) readers.set(from, [...(readers.get(from) ?? []), key]);
     if ('property' in ref && isTime(ref.property)) timed.push(key);
@@ -70,7 +68,7 @@ export function createScheduler(ir, page) {
   const mark = (key) => {
     if (dirty.has(key)) return;
     dirty.add(key);
-    for (const [ref] of referencesIn(entities[key].inputs)) if ('entity' in ref && !outputs.get(ref.entity)) mark(ref.entity);
+    for (const ref of references.get(key) ?? []) if ('entity' in ref && !outputs.get(ref.entity)) mark(ref.entity);
     for (const output of Object.values(entities[key].outputs)) if (output && 'property' in output) readers.get(output.property)?.forEach(mark);
     readers.get(key)?.forEach(mark);
   };
@@ -87,8 +85,9 @@ export function createScheduler(ir, page) {
     return name && EVALUATORS[name] ? evaluator(name) : null;
   };
 
-  /** An entity's inputs, read at the frame its ID shows. @param {any} value @param {string} id @returns {any} */
+  /** An entity's inputs, read at the frame its ID shows; what holds no reference as it is. @param {any} value @param {string} id @returns {any} */
   const resolve = (value, id) => {
+    if (!holdsReference(value)) return value;
     if (isReference(value)) {
       if ('property' in value) return isTime(value.property) ? controls.frame(id) : controls.get(value.property);
       if ('entity' in value) return outputs.get(value.entity)?.[value.output];
@@ -127,7 +126,7 @@ export function createScheduler(ir, page) {
       const found = implementation(key);
       if (found instanceof Promise) return wait(found);
       dirty.delete(key);
-      if (!found || [...referencesIn(entities[key].inputs)].some(([ref]) => 'entity' in ref && !outputs.get(ref.entity))) continue;
+      if (!found || (references.get(key) ?? []).some((ref) => 'entity' in ref && !outputs.get(ref.entity))) continue;
       // What reads it alone and runs on the same implementation runs with it, in one call: nothing passes between them.
       const chain = [key];
       for (let next = soleReader(key); found.runChain && next && dirty.has(next) && implementation(next) === found; next = soleReader(next)) {
@@ -168,7 +167,7 @@ export function createScheduler(ir, page) {
   // What the package bakes none of (curves, point clouds) and reads no property or entity runs once: nothing runs it later. What the
   // package bakes (a modifier's mesh in scene.bin) stays as baked.
   Object.keys(entities).filter((key) => UNBAKED.includes(entities[key].implementation ?? '')
-    && ![...referencesIn(entities[key].inputs)].some(([ref]) => 'property' in ref || 'entity' in ref)).forEach(mark);
+    && !(references.get(key) ?? []).some((ref) => 'property' in ref || 'entity' in ref)).forEach(mark);
   run();
 
   return {

@@ -7,6 +7,7 @@ import { AssetContainer } from '@babylonjs/core/assetContainer.js';
 import { Mesh } from '@babylonjs/core/Meshes/mesh.js';
 import { Quaternion } from '@babylonjs/core/Maths/math.vector.js';
 import { isClip } from './clips.js';
+import { sceneLights } from './overrides/babylon/clustered-lights.js';
 
 /** @typedef {import('@babylonjs/core').Scene} Scene */
 /** @typedef {import('@babylonjs/core').Node} Node */
@@ -32,7 +33,7 @@ const newest = (list, test) => { for (let i = list.length - 1; i >= 0; i--) if (
  */
 function newestFirst(scene) {
   // Bones too, as Scene.getNodeById finds them: a skeleton's animation targets its bones by id.
-  const nodes = () => [...scene.meshes, ...scene.transformNodes, ...scene.lights, ...scene.cameras, ...scene.skeletons.flatMap((s) => s.bones)];
+  const nodes = () => [...scene.meshes, ...scene.transformNodes, ...sceneLights(scene), ...scene.cameras, ...scene.skeletons.flatMap((s) => s.bones)];
   /** @param {string} id */
   const morphTarget = (id) => {
     for (const manager of [...scene.morphTargetManagers].reverse()) for (let i = 0; i < manager.numTargets; i++) if (manager.getTarget(i).id === id) return manager.getTarget(i);
@@ -41,7 +42,7 @@ function newestFirst(scene) {
   return lookups(scene, {
     getNodeById: (/** @type {string} */ id) => newest(nodes(), (n) => n.id === id),
     getMeshById: (/** @type {string} */ id) => newest(scene.meshes, (n) => n.id === id),
-    getLightById: (/** @type {string} */ id) => newest(scene.lights, (n) => n.id === id),
+    getLightById: (/** @type {string} */ id) => newest(sceneLights(scene), (n) => n.id === id),
     getCameraById: (/** @type {string} */ id) => newest(scene.cameras, (n) => n.id === id),
     getSkeletonById: (/** @type {string} */ id) => newest(scene.skeletons, (n) => n.id === id),
     getMorphTargetById: morphTarget,

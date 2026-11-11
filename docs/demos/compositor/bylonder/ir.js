@@ -186,6 +186,15 @@ const REFERENCES = ['property', 'entity', 'buffer', 'data', 'graph'];
 export const isReference = (value) => value?.constructor === Object && REFERENCES.some((kind) => kind in value)
   && Object.keys(value).every((key) => key === 'output' || REFERENCES.includes(key));
 
+/** Whether a value holds a reference anywhere, by object, found once. @type {WeakMap<object, boolean>} */
+const holds = new WeakMap();
+/** @param {any} value @returns {boolean} */
+export function holdsReference(value) {
+  if (value === null || typeof value !== 'object' || ArrayBuffer.isView(value)) return false;
+  if (!holds.has(value)) holds.set(value, isReference(value) || (Array.isArray(value) ? value.some(holdsReference) : value.constructor === Object && Object.values(value).some(holdsReference)));
+  return /** @type {boolean} */ (holds.get(value));
+}
+
 /**
  * Every reference in a value, with where it is.
  * @param {any} value
