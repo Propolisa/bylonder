@@ -16,6 +16,8 @@ import { exportModule } from '../../src/io_scene_babylon/js-export.js';
 import { blendData, idStruct } from '../../src/python/bpy_rna.js';
 import { babylonMatrix } from '../../src/blenkernel/main-view.js';
 import { rigId } from '../../src/io_scene_babylon/area-lights.js';
+import { setCustomProperty } from '../../src/blenkernel/animation/anim-blender.js';
+import { packDualQuaternions, skinPoint } from '../../src/io_scene_babylon/runtime/dual-quaternion-skinning.js';
 
 const [id, given] = process.argv.slice(2), dir = given ?? mkdtempSync(join(tmpdir(), 'bylonder-parity-'));
 const TOLERANCE = 1e-4;
@@ -28,7 +30,11 @@ function setPath(path, value) {
   const [, owner, name, index, key] = STEP.exec(path) ?? [];
   const target = owner ? blendData().path_resolve(owner) : blendData();
   if (name !== undefined) target[name] = value;
-  else target.__setitem__(index !== undefined ? Number(index) : key.replace(/\\(.)/g, '$1'), value);
+  // An ID's custom property, as Python's id["name"] = value sets it; an edit, so its drivers run again.
+  else if (key !== undefined && target.id_data === target) {
+    setCustomProperty(target.as_pointer(), key.replace(/\\(.)/g, '$1'), value);
+    target.update_tag();
+  } else target.__setitem__(index !== undefined ? Number(index) : key.replace(/\\(.)/g, '$1'), value);
 }
 
 // Values a control is set to: two away from its default, inside its soft range.
@@ -60,6 +66,23 @@ const worldOf = (node) => { if (node.parent) worldOf(node.parent); return Array.
 const isEye = (node) => /Light$|Camera$/.test(node.getClassName());
 const largest = (a, b) => Math.max(...a.map((v, i) => Math.abs(v - b[i]))).toPrecision(2);
 
+// Positions as drawn: morphed and skinned on the CPU, as Babylon draws them on the GPU; by the dual quaternion module's
+// CPU reference where it skins (Babylon's own CPU skinning blends linearly).
+function drawnPositions(mesh) {
+  if (!mesh.getVerticesData?.('position')) return null;
+  if (!mesh.metadata?.bylonderDualQuaternions || !mesh.skeleton) return mesh.getPositionData(true, true);
+  const morphed = mesh.getPositionData(false, true), packed = packDualQuaternions(mesh.skeleton.getTransformMatrices(mesh));
+  const kinds = [['matricesIndices', 'matricesWeights'], ['matricesIndicesExtra', 'matricesWeightsExtra']].map(([i, w]) => [mesh.getVerticesData(i), mesh.getVerticesData(w)]);
+  return morphed.map((_, k) => {
+    const c = Math.floor(k / 3), influences = [];
+    for (let n = 0; n < mesh.numBoneInfluencers; n++) {
+      const [indices, weights] = kinds[n >> 2], weight = weights?.[c * 4 + (n & 3)];
+      if (weight) influences.push([indices[c * 4 + (n & 3)], weight]);
+    }
+    return influences.length ? skinPoint(packed, influences, Array.from(morphed.slice(c * 3, c * 3 + 3)))[k % 3] : morphed[k];
+  });
+}
+
 // What differs between the app's scene and the page's: each object's world matrix, each mesh's positions, each
 // material's uniforms, as "<what>: <detail>" lines.
 function compare(app, page, sync) {
@@ -73,8 +96,6 @@ function compare(app, page, sync) {
     const main = Array.from(babylonMatrix(sync.blender.transform(ob).matrix_world).m), page_ = worldOf(drawn);
     const [a, b] = isEye(node) ? [main.slice(12, 15), page_.slice(12, 15)] : [main, page_];
     if (differs(b, a)) out.push(`transform ${node.name}: page [${page_.slice(12, 15).map((v) => v.toFixed(3))}] app [${main.slice(12, 15).map((v) => v.toFixed(3))}] (off by ${largest(a, b)})`);
-    // Positions as drawn: skinned and morphed on the CPU, as Babylon draws them on the GPU.
-    const drawnPositions = (mesh) => mesh.getVerticesData?.('position') && mesh.getPositionData(true, true);
     const positions = drawnPositions(node);
     if (positions) {
       const other = drawnPositions(drawn);
