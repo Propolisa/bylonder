@@ -15,10 +15,9 @@ const track = (pace, scaled) => Array.from({ length: 121 }, (_, f) => {
 const animation = (keys) => ({ name: 'pose', property: '_matrix', dataType: Animation.ANIMATIONTYPE_MATRIX, framePerSecond: 30, loopBehavior: 1, keys });
 const groups = [{ name: 'Walk', metadata: { bylonder: { clip: true } }, targetedAnimations: [{ targetId: 'Rig hips', animation: animation(track(1, false)) }, { targetId: 'Rig chest', animation: animation(track(0.1, true)) }] }];
 const bin = createSceneBin({ gzip: false }), written = binaryClipKeys(structuredClone(groups), bin, 1);
-const packed = written[0].targetedAnimations.map((t) => t.animation.bylonderKeys);
-assert.ok(packed.every(Boolean) && written[0].targetedAnimations.every((t) => t.animation.keys.length === 0), 'compressed');
-assert.equal(packed[0].scale, undefined, 'a still scale is left out');
-assert.ok(packed[1].scale !== undefined, 'a moving scale is kept');
+const table = written[0].bylonderTracks;
+assert.ok(table && written[0].targetedAnimations.length === 0, 'compressed into one table of scene.bin');
+assert.deepEqual(table.targets, ['Rig hips', 'Rig chest']);
 
 // The page's decoder on the bin's arrays.
 const bytes = bin.bytes(), buffers = bin.views.map(([offset, length, type]) => {
@@ -29,6 +28,9 @@ const clipKeys = new Function(`${CLIP_KEYS_SOURCE}; return clipKeys;`)();
 const start = performance.now();
 const decoded = clipKeys(structuredClone(written[0]), buffers);
 const decodeMs = performance.now() - start;
+const packed = decoded.targetedAnimations.map((t) => t.animation.bylonderKeys);
+assert.equal(packed[0].scale, undefined, 'a still scale is left out');
+assert.ok(packed[1].scale !== undefined, 'a moving scale is kept');
 
 for (const [k, { animation: original }] of groups[0].targetedAnimations.entries()) {
   const keys = decoded.targetedAnimations[k].animation.keys;

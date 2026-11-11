@@ -113,13 +113,12 @@ async function deskLamp() {
   const files = await exportModule(world, { animations: 'CLIPS', clipCompression: 'OFF', scope: 'SELECTED', selected: [lamp], runtimes: { ARMATURE: { runtime: 'MAPPED', instances: {} } } });
   const groups = groupsOf(files);
   assert.deepEqual(groups.map((g) => g.name), ['RigAction']);
-  assert.ok(groups[0].targetedAnimations.every((t) => t.animation.property === '_matrix'), "the rig's bones");
-  const moving = groups[0].targetedAnimations.filter((t) => t.animation.bylonderKeys);
-  assert.ok(moving.length && moving.every((t) => t.animation.keys.length === 0), 'its moving bones keyed in scene.bin, not JSON');
+  const table = groups[0].bylonderTracks;
+  assert.ok(table?.targets.length && table.property === '_matrix', "the rig's bones, in one table of scene.bin, not JSON");
   
   // Only bones that skin, or have bones that skin below them: the rig's constraints are sampled, not run in the page.
   const rig = [...blendData().objects].find((ob) => ob.type === 'ARMATURE'), skins = (bone) => bone.use_deform || [...bone.children].some(skins);
-  const tracked = groups[0].targetedAnimations.map((t) => t.targetId.slice(rig.name.length + 1).split('#')[0]);
+  const tracked = [...table.targets, ...groups[0].targetedAnimations.map((t) => t.targetId)].map((id) => id.slice(rig.name.length + 1).split('#')[0]);
   assert.ok(tracked.every((name) => skins(rig.data.bones.get(name))), `tracks of bones that skin: ${tracked.join(', ')}`);
   const written = writePackage(files);
   try {

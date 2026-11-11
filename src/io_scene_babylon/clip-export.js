@@ -202,7 +202,7 @@ function exactKeys(animation, bin) {
  */
 export function binaryClipKeys(groups, bin, mm = 1) {
   const bound = bounds(mm);
-  return groups.map((group) => (!isClip(group) ? group : { ...group, targetedAnimations: group.targetedAnimations.map((t) => {
+  return groups.map((group) => (!isClip(group) ? group : trackTable({ ...group, targetedAnimations: group.targetedAnimations.map((t) => {
     const { animation } = t;
     if (animation.dataType !== Animation.ANIMATIONTYPE_MATRIX || !animation.keys.length) return t;
     // What Babylon's Animation.Parse needs, the rest left to its defaults: a clip has thousands of tracks.
@@ -216,14 +216,40 @@ export function binaryClipKeys(groups, bin, mm = 1) {
       frames: bin.add(Float32Array.from(kept, (i) => allFrames[i])), rotation: bin.add(smallestThree(keys.map((k) => k.q))),
       location: bin.add(location.out), locationRange: [location.min, location.extent],
       ...(scale && { scale: bin.add(scale.out), scaleRange: [scale.min, scale.extent] }) } } };
-  }) }));
+  }) }, bin)));
+}
+
+// A clip's bone tracks as one table of scene.bin, a row each, in place of thousands of JSON objects: what they share
+// (property, type, rate, loop) once, and per row the track's target (its index in `targets`, kept as JSON once per
+// clip), its arrays' indices (-1 where it has none), whether it scales, and its location's and scale's ranges.
+const COLUMNS = ['frames', 'values', 'rotation', 'location', 'scale'], ROW = COLUMNS.length + 1 + 12;
+function trackTable(group, bin) {
+  const tracks = group.targetedAnimations.filter((t) => t.animation.bylonderKeys), rest = group.targetedAnimations.filter((t) => !t.animation.bylonderKeys);
+  if (tracks.length < 2) return group;
+  const { property, dataType, framePerSecond, loopBehavior } = tracks[0].animation, rows = new Float32Array(tracks.length * ROW);
+  tracks.forEach(({ animation: { bylonderKeys: keys } }, i) => {
+    const ranges = [...(keys.locationRange ?? [[0, 0, 0], [0, 0, 0]]).flat(), ...(keys.scaleRange ?? [[0, 0, 0], [0, 0, 0]]).flat()];
+    rows.set([...COLUMNS.map((c) => keys[c] ?? -1), keys.scaleRange ? 1 : 0, ...ranges], i * ROW);
+  });
+  return { ...group, targetedAnimations: rest,
+    bylonderTracks: { targets: tracks.map((t) => t.targetId), property, dataType, framePerSecond, loopBehavior, rows: bin.add(rows) } };
 }
 
 /** The page's code that decodes a clip's compressed bone keys from scene.bin (`buffers`) into Babylon's matrix keys. */
 export const CLIP_KEYS_SOURCE = `// A clip's bone keys from scene.bin: smallest-three rotations, location and scale on 16 bits over their ranges
 // (io_scene_babylon/clip-export.js binaryClipKeys), composed into matrices as Babylon's Matrix.Compose does.
 function clipKeys(entry, buffers) {
-  const R = Math.SQRT1_2;
+  const R = Math.SQRT1_2, table = entry.bylonderTracks;
+  if (table) {
+    const rows = buffers[table.rows], size = rows.length / table.targets.length, column = (row, i) => (rows[row * size + i] < 0 ? undefined : rows[row * size + i]);
+    entry.targetedAnimations = [...entry.targetedAnimations, ...table.targets.map((targetId, row) => {
+      const at = row * size, ranges = Array.from(rows.subarray(at + 6, at + 18)), scaled = rows[at + 5] === 1;
+      const keys = { frames: column(row, 0), values: column(row, 1), rotation: column(row, 2), location: column(row, 3), scale: scaled ? column(row, 4) : undefined,
+        locationRange: [ranges.slice(0, 3), ranges.slice(3, 6)], scaleRange: scaled ? [ranges.slice(6, 9), ranges.slice(9, 12)] : undefined };
+      return { targetId, animation: { name: '', property: table.property, dataType: table.dataType, framePerSecond: table.framePerSecond, loopBehavior: table.loopBehavior, keys: [], bylonderKeys: keys } };
+    })];
+    delete entry.bylonderTracks;
+  }
   for (const { animation } of entry.targetedAnimations) {
     const packed = animation.bylonderKeys;
     if (!packed) continue;
