@@ -4,7 +4,7 @@
 // the page, not sampled; moving an IK target or its pole through the page's controls moves the rig. Its controls (an
 // IK/FK switch and a Breathe slider, custom properties that drivers read) and its elbow's corrective shape key, driven by
 // the posed arm's angle, morph and pose the skinned body as Main does. Its tail, a B-Bone, bends by the joints of its
-// segments, sampled from Main.
+// segments, sampled from Main. A pose set as the page loads, before the constraints attach, holds.
 import assert from 'node:assert/strict';
 import { Matrix, NullEngine } from '@babylonjs/core';
 import { babylonMatrix } from '../src/blenkernel/main-view.js';
@@ -104,5 +104,21 @@ compare('moved targets');
 assert.ok(!Matrix.FromArray(before).equalsWithEpsilon(drawn().get('forearm.R'), 1e-3), 'the arm moved');
 console.log('Export pose constraints: moving an IK target and its pole in the page moves the rig as Main poses it');
 
+// A pose set as soon as the page loads, before its constraints attach, holds: the left forearm bent in FK, alike in a
+// page posed after it settled.
+const BENT = [['objects["Rig"]["ik_fk.L"]', 0], ...[0.6, 0.8, 0, 0].map((v, i) => [`objects["Rig"].pose.bones["forearm.L"].rotation_quaternion[${i}]`, v])];
+const leftArm = (b) => ['forearm.L', 'hand.L'].map((name) => Array.from(b.scene.getSkeletonById('Rig').bones.find((bone) => bone.name === name).getAbsoluteMatrix().asArray()));
+const unbent = leftArm(blend)[0];
+const early = await (await import(written.url)).load(new NullEngine());
+early.playhead.pause();
+for (const [path, value] of [[frameControl.path, frame], ...BENT]) early.set(path, value);
+for (const [path, value] of BENT) blend.set(path, value);
+for (const b of [early, blend]) for (let i = 0; i < 2; i++) { b.scene.render(); await b.settled(); }
+const offBy = Math.max(...leftArm(early).flatMap((m, k) => m.map((v, i) => Math.abs(v - leftArm(blend)[k][i]))));
+assert.ok(offBy < 1e-6, `a pose set before the constraints attach holds (off by ${offBy})`);
+assert.ok(!Matrix.FromArray(leftArm(blend)[0]).equalsWithEpsilon(Matrix.FromArray(unbent), 1e-3), 'the forearm bent');
+console.log('Export pose constraints: a pose set as the page loads holds once its constraints attach');
+
+early.dispose();
 blend.dispose();
 written.remove();

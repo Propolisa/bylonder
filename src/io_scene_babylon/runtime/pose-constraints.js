@@ -12,6 +12,7 @@ import { unitFor } from './units.js';
 import { swapped, trackTo } from './constraints-evaluator.js';
 import { evaluateDriver } from './drivers/driver.js';
 import { evaluateFCurve, prepareFCurve } from './drivers/fcurve.js';
+import { posedBone } from './blend-scene.js';
 
 /**
  * Where a constraint reads its target: a bone of the armature (at `head_tail` along it), or an object's node.
@@ -299,14 +300,27 @@ function listOf(scene) {
 }
 
 /**
+ * A bone's own matrix as the page's controls of its pose set it, so a pose set before the constraints attach holds; null
+ * without such controls.
+ * @param {{ get(path: string): any }} controls @param {string} id the armature object's IR id @param {string} name
+ * @param {string} mode @param {any} bone
+ */
+function posedByControls(controls, id, name, mode, bone) {
+  const base = `objects[${JSON.stringify(id.slice(id.indexOf(':') + 1))}].pose.bones[${JSON.stringify(name)}]`;
+  const vector = (/** @type {string} */ property, /** @type {number} */ count) => Array.from({ length: count }, (_, i) => controls.get(`${base}.${property}[${i}]`));
+  const values = ['location', 'scale', mode === 'QUATERNION' ? 'rotation_quaternion' : 'rotation_euler'].flatMap((p) => vector(p, p === 'rotation_quaternion' ? 4 : 3));
+  return values.every((v) => typeof v === 'number') ? posedBone({ mode }, vector, bone.getRestMatrix()) : null;
+}
+
+/**
  * Runs an armature's bone constraints before each frame draws, from each bone's own pose: what the page or its
  * animation last set, else what it had before the constraints last moved it.
  * @param {Record<string, any>} inputs `skeleton`, `mesh`, `space`, `bones` (`length`, `mode`, `own` by name) and `constraints` by bone
- * @param {object} entity
- * @param {import('@babylonjs/core').Scene} scene
+ * @param {any} entity
+ * @param {{ scene: import('@babylonjs/core').Scene, controls: { get(path: string): any } }} page
  */
-function attach(inputs, entity, scene) {
-  const list = listOf(scene).poses, found = list.find((/** @type {any} */ e) => e.entity === entity);
+function attach(inputs, entity, page) {
+  const scene = page.scene, list = listOf(scene).poses, found = list.find((/** @type {any} */ e) => e.entity === entity);
   if (found) { found.stacks = inputs.constraints; return {}; }
   const skeleton = scene.getSkeletonById(inputs.skeleton), mesh = scene.getMeshById(inputs.mesh);
   if (!skeleton || !mesh) return {};
@@ -314,9 +328,9 @@ function attach(inputs, entity, scene) {
     shape: bones.map((bone) => ({ name: bone.name, parent: bone.getParent() ? bones.indexOf(/** @type {any} */ (bone.getParent())) : -1, rest: bone.getRestMatrix(),
       length: inputs.bones[bone.name]?.length ?? 0, mode: inputs.bones[bone.name]?.mode ?? 'QUATERNION' })),
     own: new Map(), placed: new Map() };
-  for (const [name, { own }] of Object.entries(inputs.bones)) {
+  for (const [name, { own, mode }] of Object.entries(inputs.bones)) {
     const bone = bones.find((b) => b.name === name);
-    if (own && bone) bone._matrix = Matrix.FromArray(own);
+    if (own && bone) bone._matrix = posedByControls(page.controls, entity.id, name, mode, bone) ?? Matrix.FromArray(own);
   }
   list.push(entry);
   return {};
@@ -386,7 +400,7 @@ function apply(entry) {
   }
 }
 
-/** @param {{ scene: import('@babylonjs/core').Scene, controls: { frame(id?: string): number, write(path: string, value: any): void } }} page */
+/** @param {{ scene: import('@babylonjs/core').Scene, controls: { get(path: string): any, frame(id?: string): number, write(path: string, value: any): void } }} page */
 export function load(page) {
-  return { run: (/** @type {any} */ inputs, /** @type {any} */ context, /** @type {any} */ entity) => (entity.type.startsWith('driver:') ? attachDriver(inputs, entity, page) : attach(inputs, entity, page.scene)) };
+  return { run: (/** @type {any} */ inputs, /** @type {any} */ context, /** @type {any} */ entity) => (entity.type.startsWith('driver:') ? attachDriver(inputs, entity, page) : attach(inputs, entity, page)) };
 }

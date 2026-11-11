@@ -60,7 +60,7 @@ import { HemisphericLight, Mesh, UniversalCamera, Vector3, VertexBuffer, VertexD
 Object.defineProperty(Navigator.prototype, 'gpu', { get: () => undefined });
 const engine = await createEngine(document.getElementById('c')), blend = await load(engine), scene = blend.scene;
 const main = await (await fetch('main.json')).json();
-// The rig's constraints attach once their module loads, posing its bones as exported: the pose is set after.
+// Its evaluators loaded, so the first frames drawn are posed.
 await blend.settled();
 blend.playhead.pause();
 // The frame as the page's controls set it, so its live curves and constraints pose the rig for it.
