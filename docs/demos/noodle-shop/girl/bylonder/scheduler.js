@@ -29,7 +29,6 @@ export const EVALUATORS = {
 const UNBAKED = ['curves', 'pointcloud'];
 /** What Babylon runs itself (`native`: an F-Curve its AnimationGroup plays), which the scheduler leaves to it unless a unit takes over. */
 export const NATIVE = ['native'];
-
 const isTime = (/** @type {string} */ path) => path.endsWith('.frame_current');
 
 /**

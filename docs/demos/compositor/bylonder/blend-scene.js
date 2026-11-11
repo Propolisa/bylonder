@@ -10,6 +10,7 @@ import { readIR, referencesIn } from './ir.js';
 import { createPlayhead } from './playhead.js';
 import { createClips, isClip } from './clips.js';
 import { collectionKey, collectionTree, objectsIn, showing } from './collections.js';
+import { useDualQuaternionSkinning } from './dual-quaternion-skinning.js';
 
 /** @typedef {number | boolean | string} Value */
 
@@ -215,6 +216,8 @@ export class BlendScene {
     this.#values = new Map(knobs.map((knob) => [knob.path, knob.default]));
     /** The scene's one clock: its frame, which the animation and what reads the frame follow. */
     this.playhead = createPlayhead(scene, this.ir.scene.time);
+    // Meshes the export skins with dual quaternions (Preserve Volume, armature.js).
+    for (const mesh of scene.meshes) if (mesh.metadata?.bylonderDualQuaternions) useDualQuaternionSkinning(mesh, true);
     this.#clips = createClips(scene, this.ir.scene.time, this.playhead);
     /** Told of each marker passed: the scene's as the playhead plays past it, an action's as its clip does. */
     this.onMarker = this.#clips.onMarker;

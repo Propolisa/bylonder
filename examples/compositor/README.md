@@ -9,18 +9,19 @@ A small ramen bar, 麺屋 灯 (Menya Akari, "the noodle house of the lamp"), in 
   a dark backplate with standoffs.
 - **The bar.** A timber front with the window and the door cut out by Boolean, a tiled eave with chochin lanterns, a
   noren over the door and a らーめん lightbox. Inside, a shallow lit room: menu tags, a shelf of bowls, a stockpot,
-  paper lanterns, a counter, two customers eating (one raising a bowl and chopsticks) and a cook, each a few spheres
-  and tubes.
+  paper lanterns, a counter with a foot rail and a man on a bar stool eating ramen.
 - **The lane.** Narrow two-storey frontages on both sides, timber below and plaster or corrugated metal above: another
   izakaya or two with red and white chochin, lit noren and standing kanji lightboxes, a kissa with its shutter half
   down, shut shops, shoji windows lit upstairs, utility poles with tangled power lines, vending machines, styrofoam
   boxes, beer crates, plants, a scooter, a bicycle, stools and rain streaks. Each frontage is one joined object. Beside
   the corner shop, the entrance to the flats upstairs: Apartment Door (its origin on its hinge, so it swings open)
   before a lit hallway, and Apartment Window, its own material's warm emission at strength 0 until a page turns it up.
-- **People.** One woman outside on a tea break, and two people upstairs seen as soft shapes through translucent paper
-  in front of lamp-lit rooms, are Quaternius's Animated Woman (CC0 1.0: https://poly.pizza/m/9kF7eTDbhO), in
-  `models/animated-woman.glb`. The script seats each from the model's own SitIdle animation, turns the arms and curls
-  the fingers from its own rig to hold a cup, and repaints its palette texture in muted colors.
+- **People.** One woman outside on a tea break, the man eating at the counter behind the window, and two people
+  upstairs seen as soft shapes through translucent paper in front of lamp-lit rooms, are Quaternius's Animated Woman
+  (CC0 1.0: https://poly.pizza/m/9kF7eTDbhO), in `models/animated-woman.glb`. The script seats each from the model's
+  own SitIdle animation, turns the arms and curls the fingers from its own rig to hold a cup, and repaints its palette
+  texture in muted colors. For the man it first reshapes the mesh at rest: the hair cut short, broader shoulders, a
+  flat chest, stubble; then it poses his arms by reaching each hand to the bowl or the chopsticks' tips.
 - **City.** Far beyond the lane's roofs, dark towers with sparse lit windows, warning lights and tall video ads, half
   lost in fog cards whose alpha is a Noise Texture.
 - **Street.** Wet asphalt and puddles: flat faces in a dark Principled material with Roughness 0.02 that mirror the
@@ -30,8 +31,9 @@ A small ramen bar, 麺屋 灯 (Menya Akari, "the noodle house of the lamp"), in 
   of 灯 stutters back to life once, the cyan tubes dip twice, the rain falls in 20-frame cycles (two stacked copies, drawn
   below 6.5 m only), ripples spread in the puddles, the airship bobs and the fog banks drift, and the camera breathes a
   few centimeters. The woman keeps her rig, hidden in the viewport as an animator leaves it: her chest rises with each
-  breath and once a loop she lifts the cup (bone parented to her hand) for a sip; the diner in the window lifts the
-  chopsticks. Her rig's actions are Idle and Sip, which NLA strips play on the timeline, and Walk and Sit on muted
+  breath and once a loop she lifts the cup (bone parented to her hand) for a sip. The man keeps his rig too, the bowl
+  and chopsticks bone parented to his hands: his Eat action, played twice a loop by an NLA strip, picks noodles from
+  the bowl, lifts them, blows on them, eats them and chews. Her rig's actions are Idle and Sip, which NLA strips play on the timeline, and Walk and Sit on muted
   tracks, for File > Export > JavaScript with Animations set to Clips (the Noodle Shop game plays all four). Steam is particles emitted from well before frame 1, so it is already rising at the start; its puffs are
   random, so the steam changes slightly at the loop's seam.
 - **Compositor.** Render Layers, Glare (Fog Glow), Lens Distortion with a little Dispersion, a Color Balance grade and

@@ -565,11 +565,18 @@ for x in (-6.55, 3.45):
     box('Side Wall', (0.1, 2.3, 3.0), (x, 1.35, 1.5), plaster)
 box('Counter', (9.4, 0.4, 1.37), (-1.7, 1.6, 0.685), timber)
 box('Wainscot', (3.0, 0.04, 1.1), (2.0, 2.43, 0.55), dark_wood)
-for sx in (1.5, 2.25):
-    cylinder('Bar Stool', 0.17, 0.05, (sx, 1.15, 0.85), counter_wood, vertices=16)
-    cylinder('Stool Leg', 0.03, 0.7, (sx, 1.15, 0.5), dark_metal, vertices=8)
-    bpy.ops.mesh.primitive_torus_add(major_radius=0.15, minor_radius=0.012, major_segments=16, minor_segments=4, location=(sx, 1.15, 0.36))
+
+
+def bar_stool(x, y, top=0.875):
+    """A bar stool on the bar's floor, its seat's top `top` up: a wooden seat on a steel leg with a footrest ring."""
+    cylinder('Bar Stool', 0.17, 0.05, (x, y, top - 0.025), counter_wood, vertices=16)
+    cylinder('Stool Leg', 0.03, top - 0.175, (x, y, (top + 0.125) / 2), dark_metal, vertices=8)
+    bpy.ops.mesh.primitive_torus_add(major_radius=0.15, minor_radius=0.012, major_segments=16, minor_segments=4, location=(x, y, 0.36))
     finish(bpy.context.object, 'Footrest', dark_metal)
+
+
+for sx in (1.5, 2.25):
+    bar_stool(sx, 1.15)
 box('Counter Top', (9.5, 0.5, 0.05), (-1.7, 1.55, 1.395), counter_wood, bevel=0.01)
 box('Counter Edge', (9.5, 0.03, 0.06), (-1.7, 1.29, 1.39), material('Hinoki Edge', (0.55, 0.38, 0.2), roughness=0.4))
 box('Menu Board', (2.9, 0.04, 0.42), (-4.7, 2.43, 2.25), dark_wood)
@@ -602,9 +609,9 @@ with merged('Bowls'):
     for i, x in enumerate((-3.85, -3.7, -3.55, -3.4, -3.25)):
         for k in range(2 if i % 2 else 3):
             bowl('Shelf Bowl', x, 2.35, 1.765 + k * 0.05, 0.065)
-    for x in (-4.1, -2.9, -1.9):
+    for x in (-4.1, -1.9):
         bowl('Counter Bowl', x, 1.45, 1.42)
-for x in (-4.1, -2.9, -1.9):
+for x in (-4.1, -1.9):
     steam('Bowl Steam', x, 1.45, 1.47, 0.25, 0.45, density=4)
 cylinder('Stockpot', 0.2, 0.35, (-4.8, 2.2, 1.475), steel, vertices=20)
 with merged('Traces'):
@@ -736,17 +743,19 @@ def shape(obj):
     return points
 
 
-def seated(name, model, x, y, facing, seat, palette=None, floor=0.0, rigged=False):
+def seated(name, model, x, y, facing, seat, palette=None, floor=0.0, rigged=False, shaped=None):
     """A person from `model` (a .glb in models/) seated with the hips `seat` meters above the feet on a floor at `floor`,
     turned `facing` degrees from facing -Y, holding a cup at the chest, recoloured by `palette` (repaint()); returns the
     figure, where its hands meet, the top of the head, the underside of the hips (where a seat goes) and, `rigged`, its
     rig (posed as it sits, the pose its own, no longer its animation's) with each bone's rotation for a sip of the cup;
-    else the pose is the mesh's and the rig is gone."""
+    else the pose is the mesh's and the rig is gone. `shaped(rig, body)` reshapes the model at rest first."""
     before = set(bpy.data.objects)
     bpy.ops.import_scene.gltf(filepath=os.path.join(HERE, 'models', model))
     imported = [obj for obj in bpy.data.objects if obj not in before]
     rig = next(obj for obj in imported if obj.type == 'ARMATURE')
     bones = next(names for names in RIGS.values() if names['hand'].format(names['sides'][0]) in rig.pose.bones)
+    if shaped:
+        shaped(rig, next(obj for obj in imported if obj.type == 'MESH' and obj.parent is rig))
     sit = next((action for action in bpy.data.actions if action.name.split('|')[-1] in ('Man_Sitting', 'Female_Sitting', 'SitIdle')), None)
     rig.animation_data_create().action = sit
     if not sit:
@@ -943,9 +952,9 @@ def girl_actions(rig, body, facing, sip):
     return idle, sipping, walk, sit_down
 
 
-def girl_track(name, action, start):
-    """An NLA track of the tea break's rig playing `action` from `start`."""
-    track = drinker_rig.animation_data.nla_tracks.new()
+def nla_track(rig, name, action, start):
+    """An NLA track of `rig` playing `action` from `start`."""
+    track = rig.animation_data_create().nla_tracks.new()
     track.name = name
     track.strips.new(name, start, action)
     return track
@@ -1535,94 +1544,248 @@ with merged('Passers-by'):
     box('Bag', (0.32, 0.14, 0.24), (1.85, 1.05, 0.27), material('Leather Bag', (0.12, 0.05, 0.02), roughness=0.5), (0, 0, math.radians(12)), bevel=0.02)
     bpy.ops.mesh.primitive_cone_add(vertices=10, radius1=0.012, radius2=0.055, depth=0.8, location=(2.42, 1.0, 0.42), rotation=(0, math.radians(-14), 0))
     finish(bpy.context.object, 'Leaning Umbrella', umbrellas[1])
-# People in the lit rooms, seen as soft shapes: the same model seated behind paper or fogged glass, between it and
-# the room's light, cut by the window frame (rooms(), frontage()).
-# Turned three-quarters away, toward the bar's window, so the window rims the outline.
+# A man at the counter behind the bar's window, eating ramen: the tea break's model and rig reshaped as a man (manly()),
+# a bowl in his left hand and chopsticks in his right, posed by reaching each hand to where it holds them.
+MODEL_HAIR, MODEL_SKIN = (0.82, 0.76, 0.44), (0.91, 0.74, 0.57)
 
 
-# A diner behind the bar's window, a dark shape against its lit wall, traced as
-# filled 2D Bezier curves in profile (facing +X, meters, the feet or the hips at 0), about 7.5 heads tall, arms and
-# held things as tubes.
-HEAD = [(-0.055, 0.0), (-0.085, 0.035), (-0.115, 0.09), (-0.11, 0.16), (-0.07, 0.205), (0.0, 0.225), (0.06, 0.2),
-        (0.085, 0.16), (0.092, 0.12), (0.118, 0.088), (0.096, 0.072), (0.1, 0.052), (0.078, 0.03), (0.045, 0.022),
-        (0.035, 0.0)]
-SEATED = [(-0.13, 0.0), (-0.14, 0.2), (-0.12, 0.42), (-0.08, 0.55), (-0.06, 0.6), (0.035, 0.6), (0.045, 0.57),
-          (0.085, 0.53), (0.1, 0.44), (0.09, 0.28), (0.1, 0.06), (0.14, 0.04), (0.42, 0.06), (0.47, 0.01), (0.45, -0.05),
-          (0.42, -0.4), (0.49, -0.45), (0.49, -0.47), (0.35, -0.47), (0.36, -0.1), (0.02, -0.08), (-0.12, -0.05)]
+def palette_faces(body):
+    """Each face's color (sRGB, rounded), from the texel of the palette texture its first UV corner lands on."""
+    mesh = body.data
+    image = next(node for node in mesh.materials[0].node_tree.nodes if node.type == 'TEX_IMAGE').image
+    width, height, pixels, uvs = *image.size, image.pixels[:], mesh.uv_layers.active.data
+
+    def color(face):
+        u, v = uvs[face.loop_start].uv
+        i = (min(int(v * height), height - 1) * width + min(int(u * width), width - 1)) * 4
+        return tuple(round(c, 2) for c in pixels[i:i + 3])
+    return {face.index: color(face) for face in mesh.polygons}
 
 
-def placed(points, x=0.0, z=0.0, turn=0.0):
-    """Points turned `turn` degrees (positive tips them back) about the origin, then moved to (x, z)."""
-    c, s = math.cos(math.radians(turn)), math.sin(math.radians(turn))
-    return [(x + px * c - pz * s, z + px * s + pz * c) for px, pz in points]
+def manly(rig, body):
+    """Reshapes the model at rest as a man: the bob cut short above the ears and the nape, broader shoulders, a
+    thicker neck, a flat chest, a straight waist and stubble (a material of its own)."""
+    mesh, bones = body.data, rig.data.bones
+    to_rig = rig.matrix_world.inverted() @ body.matrix_world
+    head, spine, neck = (bones[name].head_local for name in ('Head', 'Spine2', 'Neck'))
+    up = (bones['HeadTop_End'].head_local - head).normalized()
+    size = (bones['HeadTop_End'].head_local - head).length
+    left = (bones['LeftArm'].head_local - bones['RightArm'].head_local).normalized()
+    ahead = left.cross(up)
+    colors = palette_faces(body)
+    hair = {v for face in mesh.polygons if colors[face.index] == MODEL_HAIR for v in face.vertices}
+    skin = {v for face in mesh.polygons if colors[face.index] == MODEL_SKIN for v in face.vertices}
+    points = [to_rig @ v.co for v in mesh.vertices]
+
+    def around(p):
+        """Up, ahead and to the left of the head's root, in head lengths."""
+        q = p - head
+        return q.dot(up) / size, q.dot(ahead) / size, q.dot(left) / size
+
+    def across(p, root):
+        q = p - root
+        return q - up * q.dot(up)
+
+    def skull(level):
+        return max(across(points[i], head).length for i in skin if abs(around(points[i])[0] - level) < 0.08)
+    names = {group.index: group.name for group in body.vertex_groups}
+    for vertex in mesh.vertices:
+        i, p = vertex.index, points[vertex.index]
+        level, fwd, _ = around(p)
+        # Hair below the cut (above the nape at the back, the temples in front) goes up to it, close to the skull.
+        cut = 0.22 + 0.36 * min(1.0, max(0.0, (fwd + 0.45) / 0.6))
+        if i in hair and level < cut:
+            radial = across(p, head)
+            points[i] = head + up * cut * size + radial.normalized() * min(radial.length, skull(cut) * 1.06)
+            continue
+        total = sum(g.weight for g in vertex.groups) or 1.0
+        weight = lambda *groups: sum(g.weight for g in vertex.groups if names[g.group] in groups) / total
+        chest, shoulder = weight('Spine1', 'Spine2'), weight('LeftShoulder', 'RightShoulder')
+        q = p - spine
+        out, front = q.dot(left), q.dot(ahead)
+        points[i] = (p + left * (math.copysign(0.07 * size * shoulder, out) + out * (0.12 * chest + 0.1 * weight('Spine')))
+                     + up * 0.02 * size * shoulder - ahead * max(front, 0.0) * 0.6 * chest + across(p, neck) * 0.2 * weight('Neck'))
+    back = to_rig.inverted()
+    for vertex, p in zip(mesh.vertices, points):
+        vertex.co = back @ p
+    # Stubble: the skin of the lower face, from under the nose round the jaw.
+    nose = max((around(points[i]) for i in skin if around(points[i])[0] > 0.2), key=lambda at: at[1])
+    mesh.materials.append(material('Stubble', (0.17, 0.1, 0.065), roughness=0.9))
+    for face in mesh.polygons:
+        level, fwd, side = around(sum((points[v] for v in face.vertices), Vector()) / len(face.vertices))
+        if colors[face.index] == MODEL_SKIN and 0.05 < level < nose[0] - 0.06 and fwd > -0.02 + abs(side) * 0.25:
+            face.material_index = len(mesh.materials) - 1
 
 
-def ellipse(cx, cz, rx, rz, steps=12):
-    return [(cx + rx * math.cos(a), cz + rz * math.sin(a)) for a in (i * math.tau / steps for i in range(steps))]
+def reach(rig, side, wrist, pole):
+    """Turns the `side` arm ('Left' or 'Right') so its wrist comes to `wrist`, the elbow bent towards `pole` (world)."""
+    pose, world = rig.pose.bones, rig.matrix_world
+    shoulder = world @ pose[f'{side}Arm'].head
+    upper, lower = ((world @ pose[bone].tail - world @ pose[bone].head).length for bone in (f'{side}Arm', f'{side}ForeArm'))
+    axis = (wrist - shoulder).normalized()
+    span = min((wrist - shoulder).length, (upper + lower) * 0.999)
+    along = (upper ** 2 - lower ** 2 + span ** 2) / (2 * span)
+    bend = (pole - axis * pole.dot(axis)).normalized()
+    elbow = shoulder + axis * along + bend * math.sqrt(max(upper ** 2 - along ** 2, 0.0))
+    posed(rig, [(f'{side}Arm', elbow - shoulder), (f'{side}ForeArm', shoulder + axis * span - elbow)])
 
 
-def filled(points, mat):
-    """A closed, filled 2D Bezier curve through the points, standing in the local XZ plane."""
-    data = bpy.data.curves.new('Silhouette', 'CURVE')
-    data.dimensions, data.fill_mode, data.resolution_u = '2D', 'BOTH', 8
-    spline = data.splines.new('BEZIER')
-    spline.bezier_points.add(len(points) - 1)
-    for point, (px, pz) in zip(spline.bezier_points, points):
-        point.co = (px, pz, 0)
-        point.handle_left_type = point.handle_right_type = 'AUTO'
-    spline.use_cyclic_u = True
-    data.materials.append(mat)
-    obj = bpy.data.objects.new('Silhouette', data)
-    obj.rotation_euler = (math.pi / 2, 0, 0)
-    collection.objects.link(obj)
-    return obj
+def axes(along, palm, across=0.0):
+    """A hand bone's world axes that point what it holds along `along`, its palm (+Z) facing `palm`: what it holds
+    lies along the bone (+Y) turned towards +X by an angle whose sine is `across`."""
+    c = along.normalized()
+    z = (palm - c * palm.dot(c)).normalized()
+    y = c * math.sqrt(1 - across ** 2) + z.cross(c) * across
+    return Matrix((y.cross(z), y, z)).transposed()
 
 
-def silhouette(name, fills, tubes, mat, x, y, z, facing, mirror=False, within=None, pivot=(0.0, 0.0)):
-    """One figure from its filled outlines and its (points, radius) tubes, set at (x, y, z) with its plane turned
-    `facing` degrees about Z; mirrored, it faces -X. `within` (x0, x1, z0, z1) cuts it to a pane, as a shadow on it.
-    Its origin is at `pivot` (in the figure's plane), what it turns about."""
-    with merged(name) as group:
-        for points in fills:
-            filled(points, mat)
-        for points, radius in tubes:
-            curve('Limb', [(px, 0, pz) for px, pz in points], mat, radius)
-    figure = group['object']
-    bpy.ops.object.select_all(action='DESELECT')
-    figure.select_set(True)
-    bpy.context.view_layer.objects.active = figure
-    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-    figure.data.transform(Matrix.Translation((-pivot[0], 0, -pivot[1])))
-    flip = -1 if mirror else 1
-    figure.location = Vector((x, y, z)) + Matrix.Rotation(math.radians(facing), 3, 'Z') @ Vector((flip * pivot[0], 0, pivot[1]))
-    figure.rotation_euler.z, figure.scale.x = math.radians(facing), flip
-    if within:
-        x0, x1, z0, z1 = within
-        pane = box('Pane', (x1 - x0, 1, z1 - z0), ((x0 + x1) / 2, y, (z0 + z1) / 2), None)
-        cut = figure.modifiers.new('Pane', 'BOOLEAN')
-        cut.operation, cut.object = 'INTERSECT', pane
-        bpy.context.view_layer.objects.active = figure
-        bpy.ops.object.modifier_apply(modifier='Pane')
-        bpy.data.objects.remove(pane)
-    return figure
+def turned(rig, bone, frame):
+    """Sets `bone`'s world axes to `frame`, where it is."""
+    pose = rig.pose.bones[bone]
+    matrix = (rig.matrix_world.to_3x3().normalized().inverted() @ frame).to_4x4()
+    matrix.translation = pose.matrix.translation
+    pose.matrix = matrix @ Matrix.Diagonal(pose.matrix.to_scale()).to_4x4()
+    bpy.context.view_layer.update()
 
 
-def eating():
-    """Seated, a bowl raised to the chin; apart, the forearm with chopsticks lifting noodles to the mouth, from the
-    elbow."""
-    fills = [SEATED, placed(HEAD, 0.0, 0.6, -10), ellipse(0.19, 0.645, 0.085, 0.045)]
-    tubes = [([(0.0, 0.55), (0.07, 0.38), (0.16, 0.6)], 0.042), ([(-0.03, 0.55), (0.1, 0.43)], 0.04)]
-    forearm = [([(0.1, 0.43), (0.21, 0.74)], 0.04), ([(0.3, 0.79), (0.1, 0.705)], 0.005), ([(0.31, 0.77), (0.11, 0.695)], 0.005)]
-    return fills, tubes, forearm
+def carried(rig, side, frame, offset, at, pole):
+    """Brings what the `side` hand holds, `offset` from the wrist along the hand's axes (meters), to `at`, the hand's
+    axes `frame`, the elbow bent towards `pole`."""
+    reach(rig, side, at - frame @ offset, pole)
+    turned(rig, f'{side}Hand', frame)
 
 
-ink = material('Silhouette', (0.006, 0.005, 0.005), roughness=0.7)
-# Facing away from the woman outside, so the two do not mirror each other.
-fills, tubes, forearm = eating()
-silhouette('Eating', fills, tubes, ink, -2.6, 1.0, 1.05, 47, mirror=True)
-# Once a loop the chopsticks come up to the mouth, slowly, and go back down.
-lifting = silhouette('Eating Forearm', [], forearm, ink, -2.6, 1.0, 1.05, 47, mirror=True, pivot=(0.1, 0.43))
-looping(lifting, 'rotation_euler', [(1, 0), (60, 0), (84, math.radians(12)), (110, math.radians(12)), (130, 0), (1 + LOOP, 0)], index=1)
+DINER = {(0.91, 0.4, 0.36): (0.17, 0.2, 0.27), (0.82, 0.76, 0.44): (0.07, 0.055, 0.045), (0.91, 0.74, 0.57): (0.8, 0.6, 0.46),
+         (0.38, 0.53, 0.83): (0.2, 0.19, 0.17), (0.94, 0.28, 0.18): (0.12, 0.09, 0.07)}
+diner, _, _, diner_seat, diner_rig, _ = seated('Diner', 'animated-woman.glb', -2.6, 0.95, 125, 0.5, palette=DINER, floor=0.75,
+                                               rigged=True, shaped=manly)
+bar_stool(-2.6, 0.95, top=diner_seat)
+# A foot rail along the counter, on brackets from it, under his soles.
+feet = soles(diner)
+rail_y = sum(co.y for co in feet) / len(feet)
+cylinder('Foot Rail', 0.02, 9.4, (-1.7, rail_y, 0.73), dark_metal, (0, math.pi / 2, 0), 8)
+for x in (-5.8, -3.5, -1.2, 1.1):
+    box('Rail Bracket', (0.03, 1.4 - rail_y, 0.03), (x, (1.4 + rail_y) / 2, 0.73), dark_metal)
+# His frame (ahead, to his left, up), his bones' rotations as he sits, which every pose starts from, and his hand's
+# length to the fingers.
+pose, world = diner_rig.pose.bones, diner_rig.matrix_world
+up = Vector((0, 0, 1))
+left = world @ pose['LeftArm'].head - world @ pose['RightArm'].head
+left = (left - up * left.dot(up)).normalized()
+ahead = left.cross(up)
+sitting = rotations(diner_rig)
+hand = (world @ pose['RightHandIndex1'].head - world @ pose['RightHand'].head).length
+# The bowl on his left palm, the fingers across under it; the chopsticks across his right fingers, 30 degrees
+# towards the thumb (CHOPSTICKS: sine of that turn), from a grip at the fingers' roots to their tips.
+BOWL_FRAME = axes(ahead * 0.4 - left, up)
+BOWL_IN_HAND = Vector((0, hand * 0.6, 0.012))
+CHOPSTICKS = 0.5
+GRIP = Vector((0, hand, 0.012))
+TIP_AHEAD = 0.17
+
+
+def chopsticks(frame):
+    """Where the chopsticks point, and their tip from the wrist (meters, along the hand's axes)."""
+    along = frame.col[1] * math.sqrt(1 - CHOPSTICKS ** 2) + frame.col[0] * CHOPSTICKS
+    return along, GRIP + frame.inverted() @ along * TIP_AHEAD
+
+
+def mouth():
+    head, top = world @ pose['Head'].head, world @ pose['HeadTop_End'].head
+    face = (world.to_3x3() @ pose['Head'].matrix.to_3x3().col[2]).normalized()
+    return head + (top - head) * 0.3 + face * (top - head).length * 0.42
+
+
+def diner_pose(nod, lift, tip, direction, palm_facing):
+    """Him hunched over the bowl, his head bowed `nod` degrees, the bowl `lift` up from where it rests, the
+    chopsticks pointing along `direction` (the palm towards `palm_facing`), their tips at `tip(mouth, bowl)`."""
+    for bone in pose:
+        setattr(bone, 'rotation_quaternion' if bone.rotation_mode == 'QUATERNION' else 'rotation_euler', sitting[bone.name].copy())
+    bpy.context.view_layer.update()
+    bow = up.cross(ahead)
+    for bone, angle in (('Spine1', 4), ('Spine2', 4), ('Head', nod)):
+        along = world @ pose[bone].tail - world @ pose[bone].head
+        posed(diner_rig, [(bone, Matrix.Rotation(math.radians(angle), 3, bow) @ along)])
+    at_bowl = bowl_place + up * lift
+    carried(diner_rig, 'Left', BOWL_FRAME, BOWL_IN_HAND, at_bowl, left * 0.6 - up)
+    frame = axes(direction, palm_facing, CHOPSTICKS)
+    carried(diner_rig, 'Right', frame, chopsticks(frame)[1], tip(mouth(), at_bowl), -left * 0.5 - up - ahead * 0.3)
+    return rotations(diner_rig)
+
+
+bowl_place = world @ pose['Neck'].head + ahead * 0.3 - up * 0.24 + left * 0.06
+down, to_mouth = -up * 0.45 + left * 0.6 + ahead * 0.45, left * 0.7 - ahead * 0.5 + up * 0.1
+palm_down, palm_in = left * 0.2 - up, left * 0.5 - ahead * 0.5 - up * 0.2
+# Each pose: the head's bow, the bowl's lift, where the tips are (from the mouth and the bowl), the chopsticks' way.
+POSES = {
+    'dip': (4, 0.0, lambda m, b: b + up * 0.035, down, palm_down),
+    'pinch': (6, 0.0, lambda m, b: b + up * 0.025, down, palm_down),
+    'lift': (-8, 0.05, lambda m, b: m + ahead * 0.07 - up * 0.06, to_mouth, palm_in),
+    'blow': (-12, 0.05, lambda m, b: m + ahead * 0.08 - up * 0.07, to_mouth, palm_in),
+    'eat': (-4, 0.06, lambda m, b: m + ahead * 0.01, to_mouth, palm_in),
+    'chew': (0, 0.02, lambda m, b: b + up * 0.06, down, palm_down),
+}
+# His bowl (broth in it, steam over it) and chopsticks, made where his hands hold them in the dip and bound to his
+# hands' bones, the noodles where the chopsticks hold them up in the lift, bound to the chopsticks.
+diner_pose(*POSES['dip'])
+with merged('Diner Bowl') as held_bowl:
+    bowl('Diner Bowl', bowl_place.x, bowl_place.y, bowl_place.z, 0.075)
+    cylinder('Broth', 0.068, 0.004, bowl_place + up * 0.05, material('Broth', (0.45, 0.24, 0.08), roughness=0.15), vertices=16)
+diner_steam = steam('Diner Steam', bowl_place.x, bowl_place.y, bowl_place.z + 0.07, 0.14, 0.3, density=4)
+
+
+def bound(child, parent, bone=''):
+    """Parents `child` to `parent` (to its `bone`, given one) where it is now, so it follows from here on."""
+    bpy.context.view_layer.update()
+    matrix = child.matrix_world.copy()
+    child.parent, child.parent_type, child.parent_bone = parent, 'BONE' if bone else 'OBJECT', bone
+    bpy.context.view_layer.update()
+    child.matrix_world = matrix
+
+
+bound(held_bowl['object'], diner_rig, 'LeftHand')
+bound(diner_steam, held_bowl['object'])
+
+
+def stick_ends(frame):
+    """Where the chopsticks start and end, in the hand at `frame` as it is posed."""
+    along, _ = chopsticks(frame)
+    grip = world @ pose['RightHand'].head + frame @ GRIP
+    return grip - along * 0.06, grip + along * TIP_AHEAD
+
+
+start, end = stick_ends(axes(down, palm_down, CHOPSTICKS))
+apart = axes(down, palm_down, CHOPSTICKS).col[2] * 0.008
+with merged('Diner Chopsticks') as held_sticks:
+    for side in (-1, 1):
+        curve('Chopstick', [start + apart * side, end + apart * side * 0.2], old_chopstick, 0.0035, smooth=False)
+bound(held_sticks['object'], diner_rig, 'RightHand')
+diner_pose(*POSES['lift'])
+_, tips = stick_ends(axes(to_mouth, palm_in, CHOPSTICKS))
+noodle = material('Noodles', (0.85, 0.66, 0.3), roughness=0.5)
+with merged('Diner Noodles') as noodles:
+    for k, (dx, dy) in enumerate(((-0.006, 0.0), (0.004, 0.005), (0.0, -0.006), (0.007, -0.002))):
+        curve('Noodle', [tips + Vector((dx * t, dy * t, -0.02 * t)) + ahead * 0.008 * math.sin(t * 2 + k) for t in range(6)], noodle, 0.0022)
+bound(noodles['object'], held_sticks['object'])
+# Eat, a 5 s action the scene plays twice a loop as an NLA strip: noodles picked from the bowl, lifted, blown on,
+# eaten, chewed, a pause.
+# Posed before the action exists, as an action's keys would pose him back.
+poses = {name: diner_pose(*pose_of) for name, pose_of in POSES.items()}
+data, keyed = diner_rig.animation_data, {}
+for track in list(data.nla_tracks):
+    data.nla_tracks.remove(track)
+data.action = bpy.data.actions.new('Eat')
+for frame, name in ((1, 'dip'), (10, 'pinch'), (20, 'dip'), (38, 'lift'), (48, 'blow'), (58, 'blow'), (66, 'eat'), (74, 'eat'),
+                    (90, 'chew'), (104, 'chew'), (121, 'dip')):
+    key_pose(diner_rig, frame, poses[name], None, keyed)
+eat, data.action = data.action, None
+nla_track(diner_rig, 'Eat', eat, 1).strips[0].repeat = 2
+diner_pose(*POSES['dip'])
+# The noodles show once they are up out of the bowl, until he eats them.
+for axis in range(3):
+    looping(noodles['object'], 'scale', [(1, 0.0), (28, 1.0), (68, 0.0), (121, 0.0)], index=axis, interpolation='CONSTANT')
+diner_rig.hide_set(True)
+
 
 def behind(pane, depth, seat=0.46):
     """Where to seat someone `depth` behind a pane so that, seen from the camera, the head shows near `pane` (a point
@@ -1656,10 +1819,10 @@ for child, parent, bone in ((tea_cup, drinker_rig, 'LeftHand'), (tea_steam, tea_
 # Her actions, each a clip of its own: Idle (she breathes slowly as she sits), Sip (the cup to her lips), and Walk and
 # Sit for a game to play. The scene plays Idle twice a loop and, once a loop, Sip over it, as NLA strips.
 idle, sipping, walk, sit_down = girl_actions(drinker_rig, drinker, 140, sip)
-girl_track('Idle', idle, 1).strips[0].repeat = 2
-girl_track('Sip', sipping, 150).strips[0].extrapolation = 'NOTHING'
+nla_track(drinker_rig, 'Idle', idle, 1).strips[0].repeat = 2
+nla_track(drinker_rig, 'Sip', sipping, 150).strips[0].extrapolation = 'NOTHING'
 for action in (walk, sit_down):
-    girl_track(action.name, action, 1).mute = True
+    nla_track(drinker_rig, action.name, action, 1).mute = True
 # Her rig hidden in the viewport (H), as an animator leaves it: her body and cup still follow its bones.
 drinker_rig.hide_set(True)
 group('Lane')
