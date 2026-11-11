@@ -30,6 +30,22 @@ LOOP = 240
 scene.frame_start, scene.frame_end, scene.render.fps = 1, LOOP, 24
 
 
+def layer(of, view_layer=None):
+    """The view layer's entry for a collection, which makes it the one new objects land in."""
+    found = view_layer or bpy.context.view_layer.layer_collection
+    return found if found.collection == of else next(filter(None, (layer(of, child) for child in found.children)), None)
+
+
+def group(name, parent=None):
+    """Puts the objects made from here on in the collection `name`, under `parent` (the scene's own by default)."""
+    global collection
+    collection = bpy.data.collections.get(name) or bpy.data.collections.new(name)
+    under = bpy.data.collections[parent] if parent else scene.collection
+    if collection.name not in under.children:
+        under.children.link(collection)
+    bpy.context.view_layer.active_layer_collection = layer(collection)
+
+
 def material(name, color, roughness=0.5, metallic=0.0, emission=0.0):
     mat = bpy.data.materials.new(name)
     principled = mat.node_tree.nodes['Principled BSDF']
@@ -267,6 +283,7 @@ weather(timber, 0.5, 0.7, moss=0.7)
 weather(weathered_plaster, 0.8, 0.5)
 weather(corrugated, 0.4, 0.4, rust=(0.22, 0.07, 0.02))
 
+group('Bar')
 wall = box('Wall', (8.6, 0.3, 2.9), (0.1, 0.15, 1.3), timber)
 upper_wall = box('Upper Wall', (8.6, 0.3, 3.4), (0.1, 0.15, 4.45), weathered_plaster)
 openings = [box('Window Opening', (2.8, 1.0, 1.5), (-1.6, 0.15, 1.75), None),
@@ -278,6 +295,7 @@ for opening in openings:
     bpy.ops.object.modifier_apply(modifier=opening.name)
     bpy.data.objects.remove(opening)
 
+group('Lane')
 # The street: a narrow road between raised sidewalks, wet asphalt with grain, and puddles that mirror the neon.
 asphalt = textured('Wet Asphalt', (0.022, 0.022, 0.024), (0.008, 0.008, 0.009), 1.5, (0.25, 0.08))
 box('Sidewalk', (60, 1.2, 0.15), (-15, -0.6, -0.075), asphalt)
@@ -309,6 +327,7 @@ for i, (x, y, z, rx, ry) in enumerate(((0.5, -2.6, -0.15, 2.2, 0.8), (-4.5, -2.5
 for i in range(6):
     puddle(f'Puddle {i + 6}', wobble.uniform(-22, -3), wobble.uniform(-3.4, -1.8), -0.15, wobble.uniform(0.3, 1.6), wobble.uniform(0.15, 0.5), i)
 
+group('Sign')
 # The sign: script words and a bowl of noodles in glass tubes, standing off a dark backplate.
 box('Backplate', (3.6, 0.05, 1.3), (0.2, -0.05, 3.6), backplate, bevel=0.04)
 with merged('Standoffs'):
@@ -526,6 +545,7 @@ def steam_volume(name, x, y, z, width, height, density=6.0, drift=(0.0, 0.0)):
     return box(name, (width, width, height), (x, y, z + height / 2), mat)
 
 
+group('Bar')
 # The bar: one shallow room behind the window and the door, plaster walls, a wooden counter, a row of menu tags over
 # the cook, paper lanterns and a stockpot.
 plaster = textured('Plaster', (0.6, 0.4, 0.22), (0.5, 0.32, 0.17), 4, (0.8, 0.9))
@@ -929,6 +949,7 @@ for half, panel, keep in zip(halves, norens[1:3], ('LEFT', 'RIGHT')):
     half.matrix_parent_inverse = panel.matrix_world.inverted()
 lettering('Ramen', 'らーめん', 1.45, -0.085, 2.43, 0.3, material('Lightbox Ink', (0.5, 0.02, 0.01), roughness=0.6))
 
+group('Lane')
 # Props: wooden crates stacked by the door and a rusty bicycle leaning on the wall.
 
 
@@ -976,6 +997,7 @@ for part in bike:
     part.matrix_world = lean @ part.matrix_world
 join('Bicycle', bike)
 
+group('Rain', 'Lane')
 # Rain: thin streaks facing the camera, slanted by the wind, faint and soft-ended (alpha a vertical gradient along each
 # streak's UV), glossy so they glint where they pass a light; longer and fainter far off, denser there.
 rain_streak = bpy.data.materials.new('Rain')
@@ -1057,6 +1079,7 @@ for falling in (rain, near['object']):
     looping(falling, 'location', [(1, 0.0), (21, -RAIN_FALL)], index=2, interpolation='LINEAR')
 
 
+group('Lane')
 # Plastic stools under the window, a bucket by the crates and an A-frame menu board.
 red_plastic = material('Red Plastic', (0.45, 0.02, 0.02), roughness=0.35)
 
@@ -1081,6 +1104,7 @@ with merged('Stools and Board'):
     for i, width in enumerate((0.42, 0.3, 0.36, 0.22)):
         box('Chalk Line', (width, 0.005, 0.025), (1.25 - (0.42 - width) / 2, -0.965, 0.72 - i * 0.12), chalk, (math.radians(-12), 0, 0))
 
+group('Street')
 # The street: a yokocho of narrow two-storey frontages, timber below and plaster or corrugated metal above, tiled
 # eaves, lanterns, vertical signboards and noren; one more izakaya open, a kissa with its shutter half down, others
 # shut, warm upstairs windows.
@@ -1315,6 +1339,7 @@ with merged('Poles and Lines'):
         points = [(x, y, z - sag * 4 * t * (1 - t)) for (x, y, z), t in zip(points, (0, 0.25, 0.5, 0.75, 1))]
         curve(f'Power Line {i + 1}', points, rubber, 0.012)
 
+group('People')
 # People, by implication: shadows on the shoji, the cook and a customer behind the glass, one person outside on a
 # tea break.
 
@@ -1468,6 +1493,7 @@ for bone, sipping in sip.items():
     looping(pose_bone, 'rotation_quaternion', [(1, rest), (150, rest), (172, sipping), (192, sipping), (214, rest), (1 + LOOP, rest)])
 # Her rig hidden in the viewport (H), as an animator leaves it: her body and cup still follow its bones.
 drinker_rig.hide_set(True)
+group('Lane')
 simple_bike('Parked Bicycle', -5.4, -0.55, 92, lamp=True)
 # Ripples in the puddles where the rain lands: each ring rises out of the water, spreads and sinks back, over and over.
 ripple = material('Ripple', (0.15, 0.16, 0.18), roughness=0.2)
@@ -1501,10 +1527,12 @@ def light(name, kind, color, energy, location, radius=0.1, rotation=(0, 0, 0), s
     return obj
 
 
+group('Sign')
 # The tubes' light: panels facing the wall, so the puddles see only their backs; no highlights on the backplate.
 glow = (math.pi / 2, 0, 0)
 light('Magenta Light', 'AREA', (1, 0.08, 0.45), 140, (0.7, -0.6, 3.7), (2.6, 1.0), glow, specular=0).data.shape = 'RECTANGLE'
 light('Cyan Light', 'AREA', (0.1, 0.65, 1), 50, (-1.0, -0.5, 3.6), (0.8, 0.8), glow, specular=0)
+group('Bar')
 # The window's and the door's light on the street (no highlights of their own: the puddles mirror the openings), a
 # cold moon from above and a street lamp off to the right.
 light('Window Light', 'POINT', (1, 0.45, 0.15), 260, (-1.6, -0.45, 0.5), 0.6, specular=0, shadow=True)
@@ -1514,6 +1542,7 @@ light('Door Light', 'POINT', (1, 0.45, 0.15), 160, (2.0, -1.7, 0.4), 0.5, specul
 # The bar's own light: one over the counter, one inside the doorway; and the vending machine's cold glow.
 light('Bar Light', 'POINT', (1, 0.6, 0.3), 200, (-3.5, 1.9, 2.5), 0.4, shadow=True)
 light('Doorway Light', 'POINT', (1, 0.5, 0.2), 80, (2.0, 0.8, 1.2), 0.3)
+group('Street')
 light('Vending Light', 'POINT', (0.6, 0.8, 1), 25, (-7.0, -1.6, 1.3), 0.4, specular=0)
 light('Yakitori Light', 'POINT', (1, 0.4, 0.12), 110, (-9.4, -0.9, 1.8), 0.5, specular=0)
 light('Izakaya Light', 'POINT', (1, 0.45, 0.15), 90, (-16.0, -0.9, 1.8), 0.5, specular=0)
@@ -1522,9 +1551,13 @@ light('Far End Light', 'POINT', (1, 0.45, 0.16), 220, (-24.0, -2.4, 2.6), 1.0, s
 # Fill for the realtime engines, which bounce no light: warm light under the eaves onto the sidewalks, and a dim warm
 # bounce from the wet lane up onto the fronts and the eaves' undersides.
 down, up = (0, 0, 0), (math.pi, 0, 0)
+group('Bar')
 light('Bar Eave Light', 'AREA', (1, 0.5, 0.2), 160, (0.1, -0.55, 2.55), (8.0, 0.6), down, specular=0).data.shape = 'RECTANGLE'
+group('Street')
 light('Lane Eave Light', 'AREA', (1, 0.45, 0.18), 260, (-14.0, -0.55, 2.55), (20.0, 0.6), down, specular=0).data.shape = 'RECTANGLE'
+group('Lane')
 light('Lane Bounce', 'AREA', (1, 0.5, 0.3), 120, (-8.0, -2.4, 0.1), (26.0, 3.0), up, specular=0).data.shape = 'RECTANGLE'
+group('City')
 light('Moon', 'SUN', (0.35, 0.5, 1), 0.08, (0, 0, 10), 0.1, (math.radians(35), math.radians(-20), 0))
 
 # The city beyond: megastructure towers far behind the lane's roofs, dark with sparse lit windows, red warning lights
@@ -1885,7 +1918,7 @@ camera.rotation_euler = (math.radians(95), 0, math.radians(38))
 # Breathing: a drift of a few centimeters, side to side once a loop and up and down twice.
 wave(camera, 'location', 0, 0.03, LOOP)
 wave(camera, 'location', 2, 0.015, LOOP / 2)
-collection.objects.link(camera)
+scene.collection.objects.link(camera)
 scene.camera = camera
 scene.render.resolution_x, scene.render.resolution_y = 1280, 720
 # Render Image blurs what moves (the rain, the steam, the airship), as EEVEE's final render does.
