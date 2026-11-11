@@ -18,8 +18,8 @@ const DYNAMIC_NODES = new Set(['GeometryNodeInputSceneTime', 'GeometryNodeObject
 // What a modifier after the Armature gives applied before it: the same (a Mask of a vertex group's vertices deforms
 // nothing), nearly the same (a Subdivision Surface smooths the rest, which the Armature then deforms), else null.
 const AFTER = { MASK: (m) => (m.mode === 'VERTEX_GROUP' ? 'SAME' : null), SUBSURF: () => 'NEARLY', MULTIRES: () => 'NEARLY' };
-// The most morph target data (floats: a position and a normal per face corner, per shape key) a subdivided rest may
-// carry; above it the mesh evaluates as Blender, until the page subdivides after skinning.
+// The most morph target data (floats: a position and a normal per face corner, per shape key) a rest with more vertices
+// than its mesh (subdivided) may carry; above it the mesh evaluates as Blender, until the page subdivides after skinning.
 const MORPH_FLOATS = 4e6;
 const afterArmature = (m) => AFTER[m.type]?.(m) ?? null;
 
@@ -95,7 +95,7 @@ function makeRest(ob, { applied, nearly, driven }) {
     if (!key) return { ob: rest, address: address(rest), key: null, applied: names, nearly, driven, vertices };
     const count = mesh.vertices.length, blocks = [...key.key_blocks];
     const discard = () => { data.objects.remove(rest); data.meshes.remove(mesh); return null; };
-    if (nearly.length && mesh.loops.length * 6 * (blocks.length - 1) > MORPH_FLOATS) return discard();
+    if (count > ob.data.vertices.length && mesh.loops.length * 6 * (blocks.length - 1) > MORPH_FLOATS) return discard();
     // A key that moves vertices the modifiers merge or mask gives other topology: the rest would hold at no value.
     const shapes = blocks.map((kb, i) => {
       if (!i) return positions(mesh).slice();
