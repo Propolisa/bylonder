@@ -1,4 +1,10 @@
 /**
+ * Track To: the owner keeps its place and scale, its track axis pointing at the target and its up axis as near the
+ * world's (or the target's) Z as that allows.
+ * @param {Matrix} owner @param {Matrix} target @param {Constraint} c
+ */
+export function trackTo(owner: Matrix, target: Matrix, c: Constraint): Matrix;
+/**
  * The world matrix (Blender's axes) of an owner after its constraints, from its own world matrix and its targets'.
  * @param {Matrix} owner @param {Constraint[]} constraints @param {(id: string) => Matrix} targetOf
  */

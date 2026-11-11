@@ -8,6 +8,7 @@ import { babylonMatrix } from '../blenkernel/main-view.js';
 import { modifierStack } from '../modifiers/stack.js';
 import { registerRuntime, runtimeOf, APPROXIMATION, FALLBACK } from './runtimes.js';
 import { livePose } from '../io_scene_babylon/live-curves.js';
+import { livePoseConstraints } from '../io_scene_babylon/pose-export.js';
 
 // A vertex Blender's Armature modifier leaves in place: its weights sum to no more than this (armature_deform.cc).
 const CONTRIBUTION = 0.0001;
@@ -311,41 +312,65 @@ function issues(arm) {
 
 // The pose as matrix animations of a mapping's bones, read from Main as Blender's animation system evaluates it, keyed
 // on the armature's grid (sampling.js); one key when nothing animates the armature. The page interpolates matrix keys
-// (Animation.AllowMatricesInterpolation). Without `bake`, a bone of an armature drawn by one skeleton whose F-Curves give
-// its pose (live-curves.js livePose, checked at each whole frame) is posed by the page instead: its F-Curves go in
-// `curves`, and each bone still sampled while it moves in `gaps`.
-function poseAnimations(world, mappings, bake, sampling) {
+// (Animation.AllowMatricesInterpolation). Without `bake`, an armature drawn by one skeleton is posed by the page where
+// it can: its bone constraints run in the page (pose-export.js livePoseConstraints, checked at each frame) and go in
+// `constraints`, the bones they move posed from their own location, rotation and scale; a bone whose own pose is its
+// F-Curves (live-curves.js livePose, checked at each whole frame) has them in `curves`; each bone still sampled while it
+// moves is in `gaps`. `scene`: the nodes (`nodeOf(ob)`, `meshOf(mapping)`, the skinned mesh) the page's constraints read.
+function poseAnimations(world, mappings, bake, sampling, scene) {
   const sync = world.mainSync, { fps, frameStart, frameEnd } = sampling.range, current = world.animation.time.frame;
   const animated = (arm) => !!arm.animation_data || [...arm.pose.bones].some((bone) => bone.constraints.length);
-  const keys = new Map(), owners = new Map();
+  const keys = new Map(), owners = new Map(), stacks = new Map();
+  if (!bake && scene) for (const mapping of mappings) {
+    const mesh = mapping.skeletons.size === 1 && scene.meshOf(mapping), [skeleton] = mapping.skeletons.values();
+    const stack = mesh && livePoseConstraints(mapping.arm, skeleton, mesh, { nodeOf: scene.nodeOf,
+      meshWorld: () => sync.worldMatrix(mesh), nodeWorld: (id) => sync.worldMatrix(world.scene.getNodeById(id)) });
+    if (stack) stacks.set(mapping, stack);
+  }
   const sample = (frame) => {
     for (const mapping of mappings) {
       const bones = bonesOf(mapping.arm);
-      for (const skeleton of mapping.skeletons.values()) skeleton.bones.forEach((bone, i) => {
-        if (!keys.has(bone)) { keys.set(bone, []); owners.set(bone, mapping); }
-        keys.get(bone).push({ frame, value: relative(bones, i, 'pose', skeleton.space) });
-      });
+      for (const skeleton of mapping.skeletons.values()) {
+        const values = skeleton.bones.map((bone, i) => relative(bones, i, 'pose', skeleton.space));
+        skeleton.bones.forEach((bone, i) => {
+          if (!keys.has(bone)) { keys.set(bone, []); owners.set(bone, mapping); }
+          keys.get(bone).push({ frame, value: values[i] });
+        });
+        stacks.get(mapping)?.check(values);
+      }
     }
   };
   if (mappings.some((m) => animated(m.arm)) && frameEnd > frameStart) {
     for (const frame of sampling.frames) { sync.frameChanged(frame); sample(frame); }
     sync.frameChanged(current);
   } else sample(current);
-  const curves = [], gaps = [];
+  // A stack the page runs where every bone it moves is posed by its own F-Curves, or not animated.
+  const curves = [], gaps = [], constraints = [], posed = new Set();
+  for (const [mapping, stack] of stacks) {
+    const entity = stack.entity(), own = entity && [...stack.moved].map((bone) => {
+      const whole = keys.get(bone).map((k, i) => ({ ...k, own: stack.own(bone)[i] })).filter((k) => Number.isInteger(k.frame));
+      return livePose(mapping.arm, mapping.arm.pose.bones.get(bone.name), bone, whole.map((k) => k.own), whole[0].frame);
+    });
+    if (!own || own.some((live) => !live)) continue;
+    curves.push(...own.flat());
+    constraints.push({ armature: scene.nodeOf(mapping.arm)?.id, pose: entity });
+    stack.moved.forEach((bone) => posed.add(bone));
+  }
   const animations = [...keys].flatMap(([bone, list]) => {
+    if (posed.has(bone)) return [];
     const { arm, skeletons } = owners.get(bone);
     const whole = list.filter((k) => Number.isInteger(k.frame));
     const live = !bake && skeletons.size === 1 && livePose(arm, arm.pose.bones.get(bone.name), bone, whole.map((k) => k.value), whole[0].frame);
     if (live) curves.push(...live);
     if (live?.length) return [];
     const moves = list.some((k) => !k.value.equalsWithEpsilon(list[0].value, 1e-6));
-    if (!bake && moves) gaps.push({ message: `${arm.name} ${bone.name}: its pose is not its F-Curves alone (constraints, IK, NLA, drivers, inheritance, several skeletons) or the unit misses Main` });
+    if (!bake && moves) gaps.push({ message: `${arm.name} ${bone.name}: its pose is not its F-Curves alone (constraints the page does not run, NLA, drivers, inheritance, several skeletons) or the unit misses Main` });
     const animation = new Animation(`${bone.id} pose`, BONE_MATRIX, fps, Animation.ANIMATIONTYPE_MATRIX, Animation.ANIMATIONLOOPMODE_CYCLE);
     const keeps = moves && sampling.keeps(arm.name);
     animation.setKeys(moves ? list.filter(({ frame }) => keeps(frame)) : list.slice(0, 1));
     return [{ animation, target: bone }];
   });
-  return { animations, curves, gaps };
+  return { animations, curves, gaps, constraints };
 }
 
 // Export: every armature mapped, those on Blender for the export's duration (their meshes skinned, then drawn as
@@ -364,14 +389,15 @@ function exportArmatures(world, { bake, sampling }) {
     temporary.push(state);
     mappings.push(state.mapping);
   }
-  const { animations, curves, gaps } = poseAnimations(world, mappings, bake, sampling);
+  const nodeOf = (ob) => byOb.get(address(ob))?.node;
+  const { animations, curves, gaps, constraints } = poseAnimations(world, mappings, bake, sampling, { nodeOf, meshOf: (m) => byOb.get(m.skins.keys().next().value)?.node });
   for (const state of temporary) {
     drawSkins({ ...view, world: { animation: { playing: true } } }, state, (key) => view.blender.mesh(key));
     for (const key of state.applied.keys()) exporting.add(key);
   }
   return {
     reports: mappings.map((m) => ({ title: `${m.arm.name}: exported`, issues: m.issues.filter((i) => !i.silent) })),
-    animations, curves, gaps,
+    animations, curves, gaps, constraints,
     clip: (sampling, owns) => poseAnimations(world, mappings.filter((m) => owns(m.arm)), true, sampling).animations,
     restore() {
       exporting.clear();

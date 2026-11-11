@@ -254,11 +254,14 @@ function evaluatedIDs(ids, graphs, entities, sync, bin) {
 }
 
 // An object's constraints the page applies to its node each frame, after what places it (`constraints:OBJECT`), by the
-// node's id.
+// node's id; an armature's bone constraints the page runs on its skeleton (`constraints:POSE`), by its node's.
 function constraintEntities(ids, constraints, time) {
   const idOf = new Map(Object.entries(ids).filter(([, id]) => id.node !== undefined).map(([k, id]) => [id.node, k]));
-  return Object.fromEntries(constraints.filter((c) => idOf.has(c.node)).map((inputs) => [`${idOf.get(inputs.node)}/constraints/object`,
-    { type: 'constraints:OBJECT', id: idOf.get(inputs.node), inputs: { ...inputs, ...(time && { frame: { property: time } }) }, outputs: {}, implementation: 'constraints' }]));
+  const frame = time && { frame: { property: time } };
+  return Object.fromEntries(constraints.flatMap((c) => {
+    if (c.pose) return idOf.has(c.armature) ? [[`${idOf.get(c.armature)}/constraints/pose`, { type: 'constraints:POSE', id: idOf.get(c.armature), inputs: { ...c.pose, ...frame }, outputs: {}, implementation: 'pose' }]] : [];
+    return idOf.has(c.node) ? [[`${idOf.get(c.node)}/constraints/object`, { type: 'constraints:OBJECT', id: idOf.get(c.node), inputs: { ...c, ...frame }, outputs: {}, implementation: 'constraints' }]] : [];
+  }));
 }
 
 // The package's IR (docs/ir.md): `controls` (controls-export.js) as its properties, with what the `live` stacks and the

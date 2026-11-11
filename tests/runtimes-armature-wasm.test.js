@@ -134,7 +134,7 @@ assert.ok(!drawn('DATA').DATA_PT_bylonder_armature_runtime?.some((b) => b.icon =
 rig.bylonder.runtime = 'MAPPED';
 sync.view();
 assert.equal(body.skeleton?.name, 'Rig', "the body is skinned by the rig's skeleton");
-assert.equal(body.skeleton.bones.length, 11);
+assert.equal(body.skeleton.bones.length, 21);
 assert.equal(body.numBoneInfluencers, 8, 'Automatic influencers: some vertices have more than 4 weights');
 assert.deepEqual(rig.bylonder.issues.map((i) => i.kind + ' ' + i.setting), ['APPROXIMATION bpy.data.objects["Body"].modifiers["Armature"]'], 'only skinned normals differ');
 for (const [i, values] of POSES.entries()) {
@@ -146,6 +146,8 @@ assert.ok(body.getBoundingInfo().boundingBox.maximumWorld.y > 0, 'the posed mesh
 // Playing an action: Blender's animation system poses the rig each frame, Babylon skins it. Keyed as I keys them, by
 // Blender's keying (BlenderAnimation.keyInsert).
 const keying = new BlenderAnimation(blender);
+// Its constraints muted: the keys pose the rig alone, as the F-Curve unit plays them (export-pose-constraints-wasm tests them).
+for (const bone of rig.pose.bones) for (const c of bone.constraints) c.mute = true;
 for (const [frame, values] of [[1, POSES[0]], [11, POSES[1]], [21, POSES[2]]]) {
   sync.frameChanged(frame);
   pose(values);
@@ -202,7 +204,7 @@ const json = await serializeScene(world);
 assert.deepEqual(json.skeletons.map((s) => s.name), ['Rig']);
 assert.equal(json.meshes.find((m) => m.name === 'Body').skeletonId, 'Rig');
 const group = json.animationGroups[0];
-assert.equal(group.targetedAnimations.filter((t) => t.animation.property === '_matrix').length, 11, "every bone's pose is animated");
+assert.equal(group.targetedAnimations.filter((t) => t.animation.property === '_matrix').length, 21, "every bone's pose is animated");
 const loaded = new Scene(new NullEngine());
 await AppendSceneAsync('data:' + JSON.stringify(json), loaded);
 const loadedBody = loaded.getMeshByName('Body'), playing = loaded.animationGroups[0];

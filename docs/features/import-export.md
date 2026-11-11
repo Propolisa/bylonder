@@ -39,6 +39,7 @@ media:
   - import-export/control-panel-timeline.png
   - import-export/control-panel-timeline.gif
   - import-export/control-panel-touch.gif
+  - import-export/character-live.gif
 ui:
   - TOPBAR_MT_file
   - TOPBAR_MT_file_import*
@@ -86,6 +87,8 @@ code:
   - src/io_scene_babylon/runtime/playhead.js
   - src/io_scene_babylon/clip-export.js
   - src/io_scene_babylon/runtime/clips.js
+  - src/io_scene_babylon/runtime/pose-constraints.js
+  - src/io_scene_babylon/pose-export.js
   - src/io_scene_babylon/runtime/control-panel.js
   - src/io_scene_babylon/runtime/control-panel-ui.js
   - src/io_scene_babylon/runtime/control-panel-model.js
@@ -111,6 +114,7 @@ tests:
   - tests/collection-time-offset-wasm.test.js
   - tests/playhead.test.js
   - tests/export-clips-wasm.test.js
+  - tests/export-pose-constraints-wasm.test.js
   - tests/unit-swap-wasm.test.js
   - tests/runtimes-armature-wasm.test.js
   - tests/texture-paint-wasm.test.js
@@ -145,6 +149,7 @@ limits:
   - File > Export's Sample Rate keys what is baked (sampled) on Blender's frame grid, for every object or one object; Babylon interpolates between the keys (rotations and bone poses spherically), so a rate below the scene's rounds off quick motion. Exact keys and F-Curves the page runs ignore it, and a boolean is keyed at each frame it changes at.
   - A collection's Time Offset is the page's own: Blender has no such setting, so the app plays every collection on the scene's frame. An object in two collections takes the first in the outliner's order; a material's animation and particle systems ignore it.
   - An exported page plays the scene's frames on one clock through sub-frames, smoother than Blender's whole frames; its playhead's snap shows whole frames. Particle systems pause with it but do not seek.
+  - An armature's bone constraints run in the page where it has one skeleton and every constraint is one the page solves: IK of one or two bones (with or without a pole, no stretch, locks or limits), Damped Track, Track To, Copy Rotation of all axes (Replace) and Limit Rotation, in world, pose or local space. The export keeps them only where they give Blender's pose at every sampled frame (IK to its solver's tolerance, about 0.001); otherwise the pose is sampled as before. Longer IK chains, iTaSC and other constraint types are sampled.
   - File > Export's Animations as Clips exports objects' transforms, bones and shape keys per action; other animated values (materials, lights, modifier settings) play on the timeline only, so Clips alone leaves them still. An action of one frame (a pose) gives no clip.
   - A clip's NLA strip gives its blending, influence, speed and repeat; blend in and out, animated influence and time, reversed strips and Subtract and Multiply are not kept, and Combine plays as Add. Babylon adds an additive clip's rotation by multiplying, where Blender's Add adds Euler angles.
   - The scene's markers are told as the playhead plays past them, not on a seek; a clip's markers as Babylon plays it.
@@ -289,6 +294,12 @@ control panel, on WebGL 2, loading Babylon.js from its CDN. [Open the demo](http
     ![The rain paused, scrubbed to the last frame, then played](../media/features/import-export/control-panel-timeline.gif)
 
     ![On a phone: scroll, drag, pinch, then Orbit](../media/features/import-export/control-panel-touch.gif)
+
+    A rig's bone constraints run in the page too: the Rigged Character's arms and legs reach for their IK targets and
+    its head turns toward the empty Look as the animation plays, and when the page's code or the panel moves a target,
+    the rig follows.
+
+    ![The Rigged Character's animation, then its right hand's IK target and the empty moved by the page's code](../media/features/import-export/character-live.gif)
 
 13. **Use it in a game.** Set Scope, at the top of the settings, to Selected Objects: the package holds the selected
     objects and what they need (the parents that place them, their meshes, materials, images, skeletons and

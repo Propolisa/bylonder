@@ -15,6 +15,7 @@ export const EVALUATOR_FILES = {
   driver: { runtime: [...declared('driver-evaluator'), ...['driver', 'expression', 'fcurve', 'float32', 'rotation-reading'].flatMap((n) => declared(`drivers/${n}`))] },
   fcurve: { runtime: [...declared('fcurve-evaluator'), ...declared('drivers/fcurve')] },
   constraints: { runtime: declared('constraints-evaluator') },
+  pose: { runtime: declared('pose-constraints', 'constraints-evaluator') },
   modifiers: { runtime: declared('modifiers-evaluator'), folder: 'bylonder-modifiers',
     files: { 'modifiers-worker.js': 'io_scene_babylon/polyfill/modifiers-worker.bundle.js', 'modifiers.wasm': 'modifiers/modifiers.wasm' } },
   'geometry-nodes': { runtime: [...declared('geometry-nodes-evaluator'), ...['index', 'evaluator', 'geometry', 'convert', 'kernels'].flatMap((n) => declared(`geometry-nodes/${n}`))],

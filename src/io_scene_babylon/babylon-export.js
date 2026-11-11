@@ -456,7 +456,7 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
     animationGroups = [...(timeline ? bakeAnimations(world, sampled, content, liveIds, mapped.animations, evaluated.transforms, keys, sampling, curves, gaps) : []),
       ...clips.map((clip) => clipGroup(clip, clip.animations.map(({ animation, target }) => ({ animation: animation.serialize(), targetId: target instanceof RectAreaLight ? rigId(target.id) : target.id }))))];
     activeCameraID = camera?.id;
-    constraints = [...stacks.values()].map((stack) => stack.entity());
+    constraints = [...[...stacks.values()].map((stack) => stack.entity()), ...(curves ? mapped.constraints ?? [] : [])];
   } finally {
     restores.forEach((restore) => restore());
   }

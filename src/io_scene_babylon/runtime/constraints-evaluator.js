@@ -35,7 +35,7 @@ const fromRows = (axes, at) => Matrix.FromArray([...axes.flatMap((a) => [a.x, a.
  * world's (or the target's) Z as that allows.
  * @param {Matrix} owner @param {Matrix} target @param {Constraint} c
  */
-function trackTo(owner, target, c) {
+export function trackTo(owner, target, c) {
   const at = row(owner, 3), scale = [0, 1, 2].map((i) => row(owner, i).length());
   const track = AXES.indexOf(/** @type {string} */ (c.track_axis).slice(-1)), up = AXES.indexOf(/** @type {string} */ (c.up_axis).slice(-1));
   let toward = row(target, 3).subtract(at);
