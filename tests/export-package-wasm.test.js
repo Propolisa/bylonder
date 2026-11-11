@@ -83,6 +83,11 @@ assert.deepEqual(shipped(webgpu), webgpuOverrides, 'a WebGPU package ships the W
 // chosen, and each control carries what Blender's UI shows of it; with Control Panel off the package ships none of it.
 assert.match(files['scene.js'], /controlPanel\(blend, \{"tools":"CDN","navigation":"FIXED","offer":\["FIXED","ORBIT","FLY","WALK","JOYSTICKS"\], root: ROOT \}\)/);
 assert.ok('bylonder/control-panel-ui.js' in packageFiles(files), 'the panel ships');
+assert.ok(!Object.keys(packageFiles(files)).some((path) => path.startsWith('bylonder-dev-tools/')), 'Editors from the CDN: none in the package');
+const offlineEditors = Object.keys(packageFiles(await exportModule(world, { devTools: 'PACKAGE' })));
+for (const editor of ['gui/babylon.gui.min.js', 'inspector/babylon.inspector.bundle.js', 'nodeEditor/babylon.nodeEditor.js', 'nodeRenderGraphEditor/babylon.nodeRenderGraphEditor.js', 'LICENSE.md']) {
+  assert.ok(offlineEditors.includes(`bylonder-dev-tools/${editor}`), `Editors In the Package: ${editor} ships, Babylon's GUI too, which the Inspector needs`);
+}
 const { name, blender_default, subtype, unit } = JSON.parse(files['scene.ir.json']).properties['objects["Flywheel"].location[0]'];
 assert.deepEqual({ name, blender_default, subtype, unit }, { name: 'Location', blender_default: 0, subtype: 'TRANSLATION', unit: 'LENGTH' }, "a control's UI name and Blender's default");
 const panelless = await exportModule(world, { controlPanel: false, navigationModes: { WALK: false } });

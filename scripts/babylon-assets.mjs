@@ -3,8 +3,13 @@
 // backend (src/render/gpu-engine.js), from Babylon's CDN at the installed @babylonjs/core version, and its area lights'
 // LTC table (Lights/LTC/ltcTextureTool.js), from its assets site; neither is in an npm package, so each is pinned by
 // sha256; the build runs this. Files already in place with the pinned hashes are kept (CI caches the folders).
+// Also Babylon's editors for an exported page's control panel (io_scene_babylon/runtime/dev-tools.js), which a package
+// made with Editors In the Package ships: their bundles from the npm packages, and Babylon's GUI, which npm has only as
+// modules, bundled here as Babylon's CDN has it (reading Babylon from the global BABYLON).
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { build } from 'esbuild';
+import { DEV_TOOLS } from '../src/io_scene_babylon/runtime/dev-tools.js';
 import { createRequire } from 'node:module';
 import { dirname } from 'node:path';
 
@@ -44,4 +49,25 @@ for (const [path, [url, hash]] of Object.entries(FILES)) {
   mkdirSync(dirname(target), { recursive: true });
   writeFileSync(target, bytes);
   console.log(`${target}: Babylon ${version}`);
+}
+
+const EDITORS = { inspector: '@babylonjs/inspector/dist/babylon.inspector.bundle.js', nodeEditor: '@babylonjs/node-editor/dist/babylon.nodeEditor.js',
+  nodeRenderGraphEditor: '@babylonjs/node-render-graph-editor/dist/babylon.nodeRenderGraphEditor.js' };
+const require = createRequire(import.meta.url), editor = (tool) => `public/bylonder-dev-tools/${DEV_TOOLS[tool]}`;
+for (const [tool, from] of Object.entries(EDITORS)) {
+  mkdirSync(dirname(editor(tool)), { recursive: true });
+  for (const notice of ['', '.LICENSE.txt']) copyFileSync(require.resolve(from + notice), editor(tool) + notice);
+}
+copyFileSync(require.resolve('@babylonjs/core/license.md'), 'public/bylonder-dev-tools/LICENSE.md');
+// Babylon's core as the page has it, from the global the editors read (tslib's helpers are bundled).
+const babylonGlobal = { name: 'babylon-global', setup(esbuild) {
+  esbuild.onResolve({ filter: /^@babylonjs\/core\// }, ({ path }) => (path.includes('tslib') ? undefined : { path, namespace: 'babylon-global' }));
+  esbuild.onLoad({ filter: /.*/, namespace: 'babylon-global' }, () => ({ contents: 'module.exports = globalThis.BABYLON;' }));
+} };
+const gui = editor('gui'), guiVersion = `/* Babylon.js GUI ${version} */`;
+if (!existsSync(gui) || !readFileSync(gui, 'utf8').startsWith(guiVersion)) {
+  mkdirSync(dirname(gui), { recursive: true });
+  await build({ stdin: { contents: "import * as GUI from '@babylonjs/gui/index.js'; globalThis.BABYLON.GUI = GUI;", resolveDir: process.cwd() }, bundle: true,
+    minify: true, format: 'iife', banner: { js: guiVersion }, outfile: gui, plugins: [babylonGlobal], logLevel: 'error' });
+  console.log(`${gui}: Babylon ${version}`);
 }

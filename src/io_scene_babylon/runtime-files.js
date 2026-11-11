@@ -1,5 +1,6 @@
 // The page runtime's files (runtime/), which every JavaScript package carries in bylonder/.
 import { deepImports } from './babylon-modules.js';
+import { DEV_TOOLS } from './runtime/dev-tools.js';
 
 const declared = (...names) => names.flatMap((name) => [`${name}.js`, `${name}.d.ts`]);
 export const RUNTIME_FILES = [...declared('blend-scene', 'collections', 'buffers', 'world', 'scheduler', 'ir', 'units', 'mesh', 'ortho-scale', 'zod'), 'ir.schema.json', 'implementations.json', 'LICENSE.md'];
@@ -85,7 +86,11 @@ export const BABYLON_ASSETS = 'babylon-assets', AREA_LIGHTS_LTC = `${BABYLON_ASS
 // Files the app serves from public/ (scripts/babylon-assets.mjs) that a package ships where scene.js names their
 // folder: [package path, the app's path].
 const APP_FILES = [...['glslang.js', 'glslang.wasm', 'twgsl.js', 'twgsl.wasm'].map((name) => [`${COMPILER_FOLDER}/${name}`, `webgpu/${name}`]), [AREA_LIGHTS_LTC, AREA_LIGHTS_LTC]];
-export const appFiles = (files) => APP_FILES.filter(([path]) => String(files['scene.js']).includes(path.slice(0, path.lastIndexOf('/') + 1)));
+// Babylon's editors with their notices, for a page whose control panel loads them from the package (Editors: In the Package).
+const DEV_TOOL_FILES = [...Object.values(DEV_TOOLS).flatMap((path) => (path.startsWith('gui/') ? [path] : [path, `${path}.LICENSE.txt`])), 'LICENSE.md']
+  .map((path) => [`bylonder-dev-tools/${path}`, `bylonder-dev-tools/${path}`]);
+export const appFiles = (files) => [...APP_FILES.filter(([path]) => String(files['scene.js']).includes(path.slice(0, path.lastIndexOf('/') + 1))),
+  ...(String(files['scene.js']).includes('"tools":"PACKAGE"') ? DEV_TOOL_FILES : [])];
 // The blocks library and Bylonder's extensions of Babylon, by package path: runtime/ files a package ships beside its
 // scene.js only when it imports them.
 export const BLOCK_FILES = { 'bylonder-blocks.js': 'blocks.js', 'bylonder-view-transform.js': 'view-transform.js', 'bylonder-area-light.js': 'area-light.js' };

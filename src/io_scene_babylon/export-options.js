@@ -13,7 +13,7 @@ export const TARGETS = [
 // Where the control panel's links load Babylon's Inspector and node editors from: [identifier, name, description].
 export const DEV_TOOLS = [
   ['CDN', "Babylon's CDN", "The editors load from Babylon's CDN when a link is followed; the page itself stays offline"],
-  ['PACKAGE', 'In the Package', "The package ships Babylon's editors in bylonder-dev-tools/ (about 9 MB), so they open offline"],
+  ['PACKAGE', 'In the Package', "The package ships Babylon's editors in bylonder-dev-tools/ (about 7 MB), so they open offline"],
 ];
 
 // How the viewer moves the view of a package's page (runtime/control-panel-camera.js): [identifier, name, description].

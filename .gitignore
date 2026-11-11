@@ -12,6 +12,7 @@ public/app-source.zip
 # Fetched by scripts/babylon-assets.mjs during build and dev
 public/webgpu/
 public/babylon-assets/
+public/bylonder-dev-tools/
 
 # Local-only Sites hosting config and secrets
 .openai/*.local.*
