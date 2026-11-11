@@ -27,7 +27,8 @@ function fallbacks(view, entry, ob, key) {
   const out = [];
   if (!key.use_relative) out.push(issue(FALLBACK, keyPath(key, 'use_relative'), `${key.name}: absolute shape keys`));
   if (!view.drawsGeometry(entry)) out.push(issue(FALLBACK, `bpy.data.objects["${ob.name}"].data`, `${ob.name}: Babylon's own geometry`));
-  const shown = [...ob.modifiers].find((m) => m.show_viewport);
+  // Babylon skins after it morphs, so an Armature modifier its skeleton skins (armature.js) may follow the keys.
+  const shown = [...ob.modifiers].find((m) => m.show_viewport && !(m.type === 'ARMATURE' && entry.node.skeleton));
   if (shown) out.push(issue(FALLBACK, `bpy.data.objects["${ob.name}"].modifiers["${shown.name}"].show_viewport`, `${ob.name}: ${shown.name} after the shape keys`));
   if (modifierStack(entry.node).some((m) => m.showViewport)) out.push(issue(FALLBACK, `bpy.data.objects["${ob.name}"].modifiers`, `${ob.name}: Bylonder's modifiers after the shape keys`));
   const active = ob.active_shape_key;
@@ -99,7 +100,8 @@ function morph(view, entry, ob, key) {
   const mesh = view.blender.mesh(entry.ob);
   const basis = blockData(key.reference_key, mesh.verts_num), positions = mesh.vert_positions;
   for (let i = 0; i < basis.length; i++) if (basis[i] !== positions[i]) return null;
-  view.drawMesh(entry, mesh);
+  // A skinned mesh draws the Mesh Main holds already (armature.js), its skin with it.
+  if (!entry.node.skeleton) view.drawMesh(entry, mesh);
   const manager = new MorphTargetManager(view.scene), targets = targetsOf(ob, key, mesh);
   for (const target of targets) {
     const made = new MorphTarget(target.name, 0, view.scene);
@@ -129,7 +131,7 @@ function unmorph(view, entry, state) {
   state.manager.dispose();
   if (!entry) return;
   entry.node.morphTargetManager = null;
-  view.drawGeometry(entry);
+  if (!entry.node.skeleton) view.drawGeometry(entry);
 }
 
 // The view's morphed objects by Object address: { manager, targets, signature, count, bounds }.

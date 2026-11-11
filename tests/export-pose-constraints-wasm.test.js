@@ -1,11 +1,14 @@
 // The JavaScript export's bone constraints against Blender's: the Rigged Character's rig (IK arms and legs with pole
 // targets, a head that Damped Track and Limit Rotation turn toward an empty, hands that copy their IK targets'
 // rotation), exported and loaded, takes the pose Main evaluates at frames of its animation with the constraints run in
-// the page, not sampled; moving an IK target or its pole through the page's controls moves the rig.
+// the page, not sampled; moving an IK target or its pole through the page's controls moves the rig. Its controls (an
+// IK/FK switch and a Breathe slider, custom properties that drivers read) and its elbow's corrective shape key, driven by
+// the posed arm's angle, morph and pose the skinned body as Main does.
 import assert from 'node:assert/strict';
 import { Matrix, NullEngine } from '@babylonjs/core';
 import { babylonMatrix } from '../src/blenkernel/main-view.js';
 import { blendData } from '../src/python/bpy_rna.js';
+import { setCustomProperty } from '../src/blenkernel/animation/anim-blender.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
 import { openExample } from './open-example.js';
 import { writePackage } from './export-package.js';
@@ -57,6 +60,30 @@ for (const frame of FRAMES) {
 }
 console.log(`The rig takes Main's pose at ${FRAMES.length} frames, its IK, Damped Track, Limit Rotation and Copy Rotation run in the page`);
 
+// The rig's controls: the Breathe slider and the Elbow.L corrective, driven by a custom property and by the angle of
+// the posed arm, morph the skinned body as Main's drivers set its keys; the IK/FK switch blends the left arm.
+const keys = blendData().shape_keys.get(body.morphTargetManager ? 'Key' : '');
+const influences = () => Object.fromEntries(['Breathe', 'Elbow.L'].map((name) => [name, body.morphTargetManager.getTargetByName(name).influence]));
+for (const path of ['objects["Rig"]["ik_fk.L"]', 'objects["Rig"]["breathe"]', 'shape_keys["Key"].key_blocks["Elbow.L"].value']) assert.ok(blend.controls().some((c) => c.path === path), `${path} is a control`);
+// Each key's normals whole: Blender's, read past the RNA buffer's first 256 floats.
+for (const name of ['Breathe', 'Elbow.L']) assert.ok(body.morphTargetManager.getTargetByName(name).getNormals().every(Number.isFinite), `${name}'s normals`);
+for (const frame of [1, 18, 36, 50]) {
+  await show(frame);
+  sync.frameChanged(frame);
+  for (const [name, value] of Object.entries(influences())) assert.ok(Math.abs(value - keys.key_blocks.get(name).value) < 2e-3, `frame ${frame}: ${name} ${value}, Main ${keys.key_blocks.get(name).value}`);
+}
+for (const [path, value] of [['objects["Rig"]["ik_fk.L"]', 0.4], ['objects["Rig"]["breathe"]', 0.7]]) blend.set(path, value);
+await show(30);
+const rigPointer = sync.objectOf(world.objects.find((n) => n.name === 'Rig'));
+setCustomProperty(rigPointer, 'ik_fk.L', 0.4);
+setCustomProperty(rigPointer, 'breathe', 0.7);
+// A property set from code is an edit: Main evaluates its drivers again once the object is tagged.
+sync.blender.tag(rigPointer, 2);
+sync.frameChanged(30);
+compare('left arm at 0.4 IK');
+assert.ok(Math.abs(influences().Breathe - keys.key_blocks.get('Breathe').value) < 1e-6 && influences().Breathe > 0.69, 'the Breathe slider sets its key');
+assert.ok(Math.abs(influences()['Elbow.L'] - keys.key_blocks.get('Elbow.L').value) < 2e-3, 'the corrective follows the blended arm');
+console.log('Export rig controls: the IK/FK switch, the Breathe slider and the elbow corrective run in the page as Main evaluates them');
 // The right hand's IK target and its pole moved through the page's controls, and in Main.
 const handTarget = rig.pose.bones.get('hand_ik.R'), pole = rig.pose.bones.get('elbow_pole.R');
 const moves = [['objects["Rig"].pose.bones["hand_ik.R"].location[0]', 0.3, (v) => { handTarget.location[0] = v; }],
@@ -72,5 +99,6 @@ sync.frameChanged(frame);
 compare('moved targets');
 assert.ok(!Matrix.FromArray(before).equalsWithEpsilon(drawn().get('forearm.R'), 1e-3), 'the arm moved');
 console.log('Export pose constraints: moving an IK target and its pole in the page moves the rig as Main poses it');
+
 blend.dispose();
 written.remove();

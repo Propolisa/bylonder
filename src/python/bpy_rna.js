@@ -185,6 +185,13 @@ function resolvePath(ptr, path) {
   const value = propertyGet(owner, prop);
   return index !== 0xffffffff && value?.__getitem__ ? value.__getitem__(index) : value;
 }
+// The RNA type of a struct's custom property (`FLOAT` also when it holds a whole number), or null.
+export function customPropertyType(struct, key) {
+  const ptr = pointerOf(struct);
+  if (!ptr || !withText([quoted(key)], (p) => x.bpy_path_resolve(...ptr, p))) return null;
+  const owner = outStruct(), [, , , prop] = out(), { kind } = propertyInfo(owner, prop);
+  return kind === FLOAT ? 'FLOAT' : kind === INT ? 'INT' : kind === BOOLEAN ? 'BOOLEAN' : null;
+}
 const idpropKeys = (ptr) => JSON.parse(cString(x.bpy_idprop_keys(...ptr)));
 const quoted = (key) => `["${String(key).replace(/["\\]/g, '\\$&')}"]`;
 
@@ -472,7 +479,9 @@ function getParameter(parms, index, [, kind, flags, , length]) {
   switch (kind) {
     case BOOLEAN: case INT: case FLOAT: {
       ensureNumbers(256);
-      const n = x.bpy_param_numbers_get(parms, index, numbersPointer, numbersCapacity);
+      let n = x.bpy_param_numbers_get(parms, index, numbersPointer, numbersCapacity);
+      // A dynamic array longer than the buffer (a mesh's normals) is read again whole.
+      if (n > numbersCapacity) { ensureNumbers(n); n = x.bpy_param_numbers_get(parms, index, numbersPointer, numbersCapacity); }
       const values = Array.from(numbers().subarray(0, n), kind === BOOLEAN ? Boolean : Number);
       return length || flags & 8 ? values : values[0];
     }

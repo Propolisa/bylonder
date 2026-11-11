@@ -2,6 +2,7 @@
 // a solver for each, and kept only where the page's pose is the one Main evaluated at every frame the export samples.
 import { posedBone } from './runtime/blend-scene.js';
 import { solvePose } from './runtime/pose-constraints.js';
+import { key } from './controls-export.js';
 
 const AXES = ['x', 'y', 'z'];
 // The spaces the page converts between, for a bone and for an object target.
@@ -47,7 +48,7 @@ export function poseStacks(arm, nodeOf) {
       if (!settings || target === undefined || !spaces || (c.type === 'IK' && !settings.chain)) return null;
       const pole = c.type === 'IK' && targetOf(arm, c.pole_target, c.pole_subtarget, nodeOf);
       if (pole === undefined) return null;
-      list.push({ type: c.type, influence: c.influence, owner_space: c.owner_space, target_space: c.target_space, ...settings, ...(target && { target }), ...(pole && { pole }) });
+      list.push({ name: c.name, type: c.type, influence: c.influence, owner_space: c.owner_space, target_space: c.target_space, ...settings, ...(target && { target }), ...(pole && { pole }) });
     }
     if (list.length) stacks[pose.name] = list;
   }
@@ -56,6 +57,11 @@ export function poseStacks(arm, nodeOf) {
 
 // A pose bone's own matrix (its location, rotation and scale after its rest), as blend-scene.js poses a Babylon Bone.
 export const ownMatrix = (pose, bone) => posedBone({ mode: pose.rotation_mode }, (name) => [...pose[name]], bone.getRestMatrix());
+
+// The constraints with their influences read from their controls (controls-export.js poseControls), so that a driver or
+// the page sets them.
+const influenced = (arm, stacks) => Object.fromEntries(Object.entries(stacks).map(([bone, list]) => [bone, list.map((c) => ({ ...c,
+  influence: { property: `objects${key(arm.name)}.pose.bones${key(bone)}.constraints${key(c.name)}.influence` } }))]));
 
 const close = (a, b) => a.asArray().every((v, i) => Math.abs(v - b.asArray()[i]) <= TOLERANCE);
 
@@ -88,7 +94,7 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
       checked++;
     },
     entity: () => (checked && held ? {
-      skeleton: skeleton.id, mesh: mesh.id, space: skeleton.space.asArray(), constraints: stacks,
+      skeleton: skeleton.id, mesh: mesh.id, space: skeleton.space.asArray(), constraints: influenced(arm, stacks),
       bones: Object.fromEntries(shape.map(({ name, length, mode }, i) => [name, { length, mode, ...(moved.has(bones[i]) && { own: ownMatrix(poses[i], bones[i]).asArray() }) }])),
     } : null),
   };

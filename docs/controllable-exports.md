@@ -216,7 +216,9 @@ its expression, its variables (a single property as the control it reads; a tran
 difference as the objects' transform controls and their static parts, parents included) and its own F-Curve. The
 `driver` evaluator (`runtime/driver-evaluator.js`) runs it with the clean-room units in `runtime/drivers/`, copied
 unchanged from the clean room with their proofs in `docs/clean-room/`. A driver needing Python, an F-Curve modifier
-other than Cycles, an F-Curve the units miss where the export samples it against Blender's, a bone target or an input that is no control stays baked.
+other than Cycles, an F-Curve the units miss where the export samples it against Blender's, or an input that is no control stays baked. A
+driver reading a bone (a corrective shape key's rotational difference or a bone's transform channel) runs with the armature's
+pose in `runtime/pose-constraints.js`, each frame after the bone constraints, where one skeleton skins one mesh for that armature.
 
 ### Evaluators
 

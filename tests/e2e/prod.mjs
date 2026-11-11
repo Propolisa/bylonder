@@ -222,11 +222,13 @@ try {
             ...[...new Set(names.filter((n, i) => names.indexOf(n) !== i))].map((n) => `${n}: two objects`)];
         });
         assert.deepEqual(problems, [], `${example}: objects`);
-        // The rig on Babylon (mapped): Babylon skins the body (docs/runtimes.md).
+        // The rig and the body's shape keys on Babylon (mapped): Babylon morphs and skins the body (docs/runtimes.md).
         if (example === "Rigged Character") {
           const skeleton = await opened.bylonder((b) => {
             const node = (name) => b.world.objects.find((n) => n.name === name);
             b.modules.bpyRna.idStruct(b.world.mainSync.objectOf(node("Rig"))).bylonder.runtime = "MAPPED";
+            // Its body's shape keys too, which Babylon morphs before it skins.
+            b.modules.bpyRna.idStruct(b.world.mainSync.objectOf(node("Body"))).data.shape_keys.bylonder.runtime = "MAPPED";
             b.world.mainSync.view();
             return node("Body").skeleton?.name ?? null;
           });

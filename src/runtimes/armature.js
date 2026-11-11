@@ -38,7 +38,8 @@ function armatureModifiers(ob, arm) {
 }
 
 // What of a mesh's deform Babylon cannot evaluate, so that the mesh deforms as Blender. Babylon skins the object's Mesh
-// as Main holds it: the Armature modifier has to be the only one, on a Mesh without shape keys.
+// as Main holds it, after its shape keys' morph targets (shape-keys.js), as Blender deforms after the keys: the Armature
+// modifier has to be the only one.
 function meshFallbacks(ob, arm) {
   const { stack, mine } = armatureModifiers(ob, arm), [modifier] = mine, at = stack.indexOf(modifier);
   const path = (name) => `modifiers["${modifier.name}"].${name}`, out = [];
@@ -46,7 +47,6 @@ function meshFallbacks(ob, arm) {
   if (at > 0) out.push(issue(FALLBACK, ob, path('show_viewport'), `Armature after ${stack[0].name}`));
   if (stack.length > at + 1) out.push(issue(FALLBACK, ob, path('show_viewport'), `${stack[at + 1].name} after Armature`));
   if (modifier.use_multi_modifier) out.push(issue(FALLBACK, ob, path('use_multi_modifier'), 'Multi Modifier'));
-  if (ob.data.shape_keys) out.push(issue(FALLBACK, ob, 'data.shape_keys', 'shape keys before Armature'));
   return out;
 }
 
@@ -275,7 +275,7 @@ function evaluate(view) {
     state.mapping.update({
       objects: meshes, meshOf, influencers: settingsOf(arm)?.influencers,
       changed: (ob) => view.updates.has(byOb.get(address(ob)).data.ptr),
-      fallbacks: (ob) => viewFallbacks(view, byOb.get(address(ob)), ob),
+      fallbacks: (ob) => [...viewFallbacks(view, byOb.get(address(ob)), ob), ...blenderShapeKeys(ob)],
     });
     drawSkins(view, state, meshOf);
   }
@@ -297,6 +297,10 @@ function viewFallbacks(view, entry, ob) {
   if (modifierStack(entry.node).some((m) => m.showViewport)) return [issue(FALLBACK, ob, 'modifiers', "Bylonder's modifiers after Armature")];
   return [];
 }
+
+// A mesh whose shape keys Blender blends deforms as Blender in the view: Babylon skins the Mesh before its keys. An
+// export blends every mesh's keys on Babylon (shape-keys.js).
+const blenderShapeKeys = (ob) => (ob.data.shape_keys && runtimeOf(ob.data.shape_keys) !== 'MAPPED' ? [issue(FALLBACK, ob, 'data.shape_keys', 'shape keys on Blender')] : []);
 
 // The issues of an armature object's deform on Babylon: the view's mapping's, else a mapping made for the question.
 function issues(arm) {

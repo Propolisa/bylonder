@@ -4,11 +4,14 @@
 // rig follows its IK targets, poles and look-at targets as the animation, the control panel or a game's code moves
 // them. Written from Blender's manual and the poses Blender evaluates (the export keeps a stack only where this gives
 // Main's pose at every frame it samples), not from Blender's code. Each constraint type runs on the unit registered for
-// `constraint:<TYPE>` (units.js), else on its own solver here. Not yet audited as clean-room code; a clean-room
+// `constraint:<TYPE>` (units.js), else on its own solver here. A driver that reads a bone (a corrective shape key's) runs
+// here too, after the pose is solved, so it reads the pose the frame draws. Not yet audited as clean-room code; a clean-room
 // constraints plugin is to replace it.
 import { Matrix, Quaternion, Vector3 } from '@babylonjs/core';
 import { unitFor } from './units.js';
 import { swapped, trackTo } from './constraints-evaluator.js';
+import { evaluateDriver } from './drivers/driver.js';
+import { evaluateFCurve, prepareFCurve } from './drivers/fcurve.js';
 
 /**
  * Where a constraint reads its target: a bone of the armature (at `head_tail` along it), or an object's node.
@@ -259,20 +262,41 @@ export function solvePose({ bones, locals, mesh, space, stacks, nodeWorld }) {
     const goal = targetWorld(ik.target), pole = targetWorld(ik.pole);
     if (!goal) return;
     const tip = world[chain.at(-1) ?? 0], tail = head(tip).add(row(tip, 1).normalize().scale(bones[chain.at(-1) ?? 0].length));
-    const aim = Vector3.Lerp(tail, head(goal), ik.influence);
+    const aim = head(goal);
     const unit = unitFor('constraint:IK'), matrices = chain.map((i) => world[i]), lengths = chain.map((i) => bones[i].length);
     const reached = unit
       ? /** @type {number[][]} */ (/** @type {any} */ (unit.run({ chain: matrices.map((m) => m.asArray()), lengths, goal: aim.asArray(), pole: pole && head(pole).asArray(), settings: ik }, { frame: 0 })).chain).map((m) => Matrix.FromArray(m))
       : reach(matrices, lengths, aim, pole && head(pole), ik.pole_angle ?? 0);
-    chain.forEach((i, k) => { world[i] = reached[k]; moved.add(i); });
+    // Below full influence each bone turns that part of the way from its own pose to the solved one, about its parent.
+    const turnedBy = (/** @type {number} */ k) => (k ? reached[k - 1] : parentWorld(chain[0])), ownBy = (/** @type {number} */ k) => (k ? matrices[k - 1] : parentWorld(chain[0]));
+    const blended = ik.influence < 1 ? reached.map((m, k) => mixed(matrices[k].multiply(inverse(ownBy(k))), m.multiply(inverse(turnedBy(k))), ik.influence)) : null;
+    chain.forEach((i, k) => {
+      world[i] = blended ? blended[k].multiply(k ? world[chain[k - 1]] : parentWorld(i)) : reached[k];
+      moved.add(i);
+    });
   }
 
   bones.forEach((_, i) => place(i));
   return new Map([...moved].map((i) => [i, swapped(world[i].multiply(inverse(parentWorld(i))))]));
 }
 
-/** Each skeleton's live pose, once per scene. */
+/** Each scene's live poses, and the drivers that read them after. */
 const scenes = new WeakMap();
+const IDENTITY = '';
+
+/**
+ * The page's list of poses and bone-reading drivers, run before each frame draws: the poses first.
+ * @param {import('@babylonjs/core').Scene} scene
+ * @returns {{ poses: any[], drivers: any[] }}
+ */
+function listOf(scene) {
+  if (!scenes.has(scene)) {
+    const list = { poses: /** @type {any[]} */ ([]), drivers: /** @type {any[]} */ ([]) };
+    scenes.set(scene, list);
+    scene.onBeforeRenderObservable.add(() => { list.poses.forEach(apply); list.drivers.forEach(drive); });
+  }
+  return scenes.get(scene);
+}
 
 /**
  * Runs an armature's bone constraints before each frame draws, from each bone's own pose: what the page or its
@@ -282,12 +306,7 @@ const scenes = new WeakMap();
  * @param {import('@babylonjs/core').Scene} scene
  */
 function attach(inputs, entity, scene) {
-  if (!scenes.has(scene)) {
-    const list = /** @type {any[]} */ ([]);
-    scenes.set(scene, list);
-    scene.onBeforeRenderObservable.add(() => list.forEach(apply));
-  }
-  const list = scenes.get(scene), found = list.find((/** @type {any} */ e) => e.entity === entity);
+  const list = listOf(scene).poses, found = list.find((/** @type {any} */ e) => e.entity === entity);
   if (found) { found.stacks = inputs.constraints; return {}; }
   const skeleton = scene.getSkeletonById(inputs.skeleton), mesh = scene.getMeshById(inputs.mesh);
   if (!skeleton || !mesh) return {};
@@ -301,6 +320,50 @@ function attach(inputs, entity, scene) {
   }
   list.push(entry);
   return {};
+}
+
+/**
+ * Keeps a driver that reads bones to run after the poses, each frame: its `objects` name a bone (`bone`, `skeleton`,
+ * `mesh`, `space`) where it reads one; it writes the property of its `value` output.
+ * @param {Record<string, any>} inputs @param {any} entity @param {any} page
+ */
+function attachDriver(inputs, entity, page) {
+  const list = listOf(page.scene).drivers, found = list.find((/** @type {any} */ e) => e.entity === entity);
+  if (found) found.inputs = inputs;
+  else list.push({ entity, inputs, page, curve: inputs.curve && prepareFCurve(inputs.curve) });
+  return {};
+}
+
+/**
+ * A bone as the driver units read an object: its location, rotation and scale in a space (Blender's axes), under an
+ * identity parent so that every space reads them as they are.
+ * @param {any} skeleton @param {any} mesh @param {string} name @param {string} space @param {Map<number, Matrix> | undefined} own
+ */
+function boneObject(skeleton, mesh, name, space, own) {
+  const bones = skeleton.bones, i = bones.findIndex((/** @type {any} */ b) => b.name === name);
+  if (i < 0) return { parent: IDENTITY };
+  /** @type {(bone: any) => Matrix} */
+  const world = (bone) => (bone.getParent() ? bone._matrix.multiply(world(bone.getParent())) : bone._matrix.multiply(mesh.computeWorldMatrix(true)));
+  const local = space === 'LOCAL_SPACE' ? own?.get(i) ?? bones[i]._matrix : bones[i]._matrix;
+  const m = swapped(space === 'WORLD_SPACE' ? world(bones[i]) : local.multiply(inverse(bones[i].getRestMatrix())));
+  const scale = new Vector3(), turn = new Quaternion(), at = new Vector3();
+  m.decompose(scale, turn, at);
+  return { location: at.asArray(), rotation_mode: 'QUATERNION', rotation_quaternion: [turn.w, turn.x, turn.y, turn.z], scale: scale.asArray(), parent: IDENTITY };
+}
+
+/** Runs a bone-reading driver on the pose as solved and writes its value. @param {any} entry */
+function drive(entry) {
+  const { inputs, entity, page } = entry, poses = scenes.get(page.scene)?.poses ?? [];
+  const objects = Object.fromEntries(Object.entries(inputs.objects ?? {}).map(([name, o]) => {
+    if (!o?.bone) return [name, o];
+    const skeleton = page.scene.getSkeletonById(o.skeleton), mesh = page.scene.getMeshById(o.mesh);
+    if (!skeleton || !mesh) return [name, { parent: IDENTITY }];
+    return [name, boneObject(skeleton, mesh, o.bone, o.space, poses.find((/** @type {any} */ p) => p.skeleton === skeleton)?.own)];
+  }));
+  objects[IDENTITY] = {};
+  const { value, valid } = evaluateDriver(inputs.driver, { frame: page.controls.frame(entity.id), objects });
+  const target = entity.outputs?.value?.property;
+  if (valid && target) page.controls.write(target, entry.curve ? evaluateFCurve(entry.curve, value) : value);
 }
 
 /**
@@ -323,7 +386,7 @@ function apply(entry) {
   }
 }
 
-/** @param {{ scene: import('@babylonjs/core').Scene }} page */
-export function load({ scene }) {
-  return { run: (/** @type {any} */ inputs, /** @type {any} */ context, /** @type {object} */ entity) => attach(inputs, entity, scene) };
+/** @param {{ scene: import('@babylonjs/core').Scene, controls: { frame(id?: string): number, write(path: string, value: any): void } }} page */
+export function load(page) {
+  return { run: (/** @type {any} */ inputs, /** @type {any} */ context, /** @type {any} */ entity) => (entity.type.startsWith('driver:') ? attachDriver(inputs, entity, page) : attach(inputs, entity, page.scene)) };
 }

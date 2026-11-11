@@ -11,5 +11,8 @@ A figure skinned to a humanoid armature, made in Blender 5.2 by `rigged-characte
   the head turns toward the empty Look with Damped Track, within a Limit Rotation in local space.
 - **Animation.** Over 72 frames the left hand waves, the hips crouch with the feet planted, and the head follows Look.
   File > Export > JavaScript runs the constraints in the page, so moving a target there moves the rig.
+- **Rig controls.** The rig's custom properties `ik_fk.L` (the left arm's IK constraint influence, 0 FK, 1 IK) and
+  `breathe` (the Breathe shape key) are drivers' inputs; the Elbow.L shape key keeps the left elbow's volume, driven by
+  the angle between the upper arm and forearm.
 - **Posing.** Select Rig, switch to Pose Mode (the header's Mode menu, or Ctrl Tab), click a bone and press R or G.
   I inserts a keyframe; Alt R and Alt G clear the pose.

@@ -13,11 +13,15 @@ export function reach(chain: Matrix[], lengths: number[], goal: Vector3, pole: V
  * @returns {Map<number, Matrix>}
  */
 export function solvePose({ bones, locals, mesh, space, stacks, nodeWorld }: Pose): Map<number, Matrix>;
-/** @param {{ scene: import('@babylonjs/core').Scene }} page */
-export function load({ scene }: {
+/** @param {{ scene: import('@babylonjs/core').Scene, controls: { frame(id?: string): number, write(path: string, value: any): void } }} page */
+export function load(page: {
     scene: import("@babylonjs/core").Scene;
+    controls: {
+        frame(id?: string): number;
+        write(path: string, value: any): void;
+    };
 }): {
-    run: (inputs: any, context: any, entity: object) => {};
+    run: (inputs: any, context: any, entity: any) => {};
 };
 /**
  * A bone constraint as the export writes it, in Blender's terms. IK names its chain's bones, root first.

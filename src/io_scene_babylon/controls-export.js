@@ -5,7 +5,7 @@
 // a camera turned to look along Babylon's +Z), the factor is measured here on the exported objects, so the page
 // needs none of Bylonder's mapping code.
 import { Matrix, Quaternion } from '@babylonjs/core';
-import { blendData, idStruct, pointerStruct, structFind } from '../python/bpy_rna.js';
+import { blendData, customPropertyType, idStruct, pointerStruct, structFind } from '../python/bpy_rna.js';
 import { declaration } from '../nodes/blender/declarations.js';
 import { babylonRotation } from './runtime/blend-scene.js';
 import { babylonMatrix } from '../blenkernel/main-view.js';
@@ -23,7 +23,9 @@ export const knob = (path, value, meta = {}, bind) => ({ path, type: typeOf(valu
 function customProperties(id, base) {
   return [...(id.keys?.() ?? [])].filter((name) => !OWN.test(name)).flatMap((name) => {
     const value = id.get(name);
-    return ['number', 'boolean', 'string'].includes(typeof value) ? [knob(base + key(name), value, { suggested: true })] : [];
+    // A float holding a whole number is still a float, which an F-Curve animates.
+    const type = typeof value === 'number' && customPropertyType(id, name) === 'FLOAT' ? { type: 'FLOAT' } : {};
+    return ['number', 'boolean', 'string'].includes(typeof value) ? [knob(base + key(name), value, { suggested: true, ...type })] : [];
   });
 }
 
@@ -139,12 +141,24 @@ function worldControls(scene) {
 
 // The project's SDK controls (sdk.controls), as Main holds them: custom properties of the Scene.
 // An armature's pose bones, where one skeleton of the file draws it (armature.js): each bone's location, rotation and
-// scale pose its Babylon Bone (blend-scene.js posedBone); an Axis Angle rotation is not composed.
+// scale pose its Babylon Bone (blend-scene.js posedBone); an Axis Angle rotation is not composed. Its custom properties
+// and its constraints' influences, which the page's constraints and drivers read, too.
 function poseControls(ob, skeletons) {
   const drawn = skeletons.filter((s) => s.id === ob.name || s.id.startsWith(`${ob.name} `));
   if (drawn.length !== 1) return [];
-  return [...ob.pose.bones].flatMap((pose) => transformControls(`objects${key(ob.name)}.pose.bones${key(pose.name)}`, pose,
-    pose.rotation_mode !== 'AXIS_ANGLE' && { node: `${drawn[0].id} ${pose.name}`, transform: { mode: pose.rotation_mode } }));
+  return [...ob.pose.bones].flatMap((pose) => {
+    const base = `objects${key(ob.name)}.pose.bones${key(pose.name)}`;
+    return [...transformControls(base, pose, pose.rotation_mode !== 'AXIS_ANGLE' && { node: `${drawn[0].id} ${pose.name}`, transform: { mode: pose.rotation_mode } }),
+      ...customProperties(pose, base), ...[...pose.constraints].map((c) => knob(`${base}.constraints${key(c.name)}.influence`, c.influence, { type: 'FLOAT', subtype: 'FACTOR' }))];
+  });
+}
+
+// A mesh's shape keys, where the file morphs it (shape-keys.js): each key's value is its morph target's influence.
+function shapeKeyControls(node, ob, entry) {
+  const shapes = ob.data?.shape_keys;
+  if (!shapes || entry?.morphTargetManagerId === undefined) return [];
+  return [...shapes.key_blocks].filter((kb) => kb.name !== shapes.reference_key.name)
+    .map((kb) => knob(`shape_keys${key(shapes.name)}.key_blocks${key(kb.name)}.value`, kb.value, { type: 'FLOAT', subtype: 'FACTOR', suggested: true }, { node: node.id, morph: kb.name }));
 }
 
 function sdkControls(world, scene) {
@@ -162,6 +176,7 @@ export function exportControls(world, data) {
   if (!sync) return [];
   const { scene } = world, byUniqueId = new Map([...scene.meshes, ...scene.transformNodes, ...scene.lights, ...scene.cameras].map((n) => [n.uniqueId, n]));
   const nodes = [...data.meshes, ...data.transformNodes, ...data.lights, ...data.cameras].map((entry) => byUniqueId.get(entry.uniqueId)).filter(Boolean);
+  const entryOf = new Map(data.meshes.map((entry) => [entry.uniqueId, entry]));
   const mainScene = sceneOf(sync);
   const list = [];
   for (const node of nodes) {
@@ -172,6 +187,7 @@ export function exportControls(world, data) {
     if (ob.type === 'LIGHT') list.push(...lightControls(node, ob.data));
     if (ob.type === 'CAMERA') list.push(...cameraControls(node, ob.data));
     if (ob.type === 'ARMATURE') list.push(...poseControls(ob, data.skeletons ?? []));
+    if (ob.type === 'MESH') list.push(...shapeKeyControls(node, ob, entryOf.get(node.uniqueId)));
   }
   list.push(...data.materials.flatMap(nodeMaterialControls), ...data.materials.flatMap((entry) => principledControls(entry, scene, sync)));
   if (!data.materials.some((m) => m.name?.startsWith('__world '))) list.push(...worldControls(mainScene));

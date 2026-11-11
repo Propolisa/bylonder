@@ -56,7 +56,7 @@ export function liveTransform(sync, node) {
 // reproduce the samples (constraints, IK, NLA, drivers, F-modifiers but Cycles, another inheritance).
 export function livePose(arm, pose, bone, samples, frameStart) {
   const base = `pose.bones${key(pose.name)}`, mode = pose.rotation_mode, animation = arm.animation_data;
-  if (mode === 'AXIS_ANGLE' || animation?.nla_tracks.length || [...(animation?.drivers ?? [])].some((d) => d.data_path.startsWith(base))) return null;
+  if (mode === 'AXIS_ANGLE' || animation?.nla_tracks.length || [...(animation?.drivers ?? [])].some((d) => d.data_path.startsWith(base) && /^\.(location|rotation_\w+|scale)$/.test(d.data_path.slice(base.length)))) return null;
   const rotation = mode === 'QUATERNION' ? 'rotation_quaternion' : 'rotation_euler', parts = ['location', rotation, 'scale'];
   const own = actionFCurves(animation).filter((fc) => !fc.mute && parts.some((part) => fc.data_path === `${base}.${part}`));
   if (own.some((fc) => [...fc.modifiers].some((m) => m.type !== 'CYCLES'))) return null;

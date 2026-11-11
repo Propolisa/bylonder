@@ -72,6 +72,14 @@ const vector = (values) => values.map(number).join(', ');
 // Babylon's classes the scene's data names, which parse only once their modules have registered them: each customType
 // and className (BABYLON.PBRMaterial, a node material's blocks), each light's and camera's constructor, and the
 // textures Texture.Parse makes through another module.
+// The skeleton drawing each armature that skins one mesh, by the armature's name, and that mesh.
+function skeletonsOf(data) {
+  return Object.fromEntries((data.skeletons ?? []).flatMap((s) => {
+    const meshes = data.meshes.filter((m) => m.skeletonId === s.id);
+    return meshes.length === 1 ? [[s.name, { skeleton: s.id, mesh: meshes[0].id }]] : [];
+  }));
+}
+
 function parsedClasses(data) {
   const names = new Set([...data.lights.map((l) => `node:Light_Type_${l.type}`), ...data.cameras.map((c) => `node:${c.type}`)]);
   // Material.Parse reads a material without a customType as a StandardMaterial.
@@ -329,7 +337,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   const collected = world.mainSync && !asset ? exportCollections(sceneOf(world.mainSync)) : null;
   const controls = withUI([...exportControls(world, data), ...(collected?.controls ?? []), ...(compositorState === 'LIVE' ? composited?.knobs ?? [] : [])]);
   const timelineGroups = data.animationGroups.filter((group) => !isClip(group)), markers = world.mainSync ? [...sceneOf(world.mainSync).timeline_markers].map(({ name, frame }) => ({ name, frame })) : [];
-  const ir = exportIR(world, { controls, collections: collected, live, bin, animationGroups: timelineGroups, sampleRates: data.sampleRates, clips: irClips(data.clips), markers, curves: data.liveCurves, constraints: data.liveConstraints, states });
+  const ir = exportIR(world, { controls, collections: collected, live, bin, animationGroups: timelineGroups, sampleRates: data.sampleRates, clips: irClips(data.clips), markers, curves: data.liveCurves, constraints: data.liveConstraints, skeletons: skeletonsOf(data), states });
   const computed = { ...ir, entities: structuredClone(ir.entities) };
   stripEntities(ir, replace);
   const irJson = json(ir);

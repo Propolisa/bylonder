@@ -266,10 +266,11 @@ function constraintEntities(ids, constraints, time) {
 
 // The package's IR (docs/ir.md): `controls` (controls-export.js) as its properties, with what the `live` stacks and the
 // Geometry Nodes modifiers add; the carried IDs, their node trees, and the computed entities, with the F-Curves and the
-// objects' constraints the page runs (`curves`, `constraints`, live-curves.js); `collections`, the scene's and its
+// objects' constraints the page runs (`curves`, `constraints`, live-curves.js); `skeletons`, the skeleton and skinned
+// mesh of each armature by name (driver-export.js); `collections`, the scene's and its
 // collections (collections-export.js); `states`, the export's options that set
 // the states of its branches (export-options.js chosenState); `clips` and `markers`, the scene time's (runtime/ir.js TimeSchema).
-export function exportIR(world, { controls, collections = null, live, bin, animationGroups = [], sampleRates = {}, clips = {}, markers = [], curves = [], constraints = [], states = {} }) {
+export function exportIR(world, { controls, collections = null, live, bin, animationGroups = [], sampleRates = {}, clips = {}, markers = [], curves = [], constraints = [], skeletons = {}, states = {} }) {
   const sync = world.mainSync, objects = world.objects.map((node) => [node, sync?.objectOf(node)]).filter(([, pointer]) => pointer);
   const { ids, references } = sync ? exportIDs(rootIDs(objects.map(([, pointer]) => pointer))) : { ids: {}, references: [] };
   for (const [node, pointer] of objects) if (ids[idKey(idStruct(pointer))]) ids[idKey(idStruct(pointer))].node = node.id;
@@ -288,7 +289,7 @@ export function exportIR(world, { controls, collections = null, live, bin, anima
     const time = Object.keys(properties).find((p) => p.endsWith('.frame_current'));
     // A Geometry Nodes modifier whose graph reads the scene's time runs again when the frame changes.
     for (const entity of Object.values(entities)) if (time && entity.type === 'modifier:NODES' && readsTime(graphs, entity.inputs.graph.graph)) entity.inputs.frame = { property: time };
-    Object.assign(entities, driverEntities(properties), animationEntities(ids, properties, time, animationGroups, curves, bin),
+    Object.assign(entities, driverEntities(properties, skeletons), animationEntities(ids, properties, time, animationGroups, curves, bin),
       greasePencilEntities(world, objects.map(([node]) => node), bin, time),
       chosenState(states, 'curves') === 'OFF' ? {} : curvesEntities(world, objects.map(([node]) => node), bin), constraintEntities(ids, constraints, time));
     Object.assign(entities, pointCloudEntities(world, objects.map(([node]) => node), bin));

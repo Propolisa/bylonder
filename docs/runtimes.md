@@ -205,8 +205,10 @@ mesh, Blender still deforms it on the CPU as well.
 
 Not yet: B-Bone segments as Babylon bones (Blender's segment matrices, `PoseBone.bbone_segment_matrix`, as extra bones
 weighted by `bbone_segment_index`); the Outliner mark; the Scene tab's rows as links to their panels; a module export
-that skips the Armature modifier of a mapped mesh, and one that gives the mesh evaluated before it (so modifiers and
-shape keys before the Armature modifier stop being fallbacks).
+that skips the Armature modifier of a mapped mesh, and one that gives the mesh evaluated before it (so modifiers before
+the Armature modifier stop being fallbacks). Shape keys before it are not: Babylon morphs a mesh, then skins it, as
+Blender deforms after the keys, when its shape keys are on Babylon (mapped) too; on Blender they make the mesh a
+fallback in the view.
 
 ## Shape keys
 

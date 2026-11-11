@@ -1,6 +1,7 @@
 """Builds rigged-character.blend: a figure skinned to a humanoid armature by automatic weights, for posing. Its arms
 and legs reach for IK targets with pole targets, its head looks at an empty within limits, and its hands turn with
-their IK targets; an animation waves, crouches and looks around.
+their IK targets; an animation waves, crouches and looks around. Custom properties on the rig switch the
+left arm between IK and FK and swell the chest; a corrective shape key keeps the left elbow's volume as it bends.
 
 usage: blender -b --factory-startup -P rigged-character.py
 """
@@ -122,6 +123,41 @@ for frame, z in ((1, 0), (24, 0), (40, -0.25), (56, 0), (72, 0)):
     move('spine', frame, (0, 0, z))
 for frame, x in ((1, -1.2), (36, 1.4), (72, -1.2)):
     key(look, frame, (x, -2, 1.85 + 0.15 * abs(x)))
+# Rig controls: custom properties on the rig, which drivers read. ik_fk.L blends the left arm between FK and IK (the
+# IK constraint's influence); breathe swells the chest (a shape key); the left elbow keeps its volume when it bends
+# (a corrective shape key driven by the angle between upper arm and forearm).
+def driver(owner, path, expression, variables, index=-1):
+    fc = owner.driver_add(path, index) if index >= 0 else owner.driver_add(path)
+    fc.driver.type = 'SCRIPTED'
+    fc.driver.expression = expression
+    for name, kind, targets in variables:
+        v = fc.driver.variables.new()
+        v.name, v.type = name, kind
+        for t, settings in zip(v.targets, targets):
+            for k, value in settings.items():
+                setattr(t, k, value)
+    return fc
+rig['ik_fk.L'] = 1.0
+rig.id_properties_ui('ik_fk.L').update(min=0.0, max=1.0, description='Left arm: 0 FK, 1 IK')
+rig['breathe'] = 0.0
+rig.id_properties_ui('breathe').update(min=0.0, max=1.0, description='Chest breath')
+driver(rig, 'pose.bones["forearm.L"].constraints["IK"].influence', 'switch',
+       [('switch', 'SINGLE_PROP', [{'id_type': 'OBJECT', 'id': rig, 'data_path': '["ik_fk.L"]'}])])
+body.shape_key_add(name='Basis')
+breathe = body.shape_key_add(name='Breathe', from_mix=False)
+elbow = body.shape_key_add(name='Elbow.L', from_mix=False)
+chest, elbow_at = Vector(J['chest']) + Vector((0, 0, 0.08)), Vector(J['elbow.L'])
+for i, v in enumerate(mesh.vertices):
+    d = (v.co - chest).length
+    if d < 0.25:
+        out = Vector((v.co.x - chest.x, v.co.y - chest.y, 0))
+        breathe.data[i].co = v.co + out * 0.25 * (1 - d / 0.25)
+    d = (v.co - elbow_at).length
+    if d < 0.12:
+        elbow.data[i].co = v.co + (v.co - elbow_at).normalized() * 0.03 * (1 - d / 0.12)
+key = mesh.shape_keys
+driver(key, 'key_blocks["Breathe"].value', 'breathe', [('breathe', 'SINGLE_PROP', [{'id_type': 'OBJECT', 'id': rig, 'data_path': '["breathe"]'}])])
+driver(key, 'key_blocks["Elbow.L"].value', 'min(bend / 1.2, 1)', [('bend', 'ROTATION_DIFF', [{'id': rig, 'bone_target': 'upper_arm.L'}, {'id': rig, 'bone_target': 'forearm.L'}])])
 scene.frame_set(1)
 # The file opens with the rig alone selected, as clicking it selects it.
 body.select_set(False)

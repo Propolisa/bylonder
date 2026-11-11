@@ -64,16 +64,33 @@ export function curveInput(fc) {
   };
 }
 
-// One driver as an IR entity reading and writing `properties`, or null when it stays baked.
-function driverEntity(collection, id, fc, properties, time) {
+// A bone a driver variable reads, as the page finds it (runtime/pose-constraints.js): its armature's skeleton and the
+// mesh it skins (`skeletons`, by the armature's name), in a space; undefined where the page draws it with none.
+function boneTarget(t, space, skeletons) {
+  const drawn = t.id?.type === 'ARMATURE' && skeletons[t.id.name];
+  return drawn && t.id.pose.bones.get(t.bone_target) ? { bone: t.bone_target, skeleton: drawn.skeleton, mesh: drawn.mesh, space } : undefined;
+}
+
+// One driver as an IR entity reading and writing `properties`, or null when it stays baked. A driver reading a bone
+// runs with the page's poses (the `pose` implementation), after them each frame.
+function driverEntity(collection, id, fc, properties, time, skeletons) {
   const exact = pathOf(collection, id.name, `${fc.data_path}[${fc.array_index}]`), written = [exact, pathOf(collection, id.name, fc.data_path)].find((p) => properties[p]);
   const { driver } = fc, curve = driverCurve(fc);
   if (!written || curve === undefined || driver.use_self) return null;
   const variables = [], objects = {}, reads = [];
+  let bones = false;
   for (const variable of driver.variables) {
     const targets = [...variable.targets].slice(0, variable.type === 'SINGLE_PROP' || variable.type === 'TRANSFORMS' ? 1 : 2);
-    if (targets.some((t) => !t.id || t.bone_target)) return null;
+    const space = (t) => (variable.type === 'ROTATION_DIFF' ? 'WORLD_SPACE' : t.transform_space);
+    if (targets.some((t) => !t.id || (t.bone_target && variable.type !== 'SINGLE_PROP' && !boneTarget(t, space(t), skeletons)))) return null;
+    if (targets.some((t) => t.bone_target && variable.type === 'SINGLE_PROP')) return null;
     variables.push({ name: variable.name, type: variable.type, targets: targets.map((t) => {
+      if (t.bone_target) {
+        const name = `${t.id.name}:${t.bone_target}:${space(t)}`;
+        objects[name] = boneTarget(t, space(t), skeletons);
+        bones = true;
+        return { object: name, transform_type: t.transform_type, transform_space: t.transform_space, rotation_mode: t.rotation_mode };
+      }
       if (variable.type === 'SINGLE_PROP') {
         const path = COLLECTIONS[t.id_type] && pathOf(COLLECTIONS[t.id_type], t.id.name, t.data_path);
         reads.push(path);
@@ -86,18 +103,20 @@ function driverEntity(collection, id, fc, properties, time) {
   if (driver.type === 'SCRIPTED' && compile(driver.expression, variables.map((v) => v.name)) === PYTHON_ONLY) return null;
   if (reads.some((path) => !properties[path])) return null;
   // The scene's time, which an expression reads as `frame`.
-  const frame = driver.type === 'SCRIPTED' && /frame/.test(driver.expression) && time;
-  return [`${idKey(id)}/driver/${fc.data_path}[${fc.array_index}]`, { type: `driver:${driver.type}`, id: idKey(id), implementation: 'driver',
+  // A driver reading bones runs each frame, after the poses; one whose expression reads `frame`, when it changes.
+  const frame = (bones || (driver.type === 'SCRIPTED' && /frame/.test(driver.expression))) && time;
+  return [`${idKey(id)}/driver/${fc.data_path}[${fc.array_index}]`, { type: `driver:${driver.type}`, id: idKey(id), implementation: bones ? 'pose' : 'driver',
     inputs: { driver: { type: driver.type, expression: driver.expression, variables }, curve, objects, ...(frame && { frame: { property: frame } }) },
     outputs: { value: { property: written } } }];
 }
 
-// The drivers of every ID that the page can run on `properties`, as IR entities by key.
-export function driverEntities(properties) {
+// The drivers of every ID that the page can run on `properties`, as IR entities by key; `skeletons`, the skeleton
+// and skinned mesh drawing each armature, by its name, for drivers that read bones.
+export function driverEntities(properties, skeletons = {}) {
   const data = blendData(), entities = {}, time = Object.keys(properties).find((path) => path.endsWith('.frame_current'));
   for (const collection of Object.values(COLLECTIONS)) for (const id of data[collection] ?? []) {
     for (const fc of id.animation_data?.drivers ?? []) {
-      const entry = driverEntity(collection, id, fc, properties, time);
+      const entry = driverEntity(collection, id, fc, properties, time, skeletons);
       if (entry) entities[entry[0]] = entry[1];
     }
   }

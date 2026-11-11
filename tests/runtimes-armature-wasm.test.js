@@ -1,5 +1,5 @@
 // Armature deform on Babylon (docs/runtimes.md, src/runtimes/armature.js): the Rigged Character example, its rig switched
-// to Babylon (mapped), skins on Babylon's skeleton to Main's evaluated deform at several poses and frames; the Runtime
+// to Babylon (mapped) with its body's shape keys, morphs and skins on Babylon's skeleton to Main's evaluated deform at several poses and frames; the Runtime
 // panel in the Armature tab; issues (B-Bones, Preserve Volume as approximations, a modifier after Armature as a
 // fallback) in the panel and the Info editor; Edit Mode as Blender; back to Blender as before; and File > Export >
 // Babylon writing a skeleton and the pose's animation that Babylon's loader skins the same.
@@ -28,6 +28,7 @@ import { regionPanels, panelClosedSet } from '../src/editors/interface/ui-tree.j
 import { subscribeReports } from '../src/windowmanager/wm-reports.js';
 import { registerRuntimeTypes } from '../src/runtimes/runtimes.js';
 import '../src/runtimes/armature.js';
+import '../src/runtimes/shape-keys.js';
 import { bylonderIcon, BYLONDER_ICON } from '../src/python/bpy_icons.js';
 import { serializeScene } from '../src/io_scene_babylon/babylon-export.js';
 import { BlenderAnimation } from '../src/blenkernel/animation/anim-blender.js';
@@ -72,7 +73,7 @@ subscribeReports((r) => reports.push(r));
 // Babylon's CPU skinning of the body against Main's evaluated (Armature-deformed) mesh, per Babylon vertex (a corner).
 function skinningError() {
   const evaluated = blender.evaluatedMesh(bodyOb), p = evaluated.vert_positions, corners = evaluated.corner_verts;
-  const skinned = body.getPositionData(true);
+  const skinned = body.getPositionData(true, true);
   let error = 0;
   for (let c = 0; c < evaluated.corners_num; c++) {
     const v = corners[c] * 3;
@@ -132,6 +133,8 @@ assert.ok(!drawn('DATA').DATA_PT_bylonder_armature_runtime?.some((b) => b.icon =
 
 // Babylon (mapped): Babylon skins the body as Main deforms it, at several poses.
 rig.bylonder.runtime = 'MAPPED';
+// Its body's shape keys too, which Babylon morphs before it skins, as Blender's Armature deforms after them.
+bodyData.data.shape_keys.bylonder.runtime = 'MAPPED';
 sync.view();
 assert.equal(body.skeleton?.name, 'Rig', "the body is skinned by the rig's skeleton");
 assert.equal(body.skeleton.bones.length, 21);
@@ -219,7 +222,7 @@ function loadedError(loadedScene, frame) {
   loadedScene.render();
   mesh.skeleton.prepare(true);
   sync.frameChanged(frame);
-  const evaluated = blender.evaluatedMesh(bodyOb), p = evaluated.vert_positions, corners = evaluated.corner_verts, skinned = mesh.getPositionData(true);
+  const evaluated = blender.evaluatedMesh(bodyOb), p = evaluated.vert_positions, corners = evaluated.corner_verts, skinned = mesh.getPositionData(true, true);
   let error = 0;
   for (let c = 0; c < evaluated.corners_num; c++) error = Math.max(error, ...[0, 2, 1].map((axis, k) => Math.abs(skinned[c * 3 + k] - p[corners[c] * 3 + axis])));
   return error;

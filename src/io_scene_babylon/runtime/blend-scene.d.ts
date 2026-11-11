@@ -349,6 +349,10 @@ export type Binding = {
     hide?: "viewport" | "render" | undefined;
     lens?: number | undefined;
     /**
+     * a morph target's name in its node's MorphTargetManager, whose influence it sets
+     */
+    morph?: string | undefined;
+    /**
      * the key in its node's `metadata.bylonderChannels` the scene's animation sets it through
      */
     channel?: string | undefined;
