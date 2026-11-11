@@ -116,7 +116,8 @@ window.check = {
       const rgb = [i + 1, (i + 1) >> 3, (i + 1) >> 6].map((v) => (v & 7) * ${ID_STEP} + ${ID_STEP / 2});
       legend[rgb.join(',')] = mesh.name;
       const material = new StandardMaterial('id ' + i, scene);
-      Object.assign(material, { disableLighting: true, emissiveColor: Color3.FromInts(...rgb), backFaceCulling: false });
+      // A points mesh stays points.
+      Object.assign(material, { disableLighting: true, emissiveColor: Color3.FromInts(...rgb), backFaceCulling: false, pointsCloud: !!mesh.material?.pointsCloud, pointSize: mesh.material?.pointSize ?? 1 });
       mesh.material = material;
       if ('useVertexColors' in mesh) mesh.useVertexColors = false;
       if (mesh.color) mesh.color = Color3.FromInts(...rgb);

@@ -128,6 +128,8 @@ function nodeCode(entry, mesh, geometries, live, bin) {
     const lines_ = entry.type === 'LinesMesh';
     lines.push(`const node = new ${lines_ ? 'LinesMesh' : 'Mesh'}(${json(entry.name)}, scene);`);
     if (lines_) lines.push(`node.color = new Color3(${vector(mesh.color.asArray())});`, mesh.alpha !== 1 ? `node.alpha = ${mesh.alpha};` : '');
+    // A points mesh without indices (a PointsCloudSystem's) draws its vertices in order, as in the app.
+    if (mesh.material?.pointsCloud && !mesh.getIndices()?.length) lines.push('node.isUnIndexed = true;');
     if (mesh.geometry) lines.push(`${geometries.get(mesh.geometry)}.applyToMesh(node);`);
   } else lines.push(`const node = new TransformNode(${json(entry.name)}, scene);`);
   lines.push(`node.id = ${json(entry.id)};`);

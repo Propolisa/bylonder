@@ -30,6 +30,9 @@ const ENGINES = ['webgl2', 'webgpu'];
 // example is looser than the default.
 const DEFAULT = { agree: 0.9, mean: 8 };
 export const TOLERANCES = {
+  // Temporary: its planets orbit by the time since the scene opened, which moves on between the app's render and its
+  // export; back to the default once the one-clock playhead puts the page and the app on the same time.
+  solar: { agree: 0.85 },
 };
 
 // Failures known and owned, by "<example> <check>" (check: controls, animation, export, look-webgl2, look-webgpu), with a
