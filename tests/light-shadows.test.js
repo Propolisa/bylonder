@@ -83,7 +83,7 @@ assert.equal(floor.material.maxSimultaneousLights, scene.lights.length, 'a mater
 for (let i = 4; i < 12; i++) createLight(`Bulb ${i}`, 'POINT', {}, scene);
 shadows.setActive(true);
 assert.equal(floor.material.maxSimultaneousLights, 8, "as many as a vertex shader's uniform blocks hold");
-// A point light's shadow spans its influence as EEVEE's does (eevee_light.cc), not the camera's clip range: Menya Akari's
+// A point light's shadow spans its influence as EEVEE's does (eevee_light.cc), not the camera's clip range: Akari Noodle House's
 // 120 W orange Door Light reaches 120^0.5 m, its near clip 1/4000 of that, its bias a few millimeters there, so a sign's
 // tube 0.2 m off the wall shadows it.
 const door = createLight('Door Light', 'POINT', { use_shadow: true, energy: 120, color: [1, 0.5, 0.2], shadow_soft_size: 0.1 }, scene);

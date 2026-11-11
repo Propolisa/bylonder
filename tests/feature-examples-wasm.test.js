@@ -62,7 +62,7 @@ const names = (collection) => [...collection].map((item) => item.name);
   }
 }
 {
-  // Menya Akari opens with the tea break's rig hidden (H), its bones undrawn, while her body shows and the rig still
+  // Akari Noodle House opens with the tea break's rig hidden (H), its bones undrawn, while her body shows and the rig still
   // poses it.
   const { objects, nodes, sync } = open('compositor');
   const rig = objects.get('Tea Break Rig');

@@ -78,7 +78,7 @@ nodes live.
 
 [Open in Bylonder](https://propolisa.github.io/bylonder/#example=compositor)
 
-The demo, Menya Akari, is a small ramen bar's neon sign in a narrow lane on a wet night, with customers at the counter
+The demo, Akari Noodle House, is a small ramen bar's neon sign in a narrow lane on a wet night, with customers at the counter
 behind the window and the lane's lanterns mirrored in a puddle, built in Blender by
 `compositor.py`. It is also a 10 s animation that loops: keyframes repeated by F-Curve Cycles modifiers sway the
 lanterns and the noren, flicker the dead neon tube and move the woman's rig for a breath and a sip. The steps below make a compositing node group from the Default Cube, then open the example for its
@@ -102,7 +102,7 @@ tree and render.
    little warm). An Ellipse Mask, softened by a Blur, is multiplied over the image by a Mix for the vignette. A Viewer
    shows the result.
 
-   ![The Menya Akari compositing node group](../media/features/compositor/tree.png)
+   ![The Akari Noodle House compositing node group](../media/features/compositor/tree.png)
 
 4. **The render.** Render > Render Image renders through the camera and composites the result with Blender's
    compositor; the Render window shows Compositing while it runs.

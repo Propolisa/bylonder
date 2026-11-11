@@ -1809,7 +1809,7 @@ const checks = {
     await splash.getByRole("button", { name: "Examples…" }).click();
     const list = splash.locator(".bl-splash-columns > div").first();
     const titles = await list.getByRole("button").allTextContents();
-    assert.deepEqual(titles.slice(0, 2).map((t) => t.trim()), ["Menya Akari", "Temple Light"]);
+    assert.deepEqual(titles.slice(0, 2).map((t) => t.trim()), ["Akari Noodle House", "Temple Light"]);
     const { client, scroll, rows } = await list.evaluate((el) => ({ client: el.clientHeight, scroll: el.scrollHeight, rows: el.clientHeight / el.querySelector("button").offsetHeight }));
     assert.ok(scroll > client && rows > 10, `${rows} rows show of a list that scrolls`);
     assert.match(await list.evaluate((el) => getComputedStyle(el).backgroundAttachment), /local.*scroll/, "the edge's shade scrolls away with the rows");

@@ -1,5 +1,5 @@
 // Records docs/features/compositor.md's media: a compositing node group made from the Default Cube through real input
-// (New, then a Color Balance between Render Layers and the Group Output, shown on the backdrop), then the Menya Akari
+// (New, then a Color Balance between Render Layers and the Group Output, shown on the backdrop), then the Akari Noodle House
 // example's tree and its Render Image, with Glare muted and not, and its 240-frame loop played in the viewport.
 // usage: node tools/docs/record-compositor.mjs [steps] [example] [loop]
 import { ffmpeg } from "../media.mjs";
@@ -69,7 +69,7 @@ if (wanted("steps")) await record("compositor", { size: SIZE }, async (r) => {
   }, { hold: 2500, part: [0.22, 0, 0.78, 1] });
 });
 
-if (wanted("example")) await record("compositor", { example: "compositor", node: "Menya Akari", size: SIZE }, async (r) => {
+if (wanted("example")) await record("compositor", { example: "compositor", node: "Akari Noodle House", size: SIZE }, async (r) => {
   const { app, page } = r;
   await workspace(r, "compositing");
   await nodes(r, "CompositorNodeGlare").waitFor();
@@ -93,7 +93,7 @@ if (wanted("example")) await record("compositor", { example: "compositor", node:
 });
 // The loop through the camera in Rendered shading, the camera's frame filling the view (Home): every third frame of the
 // timeline drawn by the viewport, a GIF at 8 fps that runs into its own start, made smaller until it is under 1 MB.
-if (wanted("loop")) await record("compositor", { example: "compositor", node: "Menya Akari", size: SIZE }, async (r) => {
+if (wanted("loop")) await record("compositor", { example: "compositor", node: "Akari Noodle House", size: SIZE }, async (r) => {
   const { app, page } = r;
   await app.bylonder((b) => { b.views.input.enterCameraView(); b.views.input.state.overlays = false; });
   // Rendered straight after opening draws washed out until the shading changes once: Material Preview first.

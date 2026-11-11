@@ -1,4 +1,4 @@
-// File > Export > JavaScript of the compositor example (Menya Akari): its compositor ships as a Babylon NodeRenderGraph of
+// File > Export > JavaScript of the compositor example (Akari Noodle House): its compositor ships as a Babylon NodeRenderGraph of
 // the blocks library's one pass block (bylonder-blocks.js), which parses with @babylonjs/core and that file
 // alone; each Blender node's code or plan is made at export at the render's size, and the inputs that land in one
 // uniform or one uploaded value are controls set without a rebuild.
@@ -64,4 +64,4 @@ console.log(JSON.stringify(graph.attachedBlocks.map((b) => [b.name, b.getClassNa
 } finally {
   written.remove();
 }
-console.log("Export compositor: Menya Akari's compositor is a NodeRenderGraph of the blocks library's pass block, with its values as controls");
+console.log("Export compositor: Akari Noodle House's compositor is a NodeRenderGraph of the blocks library's pass block, with its values as controls");

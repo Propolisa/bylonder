@@ -1,6 +1,6 @@
-# Menya Akari
+# Akari Noodle House
 
-A small ramen bar (麺屋 灯, Menya Akari) in a narrow yokocho lane on a wet night, made in Blender 5.2 by
+A small ramen bar, 麺屋 灯 (Menya Akari, "the noodle house of the lamp"), in a narrow yokocho lane on a wet night, made in Blender 5.2 by
 `compositor.py` (`blender -b --factory-startup -P compositor.py`) and opened here with Blender's own reader.
 
 - **Sign.** Text objects in Zen Maru Gothic and Poiret One (in `fonts/`, SIL Open Font License, loaded by the script;
