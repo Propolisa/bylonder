@@ -140,6 +140,14 @@ function built(babylonMesh, mesh) {
   return data.groups;
 }
 
+// A per-corner buffer copied out for every Babylon vertex: the points of loose edges and vertices, which come after the
+// face corners, have no corner, so they get zeros.
+function perVertex(data, size, vertices) {
+  const full = new data.constructor(vertices * size);
+  full.set(data.subarray(0, full.length));
+  return full;
+}
+
 // The geometry of Blender's draw buffers (bmesh-wasm.js drawBuffers), copied out of the module's memory, with the
 // attributes its materials read by `names`; its material groups, by the triangles of each slot.
 function drawn(babylonMesh, { positions, normals, uvs, tris, lines, tangents, attributes, tris_by_material: counts, free }, names) {
@@ -148,12 +156,13 @@ function drawn(babylonMesh, { positions, normals, uvs, tris, lines, tangents, at
   babylonMesh.setVerticesData(VertexBuffer.PositionKind, positions.slice(), false);
   babylonMesh.setVerticesBuffer(new VertexBuffer(babylonMesh.getEngine(), normals.slice(), VertexBuffer.NormalKind,
     { size: 3, stride: 4, type: VertexBuffer.SHORT, normalized: true }));
-  if (uvs) babylonMesh.setVerticesData(VertexBuffer.UVKind, uvs.slice(), false);
-  const engine = babylonMesh.getEngine(), attribute = (kind, { data, size, normalized }) => babylonMesh.setVerticesBuffer(new VertexBuffer(engine, data.slice(), kind,
+  const vertices = positions.length / 3;
+  if (uvs) babylonMesh.setVerticesData(VertexBuffer.UVKind, perVertex(uvs, 2, vertices), false);
+  const engine = babylonMesh.getEngine(), attribute = (kind, { data, size, normalized }) => babylonMesh.setVerticesBuffer(new VertexBuffer(engine, perVertex(data, size, vertices), kind,
     { size, type: data instanceof Uint16Array ? VertexBuffer.UNSIGNED_SHORT : data instanceof Int16Array ? VertexBuffer.SHORT : VertexBuffer.FLOAT, normalized }));
   if (tangents) attribute(TANGENT_KIND, { data: tangents, size: 4, normalized: true });
   attributes.forEach((read, i) => read && attribute(attributeKind(names[i]), read));
-  babylonMesh.setIndices(tris.slice(), positions.length / 3);
+  babylonMesh.setIndices(tris.slice(), vertices);
   faceEdges.set(babylonMesh, lines.slice());
   free();
   if (counts.length < 2) return null;

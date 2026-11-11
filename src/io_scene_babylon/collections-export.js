@@ -10,7 +10,7 @@ const TIME_OFFSET = { name: 'Time Offset', soft_min: -250, soft_max: 250 };
 
 // A collection's custom properties: numbers, booleans, strings and arrays of numbers.
 const custom = (collection) => Object.fromEntries([...(collection.keys?.() ?? [])].filter((name) => !OWN.test(name))
-  .map((name) => [name, collection.get(name)]).map(([name, value]) => [name, typeof value === 'object' && value ? [...value] : value])
+  .map((name) => [name, collection.get(name)]).map(([name, value]) => [name, typeof value === 'object' && value?.[Symbol.iterator] ? [...value] : value])
   .filter(([, value]) => ['number', 'boolean', 'string'].includes(typeof value) || (Array.isArray(value) && value.every((v) => typeof v === 'number'))));
 
 // Each LayerCollection of a view layer with its RNA path, by its collection's key.
