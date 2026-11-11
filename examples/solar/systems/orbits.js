@@ -1,4 +1,4 @@
-import { controls } from '@workbench/sdk';
+import { animation, controls } from '@workbench/sdk';
 
 const palette = ['#c9a27c', '#e3c16f', '#4f8fd9', '#d0573d', '#d9b38c', '#e8d9a8', '#8fd3e8', '#5b6fd9'];
 
@@ -17,10 +17,11 @@ export function createOrbits(scene) {
         planets.forEach(p => p.dispose());
         planets = Array.from({ length: count }, (_, i) => planet(scene, i, 4 + i * spacing, rings));
       });
-      let time = 0;
+      // The planets move with the scene's frame, so renders, playback and an export at the same frame agree.
       const spin = scene.onBeforeRenderObservable.add(() => {
-        time += scene.getEngine().getDeltaTime() / 1000 * store.values.speed;
-        planets.forEach((p, i) => p.orbit(time));
+        const { frameStart, fps, fpsBase } = animation.time.state;
+        const time = (animation.time.frame - frameStart) / (fps / fpsBase) * store.values.speed;
+        planets.forEach((p) => p.orbit(time));
       });
       return () => { build(); scene.onBeforeRenderObservable.remove(spin); planets.forEach(p => p.dispose()); };
     }

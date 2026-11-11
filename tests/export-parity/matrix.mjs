@@ -30,14 +30,12 @@ const ENGINES = ['webgl2', 'webgpu'];
 // example is looser than the default.
 const DEFAULT = { agree: 0.9, mean: 8 };
 export const TOLERANCES = {
-  // Temporary: its planets orbit by the time since the scene opened, which moves on between the app's render and its
-  // export; back to the default once the one-clock playhead puts the page and the app on the same time.
-  solar: { agree: 0.85 },
 };
 
 // Failures known and owned, by "<example> <check>" (check: controls, animation, export, look-webgl2, look-webgpu), with a
 // one-line diagnosis guess. They are reported but do not fail the run; one that passes is reported as fixed.
 export const KNOWN = {
+  'solar look-webgl2': "88.7% of pixels agree: the edges of the stars' point cloud and the glow layer's halos differ (the planets agree)",
   "grease-pencil controls": "the export overflows the stack in Babylon's SceneSerializer (fixed on export-fixes-parity)",
   "grease-pencil animation": "the export overflows the stack in Babylon's SceneSerializer (fixed on export-fixes-parity)",
   'drivers-and-graph-editor controls': 'a Bevel width set live writes the old width back through its percentage twin (fixed on export-fixes-parity)',
