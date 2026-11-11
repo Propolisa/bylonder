@@ -75,6 +75,10 @@ export function unitManifest(ir, { kernels, blocks = {}, replace = [] } = {}) {
       add(`constraint:${type}`, { kind: 'constraint', implementation, licence: GPL, files: folderFiles(implementation),
         interface: { inputs: { owner: 'array', targets: 'array', settings: 'object' }, outputs: ['matrix'] } }, { entity: key, id: entity.id, properties: [] });
     }
+    // Its B-Bones' segments, shaped by the kernels unless a unit takes their place.
+    if (entity.inputs.segments?.length) add('bbone:SEGMENTS', { kind: 'bbone', implementation, licence: GPL, files: folderFiles(implementation),
+      interface: { inputs: { pose: 'array', rest: 'array', length: 'number', prev: 'object', next: 'object', bone: 'object', pose_bone: 'object' }, outputs: ['matrices'] } },
+    { entity: key, id: entity.id, properties: [] });
   }
   const graphIds = (graph) => Object.values(ir.entities).filter((e) => e.inputs?.graph?.graph === graph).map((e) => e.id);
   for (const [type, nodes] of unitNodes(runGraphs(ir))) for (const [graph, name] of nodes) {

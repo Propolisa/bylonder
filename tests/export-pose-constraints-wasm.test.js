@@ -149,5 +149,19 @@ const segmentError = Math.max(...['upper_arm.R', 'forearm.R'].flatMap((name) => 
 })));
 assert.ok(segmentError < TOLERANCE, `a constraint-driven B-Bone's segments follow the IK target (off by ${segmentError})`);
 console.log('Export pose constraints: a B-Bone the IK solver moves bends its segments as Main does');
+
+// A unit registered for bbone:SEGMENTS shapes the segments in the kernels' place, given the bone and its handles.
+const { register, unregister } = await import(new URL('bylonder/units.js', bent.url).href);
+const given = [];
+register('bbone:SEGMENTS', { run: (inputs) => { given.push(inputs); return { matrices: Array.from({ length: 5 }, () => Matrix.Identity().asArray()) }; } });
+for (let i = 0; i < 2; i++) { arms.scene.render(); await arms.settled(); }
+const joint = armsSkeleton.bones.find((b) => b.name === 'forearm.R#2');
+assert.ok(joint._matrix.equalsWithEpsilon(Matrix.Identity(), 1e-6), 'the segments of the unit pose the joints');
+const arm = given.find((inputs) => inputs.bone.bbone_segments === 4 && inputs.prev);
+assert.ok(arm?.pose.length === 16 && arm.prev.pose.length === 16 && arm.prev.rest.length === 16, 'the unit is given the bone, its handles and its settings');
+unregister('bbone:SEGMENTS');
+for (let i = 0; i < 2; i++) { arms.scene.render(); await arms.settled(); }
+assert.ok(!joint._matrix.equalsWithEpsilon(Matrix.Identity(), 1e-6), 'the kernels shape them again once it is removed');
+console.log('Export pose constraints: a bbone:SEGMENTS unit takes the place of the kernels');
 arms.dispose();
 bent.remove();

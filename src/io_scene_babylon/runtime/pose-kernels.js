@@ -7,7 +7,10 @@
 // shapes (`shapes`, by path) by bone as the page's controls set them. A constraint type with a unit registered for
 // `constraint:<TYPE>` (units.js) runs on it in Blender's place: given the owner's and its targets' matrices in the
 // constraint's spaces (Blender's, column-major) and its settings by RNA name, it gives the owner's (`matrix`). The
-// segment joints (`bone#k`) of the B-Bones in `segments` are posed by their segments as the kernels shape them.
+// segment joints (`bone#k`) of the B-Bones in `segments` are posed by their segments as the kernels shape them, or as a
+// unit registered for `bbone:SEGMENTS` does: given the bone's pose and rest matrices (armature space, column-major)
+// and length, its handle bones' (`prev`, `next`, or null) and its Bone's and PoseBone's settings by RNA name, it gives
+// its segments' matrices in its rest space (`matrices`, Blender's bbone_segment_matrix).
 import { Matrix } from '@babylonjs/core';
 import { unitFor } from './units.js';
 import { swapped } from './constraints-evaluator.js';
@@ -19,6 +22,17 @@ import { swapped } from './constraints-evaluator.js';
  */
 
 const IDENTITY = Matrix.Identity().asArray();
+
+/**
+ * A B-Bone's handle bones in a rig as the export read it, by index (-1 for none): its custom handles, else, for an
+ * automatic handle, its parent and its child connected to it (Blender's BKE_pchan_bbone_handles_get).
+ * @param {any} spec @param {number} at
+ */
+function handlesOf(spec, at) {
+  const b = spec.bones[at], [start, end] = b.handles ?? [-1, -1];
+  const child = spec.bones.findIndex((/** @type {any} */ c) => c.parent === at && c.bone.use_connect);
+  return [b.bone.bbone_handle_type_start === 'AUTO' ? (b.bone.use_connect ? b.parent : -1) : start, b.bone.bbone_handle_type_end === 'AUTO' ? child : end];
+}
 const blender = (/** @type {Matrix} */ m) => swapped(m).asArray();
 const babylon = (/** @type {ArrayLike<number>} */ m, /** @type {number} */ at) => Matrix.FromArray(Array.from(m).slice(at, at + 16));
 
@@ -65,12 +79,19 @@ export function kernelSolve(kernels) {
       result.set(i, parent === undefined ? swapped(own).multiply(space) : swapped(own.multiply(Matrix.Invert(babylon(posed, parent * 16)))));
     }
     // The segment joints (`bone#k`, children of the bone) of each B-Bone the export found the kernels shape as Main
-    // does: each at its segment's matrix in the bone's space.
-    const segments = new Map();
+    // does: each at its segment's matrix in the bone's space, from a unit registered for `bbone:SEGMENTS` where there
+    // is one, else from the kernels.
+    const unit = unitFor('bbone:SEGMENTS'), segments = new Map();
+    const segmentsOf = (/** @type {number} */ at) => {
+      if (!unit) return rig.bboneSegments(at).matrices;
+      const handle = (/** @type {number} */ j) => (j < 0 ? null : { pose: Array.from(posed.subarray(j * 16, j * 16 + 16)), rest: spec.bones[j].bone.matrix_local, length: spec.bones[j].bone.length });
+      const [prev, next] = handlesOf(spec, at), b = spec.bones[at];
+      return /** @type {any} */ (unit.run({ ...handle(at), prev: handle(prev), next: handle(next), bone: b.bone, pose_bone: { ...b.pose, ...shapes[b.name] } }, { frame })).matrices;
+    };
     bones.forEach(({ name, parent }, i) => {
       const [, bone, k] = /^(.*)#(\d+)$/.exec(name) ?? [], at = shaped.includes(bone) && bones[parent]?.name === bone ? spec.bones.findIndex((/** @type {any} */ b) => b.name === bone) : -1;
       if (at < 0) return;
-      if (!segments.has(at)) segments.set(at, rig.bboneSegments(at).matrices);
+      if (!segments.has(at)) segments.set(at, segmentsOf(at));
       const matrix = segments.get(at)[Number(k)];
       if (matrix) result.set(i, swapped(Matrix.FromArray(matrix)));
     });
