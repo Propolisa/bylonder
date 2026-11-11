@@ -60,7 +60,7 @@ export const KNOWN = {
   "coast look-webgpu": "the app itself fails: the Sky material's shader does not compile on WebGPU",
   'lumen look-webgl2': "48% of pixels agree: the app's neon follows Lumen's per-frame emission code under motion blur (shutter 0.8), which the page's static emission does not; framing and the lens match",
   'orrery look-webgl2': "78% of pixels agree: the plinth's and floor's reflections and the mechanism's lit parts differ (not yet classified)",
-  'compositor look-webgl2': '14.5% of pixels agree: not yet classified, rerun once the view transform fix lands',
+  'compositor look-webgl2': "26% of pixels agree: the page's walls, windows and sky are flat and bright where the app's composite grades them dark and warm",
   'geometry-node-editor look-webgl2': '32% of pixels agree: not yet classified, rerun once the view transform fix lands',
   'rendering look-webgl2': "88.6% of pixels agree: the app's glass carafe is grainy",
   'volumes look-webgl2': "82% of pixels agree: blocky noise in the app's fog",
