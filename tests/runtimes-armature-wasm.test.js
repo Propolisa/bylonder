@@ -1,14 +1,15 @@
 // Armature deform on Babylon (docs/runtimes.md, src/runtimes/armature.js): the Rigged Character example, its rig switched
 // to Babylon (mapped) with its body's shape keys, morphs and skins on Babylon's skeleton to Main's evaluated deform at several poses and frames; the Runtime
 // panel in the Armature tab; issues (B-Bones where shape keys move vertices, Preserve Volume as approximations, a modifier after Armature as a
-// fallback) in the panel and the Info editor; Edit Mode as Blender; back to Blender as before; and File > Export >
-// Babylon writing a skeleton and the pose's animation that Babylon's loader skins the same.
+// fallback) in the panel and the Info editor; Edit Mode as Blender; back to Blender as before; File > Export >
+// Babylon writing a skeleton and the pose's animation that Babylon's loader skins the same; and a still Mirror before the
+// Armature and Mask after it applied into the rest mesh the export skins.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { NullEngine, Scene, AppendSceneAsync, VertexBuffer } from '@babylonjs/core';
 import { blenderMain, blenderModule } from '../src/bmesh/bmesh-wasm.js';
 import '../src/python/bpy_interface.js';
-import { idStruct, pointerStruct, structFind, setContextPointer } from '../src/python/bpy_rna.js';
+import { blendData, idStruct, pointerStruct, structFind, setContextPointer } from '../src/python/bpy_rna.js';
 import { hasArmatures } from '../src/blenkernel/armature/armature.js';
 import { createBlenderIDs } from '../src/blenkernel/blender-ids.js';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
@@ -319,6 +320,35 @@ assert.equal(onBlender.meshes.find((m) => m.name === 'Body').skeletonId, 'Rig');
 assert.equal(body.skeleton, null);
 assert.equal(scene.skeletons.length, 0);
 assert.ok(drawnError() < PRECISION);
+
+// Modifiers nothing animates around the Armature, a Mirror before it and a Mask after it, are applied into the rest mesh
+// the export skins (applied-rest.js), the shape keys through them: the loaded file skins as Main deforms at each frame,
+// and Main is left as it was.
+const mirror = bodyData.modifiers.new('Mirror', 'MIRROR');
+// Merging would join vertices the elbow's key moves apart: the rest would then hold at no value of it.
+Object.assign(mirror, { use_axis: [false, true, false], use_mirror_merge: false });
+bodyData.modifiers.move(bodyData.modifiers.length - 1, 0);
+const mask = Object.assign(bodyData.modifiers.new('Mask', 'MASK'), { vertex_group: bodyData.vertex_groups[0].name, invert_vertex_group: true });
+blender.tag(bodyOb, 2);
+sync.view();
+reports.length = 0;
+const applied = await serializeScene(world);
+assert.equal(applied.meshes.find((m) => m.name === 'Body').skeletonId, 'Rig', 'the body with a Mirror before its Armature and a Mask after it is skinned');
+assert.ok(!reports.some((r) => /Body: (Armature after|Mask after)/.test(r.message)), 'and not reported as evaluated as Blender');
+const reloaded = new Scene(new NullEngine());
+await AppendSceneAsync('data:' + JSON.stringify(applied), reloaded);
+assert.ok(reloaded.getMeshByName('Body').morphTargetManager?.numTargets, 'its shape keys are morph targets of the applied mesh');
+reloaded.animationGroups[0].start(false);
+reloaded.animationGroups[0].pause();
+for (const frame of [1, 11, 21]) assert.ok(loadedError(reloaded, frame) < PRECISION, `the applied rest at frame ${frame} skins as Main deforms (${loadedError(reloaded, frame)})`);
+reloaded.getEngine().dispose();
+assert.deepEqual([...bodyData.modifiers].map((m) => [m.name, m.show_viewport]), [['Mirror', true], ['Armature', true], ['Mask', true]], 'the modifiers are shown again');
+assert.equal(bodyData.show_only_shape_key, false);
+assert.ok(![...blendData().objects].some((ob) => ob.name.endsWith('(rest)')), 'the applied rests are removed');
+bodyData.modifiers.remove(mirror);
+bodyData.modifiers.remove(mask);
+blender.tag(bodyOb, 2);
+sync.view();
 
 // File > Export's runtime choice (export-options.js): Babylon (mapped) chosen for the rig exports as on Blender, through
 // the mapping (docs/runtimes.md, Export); Babylon (native), which an armature does not offer, is reported and the rig

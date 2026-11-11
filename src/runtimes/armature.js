@@ -11,6 +11,7 @@ import { livePose } from '../io_scene_babylon/live-curves.js';
 import { livePoseConstraints } from '../io_scene_babylon/pose-export.js';
 import { keyedVertices } from './key-blocks.js';
 import { useDualQuaternionSkinning } from '../io_scene_babylon/runtime/dual-quaternion-skinning.js';
+import { appliedRests, shownStack, smoothByAngle } from './applied-rest.js';
 
 // A vertex Blender's Armature modifier leaves in place: its weights sum to no more than this (armature_deform.cc).
 const CONTRIBUTION = 0.0001;
@@ -51,20 +52,18 @@ const bbone = (bone) => bone.use_deform && bone.bbone_segments > 1;
 const segmentsOf = (arm) => settingsOf(arm)?.use_bbone_segments ?? true;
 const dualQuaternionsOf = (arm) => settingsOf(arm)?.use_dual_quaternions ?? true;
 
-// Blender's Smooth by Angle (Object > Shade Auto Smooth), last in the stack: Babylon skins the mesh smooth instead.
-const smoothByAngle = (m) => m.type === 'NODES' && /^Smooth by Angle/.test(m.node_group?.name ?? '');
-// A mesh object's modifiers shown in the viewport, but a last Smooth by Angle, and those of them that are Armature
-// modifiers deforming by `arm`.
-function armatureModifiers(ob, arm) {
-  const shown = [...ob.modifiers].filter((m) => m.show_viewport), stack = smoothByAngle(shown.at(-1) ?? {}) ? shown.slice(0, -1) : shown;
+// A mesh object's modifiers shown in the viewport, but a last Smooth by Angle and those its applied rest holds
+// (`applied`, names), and those of them that are Armature modifiers deforming by `arm`.
+function armatureModifiers(ob, arm, applied = []) {
+  const stack = shownStack(ob).filter((m) => !applied.includes(m.name));
   return { stack, mine: stack.filter((m) => m.type === 'ARMATURE' && address(m.object) === address(arm)) };
 }
 
 // What of a mesh's deform Babylon cannot evaluate, so that the mesh deforms as Blender. Babylon skins the object's Mesh
 // as Main holds it, after its shape keys' morph targets (shape-keys.js), as Blender deforms after the keys: the Armature
-// modifier has to be the only one.
-function meshFallbacks(ob, arm) {
-  const { stack, mine } = armatureModifiers(ob, arm), [modifier] = mine, at = stack.indexOf(modifier);
+// modifier has to be the only one, but for those an export applies into the rest mesh (applied-rest.js).
+function meshFallbacks(ob, arm, applied) {
+  const { stack, mine } = armatureModifiers(ob, arm, applied), [modifier] = mine, at = stack.indexOf(modifier);
   const path = (name) => `modifiers["${modifier.name}"].${name}`, out = [];
   if (mine.length > 1) out.push(issue(FALLBACK, ob, 'modifiers', 'two Armature modifiers'));
   if (at > 0) out.push(issue(FALLBACK, ob, path('show_viewport'), `Armature after ${stack[0].name}`));
@@ -187,13 +186,16 @@ export function mapArmature(arm, scene) {
 
   // objects: the mesh objects to look at (RNA's Objects); meshOf(ob): the Mesh Babylon draws for one (its corners are
   // the skin's vertices); changed(ob): whether its Mesh changed since the last update; fallbacks(ob): issues of the
-  // view's own (a mesh Babylon draws itself); influencers: the setting.
-  function update({ objects, meshOf, changed = () => false, fallbacks = () => [], influencers = 'AUTO' }) {
+  // view's own (a mesh Babylon draws itself); influencers: the setting; restOf(ob): an export's applied rest of it
+  // (applied-rest.js), whose Mesh meshOf gives and whose weights it skins by.
+  function update({ objects, meshOf, changed = () => false, fallbacks = () => [], influencers = 'AUTO', restOf = () => null }) {
     bones = bonesOf(arm, segmentsOf(arm));
     const armatureWorld = matrix(arm.matrix_world);
-    const issues = [], deformed = new Map();
+    const issues = [], deformed = new Map(), rests = new Map();
     for (const ob of objects.filter((o) => o.type === 'MESH' && armatureModifiers(o, arm).mine.length)) {
-      const own = [...meshFallbacks(ob, arm), ...fallbacks(ob)];
+      const rest = restOf(ob);
+      if (rest) rests.set(address(ob), rest);
+      const own = [...meshFallbacks(ob, arm, rest?.applied), ...fallbacks(ob)];
       issues.push(...own);
       if (!own.length) deformed.set(address(ob), ob);
     }
@@ -206,7 +208,7 @@ export function mapArmature(arm, scene) {
       let skin = skins.get(key);
       const dualQuaternions = modifier.use_deform_preserve_volume && dualQuaternionsOf(arm);
       if (!skin || skin.skeleton !== skeleton || skin.setting !== influencers || skin.dualQuaternions !== dualQuaternions || changed(ob)) {
-        const { perVertex, keyed } = vertexWeights(ob, bones, modifier, arm, Matrix.Invert(space));
+        const { perVertex, keyed } = vertexWeights(rests.get(key)?.ob ?? ob, bones, modifier, arm, Matrix.Invert(space));
         skin = { ob: key, skeleton, setting: influencers, keyed, dualQuaternions, ...skinBuffers(meshOf(key), perVertex, influencersFor(influencers, perVertex)) };
         skins.set(key, skin);
       }
@@ -447,17 +449,18 @@ function boneParent(mappings, ob, byOb) {
 // Export: every armature mapped that skins a mesh the export writes (all of the scene's, or of its selected objects:
 // `world.only`), those on Blender for the export's duration (their meshes skinned, then drawn as Blender evaluated them
 // again), with their issues and their pose's animation.
-function exportArmatures(world, { bake, sampling }) {
+function exportArmatures(world, { bake, sampling, rests = appliedRests() }) {
   const view = lastView;
   if (!view || !world.mainSync) return { reports: [], animations: [], restore() {} };
   const entries = [...view.entries()], meshes = entries.filter((e) => e.type === 'MESH').map((e) => idStruct(e.ob)), byOb = new Map(entries.map((e) => [e.ob, e]));
   const exported = (mapping) => !world.only || [...mapping.skins.keys()].some((key) => world.only.has(byOb.get(key)?.node));
-  const temporary = [], mappings = [];
+  const temporary = [], mappings = [], meshOf = (key) => view.blender.mesh(rests.byAddress(key)?.address ?? key);
   for (const arm of entries.filter((e) => e.type === 'ARMATURE').map((e) => idStruct(e.ob))) {
     const live = mapped.get(address(arm));
     if (live) { if (exported(live.mapping)) mappings.push(live.mapping); continue; }
-    const state = { mapping: mapArmature(arm, view.scene), applied: new Map() }, meshOf = (key) => view.blender.mesh(key);
-    state.mapping.update({ objects: meshes, meshOf, influencers: settingsOf(arm)?.influencers, fallbacks: (ob) => viewFallbacks(view, byOb.get(address(ob)), ob) });
+    const state = { mapping: mapArmature(arm, view.scene), applied: new Map() };
+    state.mapping.update({ objects: meshes, meshOf, influencers: settingsOf(arm)?.influencers, restOf: rests.of,
+      fallbacks: (ob) => viewFallbacks(view, byOb.get(address(ob)), ob) });
     if (!state.mapping.skins.size || !exported(state.mapping)) { state.mapping.dispose(); continue; }
     temporary.push(state);
     mappings.push(state.mapping);
@@ -465,7 +468,7 @@ function exportArmatures(world, { bake, sampling }) {
   const nodeOf = (ob) => byOb.get(address(ob))?.node;
   const { animations, curves, gaps, constraints } = poseAnimations(world, mappings, bake, sampling, { nodeOf, meshOf: (m) => byOb.get(m.skins.keys().next().value)?.node });
   for (const state of temporary) {
-    drawSkins({ ...view, world: { animation: { playing: true } } }, state, (key) => view.blender.mesh(key));
+    drawSkins({ ...view, world: { animation: { playing: true } } }, state, meshOf);
     for (const key of state.applied.keys()) exporting.add(key);
   }
   return {

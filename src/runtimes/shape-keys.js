@@ -19,14 +19,15 @@ const issue = (kind, setting, message) => ({ kind, setting, message });
 const NORMALS = (key) => issue(APPROXIMATION, keyPath(key, 'key_blocks'), "normals blended from each key's own, not recomputed");
 const EDITING = ['EDIT', 'SCULPT'];
 
-// What of an object's shape keys Babylon cannot blend, so that its mesh evaluates as Blender. `entry`: the view's.
-function fallbacks(view, entry, ob, key) {
+// What of an object's shape keys Babylon cannot blend, so that its mesh evaluates as Blender. `entry`: the view's;
+// `rest`: an export's applied rest of the object (applied-rest.js), whose modifiers come before the keys' blend.
+function fallbacks(view, entry, ob, key, rest = null) {
   if (entry.overlay || EDITING.includes(ob.mode)) return [{ kind: FALLBACK, setting: null, message: `${ob.name}: being edited`, silent: true }];
   const out = [];
   if (!key.use_relative) out.push(issue(FALLBACK, keyPath(key, 'use_relative'), `${key.name}: absolute shape keys`));
   if (!view.drawsGeometry(entry)) out.push(issue(FALLBACK, `bpy.data.objects["${ob.name}"].data`, `${ob.name}: Babylon's own geometry`));
   // Babylon skins after it morphs, so an Armature modifier its skeleton skins (armature.js) may follow the keys.
-  const shown = [...ob.modifiers].find((m) => m.show_viewport && !(m.type === 'ARMATURE' && entry.node.skeleton));
+  const shown = [...ob.modifiers].find((m) => m.show_viewport && !rest?.applied.includes(m.name) && !(m.type === 'ARMATURE' && entry.node.skeleton));
   if (shown) out.push(issue(FALLBACK, `bpy.data.objects["${ob.name}"].modifiers["${shown.name}"].show_viewport`, `${ob.name}: ${shown.name} after the shape keys`));
   if (modifierStack(entry.node).some((m) => m.showViewport)) out.push(issue(FALLBACK, `bpy.data.objects["${ob.name}"].modifiers`, `${ob.name}: Bylonder's modifiers after the shape keys`));
   const active = ob.active_shape_key;
@@ -93,14 +94,15 @@ function influences(ob, key, names) {
   });
 }
 
-// A mesh object's keys as a MorphTargetManager on its node: the Mesh Main holds drawn, then its targets.
-function morph(view, entry, ob, key) {
-  const mesh = view.blender.mesh(entry.ob);
-  const basis = blockData(key.reference_key, mesh.verts_num), positions = mesh.vert_positions;
+// A mesh object's keys as a MorphTargetManager on its node: the Mesh Main holds drawn, then its targets; with `rest`,
+// the applied rest's Mesh and keys.
+function morph(view, entry, ob, key, rest = null) {
+  const mesh = view.blender.mesh(rest?.address ?? entry.ob), source = rest ? { ob: rest.ob, key: rest.key } : { ob, key };
+  const basis = blockData(source.key.reference_key, mesh.verts_num), positions = mesh.vert_positions;
   for (let i = 0; i < basis.length; i++) if (basis[i] !== positions[i]) return null;
   // A skinned mesh draws the Mesh Main holds already (armature.js), its skin with it.
   if (!entry.node.skeleton) view.drawMesh(entry, mesh);
-  const manager = new MorphTargetManager(view.scene), targets = targetsOf(ob, key, mesh);
+  const manager = new MorphTargetManager(view.scene), targets = targetsOf(source.ob, source.key, mesh);
   for (const target of targets) {
     const made = new MorphTarget(target.name, 0, view.scene);
     made.setPositions(target.positions);
@@ -184,17 +186,17 @@ const issues = (key) => [...(issuesByKey.get(address(key)) ?? []).filter((i) => 
 
 // Export: every mesh's keys as morph targets, those on Blender for the export's duration, with the influences' animation
 // where the keys are animated.
-function exportShapeKeys(world, { sampling }) {
+function exportShapeKeys(world, { sampling, rests }) {
   const view = lastView;
   if (!view || !world.mainSync) return { reports: [], animations: [], restore() {} };
   const temporary = [], mapped = [];
   for (const entry of view.entries()) {
     if (entry.type !== 'MESH') continue;
-    const ob = idStruct(entry.ob), key = meshKey(ob);
-    if (!key || fallbacks(view, entry, ob, key).length) continue;
+    const ob = idStruct(entry.ob), key = meshKey(ob), rest = key && !morphed.has(entry.ob) ? rests?.of(ob) : null;
+    if (!key || fallbacks(view, entry, ob, key, rest).length) continue;
     let state = morphed.get(entry.ob);
     if (!state) {
-      state = morph(view, entry, ob, key);
+      state = morph(view, entry, ob, key, rest);
       if (!state) continue;
       blend(entry, state, ob, key);
       temporary.push([entry, state]);

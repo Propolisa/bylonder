@@ -8,6 +8,7 @@ import { __class__, __kwargtrans__ } from '../bl_py/org.transcrypt.__runtime__.j
 import { registerClass, defineAssignedProperties, pointerOf, contextStruct } from '../python/bpy_rna.js';
 import { report } from '../windowmanager/wm-reports.js';
 import { exportSampling } from '../io_scene_babylon/sampling.js';
+import { appliedRests } from './applied-rest.js';
 
 export const RUNTIMES = {
   BLENDER: ['Blender', "Blender's settings, evaluated by Blender"],
@@ -56,12 +57,12 @@ function reportIssues(title, issues) {
 // and what is still sampled in `gaps`; `sampling`, the frames it samples at (io_scene_babylon/sampling.js). `choice`: File > Export's runtime options (export-options.js), each instance on its
 // own runtime where they choose none. Returns { animations: [{ animation, target }], curves, gaps, constraints (an armature's bone constraints the page runs), clip(sampling, owns), restore() }.
 export function exportRuntimes(world, { bake = true, sampling = world.animation && exportSampling(world.animation.time.state), ...choice } = {}) {
-  const results = features.map((feature) => feature.export(world, { bake, sampling, runtime: exportedRuntime(feature, choice) }));
+  const rests = appliedRests(), results = features.map((feature) => feature.export(world, { bake, sampling, rests, runtime: exportedRuntime(feature, choice) }));
   for (const { title, issues } of results.flatMap((r) => r.reports)) reportIssues(title, issues);
   return { animations: results.flatMap((r) => r.animations), curves: results.flatMap((r) => r.curves ?? []), gaps: results.flatMap((r) => r.gaps ?? []), constraints: results.flatMap((r) => r.constraints ?? []),
     clip: (clipSampling, owns) => results.flatMap((r) => r.clip?.(clipSampling, owns) ?? []),
     boneParent: (ob) => results.map((r) => r.boneParent?.(ob)).find(Boolean) ?? null,
-    restore: () => results.forEach((r) => r.restore()) };
+    restore: () => { results.forEach((r) => r.restore()); rests.dispose(); } };
 }
 
 // The runtime File > Export's options (export-options.js) choose for an instance of a feature: set on the instance, else
