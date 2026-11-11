@@ -8,6 +8,7 @@ import { join } from 'node:path';
 import { NullEngine } from '@babylonjs/core';
 import { openExample } from './open-example.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
+import { compositorLosses } from '../src/io_scene_babylon/compositor-export.js';
 import { writePackage } from './export-package.js';
 
 const { world, sync, scene } = openExample('compositor');
@@ -25,6 +26,8 @@ const pass = (name) => compositor.graph.blocks.find((b) => b.name === name)?.pas
 assert.ok(pass('Color Balance').fragment.uniforms.length > 10 && pass('Mix').fragment, 'pixel nodes are fragment passes with their values as uniforms');
 assert.ok(pass('Lens Distortion').plan.steps.length && pass('Blur').plan.steps.length, 'operations are recorded plans');
 assert.ok(!pass('Viewer'), 'a node the composite does not pass through stays out');
+// Glare's Fog Glow reads its highlights back for an FFT on the CPU, which no plan replays: the export says so.
+assert.deepEqual(compositorLosses(world), ['Compositor: Glare is not exported (texture read); the page passes its image through']);
 assert.deepEqual(constant('DISPLAY'), { exposure: 1, exponent: 1, lattice: null }, 'Standard displays as sRGB, with no lattice');
 
 // The graph parses in a process with nothing but Babylon and the blocks library.

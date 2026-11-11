@@ -101,16 +101,37 @@ function nodePass(block, size, inputsPath) {
   return { pass, knobs };
 }
 
-// The scene's compositor for the page, or null when it does not composite: { compositor: { graph, width, height },
-// knobs }. Its plans are recorded at the scene's render size (`width` by `height`).
-export function exportCompositor(world) {
+// Main's compositing tree as a graph at the render's size, or null when the scene does not composite.
+function compositing(world) {
   const sync = world.mainSync, tree = sync?.compositingTree();
   const scene = sync && idStruct(sync.blender.scene);
   if (!tree || !scene.render.use_compositing) return null;
   const { render } = scene, percent = render.resolution_percentage / 100;
   const size = [Math.round(render.resolution_x * percent), Math.round(render.resolution_y * percent)];
+  return { scene, size, graph: compositorGraph(tree, world.scene, tree.name).graph };
+}
+
+// What a page's composite leaves out: each node the composite passes through that it cannot run (a recording the
+// page cannot replay, as Fog Glow's read back for its FFT), whose image the page passes through as muted.
+export function compositorLosses(world) {
+  const made = compositing(world);
+  if (!made) return [];
+  try {
+    const dropped = (block) => (block.replays ? (block._recording(made.size)?.plan.reasons ?? (block._recording(made.size) ? null : ['not recorded'])) : !block._graph() && ['no GPU code']);
+    return [...reached(made.graph.outputBlock)].filter((block) => block instanceof BlenderCompositorBlock && !block.mute && dropped(block))
+      .map((block) => `Compositor: ${block.name} is not exported (${dropped(block).join(', ')}); the page passes its image through`);
+  } finally {
+    made.graph.dispose();
+  }
+}
+
+// The scene's compositor for the page, or null when it does not composite: { compositor: { graph, width, height },
+// knobs }. Its plans are recorded at the scene's render size (`width` by `height`).
+export function exportCompositor(world) {
+  const made = compositing(world);
+  if (!made) return null;
+  const { scene, size, graph } = made;
   const nodesPath = `node_groups${key(scene.compositing_node_group.name)}.nodes`;
-  const { graph } = compositorGraph(tree, world.scene, tree.name);
   try {
     const used = reached(graph.outputBlock), json = graph.serialize(), knobs = [];
     const byId = new Map(graph.attachedBlocks.map((b) => [b.uniqueId, b]));
