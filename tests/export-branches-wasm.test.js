@@ -12,6 +12,8 @@ import { sceneBranches } from '../src/io_scene_babylon/branches.js';
 
 const { world, sync } = openExample('compositor');
 sync.view();
+// What the branches choose does not depend on the frames sampled: three keep each export to seconds.
+world.animation.time.configure({ frameStart: 1, frameEnd: 3 });
 const SMOOTH = 'NT:Smooth by Angle@geometry_nodes_essentials.blend.001';
 
 async function exported(branches, branchState = null) {

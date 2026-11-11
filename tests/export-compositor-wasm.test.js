@@ -15,6 +15,8 @@ import { writePackage } from './export-package.js';
 
 const { world, sync, scene } = openExample('compositor');
 sync.view();
+// Nothing here depends on the frames sampled: three keep the export to seconds.
+world.animation.time.configure({ frameStart: 1, frameEnd: 3 });
 // Bylonder's light reach (light-reach.js) keeps a light off meshes it does not reach, as Babylon's excluded meshes.
 scene.getLightByName('Door Light').excludedMeshes = [scene.getMeshByName('Road')];
 const files = await exportModule(world);

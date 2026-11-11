@@ -1,3 +1,4 @@
+// Full suite only: every frame-by-frame comparison of exported animation with Main, five examples deep.
 // The JavaScript export's animation against Blender's: each example's package, loaded, placed at frames of its range
 // by its animation group and the F-Curves its page runs, puts every animated mesh where Main evaluates it at that frame,
 // with exact keys where an F-curve is all that moves a value, the clean-room F-Curve unit where Babylon cannot play it
@@ -20,8 +21,8 @@ import { writePackage } from './export-package.js';
 // Per example: frames to check, and the least share of its tracks that must be exact keys (not a sample per frame).
 const EXAMPLES = { 'drivers-and-graph-editor': [1, 7, 13, 30, 61, 96], nla: [1, 10, 25, 49, 60, 80], compositor: [1, 37, 120, 240], 'shape-keys': [1, 18, 25, 48],
   'desk-lamp': [1, 36, 49, 96] };
-// The Elastic case: the first location F-Curve of the Compositor example's objects (the airship's), its first key eased
-// with Elastic.
+// The Elastic case, in the Compositor example's run: the first location F-Curve of its objects (the airship's), its first
+// key eased with Elastic.
 const ELASTIC = 'compositor';
 
 async function check(id, { bake = false, elastic = false, slide = false, half = false } = {}) {
@@ -101,7 +102,7 @@ async function check(id, { bake = false, elastic = false, slide = false, half = 
 const [example, mode] = process.argv.slice(2);
 if (example) await check(example, { bake: mode === 'bake', elastic: mode === 'elastic', slide: mode === 'slide', half: mode === 'half' });
 else {
-  const runs = [...Object.keys(EXAMPLES).map((id) => [id]), [ELASTIC, 'elastic'], ['nla', 'slide'], ['drivers-and-graph-editor', 'bake'], ['nla', 'half'], ['desk-lamp', 'half']];
+  const runs = [...Object.keys(EXAMPLES).map((id) => (id === ELASTIC ? [id, 'elastic'] : [id])), ['nla', 'slide'], ['drivers-and-graph-editor', 'bake'], ['nla', 'half'], ['desk-lamp', 'half']];
   for (const args of runs) process.stdout.write(execFileSync(process.execPath, [fileURLToPath(import.meta.url), ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] }).split('\n').filter((l) => !l.startsWith('BJS')).join('\n'));
   console.log('Export animation: meshes play where Main evaluates them at each checked frame, with exact keys where the F-curve is the motion and F-Curves Babylon cannot play run live');
 }

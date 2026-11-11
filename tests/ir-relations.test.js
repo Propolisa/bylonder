@@ -1,3 +1,4 @@
+// Full suite only: every example opened in a process of its own (90 s).
 // The IR's relation gaps (docs/licence-free-live.md, Relation gaps) on the examples: what a walk of ID pointers does not
 // see, and which of it the depsgraph's relations (deg-relations.cc), added to the IR's references, close. Kinds: `time`
 // (a driver reading `frame`, a Scene Time node, an image sequence), `camera` (the scene's active camera read through the

@@ -9,6 +9,8 @@ import { exportModule } from '../src/io_scene_babylon/js-export.js';
 
 const { world, node, sync } = openExample('compositor');
 sync.view();
+// Only her sip is sampled, as each frame costs Blender a share of a second: the cup rises from frame 150 to her lips by 172.
+world.animation.time.configure({ frameStart: 150, frameEnd: 180 });
 const selected = ['Tea Break', 'Tea Cup'].map(node);
 const files = await exportModule(world, { scope: 'SELECTED', selected, target: 'WEBGL2', runtimes: { ARMATURE: { runtime: 'MAPPED', instances: {} } } });
 const pkg = writePackage(files);
@@ -31,7 +33,7 @@ try {
   const cup = (blend) => blend.entries.meshes.find((m) => m.name === 'Tea Cup');
   assert.equal(cup(girl).parent.name, 'LeftHand', 'the cup hangs from her hand');
   girl.entries.root.position.set(3, 0, -2);
-  for (const frame of [1, 180]) {
+  for (const frame of [150, 180]) {
     sync.frameChanged(frame);
     girl.playhead.seek(frame);
     girl.entries.skeletons[0].prepare(true);
@@ -48,8 +50,8 @@ try {
   assert.equal(copy.entries.root.parent, player);
   assert.equal(copy.scene.animationGroups.length, 1, "a copy's controller sees its own animation alone");
   assert.notEqual(copy.scene.getNodeById('Tea Cup'), girl.scene.getNodeById('Tea Cup'));
-  copy.playhead.seek(170);
-  assert.equal(girl.playhead.frame !== 170, true, 'each copy has its own playhead');
+  copy.playhead.seek(165);
+  assert.equal(girl.playhead.frame !== 165, true, 'each copy has its own playhead');
   const before = scene.meshes.length;
   copy.dispose();
   assert.equal(scene.meshes.length, before - names.length, 'dispose removes the copy alone');
@@ -70,7 +72,7 @@ try {
     const alone = await (await import(cupPkg.url)).load({ scene: new Scene(new NullEngine()) });
     assert.deepEqual(alone.entries.meshes.map((m) => m.name).filter((n) => !n.startsWith('__')).sort(), ['Tea Break Rig', 'Tea Cup'], 'the cup and the rig it hangs from');
     assert.equal(alone.entries.skeletons.length, 0, 'no skeleton without a mesh it skins');
-    for (const frame of [1, 180]) {
+    for (const frame of [150, 180]) {
       sync.frameChanged(frame);
       alone.playhead.seek(frame);
       for (const mesh of alone.entries.meshes) mesh.computeWorldMatrix(true);

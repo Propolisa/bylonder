@@ -35,6 +35,10 @@ function parseImports(file) {
   return specs.filter((spec) => typeof spec === 'string' && /^\.\.?\//.test(spec));
 }
 
+// The files a module imports (resolved once per process).
+const resolved = new Map();
+const targets = (file) => resolved.get(file) ?? resolved.set(file, imports(file).map((spec) => resolveImport(file, spec)).filter(Boolean)).get(file);
+
 // Every src/ module reachable from the entries, as paths relative to the repository.
 export function reachable(entries) {
   const seen = new Set(), queue = entries.map((entry) => resolve(entry));
@@ -42,10 +46,7 @@ export function reachable(entries) {
     const file = queue.pop();
     if (seen.has(file)) continue;
     seen.add(file);
-    for (const spec of imports(file)) {
-      const target = resolveImport(file, spec);
-      if (target) queue.push(target);
-    }
+    queue.push(...targets(file));
   }
   return new Set([...seen].map((file) => relative(process.cwd(), file)));
 }

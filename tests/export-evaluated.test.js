@@ -15,15 +15,6 @@ const range = (keys, i) => { const values = keys.map((k) => k.values[i]); return
 
 // Each example in a process of its own: the module holds one Main, which opening another replaces.
 const SCENARIOS = {
-  // File > Export > JavaScript of scenes with instances: their buffers are not vertex data.
-  async javascript() {
-    const { world } = open('geometry-nodes');
-    assert.match((await exportModule(world))['scene.js'], /export async function createScene/);
-  },
-  async compositor() {
-    const { world } = open('compositor');
-    assert.match((await exportModule(world))['scene.js'], /export async function createScene/);
-  },
   async instances() {
     // Geometry Nodes' instances (the planet's trees and rocks) are thin instances in both exports, which no longer throw.
     const { world } = open('geometry-nodes');

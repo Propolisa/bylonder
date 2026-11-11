@@ -1,3 +1,4 @@
+// Full suite only: it drives Chromium on the GPU.
 // Blender's nodes in Bylonder output what they output in Blender: each case of tests/fixtures/blender-nodes.json
 // (Blender's GPU compositor or EEVEE, tools/blender-reference/node-fixtures.py) runs the node's steps on its constant inputs
 // in WebGL 2 (headless Chromium) and reads the pixel back. Compositor nodes run their block's own fragment shader.
