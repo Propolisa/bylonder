@@ -14,7 +14,9 @@ A small ramen bar, 麺屋 灯 (Menya Akari, "the noodle house of the lamp"), in 
 - **The lane.** Narrow two-storey frontages on both sides, timber below and plaster or corrugated metal above: another
   izakaya or two with red and white chochin, lit noren and standing kanji lightboxes, a kissa with its shutter half
   down, shut shops, shoji windows lit upstairs, utility poles with tangled power lines, vending machines, styrofoam
-  boxes, beer crates, plants, a scooter, a bicycle, stools and rain streaks. Each frontage is one joined object.
+  boxes, beer crates, plants, a scooter, a bicycle, stools and rain streaks. Each frontage is one joined object. Beside
+  the corner shop, the entrance to the flats upstairs: Apartment Door (its origin on its hinge, so it swings open)
+  before a lit hallway, and Apartment Window, its own material's warm emission at strength 0 until a page turns it up.
 - **People.** One woman outside on a tea break, and two people upstairs seen as soft shapes through translucent paper
   in front of lamp-lit rooms, are Quaternius's Animated Woman (CC0 1.0: https://poly.pizza/m/9kF7eTDbhO), in
   `models/animated-woman.glb`. The script seats each from the model's own SitIdle animation, turns the arms and curls

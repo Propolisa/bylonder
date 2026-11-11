@@ -1378,8 +1378,39 @@ frontage('Izakaya', -17.8, -14.2, 'izakaya', height=6.2, sign=('居酒屋', sign
 frontage('Second Kissa', -21.0, -17.8, 'half', upper=corrugated)
 frontage('Bar', -25.0, -21.0, 'izakaya', sign=('酒', sign_paper))
 frontage('End', -30.0, -25.0, 'izakaya', lit=False)
-frontage('Corner', 4.4, 8.0, 'shut', upper=corrugated, lit=False)
-frontage('Corner 2', 8.0, 12.0, 'half')
+frontage('Corner', 4.4, 6.8, 'shut', upper=corrugated, lit=False)
+# Beside the corner shop, the entrance to the flats upstairs: a wooden door (its origin on the hinge, its left edge from
+# the lane, so it swings open) before a lit hallway, and the window of a flat over it, each an object of its own.
+with merged('Apartment Entrance'):
+    for x in (6.875, 7.925):
+        box('Apartment Jamb', (0.15, 0.3, 2.9), (x, 0.15, 1.3), timber)
+    box('Apartment Lintel', (0.9, 0.3, 0.7), (7.4, 0.15, 2.4), timber)
+    box('Apartment Upper', (1.2, 0.3, 3.05), (7.4, 0.15, 4.275), corrugated)
+    for z, depth in ((2.85, 0.75), (5.8, 0.5)):
+        box('Apartment Eave', (1.3, depth, 0.06), (7.4, -depth / 2, z), roof_tiles, (math.radians(-14), 0, 0))
+    for x in (6.94, 7.86):
+        box('Door Trim', (0.05, 0.04, 2.08), (x, -0.01, 1.04), worn_paint)
+    box('Door Trim', (0.97, 0.04, 0.05), (7.4, -0.01, 2.07), worn_paint)
+    box('Apartment Step', (1.1, 0.3, 0.08), (7.4, -0.15, 0.04), timber)
+    for x in (6.97, 7.83):
+        box('Hallway Wall', (0.04, 1.0, 2.05), (x, 0.8, 1.025), plaster)
+    box('Hallway Back', (0.9, 0.05, 2.05), (7.4, 1.3, 1.025), material('Hallway Light', (1.0, 0.45, 0.15), emission=0.6))
+    box('Hallway Ceiling', (0.9, 1.0, 0.04), (7.4, 0.8, 2.05), dark_wood)
+    box('Hallway Floor', (0.9, 1.0, 0.04), (7.4, 0.8, 0.02), dark_wood)
+    for dx in (-0.2, 0.2):
+        box('Lattice', (0.03, 0.03, 0.9), (7.4 + dx, -0.03, 4.3), dark_wood)
+with merged('Apartment Door') as door:
+    box('Apartment Door', (0.88, 0.04, 2.0), (7.4, 0.03, 1.02), material('Apartment Door', (0.12, 0.07, 0.04), roughness=0.6))
+    cylinder('Door Knob', 0.025, 0.05, (7.76, 0.0, 1.0), chrome, (math.pi / 2, 0, 0), 10)
+hinge = Vector((6.96, 0.03, 0.0))
+door['object'].data.transform(Matrix.Translation(door['object'].location - hinge))
+door['object'].location = hinge
+# Dark until someone comes home: its warm emission is there, at strength 0, for a page to turn up.
+apartment_glass = material('Apartment Window', (0.03, 0.025, 0.02), roughness=0.1)
+apartment_glass.node_tree.nodes['Principled BSDF'].inputs['Emission Color'].default_value = (1.0, 0.62, 0.3, 1)
+box('Apartment Window', (0.8, 0.02, 0.9), (7.4, -0.01, 4.3), apartment_glass)
+# Shut and dark upstairs, so the flat's window over the entrance is the one that lights up.
+frontage('Corner 2', 8.0, 12.0, 'shut', lit=False)
 # The near side of the lane, across from the shop. Each front is an object of its own, so it is lit by the few lights
 # near it.
 signs = ('酒', 'やきとり', '居酒屋')
