@@ -1,0 +1,545 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "bylonder-ir"
+    },
+    "version": {
+      "type": "number",
+      "const": 1
+    },
+    "scene": {
+      "default": {
+        "id": null,
+        "collection": null,
+        "view_layer": null,
+        "time": {
+          "frame_current": 1,
+          "frame_start": 1,
+          "frame_end": 250,
+          "fps": 24,
+          "fps_base": 1,
+          "loop": true
+        }
+      },
+      "type": "object",
+      "properties": {
+        "id": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "collection": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "view_layer": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "time": {
+          "default": {
+            "frame_current": 1,
+            "frame_start": 1,
+            "frame_end": 250,
+            "fps": 24,
+            "fps_base": 1,
+            "loop": true
+          },
+          "type": "object",
+          "properties": {
+            "frame_current": {
+              "default": 1,
+              "type": "number"
+            },
+            "frame_start": {
+              "default": 1,
+              "type": "number"
+            },
+            "frame_end": {
+              "default": 250,
+              "type": "number"
+            },
+            "fps": {
+              "default": 24,
+              "type": "number"
+            },
+            "fps_base": {
+              "default": 1,
+              "type": "number"
+            },
+            "loop": {
+              "default": true,
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "ids": {
+      "default": {},
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[A-Z]{2,3}:"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "path": {
+            "default": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "node": {
+            "type": "string"
+          },
+          "data": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "evaluated": {
+            "type": "object",
+            "properties": {
+              "matrix_world": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              },
+              "geometry": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              }
+            },
+            "required": [
+              "matrix_world"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "name"
+        ]
+      }
+    },
+    "collections": {
+      "default": {},
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "children": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "objects": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "color_tag": {
+            "default": "NONE",
+            "type": "string",
+            "enum": [
+              "NONE",
+              "COLOR_01",
+              "COLOR_02",
+              "COLOR_03",
+              "COLOR_04",
+              "COLOR_05",
+              "COLOR_06",
+              "COLOR_07",
+              "COLOR_08"
+            ]
+          },
+          "custom": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          },
+          "hide_viewport": {
+            "default": false,
+            "type": "boolean"
+          },
+          "hide_render": {
+            "default": false,
+            "type": "boolean"
+          },
+          "hide_select": {
+            "default": false,
+            "type": "boolean"
+          },
+          "view_layers": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "exclude": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "hide_viewport": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "holdout": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "indirect_only": {
+                  "default": false,
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "name"
+        ]
+      }
+    },
+    "references": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "relation": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "from",
+          "to"
+        ]
+      }
+    },
+    "properties": {
+      "default": {},
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "default": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "FLOAT",
+              "INT",
+              "BOOLEAN",
+              "STRING"
+            ]
+          },
+          "default": {
+            "type": [
+              "number",
+              "boolean",
+              "string"
+            ]
+          },
+          "soft_min": {
+            "type": "number"
+          },
+          "soft_max": {
+            "type": "number"
+          },
+          "subtype": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "suggested": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "blender_default": {
+            "type": [
+              "number",
+              "boolean",
+              "string"
+            ]
+          },
+          "hard_min": {
+            "type": "number"
+          },
+          "hard_max": {
+            "type": "number"
+          },
+          "step": {
+            "type": "number"
+          },
+          "precision": {
+            "type": "number"
+          },
+          "bind": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          }
+        },
+        "required": [
+          "type",
+          "default"
+        ]
+      }
+    },
+    "graphs": {
+      "default": {},
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "SHADER",
+              "GEOMETRY",
+              "COMPOSITOR"
+            ]
+          },
+          "nodes": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "pattern": "^node:"
+                },
+                "settings": {
+                  "default": {},
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {}
+                },
+                "inputs": {
+                  "default": {},
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {}
+                }
+              },
+              "required": [
+                "name",
+                "type"
+              ],
+              "additionalProperties": {}
+            }
+          },
+          "links": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "string"
+                }
+              ],
+              "items": false,
+              "minItems": 4,
+              "maxItems": 4
+            }
+          },
+          "interface": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            }
+          }
+        },
+        "required": [
+          "type"
+        ]
+      }
+    },
+    "entities": {
+      "default": {},
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[A-Z]{2,3}:.+\\/[a-z_]+\\/.+$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "pattern": "^[a-z_]+:"
+          },
+          "id": {
+            "type": "string"
+          },
+          "inputs": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          },
+          "outputs": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "property": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "property"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "draw": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "draw"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "implementation": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ]
+      }
+    },
+    "order": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "schema",
+    "version"
+  ],
+  "$id": "https://bylonder.dev/ir/1/schema.json",
+  "title": "Bylonder IR, version 1 (docs/ir.md)"
+}
