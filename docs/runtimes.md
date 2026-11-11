@@ -50,7 +50,7 @@ Blender is the default everywhere, and the only runtime of features that offer n
 4. **One animation system.** Blender's animation system animates everything in the editor, Babylon (native) settings
    included (they are properties, keyed with I like any other). Babylon animations are made only by export.
 5. **Approximations and fallbacks are always shown.** Mapping a Blender setting Babylon cannot express exactly is either:
-   - an **approximation**: Babylon evaluates something close (Preserve Volume skinned linearly), listed with what
+   - an **approximation**: Babylon evaluates something close (Preserve Volume of scaled bones), listed with what
      differs; or
    - a **fallback**: Babylon cannot evaluate that part at all (a Subdivision Surface after the Armature modifier), so
      that part evaluates as Blender, listed with the reason.
@@ -102,8 +102,8 @@ carries no mark: an unmarked control behaves as in Blender 5.2.
 ## Scenarios
 
 - **GPU skinning for a game.** A rigged character is slow to deform on the CPU. Select the rig, Armature tab, Runtime:
-  Babylon (mapped). The pose and the deformation look the same; the panel lists Preserve Volume as an approximation if
-  the body uses it. Exporting gives the same skeleton and skinning.
+  Babylon (mapped). The pose and the deformation look the same, Preserve Volume included (dual quaternion skinning).
+  Exporting gives the same skeleton and skinning.
 - **A modifier after Armature.** The body has Subdivision Surface after its Armature modifier. In Babylon (mapped) the
   panel lists a fallback: the body deforms in Blender; other meshes of the rig still skin in Babylon.
 - **Editing.** In Edit Mode the rig evaluates as Blender; back in Pose Mode, Babylon skins again. Weight painting the
@@ -185,8 +185,12 @@ One wrapper module per feature, without changing the code of other features or t
   frames of an action, `tests/runtimes-armature-wasm.test.js`). A deforming B-Bone's segment joints are bones of the
   skeleton (B-Bone Segments as Bones, on by default): their matrices are Blender's (`PoseBone.bbone_segment_matrix`),
   and each vertex's weight on the B-Bone is split between two joints as Blender places it (`bbone_segment_index`).
+  Preserve Volume skins with dual quaternions (Dual Quaternion Skinning, on by default;
+  `runtime/dual-quaternion-skinning.js`, a material plugin for PBR and Standard materials and a bones block for node
+  materials): Main's deform to float precision for bones that rotate and move.
 - **Approximations:** normals (Babylon skins them with the bones; Blender recomputes them from the deformed shape, so
-  shading differs a little where bones blend: listed for every skinned mesh), Preserve Volume (skinned linearly: Babylon has no dual quaternion skinning), bone envelopes
+  shading differs a little where bones blend: listed for every skinned mesh), Preserve Volume of scaled bones (dual
+  quaternions blend their scale linearly, Blender otherwise) or with Dual Quaternion Skinning off (skinned linearly), bone envelopes
   (`use_bone_envelopes`: they do not deform), a deforming bone's B-Bone segments where shape keys move a vertex (it
   keeps the segment of its Basis shape) or with B-Bone Segments as Bones off (it deforms as one segment), its
   Multiply Vertex Group by Envelope, and vertices with more weights than the influencers (the strongest kept,

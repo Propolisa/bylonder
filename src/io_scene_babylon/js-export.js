@@ -165,7 +165,9 @@ function nodeCode(entry, mesh, geometries, live, bin) {
     lines.push(`{ const instance = node.createInstance(${json(instance.name)}); instance.position.set(${vector(instance.position)}); ${instance.rotationQuaternion ? `instance.rotationQuaternion = new Quaternion(${vector(instance.rotationQuaternion)});` : `instance.rotation.set(${vector(instance.rotation)});`} instance.scaling.set(${vector(instance.scaling)}); }`);
   }
   if (entry.animations?.length) lines.push(`node.animations = ${json(entry.animations)}.map((a) => Animation.Parse(a));`);
-  if (live) lines.push(`node.metadata = ${json({ bylonderChannels: channels(live) })};`);
+  // Its channels, and dual quaternion skinning (armature.js), which BlendScene turns on.
+  const metadata = { ...(live && { bylonderChannels: channels(live) }), ...(entry.metadata?.bylonderDualQuaternions && { bylonderDualQuaternions: true }) };
+  if (Object.keys(metadata).length) lines.push(`node.metadata = ${json(metadata)};`);
   lines.push(`nodes[${entry.uniqueId}] = node;`);
   return lines.filter(Boolean);
 }

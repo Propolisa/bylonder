@@ -5,7 +5,8 @@ A figure skinned to a humanoid armature, made in Blender 5.2 by `rigged-characte
 
 - **Body.** A Skin modifier over the skeleton's edges, smoothed by Subdivision Surface and applied.
 - **Rig.** The armature Rig: spine, chest, head, arms, legs and tail, drawn In Front. The body is parented to it With
-  Automatic Weights, so each bone has its vertex group and the Armature modifier deforms the body.
+  Automatic Weights, so each bone has its vertex group and the Armature modifier deforms the body, with Preserve
+  Volume on so its joints keep their volume as they bend.
 - **Controls.** IK targets at the hands and feet (hand_ik, foot_ik) and pole targets behind the elbows and in front
   of the knees (elbow_pole, knee_pole) drive the limbs with two-bone IK; the hands copy their IK targets' rotation;
   the head turns toward the empty Look with Damped Track, within a Limit Rotation in local space.

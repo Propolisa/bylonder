@@ -34,6 +34,7 @@ import { serializeScene } from '../src/io_scene_babylon/babylon-export.js';
 import { BlenderAnimation } from '../src/blenkernel/animation/anim-blender.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
 import { writePackage } from './export-package.js';
+import { packDualQuaternions, skinPoint } from '../src/io_scene_babylon/runtime/dual-quaternion-skinning.js';
 
 if (!hasArmatures) {
   console.log('Armature runtimes: skipped, this module has no armature-api.cc');
@@ -131,7 +132,9 @@ assert.ok(props(runtimePanel()).includes('runtime') && props(runtimePanel()).inc
 assert.ok(runtimePanel().some((b) => b.icon === BYLONDER_ICON), 'its header carries the Bylonder icon');
 assert.ok(!drawn('DATA').DATA_PT_bylonder_armature_runtime?.some((b) => b.icon === 'ERROR'), 'no issues on Blender');
 
-// Babylon (mapped): Babylon skins the body as Main deforms it, at several poses.
+// Babylon (mapped): Babylon skins the body as Main deforms it, at several poses; linearly, Preserve Volume off until
+// its own checks below.
+bodyData.modifiers.get('Armature').use_deform_preserve_volume = false;
 rig.bylonder.runtime = 'MAPPED';
 // Its body's shape keys too, which Babylon morphs before it skins, as Blender's Armature deforms after them.
 bodyData.data.shape_keys.bylonder.runtime = 'MAPPED';
@@ -170,8 +173,8 @@ for (const frame of [6, 16]) {
   assert.ok(skinningError() < PRECISION, `frame ${frame}: the action's pose skinned as Main deforms it (${skinningError()})`);
 }
 
-// Issues: B-Bone segments where shape keys move vertices, and Preserve Volume, are approximations, shown in the panel;
-// a modifier after Armature is a fallback: the body deforms as Blender.
+// Issues: B-Bone segments where shape keys move vertices, and Preserve Volume with Dual Quaternion Skinning off, are
+// approximations, shown in the panel; a modifier after Armature is a fallback: the body deforms as Blender.
 reports.length = 0;
 rig.bylonder.runtime = 'BLENDER';
 sync.view();
@@ -180,11 +183,16 @@ bodyData.modifiers.get('Armature').use_deform_preserve_volume = true;
 rig.bylonder.runtime = 'MAPPED';
 sync.view();
 const kinds = () => rig.bylonder.issues.map((i) => i.kind + ' ' + i.setting.replace(/^bpy\.data\.objects\["(\w+)"\]\./, '$1.'));
+rig.bylonder.babylon.use_dual_quaternions = false;
+sync.view();
 assert.deepEqual(kinds().sort(), ['APPROXIMATION Body.data.shape_keys', 'APPROXIMATION Body.modifiers["Armature"]', 'APPROXIMATION Body.modifiers["Armature"].use_deform_preserve_volume']);
 assert.ok(rig.bylonder.issues.some((i) => /\d+ vertices on B-Bones keep the segments of their Basis shape/.test(i.message)), "the elbow's corrective moves vertices of the forearm's B-Bone");
 assert.equal(runtimePanel().filter((b) => b.icon === 'INFO' && /Preserve Volume|B-Bone/.test(b.text)).length, 2, 'the panel lists them');
 assert.equal(reports.filter((r) => /approximated/.test(r.message)).length, 3, 'switching reports them to the Info editor');
 assert.ok(body.skeleton, 'an approximation still skins in Babylon');
+rig.bylonder.babylon.use_dual_quaternions = true;
+sync.view();
+assert.ok(!rig.bylonder.issues.some((i) => /skins linearly/.test(i.message)), 'Dual Quaternion Skinning on: Preserve Volume skins as Blender');
 // B-Bone Segments as Bones off: each B-Bone deforms as one segment, an approximation.
 rig.bylonder.babylon.use_bbone_segments = false;
 sync.view();
@@ -204,6 +212,41 @@ bodyData.modifiers.get('Armature').use_deform_preserve_volume = false;
 blender.tag(bodyOb, 2);
 sync.view();
 assert.ok(body.skeleton && skinningError() < PRECISION, 'without them, skinned again');
+
+// Preserve Volume: dual quaternion skinning (runtime/dual-quaternion-skinning.js), its CPU reference of the shader's
+// math against Main's deform at poses of rotations and moves; scaled bones are an approximation.
+function dualQuaternionError() {
+  const evaluated = blender.evaluatedMesh(bodyOb), p = evaluated.vert_positions, corners = evaluated.corner_verts;
+  const packed = packDualQuaternions(body.skeleton.getTransformMatrices(body)), pos = body.getVerticesData(VertexBuffer.PositionKind);
+  const kinds = [[VertexBuffer.MatricesIndicesKind, VertexBuffer.MatricesWeightsKind], [VertexBuffer.MatricesIndicesExtraKind, VertexBuffer.MatricesWeightsExtraKind]];
+  const [I, W] = [0, 1].map((k) => kinds.map((pair) => body.getVerticesData(pair[k])));
+  const targets = Array.from({ length: body.morphTargetManager?.numTargets ?? 0 }, (_, t) => body.morphTargetManager.getTarget(t)).filter((t) => t.influence);
+  let error = 0;
+  for (let c = 0; c < evaluated.corners_num; c++) {
+    const influences = [];
+    for (let k = 0; k < body.numBoneInfluencers; k++) if (W[k >> 2][c * 4 + (k & 3)]) influences.push([I[k >> 2][c * 4 + (k & 3)], W[k >> 2][c * 4 + (k & 3)]]);
+    const morphed = [0, 1, 2].map((i) => targets.reduce((v, t) => v + (t.getPositions()[c * 3 + i] - pos[c * 3 + i]) * t.influence, pos[c * 3 + i]));
+    const skinned = skinPoint(packed, influences, morphed), v = corners[c] * 3;
+    error = Math.max(error, ...[0, 2, 1].map((axis, k) => Math.abs(skinned[k] - p[v + axis])));
+  }
+  return error;
+}
+bodyData.modifiers.get('Armature').use_deform_preserve_volume = true;
+blender.tag(bodyOb, 2);
+sync.view();
+assert.ok(body.metadata?.bylonderDualQuaternions, 'the body is marked for the page to skin it with dual quaternions');
+for (const [i, values] of POSES.slice(0, 2).entries()) {
+  pose(values);
+  assert.ok(dualQuaternionError() < PRECISION, `pose ${i}: dual quaternion skinning is Main's Preserve Volume (${dualQuaternionError()})`);
+  assert.ok(skinningError() > 1e-3, `pose ${i}: where linear skinning is not (${skinningError()})`);
+}
+pose(POSES[2]);
+assert.ok(rig.bylonder.issues.some((i) => /Preserve Volume of scaled bones/.test(i.message)), 'a scaled bone is an approximation');
+pose({});
+bodyData.modifiers.get('Armature').use_deform_preserve_volume = false;
+blender.tag(bodyOb, 2);
+sync.view();
+assert.ok(!body.metadata?.bylonderDualQuaternions);
 
 // Edit Mode evaluates as Blender; leaving it, Babylon skins again.
 blender.run('object.mode_set', { mode: 'EDIT' });
@@ -290,4 +333,4 @@ assert.ok(reports.some((r) => r.type === 'WARNING' && r.message === 'Rig: Armatu
 assert.equal(rig.bylonder.runtime, 'BLENDER', 'the export leaves the rig on its own runtime');
 assert.equal(scene.skeletons.length, 0);
 
-console.log('Armature runtimes: the Rigged Character skinned by Babylon as Main deforms it at 3 poses and 2 frames of an action, its B-Bone tail too, the Runtime panel, approximations and fallbacks, Edit Mode, .babylon and .js export reloaded and skinned the same');
+console.log('Armature runtimes: the Rigged Character skinned by Babylon as Main deforms it at 3 poses and 2 frames of an action, its B-Bone tail and Preserve Volume (dual quaternions) too, the Runtime panel, approximations and fallbacks, Edit Mode, .babylon and .js export reloaded and skinned the same');

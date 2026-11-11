@@ -1,7 +1,7 @@
-"""Builds rigged-character.blend: a figure skinned to a humanoid armature by automatic weights, for posing. Its arms
-and legs reach for IK targets with pole targets, its head looks at an empty within limits, and its hands turn with
-their IK targets; a tail is one B-Bone of eight segments that curls; an animation waves, crouches, looks around and
-swishes the tail. Custom properties on the rig switch the
+"""Builds rigged-character.blend: a figure skinned to a humanoid armature by automatic weights, for posing. It keeps its
+joints' volume (Preserve Volume); its arms and legs reach for IK targets with pole targets, its head looks at an
+empty within limits, and its hands turn with their IK targets; a tail is one B-Bone of eight segments that curls; an
+animation waves, crouches, looks around and swishes the tail. Custom properties on the rig switch the
 left arm between IK and FK and swell the chest; a corrective shape key keeps the left elbow's volume as it bends.
 
 usage: blender -b --factory-startup -P rigged-character.py
@@ -74,6 +74,8 @@ bpy.ops.object.select_all(action='DESELECT')
 body.select_set(True); rig.select_set(True)
 bpy.context.view_layer.objects.active = rig
 bpy.ops.object.parent_set(type='ARMATURE_AUTO')
+# Preserve Volume: the joints keep their volume as they bend (dual quaternion skinning).
+body.modifiers['Armature'].use_deform_preserve_volume = True
 # Controls that deform nothing, added after skinning so they have no vertex groups: IK targets at the hands and feet,
 # pole targets behind the elbows and in front of the knees.
 CONTROLS = {'hand_ik.L': ('hand.L', (0.12, 0, 0)), 'hand_ik.R': ('hand.R', (-0.12, 0, 0)),

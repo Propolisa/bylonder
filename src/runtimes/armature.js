@@ -10,6 +10,7 @@ import { registerRuntime, runtimeOf, APPROXIMATION, FALLBACK } from './runtimes.
 import { livePose } from '../io_scene_babylon/live-curves.js';
 import { livePoseConstraints } from '../io_scene_babylon/pose-export.js';
 import { keyedVertices } from './key-blocks.js';
+import { useDualQuaternionSkinning } from '../io_scene_babylon/runtime/dual-quaternion-skinning.js';
 
 // A vertex Blender's Armature modifier leaves in place: its weights sum to no more than this (armature_deform.cc).
 const CONTRIBUTION = 0.0001;
@@ -38,11 +39,17 @@ function bonesOf(arm, segments = false) {
   });
   return bones;
 }
+// Whether a deforming bone is posed with scale or shear, which dual quaternion skinning blends otherwise than Blender.
+function scaledBones(bones) {
+  const scale = new Vector3();
+  return bones.some((b) => (b.deform || b.segment) && (Matrix.Invert(b.rest).multiply(b.pose).decompose(scale), !scale.equalsWithEpsilon(Vector3.One(), 1e-4)));
+}
 // A Babylon bone of a B-Bone's segment joint.
 const isJoint = (bone) => bone.getSkeleton().bones.indexOf(bone) >= bone.getSkeleton().armatureBones;
 // A bone that deforms as B-Bone segments.
 const bbone = (bone) => bone.use_deform && bone.bbone_segments > 1;
 const segmentsOf = (arm) => settingsOf(arm)?.use_bbone_segments ?? true;
+const dualQuaternionsOf = (arm) => settingsOf(arm)?.use_dual_quaternions ?? true;
 
 // Blender's Smooth by Angle (Object > Shade Auto Smooth), last in the stack: Babylon skins the mesh smooth instead.
 const smoothByAngle = (m) => m.type === 'NODES' && /^Smooth by Angle/.test(m.node_group?.name ?? '');
@@ -72,7 +79,7 @@ function meshApproximations(ob, arm, modifier) {
   const out = [issue(APPROXIMATION, ob, `modifiers["${modifier.name}"]`, 'normals skinned, not recomputed')];
   const smooth = [...ob.modifiers].findLast((m) => m.show_viewport);
   if (smooth && smoothByAngle(smooth)) out.push(issue(APPROXIMATION, ob, `modifiers["${smooth.name}"]`, 'Smooth by Angle after Armature: shaded smooth'));
-  if (modifier.use_deform_preserve_volume) out.push(issue(APPROXIMATION, ob, path('use_deform_preserve_volume'), 'Preserve Volume skins linearly'));
+  if (modifier.use_deform_preserve_volume && !dualQuaternionsOf(arm)) out.push(issue(APPROXIMATION, ob, path('use_deform_preserve_volume'), 'Preserve Volume skins linearly'));
   if (modifier.use_bone_envelopes) out.push(issue(APPROXIMATION, ob, path('use_bone_envelopes'), 'envelopes do not deform'));
   if (!modifier.use_vertex_groups) return out;
   const groups = new Set([...ob.vertex_groups].map((g) => g.name));
@@ -197,12 +204,14 @@ export function mapArmature(arm, scene) {
       const skeleton = skeletons.get(id), modifier = armatureModifiers(ob, arm).mine[0];
       used.add(skeleton);
       let skin = skins.get(key);
-      if (!skin || skin.skeleton !== skeleton || skin.setting !== influencers || changed(ob)) {
+      const dualQuaternions = modifier.use_deform_preserve_volume && dualQuaternionsOf(arm);
+      if (!skin || skin.skeleton !== skeleton || skin.setting !== influencers || skin.dualQuaternions !== dualQuaternions || changed(ob)) {
         const { perVertex, keyed } = vertexWeights(ob, bones, modifier, arm, Matrix.Invert(space));
-        skin = { ob: key, skeleton, setting: influencers, keyed, ...skinBuffers(meshOf(key), perVertex, influencersFor(influencers, perVertex)) };
+        skin = { ob: key, skeleton, setting: influencers, keyed, dualQuaternions, ...skinBuffers(meshOf(key), perVertex, influencersFor(influencers, perVertex)) };
         skins.set(key, skin);
       }
       issues.push(...meshApproximations(ob, arm, modifier).filter((i) => !issues.some((j) => j.setting === i.setting)), ...skinIssues(ob, skin));
+      if (dualQuaternions && scaledBones(bones)) issues.push(issue(APPROXIMATION, ob, `modifiers["${modifier.name}"].use_deform_preserve_volume`, 'Preserve Volume of scaled bones: their scale blends linearly'));
     }
     for (const [id, skeleton] of skeletons) if (!used.has(skeleton)) { skeleton.dispose(); skeletons.delete(id); }
     for (const key of skins.keys()) if (!deformed.has(key)) skins.delete(key);
@@ -230,9 +239,17 @@ export function applySkin(node, skin) {
   WEIGHTS.forEach((kind, i) => (skin.weights[i] ? node.setVerticesData(kind, skin.weights[i], false, 4) : node.removeVerticesData(kind)));
   node.numBoneInfluencers = skin.influencers;
   node.skeleton = skin.skeleton;
+  dualQuaternions(node, skin.dualQuaternions);
+}
+// A mesh skinned with dual quaternions, marked for an export's page (blend-scene.js) to skin it so too.
+function dualQuaternions(node, on) {
+  useDualQuaternionSkinning(node, on);
+  const { bylonderDualQuaternions, ...rest } = node.metadata ?? {};
+  node.metadata = on ? { ...rest, bylonderDualQuaternions: true } : Object.keys(rest).length ? rest : null;
 }
 function removeSkin(node) {
   node.skeleton = null;
+  dualQuaternions(node, false);
   [...INDICES, ...WEIGHTS].forEach((kind) => node.removeVerticesData(kind));
 }
 
@@ -283,7 +300,7 @@ function drawSkins(view, state, meshOf) {
       applySkin(node, skin);
       state.applied.set(key, { skin, boxes: boneBoxes(node, skin) });
     }
-    skin.skeleton.useTextureToStoreBoneMatrices = settingsOf(state.mapping.arm)?.use_texture_for_matrices ?? true;
+    skin.skeleton.useTextureToStoreBoneMatrices = skin.dualQuaternions || (settingsOf(state.mapping.arm)?.use_texture_for_matrices ?? true);
     if (view.world.animation?.playing) poseBounds(node, state.applied.get(key).boxes);
     else node.refreshBoundingInfo({ applySkeleton: true });
   }
@@ -471,6 +488,8 @@ registerRuntime({
       items: [['AUTO', 'Automatic', 'The fewest that hold every weight: 4, or 8 when a vertex has more than 4'], ['4', '4', '4 influences per vertex'], ['8', '8', '8 influences per vertex, in extra buffers']],
       default: 'AUTO', options: new Set() })),
     use_texture_for_matrices: props.BoolProperty(kw({ name: 'Bone Matrices in Texture', description: "The skeleton's bone matrices in a texture, not uniforms (useTextureToStoreBoneMatrices)",
+      default: true, options: new Set() })),
+    use_dual_quaternions: props.BoolProperty(kw({ name: 'Dual Quaternion Skinning', description: "Meshes whose Armature modifier preserves volume skin with dual quaternions, as Blender's Preserve Volume; off, they skin linearly",
       default: true, options: new Set() })),
     use_bbone_segments: props.BoolProperty(kw({ name: 'B-Bone Segments as Bones', description: "A deforming B-Bone's segment joints as bones of the skeleton, so it bends as Blender's; off, it deforms as one segment",
       default: true, options: new Set() })),
