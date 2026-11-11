@@ -249,6 +249,19 @@ precedence = "override"
 SPDX-FileCopyrightText = "The Babylon.js contributors"
 SPDX-License-Identifier = "Apache-2.0"
 
+# The noodle shop demo's sounds, cut from Freesound and OpenGameArt recordings (docs/demos/noodle-shop/sounds/CREDITS.md).
+[[annotations]]
+path = ["docs/demos/noodle-shop/sounds/*.ogg", "docs/demos/noodle-shop/sounds/*.mp3"]
+precedence = "override"
+SPDX-FileCopyrightText = ["TAD", "cybergrrl", "o_ciz", "Breviceps", "mdayalan", "TheHiraHira", "Psychic5", "KoimeMatsuchiya", "ayustat2001", "AgusIvan"]
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "docs/demos/noodle-shop/sounds/rain.*"
+precedence = "override"
+SPDX-FileCopyrightText = "ultradust"
+SPDX-License-Identifier = "CC-BY-4.0"
+
 # The root license texts GitHub and npm detect (the dual layout), copies of LICENSES/MIT.txt and LICENSES/Apache-2.0.txt.
 [[annotations]]
 path = "LICENSE-MIT"
