@@ -14,6 +14,12 @@ export function createPlayhead(scene: import("@babylonjs/core").Scene, time: imp
     end: number;
     /** Frames per second: fps / fps_base, as Blender's. */
     fps: number;
+    /** The frames a target's animation is offset by (later); 0 unless set. @type {(target: any) => number} */
+    offsetOf: (target: any) => number;
+    /** The frame shown by what is offset by `offset` frames. @param {number} offset */
+    frameAt: (offset: number) => number;
+    /** Sets the groups to the frame again, after offsets changed. */
+    refresh(): void;
     /** Whether it shows whole frames only, as Blender's Frame Dropping does. */
     snap: boolean;
     onChanged: Observable<PlayheadState>;

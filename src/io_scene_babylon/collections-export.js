@@ -6,6 +6,7 @@ import { key, knob } from './controls-export.js';
 
 const OWN = /^(bylonder|_RNA_UI$|cycles)/;
 const LAYER_FLAGS = ['exclude', 'hide_viewport', 'holdout', 'indirect_only'];
+const TIME_OFFSET = { name: 'Time Offset', soft_min: -250, soft_max: 250 };
 
 // A collection's custom properties: numbers, booleans, strings and arrays of numbers.
 const custom = (collection) => Object.fromEntries([...(collection.keys?.() ?? [])].filter((name) => !OWN.test(name))
@@ -27,7 +28,8 @@ function layerCollections(layer, base) {
 const drawnLayer = (scene) => [...scene.view_layers].find((l) => l.use) ?? scene.view_layers[0];
 
 // The IR's `scene` and `collections` of the scene (an RNA Scene), and the controls of their visibility in the view layer
-// drawn: each collection's Disable in Viewports and Disable in Renders, and its Exclude and Hide in Viewport there.
+// drawn: each collection's Disable in Viewports and Disable in Renders, and its Exclude and Hide in Viewport there; and
+// its Time Offset, Bylonder's own (`collections["Rain"].bylonder.time_offset`): the frames its objects play later.
 export function exportCollections(scene) {
   const collections = {}, controls = [], layers = [...scene.view_layers].map((layer) => [layer, layerCollections(layer, `scenes${key(scene.name)}.view_layers${key(layer.name)}`)]);
   const drawn = drawnLayer(scene), root = idKey(scene.collection);
@@ -46,6 +48,7 @@ export function exportCollections(scene) {
       for (const flag of ['hide_viewport', 'hide_render']) controls.push(knob(`collections${key(collection.name)}.${flag}`, !!collection[flag], {}, bind));
       const at = layers.find(([layer]) => layer.name === drawn?.name)?.[1].get(k);
       if (at) for (const flag of ['exclude', 'hide_viewport']) controls.push(knob(`${at.path}.${flag}`, !!at.lc[flag], {}, bind));
+      controls.push(knob(`collections${key(collection.name)}.bylonder.time_offset`, 0, TIME_OFFSET, { ...bind, offset: true }));
     }
     for (const child of collection.children) visit(child);
   };

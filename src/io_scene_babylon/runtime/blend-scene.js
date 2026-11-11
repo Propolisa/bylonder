@@ -66,7 +66,8 @@ import { collectionKey, collectionTree, objectsIn, showing } from './collections
  * @property {'viewport' | 'render'} [hide]
  * @property {number} [lens]
  * @property {string} [channel] the key in its node's `metadata.bylonderChannels` the scene's animation sets it through
- * @property {string} [collection] a collection's visibility flag: the key of the collection it hides
+ * @property {string} [collection] a collection's visibility flag or time offset: the key of the collection it sets
+ * @property {boolean} [offset] a collection's time offset (Bylonder's own): frames its objects' animation plays later
  */
 
 /**
@@ -220,10 +221,13 @@ export class BlendScene {
     this.#scheduler = Object.keys(this.ir.entities).length ? createScheduler(this.ir, { scene, root, ir: this.ir, buffers, controls: {
       get: (path) => this.#values.get(path),
       write: (path, value) => this.#write(path, value),
-      frame: () => this.playhead.frame,
+      frame: (/** @type {string | undefined} */ id) => this.playhead.frameAt(id ? this.#idOffset(id) : 0),
     } }) : null;
     this.#channels(knobs);
-    for (const { path, bind } of knobs) if (bind?.collection) {
+    for (const { path, bind } of knobs) if (bind?.offset) this.#offsetPaths.set(/** @type {string} */ (bind.collection), path);
+    this.playhead.offsetOf = (/** @type {any} */ target) => this.#targetOffsets.get(target) ?? 0;
+    this.#retime();
+    for (const { path, bind } of knobs) if (bind?.collection && !bind.offset) {
       const flag = path.endsWith('.exclude') ? 'exclude' : path.endsWith('.hide_render') ? 'hide_render' : path.includes('.layer_collection') ? 'layer_hide_viewport' : 'hide_viewport';
       this.#flags.set(`${bind.collection} ${flag}`, path);
     }
@@ -241,6 +245,49 @@ export class BlendScene {
   /** The objects their collections hid at export. */
   /** @type {Set<string>} */
   #hiddenAtExport;
+
+  /** The path of each collection's time offset, by key. @type {Map<string, string>} */
+  #offsetPaths = new Map();
+  /** Each object's time offset by key, and each animated Babylon target's. @type {Map<string, number>} */
+  #objectOffsets = new Map();
+  /** @type {Map<any, number>} */
+  #targetOffsets = new Map();
+
+  /**
+   * The frames an object (by key or name) plays its animation later: its collections' time offsets added up from the
+   * scene collection down. An object in several collections takes the first of them in the outliner's order, depth
+   * first.
+   * @param {string} object
+   */
+  timeOffsetOf(object) {
+    return this.#objectOffsets.get(this.ir.ids[object] ? object : `OB:${object}`) ?? 0;
+  }
+
+  /** An ID's time offset: an object's, or that of the first object using it (its mesh, shape keys, armature). @param {string} id */
+  #idOffset(id) {
+    if (this.#objectOffsets.has(id)) return /** @type {number} */ (this.#objectOffsets.get(id));
+    const user = this.ir.references.find((r) => r.to === id && this.#objectOffsets.has(r.from));
+    return user ? /** @type {number} */ (this.#objectOffsets.get(user.from)) : 0;
+  }
+
+  /** Each object's and animated target's time offset, as the collections' controls set them. */
+  #retime() {
+    const sums = new Map();
+    this.#objectOffsets.clear();
+    for (const { key, parent } of collectionTree(this.ir)) {
+      const path = this.#offsetPaths.get(key), sum = (parent === null ? 0 : sums.get(parent)) + (path ? Number(this.#values.get(path)) : 0);
+      sums.set(key, sum);
+      for (const object of this.ir.collections[key].objects) if (!this.#objectOffsets.has(object)) this.#objectOffsets.set(object, sum);
+    }
+    // A node's animation, and its skeleton's bones and morph targets, follow its object.
+    this.#targetOffsets.clear();
+    for (const [object, offset] of this.#objectOffsets) {
+      const node = /** @type {any} */ (this.nodeOf(object));
+      if (!offset || !node) continue;
+      const manager = node.morphTargetManager;
+      for (const target of [node, ...(node.skeleton?.bones ?? []), ...Array.from({ length: manager?.numTargets ?? 0 }, (_, i) => manager.getTarget(i))]) this.#targetOffsets.set(target, offset);
+    }
+  }
 
   /** The path of each collection's visibility flag, by `<key> <flag>`. @type {Map<string, string>} */
   #flags = new Map();
@@ -465,6 +512,13 @@ export class BlendScene {
       const inputs = path.slice(0, path.lastIndexOf('.inputs[') + '.inputs'.length);
       const strength = /** @type {number} */ (this.#values.get(`${inputs}[1].default_value`) ?? 1);
       this.#world?.set([0, 1, 2].map((i) => /** @type {number} */ (this.#values.get(`${inputs}[0].default_value[${i}]`)) * strength));
+      return;
+    }
+    if (bind.offset) {
+      // The animation and what reads the frame show the frames the new offsets give.
+      this.#retime();
+      this.playhead.refresh();
+      this.#scheduler?.retimed();
       return;
     }
     if (bind.collection) {

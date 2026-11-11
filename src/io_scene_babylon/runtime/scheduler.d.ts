@@ -5,6 +5,8 @@
 export function createScheduler(ir: import("./ir.js").IR, page: Page): {
     /** A property was set. @param {string} path */
     changed(path: string): void;
+    /** The frames IDs show changed (a time offset): what reads the frame runs again. */
+    retimed: () => void;
     /** Resolves once every entity set going has run. */
     settled(): Promise<void>;
     dispose: () => boolean;
@@ -16,7 +18,7 @@ export function createScheduler(ir: import("./ir.js").IR, page: Page): {
  * @typedef {{ run(inputs: Record<string, any>, context: { frame: number }, entity: import('./ir.js').Entity): Outputs,
  *   runChain?(run: [Record<string, any>, import('./ir.js').Entity][], context: { frame: number }): Outputs,
  *   draw?(mesh: import('./ir.js').Mesh): Promise<import('./mesh.js').DrawBuffers>, settled?(): Promise<void> }} Evaluator
- * @typedef {{ get(path: string): any, write(path: string, value: any): void, frame(): number }} Controls
+ * @typedef {{ get(path: string): any, write(path: string, value: any): void, frame(id?: string): number }} Controls `frame(id)`: the frame an ID shows (its time offset applied)
  * What an implementation loads for: the page's scene, the package's URL, the IR, scene.bin's buffers and the properties.
  * @typedef {{ scene: import('@babylonjs/core').Scene, root: string, ir: import('./ir.js').IR, buffers: ArrayBufferView[], controls: Controls }} Page
  */
@@ -44,12 +46,13 @@ export type Evaluator = {
     settled?(): Promise<void>;
 };
 /**
+ * `frame(id)`: the frame an ID shows (its time offset applied)
  * What an implementation loads for: the page's scene, the package's URL, the IR, scene.bin's buffers and the properties.
  */
 export type Controls = {
     get(path: string): any;
     write(path: string, value: any): void;
-    frame(): number;
+    frame(id?: string): number;
 };
 /**
  * An implementation the package ships: it runs an entity on its resolved inputs; `runChain` runs a chain of entities

@@ -105,6 +105,7 @@ tests:
   - tests/export-asset-wasm.test.js
   - tests/export-runtime.test.js
   - tests/collections-sdk-wasm.test.js
+  - tests/collection-time-offset-wasm.test.js
   - tests/playhead.test.js
   - tests/unit-swap-wasm.test.js
   - tests/runtimes-armature-wasm.test.js
@@ -138,6 +139,7 @@ limits:
   - The control panel's navigation copies the chosen camera's view onto the exported one each frame, so the view transform and compositor stay; a camera's roll is not kept, and Walk finds the floor by casting down from the camera.
   - On Screen measures the materials' shares from a 64 pixel wide drawing of the scene, a few times a second while the panel is open: a material smaller than a pixel there shows no share, and a material's share counts where it is drawn, behind transparent ones too. A material's icon colour is the average of the frame's pixels there, at the same size, so it mixes its lit and shaded sides; where it is not seen, the icon shows its Base Color (or Color) if it has one as a control, else the plain icon.
   - File > Export's Sample Rate keys what is baked (sampled) on Blender's frame grid, for every object or one object; Babylon interpolates between the keys (rotations and bone poses spherically), so a rate below the scene's rounds off quick motion. Exact keys and F-Curves the page runs ignore it, and a boolean is keyed at each frame it changes at.
+  - A collection's Time Offset is the page's own: Blender has no such setting, so the app plays every collection on the scene's frame. An object in two collections takes the first in the outliner's order; a material's animation and particle systems ignore it.
   - An exported page plays the scene's frames on one clock through sub-frames, smoother than Blender's whole frames; its playhead's snap shows whole frames. Particle systems pause with it but do not seek.
   - The Node Material Editor opens in a window of its own, which a browser's popup blocker may stop.
   - The splash's Open from URL downloads only from servers that allow downloads from a web page (CORS); Blender's demo files are served from Bylonder's own copy for that reason.
@@ -260,7 +262,8 @@ control panel, on WebGL 2, loading Babylon.js from its CDN. [Open the demo](http
     each holds. The checkbox excludes a collection, the eye hides it (Shift: with its children) and the camera disables
     it in renders; a collection hidden by one holding it is dimmed. Click a collection's name to show only what its
     objects use, and again to show everything. The icons are Blender's, a unit (`block:icons`) a licence-free package
-    replaces with the panel's own.
+    replaces with the panel's own. The number beside each name, marked with Bylonder's icon, is its Time Offset: drag it
+    to 12 and the collection's objects play their animation 12 frames later, the offsets of nested collections added up.
 
     ![The Collections view](../media/features/import-export/control-panel-collections.png)
 

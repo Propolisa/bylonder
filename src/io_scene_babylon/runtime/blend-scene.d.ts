@@ -166,6 +166,9 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
         start: number;
         end: number;
         fps: number;
+        offsetOf: (target: any) => number;
+        frameAt: (offset: number) => number;
+        refresh(): void;
         snap: boolean;
         onChanged: Observable<import("./playhead.js").PlayheadState>;
         play(): void;
@@ -174,6 +177,13 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
         keepRealTime(effect: import("./playhead.js").Effect, on?: boolean): void;
         dispose(): void;
     };
+    /**
+     * The frames an object (by key or name) plays its animation later: its collections' time offsets added up from the
+     * scene collection down. An object in several collections takes the first of them in the outliner's order, depth
+     * first.
+     * @param {string} object
+     */
+    timeOffsetOf(object: string): number;
     /** The scene's collections from its scene collection down, in the outliner's order, with their flags as set. @returns {CollectionInfo[]} */
     collections(): CollectionInfo[];
     /**
@@ -297,9 +307,13 @@ export type Binding = {
      */
     channel?: string | undefined;
     /**
-     * a collection's visibility flag: the key of the collection it hides
+     * a collection's visibility flag or time offset: the key of the collection it sets
      */
     collection?: string | undefined;
+    /**
+     * a collection's time offset (Bylonder's own): frames its objects' animation plays later
+     */
+    offset?: boolean | undefined;
 };
 /**
  * A collection of the scene (docs/ir.md, Collections): its key and Blender data, its place in the tree, and whether it

@@ -91,6 +91,15 @@ flags in each view layer (Exclude, Hide in Viewport, Holdout, Indirect Only). A 
 this section is the tree a page and its tools use (`runtime/collections.js`). Omitted fields take their defaults. The
 visibility flags of the drawn view layer are properties as well (Properties).
 
+Each collection but the scene collection also has a Time Offset, Bylonder's own: the property
+`collections["Rain"].bylonder.time_offset` (frames, 0 as exported), bound `{ collection, offset: true }`. An object plays
+its animation that many frames later, its own and what reads the frame for it (its F-Curves, drivers and modifiers run
+in the page, its skeleton's bones and morph targets), wrapped into the scene's range as playback loops. Offsets add up
+from the scene collection down: an object in Rain inside Lane takes Lane's offset plus Rain's. An object in several
+collections takes the first of them in the outliner's order, depth first from the scene collection, as `blend.collections()`
+lists them; its data (a mesh, shape keys) takes the offset of the first object using it. A material's animation follows
+the scene's frame.
+
 
 `references` lists every ID pointer between the carried IDs, `{ from, path, to }`, `path` being the pointer's RNA path
 in `from` (`parent`, `data`, `material_slots[0].material`, `modifiers["Array"].offset_object`,
@@ -104,7 +113,7 @@ named in `docs/licence-free-live.md` (Relation gaps).
 `properties` are the values a page sets and reads, keyed by RNA path: `type` (`FLOAT`, `INT`, `BOOLEAN`, `STRING`),
 `default`, `soft_min`, `soft_max`, `subtype` and `unit` as Blender's RNA describes them, `id`, `suggested` (offered to
 authors and UIs) and `bind`, where its value lands in Babylon (a node's transform or property, a material input block,
-a light, the world, a compositor pass, the frame, a collection's visibility). Time is the property
+a light, the world, a compositor pass, the frame, a collection's visibility or time offset). Time is the property
 `scenes["Scene"].frame_current`. A collection's visibility flags are `collections["Lane"].hide_viewport` and
 `.hide_render`, and its LayerCollection's in the drawn view layer
 `scenes["Scene"].view_layers["ViewLayer"].layer_collection.children["Lane"].exclude` and `.hide_viewport`, each bound

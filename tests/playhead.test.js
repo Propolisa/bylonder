@@ -1,6 +1,6 @@
 // The exported page's one clock (runtime/playhead.js): it starts paused at the scene's frame, plays at the scene's
 // frame rate through sub-frames (whole frames with snap), holds the last frame before looping or stops there, seeks,
-// and sets every animation group to its frame but one kept on real time.
+// and sets every animation group to its frame but one kept on real time; a target with a time offset plays later.
 import assert from 'node:assert/strict';
 import { Animation, AnimationGroup, FreeCamera, NullEngine, Scene, TransformNode, Vector3 } from '@babylonjs/core';
 import { createPlayhead } from '../src/io_scene_babylon/runtime/playhead.js';
@@ -66,6 +66,17 @@ playhead.seek(5);
 scene.render();
 near(held.node.position.x, 5, 'a seek while paused sets the frame');
 
+// A target offset by two frames (a collection's Time Offset) shows its animation two frames later, wrapped into the range.
+playhead.offsetOf = (target) => (target === held.node ? 2 : 0);
+playhead.refresh();
+near(held.node.position.x, 3, 'offset by 2, frame 5 shows its frame 3');
+near(real.node.position.x, 5, 'what is not offset stays at the frame');
+playhead.seek(2);
+near(held.node.position.x, 10, 'before the start, it wraps to the end');
+assert.equal(playhead.frameAt(2), 10, 'frameAt gives the frame an offset shows');
+playhead.offsetOf = () => 0;
+playhead.refresh();
+
 const once = createPlayhead(scene, { ...time, frame_current: 9, loop: false });
 once.play();
 for (let i = 0; i < 6; i++) scene.render();
@@ -80,4 +91,4 @@ assert.deepEqual(readIR({ schema: 'bylonder-ir', version: 1 }).scene.time, { fra
   "an IR without the scene's time reads Blender's defaults");
 scene.dispose();
 engine.dispose();
-console.log('Playhead: one clock at the scene frame rate, sub-frames or whole frames, loops or stops, seeks, and leaves what keeps real time');
+console.log('Playhead: one clock at the scene frame rate, sub-frames or whole frames, loops or stops, seeks, offsets targets, and leaves what keeps real time');

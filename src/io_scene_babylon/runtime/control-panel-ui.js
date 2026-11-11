@@ -138,6 +138,7 @@ select option{background:var(--bl-wcol-menu);color:var(--bl-wcol-menu-item)}
 .coll.off .name{opacity:.45}
 .coll .name{flex:1;min-width:0;display:flex;align-items:center;gap:4px;height:100%;padding:0 4px;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer;overflow:hidden;white-space:nowrap}
 .coll .name .icon{margin:0}.coll .count{margin-left:auto;color:var(--bl-text-off);font-variant-numeric:tabular-nums}
+.coll .offset{flex:none;display:flex;align-items:center;gap:2px;width:64px}.coll .offset .num{flex:1;min-width:0}
 .coll .flag{flex:none;width:var(--cp-row);height:var(--cp-row);padding:0;border:0;border-radius:var(--cp-radius);background:none;color:var(--bl-text);cursor:pointer}
 .coll .flag:hover{background:var(--bl-hover)}.coll .flag[aria-pressed=false]{color:var(--bl-text-off)}
 .timeline{flex-direction:row;align-items:center;gap:6px}.timeline .scrub{flex:1;min-width:0;margin:0;accent-color:var(--bl-select)}
@@ -170,6 +171,8 @@ const OWN_ICONS = /** @type {Record<string, [string, number, number]>} */ (Objec
   pause: '<path d="M4 2.5h3v11H4zM9 2.5h3v11H9z"/>',
   restrict_render_on: '<path d="M2 5.5h8.5v6H2zM10.5 8l3.5-2.5v6zM1.5 14l13-11" fill="none" stroke="#000" stroke-width="1.3"/>',
 }).map(([name, paths]) => [name, [`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">${paths}</svg>`, 1600, 1600]])));
+// Bylonder's icon, its logo (public/logo/bylonder-20.svg) drawn plainly: it marks Bylonder's own settings.
+OWN_ICONS.BYLONDER = /** @type {[string, number, number]} */ (['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 264"><g fill="none" stroke="#000" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"><path d="M103 65l24-4 29 27 11 13M50 106h40l15 12h5M49 188h19l32-28h10"/><circle cx="156" cy="149" r="51" stroke-width="23"/></g><circle cx="157" cy="149" r="24"/></svg>', 1552, 1600]);
 const EDITOR_ICON ='<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="2" width="4" height="4" rx="1"/><rect x="9" y="8" width="4" height="4" rx="1"/><path d="M5 4h2.5a1.5 1.5 0 0 1 1.5 1.5v4"/></svg>';
 
 // Blender's collection colour tags (its default theme's collection_color), COLOR_01 to COLOR_08.
@@ -785,7 +788,10 @@ export function createPanel(shadow, blend, { button, place, viewer, state, save,
     const include = exclude ? flag('Exclude', (on) => blend.set(exclude, !on)) : null;
     const eye = flag('Hide in Viewport (Shift: with its children)', (on, e) => blend.showCollection(c.key, on, { children: e.shiftKey }));
     const camera = render ? flag('Disable in Renders', (on) => blend.set(render, !on)) : null;
-    const element = el('div', { className: 'coll', style: `--depth:${c.depth - 1}` }, [name, include, eye, camera]);
+    // Its Time Offset, Bylonder's own: the frames its objects play later.
+    const offset = flagOf(c.key, (p) => p.endsWith('.bylonder.time_offset')), shift = offset && el('span', { className: 'offset', title: 'Time Offset (Bylonder): the frames its objects play later' },
+      [icon('BYLONDER'), numberField(/** @type {Control} */ (byPath.get(offset)))]);
+    const element = el('div', { className: 'coll', style: `--depth:${c.depth - 1}` }, [name, shift, include, eye, camera]);
     return { key: c.key, element, include, eye, camera };
   });
   /** @param {HTMLElement | null} button @param {boolean} on @param {string} onIcon @param {string} offIcon */
