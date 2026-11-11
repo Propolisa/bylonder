@@ -12,6 +12,8 @@
  * @property {string} [root] the package's URL
  * @property {import('./control-panel-camera.js').Navigation} [navigation]
  * @property {import('./control-panel-camera.js').Navigation[]} [offer]
+ * @property {() => Promise<Record<string, [string, number, number]> | undefined>} [icons] Blender's icons the
+ *   Collections view draws (unit block:icons), by name: [SVG, width, height]; else the panel's own
  */
 
 /**

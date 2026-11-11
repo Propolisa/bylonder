@@ -36,7 +36,7 @@ assert.ok(report.checked >= 10, `${report.checked} input sets checked`);
 oracle.remove();
 
 // Every GPL unit replaced: no GPL file, and Simple Deform runs as the page registers it.
-const free = await exportModule(world, { live: true, replace: ['modifier:*', 'node:*', 'block:area_specular'] });
+const free = await exportModule(world, { live: true, replace: ['modifier:*', 'node:*', 'block:area_specular', 'block:icons'] });
 assert.deepEqual(gplFiles(free), []);
 assert.match(free['bylonder-nodes/nodes.js'], /MIT OR Apache-2.0/);
 assert.doesNotMatch(free['scene.js'], /Includes GPL code/);

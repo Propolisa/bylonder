@@ -7,6 +7,7 @@
 // Includes GPL code: bylonder-nodes/, Blender's code (GPL-3.0-or-later, bylonder-nodes/LICENSE.md), loaded only when a control
 // that needs it is set.
 // Includes GPL code: bylonder-area-specular/area-specular.js, Blender's light specular (GPL-3.0-or-later, bylonder-area-specular/LICENSE.md).
+// Includes GPL code: bylonder-icons/icons.js, Blender's icons, loaded when the control panel opens (GPL-3.0-or-later, bylonder-icons/LICENSE.md).
 import '@babylonjs/core/Meshes/thinInstanceMesh.js';
 import { readBuffers, readBytes } from './bylonder/buffers.js';
 import { worldColor, worldNodes } from './bylonder/world.js';
@@ -121,7 +122,7 @@ export async function load(engine) {
   const scene = await createScene(engine, engine.getRenderingCanvas());
   const blend = new BlendScene(scene, IRS.get(scene), { root: ROOT, world: WORLDS.get(scene), compositor: COMPOSITORS.get(scene), buffers: SCENE_BUFFERS.get(scene) });
   // The page's control panel, at the canvas's top right corner (none in Node).
-  controlPanel(blend, {"tools":"CDN","navigation":"FIXED","offer":["FIXED","ORBIT","FLY","WALK","JOYSTICKS"], root: ROOT });
+  controlPanel(blend, {"tools":"CDN","navigation":"FIXED","offer":["FIXED","ORBIT","FLY","WALK","JOYSTICKS"], root: ROOT, icons: () => Promise.resolve(unitFor('block:icons')?.icons ?? import('./bylonder-icons/icons.js').then((m) => m.default)) });
   return blend;
 }
 

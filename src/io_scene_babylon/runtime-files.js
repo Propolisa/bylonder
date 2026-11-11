@@ -30,6 +30,8 @@ export const NODE_KERNELS = 'bylonder-nodes/nodes.js';
 const VOLUMES = { folder: 'bylonder-volumes', files: { 'volumes.js': 'io_scene_babylon/polyfill/volumes.bundle.js' } };
 // EEVEE's light specular for the page's PBR materials, as the app gives its own (blenkernel/light/area-specular.js).
 export const AREA_SPECULAR = 'bylonder-area-specular/area-specular.js';
+// Blender's icons the control panel's Collections view draws (scripts/panel-icons.mjs).
+export const PANEL_ICONS = 'bylonder-icons/icons.js';
 // A package's files (scene.js, scene.ir.json) as text, or the IR's alone.
 const text = (files) => (typeof files === 'string' ? files : `${files['scene.ir.json'] ?? ''}${files['scene.js'] ?? ''}`);
 const evaluatorsOf = (files) => Object.entries(EVALUATOR_FILES).filter(([name]) => text(files).includes(`"implementation":"${name}"`)).map(([, e]) => e);
@@ -52,7 +54,8 @@ export const gplFolders = (files) => {
 export const gplFiles = (files) => {
   const ships = shipping(files);
   const own = withFolders(files).filter((e) => e.folder).flatMap(folderPaths)
-    .concat(text(files).includes(AREA_SPECULAR) ? [[AREA_SPECULAR, 'blenkernel/light/area-specular.js']] : []).filter(([path]) => ships(path));
+    .concat(text(files).includes(AREA_SPECULAR) ? [[AREA_SPECULAR, 'blenkernel/light/area-specular.js']] : [])
+    .concat(text(files).includes(PANEL_ICONS) ? [[PANEL_ICONS, 'io_scene_babylon/panel-icons.js']] : []).filter(([path]) => ships(path));
   const kernels = text(files).includes(NODE_KERNELS) && ships(NODE_KERNELS) ? [NODE_KERNELS] : [];
   return [...own, ...[...new Set([...own.map(([path]) => path), ...kernels].map((path) => path.split('/')[0]))].flatMap(noticeFiles)];
 };

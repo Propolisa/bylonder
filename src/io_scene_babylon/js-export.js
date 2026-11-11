@@ -19,8 +19,8 @@ import { imageFiles } from './image-files.js';
 import { exportCompositor } from './compositor-export.js';
 import { exportIR, idKey } from './ir-export.js';
 import { channels, liveStack } from './modifiers-export.js';
-import { AREA_LIGHTS_LTC, AREA_SPECULAR, BABYLON_ASSETS, CHUNKS, COMPILER_FOLDER, gplFolders, NODE_KERNELS, UNITS_FILE } from './runtime-files.js';
-import { AREA_SPECULAR_UNIT, replaces, stripEntities, stripPieces, unitManifest } from './unit-manifest.js';
+import { AREA_LIGHTS_LTC, AREA_SPECULAR, PANEL_ICONS, BABYLON_ASSETS, CHUNKS, COMPILER_FOLDER, gplFolders, NODE_KERNELS, UNITS_FILE } from './runtime-files.js';
+import { AREA_SPECULAR_UNIT, PANEL_ICONS_UNIT, replaces, stripEntities, stripPieces, unitManifest } from './unit-manifest.js';
 import { CURVES_GLSL_FILE, curvesGlslFile } from './curves-export.js';
 import { exportVolumes, VOLUMES_FILE } from './volumes-export.js';
 import { idStruct } from '../python/bpy_rna.js';
@@ -303,8 +303,11 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   const pieces = stripPieces(ir, shipped, replace), kernels = pieces && kernelsFile(pieces);
   const curves = Object.values(ir.entities).some((e) => e.implementation === 'curves');
   const meshValued = data.materials.some((m) => m.blocks?.some((b) => b.name.startsWith(MESH_VALUE)));
+  // The panel's Collections view, for a scene with collections, in Blender's icons unless a unit replaces them.
+  const panelIcons = controlPanel && Object.keys(collected?.collections ?? {}).length > 1, blenderIcons = panelIcons && !replaces(replace, PANEL_ICONS_UNIT);
   const units = json(unitManifest(computed, { kernels: shipped, replace, blocks: {
     ...(areaSpecular && { [AREA_SPECULAR_UNIT]: { files: [AREA_SPECULAR], interface: { apply: '(material: PBRMaterial) => void' }, use: { materials: pbr } } }),
+    ...(panelIcons && { [PANEL_ICONS_UNIT]: { files: [PANEL_ICONS], interface: { icons: 'Record<string, [svg: string, width: number, height: number]>' }, use: { what: "the control panel's Collections view" } } }),
     ...(volumes && { 'block:volumes': { files: [VOLUMES_FILE], swappable: false, use: { materials: volumes.materials.length } } }),
     ...(composited && { 'block:compositor': { files: ['scene.js'], swappable: false, use: { what: "Blender's compositor GLSL made at export, in scene.js" } } }),
     ...(ownCode.length && { 'block:material_code': { files: ['scene.js'], swappable: false, use: { materials: ownCode } } }),
@@ -335,7 +338,8 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
 // --splitting --format=esm --minify --external:node:* --outdir=. --entry-names=[name].bundle --chunk-names=bundle/[name]-[hash]`}${[...gplFolders({ 'scene.ir.json': irJson, [UNITS_FILE]: units }), ...(pieces && Object.keys(pieces.pieces).length ? [NODE_KERNELS.split('/')[0]] : []), ...(volumes ? [VOLUMES_FILE.split('/')[0]] : [])].map((folder) => `
 // Includes GPL code: ${folder}/, Blender's code (GPL-3.0-or-later, ${folder}/LICENSE.md), loaded only when a control
 // that needs it is set.`).join('')}${blenderSpecular ? `
-// Includes GPL code: ${AREA_SPECULAR}, Blender's light specular (GPL-3.0-or-later, ${AREA_SPECULAR.split('/')[0]}/LICENSE.md).` : ''}
+// Includes GPL code: ${AREA_SPECULAR}, Blender's light specular (GPL-3.0-or-later, ${AREA_SPECULAR.split('/')[0]}/LICENSE.md).` : ''}${blenderIcons ? `
+// Includes GPL code: ${PANEL_ICONS}, Blender's icons, loaded when the control panel opens (GPL-3.0-or-later, ${PANEL_ICONS.split('/')[0]}/LICENSE.md).` : ''}
 import { readBuffers, readBytes } from './bylonder/buffers.js';
 import { worldColor, worldNodes } from './bylonder/world.js';
 import { BlendScene } from './bylonder/blend-scene.js';${controlPanel ? `
@@ -365,7 +369,7 @@ import { viewTransform } from './bylonder-view-transform.js';
 import './bylonder/overrides/babylon/linear-image-processing.js';` : ''}${areaLights ? `
 import { AreaLight } from './bylonder-area-light.js';
 import { parseLight } from './bylonder/overrides/babylon/area-light-parse.js';` : ''}${composited ? `
-import { compositor } from './bylonder-blocks.js';` : ''}${areaSpecular ? `
+import { compositor } from './bylonder-blocks.js';` : ''}${areaSpecular || panelIcons ? `
 import { unitFor } from './bylonder/units.js';` : ''}${blenderSpecular ? `
 import { blenderAreaSpecular } from './${AREA_SPECULAR}';` : ''}
 ${BABYLON_IMPORTS}
@@ -422,7 +426,7 @@ export async function load(engine) {${webgpu ? `
   const scene = await createScene(engine, engine.getRenderingCanvas());
   ${controlPanel ? 'const blend = ' : 'return '}new BlendScene(scene, IRS.get(scene), { root: ROOT, world: WORLDS.get(scene), compositor: COMPOSITORS.get(scene), buffers: SCENE_BUFFERS.get(scene) });${controlPanel ? `
   // The page's control panel, at the canvas's top right corner (none in Node).
-  controlPanel(blend, ${json({ tools: devTools, navigation, offer: NAVIGATION.map(([id]) => id).filter((id) => navigationModes[id] !== false) }).replace('}', ', root: ROOT }')});
+  controlPanel(blend, ${json({ tools: devTools, navigation, offer: NAVIGATION.map(([id]) => id).filter((id) => navigationModes[id] !== false) }).replace('}', `, root: ROOT${panelIcons ? `, icons: () => Promise.resolve(unitFor('${PANEL_ICONS_UNIT}')?.icons${blenderIcons ? ` ?? import('./${PANEL_ICONS}').then((m) => m.default)` : ''})` : ''} }`)});
   return blend;` : ''}
 }
 

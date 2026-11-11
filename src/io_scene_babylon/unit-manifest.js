@@ -10,6 +10,8 @@ import { blendData } from '../python/bpy_rna.js';
 
 /** The type key of EEVEE's light specular on the page's PBR materials, a unit `{ apply(material) }`. */
 export const AREA_SPECULAR_UNIT = 'block:area_specular';
+/** The type key of the icons the control panel's Collections view draws, a unit `{ icons: { [name]: [svg, width, height] } }`. */
+export const PANEL_ICONS_UNIT = 'block:icons';
 const GPL = 'GPL-3.0-or-later', CLEAN = 'MIT OR Apache-2.0';
 /** What a unit cannot take the place of yet: curves draw by Blender's shape functions whatever computes them. */
 const FIXED = new Set(['curves']);
@@ -124,7 +126,7 @@ const nameOf = (key) => {
   return /^[A-Z_]+$/.test(name) ? name.toLowerCase().split('_').map((word) => word[0].toUpperCase() + word.slice(1)).join(' ')
     : name.replace(/^(ShaderNode|GeometryNode|FunctionNode)/, '').replace(/([a-z])([A-Z])/g, '$1 $2');
 };
-const BLOCK_NAMES = { [AREA_SPECULAR_UNIT]: 'Area Light Specular' };
+const BLOCK_NAMES = { [AREA_SPECULAR_UNIT]: 'Area Light Specular', [PANEL_ICONS_UNIT]: 'Control Panel Icons' };
 
 /**
  * The units a scene's JavaScript package may ship, by category, before it is exported (File > Export's Units): its
@@ -141,6 +143,6 @@ export function sceneUnits(data = blendData()) {
     modifiers: named([...data.objects].flatMap((ob) => [...ob.modifiers].map((m) => m.type)).filter((type) => type !== 'NODES').map((type) => `modifier:${type}`)),
     shader: named(shaderTrees.flatMap((tree) => [...tree.nodes].map((n) => n.bl_idname)).filter((type) => !LAYOUT.test(type)).map((type) => `node:${type}`)),
     geometry: named(unitNodes(Object.fromEntries(geometryTrees.map((g) => [g.name, graphOf(g)]))).keys()),
-    blocks: named([AREA_SPECULAR_UNIT]),
+    blocks: named([AREA_SPECULAR_UNIT, PANEL_ICONS_UNIT]),
   };
 }

@@ -7,6 +7,7 @@ import { NullEngine } from '@babylonjs/core';
 import { openExample } from './open-example.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
 import { writePackage } from './export-package.js';
+import { gplFiles } from '../src/io_scene_babylon/runtime-files.js';
 import { blendData, pointerOf } from '../src/python/bpy_rna.js';
 import { setCustomProperty } from '../src/blenkernel/animation/anim-blender.js';
 
@@ -26,7 +27,12 @@ lamps.objects.link(data.objects.get(second));
 props.objects.link(data.objects.get(second));
 sync.view();
 
-const written = writePackage(await exportModule(world));
+const files = await exportModule(world);
+// The control panel's Collections view draws Blender's icons, a unit; replaced, no GPL file ships for it.
+assert.deepEqual(JSON.parse(files['units.json']).units['block:icons']?.files, ['bylonder-icons/icons.js']);
+assert.ok(gplFiles(files).some(([path]) => path === 'bylonder-icons/icons.js'));
+assert.ok(!gplFiles(await exportModule(world, { replace: ['block:icons'] })).some(([path]) => path.startsWith('bylonder-icons/')));
+const written = writePackage(files);
 const { loadBlendScene } = await import(new URL('bylonder/blend-scene.js', written.url).href);
 const blend = await loadBlendScene(new NullEngine(), written.url);
 const { ir } = blend;
@@ -68,4 +74,4 @@ blend.set('collections["Trees"].hide_render', false);
 assert.ok(trees().every(Boolean), 'and show once it is included');
 blend.dispose();
 written.remove();
-console.log(`collections: the IR holds ${Object.keys(ir.collections).length} collections from the scene collection; the SDK lists them, gives their objects and hides them as the outliner does`);
+console.log(`collections: the IR holds ${Object.keys(ir.collections).length} collections from the scene collection; the SDK lists them, gives their objects and hides them as the outliner does; the panel's icons are a unit`);

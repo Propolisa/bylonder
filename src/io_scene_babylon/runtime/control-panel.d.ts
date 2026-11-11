@@ -21,6 +21,11 @@ export type PanelOptions = {
     root?: string | undefined;
     navigation?: import("./control-panel-camera.js").Navigation | undefined;
     offer?: import("./control-panel-camera.js").Navigation[] | undefined;
+    /**
+     * Blender's icons the
+     * Collections view draws (unit block:icons), by name: [SVG, width, height]; else the panel's own
+     */
+    icons?: (() => Promise<Record<string, [string, number, number]> | undefined>) | undefined;
 };
 /**
  * What the viewer arranged, kept per page; the panel's size in its own pixels.

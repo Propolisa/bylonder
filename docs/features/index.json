@@ -678,6 +678,8 @@
    "import-export/control-panel-drag.gif",
    "import-export/control-panel-search.png",
    "import-export/control-panel-all.png",
+   "import-export/control-panel-collections.png",
+   "import-export/control-panel-collections.gif",
    "import-export/control-panel-touch.gif"
   ],
   "ui": [

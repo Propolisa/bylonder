@@ -32,6 +32,8 @@ media:
   - import-export/control-panel-drag.gif
   - import-export/control-panel-search.png
   - import-export/control-panel-all.png
+  - import-export/control-panel-collections.png
+  - import-export/control-panel-collections.gif
   - import-export/control-panel-touch.gif
 ui:
   - TOPBAR_MT_file
@@ -241,6 +243,16 @@ control panel, on WebGL 2, loading Babylon.js from its CDN. [Open the demo](http
     ![A search](../media/features/import-export/control-panel-search.png)
 
     ![All, with the properties at Blender's defaults](../media/features/import-export/control-panel-all.png)
+
+    Collections lists the scene's collections as the outliner does, with their colour tags and the count of objects
+    each holds. The checkbox excludes a collection, the eye hides it (Shift: with its children) and the camera disables
+    it in renders; a collection hidden by one holding it is dimmed. Click a collection's name to show only what its
+    objects use, and again to show everything. The icons are Blender's, a unit (`block:icons`) a licence-free package
+    replaces with the panel's own.
+
+    ![The Collections view](../media/features/import-export/control-panel-collections.png)
+
+    ![Rain hidden by its eye, then the panel filtered to Street](../media/features/import-export/control-panel-collections.gif)
 
 12. **View and editors.** View chooses the camera the page looks through, and how you move it: Fixed (the camera as
     exported), Orbit, Fly (W A S D, E and Q), Walk (at eye height with gravity) and, on a touch screen, Sticks. Navigation,

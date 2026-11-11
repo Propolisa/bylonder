@@ -5,6 +5,8 @@
 //   usage: node tools/docs/record-control-panel.mjs [--mobile] [--colours] [--serve]
 //     --mobile  the phone's part only
 //     --colours the materials' icons in the colours they show on screen, on the Compositor example, only
+//     --collections the Collections view on the Compositor example: a collection hidden by its eye, the panel filtered
+//               to what one holds, only
 //     --serve   exports and serves the page, printing its URL, until stopped (for working on the panel); EXAMPLE another
 //               example, PORT and HOST where (default any port on localhost)
 //     BUNDLE=0  the package as ES modules, with an import map
@@ -21,8 +23,8 @@ const root = fileURLToPath(new URL('../..', import.meta.url));
 const MEDIA = join(root, 'docs/media/features/import-export');
 // Pictures go where the owner follows them too: the main checkout's .shots/ beside a worktree, else this one's.
 const SHOTS = join(existsSync(join(root, '../bylonder/.shots')) ? join(root, '../bylonder/.shots') : join(root, '.shots'), 'control-panel');
-const COLOURS = process.argv.includes('--colours');
-const EXAMPLE = process.env.EXAMPLE ?? (COLOURS ? 'compositor' : 'lava');
+const COLOURS = process.argv.includes('--colours'), COLLECTIONS = process.argv.includes('--collections');
+const EXAMPLE = process.env.EXAMPLE ?? (COLOURS || COLLECTIONS ? 'compositor' : 'lava');
 // Custom properties the page's author would have added, by object (or the scene).
 const CUSTOM = EXAMPLE !== 'lava' ? {} : { Sphere: { Glow: 0.75, Spin: true, Turns: 3 }, scene: { Speed: 2 } };
 // Bundled, as File > Export writes a package by default, unless BUNDLE=0.
@@ -142,6 +144,30 @@ if (COLOURS) {
   await pause(300);
   await shot('material-colours');
   await page.close();
+} else if (COLLECTIONS) {
+  const { page, panel, toggle, pause, shot, gif } = await open(await browser.newContext({ viewport: SIZE, deviceScaleFactor: 1 }));
+  const shown = (name) => page.evaluate((n) => window.blend.isCollectionVisible(n), name);
+  const row = (name) => panel.locator('.coll', { has: page.locator('.name', { hasText: new RegExp(`^${name}\\d+$`) }) });
+  await page.mouse.move(SIZE.width - 30, 30, { steps: 8 });
+  await toggle.click();
+  await row('Rain').locator('.icon[style*="--icon"]').first().waitFor();
+  await shot('collections', panel);
+  await gif('collections', null, 720, async () => {
+    await pause(600);
+    await row('Rain').getByRole('button', { name: /^Hide in Viewport/ }).click();
+    await pause(1200);
+    if (await shown('Rain')) throw new Error("the Rain collection's eye did not hide it");
+    await row('Rain').getByRole('button', { name: /^Hide in Viewport/ }).click();
+    await pause(800);
+    await row('Street').locator('.name').click();
+    await pause(1500);
+    const groups = await panel.locator('.group:not([hidden]) > .ghead .title').allTextContents();
+    if (groups.some((g) => /^(Rain|Neon|Wet Asphalt)$/.test(g))) throw new Error(`Street's filter shows what it does not hold: ${groups.join(', ')}`);
+    await row('Street').locator('.name').click();
+    await pause(800);
+  });
+  if (!(await shown('Rain'))) throw new Error('the Rain collection did not show again');
+  await page.close();
 } else if (!process.argv.includes('--mobile')) {
   const { page, panel, toggle, pause, shot, gif, value } = await open(await browser.newContext({ viewport: SIZE, deviceScaleFactor: 1 }));
   // The button shows as the pointer nears the corner; the panel opens on it.
@@ -188,7 +214,7 @@ if (COLOURS) {
 
 // On a phone: a tap at the corner shows the button, one finger scrolls the panel or drags a field sideways, two pinch
 // the panel's scale; with Orbit chosen, a finger outside the panel turns the view.
-if (!COLOURS) {
+if (!COLOURS && !COLLECTIONS) {
   const { page, panel, toggle, pause, gif, value } = await open(await browser.newContext({ viewport: PHONE, deviceScaleFactor: 2, isMobile: true, hasTouch: true }));
   const cdp = await page.context().newCDPSession(page);
   const touch = (type, points) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: points.map(([x, y], id) => ({ x, y, id })) });

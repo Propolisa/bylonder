@@ -7,8 +7,11 @@
 // type (Enter or a click; arithmetic and units) and step with the arrow keys; Backspace resets a field to the scene's
 // value, Ctrl+C and Ctrl+V copy and paste it, Ctrl+Shift+C copies its data path. A color's picker sets it as it moves.
 // The panel docks to any side of the canvas by its header and resizes from its inner edge. An ID that one of Babylon's
-// editors shows links to it (dev-tools.js).
-import { atDefault, baseColor, clamp, componentLabel, displayOf, dragScale, formatValue, hexOf, hsvOf, layout, matches, parseValue, rgbOf, rgbOfHsv, snapped, snapStep, softRange, storedOf, touchSpan } from './control-panel-model.js';
+// editors shows links to it (dev-tools.js). The Collections view is the outliner's tree of the scene's collections with
+// their Exclude checkbox, eye and Disable in Renders, in Blender's icons where the package has them (unit block:icons),
+// else in the panel's own; a collection's name filters the panel to what its objects use.
+import { atDefault, baseColor, clamp, componentLabel, displayOf, dragScale, formatValue, hexOf, hsvOf, layout, matches, parsePath, parseValue, rgbOf, rgbOfHsv, snapped, snapStep, softRange, storedOf, touchSpan } from './control-panel-model.js';
+import { idsIn } from './collections.js';
 
 /** @typedef {import('./control-panel-model.js').Row} Row */
 /** @typedef {import('./control-panel-model.js').Group} Group */
@@ -128,6 +131,15 @@ select option{background:var(--bl-wcol-menu);color:var(--bl-wcol-menu-item)}
 .knob{position:absolute;width:12px;height:12px;margin:-6px;border-radius:50%;box-shadow:0 0 0 2px #fff,0 0 0 3px #0008;pointer-events:none}
 .hue .knob{top:50%}
 .picker .text{border-radius:var(--cp-radius)}
+.tree{padding:2px 4px 4px}
+.coll{display:flex;align-items:center;gap:2px;height:var(--cp-row);padding-left:calc(var(--depth) * 14px);border-radius:var(--cp-radius)}
+.coll:hover{background:var(--bl-hover)}.coll.scope{background:var(--bl-select);color:var(--bl-wcol-option-item)}
+.coll.off .name{opacity:.45}
+.coll .name{flex:1;min-width:0;display:flex;align-items:center;gap:4px;height:100%;padding:0 4px;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer;overflow:hidden;white-space:nowrap}
+.coll .name .icon{margin:0}.coll .count{margin-left:auto;color:var(--bl-text-off);font-variant-numeric:tabular-nums}
+.coll .flag{flex:none;width:var(--cp-row);height:var(--cp-row);padding:0;border:0;border-radius:var(--cp-radius);background:none;color:var(--bl-text);cursor:pointer}
+.coll .flag:hover{background:var(--bl-hover)}.coll .flag[aria-pressed=false]{color:var(--bl-text-off)}
+.icon{display:block;width:16px;height:16px;margin:auto;flex:none;background:currentColor;-webkit-mask:var(--icon) center/var(--mask) no-repeat;mask:var(--icon) center/var(--mask) no-repeat}
 @media (pointer:coarse){.panel{--cp-row:28px;--edge:12px}.check input{width:18px;height:18px}.grip{width:20px}.edge{width:12px}
   :host([data-dock=top]) .edge,:host([data-dock=bottom]) .edge{width:auto;height:12px}.sv{height:180px}.hue{height:24px}}
 @media (prefers-reduced-motion:reduce){.tri,.preview{transition:none}.num.invalid{animation:none}}`;
@@ -143,7 +155,20 @@ const PRECISE = 0.1;
 const SEARCH_ICON = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="5" cy="5" r="3.6"/><path d="m7.7 7.7 3 3" stroke-linecap="round"/></svg>';
 const CLOSE_ICON = '<svg viewBox="0 0 12 12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="m3 3 6 6M9 3 3 9"/></svg>';
 const GRIP_ICON = '<svg viewBox="0 0 12 20" fill="currentColor"><circle cx="4" cy="6" r="1.2"/><circle cx="8" cy="6" r="1.2"/><circle cx="4" cy="10" r="1.2"/><circle cx="8" cy="10" r="1.2"/><circle cx="4" cy="14" r="1.2"/><circle cx="8" cy="14" r="1.2"/></svg>';
+// The Collections view's icons where the package has no Blender's: the panel's own drawings, as masks.
+const OWN_ICONS = /** @type {Record<string, [string, number, number]>} */ (Object.fromEntries(Object.entries({
+  outliner_collection: '<path d="M2.5 5.5h11v8h-11zM4 5.5l1.5-2h5l1.5 2" fill="none" stroke="#000" stroke-width="1.4"/>',
+  hide_off: '<path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z" fill="none" stroke="#000" stroke-width="1.3"/><circle cx="8" cy="8" r="2.2"/>',
+  hide_on: '<path d="M2 7c2.5 3.5 9.5 3.5 12 0M4 9.5 3 11m9-1.5 1 1.5M8 10.5V12" fill="none" stroke="#000" stroke-width="1.3"/>',
+  checkbox_hlt: '<rect x="2.5" y="2.5" width="11" height="11" rx="2"/>',
+  checkbox_dehlt: '<rect x="3" y="3" width="10" height="10" rx="2" fill="none" stroke="#000" stroke-width="1.3"/>',
+  restrict_render_off: '<path d="M2 5.5h8.5v6H2zM10.5 8l3.5-2.5v6z" fill="none" stroke="#000" stroke-width="1.3"/>',
+  restrict_render_on: '<path d="M2 5.5h8.5v6H2zM10.5 8l3.5-2.5v6zM1.5 14l13-11" fill="none" stroke="#000" stroke-width="1.3"/>',
+}).map(([name, paths]) => [name, [`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">${paths}</svg>`, 1600, 1600]])));
 const EDITOR_ICON ='<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="2" width="4" height="4" rx="1"/><rect x="9" y="8" width="4" height="4" rx="1"/><path d="M5 4h2.5a1.5 1.5 0 0 1 1.5 1.5v4"/></svg>';
+
+// Blender's collection colour tags (its default theme's collection_color), COLOR_01 to COLOR_08.
+const TAGS = ['#e2605b', '#f1a355', '#f1dc55', '#7bcc7b', '#5db6ea', '#8d59da', '#c673b8', '#7a5441'];
 
 // Each navigation mode's name and how it moves (control-panel-camera.js).
 const MODES = /** @type {Record<string, [string, string]>} */ ({ FIXED: ['Fixed', 'The camera as exported'], ORBIT: ['Orbit', '<kbd>Drag</kbd> turn <kbd>Wheel</kbd> zoom <kbd>Right drag</kbd> pan'],
@@ -188,7 +213,7 @@ export function createPanel(shadow, blend, { button, place, viewer, state, save,
   const controls = blend.controls();
   const byPath = new Map(controls.map((c) => [c.path, c]));
   const bindOf = (/** @type {string} */ path) => /** @type {Record<string, any> | undefined} */ (blend.ir.properties[path]?.bind);
-  const sections = layout(controls, (c) => c.type === 'STRING' && !!bindOf(c.path)?.image);
+  const sections = layout(controls.filter((c) => !bindOf(c.path)?.collection), (c) => c.type === 'STRING' && !!bindOf(c.path)?.image);
   /** The rows the viewer changed, shown though they are back at Blender's default. @type {Set<string>} */
   const touched = new Set();
   /** Each drawn control's update, by path. @type {Map<string, ((value: Value) => void)[]>} */
@@ -676,6 +701,10 @@ export function createPanel(shadow, blend, { button, place, viewer, state, save,
     }
   };
 
+  /** The collection whose members the panel shows, and the RNA paths of the IDs they use. @type {{ key: string, paths: Set<string> } | null} */
+  let scope = null;
+  /** Whether a row is of an ID the scoped collection's objects use. @param {Row} row */
+  const inScope = (row) => !scope || scope.paths.has(parsePath(row.key)?.idPath ?? '');
   const empty = el('div', { className: 'empty', hidden: true });
   // The view: the camera looked through and how the viewer moves it.
   const offered = (tools.offer ?? Object.keys(MODES)).filter((m) => m !== 'JOYSTICKS' || matchMedia('(pointer: coarse)').matches);
@@ -700,6 +729,63 @@ export function createPanel(shadow, blend, { button, place, viewer, state, save,
     body.append(viewSection);
   }
 
+  // The Collections view: the scene collection's children down, as the outliner lists them, in Blender's icons.
+  const icons = (tools.icons?.() ?? Promise.resolve(undefined)).then((found) => found ?? OWN_ICONS, () => OWN_ICONS);
+  const icon = (/** @type {string} */ name, /** @type {string} */ color = '') => {
+    const span = el('span', { className: 'icon' });
+    if (color) span.style.color = color;
+    icons.then((all) => {
+      const found = all[name] ?? OWN_ICONS[name];
+      if (found) span.style.cssText += `--icon:url("data:image/svg+xml,${encodeURIComponent(found[0])}");--mask:${found[1] / 16}% ${found[2] / 16}%`;
+    });
+    return span;
+  };
+  /** The path of a collection's flag control that `which` picks. @param {string} key @param {(path: string) => boolean} which */
+  const flagOf = (key, which) => controls.find((c) => bindOf(c.path)?.collection === key && which(c.path))?.path;
+  const collectionRows = blend.collections().filter((c) => c.parent !== null).map((c) => {
+    const exclude = flagOf(c.key, (p) => p.endsWith('.exclude')), render = flagOf(c.key, (p) => p.startsWith('collections[') && p.endsWith('.hide_render'));
+    const flag = (/** @type {string} */ title, /** @type {(on: boolean, e: MouseEvent) => void} */ press) => {
+      const button = el('button', { type: 'button', className: 'flag', title, 'aria-label': `${title}: ${c.name}` }, [el('span', { className: 'icon' })]);
+      button.addEventListener('click', (e) => press(button.getAttribute('aria-pressed') !== 'true', e));
+      return button;
+    };
+    const name = el('button', { type: 'button', className: 'name', title: `Show only what ${c.name} holds` },
+      [icon('outliner_collection', TAGS[Number(c.color_tag.slice(-2)) - 1]), c.name, el('span', { className: 'count', textContent: String(c.all_objects.length) })]);
+    name.addEventListener('click', () => {
+      scope = scope?.key === c.key ? null : { key: c.key, paths: new Set([...idsIn(blend.ir, c.key)].map((id) => blend.ir.ids[id]?.path ?? '')) };
+      for (const row of collectionRows) row.element.classList.toggle('scope', row.key === scope?.key);
+      filter();
+    });
+    const include = exclude ? flag('Exclude', (on) => blend.set(exclude, !on)) : null;
+    const eye = flag('Hide in Viewport (Shift: with its children)', (on, e) => blend.showCollection(c.key, on, { children: e.shiftKey }));
+    const camera = render ? flag('Disable in Renders', (on) => blend.set(render, !on)) : null;
+    const element = el('div', { className: 'coll', style: `--depth:${c.depth - 1}` }, [name, include, eye, camera]);
+    return { key: c.key, element, include, eye, camera };
+  });
+  /** @param {HTMLElement | null} button @param {boolean} on @param {string} onIcon @param {string} offIcon */
+  const flagShown = (button, on, onIcon, offIcon) => {
+    if (!button || button.getAttribute('aria-pressed') === String(on)) return;
+    button.setAttribute('aria-pressed', String(on));
+    button.firstElementChild?.replaceWith(icon(on ? onIcon : offIcon));
+  };
+  const showCollections = () => {
+    const now = new Map(blend.collections().map((c) => [c.key, c]));
+    for (const { key, element, include, eye, camera } of collectionRows) {
+      const c = /** @type {import('./blend-scene.js').CollectionInfo} */ (now.get(key)), layer = c.view_layers[blend.ir.scene.view_layer ?? ''];
+      flagShown(include, !layer?.exclude, 'checkbox_hlt', 'checkbox_dehlt');
+      flagShown(eye, !layer?.hide_viewport, 'hide_off', 'hide_on');
+      flagShown(camera, !c.hide_render, 'restrict_render_off', 'restrict_render_on');
+      element.classList.toggle('off', !c.visible);
+    }
+  };
+  const collectionPaths = new Set(controls.filter((c) => bindOf(c.path)?.collection).map((c) => c.path));
+  if (collectionRows.length) {
+    showCollections();
+    const element = el('div', { className: 'section' });
+    element.append(...collapsible('section collections', 'Collections', undefined, true, () => [el('div', { className: 'tree' }, collectionRows.map((r) => r.element))]));
+    body.append(element);
+  }
+
   body.append(...sections.map((section) => {
     const element = el('div', { className: 'section' });
     element.append(...collapsible(`section ${section.key}`, section.title, undefined, true, () => section.groups.map((g) => groupElement(g, [section.title], section.groups.length)),
@@ -711,7 +797,7 @@ export function createPanel(shadow, blend, { button, place, viewer, state, save,
   // What shows: rows away from Blender's defaults, changed here or matching the search, or every row with Show All.
   function filter() {
     const query = search.value.trim(), showAll = all.getAttribute('aria-pressed') === 'true';
-    const shown = (/** @type {Row} */ row, /** @type {string[]} */ titles) => (query ? matches(row, titles, query)
+    const shown = (/** @type {Row} */ row, /** @type {string[]} */ titles) => inScope(row) && (query ? matches(row, titles, query)
       : showAll || touched.has(row.key) || !atDefault(row, get));
     let any = false;
     for (const { element, rows, titles } of filtered) {
@@ -720,7 +806,7 @@ export function createPanel(shadow, blend, { button, place, viewer, state, save,
       any ||= visible;
     }
     empty.hidden = any;
-    empty.textContent = query ? `Nothing matches "${query}"` : controls.length ? "Every property is at Blender's default. Show them with All." : 'This scene has no controls.';
+    empty.textContent = scope && !query && !showAll ? `What ${blend.ir.collections[scope.key].name} holds is at Blender's defaults. Show it with All.` : query ? `Nothing matches "${query}"` : controls.length ? "Every property is at Blender's default. Show them with All." : 'This scene has no controls.';
   }
   search.addEventListener('input', filter);
   all.addEventListener('click', () => {
@@ -737,6 +823,7 @@ export function createPanel(shadow, blend, { button, place, viewer, state, save,
   const dirty = new Set();
   let frame = 0;
   const changed = blend.onChanged.add(({ path }) => {
+    if (!panel.hidden && collectionPaths.has(path)) showCollections();
     if (panel.hidden || !views.has(path)) return;
     dirty.add(path);
     frame ||= requestAnimationFrame(() => {
@@ -753,6 +840,7 @@ export function createPanel(shadow, blend, { button, place, viewer, state, save,
     measure(open);
     if (open) {
       for (const [path, shows] of views) for (const show of shows) show(get(path));
+      showCollections();
       filter();
       search.focus({ preventScroll: true });
     } else if (shadow.activeElement && panel.contains(shadow.activeElement)) button.focus();

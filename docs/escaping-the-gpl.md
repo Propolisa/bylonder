@@ -42,7 +42,8 @@ template of its kind:
 A unit may also give an `inputs` schema (Zod, `bylonder/zod.js` in the package): its inputs are parsed with it first,
 defaults filled, and an entity it cannot take reported by path (`docs/ir.md`, Units). EEVEE's light specular is the
 block unit `block:area_specular`, `{ apply(material) }` for each of the page's PBR materials; replaced and not registered,
-Babylon lights them its own way.
+Babylon lights them its own way. The control panel's Collections view draws Blender's icons, the block unit
+`block:icons`, `{ icons }` (`{ [name]: [svg, width, height] }`); replaced and not registered, the panel draws its own.
 
 What you write must be your own work or code you may license as you choose. Write from Blender's manual and from
 what the shipped unit does (the oracle below), not from Blender's sources: a port of Blender's code stays GPL.
