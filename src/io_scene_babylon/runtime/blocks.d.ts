@@ -97,6 +97,11 @@ export class ImagesPostProcessTask extends FrameGraphPostProcessTask {
  */
 export class ReplayTask extends FrameGraphTask {
     /**
+     * The steps a plan's operations add beyond Blender's passes, by op: (task, step, read) => the target's handle.
+     * @type {Record<string, (task: ReplayTask, step: any, read: (id: number) => TextureHandle) => TextureHandle>}
+     */
+    static operations: Record<string, (task: ReplayTask, step: any, read: (id: number) => TextureHandle) => TextureHandle>;
+    /**
      * @param {string} name
      * @param {FrameGraph} frameGraph
      * @param {string[]} outputs

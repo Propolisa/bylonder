@@ -12,6 +12,9 @@ import { glsl as libraries } from '../nodes/blender/gpu-library.js';
 import { engineGLSL, glslShader } from '../nodes/blender/glsl.js';
 import { implicitConversions } from '../nodes/blender/glsl-conversions.js';
 import { ReplayTask, formatChannels, uploadFloats } from '../io_scene_babylon/runtime/blocks.js';
+import { fogGlowFieldOfView, fogGlowKernelValue, fogGlowNormalization } from './fog-glow.js';
+import { fftConvolution } from '../io_scene_babylon/runtime/fft-convolution.js';
+import { renderExtension } from '../draw/render-extension.js';
 
 export { formatChannels, uploadFloats };
 
@@ -185,10 +188,23 @@ export function replayPlan(recording) {
           before: info.images.map((i) => ({ name: before(i.name), texture: command.images[i.slot] })),
         });
       }
-    } else if (command.op === 'update' || command.op === 'clear' || command.op === 'copy') steps.push(command);
+    } else if (['update', 'clear', 'copy', 'fogGlow'].includes(command.op)) steps.push(command);
     else reasons.push(`${command.op} is not replayed`);
   }
   return reasons.length ? { reasons } : { textures: recording.textures, steps, inputs: recording.inputs, outputs: recording.outputs };
+}
+
+// Glare's Fog Glow as the replay runs it: Blender's GPU compositor reads its highlights back, convolves them on the CPU
+// and uploads the glow, recorded as that upload; it becomes a fogGlow step (fog-glow.js) of the highlights. Gives the
+// upload's bytes too ([start, end]), which go where they are the recording's last. Null for another recording.
+function fogGlowRecording(recording, size) {
+  const at = recording.commands.findIndex((c) => c.shader === 'compositor_glare_highlights');
+  const upload = at < 0 ? -1 : recording.commands.findIndex((c, i) => i > at && c.op === 'update');
+  if (upload < 0 || recording.unsupported.join() !== 'texture read') return null;
+  const source = recording.commands[at].images[0], { texture, data, bytes } = recording.commands[upload];
+  const highlights = recording.textures.find((t) => t.id === source).size.slice(0, 2), fieldOfView = fogGlowFieldOfView(size);
+  const step = { op: 'fogGlow', source, target: texture, size: highlights, fieldOfView, normalization: fogGlowNormalization(highlights, fieldOfView) };
+  return { recording: { ...recording, unsupported: [], commands: recording.commands.map((c, i) => (i === upload ? step : c)) }, upload: [data, data + bytes] };
 }
 
 // Whether a node type runs as an operation of its own, which views replay (not GPU code, compositor-nodes.js).
@@ -213,12 +229,23 @@ export function nodeRecording(idname, { properties = {}, values = {}, linked = [
         const data = x.compositor_recorded_data(pointer);
         return { data, bytes: new Int32Array(x.memory.buffer, pointer >>> 0, 1)[0] };
       });
-      return { plan: replayPlan(recording), data: new Uint8Array(x.memory.buffer, size.data >>> 0, size.bytes).slice() };
+      const data = new Uint8Array(x.memory.buffer, size.data >>> 0, size.bytes);
+      const fog = idname === 'CompositorNodeGlare' && fogGlowRecording(recording, values.Size);
+      const kept = fog && fog.upload[1] === data.length ? fog.upload[0] : data.length;
+      return { plan: replayPlan(fog?.recording ?? recording), data: data.slice(0, kept) };
     }));
     if (recordings.size > 64) recordings.delete(recordings.keys().next().value);
   }
   return recordings.get(key);
 }
+
+// Glare's Fog Glow in the views and exported pages, a render extension: off, they draw no glow, as before.
+export const fogGlowOnGPU = renderExtension({
+  id: 'bylonder_fog_glow', label: 'Fog Glow',
+  description: "Glare's Fog Glow in the views and exported pages, with Blender's kernel by an FFT on the GPU, where Blender's GPU compositor runs it on the CPU. Off, Fog Glow adds no glow there",
+  detail: 'A kernel wider than 512 pixels convolves blocks of 2, 4, ... pixels',
+});
+ReplayTask.operations.fogGlow = (task, step, read) => (fogGlowOnGPU.enabled(task._frameGraph.scene) ? fftConvolution(task, step, read, fogGlowKernelValue) : read(step.target));
 
 // The app's replay task: its passes' GLSL specialized for the engine (WebGPU's samplers).
 export class BlenderReplayTask extends ReplayTask {

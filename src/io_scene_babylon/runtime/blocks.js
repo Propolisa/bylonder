@@ -129,12 +129,20 @@ export class ImagesPostProcessTask extends FrameGraphPostProcessTask {
   }
 }
 
+// The steps a plan replays as Blender's GPU compositor ran them; any other is an operation (ReplayTask.operations).
+const PASS_OPS = ['clear', 'copy', 'pass'];
+
 /**
  * A recorded plan as a frame graph task: its passes in order, each writing a new version of the texture it writes (a
  * pass samples the version before it), on the images linked into it (`inputTextures`, by input identifier), giving
  * `outputTextures` (by output identifier). Disabled, or with no plan, it passes `sourceTexture` through.
  */
 export class ReplayTask extends FrameGraphTask {
+  /**
+   * The steps a plan's operations add beyond Blender's passes, by op: (task, step, read) => the target's handle.
+   * @type {Record<string, (task: ReplayTask, step: any, read: (id: number) => TextureHandle) => TextureHandle>}
+   */
+  static operations = {};
   /** The plan for an image size, and its uploads' bytes. @type {(size: number[]) => { plan: any, data: Uint8Array } | null} */
   recorder = () => null;
   /** The size the task last recorded at. @type {number[] | null} */
@@ -250,6 +258,12 @@ export class ReplayTask extends FrameGraphTask {
     };
     plan.steps.forEach((/** @type {any} */ step, /** @type {number} */ i) => {
       if (step.op === 'update') return;
+      // A step of an operation the page adds (fog-glow.js), or without one its target as Blender's read back leaves it.
+      if (!PASS_OPS.includes(step.op)) {
+        const operation = ReplayTask.operations[step.op];
+        current.set(step.target, operation ? operation(this, step, read) : read(step.target));
+        return;
+      }
       const target = step.op === 'clear' ? step.texture : step.op === 'copy' ? step.to : step.target;
       const output = version(target), pass = this._frameGraph.addRenderPass(`${this.name} ${i}`);
       pass.setRenderTarget(output);

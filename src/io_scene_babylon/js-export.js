@@ -20,10 +20,11 @@ import { worldNodes } from '../blenkernel/scene/world-babylon.js';
 import { createSceneBin } from './scene-bin.js';
 import { imageFiles } from './image-files.js';
 import { exportCompositor } from './compositor-export.js';
+import { fogGlowOnGPU } from '../compositor/compositor-replay.js';
 import { exportIR, idKey } from './ir-export.js';
 import { channels, liveStack } from './modifiers-export.js';
-import { AREA_LIGHTS_LTC, AREA_SPECULAR, PANEL_ICONS, BABYLON_ASSETS, CHUNKS, COMPILER_FOLDER, gplFolders, NODE_KERNELS, UNITS_FILE } from './runtime-files.js';
-import { AREA_SPECULAR_UNIT, PANEL_ICONS_UNIT, replaces, stripEntities, stripPieces, unitManifest } from './unit-manifest.js';
+import { AREA_LIGHTS_LTC, AREA_SPECULAR, FOG_GLOW, PANEL_ICONS, BABYLON_ASSETS, CHUNKS, COMPILER_FOLDER, gplFolders, NODE_KERNELS, UNITS_FILE } from './runtime-files.js';
+import { AREA_SPECULAR_UNIT, FOG_GLOW_UNIT, PANEL_ICONS_UNIT, replaces, stripEntities, stripPieces, unitManifest } from './unit-manifest.js';
 import { CURVES_GLSL_FILE, curvesGlslFile } from './curves-export.js';
 import { exportVolumes, VOLUMES_FILE } from './volumes-export.js';
 import { idStruct } from '../python/bpy_rna.js';
@@ -352,6 +353,9 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   const pieces = stripPieces(ir, shipped, replace), kernels = pieces && kernelsFile(pieces);
   const curves = Object.values(ir.entities).some((e) => e.implementation === 'curves');
   const meshValued = data.materials.some((m) => m.blocks?.some((b) => b.name.startsWith(MESH_VALUE)));
+  // A composite convolving with Glare's Fog Glow kernel (compositor-replay.js fogGlowRecording), Blender's unless replaced,
+  // with the Fog Glow render setting on.
+  const fogGlow = !!composited && json(composited.compositor).includes('"op":"fogGlow"') && fogGlowOnGPU.enabled(world.scene), blenderFogGlow = fogGlow && !replaces(replace, FOG_GLOW_UNIT);
   const areaLitBlocks = data.materials.some((m) => m.blocks?.some((b) => b.customType === `BABYLON.${AREA_LIT_PBR_BLOCK}`));
   // The panel's Collections view, for a scene with collections, and its timeline, for a scene with frames to play, in
   // Blender's icons unless a unit replaces them.
@@ -361,6 +365,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
     ...(areaSpecular && { [AREA_SPECULAR_UNIT]: { files: [AREA_SPECULAR], interface: { apply: '(material: PBRMaterial) => void' }, use: { materials: pbr } } }),
     ...(panelIcons && { [PANEL_ICONS_UNIT]: { files: [PANEL_ICONS], interface: { icons: 'Record<string, [svg: string, width: number, height: number]>' }, use: { what: "the control panel's Collections view and timeline" } } }),
     ...(volumes && { 'block:volumes': { files: [VOLUMES_FILE], swappable: false, use: { materials: volumes.materials.length } } }),
+    ...(fogGlow && { [FOG_GLOW_UNIT]: { files: [FOG_GLOW], interface: { value: '(x: number, y: number, degreesPerTexel: number) => number' }, use: { what: "Glare's Fog Glow in the composite" } } }),
     ...(composited && { 'block:compositor': { files: ['scene.js'], swappable: false, use: { what: "Blender's compositor GLSL made at export, in scene.js" } } }),
     ...(ownCode.length && { 'block:material_code': { files: ['scene.js'], swappable: false, use: { materials: ownCode } } }),
   } }));
@@ -391,7 +396,8 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
 // --splitting --format=esm --minify --external:node:* --outdir=. --entry-names=[name].bundle --chunk-names=bundle/[name]-[hash]`}${[...gplFolders({ 'scene.ir.json': irJson, [UNITS_FILE]: units }), ...(pieces && Object.keys(pieces.pieces).length ? [NODE_KERNELS.split('/')[0]] : []), ...(volumes ? [VOLUMES_FILE.split('/')[0]] : [])].map((folder) => `
 // Includes GPL code: ${folder}/, Blender's code (GPL-3.0-or-later, ${folder}/LICENSE.md), loaded only when a control
 // that needs it is set.`).join('')}${blenderSpecular ? `
-// Includes GPL code: ${AREA_SPECULAR}, Blender's light specular (GPL-3.0-or-later, ${AREA_SPECULAR.split('/')[0]}/LICENSE.md).` : ''}${blenderIcons ? `
+// Includes GPL code: ${AREA_SPECULAR}, Blender's light specular (GPL-3.0-or-later, ${AREA_SPECULAR.split('/')[0]}/LICENSE.md).` : ''}${blenderFogGlow ? `
+// Includes GPL code: ${FOG_GLOW}, Blender's Fog Glow kernel (GPL-3.0-or-later, ${FOG_GLOW.split('/')[0]}/LICENSE.md).` : ''}${blenderIcons ? `
 // Includes GPL code: ${PANEL_ICONS}, Blender's icons, loaded when the control panel opens (GPL-3.0-or-later, ${PANEL_ICONS.split('/')[0]}/LICENSE.md).` : ''}
 import { readBuffers, readBytes } from './bylonder/buffers.js';
 import { worldColor, worldNodes } from './bylonder/world.js';
@@ -426,7 +432,9 @@ import { AreaLight } from './bylonder-area-light.js';
 import { parseLight } from './bylonder/overrides/babylon/area-light-parse.js';` : ''}${areaLitBlocks ? `
 // Babylon's PBR block with the area lights' samplers, before the materials using it are parsed.
 import './bylonder/overrides/babylon/pbr-block-area-lights.js';` : ''}${composited ? `
-import { compositor } from './bylonder-blocks.js';` : ''}${areaSpecular || panelIcons ? `
+import { compositor${fogGlow ? ', ReplayTask' : ''} } from './bylonder-blocks.js';` : ''}${fogGlow ? `
+import { fftConvolution } from './bylonder-fft-convolution.js';` : ''}${blenderFogGlow ? `
+import { fogGlowKernelValue } from './${FOG_GLOW}';` : ''}${areaSpecular || panelIcons || fogGlow ? `
 import { unitFor } from './bylonder/units.js';` : ''}${blenderSpecular ? `
 import { blenderAreaSpecular } from './${AREA_SPECULAR}';` : ''}
 ${BABYLON_IMPORTS}
@@ -552,7 +560,10 @@ ${pipelineTypes.length ? `  for (const entry of RENDERING_PIPELINES) {
   // Displayed as Blender's rendered view: scene linear, ${composited ? 'composited, ' : ''}then the view transform.
   const camera = scene.activeCamera;
   if (camera) {
-    const display = viewTransform(camera, { ...DISPLAY, lattice: DISPLAY.lattice && { ...DISPLAY.lattice, texels: buffers[DISPLAY.lattice.texels] } });${composited ? `
+    const display = viewTransform(camera, { ...DISPLAY, lattice: DISPLAY.lattice && { ...DISPLAY.lattice, texels: buffers[DISPLAY.lattice.texels] } });${composited ? `${fogGlow ? `
+    // Glare's Fog Glow: its kernel a registered unit gives, else Blender's, convolved by an FFT on the GPU.
+    const fogGlowKernel = unitFor('${FOG_GLOW_UNIT}')?.value${blenderFogGlow ? ' ?? fogGlowKernelValue' : ''};
+    if (fogGlowKernel) ReplayTask.operations.fogGlow = (task, step, read) => fftConvolution(task, step, read, fogGlowKernel);` : ''}
     COMPOSITORS.set(scene, (await compositor(scene, camera, COMPOSITOR, display)).graph);` : ''}
   }` : ''}
   if (canvas) scene.activeCamera?.attachControl(canvas, true);

@@ -27,6 +27,7 @@ const SOURCES = {
   'draw/pointcloud.js': text(() => import('../draw/pointcloud.js?raw')),
   'io_scene_babylon/polyfill/volumes.bundle.js': text(() => import('./polyfill/volumes.bundle.js?raw')),
   'blenkernel/light/area-specular.js': text(() => import('../blenkernel/light/area-specular.js?raw')),
+  'compositor/fog-glow.js': text(() => import('../compositor/fog-glow.js?raw')),
   'io_scene_babylon/panel-icons.js': text(() => import('./panel-icons.js?raw')),
   'io_scene_babylon/blender-code.LICENSE.md': text(() => import('./blender-code.LICENSE.md?raw')),
   '../LICENSES/GPL-3.0-or-later.txt': text(() => import('../../LICENSES/GPL-3.0-or-later.txt?raw')),

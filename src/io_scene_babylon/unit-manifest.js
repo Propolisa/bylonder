@@ -10,6 +10,8 @@ import { blendData } from '../python/bpy_rna.js';
 
 /** The type key of EEVEE's light specular on the page's PBR materials, a unit `{ apply(material) }`. */
 export const AREA_SPECULAR_UNIT = 'block:area_specular';
+/** The type key of Glare's Fog Glow kernel in a composite, a unit `{ value(x, y, degreesPerTexel) }`. */
+export const FOG_GLOW_UNIT = 'block:fog_glow';
 /** The type key of the icons the control panel's Collections view draws, a unit `{ icons: { [name]: [svg, width, height] } }`. */
 export const PANEL_ICONS_UNIT = 'block:icons';
 const GPL = 'GPL-3.0-or-later', CLEAN = 'MIT OR Apache-2.0';

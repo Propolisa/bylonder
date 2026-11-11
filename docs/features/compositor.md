@@ -2,7 +2,7 @@
 id: compositor
 title: Compositor
 summary: Finish a render in Blender's Compositor, here a ramen bar's neon sign in a wet lane at night with Glare's Fog Glow, Lens Distortion, a Color Balance grade and a vignette, composited by Blender's own code.
-expect: Render Image composites with Blender's own compositor, so every node renders as in Blender (Glare, Blur, Lens Distortion and the other multi-pass nodes included); the Compositor's backdrop and a Rendered view with Viewport Shading > Compositor on run the pixel nodes and Blender's own GPU passes for Glare, Blur, Lens Distortion, Kuwahara, Filter and the masks live; in camera view only the camera's frame is composited, as in Blender.
+expect: Render Image composites with Blender's own compositor, so every node renders as in Blender (Glare, Blur, Lens Distortion and the other multi-pass nodes included); the Compositor's backdrop and a Rendered view with Viewport Shading > Compositor on run the pixel nodes and Blender's own GPU passes for Glare, Blur, Lens Distortion, Kuwahara, Filter and the masks live, Fog Glow's convolution by an FFT on the GPU (a Bylonder render setting, on by default); in camera view only the camera's frame is composited, as in Blender.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/compositing/index.html
@@ -44,6 +44,9 @@ code:
   - src/compositor/compositor.js
   - src/compositor/compositor-tree.js
   - src/compositor/compositor-cpu.js
+  - src/compositor/compositor-replay.js
+  - src/compositor/fog-glow.js
+  - src/io_scene_babylon/runtime/fft-convolution.js
   - src/compositor/compositor-worker.js
   - src/nodes/blender/compositor-nodes.js
   - src/nodes/blender/compositor-io.js
@@ -55,12 +58,15 @@ code:
 tests:
   - tests/compositor-cpu-wasm.test.js
   - tests/compositor-read-wasm.test.js
+  - tests/fft-convolution.test.js
+  - tests/export-compositor-wasm.test.js
   - tests/nodes-gpu.test.js
   - tests/nodes.test.js
   - tests/e2e/smoke.mjs
   - tools/blender-reference/compositor-fixtures.py
 limits:
-  - In the backdrop and the views, Glare's Fog Glow, Convolve, Normalize, Levels and nodes whose GPU shaders share memory between invocations (summed area tables, Keying Screen, anisotropic Displace and Map UV, Vector Blur) pass their image through; Render Image composites them.
+  - In the backdrop and the views, Fog Glow convolves blocks of 2, 4, ... pixels where its kernel is wider than 512 pixels, so its halo's core is a little softer than Render Image's.
+  - In the backdrop and the views, Convolve, Normalize, Levels and nodes whose GPU shaders share memory between invocations (summed area tables, Keying Screen, anisotropic Displace and Map UV, Vector Blur) pass their image through; Render Image composites them.
   - The backdrop shows the composite through the scene camera at the output's aspect, not the Viewer node's image as Blender's does.
   - Render Layers gives the Image pass only; its other passes (Depth, Normal, Alpha and the like) and the Viewer's image are not made.
   - The Render window shows the composite, not the Viewer node's image; there is no Image Editor view of Viewer Node.

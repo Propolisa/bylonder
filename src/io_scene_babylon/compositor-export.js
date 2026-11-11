@@ -8,7 +8,7 @@ import { compositorGraph } from '../compositor/compositor-tree.js';
 import { BlenderCompositorBlock } from '../nodes/blender/compositor-nodes.js';
 import { BlenderGroupOutputBlock, BlenderRenderLayersBlock } from '../nodes/blender/compositor-io.js';
 import { nodeGraph } from '../nodes/blender/gpu-graph.js';
-import { nodeRecording } from '../compositor/compositor-replay.js';
+import { fogGlowOnGPU, nodeRecording } from '../compositor/compositor-replay.js';
 import { specializeSamplers } from '../overrides/webgpu/samplers.js';
 import { socketType } from '../nodes/blender/sockets.js';
 import { idStruct } from '../python/bpy_rna.js';
@@ -112,14 +112,16 @@ function compositing(world) {
 }
 
 // What a page's composite leaves out: each node the composite passes through that it cannot run (a recording the
-// page cannot replay, as Fog Glow's read back for its FFT), whose image the page passes through as muted.
+// page cannot replay), whose image the page passes through as muted, and a Fog Glow with its render setting off.
 export function compositorLosses(world) {
   const made = compositing(world);
   if (!made) return [];
   try {
     const dropped = (block) => (block.replays ? (block._recording(made.size)?.plan.reasons ?? (block._recording(made.size) ? null : ['not recorded'])) : !block._graph() && ['no GPU code']);
-    return [...reached(made.graph.outputBlock)].filter((block) => block instanceof BlenderCompositorBlock && !block.mute && dropped(block))
-      .map((block) => `Compositor: ${block.name} is not exported (${dropped(block).join(', ')}); the page passes its image through`);
+    const used = [...reached(made.graph.outputBlock)].filter((block) => block instanceof BlenderCompositorBlock && !block.mute);
+    const fogGlows = fogGlowOnGPU.enabled(world.scene) ? [] : used.filter((block) => block.replays && block._recording(made.size)?.plan.steps?.some((s) => s.op === 'fogGlow'));
+    return [...used.filter(dropped).map((block) => `Compositor: ${block.name} is not exported (${dropped(block).join(', ')}); the page passes its image through`),
+      ...fogGlows.map((block) => `Compositor: ${block.name}'s Fog Glow adds no glow on the page: Properties > Render > Fog Glow is off`)];
   } finally {
     made.graph.dispose();
   }

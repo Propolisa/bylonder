@@ -37,6 +37,8 @@ export const NODE_KERNELS = 'bylonder-nodes/nodes.js';
 const VOLUMES = { folder: 'bylonder-volumes', files: { 'volumes.js': 'io_scene_babylon/polyfill/volumes.bundle.js' } };
 // EEVEE's light specular for the page's PBR materials, as the app gives its own (blenkernel/light/area-specular.js).
 export const AREA_SPECULAR = 'bylonder-area-specular/area-specular.js';
+// Glare's Fog Glow kernel, Blender's, for a composite whose plans convolve with it (compositor/fog-glow.js).
+export const FOG_GLOW = 'bylonder-fog-glow/fog-glow.js';
 // Blender's icons the control panel's Collections view draws (scripts/panel-icons.mjs).
 export const PANEL_ICONS = 'bylonder-icons/icons.js';
 // A package's files (scene.js, scene.ir.json) as text, or the IR's alone.
@@ -62,6 +64,7 @@ export const gplFiles = (files) => {
   const ships = shipping(files);
   const own = withFolders(files).filter((e) => e.folder).flatMap(folderPaths)
     .concat(text(files).includes(AREA_SPECULAR) ? [[AREA_SPECULAR, 'blenkernel/light/area-specular.js']] : [])
+    .concat(text(files).includes(FOG_GLOW) ? [[FOG_GLOW, 'compositor/fog-glow.js']] : [])
     .concat(text(files).includes(PANEL_ICONS) ? [[PANEL_ICONS, 'io_scene_babylon/panel-icons.js']] : []).filter(([path]) => ships(path));
   const kernels = text(files).includes(NODE_KERNELS) && ships(NODE_KERNELS) ? [NODE_KERNELS] : [];
   return [...own, ...[...new Set([...own.map(([path]) => path), ...kernels].map((path) => path.split('/')[0]))].flatMap(noticeFiles)];
@@ -99,7 +102,8 @@ export const appFiles = (files) => [...APP_FILES.filter(([path]) => String(files
   ...(String(files['scene.js']).includes('"tools":"PACKAGE"') ? DEV_TOOL_FILES : [])];
 // The blocks library and Bylonder's extensions of Babylon, by package path: runtime/ files a package ships beside its
 // scene.js only when it imports them.
-export const BLOCK_FILES = { 'bylonder-blocks.js': 'blocks.js', 'bylonder-view-transform.js': 'view-transform.js', 'bylonder-area-light.js': 'area-light.js' };
+export const BLOCK_FILES = { 'bylonder-blocks.js': 'blocks.js', 'bylonder-view-transform.js': 'view-transform.js', 'bylonder-area-light.js': 'area-light.js',
+  'bylonder-fft-convolution.js': 'fft-convolution.js' };
 // The material builder (runtime/materials.js) and the registry it resolves nodes through, for a scene.js that imports it.
 export const MATERIAL_FILES = declared('materials');
 // The control panel (runtime/control-panel.js) and what it loads on first open, for a scene.js that imports it.

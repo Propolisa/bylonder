@@ -2,6 +2,7 @@ import { EffectRenderer, EffectWrapper, NodeRenderGraph, Viewport } from '@babyl
 import { bindGraph } from '../nodes/bindings.js';
 import { compositorGraph } from './compositor-tree.js';
 import { compositeFinalFrame } from './compositor-cpu.js';
+import { fogGlowOnGPU } from './compositor-replay.js';
 import { BlenderRenderLayersBlock } from '../nodes/blender/compositor-io.js';
 import { blendData, idStruct } from '../python/bpy_rna.js';
 
@@ -108,6 +109,7 @@ export function createCompositor(world, { commit = () => {}, notify = console.wa
     scene.frameGraph = sceneGraph();
   };
   const rebuild = () => build().catch(error => notify('Compositor: ' + error.message));
+  fogGlowOnGPU.changed.add((changed) => { if (changed === scene && enabled && graph) rebuild(); });
   // Blender's new compositing node group, the scene's (node.new_compositing_node_group, as Blender's New button runs it).
   const newGroup = () => {
     const before = new Set([...blendData().node_groups].map(g => g.name));
