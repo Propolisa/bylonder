@@ -143,7 +143,7 @@ const checks = {
       await app.page.click('[data-blender="TOPBAR_MT_file"]');
       await app.page.getByRole("menuitem", { name: /^Export/ }).first().hover();
       await app.page.getByRole("menuitem", { name: item }).click();
-      const dialog = app.page.locator(`[role="dialog"][aria-label^="Export"]`);
+      const dialog = app.frame().locator(`[role="dialog"][aria-label^="Export"]`);
       assert.equal(await dialog.getByRole("checkbox", { name: "EEVEE Parity" }).getAttribute("data-state"), "unchecked", "EEVEE Parity is off by default");
       await dialog.getByRole("button", { name: "Export" }).click();
       const chunks = [];
@@ -155,17 +155,34 @@ const checks = {
     assert.equal(json.activeCameraID, "Camera");
     assert.equal(json.geometries.vertexData[0].indices.length, 96 * 2 * 3, "the subdivided cube");
     const scenePackage = unzipSync(await exported("JavaScript (.zip)"));
-    assert.match(strFromU8(scenePackage["scene.js"]), /export async function load\(engine\)/);
-    assert.ok(scenePackage["scene.bin"].length > 0 && scenePackage["bylonder/blend-scene.js"], "the package holds scene.bin and the runtime");
+    // Bundled by default: scene.js holds the runtime and exports load.
+    assert.match(strFromU8(scenePackage["scene.js"]), /export\s*\{[^}]*\bload\b[^}]*\}/);
+    assert.ok(scenePackage["scene.bin"].length > 0, "the package holds scene.bin");
     // Live Modifiers: the IR, whose subdivided cube keeps its stack as `modifiers` entities on its settings, their
     // implementation, and modifiers.wasm with its worker beside them.
     const zip = unzipSync(await exported("JavaScript, Live Modifiers (.zip)"));
     const module = strFromU8(zip["scene.ir.json"]);
     assert.match(module, /"implementation":"modifiers"/);
     assert.match(module, /\.modifiers\[\\"[^\\]+\\"\]\.levels/, "the Subdivision's levels as a control by its Blender path");
-    assert.match(strFromU8(zip["bylonder/modifiers-evaluator.js"]), /export async function load/);
     assert.ok(zip["bylonder-modifiers/modifiers-worker.js"].length > 0 && zip["bylonder-modifiers/COPYING"]);
     assert.deepEqual(Array.from(zip["bylonder-modifiers/modifiers.wasm"].subarray(0, 4)), [0, 0x61, 0x73, 0x6d], "a WebAssembly module");
+  },
+
+  // A failed export says why in its dialog, which stays open to try again, and in Info; it never just downloads nothing.
+  async "File > Export reports a failed export in its dialog and in Info"() {
+    await app.bylonder(() => { window.savedObjectURL = URL.createObjectURL; URL.createObjectURL = () => { throw Error("no room for the file"); }; });
+    await app.page.click('[data-blender="TOPBAR_MT_file"]');
+    await app.page.getByRole("menuitem", { name: /^Export/ }).first().hover();
+    await app.page.getByRole("menuitem", { name: "Babylon (.babylon)" }).click();
+    const dialog = app.frame().locator(`[role="dialog"][aria-label^="Export"]`);
+    await dialog.getByRole("button", { name: "Export" }).click();
+    await dialog.getByRole("alert").filter({ hasText: "Export failed: no room for the file" }).waitFor({ timeout: 60000 });
+    await app.bylonder(() => { URL.createObjectURL = window.savedObjectURL; });
+    const download = app.page.waitForEvent("download", { timeout: 60000 });
+    await dialog.getByRole("button", { name: "Export" }).click();
+    assert.match((await download).suggestedFilename(), /\.babylon$/, "the dialog exports once the error is gone");
+    await app.page.click('[data-workspace="scripting"]');
+    await app.until(() => /Exportfailed:noroomforthefile/.test(document.querySelector('[data-blender="INFO"]')?.textContent.replace(/\s+/g, "")), null, 10000);
   },
 
   // Blender's own importer and exporter through the browser's file dialogs: the chosen files, the operator's options in

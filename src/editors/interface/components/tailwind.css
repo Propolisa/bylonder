@@ -39,6 +39,8 @@
   --color-border: var(--bl-popup-line);
   --color-input: var(--bl-field);
   --color-ring: var(--bl-select);
+  --color-error: var(--bl-info-error);
+  --color-error-foreground: var(--bl-info-report-text);
   /* a property overridden at its level (Theme > User Interface > State > Overridden, blended into the field) */
   --color-overridden: color-mix(in srgb, var(--bl-state-overridden) var(--bl-state-blend), var(--bl-widget));
   --color-status-done: var(--bl-status-done);

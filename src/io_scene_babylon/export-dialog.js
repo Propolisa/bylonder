@@ -161,8 +161,9 @@ function settingsTree(values, js, branches, world) {
 const options = ({ units, unitState, ...values }) => ({ ...JSON.parse(JSON.stringify(values, (key, value) => (value === null ? undefined : value))),
   ...(units && { replace: [...new Set(Object.values(units).flatMap((category) => Object.keys(category.units).filter((key) => unitStateOf(unitState, category, key) === 'REPLACED')))] }) });
 
-// Asks for a format's export options: resolves to them (export-options.js ExportOptionsSchema), or null when cancelled.
-export async function exportDialog(world, format, title) {
+// Asks for a format's export options (export-options.js ExportOptionsSchema) and exports with them by `run(options)`;
+// a failed export keeps the dialog open with its error. Resolves to whether it exported.
+export async function exportDialog(world, format, title, run) {
   const [{ createApp, h, reactive }, { default: ExportDialog }] = await Promise.all([
     import('vue'),
     import('../editors/interface/components/ExportDialog.vue'),
@@ -176,9 +177,21 @@ export async function exportDialog(world, format, title) {
   const tree = settingsTree(values, js, branches, world);
   const note = branches.geometryNodes ? await geometryNodesNote() : undefined;
   const host = document.body.appendChild(document.createElement('div'));
+  const status = reactive({ busy: false, error: '' });
   return new Promise((resolve) => {
-    const app = createApp({ render: () => h(ExportDialog, { title, fields, values, tree, note,
-      onDone: (ok) => { app.unmount(); host.remove(); resolve(ok ? options(values) : null); } }) });
+    const close = (exported) => { app.unmount(); host.remove(); resolve(exported); };
+    const done = async (ok) => {
+      if (status.busy) return;
+      if (!ok) return close(false);
+      Object.assign(status, { busy: true, error: '' });
+      try {
+        await run(options(values));
+        close(true);
+      } catch (error) {
+        Object.assign(status, { busy: false, error: error.message });
+      }
+    };
+    const app = createApp({ render: () => h(ExportDialog, { title, fields, values, tree, note, status, onDone: done }) });
     app.mount(host);
   });
 }

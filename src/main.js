@@ -399,7 +399,9 @@ window.addEventListener("message", (e) => {
   if (e.data.type === "export") {
     crossingLosses(world.objects, "BABYLON").forEach((loss) => report("WARNING", loss));
     const { format, title } = e.data.payload;
-    exportDialog(world, format, title).then((options) => options && exportScene(world, { format, selected: editor.selection.nodes, ...options })).catch((error) => notify("Export failed: " + error.message));
+    const failed = (error) => report("ERROR", `Export failed: ${error.message}`);
+    const run = (options) => exportScene(world, { format, selected: editor.selection.nodes, ...options }).catch((error) => { failed(error); throw error; });
+    exportDialog(world, format, title, run).catch(failed);
   }
   if (e.data.type === "save-blend") {
     crossingLosses(world.objects, "BLENDER").forEach((loss) => report("WARNING", loss));

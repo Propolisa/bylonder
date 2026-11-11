@@ -1,14 +1,14 @@
 <script setup>
 // File > Export's options (io_scene_babylon/export-dialog.js): Blender's props dialog with the export's checkboxes, then
 // its settings tree (SettingRow), each row inheriting from the one above it until set. Enter exports, Escape or a click
-// outside cancels; Blender's menus the rows open are not outside.
+// outside cancels; Blender's menus the rows open are not outside. A failed export shows its error and stays open.
 import { onMounted, ref } from "vue";
 import BlIcon from "./BlIcon.vue";
 import SettingRow from "./SettingRow.vue";
 import { Button } from "./ui/button";
 import { Checkbox } from "./ui/checkbox";
 
-const props = defineProps({ title: String, fields: Array, values: Object, tree: Array, note: String });
+const props = defineProps({ title: String, fields: Array, values: Object, tree: Array, note: String, status: Object });
 const emit = defineEmits(["done"]);
 const root = ref(null);
 const done = (ok) => emit("done", ok);
@@ -34,7 +34,8 @@ onMounted(() => root.value.querySelector("button")?.focus());
         <SettingRow v-for="node in tree" :key="node.key" :node="node" />
       </div>
       <p v-if="note" class="px-1 text-muted-foreground">{{ note }}</p>
-      <Button class="self-end" @click="done(true)">Export</Button>
+      <p v-if="status.error" role="alert" class="rounded-sm bg-error px-1 text-error-foreground">Export failed: {{ status.error }}</p>
+      <Button class="self-end" :disabled="status.busy" @click="done(true)">{{ status.busy ? "Exporting..." : "Export" }}</Button>
     </div>
   </div>
 </template>
