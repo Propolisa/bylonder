@@ -9,7 +9,7 @@ import { placement, posedBone } from './runtime/blend-scene.js';
 import { evaluateFCurve, prepareFCurve } from './runtime/drivers/fcurve.js';
 import { packKeys, unpackKeys } from './runtime/fcurve-evaluator.js';
 import { constrained, swapped } from './runtime/constraints-evaluator.js';
-import { curveInput } from './driver-export.js';
+import { curveInput, pageDriver } from './driver-export.js';
 import { key, transformBinding } from './controls-export.js';
 import { actionFCurves } from './ir-export.js';
 
@@ -48,6 +48,14 @@ export function liveTransform(sync, node) {
     if (!frames.every((sample, i) => { const value = placed(frameStart + i); return value && close(value, sample[key]); })) return null;
     return curves.map(({ fc, settings, keys }) => ({ id: ob, fc, settings, keys, node: node.id }));
   };
+}
+
+// Whether a pose bone's location, rotation and scale are set by drivers the page runs (driver-export.js pageDriver) and by
+// nothing else that animates them: the page's drivers then pose it, as they write its controls.
+export function drivenPose(arm, pose) {
+  const base = `pose.bones${key(pose.name)}`, animation = arm.animation_data, own = (path) => path.startsWith(base) && /^\.(location|rotation_\w+|scale)$/.test(path.slice(base.length));
+  const drivers = [...(animation?.drivers ?? [])].filter((d) => own(d.data_path));
+  return drivers.length > 0 && !animation.nla_tracks.length && !actionFCurves(animation).some((fc) => own(fc.data_path)) && drivers.every(pageDriver);
 }
 
 // For a bone of an armature (RNA's Object and PoseBone) and its Babylon Bone, the F-Curves the page runs for its pose

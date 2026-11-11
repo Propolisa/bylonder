@@ -12,7 +12,10 @@ const key = (name) => `["${name.replace(/["\\]/g, (c) => '\\' + c)}"]`;
 // The bpy.data collection of each ID type a driver target names.
 const COLLECTIONS = { OBJECT: 'objects', MATERIAL: 'materials', SCENE: 'scenes', KEY: 'shape_keys', WORLD: 'worlds', MESH: 'meshes',
   LIGHT: 'lights', CAMERA: 'cameras', NODETREE: 'node_groups' };
-const pathOf = (collection, name, dataPath) => `${collection}${key(name)}${dataPath.startsWith('[') ? '' : '.'}${dataPath}`;
+// A vector's component by letter (`pose.bones["Hand"].scale.y`), as its controls index it (`scale[1]`).
+const AXES = { rotation_quaternion: 'wxyz', rotation_axis_angle: 'wxyz' };
+const indexed = (dataPath) => dataPath.replace(/(\w+)\.([wxyz])$/, (whole, vector, axis) => `${vector}[${(AXES[vector] ?? 'xyzw').indexOf(axis)}]`);
+const pathOf = (collection, name, dataPath) => `${collection}${key(name)}${dataPath.startsWith('[') ? '' : '.'}${indexed(dataPath)}`;
 // An object's transform controls: its location, scale and the rotation of its mode (controls-export.js).
 const ROTATIONS = { QUATERNION: 'rotation_quaternion', AXIS_ANGLE: 'rotation_axis_angle' };
 const transformsOf = (ob) => ['location', ROTATIONS[ob.rotation_mode] ?? 'rotation_euler', 'scale'];
@@ -69,6 +72,15 @@ export function curveInput(fc) {
 function boneTarget(t, space, skeletons) {
   const drawn = t.id?.type === 'ARMATURE' && skeletons[t.id.name];
   return drawn && t.id.pose.bones.get(t.bone_target) ? { bone: t.bone_target, skeleton: drawn.skeleton, mesh: drawn.mesh, space } : undefined;
+}
+
+// Whether the page can run a driver that reads no bone's transform (driverEntity's `driver` implementation), as far as
+// the driver alone tells: what it reads still has to be exported.
+export function pageDriver(fc) {
+  const { driver } = fc;
+  if (driver.use_self || driverCurve(fc) === undefined) return false;
+  if ([...driver.variables].some((v) => v.type !== 'SINGLE_PROP' || [...v.targets].slice(0, 1).some((t) => !t.id || t.bone_target))) return false;
+  return driver.type !== 'SCRIPTED' || compile(driver.expression, [...driver.variables].map((v) => v.name)) !== PYTHON_ONLY;
 }
 
 // One driver as an IR entity reading and writing `properties`, or null when it stays baked. A driver reading a bone

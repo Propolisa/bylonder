@@ -7,7 +7,7 @@ import { idStruct, pointerOf } from '../python/bpy_rna.js';
 import { babylonMatrix } from '../blenkernel/main-view.js';
 import { modifierStack } from '../modifiers/stack.js';
 import { registerRuntime, runtimeOf, APPROXIMATION, FALLBACK } from './runtimes.js';
-import { livePose } from '../io_scene_babylon/live-curves.js';
+import { drivenPose, livePose } from '../io_scene_babylon/live-curves.js';
 import { livePoseConstraints } from '../io_scene_babylon/pose-export.js';
 import { keyedVertices } from './key-blocks.js';
 import { useDualQuaternionSkinning } from '../io_scene_babylon/runtime/dual-quaternion-skinning.js';
@@ -413,6 +413,7 @@ function poseAnimations(world, mappings, bake, sampling, scene) {
   const curves = [], gaps = [], constraints = [], posed = new Set();
   for (const [mapping, stack] of stacks) {
     const entity = stack.entity(), own = entity && [...stack.moved].map((bone) => {
+      if (drivenPose(mapping.arm, mapping.arm.pose.bones.get(bone.name))) return [];
       const whole = keys.get(bone).map((k, i) => ({ ...k, own: stack.own(bone)[i] })).filter((k) => Number.isInteger(k.frame));
       return livePose(mapping.arm, mapping.arm.pose.bones.get(bone.name), bone, whole.map((k) => k.own), whole[0].frame);
     });
@@ -424,6 +425,8 @@ function poseAnimations(world, mappings, bake, sampling, scene) {
   const animations = [...keys].flatMap(([bone, list]) => {
     if (posed.has(bone)) return [];
     const { arm, skeletons } = owners.get(bone);
+    // The page's drivers pose it.
+    if (!bake && !isJoint(bone) && skeletons.size === 1 && drivenPose(arm, arm.pose.bones.get(bone.name))) return [];
     const whole = list.filter((k) => Number.isInteger(k.frame));
     const live = !bake && !isJoint(bone) && skeletons.size === 1 && livePose(arm, arm.pose.bones.get(bone.name), bone, whole.map((k) => k.value), whole[0].frame);
     if (live) curves.push(...live);

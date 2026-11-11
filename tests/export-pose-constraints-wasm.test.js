@@ -5,7 +5,7 @@
 // IK/FK switch and a Breathe slider, custom properties that drivers read) and its elbow's corrective shape key, driven by
 // the posed arm's angle, morph and pose the skinned body as Main does. Its tail, a B-Bone, bends by the joints of its
 // segments, which the kernels shape, as does an arm the IK solver moves. A pose set as the page loads, before the
-// constraints attach, holds.
+// constraints attach, holds. A bone posed by a driver alone (Rigify's finger bones) is posed by the page's driver.
 import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -166,3 +166,40 @@ assert.ok(!joint._matrix.equalsWithEpsilon(Matrix.Identity(), 1e-6), 'the kernel
 console.log('Export pose constraints: a bbone:SEGMENTS unit takes the place of the kernels');
 arms.dispose();
 bent.remove();
+
+// A bone posed by a driver alone, which reads another bone's location by its letter (Rigify's finger bones read their
+// master's scale.y): the page's driver poses it and the rig's constraints still run in the page, nothing sampled.
+const drivenBone = rig.pose.bones.get('chest');
+const fc = rig.animation_data.drivers.new(`pose.bones["${drivenBone.name}"].location`, 2);
+fc.driver.type = 'SCRIPTED';
+fc.driver.expression = 'reach * 0.5';
+const reach = fc.driver.variables.new();
+Object.assign(reach, { name: 'reach', type: 'SINGLE_PROP' });
+Object.assign(reach.targets[0], { id: rig, data_path: 'pose.bones["hand_ik.R"].location.x' });
+sync.blender.tag(sync.objectOf(world.objects.find((n) => n.name === 'Rig')), 2);
+sync.frameChanged(frame);
+sync.view();
+const drivenFiles = await exportModule(world), drivenIR = JSON.parse(drivenFiles['scene.ir.json']);
+assert.ok(Object.values(drivenIR.entities).some((e) => e.type === 'constraints:POSE'), 'the rig with a driven bone runs its constraints in the page');
+assert.ok(Object.values(drivenIR.entities).some((e) => e.outputs?.value?.property === `objects["Rig"].pose.bones["${drivenBone.name}"].location[2]`), 'the driver runs in the page');
+const drivenGroups = JSON.parse(/const ANIMATION_GROUPS = (.*);\n/.exec(drivenFiles['scene.js'])[1]);
+assert.ok(!drivenGroups.flatMap((g) => g.targetedAnimations).some((t) => t.targetId === `Rig ${drivenBone.name}` && t.animation.keys.length > 1), 'the driven bone is not sampled');
+const drivenPage = writePackage(drivenFiles), driven = await (await import(drivenPage.url)).load(new NullEngine());
+await driven.settled();
+driven.playhead.pause();
+const drivenSkeleton = driven.scene.getSkeletonById('Rig'), drivenBody = driven.scene.getMeshById(entity.inputs.mesh);
+const drivenAbsolute = (bone) => (bone.getParent() ? bone._matrix.multiply(drivenAbsolute(bone.getParent())) : bone._matrix.multiply(drivenBody.computeWorldMatrix(true)));
+driven.set(frameControl.path, frame);
+driven.set('objects["Rig"].pose.bones["hand_ik.R"].location[0]', 0.3);
+for (let i = 0; i < 2; i++) { driven.scene.render(); await driven.settled(); }
+handTarget.location[0] = 0.3;
+sync.frameChanged(frame);
+const drivenError = Math.max(...main().entries().filter(([name]) => !name.includes('#')).map(([name, m]) => {
+  const ours = drivenAbsolute(drivenSkeleton.bones.find((b) => b.name === name));
+  return Math.max(...m.asArray().map((v, i) => Math.abs(v - ours.asArray()[i])));
+}));
+assert.ok(drivenError < TOLERANCE, `the driven bone and the rig take Main's pose (off by ${drivenError})`);
+assert.ok(Math.abs(rig.pose.bones.get(drivenBone.name).location[2] - 0.15) < 1e-6, 'Main drives it too');
+console.log(`Export pose constraints: ${drivenBone.name}, posed by a driver alone, runs in the page with the rig's constraints`);
+driven.dispose();
+drivenPage.remove();
