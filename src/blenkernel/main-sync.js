@@ -588,7 +588,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   // Babylon into Main: what hooks marked changed, or `all` of it before Blender's code runs (so what no hook sees, the
   // selection and the slices' state, is in Main too), each value compared with what was last synced; then Main
   // evaluated by its depsgraph, as Blender's window evaluates after each event.
-  function flush(all = true) {
+  function flush(all = true, draw = true) {
     if (state.applying) return;
     // Objects come and go by the world's list and by deleting (metadata, which hooks see).
     let came = false;
@@ -613,13 +613,13 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     }
     // Main put new objects in the active collection, as Blender adds them, and deleted ones left theirs.
     if (came && world.collections) readCollections();
-    evaluate();
+    evaluate(draw);
     if (all && api.debug) assertEqual('flush');
   }
   // Main evaluated by its depsgraph and what it updated drawn (main-view.js).
-  function evaluate() {
+  function evaluate(draw = true) {
     blender.evaluate();
-    mainView.drawEvaluated();
+    if (draw) mainView.drawEvaluated();
   }
 
   const curveObject = (entry) => new CurveObject(entry.type, entry.node.name, entry.ob, blender);
@@ -772,12 +772,14 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     // The scene at a frame: Main evaluated for it as the depsgraph evaluates a new frame (animation and drivers, then
     // matrices), and what it updated drawn (main-view.js drawEvaluated).
     // The page's edits go to Main, then the frame changes as Blender changes it (view_frame_set: simulations step through
-    // the frames between), not as a value the flush writes and evaluates at once.
-    frameChanged(frame) {
+    // the frames between), not as a value the flush writes and evaluates at once. Without `draw` (an export sampling
+    // Main at every frame), only what hooks marked changed is flushed and nothing is drawn: the next drawn frame draws
+    // all that the frames between updated.
+    frameChanged(frame, { draw = true } = {}) {
       scene.shadow.set('frame_current', Math.floor(frame)).set('frame_subframe', frame - Math.floor(frame));
-      flush();
+      flush(draw, draw);
       blender.frame = frame;
-      mainView.drawEvaluated({ scene: true });
+      if (draw) mainView.drawEvaluated({ scene: true });
     },
     // Blender's undo stack, started from Main as it is (the scene's first state), its steps pushed and loaded.
     undoInit: () => { flush(); blender.undoInit(); },

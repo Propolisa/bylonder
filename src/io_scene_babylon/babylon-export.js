@@ -1,7 +1,7 @@
 // File > Export > Babylon (.babylon): the scene as Babylon's SceneSerializer writes it, from the evaluated scene, as
 // Blender's glTF exporter exports the evaluated depsgraph (docs/blender-boundary.md, Export for Babylon).
 import { Animation, AnimationKeyInterpolation, Camera, GetClass, Light, Quaternion, RectAreaLight, SceneSerializer, Texture, Vector3, VertexBuffer } from '@babylonjs/core';
-import { evaluatedMatrix, BLENDER_FORWARD } from '../runtime/object-transform.js';
+import { evaluatedMatrix, setEvaluatedMatrix, BLENDER_FORWARD } from '../runtime/object-transform.js';
 import { idStruct } from '../python/bpy_rna.js';
 import { deleted, nodeId } from '../editors/object/identity.js';
 import { exportRuntimes } from '../runtimes/runtimes.js';
@@ -124,12 +124,13 @@ function evaluatedTransform(sync, node) {
   const parent = node.parent && (sync.worldMatrix(node.parent) ?? node.parent.computeWorldMatrix(true)), toParent = parent?.clone().invert();
   const position = new Vector3(), rotationQuaternion = new Quaternion(), scaling = new Vector3();
   // An area light's transform is its rig's (area-lights.js).
-  if (node instanceof RectAreaLight) return rigTransform(evaluatedMatrix(node), toParent);
+  if (node instanceof RectAreaLight) return rigTransform(sync.worldMatrix(node) ?? evaluatedMatrix(node), toParent);
   if (node instanceof Light) {
-    const matrix = evaluatedMatrix(node), direction = Vector3.TransformNormal(BLENDER_FORWARD, matrix);
+    const matrix = sync.worldMatrix(node) ?? evaluatedMatrix(node), direction = Vector3.TransformNormal(BLENDER_FORWARD, matrix);
     if (!toParent) return { position: matrix.getTranslation(), direction: direction.normalize() };
     return { position: Vector3.TransformCoordinates(matrix.getTranslation(), toParent), direction: Vector3.TransformNormal(direction, toParent).normalize() };
   }
+  if (node instanceof Camera && sync.worldMatrix(node)) setEvaluatedMatrix(node, sync.worldMatrix(node));
   const matrix = node instanceof Camera ? node.getViewMatrix(true).clone().invert() : sync.worldMatrix(node);
   (toParent ? matrix.multiply(toParent) : matrix).decompose(scaling, rotationQuaternion, position);
   return node instanceof Camera ? { position, rotationQuaternion } : { position, rotationQuaternion, scaling };
@@ -145,7 +146,7 @@ function evaluatedFrames(world, nodes, refs, checks, sampling) {
   if (frameEnd <= frameStart || (!nodes.some(moves) && !refs.length)) return { transforms: null, channels: new Map() };
   const transforms = new Map(nodes.map((node) => [node, []])), channels = new Map(refs.map((ref) => [ref, []]));
   for (const frame of sampling.frames) {
-    sync.frameChanged(frame);
+    sync.frameChanged(frame, { draw: false });
     for (const node of nodes) transforms.get(node).push(evaluatedTransform(sync, node));
     for (const ref of refs) channels.get(ref).push(world.animation.evaluated(ref));
     for (const stack of checks) stack.check();

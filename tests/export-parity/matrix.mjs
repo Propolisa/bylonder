@@ -42,7 +42,6 @@ export const KNOWN = {
   'newtons-cradle controls': 'Bevel width set live (fixed on export-fixes-parity)',
   'sculpting controls': 'Bevel width set live (fixed on export-fixes-parity)',
   "desk-lamp controls": "Bevel width set live on the Mug; the Lamp's skinned mesh off from load (live animation agent)",
-  "drivers-and-graph-editor animation": "the drivers read the flywheel's rotation control, which its F-Curve no longer animates, so driven parts freeze in playback (live animation agent)",
   'desk-lamp animation': 'the armature-deformed Lamp mesh is off at every frame (live animation agent)',
   "lotus controls": "shape keys counted twice: the export redraws Main's evaluated mesh over the basis it morphs (live animation agent)",
   'lotus animation': 'shape keys counted twice (live animation agent)',
