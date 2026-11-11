@@ -62,6 +62,25 @@ try {
   assert.equal(twin.entries.animationGroups.length, 1);
   assert.equal(cup(twin).parent, body(twin).skeleton.bones[cup(container.blend).parent.getIndex()], "a copy's cup hangs from its own hand");
 
+  // Her cup alone: it hangs from her rig's hand, but nothing selected is skinned by the rig, so the page has no skeleton
+  // to hang it from and plays where Blender places it instead.
+  const cupFiles = await exportModule(world, { scope: 'SELECTED', selected: [node('Tea Cup')], target: 'WEBGL2', runtimes: { ARMATURE: { runtime: 'MAPPED', instances: {} } } });
+  const cupPkg = writePackage(cupFiles);
+  try {
+    const alone = await (await import(cupPkg.url)).load({ scene: new Scene(new NullEngine()) });
+    assert.deepEqual(alone.entries.meshes.map((m) => m.name).filter((n) => !n.startsWith('__')).sort(), ['Tea Break Rig', 'Tea Cup'], 'the cup and the rig it hangs from');
+    assert.equal(alone.entries.skeletons.length, 0, 'no skeleton without a mesh it skins');
+    for (const frame of [1, 180]) {
+      sync.frameChanged(frame);
+      alone.playhead.seek(frame);
+      for (const mesh of alone.entries.meshes) mesh.computeWorldMatrix(true);
+      const placed = cup(alone).getWorldMatrix().multiply(alone.entries.root.getWorldMatrix().clone().invert());
+      assert.ok(placed.getTranslation().subtract(sync.worldMatrix(node('Tea Cup')).getTranslation()).length() < 1e-3, `the cup alone where Blender places it at frame ${frame}`);
+    }
+  } finally {
+    cupPkg.remove();
+  }
+
   const mirrored = new Scene(new NullEngine());
   mirrored.useRightHandedSystem = true;
   assert.equal((await load({ scene: mirrored })).entries.root.scaling.z, -1, 'mirrored into a right-handed scene');

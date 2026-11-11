@@ -444,19 +444,21 @@ function boneParent(mappings, ob, byOb) {
   return null;
 }
 
-// Export: every armature mapped, those on Blender for the export's duration (their meshes skinned, then drawn as
-// Blender evaluated them again), with their issues and their pose's animation.
+// Export: every armature mapped that skins a mesh the export writes (all of the scene's, or of its selected objects:
+// `world.only`), those on Blender for the export's duration (their meshes skinned, then drawn as Blender evaluated them
+// again), with their issues and their pose's animation.
 function exportArmatures(world, { bake, sampling }) {
   const view = lastView;
   if (!view || !world.mainSync) return { reports: [], animations: [], restore() {} };
   const entries = [...view.entries()], meshes = entries.filter((e) => e.type === 'MESH').map((e) => idStruct(e.ob)), byOb = new Map(entries.map((e) => [e.ob, e]));
+  const exported = (mapping) => !world.only || [...mapping.skins.keys()].some((key) => world.only.has(byOb.get(key)?.node));
   const temporary = [], mappings = [];
   for (const arm of entries.filter((e) => e.type === 'ARMATURE').map((e) => idStruct(e.ob))) {
     const live = mapped.get(address(arm));
-    if (live) { mappings.push(live.mapping); continue; }
+    if (live) { if (exported(live.mapping)) mappings.push(live.mapping); continue; }
     const state = { mapping: mapArmature(arm, view.scene), applied: new Map() }, meshOf = (key) => view.blender.mesh(key);
     state.mapping.update({ objects: meshes, meshOf, influencers: settingsOf(arm)?.influencers, fallbacks: (ob) => viewFallbacks(view, byOb.get(address(ob)), ob) });
-    if (!state.mapping.skins.size) { state.mapping.dispose(); continue; }
+    if (!state.mapping.skins.size || !exported(state.mapping)) { state.mapping.dispose(); continue; }
     temporary.push(state);
     mappings.push(state.mapping);
   }
