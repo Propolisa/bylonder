@@ -109,14 +109,21 @@ export async function loadConstraints(url) {
       const stacks = bones.map((b, i) => addStack(ob, x.rig_pose_bone(rig, i), b.constraints ?? [], layouts, resolve));
       x.rig_update(rig);
       const channels = new Float32Array(bones.length * 16);
+      // What pose and influence last wrote, so that only a change is written again.
+      const posed = new Map(), influenced = new Map();
+      const same = (a, b) => !!a && Object.keys(b).every((key) => (Array.isArray(b[key]) ? b[key].every((v, j) => v === a[key][j]) : b[key] === a[key]));
       return {
         /** A pose bone's own settings (location, rotation, scale by RNA name), as an animation sets them. */
         pose(i, values) {
+          if (same(posed.get(i), values)) return;
+          posed.set(i, structuredClone(values));
           write(x.rig_pose_bone(rig, i) >>> 0, layouts.PoseBone, values);
         },
         /** A constraint's influence, the `k`th of bone `i`'s, as a driver or the page sets it. */
         influence(i, k, value) {
-          if (stacks[i]?.[k]) write(stacks[i][k], layouts.Constraint, { influence: value });
+          if (!stacks[i]?.[k] || influenced.get(stacks[i][k]) === value) return;
+          influenced.set(stacks[i][k], value);
+          write(stacks[i][k], layouts.Constraint, { influence: value });
         },
         /** With `local` null, each bone's own settings are those `pose` last wrote. */
         evaluate(frame, local, world, matrixOf) {
@@ -135,8 +142,9 @@ export async function loadConstraints(url) {
          */
         bboneSegments(i) {
           const header = x.rig_bbone_segments(rig, i) >>> 0, view = dataView(), count = view.getInt32(header, true);
-          const read = (at) => Array.from({ length: count }, (_, k) => Array.from(floats(view.getUint32(header + at, true) + k * 64, 16)));
-          return { matrices: read(4), rest_matrices: read(8) };
+          const read = (at) => Array.from({ length: count }, (_, k) => floats(view.getUint32(header + at, true) + k * 64, 16).slice());
+          // The rest matrices only when asked: a page reads the posed ones each frame.
+          return { matrices: read(4), get rest_matrices() { return read(8); } };
         },
         free() {
           targets.free();

@@ -1,3 +1,5 @@
+/** @param {any} value @returns {boolean} */
+export function holdsReference(value: any): boolean;
 /**
  * Every reference in a value, with where it is.
  * @param {any} value

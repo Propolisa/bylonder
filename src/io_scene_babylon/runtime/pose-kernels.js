@@ -34,7 +34,28 @@ function handlesOf(spec, at) {
   return [b.bone.bbone_handle_type_start === 'AUTO' ? (b.bone.use_connect ? b.parent : -1) : start, b.bone.bbone_handle_type_end === 'AUTO' ? child : end];
 }
 const blender = (/** @type {Matrix} */ m) => swapped(m).asArray();
-const babylon = (/** @type {ArrayLike<number>} */ m, /** @type {number} */ at) => Matrix.FromArray(Array.from(m).slice(at, at + 16));
+const babylon = (/** @type {ArrayLike<number>} */ m, /** @type {number} */ at) => Matrix.FromArray(m, at);
+
+/**
+ * How a skeleton's bones map onto a rig, found once per skeleton: `order`, the skeleton's index of each of the rig's
+ * bones (-1 for none); `at`, the rig's index of each of the skeleton's; `joints`, each segment joint of a B-Bone the
+ * kernels shape, as [its index, the rig's index of its bone, its segment].
+ * @param {any} entry @param {any} spec @param {any[]} bones @param {string[]} shaped
+ */
+function layoutOf(entry, spec, bones, shaped) {
+  entry.layouts ??= new WeakMap();
+  if (entry.layouts.get(bones)?.shaped !== shaped.join(',')) {
+    const index = new Map(bones.map((b, i) => [b.name, i])), rigIndex = new Map(spec.bones.map((/** @type {any} */ b, /** @type {number} */ i) => [b.name, i]));
+    const order = spec.bones.map((/** @type {any} */ b) => index.get(b.name) ?? -1);
+    const joints = bones.flatMap(({ name, parent }, i) => {
+      const [, bone, k] = /^(.*)#(\d+)$/.exec(name) ?? [];
+      return shaped.includes(bone) && bones[parent]?.name === bone ? [[i, rigIndex.get(bone), Number(k)]] : [];
+    });
+    entry.layouts.set(bones, { order, at: new Map(order.map((/** @type {number} */ i, /** @type {number} */ k) => [i, k])), joints, shaped: shaped.join(','),
+      unrest: bones.map((b) => Matrix.Invert(b.rest)) });
+  }
+  return entry.layouts.get(bones);
+}
 
 /**
  * A solver on loaded kernels (polyfill/constraints.js loadConstraints): each bone's Babylon local matrix after the
@@ -64,23 +85,22 @@ export function kernelSolve(kernels) {
     }
     const { spec, rig, types } = rigs.get(compiled);
     handUnits(types);
+    const { order, at, joints, unrest } = layoutOf(rigs.get(compiled), spec, bones, shaped);
     spec.bones.forEach((/** @type {any} */ b, /** @type {number} */ i) => {
       influences[b.name]?.forEach((/** @type {number} */ v, /** @type {number} */ k) => rig.influence(i, k, v));
       if (shapes[b.name]) rig.pose(i, shapes[b.name]);
     });
-    const index = new Map(bones.map((b, i) => [b.name, i]));
-    const order = spec.bones.map((/** @type {any} */ b) => index.get(b.name) ?? -1);
     const channels = new Float32Array(order.length * 16);
-    order.forEach((/** @type {number} */ i, /** @type {number} */ k) => channels.set(i < 0 ? IDENTITY : blender(locals[i].multiply(Matrix.Invert(bones[i].rest))), k * 16));
+    order.forEach((/** @type {number} */ i, /** @type {number} */ k) => channels.set(i < 0 ? IDENTITY : blender(locals[i].multiply(unrest[i])), k * 16));
     const nodes = (/** @type {string} */ id) => { const m = nodeWorld(id); return m ? blender(m) : IDENTITY; };
     const posed = rig.evaluate(frame, channels, blender(space.multiply(mesh)), nodes);
-    const at = new Map(order.map((/** @type {number} */ i, /** @type {number} */ k) => [i, k]));
     /** @type {Map<number, Matrix>} */
-    const result = new Map();
+    const result = new Map(), inverted = new Map();
+    const unposed = (/** @type {number} */ k) => inverted.get(k) ?? inverted.set(k, Matrix.Invert(babylon(posed, k * 16))).get(k);
     for (const [i, k] of at) {
       if (i < 0) continue;
       const own = babylon(posed, k * 16), parent = at.get(bones[i].parent);
-      result.set(i, parent === undefined ? swapped(own).multiply(space) : swapped(own.multiply(Matrix.Invert(babylon(posed, parent * 16)))));
+      result.set(i, parent === undefined ? swapped(own).multiply(space) : swapped(own.multiply(unposed(parent))));
     }
     // The segment joints (`bone#k`, children of the bone) of each B-Bone the export found the kernels shape as Main
     // does: each at its segment's matrix in the bone's space, from a unit registered for `bbone:SEGMENTS` where there
@@ -92,13 +112,11 @@ export function kernelSolve(kernels) {
       const [prev, next] = handlesOf(spec, at), b = spec.bones[at];
       return /** @type {any} */ (unit.run({ ...handle(at), prev: handle(prev), next: handle(next), bone: b.bone, pose_bone: { ...b.pose, ...shapes[b.name] } }, { frame })).matrices;
     };
-    bones.forEach(({ name, parent }, i) => {
-      const [, bone, k] = /^(.*)#(\d+)$/.exec(name) ?? [], at = shaped.includes(bone) && bones[parent]?.name === bone ? spec.bones.findIndex((/** @type {any} */ b) => b.name === bone) : -1;
-      if (at < 0) return;
-      if (!segments.has(at)) segments.set(at, segmentsOf(at));
-      const matrix = segments.get(at)[Number(k)];
+    for (const [i, bone, k] of joints) {
+      if (!segments.has(bone)) segments.set(bone, segmentsOf(bone));
+      const matrix = segments.get(bone)[k];
       if (matrix) result.set(i, swapped(Matrix.FromArray(matrix)));
-    });
+    }
     return result;
   };
   /** A B-Bone's segments after the last solve of a rig: its segments' matrices in its rest space. @param {any} spec @param {string} bone */

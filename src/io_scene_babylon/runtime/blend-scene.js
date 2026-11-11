@@ -531,6 +531,15 @@ export class BlendScene {
     return texture;
   }
 
+  /** The paths of a vector's components (`…location[0]`), made once: a bone is placed every frame. @type {Map<string, string[]>} */
+  #vectors = new Map();
+  /** @param {string} base @param {string} name @param {number} count */
+  #paths(base, name, count) {
+    const key = `${base}.${name}`;
+    if (!this.#vectors.has(key)) this.#vectors.set(key, Array.from({ length: count }, (_, i) => `${key}[${i}]`));
+    return /** @type {string[]} */ (this.#vectors.get(key));
+  }
+
   /**
    * Places a node by the part of its object's transform a control at `path` sets (location, rotation or scale): the
    * rest of the node stays as it is, which Babylon's animation may be playing. A bone is posed by all three.
@@ -540,7 +549,7 @@ export class BlendScene {
    */
   #place(node, path, transform) {
     const base = path.slice(0, path.lastIndexOf('.')), part = path.slice(base.length + 1).replace(/\[\d+\]$/, '');
-    const vector = (/** @type {string} */ name, /** @type {number} */ count) => Array.from({ length: count }, (_, i) => /** @type {number} */ (this.#values.get(`${base}.${name}[${i}]`) ?? 1));
+    const vector = (/** @type {string} */ name, /** @type {number} */ count) => this.#paths(base, name, count).map((key) => /** @type {number} */ (this.#values.get(key) ?? 1));
     if (node.getRestMatrix) {
       node._matrix = posedBone(transform, vector, node.getRestMatrix());
       return;
