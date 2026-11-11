@@ -15,6 +15,7 @@ import { createMaterialLibrary } from '../src/blenkernel/material/library.js';
 import { createWorlds } from '../src/blenkernel/scene/world.js';
 import { createModifierSystem } from '../src/modifiers/stack.js';
 import { createCurveObjects } from '../src/editors/curve/curve-objects.js';
+import { createLightShadows } from '../src/blenkernel/light/light-shadows.js';
 import { createSelection } from '../src/editors/object/selection.js';
 import { createRNA } from '../src/makesrna/rna-bylonder.js';
 import { createMainSync } from '../src/blenkernel/main-sync.js';
@@ -51,6 +52,8 @@ export function openExample(id) {
   world.worlds = createWorlds(world);
   world.modifiers = createModifierSystem(world, { notify: (message) => { throw Error(message); } });
   world.curves = createCurveObjects(world);
+  // Lights' shadows and how many lights each material takes, as a rendered view sets them (runtime/world.js).
+  world.shadows = createLightShadows(scene);
   registerObjects(animation, objects);
   const sync = createMainSync({ rna: createRNA({ world, selection: createSelection(scene, objects) }), ids: animation.ids });
   setContextPointer(sync.blender.C);
