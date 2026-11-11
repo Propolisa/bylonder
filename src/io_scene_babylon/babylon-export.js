@@ -356,8 +356,8 @@ function shadowsOf(world, content) {
   const generators = world.shadows?.generators;
   if (!generators?.length) return null;
   const lights = new Map([...content.nodes].filter((n) => n.getClassName().endsWith('Light')).map((l) => [l.name, l]));
-  // Without Bylonder's shadow map shader (its own include remapping), which the page does not carry: Babylon's.
-  return generators.filter((g) => lights.has(g.getLight().name)).map((g) => ({ ...g.serialize(), lightId: lights.get(g.getLight().name).id, customShaderOptions: undefined }));
+  // With Bylonder's shadow map shader (lit-side-normal-bias.js), which the page carries.
+  return generators.filter((g) => lights.has(g.getLight().name)).map((g) => ({ ...g.serialize(), lightId: lights.get(g.getLight().name).id, customShaderOptions: g.customShaderOptions }));
 }
 
 async function serializeMapped(world, { geometry, live, mapped, parity, graphOf, bake }) {

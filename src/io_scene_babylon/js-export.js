@@ -370,6 +370,7 @@ import { pbrFromGLSL } from './bylonder/overrides/webgpu/pbr-from-glsl.js';
 ` : ''}${data.postProcesses.length ? `import { parsePostProcess } from './bylonder/overrides/babylon/god-rays-parse.js';
 ` : ''}${pipelineTypes.length ? `import { parsedPipeline } from './bylonder/overrides/babylon/pipeline-effects.js';
 import './bylonder/overrides/babylon/chromatic-aberration-size.js';
+` : ''}${data.shadowGenerators?.length ? `import './bylonder/overrides/babylon/lit-side-normal-bias.js';
 ` : ''}import './bylonder/overrides/babylon/geometry-gamma-albedo.js';
 import './bylonder/overrides/babylon/environment-probe.js';
 import './bylonder/overrides/babylon/srgb-texture-parse.js';
@@ -513,7 +514,7 @@ ${parented.map((e) => `  nodes[${e.uniqueId}].parent = nodes[${e.parentId}] ?? n
     if (entry.includedOnlyMeshesIds?.length) light.includedOnlyMeshes = meshes(entry.includedOnlyMeshesIds);
   }` : ''}
 
-${parse('REFLECTION_PROBES', data.reflectionProbes, "ReflectionProbe.Parse(entry, scene, ROOT)")}${parse('SHADOW_GENERATORS', data.shadowGenerators, "(entry.className === 'CascadedShadowGenerator' ? CascadedShadowGenerator : ShadowGenerator).Parse(entry, scene)")}${parse('EFFECT_LAYERS', data.effectLayers, "EffectLayer.Parse(entry, scene, ROOT)")}${parse('PARTICLE_SYSTEMS', data.particleSystems, "ParticleSystem.Parse(entry, scene, ROOT)")}  if (SCENE.environmentProbe) scene.environmentTexture = scene.reflectionProbes.find((p) => p.name === SCENE.environmentProbe)?.cubeTexture ?? scene.environmentTexture;
+${parse('REFLECTION_PROBES', data.reflectionProbes, "ReflectionProbe.Parse(entry, scene, ROOT)")}${parse('SHADOW_GENERATORS', data.shadowGenerators, "Object.assign((entry.className === 'CascadedShadowGenerator' ? CascadedShadowGenerator : ShadowGenerator).Parse(entry, scene), { customShaderOptions: entry.customShaderOptions })")}${parse('EFFECT_LAYERS', data.effectLayers, "EffectLayer.Parse(entry, scene, ROOT)")}${parse('PARTICLE_SYSTEMS', data.particleSystems, "ParticleSystem.Parse(entry, scene, ROOT)")}  if (SCENE.environmentProbe) scene.environmentTexture = scene.reflectionProbes.find((p) => p.name === SCENE.environmentProbe)?.cubeTexture ?? scene.environmentTexture;
   scene.activeCamera = scene.getCameraById(${json(data.activeCameraID ?? null)}) ?? scene.cameras[0] ?? null;
 ${pipelineTypes.length ? `  for (const entry of RENDERING_PIPELINES) {
     const make = SCREEN_SPACE[entry.customType];

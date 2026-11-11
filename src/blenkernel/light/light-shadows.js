@@ -9,7 +9,7 @@ import { areaLightShadows } from './area-light.js';
 import { createLightReach, lightsMeshes } from './light-reach.js';
 import { filmSample } from '../../render/film.js';
 import { halton } from '../../render/sampling.js';
-import { evaluatedMatrix, setEvaluatedMatrix } from '../../runtime/object-transform.js';
+import { BLENDER_FORWARD, evaluatedMatrix, setEvaluatedMatrix } from '../../runtime/object-transform.js';
 import { setRenderList } from '../../overrides/babylon/render-list.js';
 import { SHADOW_MAP } from '../../overrides/babylon/lit-side-normal-bias.js';
 
@@ -19,6 +19,9 @@ const SUN_QUALITY = [ShadowGenerator.QUALITY_LOW, ShadowGenerator.QUALITY_MEDIUM
 const CASTS = ['SUN', 'SPOT', 'POINT'];
 // How far, in meters, a caster's depth is pushed back from the light: below a brick's bump, past a cube map texel.
 const DEPTH_BIAS = 0.005;
+// How far, per meter from a point or spot light, a caster moves along its normal: a few texels of its map there, as EEVEE
+// offsets by a share of a texel, so that a caster beside the light (a lamp's housing) stays where it is.
+const NORMAL_BIAS_PER_METER = 4 * (2 / MAP_SIZE);
 
 // blender-port: eevee_light.cc Light::shape_parameters_set: a local light's shadow spans its influence, its near clip
 // 1/4000 of that.
@@ -29,10 +32,18 @@ export function shadowRange(record) {
 
 // A light's offset within its radius for a film's sample: none for the first (what a moving view shows, one stable
 // shadow), then points alternately on its sphere and within it, whose views from any side together spread evenly over
-// the disk the sphere shows, so the samples average the soft shadow of EEVEE's sphere light.
-export function shadowJitter(index, radius) {
+// the disk the sphere shows, so the samples average the soft shadow of EEVEE's sphere light. A spot's (axis: the way it
+// shines) lie on the disk facing its cone: EEVEE draws the map from the light's center and traces toward that disk, so
+// what lies behind the light (a lamp's housing) casts no shadow.
+export function shadowJitter(index, radius, axis = null) {
   if (!index || !(radius > 0)) return null;
-  const z = 2 * halton(index, 5) - 1, phi = 2 * Math.PI * halton(index, 7), s = Math.sqrt(1 - z * z);
+  const phi = 2 * Math.PI * halton(index, 7);
+  if (axis) {
+    const r = radius * Math.sqrt(halton(index, 5)), side = Vector3.Cross(axis, Math.abs(axis.x) < 0.9 ? Vector3.Right() : Vector3.Up()).normalize();
+    const up = Vector3.Cross(axis, side).normalize();
+    return side.scale(r * Math.cos(phi)).addInPlace(up.scale(r * Math.sin(phi)));
+  }
+  const z = 2 * halton(index, 5) - 1, s = Math.sqrt(1 - z * z);
   const r = radius * (index % 2 ? 1 : Math.cbrt(halton(index, 11)));
   return new Vector3(r * s * Math.cos(phi), r * s * Math.sin(phi), r * z);
 }
@@ -91,11 +102,11 @@ function softSun(light, generator) {
 }
 
 // Babylon's depth of a local light's shadow spans the camera's clip range unless the light has its own, and its bias is
-// a share of that range.
+// a share of that range; its normal bias is per meter from the light (lit-side-normal-bias.js).
 function fitRange(light, generator) {
   const { near, far } = shadowRange(lightRecord(light));
   Object.assign(light, { shadowMinZ: near, shadowMaxZ: far });
-  generator.bias = DEPTH_BIAS / (near + far);
+  Object.assign(generator, { bias: DEPTH_BIAS / (near + far), normalBias: NORMAL_BIAS_PER_METER });
 }
 
 // Moves a point or spot light within its radius for the film's sample while its shadow map and the view draw, and back
@@ -103,9 +114,11 @@ function fitRange(light, generator) {
 function jitterPerSample(scene) {
   const moved = new Map(); // light -> what it was
   const before = (light) => {
-    const offset = shadowJitter(filmSample(scene), lightRecord(light).shadow_soft_size);
-    if (!offset || moved.has(light)) return;
-    const matrix = evaluatedMatrix(light);
+    if (moved.has(light)) return;
+    const matrix = evaluatedMatrix(light), record = lightRecord(light);
+    const axis = record.type !== 'SPOT' ? null : matrix ? Vector3.TransformNormal(BLENDER_FORWARD, matrix).normalize() : light.direction;
+    const offset = shadowJitter(filmSample(scene), record.shadow_soft_size, axis);
+    if (!offset) return;
     if (matrix) {
       moved.set(light, () => setEvaluatedMatrix(light, matrix));
       setEvaluatedMatrix(light, matrix.clone().addTranslationFromFloats(offset.x, offset.y, offset.z));

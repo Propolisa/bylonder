@@ -103,6 +103,11 @@ assert.ok(offsets.every((o) => o.length() <= 0.1 + 1e-9), 'within the radius');
 const mean = offsets.reduce((sum, o) => sum.addInPlace(o), Vector3.Zero()).scale(1 / offsets.length);
 assert.ok(mean.length() < 0.02, 'around the center');
 {
+  const axis = new Vector3(1, 2, -2).normalize(), disk = Array.from({ length: 63 }, (_, i) => shadowJitter(i + 1, 0.1, axis));
+  assert.ok(disk.every((o) => o.length() <= 0.1 + 1e-9 && Math.abs(Vector3.Dot(o, axis)) < 1e-9), "a spot's lie on the disk facing its cone");
+  assert.ok(disk.some((o) => o.length() > 0.08) && disk.some((o) => o.length() < 0.03), 'spread over it');
+}
+{
   const home = new Vector3(3.6, 0.4, -0.8), at = (v) => v.equalsWithEpsilon(home, 1e-6);
   setEvaluatedMatrix(door, Matrix.Translation(home.x, home.y, home.z));
   const camera = scene.activeCamera, film = createFilm(scene, camera), map = doorShadow.getShadowMap();
