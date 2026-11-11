@@ -5,7 +5,7 @@
 // option), the view's direction is EEVEE's and a material's reflection lobes light as Babylon's clearcoat; without
 // it, the lobes merge into the base, as Bylonder draws with EEVEE Parity off.
 import {
-  AddBlock, ClampBlock, ClearCoatBlock, ColorMergerBlock, ColorSplitterBlock, CustomBlock, DivideBlock, LerpBlock, MaxBlock, MultiplyBlock, FragmentOutputBlock, ImageProcessingBlock, ImageSourceBlock, InputBlock, NodeMaterial, PBRMetallicRoughnessBlock, ReflectionBlock, ScaleBlock, SubtractBlock,
+  AddBlock, ClampBlock, ClearCoatBlock, ColorMergerBlock, ColorSplitterBlock, CustomBlock, DivideBlock, LerpBlock, MaxBlock, MultiplyBlock, FragmentOutputBlock, ImageProcessingBlock, ImageSourceBlock, InputBlock, NodeMaterial, ReflectionBlock, ScaleBlock, SubtractBlock,
   NodeMaterialBlockConnectionPointTypes as T, NodeMaterialSystemValues as System, Vector3, Vector4,
 } from '@babylonjs/core';
 import {
@@ -18,6 +18,7 @@ import { glslValue, LUMINANCE } from '../nodes/blender/sockets.js';
 import { imageFile } from '../imbuf/image-textures.js';
 import { pngDataUrl } from '../imbuf/data-url.js';
 import { MESH_VALUE } from './runtime/materials.js';
+import { AreaLitPBRBlock } from '../overrides/babylon/pbr-block-area-lights.js';
 
 const GLSL = { [T.Float]: 'float', [T.Vector2]: 'vec2', [T.Vector3]: 'vec3', [T.Vector4]: 'vec4', [T.Color3]: 'vec3', [T.Color4]: 'vec4', [T.Matrix]: 'mat4' };
 const typeName = (type) => T[type];
@@ -181,7 +182,7 @@ function exportGraph(material, out, { parity, textures, graph, kernel, mesh }) {
 
   // The base surface as Babylon's PBR block, and its lobes as Babylon's clearcoat.
   function pbr(original) {
-    const copy = new PBRMetallicRoughnessBlock(original.name);
+    const copy = new AreaLitPBRBlock(original.name);
     for (const key of PBR_SETTINGS) if (key in original) copy[key] = original[key];
     if (lobes) {
       const coat = new ClearCoatBlock('blender:clearcoat');

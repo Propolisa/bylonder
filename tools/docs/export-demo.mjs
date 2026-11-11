@@ -5,6 +5,7 @@
 // game.js) loads: its player's objects with Scope Selected Objects and their actions as clips, then the scene without
 // them, with its world, camera, view transform and compositor.
 //   usage: node tools/docs/export-demo.mjs [example or game]  (default compositor)
+import { execFileSync } from 'node:child_process';
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -17,6 +18,8 @@ import { blendData, idStruct } from '../../src/python/bpy_rna.js';
 const GAMES = { 'noodle-shop': { example: 'compositor', player: ['girl', ['Tea Break', 'Tea Cup', 'Tea Steam Card', 'Tea Steam Emitter']], scene: 'street' } };
 
 const NAME = process.argv[2] ?? 'compositor', game = GAMES[NAME];
+// The files the app serves from public/ that a package ships (its area lights' LTC table), fetched where missing.
+execFileSync(process.execPath, ['scripts/babylon-assets.mjs'], { cwd: fileURLToPath(new URL('../..', import.meta.url)), stdio: 'inherit' });
 const dir = fileURLToPath(new URL(`../../docs/demos/${NAME}/`, import.meta.url));
 const { world, sync } = openExample(game?.example ?? NAME);
 // Armatures skin on Babylon, so a game poses their bones.
@@ -25,8 +28,11 @@ const OPTIONS = { target: 'WEBGL2', controlPanel: !game, devTools: 'CDN', ...(ga
 
 // Type declarations and package.json are for code importing the package, not for the page.
 function write(folder, files) {
+  const page = Object.entries(files).filter(([path]) => !path.endsWith('.d.ts') && path !== 'package.json');
+  const empty = page.find(([, data]) => !data.length);
+  if (empty) throw Error(`${empty[0]} is empty`);
   rmSync(folder, { recursive: true, force: true });
-  for (const [path, data] of Object.entries(files).filter(([path]) => !path.endsWith('.d.ts') && path !== 'package.json')) {
+  for (const [path, data] of page) {
     mkdirSync(dirname(join(folder, path)), { recursive: true });
     writeFileSync(join(folder, path), data);
   }

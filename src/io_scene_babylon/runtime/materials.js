@@ -7,11 +7,12 @@
 // (fillMaterials), or a NodeMaterial of Babylon's own blocks is made around it from the IR alone (buildNodeMaterial).
 import {
   AddBlock, ColorSplitterBlock, Constants, CustomBlock, FragmentOutputBlock, ImageSourceBlock, InputBlock, NodeMaterial,
-  NodeMaterialBlockConnectionPointTypes as T, NodeMaterialSystemValues as System, PBRMetallicRoughnessBlock, RawTexture, ScaleBlock, Texture,
+  NodeMaterialBlockConnectionPointTypes as T, NodeMaterialSystemValues as System, RawTexture, ScaleBlock, Texture,
   TransformBlock, Vector3, Vector4, VertexOutputBlock,
 } from '@babylonjs/core';
 import { unitFor } from './units.js';
 import { webgpuSamplers } from '../../overrides/webgpu/samplers.js';
+import { AreaLitPBRBlock } from '../../overrides/babylon/pbr-block-area-lights.js';
 
 /** @typedef {import('./ir.js').IR} IR */
 
@@ -384,7 +385,7 @@ function surface(material, nodes, geometry) {
   const worldPosition = transform(geo('__position'), geo('__world'));
   const vertex = new VertexOutputBlock('blender:vertexOutput');
   transform(worldPosition, geo('__viewProjection')).connectTo(vertex.vector);
-  const pbr = Object.assign(new PBRMetallicRoughnessBlock('blender:surface'), { baseDiffuseModel: Constants.MATERIAL_DIFFUSE_MODEL_LAMBERT });
+  const pbr = Object.assign(new AreaLitPBRBlock('blender:surface'), { baseDiffuseModel: Constants.MATERIAL_DIFFUSE_MODEL_LAMBERT });
   worldPosition.connectTo(pbr.worldPosition);
   transform(geo('__normal'), geo('__world'), 0).connectTo(pbr.worldNormal);
   geo('__view').connectTo(pbr.view);

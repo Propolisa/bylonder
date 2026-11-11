@@ -33,6 +33,7 @@ import { LOG_SIZE, STOPS } from '../render/display-lut.js';
 import { colorManagementFiles } from '../imbuf/colormanagement.js';
 import { halfFloats } from '../blenkernel/colorband.js';
 import { babylonModule, sideEffectImports } from './babylon-modules.js';
+import { AREA_LIT_PBR_BLOCK } from '../overrides/babylon/pbr-block-area-lights.js';
 
 const CDN = `https://cdn.jsdelivr.net/npm/@babylonjs/core@${AbstractEngine.Version}/`;
 const json = (value) => JSON.stringify(value);
@@ -351,6 +352,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   const pieces = stripPieces(ir, shipped, replace), kernels = pieces && kernelsFile(pieces);
   const curves = Object.values(ir.entities).some((e) => e.implementation === 'curves');
   const meshValued = data.materials.some((m) => m.blocks?.some((b) => b.name.startsWith(MESH_VALUE)));
+  const areaLitBlocks = data.materials.some((m) => m.blocks?.some((b) => b.customType === `BABYLON.${AREA_LIT_PBR_BLOCK}`));
   // The panel's Collections view, for a scene with collections, and its timeline, for a scene with frames to play, in
   // Blender's icons unless a unit replaces them.
   const timeline = ir.scene.time.frame_end > ir.scene.time.frame_start && controls.some((c) => c.bind?.frame);
@@ -421,7 +423,9 @@ import { sceneVolumes } from './${VOLUMES_FILE}';` : ''}${display ? `
 import { viewTransform } from './bylonder-view-transform.js';
 import './bylonder/overrides/babylon/linear-image-processing.js';` : ''}${areaLights ? `
 import { AreaLight } from './bylonder-area-light.js';
-import { parseLight } from './bylonder/overrides/babylon/area-light-parse.js';` : ''}${composited ? `
+import { parseLight } from './bylonder/overrides/babylon/area-light-parse.js';` : ''}${areaLitBlocks ? `
+// Babylon's PBR block with the area lights' samplers, before the materials using it are parsed.
+import './bylonder/overrides/babylon/pbr-block-area-lights.js';` : ''}${composited ? `
 import { compositor } from './bylonder-blocks.js';` : ''}${areaSpecular || panelIcons ? `
 import { unitFor } from './bylonder/units.js';` : ''}${blenderSpecular ? `
 import { blenderAreaSpecular } from './${AREA_SPECULAR}';` : ''}

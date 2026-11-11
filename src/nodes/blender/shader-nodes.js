@@ -11,7 +11,7 @@
 import {
   BonesBlock, ClipPlanesBlock, Color4, ColorMergerBlock, ColorSplitterBlock, Constants, FogBlock, FragmentOutputBlock, ImageProcessingBlock, InputBlock,
   InstancesBlock, Matrix, MorphTargetsBlock, NodeMaterial, NodeMaterialBlock,
-  NodeMaterialBlockConnectionPointTypes as T, NodeMaterialBlockTargets as Targets, NodeMaterialSystemValues as System, Observable, PBRMetallicRoughnessBlock,
+  NodeMaterialBlockConnectionPointTypes as T, NodeMaterialBlockTargets as Targets, NodeMaterialSystemValues as System, Observable,
   RawTexture, RawTexture2DArray, ReflectionBlock, RefractionBlock, RegisterClass, ShaderStore, SubSurfaceBlock, Texture, TransformBlock, VertexOutputBlock,
 } from '@babylonjs/core';
 import { attributeKind, requestedAttributes, TANGENT_KIND } from './attributes.js';
@@ -36,6 +36,7 @@ import { AREA_SPECULAR, LIGHT_SPECULAR } from '../../blenkernel/light/area-specu
 import { usesAreaLights } from '../../overrides/babylon/area-light-used.js';
 import { AREA_PRE_LIGHTING } from '../../overrides/webgpu/area-light-inline.js';
 import '../../overrides/babylon/graph-roots.js';
+import { AreaLitPBRBlock } from '../../overrides/babylon/pbr-block-area-lights.js';
 import { SharedShadowDepthWrapper } from '../../overrides/babylon/shared-shadow-depth.js';
 import { probeAmbient, probeCapture, sphereProbeAt, volumeProbeTextures } from '../../draw/light-probes.js';
 import { ATLAS, CAPTURE, DEFINE as VOLUME_PROBES, GRIDS, SAMPLERS as PROBE_SAMPLERS, volumeProbeFunctions, volumeProbeLambert, volumeProbeSample } from '../../draw/volume-probe-shader.js';
@@ -1281,8 +1282,7 @@ const REFRACTION = {
   'subsurface.tintColor': (c) => `bl_closure_transmission_tint(${c})`,
   'refraction.intensity': (c) => `bl_closure_transmission(${c})`, 'refraction.volumeIndexOfRefraction': (c) => `bl_closure_parameter(${c}, ${c}.ior, 1.5)`,
 };
-const AREA_LIGHT_SAMPLERS = ['areaLightsLTC1Sampler', 'areaLightsLTC2Sampler'];
-export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
+export class BlenderSurfaceBlock extends AreaLitPBRBlock {
   // lobe: 0 for the base, else the reflection lobe it lights over the radiance of the surface before it (`under`).
   constructor(name, lobe = 0) {
     super(name);
@@ -1299,12 +1299,6 @@ export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
   }
 
   getClassName() { return 'BlenderSurfaceBlock'; }
-  // Babylon's PBR block lists each light's samplers but not the area lights' LTC tables (its LightBlock does): unlisted,
-  // they stay on texture unit 0, which a point light's cube shadow map also takes, and every draw fails.
-  updateUniformsAndSamples(state, nodeMaterial, defines, uniformBuffers) {
-    super.updateUniformsAndSamples(state, nodeMaterial, defines, uniformBuffers);
-    for (const name of AREA_LIGHT_SAMPLERS) if (!state.samplers.includes(name)) state.samplers.push(name);
-  }
   // A reset of the material's defines clears the area light support NodeMaterialDefines starts with, while the lights'
   // own defines come back: their code then calls area light functions its includes left out. So does a light turned into
   // an area light without AREALIGHTUSED (overrides/babylon/area-light-used.js).
