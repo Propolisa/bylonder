@@ -1,6 +1,6 @@
 // File > Export's options dialog, in the scene window: EEVEE Parity and, for a JavaScript package, its own options, then
 // its settings as a tree (components/ExportDialog.vue). A setting left unset inherits from the level above it.
-import { ANIMATIONS, BRANCH_STATES, BRANCHES, DEV_TOOLS, NAVIGATION, SCOPES, TARGETS } from './export-options.js';
+import { ANIMATIONS, BRANCH_STATES, CLIP_COMPRESSION, BRANCHES, DEV_TOOLS, NAVIGATION, SCOPES, TARGETS } from './export-options.js';
 import { BRANCH_ROWS, sceneBranches } from './branches.js';
 import { RUNTIMES, exportChoices, exportIssue } from '../runtimes/runtimes.js';
 import { contextStruct, idStruct } from '../python/bpy_rna.js';
@@ -153,7 +153,9 @@ const panelTree = (values) => setting(values, 'controlPanel', { label: 'Control 
 function settingsTree(values, js, branches, world) {
   const scope = setting(values, 'scope', { label: 'Scope', icon: 'BYLONDER', items: SCOPES, inherited: DEFAULT('SCENE') });
   const target = setting(values, 'target', { label: 'GPU Engine', icon: 'BYLONDER', items: TARGETS, inherited: DEFAULT('BOTH') });
-  const animations = setting(values, 'animations', { label: 'Animations', icon: 'BYLONDER', items: ANIMATIONS, inherited: DEFAULT('TIMELINE') });
+  const animations = setting(values, 'animations', { label: 'Animations', icon: 'BYLONDER', items: ANIMATIONS, inherited: DEFAULT('TIMELINE'),
+    children: [setting(values, 'clipCompression', { label: 'Clip Compression', icon: 'BYLONDER', items: CLIP_COMPRESSION.map(([id, label, note]) => [id, label, note]), inherited: DEFAULT('STANDARD'),
+      issue: (value) => (value !== 'OFF' && values.animations === 'TIMELINE' ? 'Only clips are compressed' : null) })] });
   return [...(js ? [scope, target, bundleTree(values), panelTree(values), branchesTree(values, branches)] : []), animations, sampleRateTree(values, world), runtimesTree(values), ...(js ? [unitsTree(values)] : [])].filter(Boolean);
 }
 
@@ -170,7 +172,7 @@ export async function exportDialog(world, format, title, run) {
     import('../editors/interface/components/tailwind.css'),
   ]);
   const js = format !== 'babylon';
-  const values = reactive({ eeveeParity: false, hostCompression: false, bakeAnimation: false, scope: null, target: null, animations: null, bundle: null, minify: null, controlPanel: null, devTools: null, navigation: null });
+  const values = reactive({ eeveeParity: false, hostCompression: false, bakeAnimation: false, scope: null, target: null, animations: null, clipCompression: null, bundle: null, minify: null, controlPanel: null, devTools: null, navigation: null });
   const fields = [{ name: 'eeveeParity', label: 'EEVEE Parity', note: PARITY_NOTE },
     ...(js ? [{ name: 'hostCompression', label: 'Host Compresses Geometry', note: HOST_NOTE }, { name: 'bakeAnimation', label: 'Bake Animation', note: BAKE_NOTE }] : [])];
   const branches = js ? sceneBranches(world, { live: format === 'js-live' }) : {};

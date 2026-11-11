@@ -38,6 +38,15 @@ export const ANIMATIONS = [
   ['BOTH', 'Both', "The timeline's group, and a group per action: a clip playing takes its targets from the timeline"],
 ];
 
+// How clips' bone keys are compressed (clip-export.js): [identifier, name, description, error bound in mm at the end of
+// a half-meter bone]. Off keeps every key exact.
+export const CLIP_COMPRESSION = [
+  ['OFF', 'Off', 'Every sampled key, exact (32-bit floats)', 0],
+  ['FINE', '0.25 mm', 'Keys within 0.25 mm at the end of a half-meter bone, quantized', 0.25],
+  ['STANDARD', '1 mm', "Keys within 1 mm at the end of a half-meter bone, quantized (ACL's default precision)", 1],
+  ['SMALL', '4 mm', 'Keys within 4 mm at the end of a half-meter bone, quantized: the smallest clips', 4],
+];
+
 // `fallback`: the default, or a function making it (a fresh object each time).
 const repaired = (name, schema, fallback) => {
   const made = () => (typeof fallback === 'function' ? fallback() : fallback);
@@ -100,6 +109,8 @@ export const ExportOptionsSchema = z.object({
   bakeAnimation: repaired('bakeAnimation', z.boolean(), false),
   /** what the animation exports as (ANIMATIONS): the timeline's group, a group per action (clips), or both */
   animations: repaired('animations', z.enum(ANIMATIONS.map(([id]) => id)), 'TIMELINE'),
+  /** how clips' bone keys are compressed (CLIP_COMPRESSION) */
+  clipCompression: repaired('clipCompression', z.enum(CLIP_COMPRESSION.map(([id]) => id)), 'STANDARD'),
   /** keys per second of what is baked (sampled), for every object and by object name; unset, the scene's frame rate */
   sampleRate: repaired('sampleRate', SampleRate, () => ({ rate: null, instances: {} })),
   /** a package's modules as one bundle with Babylon's (bundle.js), else as ES modules importing Babylon's; unset, bundled for the Scene, not for Selected Objects, which load into a page's own Babylon */

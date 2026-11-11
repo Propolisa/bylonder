@@ -1,10 +1,11 @@
 // File > Export > Babylon (.babylon): the scene as Babylon's SceneSerializer writes it, from the evaluated scene, as
 // Blender's glTF exporter exports the evaluated depsgraph (docs/blender-boundary.md, Export for Babylon).
-import { Animation, AnimationKeyInterpolation, Camera, GetClass, Light, Quaternion, RectAreaLight, SceneSerializer, Texture, TransformNode, Vector3, VertexBuffer } from '@babylonjs/core';
+import { Animation, AnimationKeyInterpolation, Bone, Camera, GetClass, Light, Quaternion, RectAreaLight, SceneSerializer, Texture, TransformNode, Vector3, VertexBuffer } from '@babylonjs/core';
 import { evaluatedMatrix, setEvaluatedMatrix, BLENDER_FORWARD } from '../runtime/object-transform.js';
 import { idStruct } from '../python/bpy_rna.js';
 import { deleted, nodeId } from '../editors/object/identity.js';
 import { exportRuntimes } from '../runtimes/runtimes.js';
+import { skinningBones } from '../runtimes/armature.js';
 import { imageFile } from '../imbuf/image-textures.js';
 import { exportNodeMaterial } from './node-material-export.js';
 import { exactAnimation, fcurveKeys, stripKeys } from './exact-keys.js';
@@ -223,12 +224,30 @@ function transformAnimations(node, keys, sampled, { frameStart, fps }, sampling,
   });
 }
 
+// Whether a clip's track is one the page needs: a bone's only where it skins (armature.js skinningBones), unless its
+// rig's constraints run live in the page and read or pose the others.
+function skinningTracks(sync, mapped) {
+  const live = new Set((mapped.constraints ?? []).map((c) => c.armature)), kept = new Map();
+  return ({ target }) => {
+    const skeleton = target instanceof Bone ? target.getSkeleton() : null;
+    if (!skeleton) return true;
+    if (!kept.has(skeleton)) {
+      // A skeleton per armature and mesh space is named by both ('<armature> <mesh>').
+      const arm = [...sceneOf(sync).objects].find((ob) => ob.type === 'ARMATURE' && (skeleton.name === ob.name || skeleton.name.startsWith(`${ob.name} `)));
+      const runsLive = arm && [...live].some((id) => sync.scene?.getNodeById?.(id)?.name === arm.name || id === arm.name);
+      kept.set(skeleton, arm && !runsLive ? skinningBones(arm, skeleton) : null);
+    }
+    return kept.get(skeleton)?.has(target) ?? true;
+  };
+}
+
 // An animation group per action the scene's objects and shape keys use (clip-export.js): each action evaluated alone over
 // its frame range and sampled as the scene's range is, `nodes`' transforms and the runtimes' animations (`mapped`); additive
 // clips as deltas. Gives the clips with { animations: [{ animation, target }] }, those that animate something.
 function sampledClips(world, nodes, mapped, sampling) {
   const sync = world.mainSync, objectOf = (node) => idStruct(sync.objectOf(node));
   const ids = [...sceneOf(sync).objects].flatMap((ob) => [ob, ob.data?.shape_keys]).filter((id) => id?.animation_data);
+  const skins = skinningTracks(sync, mapped);
   const clips = actionClips(ids).map((clip) => {
     const owns = ownedBy(clip.ids), owned = nodes.filter((node) => owns(objectOf(node))), isAdditive = clip.blend !== 'REPLACE';
     const range = sampling.over({ frameStart: clip.frame_start, frameEnd: clip.frame_end });
@@ -237,7 +256,7 @@ function sampledClips(world, nodes, mapped, sampling) {
       return [...[...(transforms ?? [])].flatMap(([node, frames]) => transformAnimations(node, keys.get(node), frames, range.range, range).map((animation) => ({ animation, target: node }))),
         ...mapped.clip(range, owns)];
     }, { additive: isAdditive });
-    return { ...clip, animations: animations.map(({ animation, target }) => ({ animation: isAdditive ? additive(animation, target) : animation, target })) };
+    return { ...clip, animations: animations.filter(skins).map(({ animation, target }) => ({ animation: isAdditive ? additive(animation, target) : animation, target })) };
   });
   sync.frameChanged(world.animation.time.frame);
   return clips.filter((clip) => clip.animations.length);

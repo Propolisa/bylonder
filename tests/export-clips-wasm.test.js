@@ -109,10 +109,18 @@ async function deskLamp() {
   const { world, sync, node } = openExample('desk-lamp');
   sync.view();
   const lamp = node('Lamp');
-  const files = await exportModule(world, { animations: 'CLIPS', scope: 'SELECTED', selected: [lamp], runtimes: { ARMATURE: { runtime: 'MAPPED', instances: {} } } });
+  // Exact clips, which pose the lamp as Main does; tests/clip-compression.test.js checks the compressed ones' bounds.
+  const files = await exportModule(world, { animations: 'CLIPS', clipCompression: 'OFF', scope: 'SELECTED', selected: [lamp], runtimes: { ARMATURE: { runtime: 'MAPPED', instances: {} } } });
   const groups = groupsOf(files);
   assert.deepEqual(groups.map((g) => g.name), ['RigAction']);
   assert.ok(groups[0].targetedAnimations.every((t) => t.animation.property === '_matrix'), "the rig's bones");
+  const moving = groups[0].targetedAnimations.filter((t) => t.animation.bylonderKeys);
+  assert.ok(moving.length && moving.every((t) => t.animation.keys.length === 0), 'its moving bones keyed in scene.bin, not JSON');
+  
+  // Only bones that skin, or have bones that skin below them: the rig's constraints are sampled, not run in the page.
+  const rig = [...blendData().objects].find((ob) => ob.type === 'ARMATURE'), skins = (bone) => bone.use_deform || [...bone.children].some(skins);
+  const tracked = groups[0].targetedAnimations.map((t) => t.targetId.slice(rig.name.length + 1).split('#')[0]);
+  assert.ok(tracked.every((name) => skins(rig.data.bones.get(name))), `tracks of bones that skin: ${tracked.join(', ')}`);
   const written = writePackage(files);
   try {
     const { load, loadAssetContainer } = await import(written.url);

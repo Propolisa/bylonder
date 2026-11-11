@@ -45,6 +45,18 @@ function scaledBones(bones) {
   const scale = new Vector3();
   return bones.some((b) => (b.deform || b.segment) && (Matrix.Invert(b.rest).multiply(b.pose).decompose(scale), !scale.equalsWithEpsilon(Vector3.One(), 1e-4)));
 }
+// The bones of a skeleton that skinning reads: the armature's deforming bones, the joints of its deforming B-Bones'
+// segments, and every bone above them, so their matrices still compose. Others matter to a page only where the rig's
+// constraints run live, reading or posing them.
+export function skinningBones(arm, skeleton) {
+  const deforms = (bone) => arm.data.bones.get(bone.name.split('#')[0])?.use_deform;
+  const kept = new Set();
+  for (const bone of skeleton.bones) {
+    if (!deforms(bone)) continue;
+    for (let at = bone; at && !kept.has(at); at = at.getParent()) kept.add(at);
+  }
+  return kept;
+}
 // A Babylon bone of a B-Bone's segment joint.
 const isJoint = (bone) => bone.getSkeleton().bones.indexOf(bone) >= bone.getSkeleton().armatureBones;
 // A bone that deforms as B-Bone segments.

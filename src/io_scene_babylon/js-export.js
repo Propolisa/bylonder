@@ -7,11 +7,11 @@
 import { AbstractEngine, Animation, Matrix } from '@babylonjs/core';
 import { objectMatrix } from '../runtime/object-transform.js';
 import { CLOCK, sampledGaps, serializeScene } from './babylon-export.js';
-import { irClips, isClip } from './clip-export.js';
+import { binaryClipKeys, CLIP_KEYS_SOURCE, irClips, isClip } from './clip-export.js';
 import { exportRuntimes } from '../runtimes/runtimes.js';
 import { exportSampling } from './sampling.js';
 import { prepareKernels } from './pose-export.js';
-import { chosenState, NAVIGATION, TARGETS } from './export-options.js';
+import { chosenState, CLIP_COMPRESSION, NAVIGATION, TARGETS } from './export-options.js';
 import { exportControls, controlTypes, sceneOf, withUI } from './controls-export.js';
 import { exportCollections } from './collections-export.js';
 import { exportNodeMaterial, kernelsFile, materialKernels } from './node-material-export.js';
@@ -291,9 +291,10 @@ function selectedWorld(world, selected) {
 // (export-options.js TARGETS); `runtime`, `runtimes`, the runtimes its features export with (runtimes.js chosenRuntime);
 // `replace`, the type keys of units the page registers itself, which the package ships none of (unit-manifest.js); `bundle`,
 // whether the package is then bundled (bundle.js); `branchState` and `branches`, the states of the scene's branches
-// (export-options.js chosenState); `scope`, the whole scene or its `selected` objects (export-options.js SCOPES).
+// (export-options.js chosenState); `scope`, the whole scene or its `selected` objects (export-options.js SCOPES);
+// `clipCompression`, how clips' bone keys are compressed (export-options.js CLIP_COMPRESSION).
 
-export async function exportModule(whole, { scope = 'SCENE', selected = [], live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, animations = 'TIMELINE', target = 'BOTH', runtime = null, runtimes = {}, replace = [], bundle = false, controlPanel = true, devTools = 'CDN', navigation = 'FIXED', navigationModes = {}, branchState = null, branches = {}, sampleRate = {} } = {}) {
+export async function exportModule(whole, { scope = 'SCENE', selected = [], live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, animations = 'TIMELINE', clipCompression = 'STANDARD', target = 'BOTH', runtime = null, runtimes = {}, replace = [], bundle = false, controlPanel = true, devTools = 'CDN', navigation = 'FIXED', navigationModes = {}, branchState = null, branches = {}, sampleRate = {} } = {}) {
   const world = scope === 'SELECTED' ? selectedWorld(whole, selected) : whole;
   const states = { branchState, branches }, stackState = (node) => chosenState(states, 'modifiers', node.name) ?? (keepLive ? 'LIVE' : 'BAKED');
   const live = new Map(world.objects.filter((node) => stackState(node) === 'LIVE').map((node) => [node, liveStack(world, node)]).filter(([, stack]) => stack));
@@ -303,13 +304,13 @@ export async function exportModule(whole, { scope = 'SCENE', selected = [], live
   const sampling = exportSampling(world.animation.time.state, sampleRate);
   const mapped = exportRuntimes(world, { bake: bakeAnimation, runtime, runtimes, sampling });
   try {
-    return await moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, animations, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states, sampling });
+    return await moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, animations, clipCompression, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states, sampling });
   } finally {
     mapped.restore();
   }
 }
 
-async function moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, animations, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states, sampling }) {
+async function moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, animations, clipCompression, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states, sampling }) {
   const graphs = [], graphOf = materialGraphs(world, graphs), asset = !!world.only;
   const data = await serializeScene(world, { geometry: false, live, mapped, parity, graphOf, bake: bakeAnimation, sampling, only: world.only, animations, onBones: true });
   if (chosenState(states, 'postProcessing') === 'OFF') Object.assign(data, { renderingPipelines: [], postProcesses: [] });
@@ -463,7 +464,7 @@ const SHADOW_GENERATORS = ${json(data.shadowGenerators ?? [])};
 const EFFECT_LAYERS = ${json(data.effectLayers ?? [])};
 const REFLECTION_PROBES = ${json(data.reflectionProbes ?? [])};
 const PARTICLE_SYSTEMS = ${json(data.particleSystems)};
-const ANIMATION_GROUPS = ${json(data.animationGroups)};
+const ANIMATION_GROUPS = ${json(binaryClipKeys(data.animationGroups, bin, CLIP_COMPRESSION.find(([id]) => id === clipCompression)?.[3] ?? 1))};
 const RENDERING_PIPELINES = ${json(data.renderingPipelines)};
 const POST_PROCESSES = ${json(data.postProcesses)};
 const BUFFERS = ${json(bin.views)};${volumes ? `
@@ -569,6 +570,7 @@ ${pipelineTypes.length ? `  for (const entry of RENDERING_PIPELINES) {
   return scene;
 }
 
+${CLIP_KEYS_SOURCE}
 // The exported objects added to \`scene\` at once, without awaiting: \`lookup\` finds by id what this call made
 // (bylonder/asset.js). Gives the materials by their exported unique ids.
 function addObjects(scene, { buffers, ir }, lookup = scene) {
@@ -617,7 +619,7 @@ ${parse('REFLECTION_PROBES', data.reflectionProbes, "ReflectionProbe.Parse(entry
   Animation.AllowMatricesInterpolation = true;
 ` : ''}  // Started and held: the page's playhead (playhead.js) sets them to its frame; a clip (an action's) waits to be played.
   for (const entry of ANIMATION_GROUPS) {
-    const group = AnimationGroup.Parse(entry, lookup);
+    const group = AnimationGroup.Parse(clipKeys(entry, buffers), lookup);
     if (!entry.metadata?.bylonder?.clip) group.start(entry.loopAnimation).pause();
   }
   return materials;

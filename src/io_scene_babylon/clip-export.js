@@ -2,11 +2,13 @@
 // as Blender's glTF exporter exports actions and Babylon's glTF loader names its groups. Each action is evaluated alone
 // by Blender on the IDs that use it, over its frame range; the first NLA strip playing it gives the group's playback:
 // its blending (Add, and Combine approximated as Add, additive), influence (weight), scale (speed) and repeat.
-import { Animation, Vector3 } from '@babylonjs/core';
+import { Animation, Matrix, Quaternion, Vector3 } from '@babylonjs/core';
 import { pointerOf } from '../python/bpy_rna.js';
 import { actionFCurves } from './ir-export.js';
 
-export { isClip } from './runtime/clips.js';
+import { isClip } from './runtime/clips.js';
+
+export { isClip };
 
 const address = (id) => pointerOf(id)?.[2];
 // A test of whether an ID is one of `ids`.
@@ -114,3 +116,140 @@ export function clipGroup({ name, frame_start, frame_end, blend, influence, spee
 export const irClips = (clips) => Object.fromEntries(clips.map(({ name, action, frame_start, frame_end, blend, influence, speed, repeat }) => [name, {
   action: action.name, frame_start, frame_end, blend, influence, speed, repeat,
   markers: [...(action.pose_markers ?? [])].map((m) => ({ name: m.name, frame: m.frame })) }]));
+
+// Clip compression, after ACL (Nicholas Frechette's Animation Compression Library): each bone track's keys reduced to
+// those its neighbours' interpolation cannot stand in for within an error bound, then quantized: rotation as the
+// smallest three components of its unit quaternion (16 bits each, and the index of the largest), location and scale on
+// 16 bits over the track's own range, scale left out where it stays 1. The page decodes them once, at load
+// (CLIP_KEYS_SOURCE), into the keys Babylon plays.
+// The bounds for an error of `mm` at the end of a half-meter bone (export-options.js CLIP_COMPRESSION; 1 mm is ACL's
+// default precision): location in the rig's units, rotation in radians, scale.
+const bounds = (mm) => ({ location: mm * 1e-4, rotation: mm / 500, scale: mm * 1e-3 });
+
+/** A key's location, rotation (x, y, z, w) and scale from its Babylon matrix's values. */
+function decompose(values) {
+  const m = Matrix.FromArray(values), scale = new Vector3(), turn = new Quaternion(), at = new Vector3();
+  m.decompose(scale, turn, at);
+  return { t: at.asArray(), q: turn.normalize().asArray(), s: scale.asArray() };
+}
+const lerp = (a, b, f) => a.map((v, i) => v + (b[i] - v) * f);
+const angle = (a, b) => 2 * Math.acos(Math.min(1, Math.abs(a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3])));
+function slerp(a, b, f) {
+  const q = Quaternion.Slerp(Quaternion.FromArray(a), Quaternion.FromArray(b), f);
+  return q.asArray();
+}
+/** Whether key `i` is within the bounds of its interpolation between keys `a` and `b`. */
+function fits(keys, frames, a, b, i, bound) {
+  const f = (frames[i] - frames[a]) / (frames[b] - frames[a] || 1);
+  const t = lerp(keys[a].t, keys[b].t, f), s = lerp(keys[a].s, keys[b].s, f);
+  return Math.hypot(...t.map((v, k) => v - keys[i].t[k])) <= bound.location && angle(slerp(keys[a].q, keys[b].q, f), keys[i].q) <= bound.rotation
+    && Math.max(...s.map((v, k) => Math.abs(v - keys[i].s[k]))) <= bound.scale;
+}
+/** The keys kept: the ends, then (Douglas-Peucker) the worst key of each span that its ends do not stand in for. */
+function reduce(keys, frames, bound) {
+  const kept = new Set([0, keys.length - 1]), spans = [[0, keys.length - 1]];
+  while (spans.length) {
+    const [a, b] = spans.pop();
+    let worst = -1;
+    for (let i = a + 1; i < b && worst < 0; i++) if (!fits(keys, frames, a, b, i, bound)) worst = i;
+    if (worst < 0) continue;
+    // Split where interpolation is furthest off: the key at the largest rotation or location error.
+    let far = worst, error = -1;
+    for (let i = a + 1; i < b; i++) {
+      const f = (frames[i] - frames[a]) / (frames[b] - frames[a]);
+      const e = angle(slerp(keys[a].q, keys[b].q, f), keys[i].q) / bound.rotation + Math.hypot(...lerp(keys[a].t, keys[b].t, f).map((v, k) => v - keys[i].t[k])) / bound.location;
+      if (e > error) { error = e; far = i; }
+    }
+    kept.add(far);
+    spans.push([a, far], [far, b]);
+  }
+  return [...kept].sort((x, y) => x - y);
+}
+/** Values on 16 bits over their own range per component: the quantized values, and each component's minimum and extent. */
+function quantize(rows, size) {
+  const min = Array.from({ length: size }, (_, k) => Math.min(...rows.map((r) => r[k])));
+  const extent = Array.from({ length: size }, (_, k) => Math.max(...rows.map((r) => r[k])) - min[k]);
+  const out = new Uint16Array(rows.length * size);
+  rows.forEach((r, i) => r.forEach((v, k) => { out[i * size + k] = extent[k] > 0 ? Math.round(((v - min[k]) / extent[k]) * 65535) : 0; }));
+  const short = (values) => values.map((v) => Number(v.toPrecision(7)));
+  return { out, min: short(min), extent: short(extent) };
+}
+/** Unit quaternions as their smallest three components (on 16 bits over [-1/sqrt2, 1/sqrt2]) and the largest's index. */
+function smallestThree(quaternions) {
+  const out = new Uint16Array(quaternions.length * 4), range = Math.SQRT1_2;
+  quaternions.forEach((q, i) => {
+    let largest = 0;
+    for (let k = 1; k < 4; k++) if (Math.abs(q[k]) > Math.abs(q[largest])) largest = k;
+    const sign = q[largest] < 0 ? -1 : 1;
+    let j = 0;
+    for (let k = 0; k < 4; k++) if (k !== largest) out[i * 4 + j++] = Math.round(((q[k] * sign + range) / (2 * range)) * 65535);
+    out[i * 4 + 3] = largest;
+  });
+  return out;
+}
+
+/** A track's keys exact: its frames, and each matrix's 12 affine entries (the last column is 0, 0, 0, 1). */
+function exactKeys(animation, bin) {
+  const values = new Float32Array(animation.keys.length * 12);
+  animation.keys.forEach((key, i) => { for (let r = 0; r < 4; r++) for (let c = 0; c < 3; c++) values[i * 12 + r * 3 + c] = key.values[r * 4 + c]; });
+  return { frames: bin.add(Float32Array.from(animation.keys, (key) => key.frame)), values: bin.add(values) };
+}
+
+/**
+ * Clips' bone matrices in scene.bin instead of JSON: compressed within `mm` (above), or exact with `mm` 0. Gives the
+ * groups to write; each such animation has no keys, and `bylonderKeys` (indices of `bin`): { frames, values } exact, or
+ * { frames, rotation, location, scale } with the location's and scale's ranges.
+ */
+export function binaryClipKeys(groups, bin, mm = 1) {
+  const bound = bounds(mm);
+  return groups.map((group) => (!isClip(group) ? group : { ...group, targetedAnimations: group.targetedAnimations.map((t) => {
+    const { animation } = t;
+    if (animation.dataType !== Animation.ANIMATIONTYPE_MATRIX || !animation.keys.length) return t;
+    // What Babylon's Animation.Parse needs, the rest left to its defaults: a clip has thousands of tracks.
+    const { property, dataType, framePerSecond, loopBehavior } = animation, slim = { name: '', property, dataType, framePerSecond, loopBehavior, keys: [] };
+    if (!mm || animation.keys.length < 2) return { ...t, animation: { ...slim, bylonderKeys: exactKeys(animation, bin) } };
+    const all = animation.keys.map((key) => decompose(key.values)), allFrames = animation.keys.map((key) => key.frame);
+    const kept = reduce(all, allFrames, bound), keys = kept.map((i) => all[i]);
+    const location = quantize(keys.map((k) => k.t), 3), scaled = keys.some((k) => k.s.some((v) => Math.abs(v - 1) > bound.scale));
+    const scale = scaled ? quantize(keys.map((k) => k.s), 3) : null;
+    return { ...t, animation: { ...slim, bylonderKeys: {
+      frames: bin.add(Float32Array.from(kept, (i) => allFrames[i])), rotation: bin.add(smallestThree(keys.map((k) => k.q))),
+      location: bin.add(location.out), locationRange: [location.min, location.extent],
+      ...(scale && { scale: bin.add(scale.out), scaleRange: [scale.min, scale.extent] }) } } };
+  }) }));
+}
+
+/** The page's code that decodes a clip's compressed bone keys from scene.bin (`buffers`) into Babylon's matrix keys. */
+export const CLIP_KEYS_SOURCE = `// A clip's bone keys from scene.bin: smallest-three rotations, location and scale on 16 bits over their ranges
+// (io_scene_babylon/clip-export.js binaryClipKeys), composed into matrices as Babylon's Matrix.Compose does.
+function clipKeys(entry, buffers) {
+  const R = Math.SQRT1_2;
+  for (const { animation } of entry.targetedAnimations) {
+    const packed = animation.bylonderKeys;
+    if (!packed) continue;
+    const frames = buffers[packed.frames];
+    if (packed.values !== undefined) {
+      const values = buffers[packed.values];
+      animation.keys = Array.from(frames, (frame, i) => {
+        const m = values.subarray(i * 12, i * 12 + 12);
+        return { frame, values: [m[0], m[1], m[2], 0, m[3], m[4], m[5], 0, m[6], m[7], m[8], 0, m[9], m[10], m[11], 1] };
+      });
+      continue;
+    }
+    const turns = buffers[packed.rotation], at = buffers[packed.location], sizes = packed.scale === undefined ? null : buffers[packed.scale];
+    const unpack = (data, [min, extent], i, k) => min[k] + (data[i * 3 + k] / 65535) * extent[k];
+    animation.keys = Array.from(frames, (frame, i) => {
+      const q = [0, 0, 0, 0], largest = turns[i * 4 + 3];
+      let sum = 0;
+      for (let k = 0, j = 0; k < 4; k++) if (k !== largest) { q[k] = (turns[i * 4 + j++] / 65535) * 2 * R - R; sum += q[k] * q[k]; }
+      q[largest] = Math.sqrt(Math.max(0, 1 - sum));
+      const [x, y, z, w] = q, [sx, sy, sz] = sizes ? [0, 1, 2].map((k) => unpack(sizes, packed.scaleRange, i, k)) : [1, 1, 1];
+      const t = [0, 1, 2].map((k) => unpack(at, packed.locationRange, i, k));
+      return { frame, values: [(1 - 2 * (y * y + z * z)) * sx, 2 * (x * y + z * w) * sx, 2 * (x * z - y * w) * sx, 0,
+        2 * (x * y - z * w) * sy, (1 - 2 * (x * x + z * z)) * sy, 2 * (y * z + x * w) * sy, 0,
+        2 * (x * z + y * w) * sz, 2 * (y * z - x * w) * sz, (1 - 2 * (x * x + y * y)) * sz, 0, t[0], t[1], t[2], 1] };
+    });
+  }
+  return entry;
+}
+`;
