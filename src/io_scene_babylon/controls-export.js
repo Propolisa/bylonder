@@ -10,6 +10,7 @@ import { declaration } from '../nodes/blender/declarations.js';
 import { babylonRotation } from './runtime/blend-scene.js';
 import { babylonMatrix } from '../blenkernel/main-view.js';
 import { AREA_OFFSET, rigId } from './area-lights.js';
+import { actionFCurves } from './ir-export.js';
 
 // Blender's own (Bylonder's ID properties, add-ons' groups) stay out of an ID's custom properties.
 const OWN = /^(bylonder|_RNA_UI$|cycles)/;
@@ -149,12 +150,30 @@ export const BBONE_SHAPE = ['bbone_curveinx', 'bbone_curveinz', 'bbone_curveoutx
   'bbone_easein', 'bbone_easeout', 'bbone_scalein', 'bbone_scaleout'];
 export const bboneShape = (pose) => BBONE_SHAPE.flatMap((name) => (typeof pose[name] === 'number' ? [[name, pose[name]]] : [...pose[name]].map((v, i) => [`${name}[${i}]`, v])));
 
+// Above this many bones (a production rig's mechanism bones), a bone's location, rotation and scale are controls only
+// where the page reads or writes them: bones in a collection named POSED_COLLECTION, bones a driver reads by path or
+// writes, and bones the rig's F-Curves key. Its custom properties, influences and B-Bone shape stay for every bone.
+const POSED_BONES = 64, POSED_COLLECTION = 'Controls';
+const boneIn = (path) => /pose\.bones\["((?:[^"\\]|\\.)*)"\]\.(?:location|rotation_\w+|scale)/.exec(path ?? '')?.[1];
+export function posedByPage(ob) {
+  if ([...ob.pose.bones].length <= POSED_BONES) return () => true;
+  const named = new Set([...(ob.data.collections_all?.get?.(POSED_COLLECTION)?.bones ?? [])].map((bone) => bone.name));
+  for (const driver of ob.animation_data?.drivers ?? []) {
+    named.add(boneIn(driver.data_path));
+    for (const variable of driver.driver.variables) for (const target of variable.targets) if (target.id?.name === ob.name) named.add(boneIn(target.data_path));
+  }
+  const adt = ob.animation_data, actions = [adt?.action, ...[...(adt?.nla_tracks ?? [])].flatMap((track) => [...track.strips].map((strip) => strip.action))];
+  for (const action of actions.filter(Boolean)) for (const fc of actionFCurves({ action })) named.add(boneIn(fc.data_path));
+  return (pose) => named.has(pose.name);
+}
+
 function poseControls(ob, skeletons) {
   const drawn = skeletons.filter((s) => s.id === ob.name || s.id.startsWith(`${ob.name} `));
   if (drawn.length !== 1) return [];
+  const posed = posedByPage(ob);
   return [...ob.pose.bones].flatMap((pose) => {
     const base = `objects${key(ob.name)}.pose.bones${key(pose.name)}`;
-    return [...transformControls(base, pose, pose.rotation_mode !== 'AXIS_ANGLE' && { node: `${drawn[0].id} ${pose.name}`, transform: { mode: pose.rotation_mode } }),
+    return [...(posed(pose) ? transformControls(base, pose, pose.rotation_mode !== 'AXIS_ANGLE' && { node: `${drawn[0].id} ${pose.name}`, transform: { mode: pose.rotation_mode } }) : []),
       ...customProperties(pose, base), ...[...pose.constraints].map((c) => knob(`${base}.constraints${key(c.name)}.influence`, c.influence, { type: 'FLOAT', subtype: 'FACTOR', hard_min: 0, hard_max: 1 })),
       ...(ob.data.bones.get(pose.name).bbone_segments > 1 ? bboneShape(pose).map(([path, v]) => knob(`${base}.${path}`, v, { type: 'FLOAT' })) : [])];
   });
