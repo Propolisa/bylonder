@@ -452,6 +452,16 @@ function boneParent(mappings, ob, byOb) {
   return null;
 }
 
+// A mapping that needs a skeleton per mesh space (a mesh placed apart from the others): the page then samples its bones,
+// without its pose controls, drivers or live constraints, which read one skeleton; each mesh apart, as a fallback.
+function skeletonIssues(mapping, byOb) {
+  if (mapping.skeletons.size < 2) return [];
+  const [first] = mapping.skeletons.values(), skins = [...mapping.skins], ob = (key) => idStruct(byOb.get(key).ob);
+  const anchor = ob(skins.find(([, skin]) => skin.skeleton === first)[0]).name;
+  return skins.filter(([, skin]) => skin.skeleton !== first).map(([key]) => issue(FALLBACK, ob(key), 'matrix_world',
+    `placed apart from ${anchor}, so ${mapping.arm.name} needs a skeleton per mesh: its bones are sampled, without pose controls, drivers or live constraints`));
+}
+
 // Export: every armature mapped that skins a mesh the export writes (all of the scene's, or of its selected objects:
 // `world.only`), those on Blender for the export's duration (their meshes skinned, then drawn as Blender evaluated them
 // again), with their issues and their pose's animation.
@@ -478,7 +488,7 @@ function exportArmatures(world, { bake, sampling, rests = appliedRests() }) {
     for (const key of state.applied.keys()) exporting.add(key);
   }
   return {
-    reports: mappings.map((m) => ({ title: `${m.arm.name}: exported`, issues: m.issues.filter((i) => !i.silent) })),
+    reports: mappings.map((m) => ({ title: `${m.arm.name}: exported`, issues: [...m.issues.filter((i) => !i.silent), ...skeletonIssues(m, byOb)] })),
     animations, curves, gaps, constraints,
     clip: (sampling, owns) => poseAnimations(world, mappings.filter((m) => owns(m.arm)), true, sampling).animations,
     boneParent: (ob) => boneParent(mappings, ob, byOb),

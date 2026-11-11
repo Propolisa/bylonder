@@ -366,6 +366,17 @@ bodyData.modifiers.remove(subdivision);
 blender.tag(bodyOb, 2);
 sync.view();
 
+// A second mesh the rig skins, placed apart from the body, needs a skeleton of its own: the export says so, naming it.
+const apart = blendData().objects.new('Apart', bodyData.data);
+Object.assign(apart.modifiers.new('Armature', 'ARMATURE'), { object: rig });
+apart.location = [0, 0, 0.5];
+blendData().scenes[0].collection.objects.link(apart);
+sync.view();
+reports.length = 0;
+await serializeScene(world);
+assert.ok(reports.some((r) => r.type === 'WARNING' && /Apart: placed apart from Body, so Rig needs a skeleton per mesh/.test(r.message)), JSON.stringify(reports.map((r) => r.message)));
+blendData().objects.remove(apart);
+sync.view();
 
 // File > Export's runtime choice (export-options.js): Babylon (mapped) chosen for the rig exports as on Blender, through
 // the mapping (docs/runtimes.md, Export); Babylon (native), which an armature does not offer, is reported and the rig
