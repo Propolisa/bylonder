@@ -264,6 +264,8 @@ function evaluatedIDs(ids, graphs, entities, sync, bin) {
 // and the scheduler hands over as it is (a buffer) each time the pose runs, and its constraint types.
 const compiledRig = (rig, bin) => ({ kernels: { buffer: bin.add(new TextEncoder().encode(JSON.stringify(rig))) },
   types: [...new Set(rig.bones.flatMap((b) => b.constraints.map((c) => c.type)))] });
+// A rig the native runtime runs: its description's JSON and arrays in scene.bin (pose-export.js nativeRig).
+const nativeRig = ({ description, arrays, ...rest }, bin) => ({ native: { description: { buffer: bin.add(description) }, arrays: arrays.map((a) => ({ buffer: bin.add(a) })), ...rest } });
 
 // An object's constraints the page applies to its node each frame, after what places it (`constraints:OBJECT`), by the
 // node's id; an armature's bone constraints the page runs on its skeleton (`constraints:POSE`), by its node's.
@@ -271,7 +273,8 @@ function constraintEntities(ids, constraints, time, bin) {
   const idOf = new Map(Object.entries(ids).filter(([, id]) => id.node !== undefined).map(([k, id]) => [id.node, k]));
   const frame = time && { frame: { property: time } };
   return Object.fromEntries(constraints.flatMap((c) => {
-    if (c.pose) return idOf.has(c.armature) ? [[`${idOf.get(c.armature)}/constraints/pose`, { type: 'constraints:POSE', id: idOf.get(c.armature), inputs: { ...c.pose, ...frame, ...(c.pose.kernels && compiledRig(c.pose.kernels, bin)) }, outputs: {}, implementation: c.pose.kernels ? 'pose-kernels' : 'pose' }]] : [];
+    if (c.pose) return idOf.has(c.armature) ? [[`${idOf.get(c.armature)}/constraints/pose`, { type: 'constraints:POSE', id: idOf.get(c.armature), inputs: { ...c.pose, ...frame, ...(c.pose.kernels && compiledRig(c.pose.kernels, bin)), ...(c.pose.native && nativeRig(c.pose.native, bin)) }, outputs: {},
+      implementation: c.pose.kernels ? 'pose-kernels' : c.pose.native ? 'native-rig' : 'pose' }]] : [];
     return idOf.has(c.node) ? [[`${idOf.get(c.node)}/constraints/object`, { type: 'constraints:OBJECT', id: idOf.get(c.node), inputs: { ...c, ...frame }, outputs: {}, implementation: 'constraints' }]] : [];
   }));
 }

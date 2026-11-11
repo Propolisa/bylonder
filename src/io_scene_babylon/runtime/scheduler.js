@@ -29,14 +29,14 @@ export const EVALUATORS = {
   constraints: (page) => import('./constraints-evaluator.js').then((module) => module.load(page)),
   pose: (page) => import('./pose-constraints.js').then((module) => module.load(page)),
   'pose-kernels': (page) => import('./pose-kernels.js').then((module) => module.load(page)),
+  'native-rig': (page) => import('./native-solve.js').then((module) => module.load(page)),
   modifiers: (page) => import('./modifiers-evaluator.js').then((module) => module.load(page)),
   'geometry-nodes': (page) => import('./geometry-nodes-evaluator.js').then((module) => module.load(page)),
   grease_pencil: () => import('./grease-pencil.js'),
   curves: (page) => import('./curves.js').then((module) => module.load(page)),
   pointcloud: (page) => import('./pointclouds.js').then((module) => module.load(page)),
 };
-/** What a package draws only by running it: its export bakes none of it. */
-const UNBAKED = ['curves', 'pointcloud'];
+const UNBAKED = ['curves', 'pointcloud']; // What a package draws only by running it: its export bakes none of it.
 /** What Babylon runs itself (`native`: an F-Curve its AnimationGroup plays), which the scheduler leaves to it unless a unit takes over. */
 export const NATIVE = ['native'];
 const isTime = (/** @type {string} */ path) => path.endsWith('.frame_current');

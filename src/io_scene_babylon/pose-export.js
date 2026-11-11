@@ -2,8 +2,11 @@
 // (constraints.wasm, runtime/pose-kernels.js) where they cover the rig, else on the page's own solvers where it has one
 // for each constraint; kept only where the page's pose is the one Main evaluated at every frame the export samples.
 import { posedBone } from './runtime/blend-scene.js';
+import { blendData } from '../python/bpy_rna.js';
 import { solvePose } from './runtime/pose-constraints.js';
 import { kernelSolve } from './runtime/pose-kernels.js';
+import { nativeSolve } from './runtime/native-solve.js';
+import { packDescription, rigDescription } from './rig-description.js';
 import { loadConstraints } from './polyfill/constraints.js';
 import { rigOf } from './rig-export.js';
 import { bboneShape, key } from './controls-export.js';
@@ -78,6 +81,25 @@ const shapes = (arm, read = (path) => ({ property: `objects${key(arm.name)}.pose
 // A rig's influences for the kernels, by bone, in its constraints' order.
 const influences = (arm, rig) => Object.fromEntries(rig.bones.filter((b) => b.constraints.length).map((b) => [b.name, b.constraints.map((c) => influence(arm, b.name, c))]));
 
+// An armature's description for the native runtime's pose (rig-description.js), packed: its JSON as bytes and its
+// arrays; the page's animation poses the bones, so the armature plays no action of its own there, and the page places
+// it and the objects its constraints read (`objects`: their nodes' ids, by name), so they have no parents there.
+function nativeRig(arm, nodeOf) {
+  const description = rigDescription(arm, [], () => null), objects = {};
+  for (const ob of description.objects) {
+    Object.assign(ob, { parent: null, animation_data: null });
+    const node = ob.name !== arm.name && nodeOf(blendData().objects.get(ob.name));
+    if (node) objects[ob.name] = node.id;
+  }
+  const { packed, arrays } = packDescription(description);
+  return { description: new TextEncoder().encode(JSON.stringify(packed)), arrays, armature: arm.name, objects };
+}
+const nativeSolver = nativeSolve();
+// The custom properties of an armature and its pose bones that its drivers read: their paths from the armature (as the
+// runtime's setPath takes them), with Main's values now, or by `read(path)` (a control's reference).
+const customProperties = (arm, read = (path, value) => value) => Object.fromEntries([['', arm], ...[...arm.pose.bones].map((pb) => [`pose.bones${key(pb.name)}`, pb])]
+  .flatMap(([base, struct]) => [...(struct.keys?.() ?? [])].filter((name) => typeof struct.get(name) === 'number').map((name) => [`${base}${key(name)}`, read(`${base}${key(name)}`, struct.get(name))])));
+
 const close = (a, b) => a.asArray().every((v, i) => Math.abs(v - b.asArray()[i]) <= TOLERANCE);
 
 // For an armature drawn by one skeleton, its bone constraints as the page runs them (on the kernels when an export has
@@ -92,13 +114,18 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
   const bones = skeleton.bones.slice(0, skeleton.armatureBones);
   const targetOf = (ob, bone) => { const node = !bone && nodeOf(ob); return node ? { node: node.id } : undefined; };
   const rig = kernels && bones.length === arm.data.bones.length && rigOf(arm, [...arm.data.bones].map((b) => b.name), targetOf);
-  const stacks = rig ? {} : poseStacks(arm, nodeOf);
-  if (!rig && !stacks) return null;
-  const solve = rig ? kernels : solvePose, poses = bones.map((bone) => arm.pose.bones.get(bone.name));
+  const native = !rig && bones.length === arm.data.bones.length ? nativeRig(arm, nodeOf) : null;
+  const stacks = rig || native ? {} : poseStacks(arm, nodeOf);
+  if (!rig && !native && !stacks) return null;
+  const solve = rig ? kernels : native ? nativeSolver : solvePose, poses = bones.map((bone) => arm.pose.bones.get(bone.name));
   if (poses.some((pose) => !pose || pose.rotation_mode === 'AXIS_ANGLE')) return null;
   const shape = bones.map((bone, i) => ({ name: bone.name, parent: bone.getParent() ? bones.indexOf(bone.getParent()) : -1, rest: bone.getRestMatrix(),
     length: arm.data.bones.get(bone.name).length, mode: poses[i].rotation_mode }));
   const moved = new Set(), owns = new Map(bones.map((bone) => [bone, []]));
+  // The bones whose pose must be Main's: every one on the kernels and the page's solvers; on the native runtime, those
+  // that deform and their parents, as a mechanism bone off by a little moves nothing the page draws.
+  const deforming = (i) => arm.data.bones.get(bones[i].name).use_deform, judged = new Set(bones.map((_, i) => i).filter((i) => !native || deforming(i)));
+  for (const i of [...judged]) for (let p = shape[i].parent; p >= 0; p = shape[p].parent) judged.add(p);
   // The B-Bones whose segments the kernels shape as Main does at every frame checked.
   const shaped = new Set(rig ? [...arm.data.bones].filter((b) => b.bbone_segments > 1).map((b) => b.name) : []);
   let checked = 0, held = true;
@@ -110,10 +137,10 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
       bones.forEach((bone, i) => owns.get(bone).push(locals[i]));
       const current = rig && Object.fromEntries(rig.bones.filter((b) => b.constraints.length).map((b) => [b.name, [...arm.pose.bones.get(b.name).constraints].map((c) => c.influence)]));
       const result = solve({ bones: shape, locals, mesh: meshWorld(), space: skeleton.space, stacks, kernels: rig, influences: current,
-        shapes: rig && shapes(arm, (path, v) => v), nodeWorld });
+        shapes: rig && shapes(arm, (path, v) => v), nodeWorld, native, properties: native && customProperties(arm) });
       for (const [i, local] of result) {
         moved.add(bones[i]);
-        held &&= close(local, evaluated[i]);
+        held &&= !judged.has(i) || close(local, evaluated[i]);
       }
       for (const name of shaped) {
         const pose = arm.pose.bones.get(name), ours = solve.segments(rig, name);
@@ -124,6 +151,7 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
     entity: () => (checked && held ? {
       skeleton: skeleton.id, mesh: mesh.id, space: skeleton.space.asArray(), constraints: influenced(arm, stacks),
       ...(rig && { kernels: rig, influences: influences(arm, rig), shapes: shapes(arm), segments: [...shaped] }),
+      ...(native && { native, properties: customProperties(arm, (path) => ({ property: `objects${key(arm.name)}${path.startsWith('[') ? '' : '.'}${path}` })) }),
       bones: Object.fromEntries(shape.map(({ name, length, mode }, i) => [name, { length, mode, ...(moved.has(bones[i]) && { own: ownMatrix(poses[i], bones[i]).asArray() }) }])),
     } : null),
   };

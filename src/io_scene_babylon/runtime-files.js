@@ -1,6 +1,7 @@
 // The page runtime's files (runtime/), which every JavaScript package carries in bylonder/.
 import { deepImports } from './babylon-modules.js';
 import { DEV_TOOLS } from './runtime/dev-tools.js';
+import native from './runtime/native/files.json' with { type: 'json' };
 
 const declared = (...names) => names.flatMap((name) => [`${name}.js`, `${name}.d.ts`]);
 export const RUNTIME_FILES = [...declared('blend-scene', 'collections', 'playhead', 'clips', 'buffers', 'world', 'scheduler', 'ir', 'units', 'mesh', 'ortho-scale', 'zod', 'asset', 'scene-loader', 'dual-quaternion-skinning'), 'ir.schema.json', 'implementations.json', 'LICENSE.md'];
@@ -20,6 +21,8 @@ export const EVALUATOR_FILES = {
   pose: { runtime: [...declared('pose-constraints', 'constraints-evaluator'), ...DRIVER_UNITS] },
   'pose-kernels': { runtime: [...declared('pose-kernels', 'pose-constraints', 'constraints-evaluator'), ...DRIVER_UNITS], folder: 'bylonder-constraints',
     files: { 'constraints.js': 'io_scene_babylon/polyfill/constraints-kernels.bundle.js', 'constraints.wasm': 'constraints/constraints.wasm' } },
+  // The clean room's rig runtime (MIT), in bylonder/ beside the page's own files.
+  'native-rig': { runtime: [...declared('native-solve', 'native-rig', 'pose-constraints', 'constraints-evaluator'), ...DRIVER_UNITS, ...native.files.map((f) => `native/${f}`), 'native/files.json'] },
   modifiers: { runtime: declared('modifiers-evaluator'), folder: 'bylonder-modifiers',
     files: { 'modifiers-worker.js': 'io_scene_babylon/polyfill/modifiers-worker.bundle.js', 'modifiers.wasm': 'modifiers/modifiers.wasm' } },
   'geometry-nodes': { runtime: [...declared('geometry-nodes-evaluator'), ...['index', 'evaluator', 'geometry', 'convert', 'kernels'].flatMap((n) => declared(`geometry-nodes/${n}`))],

@@ -324,11 +324,11 @@ function posedByControls(controls, id, name, mode, bone) {
  */
 function attach(inputs, entity, page, solve) {
   const scene = page.scene, list = listOf(scene).poses, found = list.find((/** @type {any} */ e) => e.entity === entity);
-  if (found) { Object.assign(found, { stacks: inputs.constraints, influences: inputs.influences, shapes: inputs.shapes, frame: inputs.frame }); return {}; }
+  if (found) { Object.assign(found, { stacks: inputs.constraints, influences: inputs.influences, shapes: inputs.shapes, properties: inputs.properties, frame: inputs.frame }); return {}; }
   const skeleton = scene.getSkeletonById(inputs.skeleton), mesh = scene.getMeshById(inputs.mesh);
   if (!skeleton || !mesh) return {};
   const bones = skeleton.bones, entry = { entity, skeleton, mesh, scene, solve, space: Matrix.FromArray(inputs.space), stacks: inputs.constraints,
-    kernels: inputs.kernels, influences: inputs.influences, shapes: inputs.shapes, segments: inputs.segments, frame: inputs.frame,
+    kernels: inputs.kernels, influences: inputs.influences, shapes: inputs.shapes, segments: inputs.segments, native: inputs.native, properties: inputs.properties, frame: inputs.frame,
     shape: bones.map((bone) => ({ name: bone.name, parent: bone.getParent() ? bones.indexOf(/** @type {any} */ (bone.getParent())) : -1, rest: bone.getRestMatrix(),
       length: inputs.bones[bone.name]?.length ?? 0, mode: inputs.bones[bone.name]?.mode ?? 'QUATERNION' })),
     own: new Map(), placed: new Map() };
@@ -385,20 +385,21 @@ function drive(entry) {
 }
 
 /**
- * Poses a skeleton's constrained bones: each one's own matrix is what was set on it since, else the one it had.
+ * Poses a skeleton's constrained bones: each one's own matrix is what was set on it since, else the one it had; a
+ * solver may give only the bones whose pose changed.
  * @param {any} entry
  */
 function apply(entry) {
   const bones = entry.skeleton.bones;
   const locals = bones.map((/** @type {any} */ bone, /** @type {number} */ i) => {
-    const current = bone._matrix.clone(), placed = entry.placed.get(i);
-    if (!placed || !current.equalsWithEpsilon(placed, 1e-7)) entry.own.set(i, current);
-    return entry.own.get(i) ?? current;
+    const current = bone._matrix, placed = entry.placed.get(i);
+    if (!placed || !current.equalsWithEpsilon(placed, 1e-7)) entry.own.set(i, current.clone());
+    return entry.own.get(i);
   });
   const moved = entry.solve({ bones: entry.shape, locals, mesh: entry.mesh.computeWorldMatrix(true), space: entry.space, stacks: entry.stacks,
-    kernels: entry.kernels, influences: entry.influences, shapes: entry.shapes, segments: entry.segments, frame: entry.frame,
+    kernels: entry.kernels, influences: entry.influences, shapes: entry.shapes, segments: entry.segments, native: entry.native, properties: entry.properties, frame: entry.frame,
     nodeWorld: (/** @type {string} */ id) => entry.scene.getNodeById(id)?.computeWorldMatrix(true) ?? null });
-  entry.placed.clear();
+  // A bone the solver leaves out holds the matrix it was last placed at.
   for (const [i, local] of moved) {
     bones[i]._matrix = local;
     entry.placed.set(i, local.clone());
