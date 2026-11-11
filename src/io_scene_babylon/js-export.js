@@ -8,6 +8,7 @@ import { AbstractEngine, Animation, Matrix } from '@babylonjs/core';
 import { objectMatrix } from '../runtime/object-transform.js';
 import { CLOCK, sampledGaps, serializeScene } from './babylon-export.js';
 import { binaryClipKeys, CLIP_KEYS_SOURCE, irClips, isClip } from './clip-export.js';
+import { binaryMorphTargets, MORPH_KEYS_SOURCE } from './morph-export.js';
 import { exportRuntimes } from '../runtimes/runtimes.js';
 import { exportSampling } from './sampling.js';
 import { prepareKernels } from './pose-export.js';
@@ -459,7 +460,7 @@ const CODE = ${json(code)};
 const MATERIALS = ${json(data.materials)};
 const MULTI_MATERIALS = ${json(data.multiMaterials)};
 const SKELETONS = ${json(data.skeletons)};
-const MORPH_TARGETS = ${json(data.morphTargetManagers)};
+const MORPH_TARGETS = ${json(binaryMorphTargets(data.morphTargetManagers ?? [], world.scene.meshes, bin))};
 const LIGHTS = ${json(data.lights)};
 const CAMERAS = ${json(data.cameras)};
 const SHADOW_GENERATORS = ${json(data.shadowGenerators ?? [])};
@@ -573,6 +574,7 @@ ${pipelineTypes.length ? `  for (const entry of RENDERING_PIPELINES) {
 }
 
 ${CLIP_KEYS_SOURCE}
+${MORPH_KEYS_SOURCE}
 // The exported objects added to \`scene\` at once, without awaiting: \`lookup\` finds by id what this call made
 // (bylonder/asset.js). Gives the materials by their exported unique ids.
 function addObjects(scene, { buffers, ir }, lookup = scene) {
@@ -596,7 +598,7 @@ ${kernels ? `  // Blender's nodes of each material and world, made from the IR's
   }
   for (const entry of SKELETONS) Skeleton.Parse(entry, scene);
   const morphTargets = {};
-  for (const entry of MORPH_TARGETS) morphTargets[entry.id] = MorphTargetManager.Parse(entry, scene);
+  for (const entry of MORPH_TARGETS) morphTargets[entry.id] = MorphTargetManager.Parse(morphKeys(entry, buffers), scene);
   const geometries = [
 ${geometryLines.join('\n')}
   ];
