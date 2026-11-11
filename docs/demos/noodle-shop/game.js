@@ -10,6 +10,7 @@ import { TransformNode } from '@babylonjs/core/Meshes/transformNode.js';
 import { Color3, Color4 } from '@babylonjs/core/Maths/math.color.js';
 import { Quaternion, Vector3 } from '@babylonjs/core/Maths/math.vector.js';
 import { ImportMeshAsync } from '@babylonjs/core/Loading/sceneLoader.js';
+import { VirtualJoystick } from '@babylonjs/core/Misc/virtualJoystick.js';
 import './street/bylonder/scene-loader.js';
 import { load } from './girl/scene.js';
 
@@ -55,9 +56,9 @@ function walkPose(phase, speed) {
 }
 
 // Seated, she breathes (frames 1 to 140 of the lane's loop) and, asked, sips (150 to 214) from her cup.
-let state = 'walking', sipping = false, sips = 0, phase = 0;
+let state = 'walking', sipping = false, sips = 0, phase = 0, nearStool = false;
 girl.playhead.onChanged.add(({ frame }) => {
-  if (sipping && frame >= 214) { sipping = false; sips++; say(sips < 3 ? 'Ahh. Press E to sip again' : 'Warm. The rain sounds nice tonight.'); }
+  if (sipping && frame >= 214) { sipping = false; sips++; say(sips < 3 ? `Ahh. ${press} to sip again` : 'Warm. The rain sounds nice tonight.'); }
   if (!sipping && frame > 140) girl.playhead.seek(1);
 });
 const sit = () => {
@@ -70,6 +71,7 @@ const sit = () => {
 };
 const stand = () => {
   state = 'walking';
+  nearStool = false;
   girl.playhead.pause();
 };
 stand();
@@ -79,9 +81,19 @@ player.rotation.y = -Math.PI / 2;
 const keys = new Set();
 addEventListener('keydown', (e) => { keys.add(e.code); ambience(); if (e.code === 'KeyE') act(); });
 addEventListener('keyup', (e) => keys.delete(e.code));
+// On a touch screen, Babylon's thumb sticks (as the export's Joysticks navigation): the left walks, the right looks; and
+// the E button.
+const touch = matchMedia('(pointer: coarse)').matches, press = touch ? 'Tap E' : 'Press E';
+const [walkStick, lookStick] = touch ? [true, false].map((left) => new VirtualJoystick(left, { limitToContainer: true })) : [];
+const stickOf = (stick) => (stick?.pressed ? stick.deltaPosition : Vector3.ZeroReadOnly);
+if (touch) {
+  const button = document.getElementById('act');
+  button.hidden = false;
+  button.addEventListener('pointerdown', (e) => { e.stopPropagation(); ambience(); act(); });
+}
 function act() {
-  if (state === 'walking' && near()) return sit(), say('Press E to buy a tea');
-  if (state === 'seated' && !tea[0].isEnabled()) return tea.forEach((m) => m.setEnabled(true)), say('A hot tea, 300 yen. Press E to sip');
+  if (state === 'walking' && near()) return sit(), say(`${press} to buy a tea`);
+  if (state === 'seated' && !tea[0].isEnabled()) return tea.forEach((m) => m.setEnabled(true)), say(`A hot tea, 300 yen. ${press} to sip`);
   if (state === 'seated' && !sipping) { sipping = true; girl.playhead.seek(150); say(''); }
 }
 const near = () => Vector3.Distance(player.position, SEAT) < 1.2;
@@ -95,11 +107,15 @@ scene.onBeforeRenderObservable.add(() => {
   if (keys.has('KeyS') || keys.has('ArrowDown')) move.subtractInPlace(ahead);
   if (keys.has('KeyD') || keys.has('ArrowRight')) move.addInPlace(right);
   if (keys.has('KeyA') || keys.has('ArrowLeft')) move.subtractInPlace(right);
-  const moving = move.lengthSquared() > 0;
+  const walk = stickOf(walkStick), look = stickOf(lookStick);
+  move.addInPlace(ahead.scale(walk.y)).addInPlace(right.scale(walk.x));
+  camera.inertialAlphaOffset -= look.x * dt * 0.1;
+  camera.inertialBetaOffset += look.y * dt * 0.05;
+  const moving = move.lengthSquared() > 0.01;
   if (moving && state === 'seated') stand(), say('');
   if (state === 'walking') {
     if (moving) {
-      player.position.addInPlace(move.normalize().scale(1.4 * dt));
+      player.position.addInPlace(move.scale(1.4 * dt / Math.max(1, move.length())));
       // The lane between the shop fronts.
       player.position.x = Math.min(Math.max(player.position.x, -20), 12);
       player.position.z = Math.min(Math.max(player.position.z, 0.35), 4);
@@ -107,7 +123,7 @@ scene.onBeforeRenderObservable.add(() => {
       phase += dt * 8;
     }
     walkPose(phase, moving ? 1 : 0);
-    if (!sipping) say(near() ? 'Press E to sit' : '');
+    if (!sipping && near() !== nearStool) say((nearStool = near()) ? `${press} to sit` : '');
   }
   // Closer while she sits.
   const seated = state === 'seated';
@@ -129,6 +145,6 @@ function ambience() {
   rain.start();
 }
 
-say('WASD to walk, drag to look. The stool by the shop window is free.');
+say(`${touch ? 'Left thumb to walk, right thumb to look' : 'WASD to walk, drag to look'}. The stool by the shop window is free.`);
 addEventListener('resize', () => engine.resize());
 engine.runRenderLoop(() => scene.render());

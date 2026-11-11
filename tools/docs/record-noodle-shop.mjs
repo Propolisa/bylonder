@@ -1,7 +1,8 @@
 // Records the Noodle Shop game (docs/demos/noodle-shop/) for the Import and Export page: she walks up the lane, sits,
 // buys a tea and sips it. Served from the folder as the site serves it; frames from Chromium's screencast, encoded with
-// ffmpeg under 1 MB. With --shot, a still of the page as it opens, for tuning.
-//   usage: node tools/docs/record-noodle-shop.mjs [--shot] [out folder]
+// ffmpeg under 1 MB. With --shot, a still of the page as it opens, for tuning; with --phone, stills of it on a phone as
+// the thumb stick walks her to the stool and the E button sits, buys and sips.
+//   usage: node tools/docs/record-noodle-shop.mjs [--shot | --phone] [out folder]
 import { createServer } from 'node:http';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
@@ -11,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from '../../tests/e2e/app.mjs';
 import { ffmpeg } from '../media.mjs';
 
-const shot = process.argv.includes('--shot');
+const shot = process.argv.includes('--shot'), phone = process.argv.includes('--phone');
 const out = process.argv.slice(2).find((a) => !a.startsWith('--')) ?? fileURLToPath(new URL('../../docs/media/features/import-export/', import.meta.url));
 const root = fileURLToPath(new URL('../../docs/demos/noodle-shop/', import.meta.url));
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.png': 'image/png' };
@@ -20,14 +21,25 @@ const server = createServer((req, res) => {
   try { res.writeHead(200, { 'content-type': TYPES[extname(path)] ?? 'application/octet-stream' }).end(readFileSync(path)); } catch { res.writeHead(404).end(); }
 }).listen(0);
 const browser = await chromium.launch();
-const page = await browser.newPage({ viewport: { width: 960, height: 540 } });
+const page = await browser.newPage(phone ? { viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 } : { viewport: { width: 960, height: 540 } });
 page.on('pageerror', (error) => console.error(error.message));
 await page.goto(`http://localhost:${server.address().port}/`);
-await page.waitForFunction(() => document.getElementById('say').textContent.startsWith('WASD'), null, { timeout: 180000 });
+await page.waitForFunction(() => document.getElementById('say').textContent.includes('stool'), null, { timeout: 180000 });
 await page.waitForTimeout(3000);
 mkdirSync(out, { recursive: true });
 
-if (shot) {
+if (phone) {
+  const cdp = await page.context().newCDPSession(page), still = (name) => page.screenshot({ path: join(out, `noodle-shop-phone-${name}.png`) });
+  const touch = (type, x, y) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y }] });
+  await still('start');
+  // The left thumb pushes right, as D walks her up the lane, then up a little to the stool.
+  await touch('touchStart', 150, 280);
+  for (const [x, y, ms] of [[200, 280, 5300], [150, 250, 400]]) { await touch('touchMove', x, y); await page.waitForTimeout(ms); }
+  await touch('touchEnd');
+  await still('walked');
+  for (const [name, wait] of [['seated', 1500], ['tea', 1500], ['sip', 2500]]) { await page.tap('#act'); await page.waitForTimeout(wait); await still(name); }
+}
+else if (shot) {
   const views = JSON.parse(process.env.VIEWS ?? '[null]');
   for (const [i, view] of views.entries()) {
     if (view) console.log(await page.evaluate((js) => eval(js), view));

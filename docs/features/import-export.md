@@ -306,8 +306,8 @@ control panel, on WebGL 2, loading Babylon.js from its CDN. [Open the demo](http
     The [Noodle Shop](https://propolisa.github.io/bylonder/docs/demos/noodle-shop/) is a small game made this way, about
     150 lines in [game.js](../demos/noodle-shop/game.js): the Compositor example's lane and its woman on a tea break,
     exported as two packages and loaded into a plain Babylon.js scene. Walk with W A S D, press E by the stool to sit,
-    again to buy a tea and to sip it; her walk is the page's own, her sip the package's animation, played by her
-    controller.
+    again to buy a tea and to sip it; on a phone, the left thumb walks, the right looks and the E button acts. Her walk
+    is the page's own, her sip the package's animation, played by her controller.
 
     ![The Noodle Shop](../media/features/import-export/noodle-shop.gif)
 
