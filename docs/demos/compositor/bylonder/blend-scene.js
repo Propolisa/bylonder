@@ -500,6 +500,8 @@ export class BlendScene {
    */
   #write(path, value) {
     const knob = /** @type {Knob} */ (this.#knobs.get(path));
+    // Clamped to its hard range, as Blender's RNA sets a property (a driver's value too).
+    if (typeof value === 'number') value = Math.min(knob.hard_max ?? Infinity, Math.max(knob.hard_min ?? -Infinity, value));
     this.#values.set(path, value);
     if (knob.bind) this.#apply(knob.bind, path, value);
     this.onChanged.notifyObservers({ path, value });

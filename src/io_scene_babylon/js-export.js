@@ -34,7 +34,6 @@ import { LOG_SIZE, STOPS } from '../render/display-lut.js';
 import { colorManagementFiles } from '../imbuf/colormanagement.js';
 import { halfFloats } from '../blenkernel/colorband.js';
 import { babylonModule, sideEffectImports } from './babylon-modules.js';
-import { AREA_LIT_PBR_BLOCK } from '../overrides/babylon/pbr-block-area-lights.js';
 
 const CDN = `https://cdn.jsdelivr.net/npm/@babylonjs/core@${AbstractEngine.Version}/`;
 const json = (value) => JSON.stringify(value);
@@ -356,7 +355,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   // A composite convolving with Glare's Fog Glow kernel (compositor-replay.js fogGlowRecording), Blender's unless replaced,
   // with the Fog Glow render setting on.
   const fogGlow = !!composited && json(composited.compositor).includes('"op":"fogGlow"') && fogGlowOnGPU.enabled(world.scene), blenderFogGlow = fogGlow && !replaces(replace, FOG_GLOW_UNIT);
-  const areaLitBlocks = data.materials.some((m) => m.blocks?.some((b) => b.customType === `BABYLON.${AREA_LIT_PBR_BLOCK}`));
+  const areaLitBlocks = areaLights && data.materials.some((m) => m.blocks?.some((b) => b.customType === 'BABYLON.PBRMetallicRoughnessBlock'));
   // The panel's Collections view, for a scene with collections, and its timeline, for a scene with frames to play, in
   // Blender's icons unless a unit replaces them.
   const timeline = ir.scene.time.frame_end > ir.scene.time.frame_start && controls.some((c) => c.bind?.frame);

@@ -64,6 +64,9 @@ const runs = cases.map(({ node, inputs, size }) => {
   const [w, h] = size ?? [width, height];
   const { plan, data } = nodeRecording(node, { values: inputs, linked: imageInput ? [imageInput.identifier] : [] }, w, h);
   if (plan.reasons) return { reasons: plan.reasons };
+  // A step the page runs as an operation of its own (Fog Glow's convolution, fft-convolution.js) is not a pass to replay.
+  const operation = plan.steps.find((s) => !['update', 'clear', 'copy', 'pass'].includes(s.op));
+  if (operation) return { reasons: [`its ${operation.op} step is an operation of the replay, tested by fft-convolution.test.js`] };
   // Upload steps as RGBA floats, as the task makes them.
   const textures = new Map(plan.textures.map((t) => [t.id, t]));
   const steps = plan.steps.map((s) => (s.op === 'update' ? { ...s, floats: [...uploadFloats(data.subarray(s.data, s.data + s.bytes), s.format, s.extent, formatChannels(textures.get(s.texture).format))] } : s));

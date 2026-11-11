@@ -62,6 +62,7 @@ path = [
   "src/blenkernel/scene/world-sun.js",
   "src/draw/curves.js",
   "src/draw/curves-blocks.js",
+  "src/compositor/fog-glow.js",
   "src/draw/draw-view.js",
   "src/draw/grease-pencil.js",
   "src/draw/light-probe-pbr.js",
@@ -232,7 +233,7 @@ SPDX-License-Identifier = "MIT"
 # The live demo of an exported page (docs/demos/, tools/docs/export-demo.mjs): its folders of Blender's code ship their
 # notices (LICENSE.md, COPYING), Zod is bundled with its own, and Babylon.js's area light table is Babylon's.
 [[annotations]]
-path = ["docs/demos/*/bylonder-nodes/**", "docs/demos/*/bylonder-area-specular/**"]
+path = ["docs/demos/*/bylonder-nodes/**", "docs/demos/*/bylonder-area-specular/**", "docs/demos/*/bylonder-fog-glow/**"]
 precedence = "override"
 SPDX-FileCopyrightText = ["Blender Authors", "2026 Chris Stanley"]
 SPDX-License-Identifier = "GPL-3.0-or-later"
