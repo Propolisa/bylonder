@@ -27,9 +27,12 @@ function bonesOf(arm) {
   }));
 }
 
-// A mesh object's modifiers shown in the viewport, and those of them that are Armature modifiers deforming by `arm`.
+// Blender's Smooth by Angle (Object > Shade Auto Smooth), last in the stack: Babylon skins the mesh smooth instead.
+const smoothByAngle = (m) => m.type === 'NODES' && /^Smooth by Angle/.test(m.node_group?.name ?? '');
+// A mesh object's modifiers shown in the viewport, but a last Smooth by Angle, and those of them that are Armature
+// modifiers deforming by `arm`.
 function armatureModifiers(ob, arm) {
-  const stack = [...ob.modifiers].filter((m) => m.show_viewport);
+  const shown = [...ob.modifiers].filter((m) => m.show_viewport), stack = smoothByAngle(shown.at(-1) ?? {}) ? shown.slice(0, -1) : shown;
   return { stack, mine: stack.filter((m) => m.type === 'ARMATURE' && address(m.object) === address(arm)) };
 }
 
@@ -50,6 +53,8 @@ function meshFallbacks(ob, arm) {
 function meshApproximations(ob, arm, modifier) {
   const path = (name) => `modifiers["${modifier.name}"].${name}`;
   const out = [issue(APPROXIMATION, ob, `modifiers["${modifier.name}"]`, 'normals skinned, not recomputed')];
+  const smooth = [...ob.modifiers].findLast((m) => m.show_viewport);
+  if (smooth && smoothByAngle(smooth)) out.push(issue(APPROXIMATION, ob, `modifiers["${smooth.name}"]`, 'Smooth by Angle after Armature: shaded smooth'));
   if (modifier.use_deform_preserve_volume) out.push(issue(APPROXIMATION, ob, path('use_deform_preserve_volume'), 'Preserve Volume skins linearly'));
   if (modifier.use_bone_envelopes) out.push(issue(APPROXIMATION, ob, path('use_bone_envelopes'), 'envelopes do not deform'));
   if (!modifier.use_vertex_groups) return out;

@@ -57,9 +57,11 @@ function withoutGeometry(geometries) {
   return () => geometries.forEach((g) => delete g.doNotSerialize);
 }
 
-// The nodes the export holds, each the evaluated object, and the materials they use.
-function exportedContent(scene) {
-  const nodes = [...scene.meshes, ...scene.transformNodes, ...scene.lights, ...scene.cameras].filter((n) => !excluded(n)).map(evaluatedMesh);
+// The nodes the export holds, each the evaluated object, and the materials they use; with `only` (Selected Objects), the
+// nodes it keeps and what they draw.
+function exportedContent(scene, only) {
+  const kept = (n) => !only || only.has(n) || (!only.objects.has(n) && (!!n.metadata?.instancers?.some((i) => only.has(i)) || (!!n.parent && kept(n.parent))));
+  const nodes = [...scene.meshes, ...scene.transformNodes, ...scene.lights, ...scene.cameras].filter((n) => !excluded(n) && kept(n)).map(evaluatedMesh);
   const meshes = nodes.filter((n) => n.geometry !== undefined);
   // Curves are drawn by the page (curves-export.js) in the materials the app draws them in.
   const curves = scene.meshes.filter((m) => m.metadata?.curves && !m.metadata.overlay && m.isEnabled());
@@ -349,12 +351,12 @@ const authoredMetadata = (node) => {
 // `graphOf` gives a material's IR graph key, for a package whose page builds its nodes from the IR. `bake: false` is for a
 // package whose page runs F-Curves Babylon cannot play exactly. `runtime`, `runtimes`: the runtimes chosen for the export
 // (export-options.js); `sampling`, the frames what is baked is sampled at (sampling.js), a key per frame unset.
-export async function serializeScene(world, { geometry = true, live = null, mapped = null, parity = false, graphOf = () => null, bake = true, runtime = null, runtimes: chosen = {}, sampling = null } = {}) {
+export async function serializeScene(world, { geometry = true, live = null, mapped = null, parity = false, graphOf = () => null, bake = true, runtime = null, runtimes: chosen = {}, sampling = null, only = null } = {}) {
   await world.modifiers.settled();
   sampling ??= exportSampling(world.animation.time.state);
   const runtimes = mapped ?? exportRuntimes(world, { bake, runtime, runtimes: chosen, sampling });
   try {
-    return await serializeMapped(world, { geometry, live, mapped: runtimes, parity, graphOf, bake, sampling });
+    return await serializeMapped(world, { geometry, live, mapped: runtimes, parity, graphOf, bake, sampling, only });
   } finally {
     if (!mapped) runtimes.restore();
   }
@@ -370,10 +372,11 @@ function shadowsOf(world, content) {
   return generators.filter((g) => lights.has(g.getLight().name)).map((g) => ({ ...g.serialize(), lightId: lights.get(g.getLight().name).id, customShaderOptions: g.customShaderOptions }));
 }
 
-async function serializeMapped(world, { geometry, live, mapped, parity, graphOf, bake, sampling }) {
+async function serializeMapped(world, { geometry, live, mapped, parity, graphOf, bake, sampling, only }) {
   const { scene } = world;
-  const camera = world.sceneSettings.camera() ?? scene.activeCamera;
-  const content = exportedContent(scene);
+  // An asset brings no camera, so none of a camera's effects.
+  const camera = only ? null : world.sceneSettings.camera() ?? scene.activeCamera;
+  const content = exportedContent(scene, only);
   // Shadows as a rendered view draws them: each light's casters and every receiver (light-shadows.js setActive), while
   // the lights' metadata, which it reads, is theirs; the views set them back as they next draw.
   world.shadows?.setActive(true, world.renderSettings.state.eevee.shadowRayCount);

@@ -34,6 +34,9 @@ import { babylonModule, sideEffectImports } from './babylon-modules.js';
 
 const CDN = `https://cdn.jsdelivr.net/npm/@babylonjs/core@${AbstractEngine.Version}/`;
 const json = (value) => JSON.stringify(value);
+// What Babylon's SceneLoader loads the package into a scene from, once bylonder/scene-loader.js is imported.
+const ASSET_FILE = 'scene.bylonder', ASSET_MANIFEST = `${JSON.stringify({ module: './scene.js', loader: './bylonder/scene-loader.js' })}
+`;
 const TARGET_NAMES = Object.fromEntries(TARGETS.map(([id, label]) => [id, label]));
 // The page's createEngine for each target: WebGPU with the adapter's limits its materials need, and in a bundle with the
 // GLSL to WGSL compilers it carries.
@@ -146,7 +149,7 @@ function nodeCode(entry, mesh, geometries, live, bin) {
   if (entry.alphaIndex !== undefined && entry.alphaIndex !== Number.MAX_VALUE && entry.alphaIndex !== null) lines.push(`node.alphaIndex = ${entry.alphaIndex};`);
   if (entry.materialUniqueId !== undefined && mesh?.material) lines.push(`node.material = materials[${json(entry.materialUniqueId)}] ?? null;`);
   if (mesh && entry.subMeshes?.length > 1) lines.push(`node.subMeshes = [];`, ...entry.subMeshes.map((s) => `new SubMesh(${s.materialIndex}, ${s.verticesStart}, ${s.verticesCount}, ${s.indexStart}, ${s.indexCount}, node);`));
-  if (entry.skeletonId !== undefined) lines.push(`node.skeleton = scene.getSkeletonById(${json(entry.skeletonId)});`, `node.numBoneInfluencers = ${entry.numBoneInfluencers};`);
+  if (entry.skeletonId !== undefined) lines.push(`node.skeleton = lookup.getSkeletonById(${json(entry.skeletonId)});`, `node.numBoneInfluencers = ${entry.numBoneInfluencers};`);
   if (entry.morphTargetManagerId !== undefined) lines.push(`node.morphTargetManager = morphTargets[${json(entry.morphTargetManagerId)}];`);
   if (entry.thinInstances?.instancesCount) lines.push(`node.thinInstanceSetBuffer('matrix', buffers[${bin.add(Float32Array.from(entry.thinInstances.matrixData.slice(0, entry.thinInstances.instancesCount * 16)))}], 16, true);`);
   for (const instance of entry.instances ?? []) {
@@ -258,6 +261,16 @@ function greasePencilClock(world, ir, groups) {
     targetedAnimations: [{ animation: animation.serialize(), targetId: animated.outputs.geometry.draw }] });
 }
 
+// Selected Objects, as Blender's glTF exporter's use_selection: the world with the selected objects and the parents that
+// place them (an armature its meshes hang from) as its objects; `only` the set the export keeps.
+function selectedWorld(world, selected) {
+  const objects = new Set(world.objects), only = new Set();
+  const keep = (node) => { if (!node || only.has(node) || !objects.has(node)) return; only.add(node); keep(node.parent); };
+  selected.forEach(keep);
+  return Object.create(world, { objects: { value: Object.assign(world.objects.filter((n) => only.has(n)), { scene: world.objects.scene }) },
+    only: { value: Object.assign(only, { objects }) } });
+}
+
 // The package's files but the runtime's: scene.js, scene.d.ts, scene.ir.json, scene.bin and images/. With `live` (the
 // Modifiers branch's default state), objects whose modifiers are all Blender's keep them live (modifiers-export.js), run
 // by modifiers.wasm in bylonder-modifiers/. With `bakeAnimation`, what Babylon cannot play as its F-Curve is sampled; `sampleRate`, the keys per
@@ -265,8 +278,10 @@ function greasePencilClock(world, ir, groups) {
 // (export-options.js TARGETS); `runtime`, `runtimes`, the runtimes its features export with (runtimes.js chosenRuntime);
 // `replace`, the type keys of units the page registers itself, which the package ships none of (unit-manifest.js); `bundle`,
 // whether the package is then bundled (bundle.js); `branchState` and `branches`, the states of the scene's branches
-// (export-options.js chosenState).
-export async function exportModule(world, { live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, target = 'BOTH', runtime = null, runtimes = {}, replace = [], bundle = false, controlPanel = true, devTools = 'CDN', navigation = 'FIXED', navigationModes = {}, branchState = null, branches = {}, sampleRate = {} } = {}) {
+// (export-options.js chosenState); `scope`, the whole scene or its `selected` objects (export-options.js SCOPES).
+
+export async function exportModule(whole, { scope = 'SCENE', selected = [], live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, target = 'BOTH', runtime = null, runtimes = {}, replace = [], bundle = false, controlPanel = true, devTools = 'CDN', navigation = 'FIXED', navigationModes = {}, branchState = null, branches = {}, sampleRate = {} } = {}) {
+  const world = scope === 'SELECTED' ? selectedWorld(whole, selected) : whole;
   const states = { branchState, branches }, stackState = (node) => chosenState(states, 'modifiers', node.name) ?? (keepLive ? 'LIVE' : 'BAKED');
   const live = new Map(world.objects.filter((node) => stackState(node) === 'LIVE').map((node) => [node, liveStack(world, node)]).filter(([, stack]) => stack));
   await world.modifiers.settled();
@@ -281,13 +296,15 @@ export async function exportModule(world, { live: keepLive = false, parity = fal
 }
 
 async function moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states, sampling }) {
-  const graphs = [], graphOf = materialGraphs(world, graphs);
-  const data = await serializeScene(world, { geometry: false, live, mapped, parity, graphOf, bake: bakeAnimation, sampling });
+  const graphs = [], graphOf = materialGraphs(world, graphs), asset = !!world.only;
+  const data = await serializeScene(world, { geometry: false, live, mapped, parity, graphOf, bake: bakeAnimation, sampling, only: world.only });
   if (chosenState(states, 'postProcessing') === 'OFF') Object.assign(data, { renderingPipelines: [], postProcesses: [] });
+  // Selected objects bring none of the scene's settings: its world, environment, effect layers or volumes.
+  if (asset) Object.assign(data, { environmentTexture: undefined, effectLayers: [] });
   const { scene } = world;
-  const worldEntry = await worldMaterial(scene, parity, graphOf);
+  const worldEntry = asset ? null : await worldMaterial(scene, parity, graphOf);
   if (worldEntry) data.materials.push(worldEntry);
-  const volumes = chosenState(states, 'volumes') === 'OFF' ? null : await exportVolumes(scene, { parity, graphOf, meshes: new Set(data.meshes.map((m) => m.id)), lights: new Set(data.lights.map((l) => l.id)) });
+  const volumes = asset || chosenState(states, 'volumes') === 'OFF' ? null : await exportVolumes(scene, { parity, graphOf, meshes: new Set(data.meshes.map((m) => m.id)), lights: new Set(data.lights.map((l) => l.id)) });
   if (volumes) data.materials.push(...volumes.materials);
   const bin = createSceneBin({ gzip: !hostCompression }), images = imageFiles(data);
   const geometries = new Map(), geometryLines = [];
@@ -297,8 +314,8 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
     geometryLines.push(`  ${geometryCode(mesh, bin)},`);
   }
   const compositorState = chosenState(states, 'compositor') ?? 'LIVE';
-  const composited = data.cameras.length && compositorState !== 'OFF' ? exportCompositor(world) : null;
-  const display = await displaySettings(world, bin);
+  const composited = !asset && data.cameras.length && compositorState !== 'OFF' ? exportCompositor(world) : null;
+  const display = asset ? null : await displaySettings(world, bin);
   // Area lights as Bylonder's (runtime/area-light.js): lit once parsed, and casting shadows as its Area Light Shadows
   // extension has them.
   const pbr = data.materials.filter((m) => m.customType === 'BABYLON.PBRMaterial').length;
@@ -308,7 +325,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   // unless one of its effects is on.
   if (display) data.renderingPipelines = data.renderingPipelines.filter((p) => !displayOnly(p));
   // Baked, the compositor runs with its settings as exported: none of them a control.
-  const collected = world.mainSync ? exportCollections(sceneOf(world.mainSync)) : null;
+  const collected = world.mainSync && !asset ? exportCollections(sceneOf(world.mainSync)) : null;
   const controls = withUI([...exportControls(world, data), ...(collected?.controls ?? []), ...(compositorState === 'LIVE' ? composited?.knobs ?? [] : [])]);
   const ir = exportIR(world, { controls, collections: collected, live, bin, animationGroups: data.animationGroups, sampleRates: data.sampleRates, curves: data.liveCurves, constraints: data.liveConstraints, states });
   const computed = { ...ir, entities: structuredClone(ir.entities) };
@@ -341,7 +358,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
     clearColor: data.clearColor, ambientColor: data.ambientColor, gravity: data.gravity, autoClear: data.autoClear, collisionsEnabled: data.collisionsEnabled,
     fog: data.fogMode ? { fogMode: data.fogMode, fogColor: data.fogColor, fogStart: data.fogStart, fogEnd: data.fogEnd, fogDensity: data.fogDensity } : null,
     environment: data.environmentTexture ? { url: data.environmentTexture, rotationY: data.environmentTextureRotationY ?? 0, hdr: data.environmentTextureType === 'BABYLON.HDRCubeTexture', size: data.environmentTextureSize, extension: data.environmentTextureForcedExtension, skybox: !!data.createDefaultSkybox } : null,
-    world: !data.environmentTexture && scene.metadata?.wbWorld ? { color: scene.metadata.wbWorld.color.map((v) => v * (scene.metadata.wbWorld.strength ?? 1)), material: worldEntry?.uniqueId ?? null } : null,
+    world: !asset && !data.environmentTexture && scene.metadata?.wbWorld ? { color: scene.metadata.wbWorld.color.map((v) => v * (scene.metadata.wbWorld.strength ?? 1)), material: worldEntry?.uniqueId ?? null } : null,
     defaultMaterial: data.defaultMaterialId ?? null, environmentProbe: data.environmentProbe ?? null, environmentIntensity: data.environmentIntensity, iblIntensity: data.iblIntensity, useRightHandedSystem: data.useRightHandedSystem,
   };
   // Written before the module's tables: they add thin instance buffers to scene.bin.
@@ -361,7 +378,8 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
 // Includes GPL code: ${PANEL_ICONS}, Blender's icons, loaded when the control panel opens (GPL-3.0-or-later, ${PANEL_ICONS.split('/')[0]}/LICENSE.md).` : ''}
 import { readBuffers, readBytes } from './bylonder/buffers.js';
 import { worldColor, worldNodes } from './bylonder/world.js';
-import { BlendScene } from './bylonder/blend-scene.js';${controlPanel ? `
+import { BlendScene } from './bylonder/blend-scene.js';
+import { addAsset, assetContainer, cloneAsset } from './bylonder/asset.js';${controlPanel ? `
 import { controlPanel } from './bylonder/control-panel.js';` : ''}
 ${webgpu ? `import { derivativeUniformity } from './bylonder/overrides/webgpu/derivative-uniformity.js';
 import { reservedNames } from './bylonder/overrides/webgpu/reserved-names.js';
@@ -441,13 +459,37 @@ const IRS = new WeakMap(), WORLDS = new WeakMap(), COMPOSITORS = new WeakMap(), 
 const compiler = (name) => ({ jsPath: new URL(\`${COMPILER_FOLDER}/\${name}.js\`, ROOT).href, wasmPath: new URL(\`${COMPILER_FOLDER}/\${name}.wasm\`, ROOT).href });
 const COMPILERS = { glslangOptions: compiler('glslang'), twgslOptions: compiler('twgsl') };` : ''}
 ${engines(bundle)[target]}
-export async function load(engine) {${webgpu ? `
+// The scene with its controller: load(engine) builds it in a scene of its own, as the page does, with the scene's
+// settings${controlPanel ? ' and the control panel' : ''}; load({ scene, root }) adds its objects to a scene of yours, as a .glb's are, under
+// a root of their own, "__root__" (bylonder/asset.js), itself under \`root\` (a node of yours) if given, with none of the
+// scene's settings; load({ instance, root }) copies what a load added, sharing its geometry, materials and textures.
+export async function load(target) {
+  if (target.scene || target.instance) {
+    const { ir, buffers } = target.instance ?? await readData(), options = { root: target.root,
+      controller: (view, entries, dispose) => new BlendScene(view, ir, { root: ROOT, buffers, entries, dispose }) };
+    return target.instance ? cloneAsset(target.instance.entries, options) : addAsset(target.scene, (into, lookup) => addObjects(into, { ir, buffers }, lookup), options);
+  }
+  const engine = target;${webgpu ? `
   warnUnlessMaximumLimits(engine);` : ''}
   const scene = await createScene(engine, engine.getRenderingCanvas());
   ${controlPanel ? 'const blend = ' : 'return '}new BlendScene(scene, IRS.get(scene), { root: ROOT, world: WORLDS.get(scene), compositor: COMPOSITORS.get(scene), buffers: SCENE_BUFFERS.get(scene) });${controlPanel ? `
   // The page's control panel, at the canvas's top right corner (none in Node).
   controlPanel(blend, ${json({ tools: devTools, navigation, offer: NAVIGATION.map(([id]) => id).filter((id) => navigationModes[id] !== false) }).replace('}', `, root: ROOT${panelIcons ? `, icons: () => Promise.resolve(unitFor('${PANEL_ICONS_UNIT}')?.icons${blenderIcons ? ` ?? import('./${PANEL_ICONS}').then((m) => m.default)` : ''})` : ''} }`)});
   return blend;` : ''}
+}
+
+// The objects in an AssetContainer, as LoadAssetContainerAsync gives a .glb's: instantiate() loads a copy with its own controller.
+export async function loadAssetContainer(scene) {
+  const blend = await load({ scene });
+  return assetContainer(blend, (root) => load({ instance: blend, root }));
+}
+
+// scene.bin's buffers and the IR.
+async function readData() {
+  const buffers = await readBuffers(new URL('scene.bin', ROOT), BUFFERS, ${!hostCompression});
+  // The IR as data: read as bytes, as Node's fetch reads no file: URL.
+  const ir = JSON.parse(new TextDecoder().decode(await readBytes(new URL('scene.ir.json', ROOT))));
+  return { buffers, ir };
 }
 
 export async function createScene(engine, canvas) {${webgpu ? `
@@ -470,19 +512,43 @@ ${settings.environment ? `  const env = SCENE.environment;
   if (env.skybox) scene.createDefaultSkybox(scene.environmentTexture, true, 1000, 0);
 ` : ''}  scene.environmentIntensity = SCENE.environmentIntensity;
   scene.iblIntensity = SCENE.iblIntensity ?? 1;
-  const buffers = await readBuffers(new URL('scene.bin', ROOT), BUFFERS, ${!hostCompression});
+  const data = await readData(), { buffers } = data;
   SCENE_BUFFERS.set(scene, buffers);
-  // The IR as data: read as bytes, as Node's fetch reads no file: URL.
-  const ir = JSON.parse(new TextDecoder().decode(await readBytes(new URL('scene.ir.json', ROOT))));
-  IRS.set(scene, ir);
+  IRS.set(scene, data.ir);
+  const materials = addObjects(scene, data);
+  if (SCENE.defaultMaterial !== null) scene.defaultMaterial = materials[SCENE.defaultMaterial];
+  // The world lights the scene: its color, or its nodes baked once their shader is ready.
+  const world = SCENE.world;
+  if (world) WORLDS.set(scene, world.material !== null ? worldNodes(scene, materials[world.material]) : worldColor(scene, world.color));
+${parse('EFFECT_LAYERS', data.effectLayers, "EffectLayer.Parse(entry, scene, ROOT)")}  if (SCENE.environmentProbe) scene.environmentTexture = scene.reflectionProbes.find((p) => p.name === SCENE.environmentProbe)?.cubeTexture ?? scene.environmentTexture;
+  scene.activeCamera = scene.getCameraById(${json(data.activeCameraID ?? null)}) ?? scene.cameras[0] ?? null;
+${pipelineTypes.length ? `  for (const entry of RENDERING_PIPELINES) {
+    const make = SCREEN_SPACE[entry.customType];
+    if (make) SerializationHelper.Parse(() => make(entry, scene), entry, scene, ROOT);
+    else parsedPipeline(PIPELINES[entry.customType]?.Parse(entry, scene, ROOT), entry);
+  }
+` : ''}${parse('POST_PROCESSES', data.postProcesses, 'parsePostProcess(entry, scene, ROOT)').trimEnd()}${volumes ? `
+  // EEVEE's volumes, resolved over each camera's render before its other post-processes.
+  sceneVolumes(scene, VOLUMES, materials, WORLDS.get(scene)?.box ?? null);` : ''}${display ? `
+  // Displayed as Blender's rendered view: scene linear, ${composited ? 'composited, ' : ''}then the view transform.
+  const camera = scene.activeCamera;
+  if (camera) {
+    const display = viewTransform(camera, { ...DISPLAY, lattice: DISPLAY.lattice && { ...DISPLAY.lattice, texels: buffers[DISPLAY.lattice.texels] } });${composited ? `
+    COMPOSITORS.set(scene, (await compositor(scene, camera, COMPOSITOR, display)).graph);` : ''}
+  }` : ''}
+  if (canvas) scene.activeCamera?.attachControl(canvas, true);
+  return scene;
+}
 
-  const materials = {};
+// The exported objects added to \`scene\` at once, without awaiting: \`lookup\` finds by id what this call made
+// (bylonder/asset.js). Gives the materials by their exported unique ids.
+function addObjects(scene, { buffers, ir }, lookup = scene) {
+  const materials = {}, entries = structuredClone(MATERIALS);
   // A custom block's code is written once for every material that shares it.
-  for (const entry of MATERIALS) for (const block of entry.blocks ?? []) if (typeof block.options?.code === 'number') block.options.code = CODE[block.options.code];
+  for (const entry of entries) for (const block of entry.blocks ?? []) if (typeof block.options?.code === 'number') block.options.code = CODE[block.options.code];
 ${kernels ? `  // Blender's nodes of each material and world, made from the IR's graphs.
-  fillMaterials(MATERIALS, ir, kernels);
-` : ''}  for (const entry of MATERIALS) materials[entry.uniqueId] = Material.Parse(entry, scene, ROOT);
-  if (SCENE.defaultMaterial !== null) scene.defaultMaterial = materials[SCENE.defaultMaterial];${webgpu ? `
+  fillMaterials(entries, ir, kernels);
+` : ''}  for (const entry of entries) materials[entry.uniqueId] = Material.Parse(entry, scene, ROOT);${webgpu ? `
   // Node materials' samplers as WebGPU binds them.
   for (const material of Object.values(materials)) if (material.getClassName() === 'NodeMaterial') webgpuSamplers(material);` : ''}${meshValued ? `
   // Each mesh's own texture space, in the materials it shares.
@@ -495,9 +561,6 @@ ${kernels ? `  // Blender's nodes of each material and world, made from the IR's
     const multi = materials[entry.uniqueId] = MultiMaterial.ParseMultiMaterial(entry, scene);
     multi.subMaterials = (entry.materialsUniqueIds ?? []).map((id) => materials[id] ?? null);
   }
-  // The world lights the scene: its color, or its nodes baked once their shader is ready.
-  const world = SCENE.world;
-  if (world) WORLDS.set(scene, world.material !== null ? worldNodes(scene, materials[world.material]) : worldColor(scene, world.color));
   for (const entry of SKELETONS) Skeleton.Parse(entry, scene);
   const morphTargets = {};
   for (const entry of MORPH_TARGETS) morphTargets[entry.id] = MorphTargetManager.Parse(entry, scene);
@@ -510,37 +573,20 @@ ${objectLines}
 ${parse('LIGHTS', data.lights, `nodes[entry.uniqueId] = ${areaLights ? 'parseLight(entry, scene, AreaLight)' : 'Light.Parse(entry, scene)'}`)}${parse('CAMERAS', data.cameras, 'nodes[entry.uniqueId] = orthoScaled(parseCamera(entry, scene))')}
 ${parented.map((e) => `  nodes[${e.uniqueId}].parent = nodes[${e.parentId}] ?? null;`).join('\n')}${data.lights.some((l) => l.excludedMeshesIds?.length || l.includedOnlyMeshesIds?.length) ? `
   // The meshes each light leaves out or lights alone, by id, as Babylon's loader resolves them once the meshes exist.
-  const meshes = (ids) => ids.map((id) => scene.getMeshById(id)).filter(Boolean);
+  const meshes = (ids) => ids.map((id) => lookup.getMeshById(id)).filter(Boolean);
   for (const entry of LIGHTS) {
     const light = nodes[entry.uniqueId];
     if (entry.excludedMeshesIds?.length) light.excludedMeshes = meshes(entry.excludedMeshesIds);
     if (entry.includedOnlyMeshesIds?.length) light.includedOnlyMeshes = meshes(entry.includedOnlyMeshesIds);
   }` : ''}
 
-${parse('REFLECTION_PROBES', data.reflectionProbes, "ReflectionProbe.Parse(entry, scene, ROOT)")}${parse('SHADOW_GENERATORS', data.shadowGenerators, "Object.assign((entry.className === 'CascadedShadowGenerator' ? CascadedShadowGenerator : ShadowGenerator).Parse(entry, scene), { customShaderOptions: entry.customShaderOptions })")}${parse('EFFECT_LAYERS', data.effectLayers, "EffectLayer.Parse(entry, scene, ROOT)")}${parse('PARTICLE_SYSTEMS', data.particleSystems, "ParticleSystem.Parse(entry, scene, ROOT)")}  if (SCENE.environmentProbe) scene.environmentTexture = scene.reflectionProbes.find((p) => p.name === SCENE.environmentProbe)?.cubeTexture ?? scene.environmentTexture;
-  scene.activeCamera = scene.getCameraById(${json(data.activeCameraID ?? null)}) ?? scene.cameras[0] ?? null;
-${pipelineTypes.length ? `  for (const entry of RENDERING_PIPELINES) {
-    const make = SCREEN_SPACE[entry.customType];
-    if (make) SerializationHelper.Parse(() => make(entry, scene), entry, scene, ROOT);
-    else parsedPipeline(PIPELINES[entry.customType]?.Parse(entry, scene, ROOT), entry);
-  }
-` : ''}${parse('POST_PROCESSES', data.postProcesses, 'parsePostProcess(entry, scene, ROOT)').trimEnd()}${volumes ? `
-  // EEVEE's volumes, resolved over each camera's render before its other post-processes.
-  sceneVolumes(scene, VOLUMES, materials, WORLDS.get(scene)?.box ?? null);` : ''}
-${data.animationGroups.some((g) => g.targetedAnimations.some((t) => t.animation.property === CLOCK)) ? `  // The frame Babylon's animation keeps where the page's F-Curves are all that moves.
-  for (const entry of ANIMATION_GROUPS) for (const { animation, targetId } of entry.targetedAnimations) if (animation.property === '${CLOCK}') scene.getNodeById(targetId).${CLOCK} = entry.from;
+${parse('REFLECTION_PROBES', data.reflectionProbes, "ReflectionProbe.Parse(entry, scene, ROOT)")}${parse('SHADOW_GENERATORS', data.shadowGenerators, "Object.assign((entry.className === 'CascadedShadowGenerator' ? CascadedShadowGenerator : ShadowGenerator).Parse(entry, lookup), { customShaderOptions: entry.customShaderOptions })")}${parse('PARTICLE_SYSTEMS', data.particleSystems, "ParticleSystem.Parse(entry, scene, ROOT)")}${data.animationGroups.some((g) => g.targetedAnimations.some((t) => t.animation.property === CLOCK)) ? `  // The frame Babylon's animation keeps where the page's F-Curves are all that moves.
+  for (const entry of ANIMATION_GROUPS) for (const { animation, targetId } of entry.targetedAnimations) if (animation.property === '${CLOCK}') lookup.getNodeById(targetId).${CLOCK} = entry.from;
 ` : ''}${data.animationGroups.some((g) => g.targetedAnimations.some((t) => t.animation.dataType === Animation.ANIMATIONTYPE_MATRIX)) ? `  // Bones' poses interpolated between their keys, as between frames and on a grid sparser than the frames.
   Animation.AllowMatricesInterpolation = true;
 ` : ''}  // Started and held: the page's playhead (playhead.js) sets them to its frame.
-  for (const entry of ANIMATION_GROUPS) AnimationGroup.Parse(entry, scene).start(entry.loopAnimation).pause();${display ? `
-  // Displayed as Blender's rendered view: scene linear, ${composited ? 'composited, ' : ''}then the view transform.
-  const camera = scene.activeCamera;
-  if (camera) {
-    const display = viewTransform(camera, { ...DISPLAY, lattice: DISPLAY.lattice && { ...DISPLAY.lattice, texels: buffers[DISPLAY.lattice.texels] } });${composited ? `
-    COMPOSITORS.set(scene, (await compositor(scene, camera, COMPOSITOR, display)).graph);` : ''}
-  }` : ''}
-  if (canvas) scene.activeCamera?.attachControl(canvas, true);
-  return scene;
+  for (const entry of ANIMATION_GROUPS) AnimationGroup.Parse(entry, lookup).start(entry.loopAnimation).pause();
+  return materials;
 }
 `;
   const unmaterialed = settings.defaultMaterial === null && data.meshes.some((m) => m.materialUniqueId === undefined);
@@ -549,5 +595,5 @@ ${data.animationGroups.some((g) => g.targetedAnimations.some((t) => t.animation.
 import { ${[...usedNames(source), ...pipelineClasses].join(', ')} } from '@babylonjs/core';`;
   // An ES module package in Node too (the headless SDK), needing only Babylon.
   const manifest = { name: name.toLowerCase().replace(/[^a-z0-9-]+/g, '-'), type: 'module', main: 'scene.js', types: 'scene.d.ts', peerDependencies: { '@babylonjs/core': AbstractEngine.Version } };
-  return { 'scene.js': source.replace(BABYLON_IMPORTS, babylonImports), 'scene.d.ts': controlTypes(Object.entries(ir.properties).map(([path, { type }]) => ({ path, type }))), 'scene.ir.json': irJson, [UNITS_FILE]: units, ...(kernels && { [NODE_KERNELS]: kernels }), ...(curves && { [CURVES_GLSL_FILE]: curvesGlslFile() }), 'scene.bin': bin.bytes(), 'package.json': `${JSON.stringify(manifest, null, 2)}\n`, ...images };
+  return { 'scene.js': source.replace(BABYLON_IMPORTS, babylonImports), 'scene.d.ts': controlTypes(Object.entries(ir.properties).map(([path, { type }]) => ({ path, type }))), 'scene.ir.json': irJson, [UNITS_FILE]: units, ...(kernels && { [NODE_KERNELS]: kernels }), ...(curves && { [CURVES_GLSL_FILE]: curvesGlslFile() }), 'scene.bin': bin.bytes(), [ASSET_FILE]: ASSET_MANIFEST, 'package.json': `${JSON.stringify(manifest, null, 2)}\n`, ...images };
 }

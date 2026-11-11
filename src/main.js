@@ -399,7 +399,7 @@ window.addEventListener("message", (e) => {
   if (e.data.type === "export") {
     crossingLosses(world.objects, "BABYLON").forEach((loss) => report("WARNING", loss));
     const { format, title } = e.data.payload;
-    exportDialog(world, format, title).then((options) => options && exportScene(world, { format, ...options })).catch((error) => notify("Export failed: " + error.message));
+    exportDialog(world, format, title).then((options) => options && exportScene(world, { format, selected: editor.selection.nodes, ...options })).catch((error) => notify("Export failed: " + error.message));
   }
   if (e.data.type === "save-blend") {
     crossingLosses(world.objects, "BLENDER").forEach((loss) => report("WARNING", loss));

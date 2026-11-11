@@ -41,23 +41,27 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
      * @param {import('@babylonjs/core').Scene} scene
      * @param {any} ir the scene's IR (scene.ir.json), read with readIR
      * @param {{ root?: string, world?: { set(color: number[]): void }, compositor?: import('@babylonjs/core').NodeRenderGraph,
-     *   buffers?: ArrayBufferView[] }} [options]
+     *   buffers?: ArrayBufferView[], entries?: import('./asset.js').Entries, dispose?: () => void }} [options]
      * the package's URL, which relative image URLs resolve against, the world of one color its background controls set
-     * (world.js), the compositor its pass controls set (bylonder-blocks.js), and scene.bin's buffers, which its entities
-     * read
+     * (world.js), the compositor its pass controls set (bylonder-blocks.js), scene.bin's buffers, which its entities
+     * read; loaded into a scene of the page's own, what was added there and what removes it (asset.js)
      */
-    constructor(scene: import("@babylonjs/core").Scene, ir: any, { root, world, compositor, buffers }?: {
+    constructor(scene: import("@babylonjs/core").Scene, ir: any, { root, world, compositor, buffers, entries, dispose }?: {
         root?: string;
         world?: {
             set(color: number[]): void;
         };
         compositor?: import("@babylonjs/core").NodeRenderGraph;
         buffers?: ArrayBufferView[];
+        entries?: import("./asset.js").Entries;
+        dispose?: () => void;
     });
     /** Told of each control's new value. @type {Observable<Change>} */
     onChanged: Observable<Change>;
-    /** Babylon's scene. */
+    /** Babylon's scene: loaded into a scene of the page's own, a view of it that holds what was loaded alone. */
     scene: import("@babylonjs/core").Scene;
+    /** Loaded into a scene of the page's own: what was added there, as ImportMeshAsync gives a .glb's (meshes[0] the root). */
+    entries: import("./asset.js").Entries | undefined;
     /** The compositor, a NodeRenderGraph of the blocks library's passes, when the scene composites. */
     compositor: import("@babylonjs/core").NodeRenderGraph | undefined;
     /** scene.bin's arrays, which the IR's `{ buffer }` inputs name. */

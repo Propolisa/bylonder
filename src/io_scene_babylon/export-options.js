@@ -10,6 +10,12 @@ export const TARGETS = [
   ['WEBGL2', 'WebGL 2', 'The page creates a WebGL 2 engine only, and ships no WebGPU overrides of its own'],
 ];
 
+// What a package holds: [identifier, name, description]. Selected Objects is Blender's glTF exporter's use_selection.
+export const SCOPES = [
+  ['SCENE', 'Scene', "The whole scene with its settings: load(engine) builds it in a scene of its own"],
+  ['SELECTED', 'Selected Objects', "The selected objects and what they need, without the scene's world, camera effects or compositor: load({ scene }) adds them to a scene of yours, as a .glb's"],
+];
+
 // Where the control panel's links load Babylon's Inspector and node editors from: [identifier, name, description].
 export const DEV_TOOLS = [
   ['CDN', "Babylon's CDN", "The editors load from Babylon's CDN when a link is followed; the page itself stays offline"],
@@ -77,6 +83,8 @@ const SampleRate = z.object({
 });
 
 export const ExportOptionsSchema = z.object({
+  /** what the package holds (SCOPES) */
+  scope: repaired('scope', z.enum(SCOPES.map(([id]) => id)), 'SCENE'),
   /** materials with Bylonder's EEVEE extensions, as Babylon's blocks */
   eeveeParity: repaired('eeveeParity', z.boolean(), false),
   /** a package's scene.bin uncompressed, for a host that compresses it */
@@ -85,8 +93,8 @@ export const ExportOptionsSchema = z.object({
   bakeAnimation: repaired('bakeAnimation', z.boolean(), false),
   /** keys per second of what is baked (sampled), for every object and by object name; unset, the scene's frame rate */
   sampleRate: repaired('sampleRate', SampleRate, () => ({ rate: null, instances: {} })),
-  /** a package's modules as one bundle with Babylon's (bundle.js), else as ES modules importing Babylon's */
-  bundle: repaired('bundle', z.boolean(), true),
+  /** a package's modules as one bundle with Babylon's (bundle.js), else as ES modules importing Babylon's; unset, bundled for the Scene, not for Selected Objects, which load into a page's own Babylon */
+  bundle: repaired('bundle', z.nullable(z.boolean()), null),
   /** the bundle minified */
   minify: repaired('minify', z.boolean(), true),
   /** a package's page shows a control panel of its controls (runtime/control-panel.js) */
@@ -112,5 +120,8 @@ export const ExportOptionsSchema = z.object({
 });
 
 /** The options given, with defaults filled and what does not parse repaired. */
-export const exportOptions = (options = {}) => z.parse(ExportOptionsSchema, options);
+export function exportOptions(options = {}) {
+  const parsed = z.parse(ExportOptionsSchema, options);
+  return { ...parsed, bundle: parsed.bundle ?? parsed.scope === 'SCENE' };
+}
 

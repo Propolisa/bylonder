@@ -62,11 +62,12 @@ const FORMATS = {
 };
 
 // `options`: export-options.js ExportOptionsSchema's, which export-dialog.js asks for.
-export async function exportScene(world, { format, ...options }) {
+// `selected`: the objects a Selected Objects scope exports.
+export async function exportScene(world, { format, selected = [], ...options }) {
   const { extension, type, build } = FORMATS[format];
   const name = world.sceneSettings.state.name || 'scene';
   const { eeveeParity, ...rest } = exportOptions(options);
-  const blob = new Blob([await build(world, name, { parity: eeveeParity, ...rest })], { type });
+  const blob = new Blob([await build(world, name, { parity: eeveeParity, selected, ...rest })], { type });
   const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `${name}.${extension}` });
   document.body.append(a);
   a.click();

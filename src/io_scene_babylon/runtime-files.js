@@ -3,7 +3,7 @@ import { deepImports } from './babylon-modules.js';
 import { DEV_TOOLS } from './runtime/dev-tools.js';
 
 const declared = (...names) => names.flatMap((name) => [`${name}.js`, `${name}.d.ts`]);
-export const RUNTIME_FILES = [...declared('blend-scene', 'collections', 'playhead', 'buffers', 'world', 'scheduler', 'ir', 'units', 'mesh', 'ortho-scale', 'zod'), 'ir.schema.json', 'implementations.json', 'LICENSE.md'];
+export const RUNTIME_FILES = [...declared('blend-scene', 'collections', 'playhead', 'buffers', 'world', 'scheduler', 'ir', 'units', 'mesh', 'ortho-scale', 'zod', 'asset', 'scene-loader'), 'ir.schema.json', 'implementations.json', 'LICENSE.md'];
 // GPL's notice and text, beside Blender's code in a package (src/ paths).
 const NOTICE = { 'LICENSE.md': 'io_scene_babylon/blender-code.LICENSE.md', COPYING: '../LICENSES/GPL-3.0-or-later.txt' };
 // Stopgap: the scene module stands in as a package's Geometry Nodes kernels (its gn_* entry points, one node a call)
