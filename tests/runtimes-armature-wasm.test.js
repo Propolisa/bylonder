@@ -1,6 +1,6 @@
 // Armature deform on Babylon (docs/runtimes.md, src/runtimes/armature.js): the Rigged Character example, its rig switched
 // to Babylon (mapped) with its body's shape keys, morphs and skins on Babylon's skeleton to Main's evaluated deform at several poses and frames; the Runtime
-// panel in the Armature tab; issues (B-Bones, Preserve Volume as approximations, a modifier after Armature as a
+// panel in the Armature tab; issues (B-Bones where shape keys move vertices, Preserve Volume as approximations, a modifier after Armature as a
 // fallback) in the panel and the Info editor; Edit Mode as Blender; back to Blender as before; and File > Export >
 // Babylon writing a skeleton and the pose's animation that Babylon's loader skins the same.
 import assert from 'node:assert/strict';
@@ -137,7 +137,7 @@ rig.bylonder.runtime = 'MAPPED';
 bodyData.data.shape_keys.bylonder.runtime = 'MAPPED';
 sync.view();
 assert.equal(body.skeleton?.name, 'Rig', "the body is skinned by the rig's skeleton");
-assert.equal(body.skeleton.bones.length, 21);
+assert.equal(body.skeleton.bones.length, 22 + 9, "the rig's bones, then the joints of the tail's 8 B-Bone segments");
 assert.equal(body.numBoneInfluencers, 8, 'Automatic influencers: some vertices have more than 4 weights');
 assert.deepEqual(rig.bylonder.issues.map((i) => i.kind + ' ' + i.setting), ['APPROXIMATION bpy.data.objects["Body"].modifiers["Armature"]'], 'only skinned normals differ');
 for (const [i, values] of POSES.entries()) {
@@ -145,6 +145,13 @@ for (const [i, values] of POSES.entries()) {
   assert.ok(skinningError() < PRECISION, `pose ${i}: Babylon's skinning is Main's deform (${skinningError()})`);
 }
 assert.ok(body.getBoundingInfo().boundingBox.maximumWorld.y > 0, 'the posed mesh has bounds');
+// The tail bends as Blender's B-Bone: curved, eased, rolled and scaled at its ends, its segment joints as bones.
+const tail = rig.pose.bones.get('tail');
+Object.assign(tail, { bbone_curveinx: 0.3, bbone_curveoutz: -0.2, bbone_easein: 1.5, bbone_rollout: 0.6, bbone_scaleout: [1.4, 1, 0.8] });
+pose({ tail: { rotation: [0.9, 0.2, 0, 0.3] } });
+assert.ok(skinningError() < PRECISION, `the curled tail is Main's deform (${skinningError()})`);
+Object.assign(tail, { bbone_curveinx: 0, bbone_curveoutz: 0, bbone_easein: 0, bbone_rollout: 0, bbone_scaleout: [1, 1, 1] });
+pose({});
 
 // Playing an action: Blender's animation system poses the rig each frame, Babylon skins it. Keyed as I keys them, by
 // Blender's keying (BlenderAnimation.keyInsert).
@@ -163,8 +170,8 @@ for (const frame of [6, 16]) {
   assert.ok(skinningError() < PRECISION, `frame ${frame}: the action's pose skinned as Main deforms it (${skinningError()})`);
 }
 
-// Issues: B-Bone segments and Preserve Volume are approximations, shown in the panel; a modifier after Armature is a
-// fallback: the body deforms as Blender.
+// Issues: B-Bone segments where shape keys move vertices, and Preserve Volume, are approximations, shown in the panel;
+// a modifier after Armature is a fallback: the body deforms as Blender.
 reports.length = 0;
 rig.bylonder.runtime = 'BLENDER';
 sync.view();
@@ -173,10 +180,17 @@ bodyData.modifiers.get('Armature').use_deform_preserve_volume = true;
 rig.bylonder.runtime = 'MAPPED';
 sync.view();
 const kinds = () => rig.bylonder.issues.map((i) => i.kind + ' ' + i.setting.replace(/^bpy\.data\.objects\["(\w+)"\]\./, '$1.'));
-assert.deepEqual(kinds().sort(), ['APPROXIMATION Body.modifiers["Armature"]', 'APPROXIMATION Body.modifiers["Armature"].use_deform_preserve_volume', 'APPROXIMATION Rig.data.bones["forearm.L"].bbone_segments']);
+assert.deepEqual(kinds().sort(), ['APPROXIMATION Body.data.shape_keys', 'APPROXIMATION Body.modifiers["Armature"]', 'APPROXIMATION Body.modifiers["Armature"].use_deform_preserve_volume']);
+assert.ok(rig.bylonder.issues.some((i) => /\d+ vertices on B-Bones keep the segments of their Basis shape/.test(i.message)), "the elbow's corrective moves vertices of the forearm's B-Bone");
 assert.equal(runtimePanel().filter((b) => b.icon === 'INFO' && /Preserve Volume|B-Bone/.test(b.text)).length, 2, 'the panel lists them');
 assert.equal(reports.filter((r) => /approximated/.test(r.message)).length, 3, 'switching reports them to the Info editor');
 assert.ok(body.skeleton, 'an approximation still skins in Babylon');
+// B-Bone Segments as Bones off: each B-Bone deforms as one segment, an approximation.
+rig.bylonder.babylon.use_bbone_segments = false;
+sync.view();
+assert.equal(body.skeleton.bones.length, 22, 'no segment joints');
+assert.deepEqual(kinds().filter((k) => /bbone/.test(k)).sort(), ['APPROXIMATION Rig.data.bones["forearm.L"].bbone_segments', 'APPROXIMATION Rig.data.bones["tail"].bbone_segments']);
+rig.bylonder.babylon.use_bbone_segments = true;
 bodyData.modifiers.new('Subdivision', 'SUBSURF');
 blender.tag(bodyOb, 2);
 sync.view();
@@ -207,7 +221,7 @@ const json = await serializeScene(world);
 assert.deepEqual(json.skeletons.map((s) => s.name), ['Rig']);
 assert.equal(json.meshes.find((m) => m.name === 'Body').skeletonId, 'Rig');
 const group = json.animationGroups[0];
-assert.equal(group.targetedAnimations.filter((t) => t.animation.property === '_matrix').length, 21, "every bone's pose is animated");
+assert.equal(group.targetedAnimations.filter((t) => t.animation.property === '_matrix').length, 22 + 9, "every bone's pose and B-Bone joint is animated");
 const loaded = new Scene(new NullEngine());
 await AppendSceneAsync('data:' + JSON.stringify(json), loaded);
 const loadedBody = loaded.getMeshByName('Body'), playing = loaded.animationGroups[0];
@@ -232,7 +246,8 @@ for (const frame of [1, 6, 16, 21]) assert.ok(loadedError(loaded, frame) < PRECI
 loaded.getEngine().dispose();
 // The JavaScript export builds the same skeleton, skin and animation.
 const files = await exportModule(world), ir = JSON.parse(typeof files['scene.ir.json'] === 'string' ? files['scene.ir.json'] : new TextDecoder().decode(files['scene.ir.json']));
-const poses = Object.values(ir.entities).filter((e) => /^pose\.bones/.test(e.inputs.data_path));
+// Their location, rotation and scale; the tail's B-Bone curves are sampled into its segment joints.
+const poses = Object.values(ir.entities).filter((e) => /^pose\.bones\[.*\]\.(location|rotation|scale)/.test(e.inputs.data_path));
 assert.ok(poses.length && poses.every((e) => e.implementation === 'fcurve'), "the action's pose bones run on the F-Curve unit");
 const written = writePackage(files);
 const blend = await (await import(written.url)).load(new NullEngine());
@@ -275,4 +290,4 @@ assert.ok(reports.some((r) => r.type === 'WARNING' && r.message === 'Rig: Armatu
 assert.equal(rig.bylonder.runtime, 'BLENDER', 'the export leaves the rig on its own runtime');
 assert.equal(scene.skeletons.length, 0);
 
-console.log('Armature runtimes: the Rigged Character skinned by Babylon as Main deforms it at 3 poses and 2 frames of an action, the Runtime panel, approximations and fallbacks, Edit Mode, .babylon and .js export reloaded and skinned the same');
+console.log('Armature runtimes: the Rigged Character skinned by Babylon as Main deforms it at 3 poses and 2 frames of an action, its B-Bone tail too, the Runtime panel, approximations and fallbacks, Edit Mode, .babylon and .js export reloaded and skinned the same');

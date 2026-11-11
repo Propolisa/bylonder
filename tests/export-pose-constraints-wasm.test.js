@@ -3,7 +3,8 @@
 // rotation), exported and loaded, takes the pose Main evaluates at frames of its animation with the constraints run in
 // the page, not sampled; moving an IK target or its pole through the page's controls moves the rig. Its controls (an
 // IK/FK switch and a Breathe slider, custom properties that drivers read) and its elbow's corrective shape key, driven by
-// the posed arm's angle, morph and pose the skinned body as Main does.
+// the posed arm's angle, morph and pose the skinned body as Main does. Its tail, a B-Bone, bends by the joints of its
+// segments, sampled from Main.
 import assert from 'node:assert/strict';
 import { Matrix, NullEngine } from '@babylonjs/core';
 import { babylonMatrix } from '../src/blenkernel/main-view.js';
@@ -27,7 +28,8 @@ assert.equal(entity?.implementation, 'pose', 'the page runs the rig\'s constrain
 assert.deepEqual(Object.keys(entity.inputs.constraints).sort(), ['forearm.L', 'forearm.R', 'hand.L', 'hand.R', 'head', 'shin.L', 'shin.R']);
 const groups = JSON.parse(/const ANIMATION_GROUPS = (.*);\n/.exec(files['scene.js'])[1]);
 const sampled = groups.flatMap((g) => g.targetedAnimations).filter((t) => /^Rig /.test(t.targetId) && t.animation.keys.length > 1).map((t) => t.targetId);
-assert.deepEqual(sampled, [], 'no bone is sampled');
+const joints = Array.from({ length: 9 }, (_, k) => `Rig tail#${k}`);
+assert.deepEqual(sampled, joints, "no bone is sampled, only the tail's segment joints");
 
 const written = writePackage(files);
 const blend = await (await import(written.url)).load(new NullEngine());
@@ -39,7 +41,9 @@ blend.playhead.pause();
 // Each bone's matrix in the world, in the page and in Main.
 const absolute = (bone) => (bone.getParent() ? bone._matrix.multiply(absolute(bone.getParent())) : bone._matrix.multiply(body.computeWorldMatrix(true)));
 const drawn = () => new Map(skeleton.bones.map((b) => [b.name, absolute(b)]));
-const main = () => new Map([...rig.pose.bones].map((pb) => [pb.name, babylonMatrix(Array.from(pb.matrix)).multiply(babylonMatrix(Array.from(rig.matrix_world)))]));
+const world_ = (m) => babylonMatrix(Array.from(m)).multiply(babylonMatrix(Array.from(rig.matrix_world)));
+const main = () => new Map([...rig.pose.bones].flatMap((pb) => [[pb.name, world_(pb.matrix)],
+  ...Array.from({ length: pb.bone.bbone_segments > 1 ? pb.bone.bbone_segments + 1 : 0 }, (_, k) => [`${pb.name}#${k}`, babylonMatrix(Array.from(pb.bbone_segment_matrix(k, false))).multiply(world_(pb.matrix))])]));
 function compare(label) {
   const ours = drawn(), theirs = main();
   for (const [name, m] of theirs) {

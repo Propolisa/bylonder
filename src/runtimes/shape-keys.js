@@ -6,16 +6,14 @@
 // Blender recomputes them from the blended positions.
 import { Animation, BoundingInfo, MorphTarget, MorphTargetManager, Vector3 } from '@babylonjs/core';
 import { idStruct, pointerOf } from '../python/bpy_rna.js';
-import { blenderModule } from '../bmesh/bmesh-wasm.js';
 import { modifierStack } from '../modifiers/stack.js';
 import { mesh_batch_cache_corner_buffers, mesh_batch_cache_flat } from '../draw/mesh-batch-buffers.js';
 import { registerRuntime, runtimeOf, APPROXIMATION, FALLBACK } from './runtimes.js';
+import { blockData } from './key-blocks.js';
 import { exactAnimation, fcurveKeys } from '../io_scene_babylon/exact-keys.js';
 import { actionFCurves } from '../io_scene_babylon/ir-export.js';
 
 const address = (struct) => pointerOf(struct)?.[2] ?? 0;
-// A key block's coordinates in the module's memory (KeyBlock.data, contiguous float[3] per vertex).
-const blockData = (kb, count) => (count ? new Float32Array(blenderModule.exports.memory.buffer, pointerOf(kb.data[0])[2], count * 3) : new Float32Array(0));
 const keyPath = (key, path) => `bpy.data.shape_keys["${key.name}"].${path}`;
 const issue = (kind, setting, message) => ({ kind, setting, message });
 const NORMALS = (key) => issue(APPROXIMATION, keyPath(key, 'key_blocks'), "normals blended from each key's own, not recomputed");

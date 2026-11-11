@@ -74,7 +74,8 @@ const close = (a, b) => a.asArray().every((v, i) => Math.abs(v - b.asArray()[i])
 export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, nodeWorld }) {
   const stacks = poseStacks(arm, nodeOf);
   if (!stacks) return null;
-  const bones = skeleton.bones, poses = bones.map((bone) => arm.pose.bones.get(bone.name));
+  // The armature's own bones, without its B-Bones' segment joints after them.
+  const bones = skeleton.bones.slice(0, skeleton.armatureBones), poses = bones.map((bone) => arm.pose.bones.get(bone.name));
   if (poses.some((pose) => !pose || pose.rotation_mode === 'AXIS_ANGLE')) return null;
   const shape = bones.map((bone, i) => ({ name: bone.name, parent: bone.getParent() ? bones.indexOf(bone.getParent()) : -1, rest: bone.getRestMatrix(),
     length: arm.data.bones.get(bone.name).length, mode: poses[i].rotation_mode }));

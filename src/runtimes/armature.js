@@ -9,6 +9,7 @@ import { modifierStack } from '../modifiers/stack.js';
 import { registerRuntime, runtimeOf, APPROXIMATION, FALLBACK } from './runtimes.js';
 import { livePose } from '../io_scene_babylon/live-curves.js';
 import { livePoseConstraints } from '../io_scene_babylon/pose-export.js';
+import { keyedVertices } from './key-blocks.js';
 
 // A vertex Blender's Armature modifier leaves in place: its weights sum to no more than this (armature_deform.cc).
 const CONTRIBUTION = 0.0001;
@@ -16,17 +17,32 @@ const address = (struct) => pointerOf(struct)?.[2] ?? 0;
 const matrix = (values) => babylonMatrix(Array.from(values));
 const issue = (kind, ob, path, message) => ({ kind, setting: `bpy.data.objects["${ob.name}"].${path}`, message: `${ob.name}: ${message}` });
 
-// The armature's bones, parents first, each with its rest and evaluated pose matrices in armature space (Babylon's axes).
-function bonesOf(arm) {
+// The armature's bones, parents first, each with its rest and evaluated pose matrices in armature space (Babylon's
+// axes); then, with `segments`, the joints of each deforming B-Bone's segments (Blender's bbone_segment_matrix, in the
+// bone's space) as bones of its own, `segment` the bone's index and the joint's.
+function bonesOf(arm, segments = false) {
   const ordered = [];
   const visit = (bone) => { ordered.push(bone); for (const child of bone.children) visit(child); };
   for (const bone of arm.data.bones) if (!bone.parent) visit(bone);
   const index = new Map(ordered.map((bone, i) => [bone.name, i]));
-  return ordered.map((bone) => ({
+  const bones = ordered.map((bone) => ({
     name: bone.name, parent: bone.parent ? index.get(bone.parent.name) : -1, deform: bone.use_deform,
     rest: matrix(bone.matrix_local), pose: matrix(arm.pose.bones.get(bone.name).matrix),
   }));
+  if (!segments) return bones;
+  ordered.forEach((bone, i) => {
+    if (!bbone(bone)) return;
+    const pose = arm.pose.bones.get(bone.name);
+    for (let k = 0; k <= bone.bbone_segments; k++) bones.push({ name: `${bone.name}#${k}`, parent: i, deform: false, segment: [i, k],
+      rest: matrix(pose.bbone_segment_matrix(k, true)).multiply(bones[i].rest), pose: matrix(pose.bbone_segment_matrix(k, false)).multiply(bones[i].pose) });
+  });
+  return bones;
 }
+// A Babylon bone of a B-Bone's segment joint.
+const isJoint = (bone) => bone.getSkeleton().bones.indexOf(bone) >= bone.getSkeleton().armatureBones;
+// A bone that deforms as B-Bone segments.
+const bbone = (bone) => bone.use_deform && bone.bbone_segments > 1;
+const segmentsOf = (arm) => settingsOf(arm)?.use_bbone_segments ?? true;
 
 // Blender's Smooth by Angle (Object > Shade Auto Smooth), last in the stack: Babylon skins the mesh smooth instead.
 const smoothByAngle = (m) => m.type === 'NODES' && /^Smooth by Angle/.test(m.node_group?.name ?? '');
@@ -63,7 +79,7 @@ function meshApproximations(ob, arm, modifier) {
   for (const bone of arm.data.bones) {
     if (!bone.use_deform || !groups.has(bone.name)) continue;
     const at = `data.bones["${bone.name}"]`;
-    if (bone.bbone_segments > 1) out.push(issue(APPROXIMATION, arm, `${at}.bbone_segments`, `${bone.name} deforms as one B-Bone segment`));
+    if (bbone(bone) && !segmentsOf(arm)) out.push(issue(APPROXIMATION, arm, `${at}.bbone_segments`, `${bone.name} deforms as one B-Bone segment`));
     if (bone.use_envelope_multiply) out.push(issue(APPROXIMATION, arm, `${at}.use_envelope_multiply`, `${bone.name} envelope multiply ignored`));
   }
   return out;
@@ -72,12 +88,21 @@ function meshApproximations(ob, arm, modifier) {
 // Each Main vertex's weights as Blender's Armature modifier deforms by them (armature_deform.cc): the vertex groups of
 // deforming bones, normalized by their sum, the modifier's vertex group scaling the deform; what is left of the weight
 // goes to `identity` (Babylon's skeletons end with an identity matrix), so a vertex without weights keeps its place.
-// Strongest first.
-function vertexWeights(ob, bones, modifier) {
+// Strongest first. A B-Bone's weight is split between the two joints of the segment the vertex lies in, as Blender's
+// PoseBone.bbone_segment_index places its position (`space`: mesh to armature): its reference key's, where Blender
+// places it after the shape keys; `keyed` counts those its keys move.
+function vertexWeights(ob, bones, modifier, arm, space) {
   const groups = [...ob.vertex_groups].map((g) => g.name), identity = bones.length;
   const boneOf = groups.map((name) => (modifier.use_vertex_groups ? bones.findIndex((b) => b.name === name && b.deform) : -1));
+  const joints = new Map(bones.flatMap((b, i) => (b.segment?.[1] === 0 ? [[b.segment[0], i]] : [])));
   const mask = modifier.vertex_group ? groups.indexOf(modifier.vertex_group) : -1;
-  return Array.from(ob.data.vertices, (vertex) => {
+  const split = (bone, weight, co) => {
+    const [segment, blend] = arm.pose.bones.get(bones[bone].name).bbone_segment_index(armaturePoint(co, space));
+    return [[joints.get(bone) + segment, weight * (1 - blend)], [joints.get(bone) + segment + 1, weight * blend]].filter(([, w]) => w);
+  };
+  const moved = joints.size ? keyedVertices(ob.data) : new Set();
+  let keyed = 0;
+  const perVertex = Array.from(ob.data.vertices, (vertex, v) => {
     const weights = [];
     let scale = mask >= 0 ? 0 : 1, sum = 0;
     for (const { group, weight } of vertex.groups) {
@@ -86,10 +111,20 @@ function vertexWeights(ob, bones, modifier) {
     }
     if (mask >= 0 && modifier.invert_vertex_group) scale = 1 - scale;
     if (!(sum > CONTRIBUTION) || scale === 0) return [[identity, 1]];
-    const out = weights.map(([bone, weight]) => [bone, (weight / sum) * scale]);
+    if (moved.has(v) && weights.some(([bone]) => joints.has(bone))) keyed++;
+    const out = weights.flatMap(([bone, weight]) => (joints.has(bone) ? split(bone, weight, vertex.co) : [[bone, weight]]))
+      .map(([bone, weight]) => [bone, (weight / sum) * scale]);
     if (scale !== 1) out.push([identity, 1 - scale]);
     return out.sort((a, b) => b[1] - a[1]);
   });
+  return { perVertex, keyed };
+}
+
+// A mesh's point (Blender's axes) in its armature's space, Blender's axes, `space` the mesh's matrix relative to the
+// armature's (Babylon's).
+function armaturePoint([x, y, z], space) {
+  const p = Vector3.TransformCoordinates(new Vector3(x, z, y), space);
+  return [p.x, p.z, p.y];
 }
 
 // Babylon's influencers per vertex: 4, or 8 with the extra buffers; AUTO is the fewest that hold every vertex's weights.
@@ -108,7 +143,10 @@ function skinBuffers(mesh, perVertex, influencers) {
   for (let c = 0; c < corners; c++) kept[corner_verts[c]].forEach(([bone, w], i) => { indices[i >> 2][c * 4 + (i & 3)] = bone; weights[i >> 2][c * 4 + (i & 3)] = w; });
   return { indices, weights, influencers, truncated: perVertex.filter((list) => list.length > influencers).length };
 }
-const truncation = (ob, { truncated, influencers }) => (truncated ? [issue(APPROXIMATION, ob, 'vertex_groups', `${truncated} vertices over ${influencers} influencers`)] : []);
+const skinIssues = (ob, { truncated, influencers, keyed }) => [
+  ...(truncated ? [issue(APPROXIMATION, ob, 'vertex_groups', `${truncated} vertices over ${influencers} influencers`)] : []),
+  ...(keyed ? [issue(APPROXIMATION, ob, 'data.shape_keys', `${keyed} vertices on B-Bones keep the segments of their Basis shape`)] : []),
+];
 
 // A bone's matrix relative to its parent's; a root's relative to the skinned mesh (`space`: armature to mesh).
 const relative = (bones, i, key, space) => {
@@ -127,7 +165,8 @@ function skeletonOf(name, bones, space, scene) {
     const made = new Bone(bone.name, skeleton, bone.parent < 0 ? null : skeleton.bones[bone.parent], relative(bones, i, 'pose', space), rest, rest);
     made.id = `${name} ${bone.name}`;
   });
-  return Object.assign(skeleton, { space });
+  // The armature's own bones come first, the B-Bone joints after them.
+  return Object.assign(skeleton, { space, armatureBones: bones.filter((b) => !b.segment).length });
 }
 const restSignature = (bones, space) => JSON.stringify([bones.map((b) => [b.name, b.parent, Array.from(b.rest.m)]), Array.from(space.m)]);
 
@@ -143,7 +182,7 @@ export function mapArmature(arm, scene) {
   // the skin's vertices); changed(ob): whether its Mesh changed since the last update; fallbacks(ob): issues of the
   // view's own (a mesh Babylon draws itself); influencers: the setting.
   function update({ objects, meshOf, changed = () => false, fallbacks = () => [], influencers = 'AUTO' }) {
-    bones = bonesOf(arm);
+    bones = bonesOf(arm, segmentsOf(arm));
     const armatureWorld = matrix(arm.matrix_world);
     const issues = [], deformed = new Map();
     for (const ob of objects.filter((o) => o.type === 'MESH' && armatureModifiers(o, arm).mine.length)) {
@@ -159,11 +198,11 @@ export function mapArmature(arm, scene) {
       used.add(skeleton);
       let skin = skins.get(key);
       if (!skin || skin.skeleton !== skeleton || skin.setting !== influencers || changed(ob)) {
-        const perVertex = vertexWeights(ob, bones, modifier);
-        skin = { ob: key, skeleton, setting: influencers, ...skinBuffers(meshOf(key), perVertex, influencersFor(influencers, perVertex)) };
+        const { perVertex, keyed } = vertexWeights(ob, bones, modifier, arm, Matrix.Invert(space));
+        skin = { ob: key, skeleton, setting: influencers, keyed, ...skinBuffers(meshOf(key), perVertex, influencersFor(influencers, perVertex)) };
         skins.set(key, skin);
       }
-      issues.push(...meshApproximations(ob, arm, modifier).filter((i) => !issues.some((j) => j.setting === i.setting)), ...truncation(ob, skin));
+      issues.push(...meshApproximations(ob, arm, modifier).filter((i) => !issues.some((j) => j.setting === i.setting)), ...skinIssues(ob, skin));
     }
     for (const [id, skeleton] of skeletons) if (!used.has(skeleton)) { skeleton.dispose(); skeletons.delete(id); }
     for (const key of skins.keys()) if (!deformed.has(key)) skins.delete(key);
@@ -333,7 +372,7 @@ function poseAnimations(world, mappings, bake, sampling, scene) {
   }
   const sample = (frame) => {
     for (const mapping of mappings) {
-      const bones = bonesOf(mapping.arm);
+      const bones = bonesOf(mapping.arm, segmentsOf(mapping.arm));
       for (const skeleton of mapping.skeletons.values()) {
         const values = skeleton.bones.map((bone, i) => relative(bones, i, 'pose', skeleton.space));
         skeleton.bones.forEach((bone, i) => {
@@ -364,7 +403,7 @@ function poseAnimations(world, mappings, bake, sampling, scene) {
     if (posed.has(bone)) return [];
     const { arm, skeletons } = owners.get(bone);
     const whole = list.filter((k) => Number.isInteger(k.frame));
-    const live = !bake && skeletons.size === 1 && livePose(arm, arm.pose.bones.get(bone.name), bone, whole.map((k) => k.value), whole[0].frame);
+    const live = !bake && !isJoint(bone) && skeletons.size === 1 && livePose(arm, arm.pose.bones.get(bone.name), bone, whole.map((k) => k.value), whole[0].frame);
     if (live) curves.push(...live);
     if (live?.length) return [];
     const moves = list.some((k) => !k.value.equalsWithEpsilon(list[0].value, 1e-6));
@@ -432,6 +471,8 @@ registerRuntime({
       items: [['AUTO', 'Automatic', 'The fewest that hold every weight: 4, or 8 when a vertex has more than 4'], ['4', '4', '4 influences per vertex'], ['8', '8', '8 influences per vertex, in extra buffers']],
       default: 'AUTO', options: new Set() })),
     use_texture_for_matrices: props.BoolProperty(kw({ name: 'Bone Matrices in Texture', description: "The skeleton's bone matrices in a texture, not uniforms (useTextureToStoreBoneMatrices)",
+      default: true, options: new Set() })),
+    use_bbone_segments: props.BoolProperty(kw({ name: 'B-Bone Segments as Bones', description: "A deforming B-Bone's segment joints as bones of the skeleton, so it bends as Blender's; off, it deforms as one segment",
       default: true, options: new Set() })),
   }),
   poll: (ob) => ob.type === 'ARMATURE',

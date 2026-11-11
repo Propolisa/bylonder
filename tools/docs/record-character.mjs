@@ -1,8 +1,8 @@
 // Records the Rigged Character's exported page reacting live (docs/features/import-export.md): the example's File >
 // Export > JavaScript package as a page on WebGL 2 in Playwright's Chromium, its animation playing (the IK arms and legs,
 // the head looking at the empty), then paused while the page's code moves the right hand's IK target in a circle and the
-// empty side to side, the rig following through the constraints the page runs; then the control panel, its IK/FK switch
-// and Breathe slider set by the page's code.
+// empty side to side, the rig following through the constraints the page runs; then the B-Bone tail from the side as
+// the animation swishes it; then the control panel, its IK/FK switch and Breathe slider set by the page's code.
 //   usage: node tools/docs/record-character.mjs
 import { execFileSync, spawnSync } from 'node:child_process';
 import { copyFileSync, existsSync, mkdirSync, mkdtempSync, rmSync, statSync, writeFileSync } from 'node:fs';
@@ -107,6 +107,17 @@ try {
     await page.evaluate(() => { window.blend.playhead.pause(); window.blend.playhead.seek(1); });
     await drive([[`${HAND}[0]`, '-0.15 + 0.15 * Math.cos(t * 2.4)'], [`${HAND}[2]`, '0.3 + 0.25 * Math.sin(t * 2.4)'], [LOOK, '1.4 * Math.sin(t * 1.3)']], 5);
   });
+  // The tail, a B-Bone of eight segments, from behind and to the side as the animation swishes and curls it; the
+  // camera placed by its controls, then put back.
+  const CAMERA = [['objects["Camera"].location', [3.2, 2.6, 1.6]], ['objects["Camera"].rotation_euler', [1.39, 0, 2.153]]];
+  const before = await page.evaluate((camera) => camera.map(([path]) => [path, [0, 1, 2].map((i) => window.blend.get(`${path}[${i}]`))]), CAMERA);
+  const place = (camera) => page.evaluate((camera) => camera.forEach(([path, v]) => v.forEach((x, i) => window.blend.set(`${path}[${i}]`, x))), camera);
+  await place(CAMERA);
+  await gif('character-tail', [300, 120, 500, 480], async () => {
+    await page.evaluate(() => { window.blend.playhead.seek(1); window.blend.playhead.play(); });
+    await page.waitForTimeout(3000);
+  });
+  await place(before);
   // The rig's controls in the panel at frame 30, the left hand raised: the IK/FK switch and the Breathe slider set by
   // the page's code, the elbow's corrective following the arm.
   await page.evaluate(() => window.blend.playhead.seek(30));

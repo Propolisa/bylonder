@@ -182,10 +182,13 @@ One wrapper module per feature, without changing the code of other features or t
   bounds and picking positions follow the pose (skinned on the CPU when the pose changes, from its bones' boxes while
   the animation plays).
 - **Exact.** Babylon's skinning gives Main's evaluated positions to float precision (checked at three poses and two
-  frames of an action, `tests/runtimes-armature-wasm.test.js`).
+  frames of an action, `tests/runtimes-armature-wasm.test.js`). A deforming B-Bone's segment joints are bones of the
+  skeleton (B-Bone Segments as Bones, on by default): their matrices are Blender's (`PoseBone.bbone_segment_matrix`),
+  and each vertex's weight on the B-Bone is split between two joints as Blender places it (`bbone_segment_index`).
 - **Approximations:** normals (Babylon skins them with the bones; Blender recomputes them from the deformed shape, so
   shading differs a little where bones blend: listed for every skinned mesh), Preserve Volume (skinned linearly: Babylon has no dual quaternion skinning), bone envelopes
-  (`use_bone_envelopes`: they do not deform), a deforming bone's B-Bone segments (it deforms as one segment) and its
+  (`use_bone_envelopes`: they do not deform), a deforming bone's B-Bone segments where shape keys move a vertex (it
+  keeps the segment of its Basis shape) or with B-Bone Segments as Bones off (it deforms as one segment), its
   Multiply Vertex Group by Envelope, and vertices with more weights than the influencers (the strongest kept,
   normalized).
 - **Fallbacks**, per mesh (the mesh deforms as Blender; the rig's other meshes still skin in Babylon): a modifier before
@@ -203,8 +206,7 @@ When Babylon (mapped) is preferable: GPU skinning keeps the deformed mesh off th
 the view is what the exported file shows. Until the module skips the Armature modifier in Main's evaluation of a mapped
 mesh, Blender still deforms it on the CPU as well.
 
-Not yet: B-Bone segments as Babylon bones (Blender's segment matrices, `PoseBone.bbone_segment_matrix`, as extra bones
-weighted by `bbone_segment_index`); the Outliner mark; the Scene tab's rows as links to their panels; a module export
+Not yet: the Outliner mark; the Scene tab's rows as links to their panels; a module export
 that skips the Armature modifier of a mapped mesh, and one that gives the mesh evaluated before it (so modifiers before
 the Armature modifier stop being fallbacks). Shape keys before it are not: Babylon morphs a mesh, then skins it, as
 Blender deforms after the keys, when its shape keys are on Babylon (mapped) too; on Blender they make the mesh a
