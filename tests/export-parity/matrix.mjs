@@ -67,6 +67,7 @@ export const KNOWN = {
   'hair-dynamics look-webgl2': "22% of pixels agree: the app's tentacles are wider and brighter than the page's, and the water's pattern behind is offset",
   'geometry-nodes look-webgl2': '87% of pixels agree: the page draws no point clouds (the planet clouds, draw/pointcloud.js in the app)',
   'cube look-webgpu': 'the page is never ready within 180 s (a material never reports ready)',
+  'rigged-character controls': "the tail B-Bone's ease in and out and scale in, set live, do not reshape its segments in the page (from 19a57b3a, next rig agent)",
 };
 // Failures known by what they say, wherever they happen.
 const KNOWN_ERRORS = [

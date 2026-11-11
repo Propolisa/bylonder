@@ -301,6 +301,8 @@ export function exportIR(world, { controls, collections = null, live, bin, anima
   }
   // What the page computes from is offered to authors.
   for (const entity of Object.values(entities)) if (entity.implementation) for (const [ref] of referencesIn(entity.inputs)) if ('property' in ref) properties[ref.property].suggested = true;
+  // What a driver sets is its driver's, as in Blender: still a control, but not one to suggest.
+  for (const entity of Object.values(entities)) if (entity.type.startsWith('driver:')) for (const target of Object.values(entity.outputs ?? {})) if (target && 'property' in target) delete properties[target.property]?.suggested;
   return { schema: IR_SCHEMA, version: IR_VERSION, scene: { ...(collections?.scene ?? { id: null, collection: null, view_layer: null }), time: { ...sceneTime(world.animation.time.state), sample_rates: sampleRates, clips, markers } }, ids,
     collections: collections?.collections ?? {}, references, properties, graphs, entities, order: entityOrder(entities) };
 }

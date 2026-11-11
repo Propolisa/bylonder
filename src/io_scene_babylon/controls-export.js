@@ -155,7 +155,7 @@ function poseControls(ob, skeletons) {
   return [...ob.pose.bones].flatMap((pose) => {
     const base = `objects${key(ob.name)}.pose.bones${key(pose.name)}`;
     return [...transformControls(base, pose, pose.rotation_mode !== 'AXIS_ANGLE' && { node: `${drawn[0].id} ${pose.name}`, transform: { mode: pose.rotation_mode } }),
-      ...customProperties(pose, base), ...[...pose.constraints].map((c) => knob(`${base}.constraints${key(c.name)}.influence`, c.influence, { type: 'FLOAT', subtype: 'FACTOR' })),
+      ...customProperties(pose, base), ...[...pose.constraints].map((c) => knob(`${base}.constraints${key(c.name)}.influence`, c.influence, { type: 'FLOAT', subtype: 'FACTOR', hard_min: 0, hard_max: 1 })),
       ...(ob.data.bones.get(pose.name).bbone_segments > 1 ? bboneShape(pose).map(([path, v]) => knob(`${base}.${path}`, v, { type: 'FLOAT' })) : [])];
   });
 }
@@ -165,7 +165,8 @@ function shapeKeyControls(node, ob, entry) {
   const shapes = ob.data?.shape_keys;
   if (!shapes || entry?.morphTargetManagerId === undefined) return [];
   return [...shapes.key_blocks].filter((kb) => kb.name !== shapes.reference_key.name)
-    .map((kb) => knob(`shape_keys${key(shapes.name)}.key_blocks${key(kb.name)}.value`, kb.value, { type: 'FLOAT', subtype: 'FACTOR', suggested: true }, { node: node.id, morph: kb.name }));
+    .map((kb) => knob(`shape_keys${key(shapes.name)}.key_blocks${key(kb.name)}.value`, kb.value, { type: 'FLOAT', subtype: 'FACTOR', soft_min: kb.slider_min, soft_max: kb.slider_max,
+      hard_min: kb.slider_min, hard_max: kb.slider_max, suggested: true }, { node: node.id, morph: kb.name }));
 }
 
 function sdkControls(world, scene) {
