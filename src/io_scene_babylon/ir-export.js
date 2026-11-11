@@ -39,8 +39,9 @@ const SKIP = new Set(['rna_type', 'bl_rna', 'original', 'id_data', 'users_collec
   'matrix_basis', 'dimensions', 'name_full', 'is_editable', 'id_type', 'location_absolute', 'width', 'height', 'select', 'hide_select', 'is_active_output', 'users', 'is_editmode']);
 // UI-only state: what a panel or a node shows expanded, selected or active.
 const UI = /^(show_expanded|.*_expanded|is_active|ui_.*|bl_.*|select_.*|use_custom_color|color_tag)$/;
-// Views of what is written elsewhere: an F-Curve group's channels are its action's F-Curves.
-const DERIVED = new Set(['ActionGroup.channels']);
+// Views of what is written elsewhere: an F-Curve group's channels are its action's F-Curves, a bone's children name it
+// their parent, a bone collection's bones name it in their collections, and a pose bone's matrices are evaluated.
+const DERIVED = new Set(['ActionGroup.channels', 'Bone.children', 'BoneCollection.bones', 'PoseBone.matrix', 'PoseBone.matrix_channel']);
 // A node tree's nodes, links and interface, which its graph holds.
 const GRAPHED = new Set(['nodes', 'links', 'interface']);
 // A node's place in its editor, which only the editor reads.
