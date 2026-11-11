@@ -9,6 +9,7 @@ import { driverCurve, driverEntities } from './driver-export.js';
 import { packKeys } from './runtime/fcurve-evaluator.js';
 import { baseMesh, geometryNodesEntities, modifierEntities } from './modifiers-export.js';
 import { ID_OB } from '../blenkernel/main-evaluated.js';
+import { INLINED } from '../blenkernel/main-view.js';
 import { greasePencilEntities } from './grease-pencil-export.js';
 import { curvesEntities } from './curves-export.js';
 import { pointCloudEntities } from './pointclouds-export.js';
@@ -131,8 +132,10 @@ export function pathID(path) {
 // The scene's own IDs: every scene with its collections, view layers, world and compositor, and the objects drawn.
 export const rootIDs = (objects) => [...blendData().scenes, ...objects.map(idStruct)];
 
-// An unlinked socket's value as the property that sets it, where there is one: a vector's by component.
-const socketProperty = (properties, base) => (socket, node) => {
+// An unlinked socket's value as the property that sets it, where there is one: a vector's by component. With `main`,
+// the tree the node is written from is an inlined copy of `main`: only a node of `main` itself has properties.
+const socketProperty = (properties, base, main = null) => (socket, node) => {
+  if (main && main.nodes.get(node.name)?.bl_idname !== node.bl_idname) return undefined;
   const index = [...node.inputs].findIndex((s) => s.identifier === socket.identifier), path = `${base}.nodes${key(node.name)}.inputs[${index}].default_value`;
   if (properties[path]) return { property: path };
   if (!properties[`${path}[0]`]) return undefined;
@@ -140,14 +143,17 @@ const socketProperty = (properties, base) => (socket, node) => {
 };
 
 // The carried node trees as graphs: a node group (Geometry Nodes, a compositor) by its own key, a material's or a
-// world's by `<its key>/node_tree`; an unlinked input set by a property refers to it.
-function idGraphs(ids, properties, graphs) {
+// world's by `<its key>/node_tree`, as EEVEE compiles it and the app builds its material: with its node groups and
+// closures inlined by Blender (main-view.js nodeTreeOf); an unlinked input set by a property refers to it.
+function idGraphs(ids, properties, graphs, blender) {
   const data = blendData();
   for (const [k, id] of Object.entries(ids)) {
     const collection = COLLECTION_OF.get(k.split(':')[0]), struct = collection && !id.name.includes('@') && safe(() => data[collection].get(id.name));
     if (collection === 'node_groups' && struct) writeGraph(struct, k, graphs, { value: socketProperty(properties, id.path) });
     else if ((collection === 'materials' || collection === 'worlds') && struct?.node_tree) {
-      writeGraph(struct.node_tree, `${k}/node_tree`, graphs, { value: socketProperty(properties, `${id.path}.node_tree`) });
+      const tree = struct.node_tree, write = (from, main) => writeGraph(from, `${k}/node_tree`, graphs, { value: socketProperty(properties, `${id.path}.node_tree`, main) });
+      if ([...tree.nodes].some((node) => INLINED.includes(node.bl_idname))) blender.withInlinedNodeTree(struct.as_pointer(), (inlined) => write(idStruct(inlined.id), tree));
+      else write(tree);
     }
   }
 }
@@ -291,7 +297,7 @@ export function exportIR(world, { controls, collections = null, live, bin, anima
   const properties = Object.fromEntries(controls.map(({ path, bind, ...property }) => [path, { id: pathID(path), ...property, ...(bind && { bind }) }]));
   if (sync) {
     evaluatedIDs(ids, graphs, entities, sync, bin);
-    idGraphs(ids, properties, graphs);
+    idGraphs(ids, properties, graphs, sync.blender);
     const time = Object.keys(properties).find((p) => p.endsWith('.frame_current'));
     // A Geometry Nodes modifier whose graph reads the scene's time runs again when the frame changes.
     for (const entity of Object.values(entities)) if (time && entity.type === 'modifier:NODES' && readsTime(graphs, entity.inputs.graph.graph)) entity.inputs.frame = { property: time };

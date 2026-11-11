@@ -89,6 +89,9 @@ const emptyMesh = () => createMesh({ vert_positions: new Float32Array(), edges: 
 // One edit overlay per object, whichever sync drew it first: a file a project's code read is adopted again by the
 // scene's sync.
 const editOverlays = new WeakMap();
+// The nodes that make a shader tree one EEVEE compiles inlined (blender.withInlinedNodeTree): node groups and closures.
+export const INLINED = ['ShaderNodeGroup', 'GeometryNodeRepeatInput', 'NodeClosureOutput', 'NodeEvaluateClosure', 'NodeCombineBundle', 'NodeSeparateBundle'];
+
 export function createMainView(state) {
   const { rna, world, selection, blender, ids, objects, materials, worlds } = state;
 
@@ -324,7 +327,6 @@ export function createMainView(state) {
   // A material's node tree in Main as plain data (nodeMaterialFromTree), its nodes' properties as RNA reads them. One with
   // node groups or zones is the tree EEVEE compiles, inlined.
   const PRINCIPLED_TREE = ['ShaderNodeBsdfPrincipled', 'ShaderNodeOutputMaterial'];
-  const INLINED = ['ShaderNodeGroup', 'GeometryNodeRepeatInput', 'NodeClosureOutput', 'NodeEvaluateClosure', 'NodeCombineBundle', 'NodeSeparateBundle'];
   // The integer and boolean inputs Main's description leaves out (a repeat zone's iterations), as RNA reads them.
   // A compositor's menus too, by item name.
   const wholeValues = (inputs, rnaNode, menus = false) => Object.fromEntries(Object.entries(inputs).filter(([, value]) => value === null)
