@@ -354,14 +354,15 @@ const DECLARED = /\b(?:float|int|bool|vec[234]|mat[34]|BlClosure|BlLobe)\s+([A-Z
 const isShaderOutput = (point) => point.ownerBlock.declaration?.outputs.find((s) => s.identifier === point.name)?.type === 'SHADER';
 const glslOf = (point) => (isShaderOutput(point) ? 'BlClosure' : GLSL[point.type]);
 
-// A node's code as a function of the IR's kernels, named by its hash; its parameters and locals named alike, so nodes of
-// the same code share it across materials.
+// A node's code as a function of the IR's kernels, named by its hash with what its parameters take (one code reads a
+// mesh attribute in one material and an object's in another); its parameters and locals named alike, so nodes of the
+// same code and parameters share it across materials.
 function nodeFunction(functions, params, variables, code, outputs, into) {
   const names = new Map(variables.map((v, i) => [v, `bl_p${i}`]));
   for (const [, local] of code.matchAll(DECLARED)) if (!names.has(local)) names.set(local, `bl_l${names.size}`);
   const signature = [...params.map((p, i) => `${p.type} bl_p${i}`), ...outputs.map(([, type], k) => `out ${type} bl_o${k}`)].join(', ');
   const body = `${renamed(code, names)}${outputs.map(([variable], k) => `bl_o${k} = ${names.get(variable) ?? variable};\n`).join('')}`;
-  const text = `void NAME(${signature}) {\n${body}}\n`, name = `bl_node_${hash(text + functions.join())}`;
+  const text = `void NAME(${signature}) {\n${body}}\n`, name = `bl_node_${hash(text + functions.join() + JSON.stringify(params))}`;
   into.pieces[name] = { functions, code: text.replace('NAME', name), params: [...params, ...outputs.map(([, type, output]) => ({ output, type }))] };
   return name;
 }
