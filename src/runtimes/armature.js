@@ -286,7 +286,11 @@ function boneBoxes(node, skin) {
   return boxes;
 }
 function poseBounds(node, boxes) {
-  const matrices = node.skeleton.getTransformMatrices(node), min = Vector3.One().scale(Infinity), max = Vector3.One().scale(-Infinity);
+  const [min, max] = posedBox(node, boxes);
+  node.setBoundingInfo(new BoundingInfo(min, max));
+}
+function posedBox(node, boxes, min = Vector3.One().scale(Infinity), max = Vector3.One().scale(-Infinity)) {
+  const matrices = node.skeleton.getTransformMatrices(node);
   for (const [bone, [a, b]] of boxes) {
     const m = Matrix.FromArray(matrices, bone * 16);
     for (let k = 0; k < 8; k++) {
@@ -295,7 +299,28 @@ function poseBounds(node, boxes) {
       max.maximizeInPlace(p);
     }
   }
-  node.setBoundingInfo(new BoundingInfo(min, max));
+  return [min, max];
+}
+
+// Each skinned mesh's bounds over every frame of a clip's bone keys (its `animations`), joined into the mesh's
+// `metadata.bylonderBounds` ([min, max] in its own space), which a page sets as its bounding box so a character
+// animated by clips is culled where it can be, not where its rest pose was.
+function clipBounds(mappings, animations, nodeOfKey) {
+  const keysOf = new Map(animations.filter(({ animation }) => animation.dataType === Animation.ANIMATIONTYPE_MATRIX).map(({ animation, target }) => [target, animation.getKeys()]));
+  for (const mapping of mappings) for (const [key, skin] of mapping.skins) {
+    const node = nodeOfKey(key), bones = skin.skeleton.bones;
+    if (!node?.skeleton || !bones.some((b) => keysOf.has(b))) continue;
+    const boxes = boneBoxes(node, skin), saved = bones.map((b) => b._matrix.clone()), frames = Math.max(...bones.map((b) => keysOf.get(b)?.length ?? 0));
+    const [min, max] = (node.metadata?.bylonderBounds ?? [[Infinity, Infinity, Infinity], [-Infinity, -Infinity, -Infinity]]).map((v) => Vector3.FromArray(v));
+    for (let f = 0; f < frames; f++) {
+      bones.forEach((b) => { const keys = keysOf.get(b); if (keys) b._matrix.copyFrom(keys[Math.min(f, keys.length - 1)].value); b.markAsDirty(); });
+      skin.skeleton.prepare(true);
+      posedBox(node, boxes, min, max);
+    }
+    bones.forEach((b, i) => { b._matrix.copyFrom(saved[i]); b.markAsDirty(); });
+    skin.skeleton.prepare(true);
+    node.metadata = { ...node.metadata, bylonderBounds: [min.asArray(), max.asArray()] };
+  }
 }
 
 // The view's mappings, by armature Object address: { mapping, applied: skins drawn, by mesh Object address }.
@@ -502,7 +527,11 @@ function exportArmatures(world, { bake, sampling, rests = appliedRests() }) {
   return {
     reports: mappings.map((m) => ({ title: `${m.arm.name}: exported`, issues: [...m.issues.filter((i) => !i.silent), ...skeletonIssues(m, byOb)] })),
     animations, curves, gaps, constraints,
-    clip: (sampling, owns) => poseAnimations(world, mappings.filter((m) => owns(m.arm)), true, sampling).animations,
+    clip: (sampling, owns) => {
+      const owned = mappings.filter((m) => owns(m.arm)), { animations } = poseAnimations(world, owned, true, sampling);
+      clipBounds(owned, animations, (key) => byOb.get(key)?.node);
+      return animations;
+    },
     boneParent: (ob) => boneParent(mappings, ob, byOb),
     restore() {
       exporting.clear();

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // A scene exported from Bylonder, with its controls: the IR's properties (docs/ir.md), each a Blender RNA path from
 // bpy.data (`objects["Cube"].location[0]`) whose value the page sets, and which lands on the Babylon objects it binds to.
-import { Matrix, Observable, Quaternion, Texture, Vector3 } from '@babylonjs/core';
+import { BoundingInfo, Matrix, Observable, Quaternion, Texture, Vector3 } from '@babylonjs/core';
 import { createScheduler, EVALUATORS, NATIVE } from './scheduler.js';
 import { readIR, referencesIn } from './ir.js';
 import { createPlayhead } from './playhead.js';
@@ -216,6 +216,11 @@ export class BlendScene {
     this.playhead = createPlayhead(scene, this.ir.scene.time);
     // Meshes the export skins with dual quaternions (Preserve Volume, armature.js).
     for (const mesh of scene.meshes) if (mesh.metadata?.bylonderDualQuaternions) useDualQuaternionSkinning(mesh, true);
+    // A skinned mesh's bounds over its clips' poses (armature.js clipBounds), so it is culled where it can be.
+    for (const mesh of scene.meshes) {
+      const bounds = mesh.metadata?.bylonderBounds;
+      if (bounds) mesh.setBoundingInfo(new BoundingInfo(Vector3.FromArray(bounds[0]), Vector3.FromArray(bounds[1])));
+    }
     this.#clips = createClips(scene, this.ir.scene.time, this.playhead);
     /** Told of each marker passed: the scene's as the playhead plays past it, an action's as its clip does. */
     this.onMarker = this.#clips.onMarker;

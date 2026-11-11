@@ -134,10 +134,15 @@ async function deskLamp() {
       const evaluated = sync.blender.evaluatedMesh(sync.objectOf(lamp)), p = evaluated.vert_positions, verts = evaluated.corner_verts;
       return Array.from({ length: evaluated.corners_num * 3 }, (_, i) => p[verts[Math.floor(i / 3)] * 3 + [0, 2, 1][i % 3]]);
     };
+    assert.ok(mesh.metadata?.bylonderBounds, "the lamp's bounds over its clip's poses are exported");
     blend.play('RigAction');
     for (const frame of [1, 36, 49, 96]) {
       at(blend, 'RigAction', frame);
-      near([...mesh.getPositionData(true, true)], corners(frame), `the lamp posed by RigAction at frame ${frame}`);
+      const posed = [...mesh.getPositionData(true, true)];
+      near(posed, corners(frame), `the lamp posed by RigAction at frame ${frame}`);
+      // Its bounds hold every pose of its clips, so it is culled where it can be.
+      const { minimum, maximum } = mesh.getBoundingInfo().boundingBox;
+      for (let i = 0; i < posed.length; i += 3) assert.ok([0, 1, 2].every((k) => posed[i + k] >= minimum.asArray()[k] - 1e-4 && posed[i + k] <= maximum.asArray()[k] + 1e-4), `the lamp's bounds hold its pose at frame ${frame}`);
     }
     const container = await loadAssetContainer(scene), copy = await container.instantiate();
     const copied = copy.clips()[0].group;

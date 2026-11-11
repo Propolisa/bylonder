@@ -168,7 +168,7 @@ function nodeCode(entry, mesh, geometries, live, bin) {
   }
   if (entry.animations?.length) lines.push(`node.animations = ${json(entry.animations)}.map((a) => Animation.Parse(a));`);
   // Its channels, and dual quaternion skinning (armature.js), which BlendScene turns on.
-  const metadata = { ...(live && { bylonderChannels: channels(live) }), ...(entry.metadata?.bylonderDualQuaternions && { bylonderDualQuaternions: true }) };
+  const metadata = { ...(live && { bylonderChannels: channels(live) }), ...(entry.metadata?.bylonderDualQuaternions && { bylonderDualQuaternions: true }), ...(entry.metadata?.bylonderBounds && { bylonderBounds: entry.metadata.bylonderBounds }) };
   if (Object.keys(metadata).length) lines.push(`node.metadata = ${json(metadata)};`);
   lines.push(`nodes[${entry.uniqueId}] = node;`);
   return lines.filter(Boolean);
