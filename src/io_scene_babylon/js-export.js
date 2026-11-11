@@ -37,15 +37,25 @@ const TARGET_NAMES = Object.fromEntries(TARGETS.map(([id, label]) => [id, label]
 // The page's createEngine for each target: WebGPU with the adapter's limits its materials need, and in a bundle with the
 // GLSL to WGSL compilers it carries.
 const engines = (bundle) => {
-  const WEBGPU_ENGINE = (engine) => `${engine}.CreateAsync(canvas, { ...WEBGPU_OPTIONS, ${bundle ? '...COMPILERS, ' : ''}...options })`;
+  // Babylon's CreateAsync never settles when the adapter or device fails to start; initAsync rejects.
+  const START_WEBGPU = `async function webgpuEngine(WebGPU, canvas, options) {
+  const settings = { ...WEBGPU_OPTIONS, ${bundle ? '...COMPILERS, ' : ''}...options };
+  const engine = new WebGPU(canvas, settings);
+  await engine.initAsync(settings.glslangOptions, settings.twgslOptions);
+  return engine;
+}
+`;
   return {
-    BOTH: `// A WebGPU engine where the browser has WebGPU, else a WebGL 2 one: the page loads only the engine it makes.
+    BOTH: `${START_WEBGPU}// A WebGPU engine where the browser has WebGPU and its device starts, else a WebGL 2 one: the page loads only the
+// engines it tries.
 export async function createEngine(canvas, options = {}) {
   const webgpu = globalThis.navigator?.gpu && (await import('@babylonjs/core/Engines/webgpuEngine.js')).WebGPUEngine;
-  if (webgpu && (await webgpu.IsSupportedAsync)) return ${WEBGPU_ENGINE('webgpu')};
+  if (webgpu && (await webgpu.IsSupportedAsync)) {
+    try { return await webgpuEngine(webgpu, canvas, options); } catch (error) { console.warn(\`WebGPU failed to start, drawing with WebGL 2: \${error?.message ?? error}\`); }
+  }
   return new (await import('@babylonjs/core/Engines/engine.js')).Engine(canvas, true, options);
 }`,
-    WEBGPU: `export const createEngine = (canvas, options = {}) => ${WEBGPU_ENGINE('WebGPUEngine')};`,
+    WEBGPU: `${START_WEBGPU}export const createEngine = (canvas, options = {}) => webgpuEngine(WebGPUEngine, canvas, options);`,
     WEBGL2: 'export const createEngine = async (canvas, options = {}) => new Engine(canvas, true, options);',
   };
 };

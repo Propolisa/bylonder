@@ -67,7 +67,8 @@ assert.match(packageFiles(files)['scene.js'], /^import '@babylonjs\/core\/Lights
 // overrides only for a target with WebGPU. A WebGL 2 package still loads.
 const shipped = (files) => Object.keys(packageFiles(files)).filter((path) => path.startsWith('bylonder/overrides/webgpu/') && path.endsWith('.js'));
 const webgpuOverrides = shipped(files);
-assert.match(files['scene.js'], /IsSupportedAsync\)\) return webgpu\.CreateAsync[^\n]*\n[^\n]*new \(await import\('@babylonjs\/core\/Engines\/engine\.js'\)\)\.Engine\(/, 'by default the page makes WebGPU where it can, else WebGL 2');
+assert.match(files['scene.js'], /IsSupportedAsync\)\) \{\n\s*try \{ return await webgpuEngine\(webgpu, canvas, options\); \} catch[^\n]*\n\s*\}\n\s*return new \(await import\('@babylonjs\/core\/Engines\/engine\.js'\)\)\.Engine\(/, 'by default the page makes WebGPU where it can, else WebGL 2, also when the WebGPU device fails to start');
+assert.match(files['scene.js'], /await engine\.initAsync\(settings\.glslangOptions, settings\.twgslOptions\)/, 'with initAsync, which rejects where CreateAsync never settles');
 assert.doesNotMatch(packageFiles(files)['scene.js'], /^import .*\b(Engine|WebGPUEngine)\b.*from/m, 'and loads only the engine it makes');
 assert.ok(webgpuOverrides.includes('bylonder/overrides/webgpu/maximum-limits.js'), 'by default the WebGPU overrides ship');
 const webgl2 = await exportModule(world, { target: 'WEBGL2' });
@@ -75,7 +76,7 @@ assert.doesNotMatch(webgl2['scene.js'], /WebGPU|overrides\/webgpu\/(?!float-worl
 assert.match(webgl2['scene.js'], /createEngine = async \(canvas, options = \{\}\) => new Engine\(canvas, true, options\)/);
 assert.deepEqual(shipped(webgl2).filter((path) => !/float-world-cube|samplers|missing-attributes/.test(path)), [], 'a WebGL 2 package ships only the WebGPU overrides its runtime files import');
 const webgpu = await exportModule(world, { target: 'WEBGPU' });
-assert.match(webgpu['scene.js'], /createEngine = \(canvas, options = \{\}\) => WebGPUEngine\.CreateAsync\(canvas, \{ \.\.\.WEBGPU_OPTIONS, \.\.\.options \}\)/);
+assert.match(webgpu['scene.js'], /createEngine = \(canvas, options = \{\}\) => webgpuEngine\(WebGPUEngine, canvas, options\)/);
 assert.doesNotMatch(webgpu['scene.js'], /new Engine\(/, 'a WebGPU page makes no WebGL engine');
 assert.deepEqual(shipped(webgpu), webgpuOverrides, 'a WebGPU package ships the WebGPU overrides');
 // The control panel (runtime/control-panel.js): scene.js adds it to the page with the editors' source and navigation
