@@ -77,7 +77,7 @@ cases = [
                                  "Color Modulation": 0.0}),  # bike_ride
     case("CompositorNodeGlare", {"Type": "Sun Beams", "Quality": "High", "Highlights Threshold": 1.0, "Strength": 0.5, "Size": 0.22}),  # cloth_tear
     case("CompositorNodeGlare", {"Type": "Fog Glow", "Highlights Threshold": 1.0, "Size": 0.5}),
-    # Neon Night's, whose glow reaches tens of pixels out.
+    # Menya Akari's, whose glow reaches tens of pixels out.
     case("CompositorNodeGlare", {"Type": "Fog Glow", "Quality": "High", "Highlights Threshold": 0.7, "Size": 0.85, "Strength": 1.8}, size=LARGE),
     case("CompositorNodeFilter", {"Type": "Diamond Sharpen", "Fac": 0.5}),  # impact_fracture
     case("CompositorNodeBlur", {"Type": "Gaussian", "Size": (6.0, 6.0)}),  # pizza_delivery, smaller

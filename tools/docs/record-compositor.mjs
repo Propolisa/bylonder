@@ -1,5 +1,5 @@
 // Records docs/features/compositor.md's media: a compositing node group made from the Default Cube through real input
-// (New, then a Color Balance between Render Layers and the Group Output, shown on the backdrop), then the Neon Night
+// (New, then a Color Balance between Render Layers and the Group Output, shown on the backdrop), then the Menya Akari
 // example's tree and its Render Image, with Glare muted and not, and its 240-frame loop played in the viewport.
 // usage: node tools/docs/record-compositor.mjs [steps] [example] [loop]
 import { ffmpeg } from "../media.mjs";
