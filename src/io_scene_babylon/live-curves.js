@@ -50,12 +50,15 @@ export function liveTransform(sync, node) {
   };
 }
 
+// Whether NLA tracks play into an animation: muted ones, or ones without strips, do not.
+const playsNla = (animation) => [...(animation?.nla_tracks ?? [])].some((track) => !track.mute && track.strips.length);
+
 // Whether a pose bone's location, rotation and scale are set by drivers the page runs (driver-export.js pageDriver) and by
 // nothing else that animates them: the page's drivers then pose it, as they write its controls.
 export function drivenPose(arm, pose) {
   const base = `pose.bones${key(pose.name)}`, animation = arm.animation_data, own = (path) => path.startsWith(base) && /^\.(location|rotation_\w+|scale)$/.test(path.slice(base.length));
   const drivers = [...(animation?.drivers ?? [])].filter((d) => own(d.data_path));
-  return drivers.length > 0 && !animation.nla_tracks.length && !actionFCurves(animation).some((fc) => own(fc.data_path)) && drivers.every(pageDriver);
+  return drivers.length > 0 && !playsNla(animation) && !actionFCurves(animation).some((fc) => own(fc.data_path)) && drivers.every(pageDriver);
 }
 
 // For a bone of an armature (RNA's Object and PoseBone) and its Babylon Bone, the F-Curves the page runs for its pose
@@ -64,7 +67,7 @@ export function drivenPose(arm, pose) {
 // reproduce the samples (constraints, IK, NLA, drivers, F-modifiers but Cycles, another inheritance).
 export function livePose(arm, pose, bone, samples, frameStart) {
   const base = `pose.bones${key(pose.name)}`, mode = pose.rotation_mode, animation = arm.animation_data;
-  if (mode === 'AXIS_ANGLE' || animation?.nla_tracks.length || [...(animation?.drivers ?? [])].some((d) => d.data_path.startsWith(base) && /^\.(location|rotation_\w+|scale)$/.test(d.data_path.slice(base.length)))) return null;
+  if (mode === 'AXIS_ANGLE' || playsNla(animation) || [...(animation?.drivers ?? [])].some((d) => d.data_path.startsWith(base) && /^\.(location|rotation_\w+|scale)$/.test(d.data_path.slice(base.length)))) return null;
   const rotation = mode === 'QUATERNION' ? 'rotation_quaternion' : 'rotation_euler', parts = ['location', rotation, 'scale'];
   const own = actionFCurves(animation).filter((fc) => !fc.mute && parts.some((part) => fc.data_path === `${base}.${part}`));
   if (own.some((fc) => [...fc.modifiers].some((m) => m.type !== 'CYCLES'))) return null;
@@ -96,7 +99,7 @@ const CONSTRAINTS = {
 export function liveConstraints(sync, node, nodeOf) {
   const ob = idStruct(sync.objectOf(node)), rotation = ob.rotation_mode === 'QUATERNION' ? 'rotation_quaternion' : 'rotation_euler', animation = ob.animation_data;
   if (!ob.constraints.length || !['Mesh', 'TransformNode', 'InstancedMesh'].includes(node.getClassName())) return null;
-  if (actionFCurves(animation).some((fc) => /^(location|rotation_|scale|delta_)/.test(fc.data_path)) || animation?.nla_tracks.length || animation?.drivers.length) return null;
+  if (actionFCurves(animation).some((fc) => /^(location|rotation_|scale|delta_)/.test(fc.data_path)) || playsNla(animation) || animation?.drivers.length) return null;
   const bind = transformBinding(node, ob, [...ob[rotation]], sync.blender.transform(sync.objectOf(node)).matrix_parent_inverse);
   if (!bind || bind.transform.offset) return null;
   const stack = [];
