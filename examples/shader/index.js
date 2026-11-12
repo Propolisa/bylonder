@@ -1,6 +1,6 @@
 import vertex from './shaders/wave.vert.glsl?raw';
 import fragment from './shaders/wave.frag.glsl?raw';
-import { controls } from '@workbench/sdk';
+import { animation, controls } from '@workbench/sdk';
 
 export const createScene = function () {
   const scene = new BABYLON.Scene(engine);
@@ -30,10 +30,10 @@ export const createScene = function () {
   });
   material.setColor3('deep', new BABYLON.Color3(0.02, 0.15, 0.3));
   material.setColor3('shallow', new BABYLON.Color3(0.3, 0.85, 0.9));
-  let time = 0;
+  // The waves follow the playhead (press Play), so a render and an export of one frame agree.
   scene.onBeforeRenderObservable.add(() => {
-    time += engine.getDeltaTime() / 1000 * store.values.speed;
-    material.setFloat('time', time);
+    const { frameStart, fps, fpsBase } = animation.time.state;
+    material.setFloat('time', (animation.time.frame - frameStart) / (fps / fpsBase) * store.values.speed);
   });
   return scene;
 };
