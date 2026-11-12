@@ -3,8 +3,9 @@
  * @param {import('@babylonjs/core').Scene} scene
  * @param {import('./ir.js').Time} time
  * @param {ReturnType<typeof import('./playhead.js').createPlayhead>} playhead
+ * @param {(path: string, value: any) => void} [set] the page's control setter, for clips' keyed properties
  */
-export function createClips(scene: import("@babylonjs/core").Scene, time: import("./ir.js").Time, playhead: ReturnType<typeof import("./playhead.js").createPlayhead>): {
+export function createClips(scene: import("@babylonjs/core").Scene, time: import("./ir.js").Time, playhead: ReturnType<typeof import("./playhead.js").createPlayhead>, set?: (path: string, value: any) => void): {
     onMarker: Observable<MarkerEvent>;
     /** The clips: each one's name and Babylon's animation group. */
     list: () => {
@@ -31,6 +32,8 @@ export function createClips(scene: import("@babylonjs/core").Scene, time: import
      * @returns {Promise<void>}
      */
     crossFade(from: string, to: string, seconds: number, options?: PlayOptions): Promise<void>;
+    /** Whether a started clip keys a property. @param {string} path */
+    holds: (path: string) => boolean;
     dispose(): void;
 };
 export function isClip(group: {

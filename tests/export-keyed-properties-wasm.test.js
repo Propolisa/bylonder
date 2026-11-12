@@ -2,7 +2,7 @@
 // tools/blender-reference/keyed-properties-fixture.py, as a rig's IK parent switch and a toggle) play in the page as
 // Blender evaluates them: run on the F-Curve unit, the integer rounded between its keys (0.8 is 1) and held to its hard
 // maximum (3, where its keys reach 4), the boolean switched at its key. Before, neither ran: the page held their
-// defaults. A clip of the action carries the values, which the page's controls hold to the same limits as they are set.
+// defaults. Its clip, played, sets them too, as the clip plays, held to the same limits.
 import assert from 'node:assert/strict';
 import { NullEngine } from '@babylonjs/core';
 import { blendData } from '../src/python/bpy_rna.js';
@@ -37,13 +37,15 @@ for (const [i, expected] of IK_PARENTS.entries()) {
   assert.equal(blend.get(INT), expected, `frame ${i + 1}: ik_parents`);
   assert.equal(Number(blend.get(BOOL)), TOGGLE[i], `frame ${i + 1}: toggle`);
 }
-// A clip's samples of them, which the page sets as the clip plays: held to the integer's hard maximum as they are set.
-const clip = blend.scene.animationGroups.find((g) => g.metadata?.bylonder?.clip), { properties: sampled, frame_start: start } = clip.metadata.bylonder;
-const at = (values, i) => (typeof values === 'number' ? values : values[i + 1 - start]);
+// Its clip, played (blend.play) over the paused timeline: the page sets them as the clip plays, from the clip's samples,
+// held to the integer's hard maximum.
+const { group } = blend.clips()[0], start = group.metadata.bylonder.frame_start;
+blend.play(group.name).pause();
 for (const i of IK_PARENTS.keys()) {
-  if (at(sampled[INT], i) === undefined) continue;
-  blend.set(INT, at(sampled[INT], i));
-  blend.set(BOOL, at(sampled[BOOL], i));
+  if (i + 1 - start > group.to) continue;
+  group.goToFrame(i + 1 - start);
+  blend.scene.render();
+  await blend.settled();
   assert.equal(blend.get(INT), IK_PARENTS[i], `clip frame ${i + 1}: ik_parents`);
   assert.equal(blend.get(BOOL), !!TOGGLE[i], `clip frame ${i + 1}: toggle`);
 }

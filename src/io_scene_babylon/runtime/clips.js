@@ -3,7 +3,8 @@
 // The scene's clips (docs/ir.md, Clips): an animation group per Blender action, which plays on Babylon's own clock as a
 // .glb's animation groups do, apart from the playhead. While clips play, the timeline's groups blend with them: a target
 // a clip that replaces sets is left to it, and an additive clip adds to what the timeline sets. The scene's markers are
-// told as the playhead passes them, an action's as its clip plays past them (Babylon's AnimationEvents).
+// told as the playhead passes them, an action's as its clip plays past them (Babylon's AnimationEvents). A clip's
+// action's keyed custom properties (a rig's IK or FK switch) are set as it plays, as Blender's animation sets them.
 import { AnimationEvent, Observable } from '@babylonjs/core';
 
 /** @typedef {import('@babylonjs/core').AnimationGroup} AnimationGroup */
@@ -23,8 +24,9 @@ export const isClip = (group) => !!group.metadata?.bylonder?.clip;
  * @param {import('@babylonjs/core').Scene} scene
  * @param {import('./ir.js').Time} time
  * @param {ReturnType<typeof import('./playhead.js').createPlayhead>} playhead
+ * @param {(path: string, value: any) => void} [set] the page's control setter, for clips' keyed properties
  */
-export function createClips(scene, time, playhead) {
+export function createClips(scene, time, playhead, set = () => {}) {
   /** Told of each marker passed. @type {Observable<MarkerEvent>} */
   const onMarker = new Observable();
   const groups = new Map(scene.animationGroups.filter(isClip).map((group) => [group.name, group]));
@@ -51,6 +53,20 @@ export function createClips(scene, time, playhead) {
   });
 
   const playing = () => [...groups.values()].filter((group) => group.isPlaying);
+  // Each started clip's keyed properties at its frame (a value per frame from its start, or one), set where they changed.
+  const written = new Map();
+  const properties = scene.onAfterAnimationsObservable.add(() => {
+    for (const group of groups.values()) {
+      const sampled = group.metadata.bylonder.properties, frame = group.animatables[0]?.masterFrame;
+      if (!sampled || !group.isStarted || frame === undefined) continue;
+      for (const [path, values] of Object.entries(sampled)) {
+        const value = Array.isArray(values) ? values[Math.min(values.length - 1, Math.max(0, Math.round(frame)))] : values;
+        if (written.get(path) === value) continue;
+        written.set(path, value);
+        set(path, value);
+      }
+    }
+  });
   // The timeline blends with the clips playing (a weight of its own), else plays alone.
   const retime = () => {
     const clips = playing(), claimed = new Set(clips.filter((group) => !group.isAdditive).flatMap((group) => group.targetedAnimations.map((t) => t.target)));
@@ -140,9 +156,12 @@ export function createClips(scene, time, playhead) {
         });
       });
     },
+    /** Whether a started clip keys a property. @param {string} path */
+    holds: (path) => [...groups.values()].some((group) => group.isStarted && group.metadata.bylonder.properties?.[path] !== undefined),
     dispose() {
       for (const group of endings.keys()) unwatch(group);
       passing.remove();
+      properties.remove();
       onMarker.clear();
     },
   };

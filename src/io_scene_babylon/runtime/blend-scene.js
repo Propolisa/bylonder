@@ -231,7 +231,7 @@ export class BlendScene {
       const bounds = mesh.metadata?.bylonderBounds;
       if (bounds) mesh.setBoundingInfo(new BoundingInfo(Vector3.FromArray(bounds[0]), Vector3.FromArray(bounds[1])));
     }
-    this.#clips = createClips(scene, this.ir.scene.time, this.playhead);
+    this.#clips = createClips(scene, this.ir.scene.time, this.playhead, (path, value) => this.set(path, value));
     /** Told of each marker passed: the scene's as the playhead plays past it, an action's as its clip does. */
     this.onMarker = this.#clips.onMarker;
     const frameControl = knobs.find((knob) => knob.bind?.frame)?.path;
@@ -243,7 +243,8 @@ export class BlendScene {
     });
     this.#scheduler = Object.keys(this.ir.entities).length ? createScheduler(this.ir, { scene, root, ir: this.ir, buffers, controls: {
       get: (path) => this.#values.get(path),
-      write: (path, value) => this.#write(path, value),
+      // A property a started clip keys is the clip's: the timeline's curves do not write it meanwhile.
+      write: (path, value) => { if (!this.#clips?.holds(path)) this.#write(path, value); },
       set: (path, value) => { this.#write(path, value); this.#scheduler?.changed(path); },
       frame: (/** @type {string | undefined} */ id) => this.playhead.frameAt(id ? this.#idOffset(id) : 0),
     } }) : null;
