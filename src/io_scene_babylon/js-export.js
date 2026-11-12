@@ -15,6 +15,7 @@ import { exportSampling } from './sampling.js';
 import { prepareKernels } from './pose-export.js';
 import { chosenState, CLIP_COMPRESSION, NAVIGATION, TARGETS } from './export-options.js';
 import { exportControls, controlTypes, sceneOf, withUI } from './controls-export.js';
+import { evaluateForRender } from './render-evaluation.js';
 import { exportCollections } from './collections-export.js';
 import { exportNodeMaterial, kernelsFile, materialKernels } from './node-material-export.js';
 import { fillMaterials, MESH_VALUE } from './runtime/materials.js';
@@ -312,15 +313,20 @@ export async function exportModule(whole, { scope = 'SCENE', selected = [], live
   const world = scope === 'SELECTED' ? selectedWorld(whole, selected) : whole;
   const states = { branchState, branches }, stackState = (node) => chosenState(states, 'modifiers', node.name) ?? (keepLive ? 'LIVE' : 'BAKED');
   const live = new Map(world.objects.filter((node) => stackState(node) === 'LIVE').map((node) => [node, liveStack(world, node)]).filter(([, stack]) => stack));
-  await world.modifiers.settled();
-  await prepareKernels();
-  // The mapped meshes' geometry is read below: their mapping holds until the module is written.
-  const sampling = exportSampling(world.animation.time.state, sampleRate);
-  const mapped = exportRuntimes(world, { bake: bakeAnimation, runtime, runtimes, sampling });
+  const disable = evaluateForRender(whole);
   try {
-    return await moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, animations, clipCompression, deformBonesOnly, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states, sampling });
+    await world.modifiers.settled();
+    await prepareKernels();
+    // The mapped meshes' geometry is read below: their mapping holds until the module is written.
+    const sampling = exportSampling(world.animation.time.state, sampleRate);
+    const mapped = exportRuntimes(world, { bake: bakeAnimation, runtime, runtimes, sampling });
+    try {
+      return await moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, animations, clipCompression, deformBonesOnly, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states, sampling });
+    } finally {
+      mapped.restore();
+    }
   } finally {
-    mapped.restore();
+    disable();
   }
 }
 
