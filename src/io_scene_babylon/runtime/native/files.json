@@ -41,6 +41,7 @@
   "deform/corrective-smooth.js",
   "deform/cpu.js",
   "deform/displace.js",
+  "deform/hook.js",
   "deform/joints.js",
   "deform/lattice.js",
   "deform/mesh.js",

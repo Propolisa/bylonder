@@ -18,6 +18,7 @@ import { applyShapeKeys } from '../deform/shape-keys.js';
 import { mulAffine, invertAffine } from '../rig/m4.js';
 import { applyStencil } from '../deform/topology.js';
 import { surfaceDeformTables } from '../deform/surface-deform.js';
+import { hookTables, hookMatrix } from '../deform/hook.js';
 import { evaluatedPositions } from '../deform/targets.js';
 
 const WG = 64;
@@ -217,6 +218,29 @@ fn spline(kind : u32, t : f32) -> vec4<f32> {
   o = (mats[0] * vec4<f32>(o, 1.0)).xyz;
   dst.v[v] = vec4<f32>(c + r.z * (o - c), 1.0);
 }`,
+  hook: `${HEADER}
+@group(0) @binding(0) var<storage, read> src : P;
+@group(0) @binding(1) var<storage, read_write> dst : P;
+@group(0) @binding(2) var<storage, read> factor : array<f32>;
+@group(0) @binding(3) var<storage, read> mats : array<mat4x4<f32>>;
+@group(0) @binding(4) var<storage, read> prm : array<vec4<f32>>;
+fn falloff(kind : u32, t : f32) -> f32 {
+  if (kind == 2u) { return t; } if (kind == 3u) { return 3.0 * t * t - 2.0 * t * t * t; }
+  if (kind == 4u) { return sqrt(2.0 * t - t * t); } if (kind == 5u) { return sqrt(t); }
+  if (kind == 6u) { return t * (2.0 - t); } if (kind == 7u) { return t * t; } return 1.0;
+}
+@compute @workgroup_size(${WG}) fn main(@builtin(global_invocation_id) id : vec3<u32>) {
+  let v = id.x; if (v >= arrayLength(&dst.v)) { return; }
+  let p = src.v[v].xyz; var f = factor[v];
+  let fo = prm[0]; let kind = u32(fo.x);
+  if (f != 0.0 && kind != 0u) {
+    var d = p - prm[1].xyz;
+    if (fo.z > 0.5) { d = (mats[1] * vec4<f32>(d, 0.0)).xyz; }
+    let l = length(d);
+    f = select(f * falloff(kind, 1.0 - l / fo.y), 0.0, l >= fo.y);
+  }
+  dst.v[v] = vec4<f32>(p + f * ((mats[0] * vec4<f32>(p, 1.0)).xyz - p), 1.0);
+}`,
   correct: `${HEADER}
 @group(0) @binding(0) var<storage, read> src : P;
 @group(0) @binding(1) var<storage, read_write> dst : P;
@@ -254,6 +278,7 @@ const BINDINGS = {
   smooth: bind(['src', 'dst', 'start', 'nb', 'factor']),
   correct: bind(['src', 'dst', 'start', 'corners', 'prm']),
   surfaceDeform: bind(['src', 'dst', 'ranges', 'bindings', 'surface', 'mats']),
+  hook: bind(['src', 'dst', 'factor', 'mats', 'prm']),
   faceNormals: bind(['src', 'dst', 'start', 'idx']),
   xform: bind(['src', 'dst', 'axis']),
   vertexNormals: bind(['src', 'dst', 'start', 'corners', 'faceN']),
@@ -436,6 +461,14 @@ export class GpuDeformer {
         L.range[0][0], L.range[1][0], L.range[2][0], 0, L.range[0][1], L.range[1][1], L.range[2][1], 0]));
     };
     return { cs: this.newShader('lattice'), buffers: { disp, mats, prm, mask }, update };
+  }
+
+  // The hook matrix is uploaded each frame (one matrix); factors and falloff are static.
+  compileHOOK(step, rest, count) {
+    const t = hookTables(step, count), mats = new StorageBuffer(this.engine, 128, RO), data = new Float32Array(32);
+    const prm = this.buffer(new Float32Array([...t.falloff, ...step.center, 0]));
+    const update = () => { data.set(hookMatrix(this.inst, this.deform.mesh, step)); data.set(step.inverse, 16); mats.update(data); };
+    return { cs: this.newShader('hook'), buffers: { factor: this.buffer(t.factor), mats, prm }, update };
   }
 
   // The target's evaluated positions come from the CPU (targets.js, once per evaluate) and are uploaded each frame.

@@ -93,7 +93,7 @@ const drawnVertices = (mesh) => Int32Array.from([...mesh.corner_verts, ...Array.
 
 // An armature's description for the native runtime (rig-description.js), packed: its JSON as bytes and its arrays; the
 // page's animation poses the bones, so the armature plays no action of its own there, and the page places it and the
-// objects its constraints and modifiers read (`objects`: their nodes' ids, by name), so they have no parents there.
+// objects it draws that its constraints and modifiers read (`objects`: their nodes' ids, by name).
 // `deformed`: mesh objects Babylon cannot skin for their modifier stack ({ ob, node, mesh(), evaluated() }: Main's Mesh
 // and the evaluated one the export draws; `source`: a mesh only another's Surface Deform reads, which goes in as data);
 // those whose stack the runtime runs to the evaluated mesh's vertices go in
@@ -119,8 +119,10 @@ function nativeRig(arm, nodeOf, deformed = []) {
     .flatMap((m) => { const at = program.objectIndex.get(m.object.name); return at === undefined ? [] : compileDeform(program, at).unsupported.map((step) => ({ mesh: d.ob.name, lattice: m.object.name, step })); }));
   const objects = {}, meshes = {};
   for (const ob of description.objects) {
-    Object.assign(ob, { parent: null, animation_data: null });
     const node = ob.name !== arm.name && nodeOf(blendData().objects.get(ob.name));
+    // The page places an object it draws at its world matrix, which its parent and constraints have given it already;
+    // one it does not draw (a lattice) the runtime places by its parent (a bone) and constraints.
+    Object.assign(ob, { animation_data: null }, (node || ob.name === arm.name) && { parent: null }, node && { constraints: [] });
     if (node) objects[ob.name] = node.id;
   }
   for (const d of runs) {

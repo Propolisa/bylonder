@@ -13,6 +13,7 @@ import { applyShapeKeys } from './shape-keys.js';
 import { bindDisplace, runDisplace } from './displace.js';
 import { bindShrinkwrap, runShrinkwrap } from './shrinkwrap.js';
 import { bindSurfaceDeform, runSurfaceDeform } from './surface-deform.js';
+import { bindHook, runHook } from './hook.js';
 import { mulAffine, invertAffine } from '../rig/m4.js';
 
 const KINDS = {
@@ -25,6 +26,7 @@ const KINDS = {
   DISPLACE: { bind: bindDisplace, run: runDisplace },
   SHRINKWRAP: { bind: bindShrinkwrap, run: runShrinkwrap },
   SURFACE_DEFORM: { bind: bindSurfaceDeform, run: runSurfaceDeform },
+  HOOK: { bind: bindHook, run: runHook },
 };
 
 // `inst` (optional): driven modifier settings (levels, show_viewport ...) of that instance are applied; compile again

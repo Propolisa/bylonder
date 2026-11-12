@@ -17,6 +17,7 @@ import { latticeFrame } from './lattice.js';
 import { runStep } from './mesh.js';
 import { applyStencil } from './topology.js';
 import { surfaceDeformInto } from './surface-deform.js';
+import { hookInto, hookMatrix } from './hook.js';
 import { evaluatedPositions } from './targets.js';
 
 const SPLINE_KIND = { KEY_LINEAR: 0, KEY_CARDINAL: 1, KEY_CATMULL_ROM: 2, KEY_BSPLINE: 3 };
@@ -391,6 +392,11 @@ function surfaceDeformPass(inst, step) {
   return { run, live: (out) => out };
 }
 
+function hookPass(inst, deform, step) {
+  const run = (src, dst) => { dst.set(src); hookInto(dst, src, step, hookMatrix(inst, deform.mesh, step)); };
+  return { run, live: (out) => out };
+}
+
 // A step mesh.js runs: positions copied in and out, with its ctx (Multi Modifier's input).
 function referencePass(inst, deform, step, ctx) {
   return { run: (src, dst) => dst.set(runStep(inst, deform, step, src, ctx)), reference: true, live: (out, inCount) => new Uint8Array(inCount).fill(1) };
@@ -448,6 +454,7 @@ export class CpuStack {
       else if (step.type === 'LATTICE') pass = latticePass(inst, deform, step);
       else if (step.type === 'CORRECTIVE_SMOOTH') pass = correctiveSmoothPass(step, count);
       else if (step.type === 'SURFACE_DEFORM') pass = surfaceDeformPass(inst, step);
+      else if (step.type === 'HOOK') pass = hookPass(inst, deform, step);
       else pass = referencePass(inst, deform, step, ctx);
       if (step.type === 'ARMATURE') armatures++;
       const n = pass.count ?? count;

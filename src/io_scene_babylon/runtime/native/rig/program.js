@@ -243,6 +243,10 @@ export class RigProgram {
       state[i] = 2;
       order.push(i);
     };
+    // Bones are visited first, so in a cycle through an object parented to a bone (a bone tracking its own child
+    // object) the dropped edge is the object's parent relation: the object reads the bone's earlier pose, as Blender
+    // does (damped_track_aim2 look_parented_to_head_cycle: the object sits at the bone's rest).
+    ops.forEach((op, i) => op.kind !== OP_OBJECT && !state[i] && visit(i));
     ops.forEach((_, i) => state[i] || visit(i));
     const position = new Int32Array(ops.length);
     order.forEach((i, k) => { position[i] = k; });
@@ -302,8 +306,9 @@ export class RigInstance {
     this.world = new Float64Array(nO * 16);
     this.parentMatrix = new Float64Array(nO * 16);
     this.objectBasis = new Float64Array(nO * 16);
-    this.pose = new Float64Array(nB * 16);
-    this.pre = new Float64Array(nB * 16);
+    // Poses start at rest: what a dropped cycle edge reads on the first evaluation.
+    this.pose = Float64Array.from(P.rest);
+    this.pre = Float64Array.from(P.rest);
     // Transform inputs of pose bones and objects: location, rotation (4 values, see m4.js composeBasis), scale.
     this.location = new Float64Array(nB * 3);
     this.rotation = new Float64Array(nB * 4);

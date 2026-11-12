@@ -24,6 +24,7 @@ import { applyStencil } from '../deform/topology.js';
 import { applyShapeKeys } from '../deform/shape-keys.js';
 import { shapeKeyInput } from '../deform/cpu.js';
 import { surfaceDeformTables } from '../deform/surface-deform.js';
+import { hookTables, hookMatrix } from '../deform/hook.js';
 import { evaluatedPositions } from '../deform/targets.js';
 import { mulAffine, invertAffine } from '../rig/m4.js';
 
@@ -183,6 +184,24 @@ void main(void) {
   }
   o = (bindMatrix * vec4(o, 1.0)).xyz;
   gl_FragColor = vec4(c + r.z * (o - c), 1.0);
+}` },
+  hook: { samplers: ['src', 'factor'], uniforms: ['hookMatrix', 'hookInverse', 'falloffPrm', 'center'], body: `
+uniform mat4 hookMatrix; uniform mat4 hookInverse; uniform vec4 falloffPrm; uniform vec3 center;
+float falloffOf(int kind, float t) {
+  if (kind == 2) return t; if (kind == 3) return 3.0 * t * t - 2.0 * t * t * t;
+  if (kind == 4) return sqrt(2.0 * t - t * t); if (kind == 5) return sqrt(t);
+  if (kind == 6) return t * (2.0 - t); if (kind == 7) return t * t; return 1.0;
+}
+void main(void) {
+  int v = selfIndex(); if (float(v) >= outCount) discard;
+  vec3 p = fetch(src, v).xyz; float f = fetch(factor, v).x; int kind = int(falloffPrm.x);
+  if (f != 0.0 && kind != 0) {
+    vec3 d = p - center;
+    if (falloffPrm.z > 0.5) d = (hookInverse * vec4(d, 0.0)).xyz;
+    float l = length(d);
+    f = l >= falloffPrm.y ? 0.0 : f * falloffOf(kind, 1.0 - l / falloffPrm.y);
+  }
+  gl_FragColor = vec4(p + f * ((hookMatrix * vec4(p, 1.0)).xyz - p), 1.0);
 }` },
   faceNormals: { samplers: ['src', 'ranges', 'idx'], uniforms: [], body: `
 void main(void) {
@@ -413,6 +432,23 @@ export class GlDeformer {
       },
     };
     return pass;
+  }
+
+  compileHOOK(step, rest, count) {
+    const t = hookTables(step, count);
+    const tex = this.dataTexture(Float32Array.from({ length: count * 4 }, (_, i) => (i % 4 ? 0 : t.factor[i / 4])), count);
+    const out = this.target(count), wrapper = this.kernel('hook'), M = new Float32Array(16), I = Float32Array.from(step.inverse);
+    return {
+      out,
+      run: (src) => {
+        M.set(hookMatrix(this.inst, this.deform.mesh, step));
+        this.draw(wrapper, out, (e) => {
+          e.setTexture('src', src); e.setTexture('factor', tex);
+          e.setMatrices('hookMatrix', M); e.setMatrices('hookInverse', I);
+          e.setFloat4('falloffPrm', t.falloff[0], t.falloff[1], t.falloff[2], 0); e.setFloat3('center', step.center[0], step.center[1], step.center[2]);
+        });
+      },
+    };
   }
 
   // The target's evaluated positions come from the CPU (targets.js, once per evaluate) and are uploaded each frame.
