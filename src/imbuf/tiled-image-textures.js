@@ -19,7 +19,7 @@ const FIRST = 1001;
 function tileBuffer(pointer, number) {
   const p = x.image_tile_buffer(pointer, number) >>> 0;
   if (!p) return null;
-  const [width, height, bytes, floats, byteKind] = new Int32Array(x.memory.buffer, p, 6);
+  const [width, height, bytes, floats, byteKind] = new Int32Array(x.memory.buffer, p >>> 0, 6);
   const float = floats !== 0;
   const pixels = float ? new Float32Array(x.memory.buffer, floats >>> 0, width * height * 4).slice() : new Uint8Array(x.memory.buffer, bytes >>> 0, width * height * 4).slice();
   return { number, width, height, float, srgb: !float && byteKind === SRGB, pixels };
