@@ -125,9 +125,10 @@ function nativeRig(arm, nodeOf, deformed = [], armatureOnly = false) {
     .filter((s, i, all) => all.findIndex((t) => t.mesh === s.mesh && t.lattice === s.lattice && t.step === s.step) === i);
   const objects = {}, meshes = {};
   for (const ob of description.objects) {
-    const node = ob.name !== arm.name && nodeOf(blendData().objects.get(ob.name));
+    const node = ob.name !== arm.name && ob.type !== 'LATTICE' && nodeOf(blendData().objects.get(ob.name));
     // The page places an object it draws at its world matrix, which its parent and constraints have given it already;
-    // one it does not draw (a lattice) the runtime places by its parent (a bone) and constraints.
+    // a lattice, which it does not draw, the runtime places by its parent (a bone) and constraints: Main keeps no world
+    // for one only a modifier reads (Snow's cheek lattices, in a hidden collection, stay where the file saved them).
     Object.assign(ob, { animation_data: null }, (node || ob.name === arm.name) && { parent: null }, node && { constraints: [] });
     if (node) objects[ob.name] = node.id;
   }

@@ -54,6 +54,8 @@ const entity = Object.values(JSON.parse(files['scene.ir.json']).entities).find((
 assert.equal(entity?.implementation, 'native-rig', JSON.stringify(reports.filter((r) => r.type !== 'INFO').map((r) => r.message)));
 assert.ok(!reports.some((r) => /native rig runtime does not run/.test(r.message)), 'the runtime runs every step');
 assert.ok(Object.keys(entity.inputs.native.meshes).includes('Body'), 'the body deforms on the runtime');
+// Not by its node's world, which Main leaves where the file saved it when only a modifier reads the lattice (Snow's cheeks).
+assert.ok(!('Cage' in entity.inputs.native.objects), 'the runtime places the lattice by its bone');
 
 const written = writePackage(files);
 const blend = await (await import(written.url)).load(new NullEngine());
