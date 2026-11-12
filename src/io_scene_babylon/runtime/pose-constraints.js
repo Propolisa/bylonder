@@ -286,7 +286,8 @@ const scenes = new WeakMap();
 const IDENTITY = '';
 
 /**
- * The page's list of poses and bone-reading drivers, run before each frame draws: the poses first.
+ * The page's list of poses and bone-reading drivers, run before each frame draws: the poses first (by their solver's own
+ * pass where it has one, native-solve.js).
  * @param {import('@babylonjs/core').Scene} scene
  * @returns {{ poses: any[], drivers: any[] }}
  */
@@ -294,7 +295,7 @@ function listOf(scene) {
   if (!scenes.has(scene)) {
     const list = { poses: /** @type {any[]} */ ([]), drivers: /** @type {any[]} */ ([]) };
     scenes.set(scene, list);
-    scene.onBeforeRenderObservable.add(() => { list.poses.forEach(apply); list.drivers.forEach(drive); });
+    scene.onBeforeRenderObservable.add(() => { list.poses.forEach((/** @type {any} */ e) => (e.solve.pass ?? apply)(e)); list.drivers.forEach(drive); });
   }
   return scenes.get(scene);
 }

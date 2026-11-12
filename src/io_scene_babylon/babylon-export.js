@@ -259,7 +259,26 @@ function sampledClips(world, nodes, mapped, sampling) {
     return { ...clip, animations: animations.filter(skins).map(({ animation, target }) => ({ animation: isAdditive ? additive(animation, target) : animation, target })) };
   });
   sync.frameChanged(world.animation.time.frame);
-  return clips.filter((clip) => clip.animations.length);
+  return nativeTracks(clips, mapped).filter((clip) => clip.animations.length);
+}
+
+// The clips of a rig on the native runtime with the tracks its page needs: a clip keys such a rig's bones by their own
+// pose, which the runtime reads from the skeleton, and the runtime shapes its B-Bones' segment joints, so neither those
+// nor a bone it holds still in every clip (one value, no clip additive) is keyed: that bone keeps the one it loads with,
+// and the page animates only the bones some clip moves.
+function nativeTracks(clips, mapped) {
+  const native = new Set((mapped.constraints ?? []).filter((c) => c.pose.native).map((c) => c.pose.skeleton));
+  const ofNative = ({ target }) => target instanceof Bone && native.has(target.getSkeleton().id);
+  const joint = (target) => target.getSkeleton().bones.indexOf(target) >= target.getSkeleton().armatureBones;
+  const tracks = clips.flatMap((clip) => clip.animations.map((track) => ({ clip, ...track }))).filter((track) => ofNative(track) && !joint(track.target));
+  const values = new Map();
+  for (const { clip, animation, target } of tracks) {
+    const keys = animation.getKeys(), still = clip.blend === 'REPLACE' && keys.every((k) => k.value.equalsWithEpsilon(keys[0].value, 1e-6));
+    const seen = values.get(target);
+    values.set(target, still && (seen === undefined || (seen && seen.equalsWithEpsilon(keys[0].value, 1e-6))) ? keys[0].value : null);
+  }
+  const left = new Set([...values].filter(([, value]) => value).map(([target]) => target));
+  return clips.map((clip) => ({ ...clip, animations: clip.animations.filter((track) => !ofNative(track) || !(left.has(track.target) || joint(track.target))) }));
 }
 
 const ANIMATION_TYPES = { Vector2: Animation.ANIMATIONTYPE_VECTOR2, Vector3: Animation.ANIMATIONTYPE_VECTOR3, Color3: Animation.ANIMATIONTYPE_COLOR3, Color4: Animation.ANIMATIONTYPE_COLOR4, Quaternion: Animation.ANIMATIONTYPE_QUATERNION };
