@@ -472,6 +472,7 @@ function poseAnimations(world, mappings, bake, sampling, scene, bases = new Set(
         continue;
       }
       for (const [name, distance] of stack.deviation) report('INFO', `${name}: deformed live by the native rig runtime, within ${distance.toPrecision(2)} m of Blender's evaluated mesh`);
+      for (const { mesh, lattice, step } of entity.native?.skipped ?? []) report('WARNING', `${mesh}: the native rig runtime does not run ${lattice}'s ${step} modifier, so the lattice deforms it without it`);
       curves.push(...own.flat());
       constraints.push({ armature: scene.nodeOf(mapping.arm)?.id, pose: entity });
       stack.moved.forEach((bone) => posed.add(bone));

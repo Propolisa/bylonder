@@ -114,6 +114,9 @@ function nativeRig(arm, nodeOf, deformed = []) {
     return !deform.unsupported.length && deform.geo.base.length === evaluated?.verts_num * 3 && d.node.getTotalVertices() === drawnVertices(evaluated).length;
   });
   if (runs.length < drawn.length) description = describe(runs);
+  // What the runtime skips in the stacks of the lattices the meshes it deforms read (their points deform apart).
+  const skipped = runs.flatMap((d) => [...d.ob.modifiers].filter((m) => m.type === 'LATTICE' && m.object && shown(d.ob).has(m.name))
+    .flatMap((m) => { const at = program.objectIndex.get(m.object.name); return at === undefined ? [] : compileDeform(program, at).unsupported.map((step) => ({ mesh: d.ob.name, lattice: m.object.name, step })); }));
   const objects = {}, meshes = {};
   for (const ob of description.objects) {
     Object.assign(ob, { parent: null, animation_data: null });
@@ -125,7 +128,7 @@ function nativeRig(arm, nodeOf, deformed = []) {
     meshes[d.ob.name] = d.node.id;
   }
   const { packed, arrays } = packDescription(description);
-  return { description: new TextEncoder().encode(JSON.stringify(packed)), arrays, armature: arm.name, objects, meshes, published: [...driven(arm, description), ...drivenKeys(keyed, description)] };
+  return { description: new TextEncoder().encode(JSON.stringify(packed)), arrays, armature: arm.name, objects, meshes, skipped, published: [...driven(arm, description), ...drivenKeys(keyed, description)] };
 }
 // The armature's and its pose bones' custom properties the rig's drivers set (a corrective's input the rig computes),
 // which the runtime hands back to the page's controls after each solve so the page's drivers read them: each one's path

@@ -130,11 +130,19 @@ function surfaceBind(m) {
     normal_distance: Float32Array.from(distance), indices: Int32Array.from(indices), weights: Float32Array.from(weights),
     matrix: Float32Array.from({ length: 16 }, (_, k) => view.getFloat32(at + FALLOFF + 24 + k * 4, true)) };
 }
-const modifier = (m) => { const coords = bindCoords(m), bind = surfaceBind(m); return { ...rna(m), ...(coords && { bind_coords: coords }), ...(bind && { bind }) }; };
+const modifier = (m) => { const coords = bindCoords(m), bind = surfaceBind(m); return { ...rna(m), ...(coords && { bind_coords: coords }), ...(bind && { bind }), ...hook(m) }; };
+// A Hook's vertex indices (an empty dynamic array reads as a number).
+const hook = (m) => (m.type === 'HOOK' ? { vertex_indices: Array.isArray(m.vertex_indices) ? m.vertex_indices : [] } : {});
 
-const latticeData = (lt) => ({ points_u: lt.points_u, points_v: lt.points_v, points_w: lt.points_w, interpolation_type_u: lt.interpolation_type_u,
-  interpolation_type_v: lt.interpolation_type_v, interpolation_type_w: lt.interpolation_type_w, vertex_group: lt.vertex_group,
-  points: [...lt.points].map((p) => ({ co: [...p.co], co_deform: [...p.co_deform] })) });
+// A lattice's points and, as a mesh's, its object's vertex groups (each point's weight), which its Hooks and its own
+// vertex group read.
+const latticeData = (ob) => {
+  const lt = ob.data, points = [...lt.points], groups = [...ob.vertex_groups].map((g) => ({ name: g.name, weights: new Array(points.length).fill(0) }));
+  points.forEach((p, i) => { for (const { group, weight } of p.groups) if (groups[group]) groups[group].weights[i] = weight; });
+  return { points_u: lt.points_u, points_v: lt.points_v, points_w: lt.points_w, interpolation_type_u: lt.interpolation_type_u,
+    interpolation_type_v: lt.interpolation_type_v, interpolation_type_w: lt.interpolation_type_w, vertex_group: lt.vertex_group,
+    points: points.map((p) => ({ co: [...p.co], co_deform: [...p.co_deform] })), vertex_groups: groups };
+};
 
 // An F-Curve as the runtime reads it (README, FCurve).
 const fcurve = (fc) => ({ data_path: fc.data_path, array_index: fc.array_index, extrapolation: fc.extrapolation, auto_smoothing: fc.auto_smoothing,
@@ -187,7 +195,7 @@ export function rigDescription(arm, meshes, meshOf, keyed = []) {
       for (const pb of ob.pose.bones) for (const c of pb.constraints) if (c.type === 'ACTION') use(c.action);
       return { ...out, data: { name: ob.data.name, bones: [...ob.data.bones].map(bone) }, pose: { ik_solver: ob.pose.ik_solver, bones: [...ob.pose.bones].map(poseBone) } };
     }
-    if (ob.type === 'LATTICE') return { ...out, data: latticeData(ob.data), modifiers: [...ob.modifiers].map(rna) };
+    if (ob.type === 'LATTICE') return { ...out, data: latticeData(ob), modifiers: [...ob.modifiers].map(modifier) };
     if (ob.type === 'MESH' && deformed.has(ob.name)) return { ...out, data: meshData(ob, meshOf(ob)), modifiers: [...ob.modifiers].map(modifier) };
     // A mesh only its shape keys' drivers run for: the Key's and its blocks' names and values, no geometry.
     if (ob.type === 'MESH' && key) return { ...out, data: { shape_keys: { name: key.name, key_blocks: [...key.key_blocks].map((kb) => ({ name: kb.name, value: kb.value, slider_min: kb.slider_min,
