@@ -45,7 +45,7 @@ const entity = Object.values(JSON.parse(files['scene.ir.json']).entities).find((
 assert.equal(entity?.implementation, 'native-rig', 'a rig with an Action constraint runs on the native runtime');
 assert.deepEqual(Object.keys(entity.inputs.native.meshes), ['Body'], 'the body, whose stack Babylon cannot skin, deforms on the runtime');
 const groups = JSON.parse(/const ANIMATION_GROUPS = (.*);\n/.exec(files['scene.js'])[1]);
-assert.deepEqual(groups.flatMap((g) => g.targetedAnimations).filter((t) => /^Rig /.test(t.targetId) && !t.targetId.includes('#') && t.animation.keys.length > 1).map((t) => t.targetId), [],
+assert.deepEqual(groups.flatMap((g) => [...g.targetedAnimations.filter((t) => t.animation.keys.length > 1).map((t) => t.targetId), ...(g.bylonderTracks?.targets ?? [])]).filter((id) => /^Rig /.test(id) && !id.includes('#')), [],
   'no bone is sampled');
 
 const written = writePackage(files);

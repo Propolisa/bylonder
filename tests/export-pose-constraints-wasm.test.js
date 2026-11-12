@@ -32,7 +32,8 @@ assert.deepEqual(Object.keys(entity.inputs.influences).sort(), ['forearm.L', 'fo
 assert.ok('buffer' in entity.inputs.kernels, 'the rig compiled once into scene.bin');
 assert.deepEqual(entity.inputs.segments, ['tail'], 'the kernels bend the tail, its animated B-Bone shape fed from its controls');
 const groups = JSON.parse(/const ANIMATION_GROUPS = (.*);\n/.exec(files['scene.js'])[1]);
-const sampled = groups.flatMap((g) => g.targetedAnimations).filter((t) => /^Rig /.test(t.targetId) && t.animation.keys.length > 1).map((t) => t.targetId);
+// The tracks that move, in JSON or in a group's table of scene.bin.
+const sampled = groups.flatMap((g) => [...g.targetedAnimations.filter((t) => t.animation.keys.length > 1).map((t) => t.targetId), ...(g.bylonderTracks?.targets ?? [])]).filter((id) => /^Rig /.test(id));
 const joints = Array.from({ length: 9 }, (_, k) => `Rig tail#${k}`);
 assert.deepEqual(sampled, joints, "no bone is sampled, only the tail's segment joints");
 

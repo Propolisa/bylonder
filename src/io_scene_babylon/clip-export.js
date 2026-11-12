@@ -229,18 +229,20 @@ function exactKeys(animation, bin) {
 }
 
 /**
- * Clips' bone matrices in scene.bin instead of JSON: compressed within `mm` (above), or exact with `mm` 0. Gives the
- * groups to write; each such animation has no keys, and `bylonderKeys` (indices of `bin`): { frames, values } exact, or
- * { frames, rotation, location, scale } with the location's and scale's ranges.
+ * Bone matrices in scene.bin instead of JSON, in one track table per group: a clip's compressed within `mm` (above), or
+ * exact with `mm` 0; the timeline's exact, as it plays the scene. Gives the groups to write; each such animation has no
+ * keys, and `bylonderKeys` (indices of `bin`): { frames, values } exact, or { frames, rotation, location, scale } with the
+ * location's and scale's ranges.
  */
 export function binaryClipKeys(groups, bin, mm = 1) {
   const bound = bounds(mm);
-  return groups.map((group) => (!isClip(group) ? group : trackTable({ ...group, targetedAnimations: group.targetedAnimations.map((t) => {
+  return groups.map((group) => trackTable({ ...group, targetedAnimations: group.targetedAnimations.map((t) => {
     const { animation } = t;
-    if (animation.dataType !== Animation.ANIMATIONTYPE_MATRIX || !animation.keys.length) return t;
+    // A timeline's track of one key (a bone held still) stays as it is: the table holds what moves.
+    if (animation.dataType !== Animation.ANIMATIONTYPE_MATRIX || !animation.keys.length || (!isClip(group) && animation.keys.length < 2)) return t;
     // What Babylon's Animation.Parse needs, the rest left to its defaults: a clip has thousands of tracks.
     const { property, dataType, framePerSecond, loopBehavior } = animation, slim = { name: '', property, dataType, framePerSecond, loopBehavior, keys: [] };
-    if (!mm || animation.keys.length < 2) return { ...t, animation: { ...slim, bylonderKeys: exactKeys(animation, bin) } };
+    if (!mm || !isClip(group) || animation.keys.length < 2) return { ...t, animation: { ...slim, bylonderKeys: exactKeys(animation, bin) } };
     const all = animation.keys.map((key) => decompose(key.values)), allFrames = animation.keys.map((key) => key.frame);
     const kept = reduce(all, allFrames, bound), keys = kept.map((i) => all[i]);
     const location = quantize(keys.map((k) => k.t), 3), scaled = keys.some((k) => k.s.some((v) => Math.abs(v - 1) > bound.scale));
@@ -249,12 +251,12 @@ export function binaryClipKeys(groups, bin, mm = 1) {
       frames: bin.add(Float32Array.from(kept, (i) => allFrames[i])), rotation: bin.add(smallestThree(keys.map((k) => k.q))),
       location: bin.add(location.out), locationRange: [location.min, location.extent],
       ...(scale && { scale: bin.add(scale.out), scaleRange: [scale.min, scale.extent] }) } } };
-  }) }, bin)));
+  }) }, bin));
 }
 
-// A clip's bone tracks as one table of scene.bin, a row each, in place of thousands of JSON objects: what they share
+// A group's bone tracks as one table of scene.bin, a row each, in place of thousands of JSON objects: what they share
 // (property, type, rate, loop) once, and per row the track's target (its index in `targets`, kept as JSON once per
-// clip), its arrays' indices (-1 where it has none), whether it scales, and its location's and scale's ranges.
+// group), its arrays' indices (-1 where it has none), whether it scales, and its location's and scale's ranges.
 const COLUMNS = ['frames', 'values', 'rotation', 'location', 'scale'], ROW = COLUMNS.length + 1 + 12;
 function trackTable(group, bin) {
   const tracks = group.targetedAnimations.filter((t) => t.animation.bylonderKeys), rest = group.targetedAnimations.filter((t) => !t.animation.bylonderKeys);
