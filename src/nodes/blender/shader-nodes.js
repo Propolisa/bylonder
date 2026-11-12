@@ -806,6 +806,8 @@ function finalWorld(material) {
   instances.autoConfigure(material);
   const bones = helper(material, '__bones', (name) => new BonesBlock(name));
   wire(instances.output, bones.world);
+  // Babylon's autoConfigure leaves the extra influences unwired, which a mesh skinned by more than 4 bones needs.
+  for (const name of ['matricesIndicesExtra', 'matricesWeightsExtra']) wire(attributeBlock(material, name, T.Vector4).output, bones[name]);
   bones.autoConfigure(material);
   return bones;
 }

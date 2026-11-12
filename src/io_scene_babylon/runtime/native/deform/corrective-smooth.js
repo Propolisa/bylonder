@@ -25,10 +25,11 @@ export function bindCorrectiveSmooth(program, ob, m, geo) {
   const factor = new Float64Array(nv), mask = maskWeights(geo, m);
   for (let v = 0; v < nv; v++) factor[v] = (m.use_pin_boundary && boundary[v] ? 0 : 1) * (m.factor ?? 0.5) * (mask ? mask[v] : 1);
   const settings = { iterations: m.iterations ?? 5, scale: m.scale ?? 1, lengthWeighted: m.smooth_type === 'LENGTH_WEIGHTED', onlySmooth: !!m.use_only_smooth };
-  const step = { neighbours, corners, factor, ...settings };
-  // Rest: the mesh's own positions (rest_source ORCO), smoothed once.
-  step.rest = base;
-  step.restSmooth = smooth(base, step);
+  const step = { neighbours, corners, faces, factor, ...settings };
+  // Rest: the stored bind positions with rest_source BIND (bind_coords, the modifier's input mesh at bind time), else
+  // the mesh's own positions (ORCO).
+  step.rest = m.rest_source === 'BIND' && m.bind_coords ? Float64Array.from(m.bind_coords) : base;
+  step.restSmooth = smooth(step.rest, step);
   return step;
 }
 
@@ -81,13 +82,18 @@ export function runCorrectiveSmooth(inst, mesh, step, cur) {
     const cs = step.corners[v];
     if (!cs.length) continue;
     const off = [R[v * 3] - Rs[v * 3], R[v * 3 + 1] - Rs[v * 3 + 1], R[v * 3 + 2] - Rs[v * 3 + 2]];
+    // Each corner's rotated offset weighs pi minus the corner's angle in the smoothed deformed mesh.
     const acc = [0, 0, 0];
+    let total = 0;
     for (const [prev, next] of cs) {
       const Fr = cornerFrame(Rs, v, prev, next), Fd = cornerFrame(Ds, v, prev, next);
+      const e1 = norm(sub(Ds, next, v)), e2 = norm(sub(Ds, prev, v));
+      const w = Math.PI - Math.acos(Math.max(-1, Math.min(1, e1[0] * e2[0] + e1[1] * e2[1] + e1[2] * e2[2])));
       const local = Fr.map((c) => c[0] * off[0] + c[1] * off[1] + c[2] * off[2]); // Fr^T off
-      for (let a = 0; a < 3; a++) acc[a] += Fd[0][a] * local[0] + Fd[1][a] * local[1] + Fd[2][a] * local[2];
+      for (let a = 0; a < 3; a++) acc[a] += w * (Fd[0][a] * local[0] + Fd[1][a] * local[1] + Fd[2][a] * local[2]);
+      total += w;
     }
-    for (let a = 0; a < 3; a++) out[v * 3 + a] += (step.scale * acc[a]) / cs.length;
+    if (total) for (let a = 0; a < 3; a++) out[v * 3 + a] += (step.scale * acc[a]) / total;
   }
   return out;
 }

@@ -5,7 +5,8 @@
 // and every deformed mesh takes the fastest path that covers its modifier stack:
 //   - shape keys and Armature modifiers only: Babylon's skinning (RigSkeleton bone texture, B-Bone joints) or the dual
 //     quaternion plugin, and morph targets;
-//   - other stacks on WebGPU: the compute deformer (skin, stencils, lattice, corrective smooth);
+//   - other stacks: on WebGPU the compute deformer, on WebGL 2 the fragment-pass deformer (skin, stencils, lattice,
+//     corrective smooth, normals);
 //   - anything else: the CPU stack, written into the vertex buffer.
 // Objects' world matrices go to their TransformNodes (frozen for the frame), in the description's coordinates mapped
 // by `axis` (Blender to scene) when given.
@@ -14,6 +15,7 @@ import { compileDeform } from '../deform/mesh.js';
 import { RigSkin } from './skin.js';
 import { RigMorphs } from './morph.js';
 import { GpuDeformer, CpuDeformer, gpuSupported } from './gpu-deform.js';
+import { GlDeformer, glSupported } from './gl-deform.js';
 import { Matrix } from '@babylonjs/core/Maths/math.vector.js';
 import { mul, invert } from '../math.js';
 
@@ -58,11 +60,15 @@ export class BabylonRig {
         return { kind: skin.binding.dq ? 'dual-quaternion plugin' : 'skeleton', update: () => { skin.update(); morphs?.update(); } };
       }
     }
-    if (webgpu && gpuSupported(deform).supported && !this.axis) {
-      const gpu = new GpuDeformer(this.scene.getEngine(), this.rig, deform, mesh);
+    if (webgpu && gpuSupported(deform).supported) {
+      const gpu = new GpuDeformer(this.scene.getEngine(), this.rig, deform, mesh, { axis: this.axis });
       return { kind: 'webgpu compute', update: () => gpu.update(), ready: gpu.whenReady() };
     }
-    const cpu = new CpuDeformer(this.rig, deform, mesh);
+    if (!webgpu && this.scene.getEngine().webGLVersion >= 2 && glSupported(deform).supported) {
+      const gl = new GlDeformer(this.scene.getEngine(), this.rig, deform, mesh, { axis: this.axis });
+      return { kind: 'webgl2 passes', update: () => gl.update(), ready: gl.whenReady() };
+    }
+    const cpu = new CpuDeformer(this.rig, deform, mesh, { axis: this.axis });
     return { kind: 'cpu', update: () => cpu.update() };
   }
 

@@ -106,15 +106,6 @@ function handleEnd(end, bone, ctx, rest, space, Lp) {
   return { d, roll, hb };
 }
 
-const bezier = (p0, p1, p2, p3, t) => {
-  const u = 1 - t;
-  return [0, 1, 2].map((i) => u * u * u * p0[i] + 3 * u * u * t * p1[i] + 3 * u * t * t * p2[i] + t * t * t * p3[i]);
-};
-const bezierTangent = (p0, p1, p2, p3, t) => {
-  const u = 1 - t;
-  return [0, 1, 2].map((i) => 3 * u * u * (p1[i] - p0[i]) + 6 * u * t * (p2[i] - p1[i]) + 3 * t * t * (p3[i] - p2[i]));
-};
-
 export function bboneJoints(bone, ctx, rest, debug = null) {
   const n = bone.bbone_segments ?? 1;
   const M = ctx.matrix(bone.index, rest);
@@ -149,43 +140,75 @@ export function bboneJoints(bone, ctx, rest, debug = null) {
   const hlen = Lp / (3 * Math.cos(phi / 4) ** 2);
   const h1 = add(scaleV(d1, hlen * easeIn), [v.bbone_curveinx * S[0], 0, v.bbone_curveinz * S[2]]);
   const h2 = add(scaleV(d2, -hlen * easeOut), [v.bbone_curveoutx * S[0], 0, v.bbone_curveoutz * S[2]]);
-  const P0 = [0, 0, 0], P1 = h1, P3 = [0, Lp, 0], P2 = add(P3, h2);
   if (debug) Object.assign(debug, { h1, h2, roll1, roll2, S, d1, d2 });
-  // Arc length table over 32 steps.
-  const dist = [0];
-  let prev = P0;
+  // The curve P0 = 0, P1 = h1, P2 = P3 + h2, P3 = (0, Lp, 0), as scalars; arc length table over SAMPLES steps.
+  const p1x = h1[0], p1y = h1[1], p1z = h1[2], p2x = h2[0], p2y = Lp + h2[1], p2z = h2[2];
+  const dist = DIST;
+  dist[0] = 0;
+  let qx = 0, qy = 0, qz = 0;
   for (let i = 1; i <= SAMPLES; i++) {
-    const p = bezier(P0, P1, P2, P3, i / SAMPLES);
-    dist.push(dist[i - 1] + len(sub(p, prev)));
-    prev = p;
+    const t = i / SAMPLES, u = 1 - t, b1 = 3 * u * u * t, b2 = 3 * u * t * t, b3 = t * t * t;
+    const x = b1 * p1x + b2 * p2x, y = b1 * p1y + b2 * p2y + b3 * Lp, z = b1 * p1z + b2 * p2z;
+    dist[i] = dist[i - 1] + Math.sqrt((x - qx) ** 2 + (y - qy) ** 2 + (z - qz) ** 2);
+    qx = x; qy = y; qz = z;
   }
-  const segLen = Array.from({ length: n }, (_, k) => (n > 1 ? scaleIn[1] ** (1 - k / (n - 1)) * scaleOut[1] ** (k / (n - 1)) : 1));
-  const totalSeg = segLen.reduce((a, b) => a + b, 0);
+  // Segment lengths scale from Scale In Y to Scale Out Y.
+  let totalSeg = 0;
+  for (let k = 0; k < n; k++) totalSeg += segLength(scaleIn[1], scaleOut[1], k, n);
   const out = new Float64Array((n + 1) * 16);
   let acc = 0;
   for (let j = 0; j <= n; j++) {
-    if (j) acc += segLen[j - 1];
+    if (j) acc += segLength(scaleIn[1], scaleOut[1], j - 1, n);
     const c = dist[SAMPLES] * acc / totalSeg;
     let i = 1;
     while (i < SAMPLES && dist[i] < c) i++;
     const span = dist[i] - dist[i - 1];
-    const t = (i - 1 + (span > 0 ? (c - dist[i - 1]) / span : 0)) / SAMPLES;
-    const pos = bezier(P0, P1, P2, P3, t);
-    let tan = bezierTangent(P0, P1, P2, P3, t);
-    if (!len(tan)) tan = sub(P2, P0);
-    if (!len(tan)) tan = [0, 1, 0];
+    // Clamped: rounding past t = 1 would reverse a zero-length end handle's tangent.
+    const t = Math.min(1, (i - 1 + (span > 0 ? (c - dist[i - 1]) / span : 0)) / SAMPLES), u = 1 - t;
+    const b1 = 3 * u * u * t, b2 = 3 * u * t * t, b3 = t * t * t;
+    const px = b1 * p1x + b2 * p2x, py = b1 * p1y + b2 * p2y + b3 * Lp, pz = b1 * p1z + b2 * p2z;
+    const c0 = 3 * u * u, c1 = 6 * u * t, c2 = 3 * t * t;
+    let tx = c0 * p1x + c1 * (p2x - p1x) - c2 * p2x, ty = c0 * p1y + c1 * (p2y - p1y) + c2 * (Lp - p2y), tz = c0 * p1z + c1 * (p2z - p1z) - c2 * p2z;
+    // A zero-length handle: the tangent's limit at that end.
+    if (!(tx || ty || tz)) {
+      if (t < 1) { tx = p2x; ty = p2y; tz = p2z; } else { tx = -p1x; ty = Lp - p1y; tz = -p1z; }
+      if (!(tx || ty || tz)) ty = 1;
+    }
     const roll = roll1 + (roll2 - roll1) * j / n;
-    const R = compose3(arc([0, 1, 0], normalize(tan)), rotY(roll));
     const sx = scaleIn[0] + (scaleOut[0] - scaleIn[0]) * j / n, sz = scaleIn[2] + (scaleOut[2] - scaleIn[2]) * j / n;
-    const cols = [scaleV(R[0], sx), R[1], scaleV(R[2], sz)];
-    // To bone space: diag(S)^-1 @ J @ diag(S).
-    const o = j * 16;
-    for (let cc = 0; cc < 3; cc++) for (let r = 0; r < 3; r++) out[o + cc * 4 + r] = cols[cc][r] * S[cc] / S[r];
-    for (let r = 0; r < 3; r++) out[o + 12 + r] = pos[r] / S[r];
-    out[o + 15] = 1;
+    jointInto(out, j * 16, tx, ty, tz, roll, sx, sz, S, px, py, pz);
   }
   return out;
 }
+
+const DIST = new Float64Array(SAMPLES + 1);
+const segLength = (yin, yout, k, n) => (n > 1 ? yin ** (1 - k / (n - 1)) * yout ** (k / (n - 1)) : 1);
+
+// Joint matrix in bone space: R = arc(Y, tangent) @ rotY(roll), X and Z columns scaled by sx, sz, at (px, py, pz) in
+// the scaled bone space; written as diag(S)^-1 @ J @ diag(S).
+function jointInto(out, o, tx, ty, tz, roll, sx, sz, S, px, py, pz) {
+  const l = Math.sqrt(tx * tx + ty * ty + tz * tz);
+  tx /= l; ty /= l; tz /= l;
+  // arc(Y, t) as axis-angle (arc above): axis normalize(Y x t) = (tz, 0, -tx), angle acos(ty).
+  let ax = 0, ay = 0, az = 1, angle = 0;
+  if (ty < -1 + 1e-12) { ax = 0; ay = 0; az = -1; angle = Math.PI; }
+  else if (ty <= 1 - 1e-12) { const k = Math.sqrt(tz * tz + tx * tx) || 1; ax = tz / k; az = -tx / k; angle = Math.acos(ty); }
+  const c = Math.cos(angle), s = Math.sin(angle), v = 1 - c;
+  // A (columns), as axisAngleCols.
+  const a00 = v * ax * ax + c, a01 = v * ax * ay + s * az, a02 = v * ax * az - s * ay;
+  const a10 = v * ax * ay - s * az, a11 = v * ay * ay + c, a12 = v * ay * az + s * ax;
+  const a20 = v * ax * az + s * ay, a21 = v * ay * az - s * ax, a22 = v * az * az + c;
+  // R = A @ rotY(roll): rotY columns (cr, 0, -sr), (0, 1, 0), (sr, 0, cr).
+  const cr = Math.cos(roll), sr = Math.sin(roll);
+  const R = JOINT;
+  R[0] = (a00 * cr - a20 * sr) * sx; R[1] = (a01 * cr - a21 * sr) * sx; R[2] = (a02 * cr - a22 * sr) * sx;
+  R[3] = a10; R[4] = a11; R[5] = a12;
+  R[6] = (a00 * sr + a20 * cr) * sz; R[7] = (a01 * sr + a21 * cr) * sz; R[8] = (a02 * sr + a22 * cr) * sz;
+  for (let cc = 0; cc < 3; cc++) for (let r = 0; r < 3; r++) out[o + cc * 4 + r] = R[cc * 3 + r] * S[cc] / S[r];
+  out[o + 3] = out[o + 7] = out[o + 11] = 0;
+  out[o + 12] = px / S[0]; out[o + 13] = py / S[1]; out[o + 14] = pz / S[2]; out[o + 15] = 1;
+}
+const JOINT = new Float64Array(9);
 
 // The context bboneJoints reads, over a RigInstance (pose: final pose matrices; rest: rest matrices).
 export function bboneContext(inst) {
@@ -197,6 +220,7 @@ export function bboneContext(inst) {
       if (p >= 0 && b.use_connect && P.connectedChild[p] < 0) P.connectedChild[p] = b.index;
     }
   }
+  const posed = byBone(inst.poseValues), edit = byBone(inst.boneData);
   return {
     bones: P.bones,
     matrix: (b, rest) => (rest ? inst.restView[b] : inst.poseView[b]),
@@ -205,23 +229,26 @@ export function bboneContext(inst) {
     indexOf: (arm, name) => P.objects[arm].boneIndex.get(name) ?? -1,
     scale: (b) => Array.from(inst.scale.subarray(b * 3, b * 3 + 3)),
     // Pose and edit B-Bone values with this instance's driven ones over the description's.
-    posed: (bone) => overlay(bone.pose, inst.poseValues, bone.index),
-    edit: (bone) => overlay(bone, inst.boneData, bone.index),
+    posed: (bone) => overlay(bone.pose, posed, bone.index),
+    edit: (bone) => overlay(bone, edit, bone.index),
   };
 }
 
-function overlay(base, values, b) {
-  if (!values?.size) return base;
-  let out = null;
-  for (const [key, v] of values) {
-    const [i, prop] = key.split('/');
-    if (+i !== b) continue;
-    (out ??= { ...base })[prop] = v;
+// Driven values ("bone/prop" keys) grouped by bone index.
+function byBone(values) {
+  const out = new Map();
+  for (const [key, v] of values ?? []) {
+    const i = key.indexOf('/'), b = +key.slice(0, i);
+    if (!out.has(b)) out.set(b, []);
+    out.get(b).push(key.slice(i + 1), v);
   }
-  return out ?? base;
+  return out;
 }
 
-function rotY(a) {
-  const c = Math.cos(a), s = Math.sin(a);
-  return [[c, 0, -s], [0, 1, 0], [s, 0, c]];
+function overlay(base, grouped, b) {
+  const list = grouped.get(b);
+  if (!list) return base;
+  const out = { ...base };
+  for (let i = 0; i < list.length; i += 2) out[list[i]] = list[i + 1];
+  return out;
 }

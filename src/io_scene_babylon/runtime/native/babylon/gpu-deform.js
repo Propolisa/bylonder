@@ -5,7 +5,7 @@
 // joints), Mask / Mirror / Subdivision (stencils), Lattice, Corrective Smooth, then vertex normals; the last buffer is
 // the mesh's position vertex buffer. Static data (influences, stencils, neighbours, corner offsets) is built once from
 // the rest geometry; per frame only joint matrices and small parameter buffers are uploaded. WebGL 2 and anything the
-// kernels do not cover use src/deform/mesh.js on the CPU (`CpuDeformer` below), which is also the reference.
+// kernels do not cover run on the CPU (`CpuDeformer` below: src/deform/cpu.js, checked against src/deform/mesh.js).
 import { ComputeShader } from '@babylonjs/core/Compute/computeShader.js';
 import '@babylonjs/core/Engines/WebGPU/Extensions/engine.computeShader.js';
 import { StorageBuffer } from '@babylonjs/core/Buffers/storageBuffer.js';
@@ -13,8 +13,7 @@ import { VertexBuffer } from '@babylonjs/core/Buffers/buffer.js';
 import { Constants } from '@babylonjs/core/Engines/constants.js';
 import { buildBinding, jointMatrices, dualQuatData, MAX_INFLUENCES } from '../deform/binding.js';
 import { latticeFrame } from '../deform/lattice.js';
-import { deformMesh, drawnPositions } from '../deform/mesh.js';
-import { vertexNormals } from '../deform/displace.js';
+import { CpuStack } from '../deform/cpu.js';
 import { applyShapeKeys } from '../deform/shape-keys.js';
 import { mulAffine, invertAffine } from '../rig/m4.js';
 import { applyStencil } from '../deform/topology.js';
@@ -152,6 +151,47 @@ fn spline(kind : u32, t : f32) -> vec4<f32> {
   }
   dst.v[v] = vec4<f32>(p + f * s, 1.0);
 }`,
+  xform: `${HEADER}
+@group(0) @binding(0) var<storage, read> src : P;
+@group(0) @binding(1) var<storage, read_write> dst : P;
+@group(0) @binding(2) var<storage, read> axis : array<mat4x4<f32>>;
+@compute @workgroup_size(${WG}) fn main(@builtin(global_invocation_id) id : vec3<u32>) {
+  let v = id.x; if (v >= arrayLength(&dst.v)) { return; }
+  let w = src.v[v].w;
+  dst.v[v] = vec4<f32>((axis[0] * vec4<f32>(src.v[v].xyz, w)).xyz, w);
+}`,
+  faceNormals: `${HEADER}
+@group(0) @binding(0) var<storage, read> src : P;
+@group(0) @binding(1) var<storage, read_write> dst : P;
+@group(0) @binding(2) var<storage, read> start : array<u32>;
+@group(0) @binding(3) var<storage, read> idx : array<u32>;
+@compute @workgroup_size(${WG}) fn main(@builtin(global_invocation_id) id : vec3<u32>) {
+  let f = id.x; if (f >= arrayLength(&dst.v)) { return; }
+  var n = vec3<f32>(0.0);
+  let s = start[f]; let e = start[f + 1u];
+  for (var i = s; i < e; i++) {
+    let a = src.v[idx[i]].xyz; let b = src.v[idx[select(i + 1u, s, i + 1u == e)]].xyz;
+    n += vec3<f32>((a.y - b.y) * (a.z + b.z), (a.z - b.z) * (a.x + b.x), (a.x - b.x) * (a.y + b.y));
+  }
+  dst.v[f] = vec4<f32>(n / max(length(n), 1e-30), 0.0);
+}`,
+  vertexNormals: `${HEADER}
+@group(0) @binding(0) var<storage, read> src : P;
+@group(0) @binding(1) var<storage, read_write> dst : P;
+@group(0) @binding(2) var<storage, read> start : array<u32>;
+@group(0) @binding(3) var<storage, read> corners : array<vec4<u32>>;
+@group(0) @binding(4) var<storage, read> faceN : P;
+@compute @workgroup_size(${WG}) fn main(@builtin(global_invocation_id) id : vec3<u32>) {
+  let v = id.x; if (v >= arrayLength(&dst.v)) { return; }
+  let p = src.v[v].xyz; var n = vec3<f32>(0.0);
+  for (var k = start[v]; k < start[v + 1u]; k++) {
+    let c = corners[k];
+    let e1 = src.v[c.y].xyz - p; let e2 = src.v[c.z].xyz - p;
+    let cosA = dot(e1, e2) / max(length(e1) * length(e2), 1e-30);
+    n += acos(clamp(cosA, -1.0, 1.0)) * faceN.v[c.x].xyz;
+  }
+  dst.v[v] = vec4<f32>(n / max(length(n), 1e-30), 0.0);
+}`,
   correct: `${HEADER}
 @group(0) @binding(0) var<storage, read> src : P;
 @group(0) @binding(1) var<storage, read_write> dst : P;
@@ -166,13 +206,16 @@ fn frame(v : vec3<f32>, prev : vec3<f32>, next : vec3<f32>) -> mat3x3<f32> {
 }
 @compute @workgroup_size(${WG}) fn main(@builtin(global_invocation_id) id : vec3<u32>) {
   let v = id.x; if (v >= arrayLength(&dst.v)) { return; }
-  let p = src.v[v].xyz; var acc = vec3<f32>(0.0);
-  let count = start[v + 1u] - start[v];
+  let p = src.v[v].xyz; var acc = vec3<f32>(0.0); var total = 0.0;
   for (var k = start[v]; k < start[v + 1u]; k++) {
     let a = corners[k * 2u]; let off = corners[k * 2u + 1u].xyz;
-    acc += frame(p, src.v[u32(a.x)].xyz, src.v[u32(a.y)].xyz) * off;
+    let prev = src.v[u32(a.x)].xyz; let next = src.v[u32(a.y)].xyz;
+    // weight: pi minus the corner's angle in the smoothed deformed mesh
+    let w = 3.14159265358979 - acos(clamp(dot(normalize(next - p), normalize(prev - p)), -1.0, 1.0));
+    acc += w * (frame(p, prev, next) * off);
+    total += w;
   }
-  if (count > 0u) { acc = acc * (prm[0] / f32(count)); }
+  if (total > 0.0) { acc = acc * (prm[0] / total); }
   dst.v[v] = vec4<f32>(p + acc, 1.0);
 }`,
 };
@@ -185,6 +228,9 @@ const BINDINGS = {
   lattice: bind(['src', 'dst', 'disp', 'mats', 'prm', 'mask']),
   smooth: bind(['src', 'dst', 'start', 'nb', 'factor']),
   correct: bind(['src', 'dst', 'start', 'corners', 'prm']),
+  faceNormals: bind(['src', 'dst', 'start', 'idx']),
+  xform: bind(['src', 'dst', 'axis']),
+  vertexNormals: bind(['src', 'dst', 'start', 'corners', 'faceN']),
 };
 
 // Whether the GPU deformer covers a compiled deform (else CpuDeformer).
@@ -197,8 +243,10 @@ export function gpuSupported(deform) {
   return { supported: !reasons.length, reasons };
 }
 
+// `axis` (column-major 4x4 or a Babylon Matrix): maps the description's object space to the mesh's local coordinates
+// (a page's Babylon axes); positions and normals are written through it.
 export class GpuDeformer {
-  constructor(engine, inst, deform, mesh) {
+  constructor(engine, inst, deform, mesh, { axis = null } = {}) {
     this.engine = engine; this.inst = inst; this.deform = deform; this.mesh = mesh;
     this.passes = [];
     let rest = deform.shapeKeys ? applyShapeKeys(inst, deform) : deform.base;
@@ -212,6 +260,9 @@ export class GpuDeformer {
       cur = out; count = pass.count ?? count;
       rest = pass.rest ?? rest;
     }
+    // Normals from the welded deformed mesh (angle-weighted face normals, as the CPU path), when the mesh has them.
+    const welded = cur;
+    if (mesh.isVerticesDataPresent(VertexBuffer.NormalKind) && deform.geo.faces.length) this.compileNormals(welded, count);
     // draw_vertices: a last gather pass writes one position per Babylon vertex.
     if (deform.draw) {
       const st = { start: Int32Array.from({ length: deform.draw.length + 1 }, (_, i) => i), src: deform.draw, weight: new Float64Array(deform.draw.length).fill(1), flip: new Uint8Array(deform.draw.length), count: deform.draw.length };
@@ -220,9 +271,60 @@ export class GpuDeformer {
       this.passes.push({ ...pass, src: cur, dst: out, n: st.count });
       cur = out; count = st.count;
     }
+    if (axis) {
+      const m = Float32Array.from(axis.m ?? axis), buf = this.buffer(m), cs = this.newShader('xform');
+      const out = this.positions(count);
+      this.passes.push({ cs, buffers: { axis: buf }, update: () => {}, src: cur, dst: out, n: count });
+      cur = out;
+      if (this.normals) {
+        // Normals: the same 3x3 (an axis map is a rotation or a reflection), w = 0 so no translation.
+        const nOut = this.positions(this.deform.draw ? this.deform.draw.length : count), nIn = this.normals, prev = this.normalPass;
+        this.normalPass = () => { prev(); this.dispatch(cs, { src: nIn, dst: nOut, axis: buf }, this.deform.draw ? this.deform.draw.length : count); };
+        this.normals = nOut;
+      }
+    }
     this.output = cur;
     this.count = count;
     mesh.setVerticesBuffer(new VertexBuffer(engine, cur.getBuffer(), VertexBuffer.PositionKind, false, false, 4, false, 0, 3));
+    if (this.normals) mesh.setVerticesBuffer(new VertexBuffer(engine, this.normals.getBuffer(), VertexBuffer.NormalKind, false, false, 4, false, 0, 3));
+  }
+
+  // Face normals, then per welded vertex the angle-weighted sum over its corners, then gathered per drawn vertex.
+  compileNormals(welded, count) {
+    const faces = this.deform.geo.faces, fStart = new Uint32Array(faces.length + 1), fIdx = [];
+    faces.forEach((f, i) => { fStart[i] = fIdx.length; fIdx.push(...f); });
+    fStart[faces.length] = fIdx.length;
+    const corners = Array.from({ length: count }, () => []);
+    faces.forEach((f, fi) => f.forEach((v, i) => corners[v].push(fi, f[(i + f.length - 1) % f.length], f[(i + 1) % f.length], 0)));
+    const cStart = new Uint32Array(count + 1), cData = [];
+    corners.forEach((c, v) => { cStart[v] = cData.length / 4; cData.push(...c); });
+    cStart[count] = cData.length / 4;
+    const faceN = this.positions(faces.length), vertexN = this.positions(count);
+    const fBuffers = { start: this.buffer(fStart), idx: this.buffer(Uint32Array.from(fIdx)) };
+    const vBuffers = { start: this.buffer(cStart), corners: this.buffer(Uint32Array.from(cData.length ? cData : [0, 0, 0, 0])), faceN };
+    const fCs = this.newShader('faceNormals'), vCs = this.newShader('vertexNormals');
+    let out = vertexN, gather = null;
+    const draw = this.deform.draw;
+    if (draw) {
+      const st = { start: Int32Array.from({ length: draw.length + 1 }, (_, i) => i), src: draw, weight: new Float64Array(draw.length).fill(1), flip: new Uint8Array(draw.length), count: draw.length };
+      gather = this.compileStencil({ stencil: st }, new Float64Array(count * 3));
+      out = this.positions(draw.length);
+    }
+    this.normals = out;
+    this.normalPass = () => {
+      this.dispatch(fCs, { src: welded, dst: faceN, ...fBuffers }, faces.length);
+      this.dispatch(vCs, { src: welded, dst: vertexN, ...vBuffers }, count);
+      if (gather) this.dispatch(gather.cs, { src: vertexN, dst: out, ...gather.buffers }, draw.length);
+    };
+  }
+
+  // Normals read back (tests): Float32Array of xyz per drawn vertex.
+  async readNormals() {
+    this.engine.flushFramebuffer?.();
+    const raw = await this.normals.read(undefined, undefined, undefined, true), n = raw.byteLength / 16;
+    const f = new Float32Array(raw.buffer, raw.byteOffset, n * 4), out = new Float32Array(n * 3);
+    for (let v = 0; v < n; v++) out.set(f.subarray(v * 4, v * 4 + 3), v * 3);
+    return out;
   }
 
   positions(count, data) {
@@ -368,6 +470,7 @@ export class GpuDeformer {
       if (p.run) p.run(p.src, p.dst);
       else this.dispatch(p.cs, { src: p.src, dst: p.dst, ...p.buffers }, p.n);
     }
+    this.normalPass?.();
   }
 
   // Positions read back (tests): Float32Array of xyz.
@@ -399,16 +502,16 @@ function cornerFrame(P, v, prev, next) {
 
 // The CPU path with the same interface: the stack on the CPU, written into the mesh's positions each frame.
 export class CpuDeformer {
-  constructor(inst, deform, mesh) { this.inst = inst; this.deform = deform; this.mesh = mesh; }
+  constructor(inst, deform, mesh, { axis = null } = {}) {
+    this.mesh = mesh;
+    this.stack = new CpuStack(inst, deform, { axis, normals: mesh.isVerticesDataPresent(VertexBuffer.NormalKind) });
+  }
+  // Normals come from the welded mesh (angle-weighted face normals), so seams split for UVs stay smooth.
   update() {
-    const welded = deformMesh(this.inst, this.deform), pos = drawnPositions(this.deform, welded);
-    this.mesh.updateVerticesData(VertexBuffer.PositionKind, Float32Array.from(pos), false, false);
-    // Normals from the welded mesh (angle-weighted face normals), so seams split for UVs stay smooth.
-    if (this.mesh.isVerticesDataPresent(VertexBuffer.NormalKind) && this.deform.geo.faces.length) {
-      const n = drawnPositions(this.deform, vertexNormals(welded, this.deform.geo.faces));
-      this.mesh.updateVerticesData(VertexBuffer.NormalKind, Float32Array.from(n), false, false);
-    }
-    return pos;
+    const { positions, normals } = this.stack;
+    this.stack.run();
+    this.mesh.updateVerticesData(VertexBuffer.PositionKind, positions, false, false);
+    if (normals) this.mesh.updateVerticesData(VertexBuffer.NormalKind, normals, false, false);
+    return positions;
   }
 }
-

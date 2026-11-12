@@ -7,8 +7,9 @@ import { idStruct, pointerOf } from '../python/bpy_rna.js';
 import { babylonMatrix } from '../blenkernel/main-view.js';
 import { modifierStack } from '../modifiers/stack.js';
 import { registerRuntime, runtimeOf, APPROXIMATION, FALLBACK } from './runtimes.js';
+import { report } from '../windowmanager/wm-reports.js';
 import { drivenPose, livePose } from '../io_scene_babylon/live-curves.js';
-import { livePoseConstraints } from '../io_scene_babylon/pose-export.js';
+import { livePoseConstraints, ownMatrix } from '../io_scene_babylon/pose-export.js';
 import { keyedVertices } from './key-blocks.js';
 import { useDualQuaternionSkinning } from '../io_scene_babylon/runtime/dual-quaternion-skinning.js';
 import { appliedRests, shownStack, smoothByAngle } from './applied-rest.js';
@@ -17,7 +18,7 @@ import { appliedRests, shownStack, smoothByAngle } from './applied-rest.js';
 const CONTRIBUTION = 0.0001;
 const address = (struct) => pointerOf(struct)?.[2] ?? 0;
 const matrix = (values) => babylonMatrix(Array.from(values));
-const issue = (kind, ob, path, message) => ({ kind, setting: `bpy.data.objects["${ob.name}"].${path}`, message: `${ob.name}: ${message}` });
+const issue = (kind, ob, path, message) => ({ kind, ob: ob.name, setting: `bpy.data.objects["${ob.name}"].${path}`, message: `${ob.name}: ${message}` });
 
 // The armature's bones, parents first, each with its rest and evaluated pose matrices in armature space (Babylon's
 // axes); then, with `segments`, the joints of each deforming B-Bone's segments (Blender's bbone_segment_matrix, in the
@@ -189,12 +190,13 @@ function skeletonOf(name, bones, space, scene) {
 const restSignature = (bones, space) => JSON.stringify([bones.map((b) => [b.name, b.parent, Array.from(b.rest.m)]), Array.from(space.m)]);
 
 // An armature object (RNA's Object) mapped into Babylon in `scene`: a Skeleton per armature-to-mesh matrix and each
-// skinned mesh object's skin, by Object address; `issues` of the last update. update() poses the skeletons from Main's
+// skinned mesh object's skin, by Object address; `apart`, the mesh objects it deforms that Babylon cannot skin for their
+// modifier stack alone (the native rig runtime may deform them), by Object address; `issues` of the last update. update() poses the skeletons from Main's
 // evaluated pose and rebuilds what changed (bones, weights, placement, influencers).
 export function mapArmature(arm, scene) {
   const skeletons = new Map(), skins = new Map();
   let bones = bonesOf(arm);
-  const mapping = { arm, skeletons, skins, issues: [], update, dispose };
+  const mapping = { arm, skeletons, skins, apart: new Map(), issues: [], update, dispose };
 
   // objects: the mesh objects to look at (RNA's Objects); meshOf(ob): the Mesh Babylon draws for one (its corners are
   // the skin's vertices); changed(ob): whether its Mesh changed since the last update; fallbacks(ob): issues of the
@@ -204,12 +206,14 @@ export function mapArmature(arm, scene) {
     bones = bonesOf(arm, segmentsOf(arm));
     const armatureWorld = matrix(arm.matrix_world);
     const issues = [], deformed = new Map(), rests = new Map();
+    mapping.apart.clear();
     for (const ob of objects.filter((o) => o.type === 'MESH' && armatureModifiers(o, arm).mine.length)) {
       const rest = restOf(ob);
       if (rest) rests.set(address(ob), rest);
-      const own = [...meshFallbacks(ob, arm, rest?.applied), ...fallbacks(ob)];
-      issues.push(...own);
-      if (!own.length) deformed.set(address(ob), ob);
+      const stack = meshFallbacks(ob, arm, rest?.applied), view = fallbacks(ob);
+      issues.push(...stack, ...view);
+      if (!stack.length && !view.length) deformed.set(address(ob), ob);
+      else if (!view.length) mapping.apart.set(address(ob), ob);
     }
     const used = new Set();
     for (const [key, ob] of deformed) {
@@ -419,14 +423,17 @@ function issues(arm) {
 // `constraints`, the bones they move posed from their own location, rotation and scale; a bone whose own pose is its
 // F-Curves (live-curves.js livePose, checked at each whole frame) has them in `curves`; each bone still sampled while it
 // moves is in `gaps`. `scene`: the nodes (`nodeOf(ob)`, `meshOf(mapping)`, the skinned mesh) the page's constraints read.
-// Sampled in the sampling's pass over the frames (sampling.js sample): gives a function that returns them once it ran.
-function poseAnimations(world, mappings, bake, sampling, scene) {
+// The `bases` mappings' armature bones are keyed by their own location, rotation and scale instead (a clip of a rig the
+// native runtime poses, which solves its constraints and drivers from them). Sampled in the sampling's pass over the
+// frames (sampling.js sample): gives a function that returns them once it ran, `deforms`, the names of the meshes the
+// page's native rig runtime deforms where its pose runs live, and `natives`, the mappings it poses.
+function poseAnimations(world, mappings, bake, sampling, scene, bases = new Set()) {
   const sync = world.mainSync, { fps, frameStart, frameEnd } = sampling.range, current = world.animation.time.frame;
   const animated = (arm) => !!arm.animation_data || [...arm.pose.bones].some((bone) => bone.constraints.length);
   const keys = new Map(), owners = new Map(), stacks = new Map();
   if (!bake && scene) for (const mapping of mappings) {
     const mesh = mapping.skeletons.size === 1 && scene.meshOf(mapping), [skeleton] = mapping.skeletons.values();
-    const stack = mesh && livePoseConstraints(mapping.arm, skeleton, mesh, { nodeOf: scene.nodeOf,
+    const stack = mesh && livePoseConstraints(mapping.arm, skeleton, mesh, { nodeOf: scene.nodeOf, deformed: scene.deformed(mapping),
       meshWorld: () => sync.worldMatrix(mesh), nodeWorld: (id) => sync.worldMatrix(world.scene.getNodeById(id)) });
     if (stack) stacks.set(mapping, stack);
   }
@@ -434,7 +441,8 @@ function poseAnimations(world, mappings, bake, sampling, scene) {
     for (const mapping of mappings) {
       const bones = bonesOf(mapping.arm, segmentsOf(mapping.arm));
       for (const skeleton of mapping.skeletons.values()) {
-        const values = skeleton.bones.map((bone, i) => relative(bones, i, 'pose', skeleton.space));
+        const values = skeleton.bones.map((bone, i) => (bases.has(mapping) && i < skeleton.armatureBones ? ownMatrix(mapping.arm.pose.bones.get(bone.name), bone)
+          : relative(bones, i, 'pose', skeleton.space)));
         skeleton.bones.forEach((bone, i) => {
           if (!keys.has(bone)) { keys.set(bone, []); owners.set(bone, mapping); }
           keys.get(bone).push({ frame, value: values[i] });
@@ -445,7 +453,8 @@ function poseAnimations(world, mappings, bake, sampling, scene) {
   };
   if (mappings.some((m) => animated(m.arm)) && frameEnd > frameStart) sampling.sample(sample);
   else sample(current);
-  return once(finish);
+  return Object.assign(once(finish), { deforms: new Set([...stacks.values()].flatMap((stack) => stack.deforms)),
+    natives: new Set([...stacks].filter(([, stack]) => stack.native).map(([mapping]) => mapping)) });
   function finish() {
     // A stack the page runs where every bone it moves is posed by its own F-Curves, or not animated.
     const curves = [], gaps = [], constraints = [], posed = new Set();
@@ -455,7 +464,11 @@ function poseAnimations(world, mappings, bake, sampling, scene) {
         const whole = keys.get(bone).map((k, i) => ({ ...k, own: stack.own(bone)[i] })).filter((k) => Number.isInteger(k.frame));
         return livePose(mapping.arm, mapping.arm.pose.bones.get(bone.name), bone, whole.map((k) => k.own), whole[0].frame);
       });
-      if (!own || own.some((live) => !live)) continue;
+      if (!own || own.some((live) => !live)) {
+        for (const name of stack.deforms) report('WARNING', `${name}: deformed as Blender at the frame exported, as ${mapping.arm.name}'s pose does not run live`);
+        continue;
+      }
+      for (const [name, distance] of stack.deviation) report('INFO', `${name}: deformed live by the native rig runtime, within ${distance.toPrecision(2)} m of Blender's evaluated mesh`);
       curves.push(...own.flat());
       constraints.push({ armature: scene.nodeOf(mapping.arm)?.id, pose: entity });
       stack.moved.forEach((bone) => posed.add(bone));
@@ -522,22 +535,27 @@ function exportArmatures(world, { bake, sampling, rests = appliedRests() }) {
     mappings.push(state.mapping);
   }
   const nodeOf = (ob) => byOb.get(address(ob))?.node;
-  const posed = poseAnimations(world, mappings, bake, sampling, { nodeOf, meshOf: (m) => byOb.get(m.skins.keys().next().value)?.node });
+  const deformed = (m) => [...m.apart].flatMap(([key, ob]) => { const node = byOb.get(key)?.node;
+    return node ? [{ ob, node, mesh: () => view.blender.mesh(key), evaluated: () => view.blender.evaluatedMesh(key) }] : []; });
+  const posed = poseAnimations(world, mappings, bake, sampling, { nodeOf, deformed, meshOf: (m) => byOb.get(m.skins.keys().next().value)?.node });
+  // A mesh the native runtime deforms is no longer Blender's, whatever its stack.
+  const native = (issues) => [...issues.filter((i) => i.kind !== FALLBACK || !posed.deforms.has(i.ob)),
+    ...[...new Set(issues.map((i) => i.ob))].filter((name) => posed.deforms.has(name)).map((name) => issue(APPROXIMATION, { name }, 'modifiers', 'its modifiers deform on the native rig runtime'))];
   for (const state of temporary) {
     drawSkins({ ...view, world: { animation: { playing: true } } }, state, meshOf);
     for (const key of state.applied.keys()) exporting.add(key);
   }
   return {
-    reports: mappings.map((m) => ({ title: `${m.arm.name}: exported`, issues: [...m.issues.filter((i) => !i.silent), ...skeletonIssues(m, byOb)] })),
+    reports: mappings.map((m) => ({ title: `${m.arm.name}: exported`, issues: native([...m.issues.filter((i) => !i.silent), ...skeletonIssues(m, byOb)]) })),
     get animations() { return posed().animations; },
     get curves() { return posed().curves; },
     get gaps() { return posed().gaps; },
     get constraints() { return posed().constraints; },
     clip(clipSampling, owns) {
-      const owned = mappings.filter((m) => owns(m.arm)), clipPosed = poseAnimations(world, owned, true, clipSampling);
+      const owned = mappings.filter((m) => owns(m.arm)), clipPosed = poseAnimations(world, owned, true, clipSampling, null, posed.natives);
       return once(() => {
         const { animations } = clipPosed();
-        clipBounds(owned, animations, (key) => byOb.get(key)?.node);
+        clipBounds(owned.filter((m) => !posed.natives.has(m)), animations, (key) => byOb.get(key)?.node);
         return animations;
       });
     },

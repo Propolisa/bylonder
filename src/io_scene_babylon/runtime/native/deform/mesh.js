@@ -74,9 +74,12 @@ export function drawnPositions(deform, positions) {
 export function deformMesh(inst, deform) {
   let cur = deform.shapeKeys ? applyShapeKeys(inst, deform) : Float64Array.from(deform.base);
   const ctx = { prevIn: cur, armatureCount: 0 };
-  for (const step of deform.steps) cur = KINDS[step.type].run(inst, deform.mesh, step, cur, ctx);
+  for (const step of deform.steps) cur = runStep(inst, deform, step, cur, ctx);
   return cur;
 }
+
+// One step of the stack on positions `cur` (a new array back); ctx carries Multi Modifier's input between steps.
+export const runStep = (inst, deform, step, cur, ctx) => KINDS[step.type].run(inst, deform.mesh, step, cur, ctx);
 
 // The mirror frame this frame: Mirror Object space from the mesh's object space.
 function runStencil(inst, mesh, step, cur, ctx) {

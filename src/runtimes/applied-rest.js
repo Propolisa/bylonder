@@ -48,8 +48,9 @@ function still(ob, m, animated) {
   return !readsOtherID(m);
 }
 
-// Blender's Smooth by Angle (Object > Shade Auto Smooth), last in the stack: Babylon skins the mesh smooth instead.
-export const smoothByAngle = (m) => m.type === 'NODES' && /^Smooth by Angle/.test(m.node_group?.name ?? '');
+// Blender's Smooth by Angle (Object > Shade Auto Smooth; Auto Smooth in files from Blender 4.1), last in the stack:
+// Babylon skins the mesh smooth instead.
+export const smoothByAngle = (m) => m.type === 'NODES' && /^(Smooth by Angle|Auto Smooth)/.test(m.node_group?.name ?? '');
 // A mesh object's modifiers shown in the viewport, but a last Smooth by Angle.
 export function shownStack(ob) {
   const shown = [...ob.modifiers].filter((m) => m.show_viewport);

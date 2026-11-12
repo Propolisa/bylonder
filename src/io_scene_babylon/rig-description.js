@@ -4,6 +4,9 @@
 // and modifiers), every object those name (targets, lattices, parents), their drivers and the actions they play.
 import { blockData, positions } from '../runtimes/key-blocks.js';
 import { actionFCurves } from './ir-export.js';
+import { pointerOf } from '../python/bpy_rna.js';
+import { blenderModule } from '../bmesh/bmesh-wasm.js';
+import dna from '../makesrna/dna-modifiers.json' with { type: 'json' };
 
 // A matrix (RNA's, column-major, flat or by column) as rows.
 const rows = (m) => { const flat = typeof m[0] === 'object' ? [...m].flatMap((c) => [...c]) : [...m]; return [0, 1, 2, 3].map((r) => [0, 1, 2, 3].map((c) => flat[c * 4 + r])); };
@@ -57,6 +60,18 @@ function meshData(ob, mesh) {
       value: kb.value, slider_min: kb.slider_min, slider_max: kb.slider_max, mute: kb.mute, relative_key: kb.relative_key.name, vertex_group: kb.vertex_group,
       interpolation: kb.interpolation })) } }) };
 }
+
+// CorrectiveSmoothModifierData's bind_coords, their sharing info and bind_coords_num, before lambda (RNA's factor).
+const LAMBDA = dna.CorrectiveSmoothModifier.properties.factor.offset;
+// A Corrective Smooth modifier's positions at its bind (Blender's Bind), which a rest source of BIND smooths toward;
+// RNA does not expose them, so they are read from the ModifierData.
+function bindCoords(m) {
+  if (m.type !== 'CORRECTIVE_SMOOTH' || m.rest_source !== 'BIND' || !m.is_bind) return null;
+  const memory = blenderModule.exports.memory.buffer, view = new DataView(memory), at = pointerOf(m)[2];
+  const coords = view.getUint32(at + LAMBDA - 12, true), count = view.getUint32(at + LAMBDA - 4, true);
+  return coords ? new Float32Array(memory, coords >>> 0, count * 3).slice() : null;
+}
+const modifier = (m) => { const bind = bindCoords(m); return { ...rna(m), ...(bind && { bind_coords: bind }) }; };
 
 const latticeData = (lt) => ({ points_u: lt.points_u, points_v: lt.points_v, points_w: lt.points_w, interpolation_type_u: lt.interpolation_type_u,
   interpolation_type_v: lt.interpolation_type_v, interpolation_type_w: lt.interpolation_type_w, vertex_group: lt.vertex_group,
@@ -112,15 +127,15 @@ export function rigDescription(arm, meshes, meshOf) {
       return { ...out, data: { name: ob.data.name, bones: [...ob.data.bones].map(bone) }, pose: { ik_solver: ob.pose.ik_solver, bones: [...ob.pose.bones].map(poseBone) } };
     }
     if (ob.type === 'LATTICE') return { ...out, data: latticeData(ob.data), modifiers: [...ob.modifiers].map(rna) };
-    if (ob.type === 'MESH' && deformed.has(ob.name)) return { ...out, data: meshData(ob, meshOf(ob)), modifiers: [...ob.modifiers].map(rna) };
+    if (ob.type === 'MESH' && deformed.has(ob.name)) return { ...out, data: meshData(ob, meshOf(ob)), modifiers: [...ob.modifiers].map(modifier) };
     return out;
   });
   return { schema: 'bylonder-rig', version: 1, objects: description, drivers, actions: [...actions.values()] };
 }
 
 // The description with its bulk as typed arrays: a mesh's vertices and faces, its vertex groups' weights and its shape
-// keys' offsets from the basis (each where non-zero), and F-Curves' keys, as `{ array }` indices into `arrays`, which the
-// page reads back (runtime/native-rig.js unpackDescription).
+// keys' offsets from the basis (each where non-zero), the vertices it draws, its Corrective Smooth binds, and F-Curves'
+// keys, as `{ array }` indices into `arrays`, which the page reads back (runtime/native-rig.js unpackDescription).
 export function packDescription(description) {
   const arrays = [], buffer = (array) => ({ array: arrays.push(array) - 1 });
   const sparse = (values, basis = null) => {
@@ -131,6 +146,7 @@ export function packDescription(description) {
   const mesh = (data) => {
     const basis = data.shape_keys?.key_blocks[0]?.co;
     return { ...data, vertices: buffer(Float32Array.from(data.vertices.flat())), edges: buffer(Int32Array.from(data.edges.flat())),
+      ...(data.draw_vertices && { draw_vertices: buffer(data.draw_vertices) }),
       faces: { offsets: buffer(Int32Array.from([0, ...data.faces.map(((n) => (f) => (n += f.length))(0))])), indices: buffer(Int32Array.from(data.faces.flat())) },
       vertex_groups: data.vertex_groups.map(({ name, weights }) => ({ name, count: weights.length, ...sparse(weights) })),
       ...(data.shape_keys && { shape_keys: { ...data.shape_keys, key_blocks: data.shape_keys.key_blocks.map((kb, i) => ({ ...kb, count: kb.co.length,
@@ -138,7 +154,8 @@ export function packDescription(description) {
   };
   const curve = ({ keyframe_points: keys, ...fc }) => ({ ...fc, keys: buffer(Float32Array.from(keys.flatMap((k) => [...k.co, ...k.handle_left, ...k.handle_right, k.back, k.amplitude, k.period]))),
     enums: keys.map((k) => [k.interpolation, k.easing, k.handle_left_type, k.handle_right_type]) });
-  const packed = { ...description, objects: description.objects.map((ob) => (ob.type === 'MESH' && ob.data?.vertices ? { ...ob, data: mesh(ob.data) } : ob)),
+  const modifiers = (list) => list?.map((m) => (m.bind_coords ? { ...m, bind_coords: buffer(m.bind_coords) } : m));
+  const packed = { ...description, objects: description.objects.map((ob) => (ob.type === 'MESH' && ob.data?.vertices ? { ...ob, data: mesh(ob.data), modifiers: modifiers(ob.modifiers) } : ob)),
     drivers: description.drivers.map(curve), actions: description.actions.map((a) => ({ ...a, fcurves: a.fcurves.map(curve) })) };
   return { packed, arrays };
 }

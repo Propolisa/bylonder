@@ -9,12 +9,14 @@
 // Not expressible as one linear blend: Preserve Volume, and modifiers stacked without Multi Modifier; for those
 // binding.supported is false with a reason, and deformMesh (armature-modifier.js) is the path.
 import { mulAffine, invertAffine } from '../rig/m4.js';
-import { frameContributions, segmentOf, envelope, dualQuat } from './armature-modifier.js';
+import { frameContributions, segmentOf, envelope } from './armature-modifier.js';
+import { armatureJoints, useBones, updateJoints, updateDualQuats } from './joints.js';
 import { applyShapeKeys } from './shape-keys.js';
 
 export const MAX_INFLUENCES = 8;
 
-export function buildBinding(inst, deform) {
+// { csr: true }: every influence kept, as CSR rows (start, joint, weight; joint -1 is the identity), for the CPU.
+export function buildBinding(inst, deform, { csr = false } = {}) {
   const reasons = [];
   const dq = deform.modifiers.some((m) => m.dq);
   const others = [...new Set(deform.steps.filter((m) => m.type !== 'ARMATURE').map((m) => m.type))];
@@ -78,6 +80,7 @@ export function buildBinding(inst, deform) {
   const renumber = new Map(order.map((old, i) => [old, i]));
   joints.splice(0, joints.length, ...order.map((i) => joints[i]));
   cur = cur.map((m) => new Map([...m].map(([j, w]) => [j < 0 ? j : renumber.get(j), w])));
+  if (csr) return { joints, ...csrRows(cur), dq, supported: !reasons.length, reasons };
   // Pack: up to MAX_INFLUENCES largest weights per vertex, renormalized (to their sum for dual quaternions), stored
   // by ascending joint.
   const identity = joints.length;
@@ -95,6 +98,16 @@ export function buildBinding(inst, deform) {
   return { joints, indices, weights, influences: used <= 4 ? 4 : 8, overflow, dq, supported: !reasons.length, reasons };
 }
 
+function csrRows(cur) {
+  const start = new Int32Array(cur.length + 1), joint = [], weight = [];
+  cur.forEach((m, v) => {
+    start[v] = joint.length;
+    for (const [j, w] of m) if (w > 0) { joint.push(j); weight.push(w); }
+  });
+  start[cur.length] = joint.length;
+  return { start, joint: Int32Array.from(joint), weight: Float64Array.from(weight) };
+}
+
 const addTo = (m, k, w) => m.set(k, (m.get(k) ?? 0) + w);
 
 function preMatrix(inst, mesh, arm) {
@@ -109,18 +122,34 @@ const transform = (M, a, o) => [
   M[2] * a[o] + M[6] * a[o + 1] + M[10] * a[o + 2] + M[14],
 ];
 
+// Each binding joint's armature (joints.js) and its index there, resolved once per instance.
+function sharedJoints(inst, deform, binding) {
+  if (binding.sharedInst !== inst) {
+    binding.sharedInst = inst;
+    const arms = deform.modifiers.map((mod) => armatureJoints(inst, mod.arm));
+    binding.shared = binding.joints.map((jt) => {
+      const mod = deform.modifiers[jt.mod], J = arms[jt.mod], bone = mod.bones[jt.slot].index;
+      useBones(J, [bone]);
+      return { J, index: J.offset[bone] + jt.seg };
+    });
+  }
+  return binding.shared;
+}
+
 // Joint matrices in the mesh's object space, M = pre^-1 @ D @ pre, written as 16 floats per joint into out
 // (column-major, which is also Babylon's Matrix layout), followed by the identity.
 export function jointMatrices(inst, deform, binding, out = new Float32Array((binding.joints.length + 1) * 16)) {
+  const shared = sharedJoints(inst, deform, binding);
   const perMod = deform.modifiers.map((mod) => {
     const pre = preMatrix(inst, deform.mesh, mod.arm), preInv = new Float64Array(16);
     invertAffine(preInv, 0, pre, 0);
-    return { pre, preInv, contrib: frameContributions(inst, mod) };
+    return { pre, preInv };
   });
   const M = new Float64Array(16);
   binding.joints.forEach((jt, i) => {
-    const { pre, preInv, contrib } = perMod[jt.mod];
-    mulAffine(M, 0, contrib[jt.slot].D[jt.seg], 0, pre, 0);
+    const { pre, preInv } = perMod[jt.mod], { J, index } = shared[i];
+    updateJoints(inst, J);
+    mulAffine(M, 0, J.D, index * 16, pre, 0);
     mulAffine(M, 0, preInv, 0, M, 0);
     for (let k = 0; k < 16; k++) out[i * 16 + k] = M[k];
   });
@@ -133,14 +162,15 @@ export function jointMatrices(inst, deform, binding, out = new Float32Array((bin
 // Dual quaternion data per joint for the GPU (24 floats: q as x, y, z, w; e likewise; the scale matrix S, column-major)
 // and the modifier's pre matrices (armature from mesh space and back).
 export function dualQuatData(inst, deform, binding, out = new Float32Array(binding.joints.length * 24)) {
-  const mod = deform.modifiers[0], contrib = frameContributions(inst, mod);
+  const shared = sharedJoints(inst, deform, binding), mod = deform.modifiers[0];
   const pre = preMatrix(inst, deform.mesh, mod.arm), preInv = new Float64Array(16);
   invertAffine(preInv, 0, pre, 0);
   binding.joints.forEach((jt, i) => {
-    const c = contrib[jt.slot], { q, e, S } = dualQuat(c.D[jt.seg], c.B[jt.seg]), o = i * 24;
-    out[o] = q[1]; out[o + 1] = q[2]; out[o + 2] = q[3]; out[o + 3] = q[0];
-    out[o + 4] = e[1]; out[o + 5] = e[2]; out[o + 6] = e[3]; out[o + 7] = e[0];
-    for (let k = 0; k < 16; k++) out[o + 8 + k] = S[k];
+    const { J, index } = shared[i], d = J.dq, s = index * 24, o = i * 24;
+    updateDualQuats(inst, J);
+    out[o] = d[s + 1]; out[o + 1] = d[s + 2]; out[o + 2] = d[s + 3]; out[o + 3] = d[s];
+    out[o + 4] = d[s + 5]; out[o + 5] = d[s + 6]; out[o + 6] = d[s + 7]; out[o + 7] = d[s + 4];
+    for (let k = 0; k < 16; k++) out[o + 8 + k] = d[s + 8 + k];
   });
   return { data: out, pre, preInv };
 }
