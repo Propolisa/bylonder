@@ -183,8 +183,18 @@ function framed(F, base, i) {
 
 // --- Subdivision Surface ---
 
+// The level a Subdivision Surface or Multires modifier evaluates at (subsurf.md Simplify): with the scene's Simplify
+// on, its levels capped by Max Subdivision (render: render_levels by the render Max), after drivers; Multires also by
+// its total_levels. `simplify`: { enabled, subdivision, subdivision_render } or null.
+export function evaluatedLevel(m, simplify, render = false) {
+  let level = render ? m.render_levels ?? m.levels ?? 1 : m.levels ?? 1;
+  if (m.type === 'MULTIRES' && m.total_levels != null) level = Math.min(level, m.total_levels);
+  const max = render ? simplify?.subdivision_render : simplify?.subdivision;
+  return simplify?.enabled && max != null ? Math.min(level, max) : level;
+}
+
 export function bindSubsurf(program, ob, m, geo) {
-  const levels = m.levels ?? 1, simple = m.subdivision_type === 'SIMPLE', limit = m.use_limit_surface !== false && !simple;
+  const levels = evaluatedLevel(m, program.scene?.simplify), simple = m.subdivision_type === 'SIMPLE', limit = m.use_limit_surface !== false && !simple;
   if (levels <= 0) return null; // level 0: no subdivision (no limit surface either)
   const corners = m.boundary_smooth === 'PRESERVE_CORNERS';
   let rows = Array.from({ length: geo.count }, (_, i) => new Map([[i, 1]]));

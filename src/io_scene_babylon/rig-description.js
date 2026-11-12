@@ -1,10 +1,11 @@
 // A character as the native rig runtime takes it (bylonder-native-rig/, the clean room's babylon-blender-rig, MIT): a
 // description of schema `bylonder-rig` version 1 (its README, Rig description), read from Main by RNA name. It holds
-// the armature with its bones, pose and constraints, the meshes it deforms (their geometry, vertex groups, shape keys
-// and modifiers), every object those name (targets, lattices, parents), their drivers and the actions they play.
+// the scene's Simplify, the armature with its bones, pose and constraints, the meshes it deforms (their geometry,
+// vertex groups, shape keys and modifiers), every object those name (targets, lattices, parents), their drivers and the
+// actions they play.
 import { blockData, positions } from '../runtimes/key-blocks.js';
 import { actionFCurves } from './ir-export.js';
-import { pointerOf } from '../python/bpy_rna.js';
+import { contextStruct, pointerOf } from '../python/bpy_rna.js';
 import { blenderModule } from '../bmesh/bmesh-wasm.js';
 import dna from '../makesrna/dna-modifiers.json' with { type: 'json' };
 
@@ -181,6 +182,9 @@ function named(arm, meshes) {
   return [...all.values()];
 }
 
+// Scene > Simplify's viewport Max Subdivision, which caps Subdivision and Multires levels; null with Simplify off.
+const simplify = ({ render }) => (render.use_simplify ? { enabled: true, subdivision: render.simplify_subdivision } : null);
+
 // The description of an armature (RNA's Object) and the mesh objects it deforms; `meshOf(ob)` gives a mesh object's
 // Mesh as main-sync reads it; `keyed`, mesh objects whose shape keys' drivers the runtime runs (their keys' values
 // published to the page), described by their keys' names alone.
@@ -208,7 +212,7 @@ export function rigDescription(arm, meshes, meshOf, keyed = []) {
       slider_max: kb.slider_max, mute: kb.mute })) } } };
     return out;
   });
-  return { schema: 'bylonder-rig', version: 1, objects: description, drivers, actions: [...actions.values()] };
+  return { schema: 'bylonder-rig', version: 1, scene: { simplify: simplify(contextStruct().scene) }, objects: description, drivers, actions: [...actions.values()] };
 }
 
 // The description with its bulk as typed arrays: a mesh's vertices and faces, its vertex groups' weights and order, its shape
