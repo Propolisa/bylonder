@@ -81,7 +81,8 @@ What File > Export > JavaScript gives per example, ranked by the largest gap fir
 WebGL 2 picture and of the app's Render Image agree with the reference Blender's EEVEE render of the example (its .blend
 at its current frame; none for an example built by code), how much the page agrees with the app (the export parity
 matrix's look, \`--eevee\` adds EEVEE), what the package runs live and
-ships baked (its IR's entities), what the export reports it cannot run, and the top known gap. Written by
+ships baked (its IR's entities), what the export reports it cannot run, and the top known gap. WebGPU pictures are not
+measured here yet: the matrix's WebGPU looks before 7fa3c128 were drawn on the WebGL 2 fallback. Written by
 \`node scripts/export-coverage.mjs\` from the matrix's report and each example's export; do not edit it by hand.
 
 ${rows.length} examples: ${passing} within the look's tolerance (90% of pixels agree, mean difference at most 8 of

@@ -36,7 +36,8 @@ export const TOLERANCES = {
 };
 
 // Failures known and owned, by "<example> <check>" (check: controls, animation, export, look-webgl2, look-webgpu), with a
-// one-line diagnosis guess. They are reported but do not fail the run; one that passes is reported as fixed.
+// one-line diagnosis guess. They are reported but do not fail the run; one that passes is reported as fixed. look-webgpu
+// entries from before 7fa3c128 were drawn on the WebGL 2 fallback (Chromium started without WebGPU) and say so.
 export const KNOWN = {
   'solar look-webgl2': "88.7% of pixels agree: the edges of the stars' point cloud and the glow layer's halos differ (the planets agree)",
   "grease-pencil controls": "the export overflows the stack in Babylon's SceneSerializer (fixed on export-fixes-parity)",
@@ -52,15 +53,15 @@ export const KNOWN = {
   'shape-keys animation': 'shape keys counted twice (live animation agent)',
   "compositor animation": "the Aircraft Light material's animated emission does not play in the page; Tea Break's mesh off 0.02 at frame 89",
   'animation look-webgl2': 'the page skips the Standard view transform, so linear colors reach the screen unencoded (fixed on export-fixes-parity)',
-  'animation look-webgpu': 'the page skips the Standard view transform, so linear colors reach the screen unencoded (fixed on export-fixes-parity)',
+  'animation look-webgpu': 'not measured on WebGPU (drawn on the WebGL 2 fallback before 7fa3c128): the page skips the Standard view transform, so linear colors reach the screen unencoded (fixed on export-fixes-parity)',
   'lava look-webgl2': 'the page skips the Standard view transform, so linear colors reach the screen unencoded (fixed on export-fixes-parity)',
-  'lava look-webgpu': 'the page skips the Standard view transform, so linear colors reach the screen unencoded (fixed on export-fixes-parity)',
-  'city look-webgpu': 'the page skips the Standard view transform, so linear colors reach the screen unencoded (fixed on export-fixes-parity)',
+  'lava look-webgpu': 'not measured on WebGPU (drawn on the WebGL 2 fallback before 7fa3c128): the page skips the Standard view transform, so linear colors reach the screen unencoded (fixed on export-fixes-parity)',
+  'city look-webgpu': 'not measured on WebGPU (drawn on the WebGL 2 fallback before 7fa3c128): the page skips the Standard view transform, so linear colors reach the screen unencoded (fixed on export-fixes-parity)',
   'bouncing-ball look-webgl2': 'Grease Pencil strokes are not exported (fixed on export-grease-pencil), and the view transform',
-  'bouncing-ball look-webgpu': 'Grease Pencil strokes are not exported (fixed on export-grease-pencil), and the view transform',
-  'chess look-webgpu': 'the page does not load: this._light.needCube is not a function (a shadow generator on a light of another class)',
-  'drivers-and-graph-editor look-webgpu': 'the page does not load: this._light.needCube is not a function',
-  "coast look-webgpu": "the app itself fails: the Sky material's shader does not compile on WebGPU",
+  'bouncing-ball look-webgpu': 'not measured on WebGPU (drawn on the WebGL 2 fallback before 7fa3c128): Grease Pencil strokes are not exported (fixed on export-grease-pencil), and the view transform',
+  'chess look-webgpu': 'not measured on WebGPU (drawn on the WebGL 2 fallback before 7fa3c128): the page does not load: this._light.needCube is not a function (a shadow generator on a light of another class)',
+  'drivers-and-graph-editor look-webgpu': 'not measured on WebGPU (drawn on the WebGL 2 fallback before 7fa3c128): the page does not load: this._light.needCube is not a function',
+  "coast look-webgpu": "not measured on WebGPU (drawn on the WebGL 2 fallback before 7fa3c128): the app itself fails: the Sky material's shader does not compile on WebGPU",
   'lumen look-webgl2': "48% of pixels agree: the app's neon follows Lumen's per-frame emission code under motion blur (shutter 0.8), which the page's static emission does not; framing and the lens match",
   'orrery look-webgl2': "78% of pixels agree: the plinth's and floor's reflections and the mechanism's lit parts differ (not yet classified)",
   'compositor look-webgl2': "70% of pixels agree: the page draws its point lights in clusters (all 16) where the app takes 8 per mesh; against EEVEE both agree 59%, the composite grade and the lights the app leaves out differing (lights agent)",
@@ -70,7 +71,7 @@ export const KNOWN = {
   'particle-hair look-webgl2': "73% of pixels agree: the grass strands are thin and aliased in app and page alike, so their pixels land apart; against EEVEE both are paler and brighter than its dark, soft grass (the app's hair shading and anti-aliasing, a known app gap)",
   'hair-dynamics look-webgl2': "22% of pixels agree: the app's tentacles are wider and brighter than the page's, and the water's pattern behind is offset",
   'geometry-nodes look-webgl2': '87% of pixels agree: the page draws no point clouds (the planet clouds, draw/pointcloud.js in the app)',
-  'cube look-webgpu': 'the page is never ready within 180 s (a material never reports ready)',
+  'cube look-webgpu': 'not measured on WebGPU (drawn on the WebGL 2 fallback before 7fa3c128): the page is never ready within 180 s (a material never reports ready)',
   'rigged-character controls': "the tail B-Bone's ease in and out and scale in, set live, do not reshape its segments in the page (from 19a57b3a, next rig agent)",
 };
 // Failures known by what they say, wherever they happen.
