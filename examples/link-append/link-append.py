@@ -6,7 +6,7 @@ instanced along both sides, the bench appended and the cobblestones appended ont
 
 blender -b --factory-startup -P link-append.py   (writes libraries/library.blend and link-append.blend beside this file)
 
-The library is at /libraries/library.blend in Bylonder's file system, where a project keeps its libraries.
+The library is linked by its relative path, //libraries/library.blend, which Blender and Bylonder both resolve.
 """
 import math
 import os
@@ -141,5 +141,6 @@ scene.collection.objects.link(camera)
 scene.camera = camera
 
 bpy.ops.object.select_all(action="DESELECT")
-bpy.data.libraries["library.blend"].filepath = "/libraries/library.blend"
+# Relative with forward slashes on every system, as the module's file system and Blender both read it.
+bpy.data.libraries["library.blend"].filepath = "//libraries/library.blend"
 bpy.ops.wm.save_as_mainfile(filepath=os.path.join(HERE, "link-append.blend"), compress=True, relative_remap=False)

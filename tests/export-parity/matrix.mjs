@@ -188,12 +188,6 @@ async function lookChecks(ids, keys, engines, { prod }) {
   return results;
 }
 
-// Libraries a .blend links where Bylonder's file system keeps them (/libraries/) read from the example's libraries/.
-const LIBRARIES = `for library in bpy.data.libraries:
-    if library.filepath[:11] in ('/libraries/', '/libraries' + os.sep):
-        library.filepath = os.path.join('$FOLDER', 'libraries', library.filepath[11:])
-        library.reload()`;
-
 // The reference Blender's EEVEE render of an example's .blend at its current frame and camera, at a picture's size,
 // cached per .blend and size; null for an example built by code. Its film is opaque, as the app's Render Image shows the
 // world behind the scene.
@@ -206,8 +200,7 @@ function eeveePicture(id, picture) {
   if (existsSync(path)) return path;
   mkdirSync(join(CACHE, id), { recursive: true });
   if (!existsSync(full)) {
-    const script = `import bpy, os
-${LIBRARIES.replace('$FOLDER', fileURLToPath(new URL('.', blend)).replaceAll('\\', '/'))}
+    const script = `import bpy
 s = bpy.context.scene
 s.render.engine = 'BLENDER_EEVEE'
 s.render.film_transparent = False
