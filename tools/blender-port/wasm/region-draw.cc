@@ -740,6 +740,118 @@ void BLF_width_and_height(int fontid, const char *str, size_t str_len, float *r_
   *r_height = BLF_height_max(fontid);
 }
 
+/* port-override: the rest of blf.cc's font API over the page's text metrics (region_text_width), as BLF_width is:
+ * fonts are the browser's, so loading, batching and glyph caches do nothing, and positions within a string are the
+ * measured widths of its prefixes. Text drawn into image buffers (BLF_buffer, BLF_draw_buffer) is not ported. */
+void BLF_aspect(int /*fontid*/, float /*x*/, float /*y*/, float /*z*/) {}
+void BLF_color3f(int fontid, float r, float g, float b) { BLF_color4f(fontid, r, g, b, 1.0f); }
+void BLF_color4f(int fontid, float r, float g, float b, float a)
+{
+  const float rgba[4] = {r, g, b, a};
+  copy_v4_v4(font(fontid).color, rgba);
+}
+void BLF_color3ub(int fontid, unsigned char r, unsigned char g, unsigned char b)
+{
+  const uchar rgb[3] = {r, g, b};
+  BLF_color3ubv(fontid, rgb);
+}
+void BLF_wordwrap(int /*fontid*/, int /*wrap_width*/, BLFWrapMode /*mode*/) {}
+bool BLF_has_glyph(int /*fontid*/, unsigned int /*unicode*/) { return true; }
+bool BLF_is_builtin(int /*fontid*/) { return true; }
+bool BLF_is_loaded_id(int fontid) { return fontid >= 0 && fontid < int(ARRAY_SIZE(fonts)); }
+void BLF_addref_id(int /*fontid*/) {}
+void BLF_unload(const char * /*filepath*/) {}
+void BLF_reset_fonts() {}
+void BLF_exit() {}
+void BLF_batch_discard() {}
+void BLF_batch_draw_flush() {}
+int BLF_default_weight(int /*fontid*/) { return 400; }
+bool BLF_has_variable_weight(int /*fontid*/) { return false; }
+/* The widest glyph stands in as the font's "W". */
+int BLF_width_max(int fontid) { return int(ceilf(BLF_width(fontid, "W", 1))); }
+bool BLF_bounds_max(int fontid, rctf *r_bounds)
+{
+  BLI_rctf_init(r_bounds, 0.0f, float(BLF_width_max(fontid)), region_font_descender(font(fontid).size), region_font_ascender(font(fontid).size));
+  return true;
+}
+void BLF_boundbox(int fontid, const char *str, size_t str_len, rcti *r_box, ResultBLF * /*r_info*/)
+{
+  BLI_rcti_init(r_box, 0, int(ceilf(BLF_width(fontid, str, str_len))), int(region_font_descender(font(fontid).size)), int(region_font_ascender(font(fontid).size)));
+}
+/* The bytes of whole characters from the string's start (or, rstrlen, its end) that fit a width, and their width. */
+size_t BLF_width_to_strlen(int fontid, const char *str, size_t str_len, float width, float *r_width)
+{
+  const size_t len = text_length(str, str_len);
+  size_t fit = 0, i = 0;
+  float fit_width = 0.0f;
+  while (i < len) {
+    BLI_str_utf8_as_unicode_step_safe(str, len, &i);
+    const float w = BLF_width(fontid, str, i);
+    if (w > width) {
+      break;
+    }
+    fit = i, fit_width = w;
+  }
+  if (r_width) {
+    *r_width = fit_width;
+  }
+  return fit;
+}
+size_t BLF_width_to_rstrlen(int fontid, const char *str, size_t str_len, float width, float *r_width)
+{
+  const size_t len = text_length(str, str_len);
+  size_t fit = len;
+  float fit_width = 0.0f;
+  for (size_t i = len; i > 0;) {
+    i = size_t(BLI_str_find_prev_char_utf8(str + i, str) - str);
+    const float w = BLF_width(fontid, str + i, len - i);
+    if (w > width) {
+      break;
+    }
+    fit = i, fit_width = w;
+  }
+  if (r_width) {
+    *r_width = fit_width;
+  }
+  return fit;
+}
+int BLF_str_offset_to_cursor(int fontid, const char *str, size_t str_len, size_t str_offset, int /*cursor_width*/)
+{
+  return int(BLF_width(fontid, str, std::min(str_offset, text_length(str, str_len))));
+}
+/* The offset of the character boundary nearest a position. */
+size_t BLF_str_offset_from_cursor_position(int fontid, const char *str, size_t str_len, int location_x)
+{
+  const size_t len = text_length(str, str_len);
+  size_t best = 0, i = 0;
+  float best_distance = fabsf(float(location_x));
+  while (i < len) {
+    BLI_str_utf8_as_unicode_step_safe(str, len, &i);
+    const float distance = fabsf(BLF_width(fontid, str, i) - float(location_x));
+    if (distance < best_distance) {
+      best = i, best_distance = distance;
+    }
+  }
+  return best;
+}
+bool BLF_str_offset_to_glyph_bounds(int fontid, const char *str, size_t str_offset, rcti *r_glyph_bounds)
+{
+  const size_t len = strlen(str);
+  if (str_offset >= len) {
+    return false;
+  }
+  size_t next = str_offset;
+  BLI_str_utf8_as_unicode_step_safe(str, len, &next);
+  BLI_rcti_init(r_glyph_bounds, int(BLF_width(fontid, str, str_offset)), int(ceilf(BLF_width(fontid, str, next))),
+                int(region_font_descender(font(fontid).size)), int(region_font_ascender(font(fontid).size)));
+  return true;
+}
+Vector<Bounds<int>> BLF_str_selection_boxes(int fontid, const char *str, size_t str_len, size_t sel_start, size_t sel_length)
+{
+  const size_t len = text_length(str, str_len), end = std::min(sel_start + sel_length, len);
+  return {Bounds<int>(int(BLF_width(fontid, str, std::min(sel_start, len))), int(ceilf(BLF_width(fontid, str, end))))};
+}
+
 void BLF_draw(int fontid, const char *str, size_t str_len, ResultBLF * /*r_info*/)
 {
   const Font &f = font(fontid);

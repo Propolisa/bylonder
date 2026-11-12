@@ -93,6 +93,7 @@ path = [
   "src/windowmanager/wm-event-system.js",
   "tools/docs/record.mjs",
   "tools/blender-port/wasm/armature-draw.cc",
+  "tools/blender-port/wasm/blf-port.cc",
   "tools/blender-port/wasm/compositor-api.cc",
   "tools/blender-port/wasm/draw-mesh.cc",
   "tools/blender-port/wasm/gpu-material-api.cc",
