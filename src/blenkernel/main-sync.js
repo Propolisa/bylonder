@@ -990,6 +990,8 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   if (active) selection?.setActive(active);
   if (ids.read && world.collections) {
     mainView.adoptScene();
+    // A read file's scene without a World renders black behind its objects, as Blender's does, not the page's own.
+    if (!blender.world && world.worlds?.active()?.home === 'BABYLON') world.worlds.unlink();
     ids.read = false;
   }
   // Evaluated from the start, as Blender's window evaluates Main after each event, and what Main already holds drawn; the
