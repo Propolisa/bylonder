@@ -101,6 +101,7 @@ await blend.settled();
 engine.runRenderLoop(() => scene.render());
 window.check = {
   errors,
+  engine: () => (engine.isWebGPU ? 'webgpu' : 'webgl2'),
   ready: () => scene.isReady() && scene.meshes.every((m) => !m.material || m.material.isReady(m)),
   notReady: () => scene.meshes.filter((m) => m.material && !m.material.isReady(m)).map((m) => m.name + ': ' + m.material.name),
   frames: (n) => new Promise((resolve) => { let i = 0; const o = scene.onAfterRenderObservable.add(() => { if (++i >= n) { scene.onAfterRenderObservable.remove(o); resolve(); } }); }),
@@ -165,7 +166,9 @@ export async function appPicture(browser, url, { id, engine, path, exportTo }) {
     writeFileSync(path, Buffer.from(png.split(',')[1], 'base64'));
     await app.frame().locator('.render-result [data-close]').click();
     if (exportTo) await exportPackage(app, exportTo);
-    return { width, height, frame, stats, errors: app.errors.filter((e) => !/^\[vite\]/.test(e)) };
+    // The engine the app drew with, which a fallback from WebGPU would hide.
+    const drew = await app.bylonder((b) => (b.world.scene.getEngine().isWebGPU ? 'webgpu' : 'webgl2'));
+    return { width, height, frame, stats, drew, errors: [...app.errors.filter((e) => !/^\[vite\]/.test(e)), ...(drew !== engine ? [`asked for ${engine}, drew with ${drew}`] : [])] };
   } finally {
     await app.close();
   }
@@ -210,12 +213,15 @@ export async function pagePicture(browser, served, { folder, engine, width, heig
     });
     await page.evaluate(() => window.check.frames(20));
     await page.locator('canvas').screenshot({ path });
-    const errors = [...(await page.evaluate(() => window.check.errors)), ...logs, ...served.missing().map((path) => `404 ${path}`)];
+    // The engine the page drew with: a WebGPU page that fell back to WebGL 2 fails, as it did not check WebGPU.
+    const drew = await page.evaluate(() => window.check.engine());
+    const errors = [...(await page.evaluate(() => window.check.errors)), ...logs, ...served.missing().map((path) => `404 ${path}`),
+      ...(drew !== engine ? [`asked for ${engine}, drew with ${drew}`] : [])];
     const stats = await page.evaluate(() => window.check.stats());
     const legend = await page.evaluate(() => window.check.idLayer());
     await page.evaluate(() => window.check.frames(3));
     await page.locator('canvas').screenshot({ path: idPath });
-    return { errors, stats, legend };
+    return { errors, stats, legend, drew };
   } finally {
     await page.close();
   }

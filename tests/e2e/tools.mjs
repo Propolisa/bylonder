@@ -19,5 +19,7 @@ const GL_BY_PLATFORM = {
 export const E2E_ENGINE = process.env.E2E_ENGINE === 'webgpu' ? 'webgpu' : null;
 export const E2E_CHROME = process.env.E2E_CHROME || undefined;
 const FXC = process.platform === 'win32' && !E2E_CHROME ? ['--disable-dawn-features=use_dxc'] : [];
-const WEBGPU_ARGS = E2E_ENGINE ? ['--enable-unsafe-webgpu', ...FXC, ...(process.platform === 'linux' ? ['--enable-features=Vulkan'] : [])] : [];
+// Always on: an exported page asked for WebGPU makes its own engine whatever the app draws with, and without them
+// Chromium's WebGPU fails to start (no DXC) and the page falls back to WebGL 2.
+const WEBGPU_ARGS = ['--enable-unsafe-webgpu', ...FXC, ...(process.platform === 'linux' ? ['--enable-features=Vulkan'] : [])];
 export const GL_ARGS = [...(GL_BY_PLATFORM[process.platform] ?? []), '--ignore-gpu-blocklist', ...WEBGPU_ARGS];
