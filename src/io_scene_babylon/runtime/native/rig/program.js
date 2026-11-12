@@ -18,6 +18,7 @@ import { poseFromBasisInto } from './inherit.js';
 import { compileDrivers, evaluateDriver, resolveProperty, parsePath } from '../drivers/drivers.js';
 import { compileDeform, deformMesh } from '../deform/mesh.js';
 import { bboneJoints, bboneContext } from '../deform/bbone.js';
+import { bboneSegments } from '../deform/joints.js';
 import { compileAnimations, evaluateAnimation } from '../anim/animation.js';
 
 const BONE_SPACES = new Set(['LOCAL', 'POSE', 'LOCAL_WITH_PARENT']);
@@ -373,6 +374,42 @@ export class RigInstance {
     return this.changedBones ? this.changedBones.subarray(0, this.changedBoneCount) : new Int32Array(0);
   }
 
+  // Bone indices whose local pose (the pose relative to the parent bone's pose; armature space for a root bone)
+  // changed since the previous call, a view valid until the next call; localPoseView[b] holds those local matrices.
+  // Bones that moved only with their parent are not listed (changes under 1e-9 are ignored). The first call lists
+  // every bone.
+  changedLocalPoses() {
+    const P = this.program, n = P.bones.length;
+    if (!this.localPose) {
+      this.localPose = new Float64Array(n * 16).fill(NaN);
+      this.localPoseView = P.bones.map((_, b) => this.localPose.subarray(b * 16, b * 16 + 16));
+      this.localPending = new Uint8Array(n).fill(1);
+      this.localChanged = new Int32Array(n);
+    }
+    const L = this.localPose, T = LOCAL_TMP, pending = this.localPending;
+    let count = 0;
+    for (let b = 0; b < n; b++) {
+      if (!pending[b]) continue;
+      pending[b] = 0;
+      const p = P.parent[b];
+      if (p >= 0) { invertAffine(T, 0, this.pose, p * 16); mulAffine(T, 0, T, 0, this.pose, b * 16); }
+      else for (let i = 0; i < 16; i++) T[i] = this.pose[b * 16 + i];
+      // Recomputing a local pose under a moved parent rounds in the last bits: such a bone did not change.
+      let same = true;
+      for (let i = 0; i < 16; i++) if (!(Math.abs(T[i] - L[b * 16 + i]) <= LOCAL_EPS)) { same = false; break; }
+      if (same) continue;
+      L.set(T, b * 16);
+      this.localChanged[count++] = b;
+    }
+    return this.localChanged.subarray(0, count);
+  }
+
+  // A B-Bone's segment joints after the last evaluate() (bone space, (n + 1) x 16 floats; rest: the rest shape),
+  // the same arrays the deformers use, computed once per evaluate.
+  bboneSegments(b, rest = false) {
+    return bboneSegments(this, b, rest);
+  }
+
   // After writing location, rotation or scale arrays directly.
   touchBone(b) {
     this.dirty[this.program.boneOp[b]] = 1;
@@ -578,6 +615,9 @@ export class RigInstance {
       if (changed[P.boneOp[b]] || (c >= 0 && changed[P.chainOp[c]])) list[n++] = b;
     }
     this.changedBoneCount = n;
+    const lastChanged = (this.boneChangedPass ??= new Int32Array(P.bones.length).fill(this.pass));
+    for (let k = 0; k < n; k++) lastChanged[list[k]] = this.pass;
+    if (this.localPending) for (let k = 0; k < n; k++) this.localPending[list[k]] = 1;
     return count;
   }
 
@@ -761,3 +801,5 @@ export class RigInstance {
     c.members.forEach((x, k) => this.poseView[x].set(result[k]));
   }
 }
+
+const LOCAL_TMP = new Float64Array(16), LOCAL_EPS = 1e-9;

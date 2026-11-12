@@ -38,10 +38,52 @@ export function armatureJoints(inst, arm) {
   return J;
 }
 
+// A B-Bone's segment joints after the last evaluate() (bone space, (n + 1) * 16; `rest`: the rest shape), computed
+// once and shared by the deformers and the page. The rest shape is recomputed only for bones whose edit B-Bone values
+// are driven.
+export function bboneSegments(inst, b, rest = false) {
+  const c = (inst.bboneCache ??= { pose: new Map(), rest: new Map(), pass: NaN, ctx: null, drivenEdit: null });
+  if (c.pass !== inst.pass) {
+    c.pass = inst.pass;
+    c.ctx = bboneContext(inst);
+    c.drivenEdit = inst.boneData?.size ? new Set(Array.from(inst.boneData.keys(), (k) => +k.slice(0, k.indexOf('/')))) : null;
+  }
+  const map = rest ? c.rest : c.pose, e = map.get(b);
+  if (rest) {
+    const stamp = c.drivenEdit?.has(b) ? inst.pass : 'static';
+    if (e?.stamp === stamp) return e.joints;
+    const joints = bboneJoints(inst.program.bones[b], c.ctx, true);
+    map.set(b, { stamp, joints });
+    return joints;
+  }
+  // The pose shape depends on the bone and its handle bones only (driven values wake the bone): kept until one changes.
+  if (e && e.stamp === inst.pass) return e.joints;
+  if (e && inst.boneChangedPass && handlesOf(inst, b).every((h) => inst.boneChangedPass[h] < e.stamp)) { e.stamp = inst.pass; return e.joints; }
+  const joints = bboneJoints(inst.program.bones[b], c.ctx, false);
+  map.set(b, { stamp: inst.pass, joints });
+  return joints;
+}
+
+// The bone and every bone its B-Bone shape reads: parent and connected child (automatic handles), custom handles.
+function handlesOf(inst, b) {
+  const c = (inst.program.bboneHandles ??= new Map());
+  if (!c.has(b)) {
+    const P = inst.program, bone = P.bones[b], arm = P.objects[bone.arm], list = [b];
+    if (P.parent[b] >= 0) list.push(P.parent[b]);
+    for (const k of P.bones) if (P.parent[k.index] === b && k.use_connect) list.push(k.index);
+    for (const end of ['start', 'end']) {
+      const h = bone[`bbone_custom_handle_${end}`], i = h ? arm.boneIndex.get(h) : undefined;
+      if (i !== undefined) list.push(i);
+    }
+    c.set(b, list);
+  }
+  return c.get(b);
+}
+
 export function updateJoints(inst, J) {
   if (J.pass === inst.pass) return;
   J.pass = inst.pass;
-  const ctx = bboneContext(inst), T = TMP, restInv = TMP2;
+  const T = TMP, restInv = TMP2;
   // Rest shapes once, and again each frame for bones whose edit B-Bone values are driven.
   const drivenEdit = inst.boneData?.size ? new Set(Array.from(inst.boneData.keys(), (k) => +k.slice(0, k.indexOf('/')))) : null;
   for (const b of J.bones) {
@@ -56,9 +98,9 @@ export function updateJoints(inst, J) {
       continue;
     }
     // D_j = Pose @ J_j @ Jr_j^-1 @ Rest^-1; B_j = Rest @ Jr_j (armature_modifier.md, B-Bones).
-    const Jp = bboneJoints(b, ctx, false);
+    const Jp = bboneSegments(inst, b.index);
     if (restStale) {
-      const Jr = bboneJoints(b, ctx, true);
+      const Jr = bboneSegments(inst, b.index, true);
       for (let j = 0; j <= n; j++) mulAffine(J.B, (o + j) * 16, rest, 0, Jr, j * 16);
     }
     for (let j = 0; j <= n; j++) {
