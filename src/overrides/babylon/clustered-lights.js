@@ -1,8 +1,8 @@
 // @ts-check
 // SPDX-License-Identifier: MIT OR Apache-2.0
-// Override of Babylon's lights per material: where a scene has more lights than a material's uniform blocks hold, its point and spot lights without shadows are drawn by one ClusteredLightContainer, as EEVEE culls lights in clusters with no cap per material; their falloff is the material's own (Babylon's clusters take no other), not glTF's window at their range, where EEVEE's light has faded to its threshold anyway; goes when Babylon's clustered lights take each light's falloff.
+// Override of Babylon's lights per material: where a scene has more lights than a material's uniform blocks hold, its point and spot lights without shadows are drawn by one ClusteredLightContainer, as EEVEE culls lights in clusters with no cap per material; their falloff is the material's (Babylon's clusters take no other), which the materials set to glTF's window at each light's range, as Bylonder's lights fall off; goes when Babylon's clustered lights take each light's falloff.
 // The scene component, imported for the clustering step it registers.
-import { ClusteredLightContainer, ClusteredLightingSceneComponent, Light } from '@babylonjs/core';
+import { ClusteredLightContainer, ClusteredLightingSceneComponent, Constants, Light } from '@babylonjs/core';
 
 /** @typedef {import('@babylonjs/core').Scene} Scene */
 
@@ -16,6 +16,22 @@ function clusterable(light) {
   const can = ClusteredLightContainer.IsLightSupported(light);
   light.falloffType = falloff;
   return can;
+}
+
+/**
+ * A material falling off the lights that take no falloff of their own (the clustered ones, which Babylon falls off by
+ * the material's) by glTF's window at each light's range, as Bylonder's lights fall off (light-home.js), not by the
+ * physical inverse square, which lights far past a light's reach.
+ * @param {import('@babylonjs/core').Material} material
+ */
+function windowed(material) {
+  const pbr = /** @type {any} */ (material), blocks = /** @type {any} */ (material).attachedBlocks ?? [];
+  if ('useGLTFLightFalloff' in pbr && !pbr.useGLTFLightFalloff) pbr.useGLTFLightFalloff = true;
+  for (const block of blocks) {
+    if (!('lightFalloff' in block) || block.lightFalloff === 1) continue;
+    block.lightFalloff = 1;
+    material.markAsDirty(Constants.MATERIAL_AllDirtyFlag);
+  }
 }
 
 /**
@@ -53,5 +69,12 @@ export function clusterLights(scene, lights, budget, exact = () => false) {
     light.falloffType = Light.FALLOFF_DEFAULT;
     container.addLight(light);
   }
+  // Every material, those a page adds later too, windows the clustered lights.
+  let materials = -1;
+  scene.onBeforeRenderObservable.add(() => {
+    if (scene.materials.length === materials) return;
+    materials = scene.materials.length;
+    scene.materials.forEach(windowed);
+  });
   return { container, cutPerTile: joining.filter(exact) };
 }
