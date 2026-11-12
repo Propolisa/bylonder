@@ -545,10 +545,15 @@ export async function load(target) {
 }
 
 // Once the scene's shaders are compiled, so that a page's first frames do not stall on them: a frame drawn (its time
-// held) sets what each material compiles for. At once without a canvas (Node's Null engine compiles nothing).
+// held) sets what each material compiles for, within the engine's frame: an engine that submits a frame's commands at
+// its end would send them with a later frame, to a canvas texture that has expired, and the page stays black. At once
+// without a canvas (Node's Null engine compiles nothing).
 async function shadersCompiled(scene) {
-  if (!scene.getEngine().getRenderingCanvas() || !scene.activeCamera) return;
+  const engine = scene.getEngine();
+  if (!engine.getRenderingCanvas() || !scene.activeCamera) return;
+  engine.beginFrame();
   scene.render(true, true);
+  engine.endFrame();
   await scene.whenReadyAsync(true);
 }
 

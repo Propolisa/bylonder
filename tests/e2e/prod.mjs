@@ -3,14 +3,29 @@
 // topbar menus, the 3D View header menus and the context menus open with items, every workspace tab shows a screen in
 // its object mode, the app is cross-origin isolated (Blender's threads) without the server's headers, examples made in
 // Blender open with their objects in the scene sync, an #example= link opens its
-// example and the manual (docs.html) shows its feature pages with their media. CI runs it after the build and before
+// example, an exported page draws on WebGPU and the manual (docs.html) shows its feature pages with their media. CI runs it after the build and before
 // deploying, since some failures only happen in the production build.
 // usage: npm run build && npm run test:prod   (E2E_URL checks a running server instead)
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
 import { BOOT, chromium, openApp, runtimeCoverage, startServer } from "./app.mjs";
 
+// A page of an exported package: its tenth frame read back, how much of it is lit.
+const WEBGPU_PAGE = `<!doctype html><canvas id="c" width="320" height="200" style="display:block"></canvas><script type="module">
+import { createEngine, load } from './scene.js';
+const engine = await createEngine(document.getElementById('c')), blend = await load(engine);
+let frames = 0;
+blend.scene.onAfterRenderObservable.add(async () => {
+  if (++frames !== 10) return;
+  const pixels = await engine.readPixels(0, 0, 320, 200);
+  let lit = 0;
+  for (let i = 0; i < pixels.length; i += 4) if (pixels[i] + pixels[i + 1] + pixels[i + 2] > 30) lit++;
+  window.drawn = { webgpu: !!engine.isWebGPU, lit: lit / (pixels.length / 4) };
+});
+engine.runRenderLoop(() => blend.scene.render());
+</script>`;
 const TOPBAR = ["TOPBAR_MT_file", "TOPBAR_MT_edit", "TOPBAR_MT_render", "TOPBAR_MT_window", "TOPBAR_MT_help"];
 const started = Date.now();
 const steps = [];
@@ -205,6 +220,33 @@ try {
     });
     assert.ok(serialized, "Texture.serialize writes the data");
     assert.ok(written.every((v, i) => Math.abs(v - straight[i] * 255) <= 2), `Blender's straight pixel ${straight}, written ${written}`);
+  });
+
+  // An exported page draws with WebGPU where the browser has it (tools.mjs starts Chromium's): its engine is WebGPU's
+  // and its frame shows the scene, as a first frame drawn outside the engine's frame once left every page black there.
+  await step("an exported page draws on WebGPU", async () => {
+    const [{ openExample }, { exportModule }, { bundledFiles }, { servePackages }] = await Promise.all([import("../open-example.js"),
+      import("../../src/io_scene_babylon/js-export.js"), import("../export-package.js"), import("../export-parity/look.mjs")]);
+    const { world, sync } = openExample("framed-print");
+    sync.view();
+    const files = { ...(await bundledFiles(await exportModule(world, { live: true, bundle: true }))), "index.html": WEBGPU_PAGE };
+    const dir = mkdtempSync(join(tmpdir(), "bylonder-webgpu-"));
+    for (const [path, data] of Object.entries(files)) {
+      mkdirSync(dirname(join(dir, "page", path)), { recursive: true });
+      writeFileSync(join(dir, "page", path), data);
+    }
+    // A browser of its own, with the harness's flags that start WebGPU (this check's is launched with CHROMIUM_ARGS).
+    const served = servePackages(dir), gpu = await chromium.launch(), page = await gpu.newPage({ viewport: { width: 320, height: 200 } });
+    try {
+      await page.goto(served.url("page/index.html"));
+      const drawn = await (await page.waitForFunction(() => window.drawn, null, { timeout: 180000 })).jsonValue();
+      assert.ok(drawn.webgpu, "the page's engine is WebGPU's");
+      assert.ok(drawn.lit > 0.5, `its frame shows the scene (${(drawn.lit * 100).toFixed(0)}% of pixels lit)`);
+    } finally {
+      await gpu.close();
+      served.close();
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   // Examples made in Blender open with every object of Main in the scene sync, once (an armature left out of it was
