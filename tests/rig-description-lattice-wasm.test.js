@@ -67,9 +67,8 @@ for (const f of [1, 11, 21]) {
   const mesh = sync.blender.evaluatedMesh(key), p = mesh.vert_positions;
   const theirs = [...mesh.corner_verts].flatMap((v) => [p[v * 3], p[v * 3 + 2], p[v * 3 + 1]]), ours = drawn.getVerticesData(VertexBuffer.PositionKind);
   const error = Math.max(...theirs.map((v, i) => Math.abs(v - ours[i])));
-  // The runtime's deform of this body is within 7.5 mm of Main's at its left elbow (export-native-rig-wasm.test.js),
-  // 12 mm through the lattice.
-  assert.ok(error < 1.5e-2, `frame ${f}: the body is off Main's by ${error}`);
+  // As Main's to a float's precision (export-native-rig-wasm.test.js).
+  assert.ok(error < 1e-4, `frame ${f}: the body is off Main's by ${error}`);
 }
 blend.dispose();
 written.remove();

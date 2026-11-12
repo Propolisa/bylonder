@@ -38,7 +38,12 @@ export function resolveProperty(program, idName, idType, segs, arrayIndex) {
   const at = (k) => segs[k] ?? {};
   // Shape keys: key_blocks["K"].value or eval_time on a mesh's Key (named by the mesh object or the Key).
   if (idType === 'KEY') {
-    const mesh = program.objects.findIndex((o) => o.data?.shape_keys && (o.name === idName || o.data.shape_keys.name === idName));
+    let mesh = program.objects.findIndex((o) => o.data?.shape_keys && (o.name === idName || o.data.shape_keys.name === idName));
+    // A Key the description does not name: the one mesh whose key blocks hold the driven key.
+    if (mesh < 0 && at(1).key != null) {
+      const holders = program.objects.flatMap((o, i) => (o.data?.shape_keys?.key_blocks?.some((k) => k.name === at(1).key) ? [i] : []));
+      if (holders.length === 1) mesh = holders[0];
+    }
     if (mesh < 0) return null;
     if (at(0).name === 'key_blocks' && at(1).key != null && at(2).name === 'value') return { kind: 'shapeKey', object: mesh, name: at(1).key };
     if (at(0).name === 'eval_time') return { kind: 'shapeEvalTime', object: mesh };

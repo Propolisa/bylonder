@@ -478,6 +478,9 @@ export class RigInstance {
   // Sets a property by its RNA path on an object, as drivers and actions address it: 'location' with an index,
   // 'pose.bones["B"].rotation_quaternion', '["prop"]', 'pose.bones["B"]["prop"]', 'pose.bones["B"].constraints["C"].influence'.
   setPath(objectName, path, value, index = 0) {
+    // A trailing array index in the path (`bbone_scalein[1]`) is the component.
+    const m = /^(.*\.\w+)\[(\d+)\]$/.exec(path);
+    if (m) { path = m[1]; index = Number(m[2]); }
     const w = resolveProperty(this.program, objectName, 'OBJECT', parsePath(path), index);
     if (!w) throw new Error(`path not supported: ${objectName}.${path}`);
     this.writeProperty(w, value);

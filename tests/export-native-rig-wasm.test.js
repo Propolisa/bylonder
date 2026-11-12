@@ -17,9 +17,9 @@ import { writePackage } from './export-package.js';
 const FRAMES = [1, 8, 15, 21];
 // The IK solver's tolerance, as a matrix's entries.
 const TOLERANCE = 1e-3;
-// The runtime's deform of the body, within 7.5 mm of Main's at these frames, all at the left elbow (IK with Preserve
-// Volume, a case with the clean room); its multi-segment tail as Main's, its animated B-Bone curves given to the runtime.
-const DEFORM_TOLERANCE = 8e-3;
+// The runtime's deform of the body as Main's to a float's precision (it measures 6e-6 m): its multi-segment tail bent by
+// its animated B-Bone curves, its elbow corrective by its driver.
+const DEFORM_TOLERANCE = 1e-4;
 
 const { world, sync } = openExample('rigged-character');
 const rig = blendData().objects.get('Rig');

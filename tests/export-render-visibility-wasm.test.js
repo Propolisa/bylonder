@@ -9,7 +9,7 @@ import { exportModule } from '../src/io_scene_babylon/js-export.js';
 import { openExample } from './open-example.js';
 import { writePackage } from './export-package.js';
 
-const FRAME = 15, TOLERANCE = 1e-2;
+const FRAME = 15, TOLERANCE = 1e-4;
 const { world, sync } = openExample('rigged-character');
 const data = blendData(), C = contextStruct(), body = data.objects.get('Body'), bodyNode = world.objects.find((n) => n.name === 'Body');
 // An Action constraint puts the rig on the native rig runtime (export-native-rig-wasm.test.js), and a stack Babylon
