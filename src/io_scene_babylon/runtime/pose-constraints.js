@@ -337,7 +337,8 @@ function attach(inputs, entity, page, solve) {
     own: new Map(), placed: new Map() };
   for (const [name, { own, mode }] of Object.entries(inputs.bones)) {
     const bone = bones.find((b) => b.name === name);
-    if (own && bone) bone._matrix = posedByControls(page.controls, entity.id, name, mode, bone) ?? Matrix.FromArray(own);
+    // The first frame's animation (a clip, the timeline) has already set the bones it drives: theirs is that pose.
+    if (own && bone && !scene.getAllAnimatablesByTarget(bone).length) bone._matrix = posedByControls(page.controls, entity.id, name, mode, bone) ?? Matrix.FromArray(own);
   }
   list.push(entry);
   return {};

@@ -1,7 +1,8 @@
 // A clip playing takes the bones it animates from the timeline: the Rigged Character's action runs in the page from the
 // paused timeline (its F-Curves live) and plays as a clip too; played with blend.play, the clip's pose is what the page
 // shows at each of its frames, as Main poses the action there, not the timeline's frame (before, the timeline's curves
-// wrote the bones back every frame, the IK hands decimeters off).
+// wrote the bones back every frame, the IK hands decimeters off). The first frame drawn is one of them: the constraints,
+// attaching as it draws, keep the pose the clip set (before, they put back the file's).
 import assert from 'node:assert/strict';
 import { Matrix, NullEngine } from '@babylonjs/core';
 import { babylonMatrix } from '../src/blenkernel/main-view.js';
@@ -26,7 +27,6 @@ const blend = await (await import(written.url)).load(new NullEngine());
 await blend.settled();
 const render = async () => { blend.scene.render(); await blend.settled(); };
 blend.playhead.pause();
-await render();
 const clip = blend.play(action.name), start = clip.metadata.bylonder.frame_start;
 clip.pause();
 const skeleton = blend.scene.getSkeletonById(entity.inputs.skeleton), unspace = Matrix.Invert(Matrix.FromArray(entity.inputs.space));
