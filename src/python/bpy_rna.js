@@ -192,6 +192,13 @@ export function customPropertyType(struct, key) {
   const owner = outStruct(), [, , , prop] = out(), { kind } = propertyInfo(owner, prop);
   return kind === FLOAT ? 'FLOAT' : kind === INT ? 'INT' : kind === BOOLEAN ? 'BOOLEAN' : null;
 }
+/** Writes a struct's numeric custom property (`struct["key"] = value`, which a JS class cannot hook). */
+export function setCustomProperty(struct, key, value) {
+  const ptr = pointerOf(struct);
+  if (!ptr || !withText([quoted(key)], (p) => x.bpy_path_resolve(...ptr, p))) throw KeyError(`bpy_struct[key]: key "${key}" not found`);
+  const owner = outStruct(), [, , , prop] = out(), { kind, flags } = propertyInfo(owner, prop);
+  writeProperty(owner, prop, kind, flags, value, -1);
+}
 const idpropKeys = (ptr) => JSON.parse(cString(x.bpy_idprop_keys(...ptr)));
 const quoted = (key) => `["${String(key).replace(/["\\]/g, '\\$&')}"]`;
 

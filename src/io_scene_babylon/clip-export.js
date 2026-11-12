@@ -3,7 +3,7 @@
 // by Blender on the IDs that use it, over its frame range; the first NLA strip playing it gives the group's playback:
 // its blending (Add, and Combine approximated as Add, additive), influence (weight), scale (speed) and repeat.
 import { Animation, Matrix, Quaternion, Vector3 } from '@babylonjs/core';
-import { pointerOf } from '../python/bpy_rna.js';
+import { pointerOf, setCustomProperty } from '../python/bpy_rna.js';
 import { actionFCurves } from './ir-export.js';
 
 import { isClip } from './runtime/clips.js';
@@ -59,16 +59,33 @@ function zeroUnset(id) {
   return () => saved.forEach(([path, i, value]) => { id[path][i] = value; });
 }
 
+// An armature's own pose (each bone's location, rotation and scale) and the custom properties of it and its bones (a
+// rig's settings), put back by the function it gives: an action sampled before another leaves what it keys where it put
+// it, which the next would sample, and the export write, as the file's.
+const POSE = ['location', 'rotation_quaternion', 'rotation_euler', 'rotation_axis_angle', 'scale'];
+const numbers = (struct) => [...(struct?.keys?.() ?? [])].filter((name) => typeof struct.get(name) === 'number').map((name) => [name, struct.get(name)]);
+function keepPose(id) {
+  const bones = [...(id.pose?.bones ?? [])], saved = bones.map((bone) => POSE.map((path) => [...bone[path]]));
+  const properties = [id, ...bones].map((struct) => [struct, numbers(struct)]);
+  return () => {
+    bones.forEach((bone, i) => POSE.forEach((path, k) => { bone[path] = saved[i][k]; }));
+    for (const [struct, values] of properties) for (const [name, value] of values) if (struct.get(name) !== value) setCustomProperty(struct, name, value);
+  };
+}
+
 /**
  * Runs `sample` with `action` alone animating `ids`: assigned to each, its NLA off; then gives each its animation data
- * back. With `additive`, an object's transform the action leaves alone is zero meanwhile.
+ * and an armature its own pose back. With `additive`, an object's transform the action leaves alone is zero meanwhile.
  */
 export function withAction(ids, action, sample, { additive = false } = {}) {
   const saved = ids.map((id) => { const adt = id.animation_data; return { id, adt, action: adt.action, slot: adt.action_slot, use_nla: adt.use_nla }; });
-  const restores = [];
+  const restores = ids.map(keepPose);
   try {
     for (const { id, adt } of saved) {
       adt.action = action;
+      // An action whose one slot is not named for this ID (a pose library's "Legacy Slot") animates it all the same.
+      const slots = [...(action.slots ?? [])];
+      if (!adt.action_slot && slots.length === 1) adt.action_slot = slots[0];
       adt.use_nla = false;
       if (additive) restores.push(zeroUnset(id));
     }
@@ -105,11 +122,27 @@ export function additive(animation, target) {
  * A clip's animation group as Babylon's glTF loader makes one: normalized to start at 0, looping, not started, with
  * the strip's playback. `targetedAnimations`: serialized, at the action's frames.
  */
-export function clipGroup({ name, frame_start, frame_end, blend, influence, speed }, targetedAnimations) {
+export function clipGroup(clip, targetedAnimations) {
+  const { name, frame_start, frame_end, blend, influence, speed } = clip;
   for (const { animation } of targetedAnimations) for (const key of animation.keys) key.frame -= frame_start;
-  const isAdditive = blend !== 'REPLACE';
+  const isAdditive = blend !== 'REPLACE', properties = clipProperties(clip);
   return { name, from: 0, to: frame_end - frame_start, speedRatio: speed, loopAnimation: true, isAdditive, weight: isAdditive || influence < 1 ? influence : -1,
-    playOrder: 0, targetedAnimations, metadata: { bylonder: { clip: true, action: name, frame_start } } };
+    playOrder: 0, targetedAnimations, metadata: { bylonder: { clip: true, action: name, frame_start, ...(properties && { properties }) } } };
+}
+
+// The custom properties a clip's action keys on an object or its pose bones (a rig's settings: IK or FK, what follows
+// what), by their path as the page's controls name them: a value per frame from the clip's start, or one where it holds
+// still. The page sets them as the clip plays, as Blender's animation does.
+function clipProperties({ action, ids = [], frame_start, frame_end }) {
+  const objects = ids.filter((id) => id.pose !== undefined || id.location !== undefined);
+  if (!action || !objects.length) return null;
+  const owner = `objects[${JSON.stringify(objects[0].name)}]`, out = {};
+  for (const fc of [...action.layers].flatMap((l) => [...l.strips]).flatMap((s) => [...s.channelbags]).flatMap((bag) => [...bag.fcurves])) {
+    if (!/\]\["|^\["/.test(fc.data_path)) continue;
+    const values = Array.from({ length: frame_end - frame_start + 1 }, (_, f) => Math.fround(fc.evaluate(frame_start + f)));
+    out[`${owner}${fc.data_path.startsWith('[') ? '' : '.'}${fc.data_path}`] = values.every((v) => v === values[0]) ? values[0] : values;
+  }
+  return Object.keys(out).length ? out : null;
 }
 
 /** The clips as the IR's scene time records them (runtime/ir.js ClipSchema), by name, with their actions' pose markers. */

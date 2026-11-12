@@ -451,7 +451,7 @@ function poseAnimations(world, mappings, bake, sampling, scene, bases = new Set(
       }
     }
   };
-  if (mappings.some((m) => animated(m.arm)) && frameEnd > frameStart) sampling.sample(sample);
+  if (mappings.some((m) => animated(m.arm)) && frameEnd >= frameStart) sampling.sample(sample);
   else sample(current);
   return Object.assign(once(finish), { deforms: new Set([...stacks.values()].flatMap((stack) => stack.deforms)),
     natives: new Set([...stacks].filter(([, stack]) => stack.native).map(([mapping]) => mapping)) });
