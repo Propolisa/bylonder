@@ -618,7 +618,8 @@ export class BlendScene {
     const node = /** @type {any} */ (bind.node === undefined ? this.scene : nodeById(this.scene, bind.node));
     if (!node) return;
     if (bind.transform) {
-      this.#place(node, path, bind.transform);
+      // A clip playing takes the bones and objects it animates: the timeline's own curves do not move them meanwhile.
+      if (!this.playhead.claimed(node)) this.#place(node, path, bind.transform);
     } else if (bind.hide) {
       const object = Object.keys(this.ir.ids).find((k) => this.ir.ids[k].node === bind.node);
       if (object) this.#showObjects([object]);
