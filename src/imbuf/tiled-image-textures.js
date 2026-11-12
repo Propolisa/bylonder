@@ -67,6 +67,7 @@ function srgbArray(scene, { layers, width, height, depth }, sampling) {
   const internal = texture.getInternalTexture();
   const fill = () => {
     if (engine.isWebGPU) {
+      // Babylon's private flag, which its WebGPU texture manager reads for the format (tests/udim-wasm.test.js guards it).
       internal._useSRGBBuffer = true;
       engine._textureHelper.createGPUTextureForInternalTexture(internal, width, height, depth, 0);
       engine.updateRawTexture2DArray(internal, layers, Constants.TEXTUREFORMAT_RGBA, false, null, Constants.TEXTURETYPE_UNSIGNED_BYTE);
