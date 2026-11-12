@@ -15,7 +15,7 @@ import { CurveObject } from './curve/curve.js';
 import { mesh_batch_cache_apply } from '../draw/mesh-batch-cache.js';
 import { asObject, setEvaluatedMatrix } from '../runtime/object-transform.js';
 import { ID_RECALC_GEOMETRY, ID_RECALC_SHADING, ID_RECALC_SYNC_TO_EVAL, ID_RECALC_ALL } from '../bmesh/bmesh-wasm.js';
-import { Camera, Color3, FreeCamera, Material, Matrix, Mesh, MultiMaterial, PBRMaterial, RenderTargetTexture, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
+import { Camera, Color3, FreeCamera, Material, Matrix, Mesh, MultiMaterial, PBRMaterial, RenderTargetTexture, StandardMaterial, SubMesh, TransformNode, Vector3 } from '@babylonjs/core';
 import { particleShapeMesh, particleShapeMaterial, hairOverlay, particleEditOverlay } from '../draw/overlay-particle.js';
 import { drawPointClouds } from '../draw/pointcloud.js';
 import { paintWeightOverlay } from '../draw/overlay-paint-weight.js';
@@ -587,7 +587,14 @@ export function createMainView(state) {
         if (carrier.material) carrier.onDisposeObservable.add(() => carrier.material.dispose());
       }
       if (geometric) mesh_batch_cache_apply(blender.instanceMesh(geometry), carrier);
-      else if (carrier.geometry !== source.geometry) source.geometry.applyToMesh(carrier);
+      else if (carrier.geometry !== source.geometry) {
+        source.geometry.applyToMesh(carrier);
+        // Its material slots' faces, as its source draws them.
+        if (source.subMeshes?.length > 1) {
+          carrier.releaseSubMeshes();
+          for (const sub of source.subMeshes) new SubMesh(sub.materialIndex, sub.verticesStart, sub.verticesCount, sub.indexStart, sub.indexCount, carrier);
+        }
+      }
       if (shape === 'OBJECT') carrier.material = source.material;
       if (geometric) carrier.material = materialFor(material);
       // Read after instanceMesh and materialFor, which can grow the module's memory.
