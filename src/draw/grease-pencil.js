@@ -11,7 +11,7 @@ import { RenderingGroup } from '@babylonjs/core/Rendering/renderingGroup.js';
 import defaultTheme from '../editors/interface/theme-default.json' with { type: 'json' };
 import { overlayMaterial } from './overlay-edit-mesh.js';
 import { pointSprites, setPoints } from './point-sprites.js';
-import { BLEND_MODES, CURVE_INTS, POINT_FLOATS, alphaIndex, fillMesh as fillGeometry, followResolution, greasedLineMaterial, meanScale, strokeArrays, strokesMesh } from '../io_scene_babylon/runtime/grease-pencil.js';
+import { BLEND_MODES, CURVE_INTS, POINT_FLOATS, alphaIndex, fillMesh as fillGeometry, followResolution, greasedLineMaterial, lightLayer, meanScale, strokeArrays, strokesMesh } from '../io_scene_babylon/runtime/grease-pencil.js';
 
 // A drawing's last strokes that change without the rest (a stroke being drawn) stay in the active mesh up to this many.
 const ACTIVE_STROKES = 8;
@@ -105,7 +105,15 @@ export function greasePencilSortCompare(scene) {
   };
 }
 
-export function createGreasePencilDraw(scene, { matrix: babylonMatrix, look = () => BLENDER_LOOK }) {
+// blender-port: gpencil_engine_c.cc: a layer lit (its Use Lights and its object's) takes the scene's world color as its
+// ambient light, no world none; Light objects are not added yet. Null for an unlit layer. `ob`, `scene`: RNA structs.
+export function layerLight(ob, layer, scene) {
+  if (!ob.use_grease_pencil_lights || !ob.data.layers[layer]?.use_lights) return null;
+  return scene.world ? Array.from(scene.world.color) : [0, 0, 0];
+}
+
+// `light(draw)`: a drawing's layer's ambient light (layerLight), null when unlit.
+export function createGreasePencilDraw(scene, { matrix: babylonMatrix, look = () => BLENDER_LOOK, light = () => null }) {
   const drawings = new Map();
   scene.setRenderingOrder(0, null, null, greasePencilSortCompare(scene));
   // Draws `draws` (BlenderMain.greasePencil) for the objects `nodeOf` gives; returns whether a drawing packed anew had no
@@ -125,6 +133,8 @@ export function createGreasePencilDraw(scene, { matrix: babylonMatrix, look = ()
       drawn.base.configure(settings, blend);
       drawn.active.configure(settings, blend);
       if (drawn.fill) drawn.fill.material.alphaMode = blend;
+      const lit = light(draw);
+      lightLayer([drawn.base.material, drawn.active.material, drawn.fill?.material], lit);
       if (!draw.changed) {
         drawn.base.place(matrix);
         drawn.active.place(matrix);
@@ -143,6 +153,7 @@ export function createGreasePencilDraw(scene, { matrix: babylonMatrix, look = ()
       drawn.active.set(strokeArrays(draw, drawn.split, total, scale), matrix, alphaIndex(draw, 2));
       drawn.hashes = hashes;
       drawn.fill = fillMesh(scene, name + ' fill', owner, draw, matrix, drawn.fill);
+      lightLayer([drawn.fill?.material], lit);
       drawn.points = editPoints(scene, name + ' points', draw, matrix, drawn.points);
     }
     for (const [key, drawn] of drawings) if (!seen.has(key)) dispose(key, drawn);

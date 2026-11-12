@@ -61,11 +61,14 @@ tests:
   - tests/grease-pencil-wasm.test.js
   - tests/grease-pencil-onion-render-wasm.test.js
   - tests/export-grease-pencil-wasm.test.js
+  - tests/grease-pencil-lights-wasm.test.js
+  - tests/grease-pencil-scene-linear.test.js
   - tests/e2e/smoke.mjs
 limits:
   - Stroke ends and corners are flat (GreasedLine has no round caps or joins); Dots and Squares strokes draw as lines.
   - A layer's opacity applies per stroke; Hard Light and Divide layers blend as Regular; layer masks do not mask.
-  - Gradient and texture fills draw in their fill color, texture strokes in their stroke color; strokes are not lit.
+  - Gradient and texture fills draw in their fill color, texture strokes in their stroke color.
+  - A layer that uses lights takes its world's color as its light; Light objects do not light it yet.
   - Fills draw under their layer's strokes rather than interleaved stroke by stroke.
   - Shader effects (Blur, Shadow, Rim, ...) and Line Art's evaluation in a render are not drawn.
   - Line Art objects are added and evaluated in the module but are not checked against Blender's.

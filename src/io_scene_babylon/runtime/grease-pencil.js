@@ -43,19 +43,43 @@ void main() { vColor = color; gl_Position = worldViewProjection * vec4(position,
 const FILL_FRAGMENT = `precision highp float;
 varying vec4 vColor;
 uniform float sceneLinear;
+uniform vec3 gpLight;
 vec3 linear(vec3 c) { return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c)); }
-void main() { if (vColor.a <= 0.0) discard; gl_FragColor = vec4(sceneLinear > 0.5 ? linear(vColor.rgb) : vColor.rgb, vColor.a); }`;
+void main() { if (vColor.a <= 0.0) discard; gl_FragColor = vec4(sceneLinear > 0.5 ? linear(vColor.rgb) * gpLight : vColor.rgb, vColor.a); }`;
 
-// GreasedLine sets a stroke's color after Babylon's material takes its color to scene linear: this does it after.
+// GreasedLine sets a stroke's color after Babylon's material takes its color to scene linear: this does it after, and
+// lights it as Blender's Grease Pencil engine lights a layer (gpencil_frag.glsl: fragColor.rgb *= gpencil_lighting()):
+// a layer that uses lights by its scene's world color (gpencil_engine_c.cc, the ambient light), another unlit.
 class SceneLinearStrokePlugin extends MaterialPluginBase {
   /** @param {Material} material */
-  constructor(material) { super(material, 'BlenderSceneLinearStroke', 300, {}, true, true); }
+  constructor(material) {
+    super(material, 'BlenderSceneLinearStroke', 300, {}, true, true);
+    this.light = [1, 1, 1];
+  }
   getClassName() { return 'BlenderSceneLinearStrokePlugin'; }
   isCompatible() { return true; }
+  getUniforms() { return { ubo: [{ name: 'gpLight', size: 3, type: 'vec3' }] }; }
+  /** @param {any} uniformBuffer */
+  bindForSubMesh(uniformBuffer) { uniformBuffer.updateFloat3('gpLight', this.light[0], this.light[1], this.light[2]); }
   /** @param {string} shaderType @param {number} [shaderLanguage] */
   getCustomCode(shaderType, shaderLanguage = 0) {
-    const linear = shaderLanguage === 0 ? 'color.rgb = toLinearSpace(color.rgb);' : 'color = vec4f(toLinearSpaceVec3(color.rgb), color.a);';
+    const linear = shaderLanguage === 0 ? 'color.rgb = toLinearSpace(color.rgb) * gpLight;' : 'color = vec4f(toLinearSpaceVec3(color.rgb) * uniforms.gpLight, color.a);';
     return shaderType === 'fragment' ? { CUSTOM_FRAGMENT_BEFORE_FRAGCOLOR: `#ifdef IMAGEPROCESSINGPOSTPROCESS\n${linear}\n#endif\n` } : null;
+  }
+}
+
+/**
+ * A layer's lighting on its stroke and fill materials: the ambient light Blender gives it (its world's color when it
+ * uses lights), white (unlit) for null.
+ * @param {(Material | null | undefined)[]} materials
+ * @param {ArrayLike<number> | null} light
+ */
+export function lightLayer(materials, light) {
+  const rgb = light ? Array.from(light) : [1, 1, 1];
+  for (const material of materials) {
+    const plugin = /** @type {any} */ (material?.pluginManager?.getPlugin('BlenderSceneLinearStroke'));
+    if (plugin) plugin.light = rgb;
+    else if (material) material.metadata = { ...material.metadata, gpLight: rgb };
   }
 }
 
@@ -175,8 +199,12 @@ export function strokesMesh(scene, name, { lines, widths, colors }, plugin, text
  */
 export function fillMaterial(scene, name) {
   const material = Object.assign(new ShaderMaterial(name, scene, { vertexSource: FILL_VERTEX, fragmentSource: FILL_FRAGMENT },
-    { attributes: ['position', 'color'], uniforms: ['worldViewProjection', 'sceneLinear'], needAlphaBlending: true }), { backFaceCulling: false, disableDepthWrite: true });
-  material.onBindObservable.add(() => material.getEffect()?.setFloat('sceneLinear', +scene.imageProcessingConfiguration.applyByPostProcess));
+    { attributes: ['position', 'color'], uniforms: ['worldViewProjection', 'sceneLinear', 'gpLight'], needAlphaBlending: true }), { backFaceCulling: false, disableDepthWrite: true });
+  material.onBindObservable.add(() => {
+    const effect = material.getEffect(), light = material.metadata?.gpLight ?? [1, 1, 1];
+    effect?.setFloat('sceneLinear', +scene.imageProcessingConfiguration.applyByPostProcess);
+    effect?.setFloat3('gpLight', light[0], light[1], light[2]);
+  });
   return material;
 }
 
@@ -203,7 +231,7 @@ export function fillMesh(scene, name, draw, kept) {
 /**
  * A layer's input as a `grease_pencil:LAYER` entity gives it: its index in the object's layers, blend mode, matrix in its
  * object's space (Babylon's layout), scale, keyed frames and the drawing of each (null: none shown from that key on).
- * @typedef {{ layer: number, blend: number, matrix: number[], scale: number, frames: number[], drawings: (Drawing | null)[] }} Layer
+ * @typedef {{ layer: number, blend: number, matrix: number[], scale: number, light?: number[] | null, frames: number[], drawings: (Drawing | null)[] }} Layer
  */
 
 /**
@@ -235,7 +263,7 @@ const made = new WeakMap();
  * @param {string} node the object's
  * @param {Omit<Layer, 'frames' | 'drawings'> & { drawing: Drawing | null }} layer
  */
-export function drawLayer(scene, node, { layer, blend, matrix, scale, drawing }) {
+export function drawLayer(scene, node, { layer, blend, matrix, scale, light = null, drawing }) {
   const owner = scene.getNodeById(node);
   if (!owner) return;
   const holderId = `${node}/grease_pencil/${layer}`;
@@ -259,6 +287,7 @@ export function drawLayer(scene, node, { layer, blend, matrix, scale, drawing })
     if (fill) meshes.push(Object.assign(fill, { alphaIndex: alphaIndex(order, 0) }));
     material.alphaMode = BLEND_MODES[blend] ?? Constants.ALPHA_COMBINE;
     if (fill?.material) fill.material.alphaMode = material.alphaMode;
+    lightLayer([material, fill?.material], light);
     for (const mesh of meshes) mesh.parent = holder;
     drawn.set(drawing.points, meshes);
   }

@@ -32,7 +32,7 @@ import { pullRenderExtensions } from '../draw/render-extension.js';
 import { syncVolumeProbes } from '../draw/light-probes.js';
 import { idStruct, pointerStruct, structFind } from '../python/bpy_rna.js';
 import { createEditMeshOverlay } from '../draw/overlay-edit-mesh.js';
-import { createGreasePencilDraw, BLENDER_LOOK } from '../draw/grease-pencil.js';
+import { createGreasePencilDraw, BLENDER_LOOK, layerLight } from '../draw/grease-pencil.js';
 import { provideGreasePencilRender } from '../draw/grease-pencil-render.js';
 import * as runtimes from '../runtimes/runtimes.js';
 import { uploadImageTextures } from '../imbuf/image-textures.js';
@@ -675,7 +675,8 @@ function redrawProbesDrawnOnce(scene) {
   const onionWanted = () => !world.collections?.rendering && !world.animation?.playing;
   function drawGreasePencil() {
     if (!greasePencil) {
-      greasePencil = createGreasePencilDraw(world.scene, { matrix: babylonMatrix, look: (ob) => runtimes.look(idStruct(ob).data) ?? BLENDER_LOOK });
+      greasePencil = createGreasePencilDraw(world.scene, { matrix: babylonMatrix, look: (ob) => runtimes.look(idStruct(ob).data) ?? BLENDER_LOOK,
+        light: (draw) => layerLight(idStruct(draw.ob), draw.layer, idStruct(blender.scene)) });
       provideGreasePencilRender(world.scene.getEngine());
     }
     const byOb = new Map([...objects.values()].map((e) => [e.ob, e.node])), onion = onionWanted();

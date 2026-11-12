@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import { FreeCamera, NullEngine, Scene, Vector3 } from '@babylonjs/core';
 import { GreasedLineMesh } from '@babylonjs/core/Meshes/GreasedLine/greasedLineMesh.js';
-import { fillMaterial, greasedLineMaterial } from '../src/io_scene_babylon/runtime/grease-pencil.js';
+import { fillMaterial, greasedLineMaterial, lightLayer } from '../src/io_scene_babylon/runtime/grease-pencil.js';
 
 const scene = new Scene(new NullEngine());
 new FreeCamera('Camera', new Vector3(0, 0, -5), scene);
@@ -18,18 +18,25 @@ const strokeEffect = async (sceneLinear) => {
   await scene.whenReadyAsync();
   return stroke.subMeshes[0].effect;
 };
-const GUARDED = '#ifdef IMAGEPROCESSINGPOSTPROCESS\ncolor.rgb = toLinearSpace(color.rgb);\n#endif';
+const GUARDED = '#ifdef IMAGEPROCESSINGPOSTPROCESS\ncolor.rgb = toLinearSpace(color.rgb) * gpLight;\n#endif';
 const linear = await strokeEffect(true), code = linear._fragmentSourceCode;
 assert.ok(code.lastIndexOf(GUARDED) > code.lastIndexOf('grl_colors'), "a stroke's color is taken to scene linear after GreasedLine sets it");
 assert.match(linear.defines, /IMAGEPROCESSINGPOSTPROCESS/, 'in a scene linear view');
 assert.doesNotMatch((await strokeEffect(false)).defines, /IMAGEPROCESSINGPOSTPROCESS/, 'a display view draws it as it comes');
 
 const fill = fillMaterial(scene, 'Fill'), bound = [];
-const effect = { setFloat: (name, value) => bound.push([name, value]) };
+const effect = { setFloat: (name, value) => bound.push([name, value]), setFloat3: () => {} };
 fill.getEffect = () => effect;
 for (const linear of [true, false]) {
   ip.applyByPostProcess = linear;
   fill.onBindObservable.notifyObservers(null);
 }
 assert.deepEqual(bound, [['sceneLinear', 1], ['sceneLinear', 0]], "a fill's colors follow the view's scene linear");
-console.log('Grease Pencil: strokes and fills draw in scene linear where the view does');
+// A layer that uses lights is lit by its ambient light (its world's color), in scene linear, as Blender's engine lights it.
+const lights = [];
+effect.setFloat3 = (name, ...rgb) => lights.push([name, rgb]);
+lightLayer([stroke.material, fill], [0.05, 0.04, 0.1]);
+fill.onBindObservable.notifyObservers(null);
+assert.deepEqual(lights, [['gpLight', [0.05, 0.04, 0.1]]], "a lit layer's fill takes its world's color");
+assert.deepEqual(stroke.material.pluginManager.getPlugin('BlenderSceneLinearStroke').light, [0.05, 0.04, 0.1], 'and its strokes');
+console.log('Grease Pencil: strokes and fills draw in scene linear where the view does, a layer that uses lights lit by its world');

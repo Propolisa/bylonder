@@ -1,4 +1,11 @@
 /**
+ * A layer's lighting on its stroke and fill materials: the ambient light Blender gives it (its world's color when it
+ * uses lights), white (unlit) for null.
+ * @param {(Material | null | undefined)[]} materials
+ * @param {ArrayLike<number> | null} light
+ */
+export function lightLayer(materials: (Material | null | undefined)[], light: ArrayLike<number> | null): void;
+/**
  * A drawing's strokes from `first` to `last` curve as GreasedLine points, widths (two per point) and their colors.
  * @param {Drawing} draw
  * @param {number} first
@@ -57,7 +64,7 @@ export function fillMesh(scene: import("@babylonjs/core").Scene, name: string, d
 /**
  * A layer's input as a `grease_pencil:LAYER` entity gives it: its index in the object's layers, blend mode, matrix in its
  * object's space (Babylon's layout), scale, keyed frames and the drawing of each (null: none shown from that key on).
- * @typedef {{ layer: number, blend: number, matrix: number[], scale: number, frames: number[], drawings: (Drawing | null)[] }} Layer
+ * @typedef {{ layer: number, blend: number, matrix: number[], scale: number, light?: number[] | null, frames: number[], drawings: (Drawing | null)[] }} Layer
  */
 /**
  * The drawing a layer shows at a frame: its last key's at or before it.
@@ -82,6 +89,7 @@ export function run({ frame: _, frames, drawings, ...layer }: Layer & {
             blend: number;
             matrix: number[];
             scale: number;
+            light?: number[] | null;
         };
     };
 };
@@ -91,7 +99,7 @@ export function run({ frame: _, frames, drawings, ...layer }: Layer & {
  * @param {string} node the object's
  * @param {Omit<Layer, 'frames' | 'drawings'> & { drawing: Drawing | null }} layer
  */
-export function drawLayer(scene: import("@babylonjs/core").Scene, node: string, { layer, blend, matrix, scale, drawing }: Omit<Layer, "frames" | "drawings"> & {
+export function drawLayer(scene: import("@babylonjs/core").Scene, node: string, { layer, blend, matrix, scale, light, drawing }: Omit<Layer, "frames" | "drawings"> & {
     drawing: Drawing | null;
 }): void;
 export const CURVE_INTS: 5;
@@ -114,6 +122,7 @@ export type Layer = {
     blend: number;
     matrix: number[];
     scale: number;
+    light?: number[] | null;
     frames: number[];
     drawings: (Drawing | null)[];
 };
@@ -127,6 +136,7 @@ export type Strokes = {
     widths: number[];
     colors: Float32Array;
 };
+import { Material } from '@babylonjs/core';
 import { RawTexture } from '@babylonjs/core';
 import { GreasedLineMesh } from '@babylonjs/core';
 import { ShaderMaterial } from '@babylonjs/core';

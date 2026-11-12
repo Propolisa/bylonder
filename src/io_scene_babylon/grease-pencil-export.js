@@ -7,6 +7,7 @@ import { idStruct } from '../python/bpy_rna.js';
 import { babylonMatrix } from '../blenkernel/main-evaluated.js';
 import { meanScale } from './runtime/grease-pencil.js';
 import { idKey } from './ir-export.js';
+import { layerLight } from '../draw/grease-pencil.js';
 
 // A drawing copied out of the module's memory into scene.bin, by reference.
 const binDrawing = (bin, { curves, points, triangles }) => ({ curves: { buffer: bin.add(Int32Array.from(curves)) },
@@ -46,7 +47,7 @@ export function greasePencilEntities(world, nodes, bin, time) {
       if (!placed && drawings.every((d) => d === null)) return;
       const { blend = 0, matrix = objectToWorld, scale = 1 } = placed ?? {};
       entities[`${idKey(ob)}/grease_pencil/${name}`] = { type: 'grease_pencil:LAYER', id: idKey(ob), implementation: 'grease_pencil',
-        inputs: { layer, blend, matrix: Array.from(matrix.multiply(toObject).m), scale, frames: keys, drawings,
+        inputs: { layer, blend, matrix: Array.from(matrix.multiply(toObject).m), scale, light: layerLight(ob, layer, idStruct(sync.blender.scene)), frames: keys, drawings,
           ...(time && { frame: { property: time } }) },
         outputs: { geometry: { draw: node.id } } };
     });
