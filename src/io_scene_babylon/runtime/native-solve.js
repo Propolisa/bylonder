@@ -145,7 +145,10 @@ export function nativeSolve(scene = null, controls = null) {
     for (const [path, value] of Object.entries(properties)) {
       if (entry.properties.get(path) === value) continue;
       entry.properties.set(path, value);
-      rig.setPath(native.armature, path, value);
+      // An array's item (a B-Bone's scale in or out) goes in by its index.
+      const [, base, index] = /^(.*\.\w+)\[(\d+)\]$/.exec(path) ?? [];
+      if (base) rig.setPath(native.armature, base, value, Number(index));
+      else rig.setPath(native.armature, path, value);
     }
     place(entry, entry.armature, space.multiply(mesh));
     for (const [name, id] of Object.entries(native.objects ?? {})) { const world = nodeWorld(id); if (world) place(entry, program.objectIndex.get(name), world); }

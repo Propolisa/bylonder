@@ -147,12 +147,14 @@ const drivenKeys = (keyed, description) => keyed.flatMap((ob) => description.dri
   .map((d) => { const name = JSON.parse(`"${KEY_VALUE.exec(d.data_path)[1]}"`), block = ob.data.shape_keys.key_blocks.get(name);
     return { mesh: ob.name, key: name, range: [block.slider_min, block.slider_max], property: `shape_keys${key(ob.data.shape_keys.name)}.key_blocks${key(name)}.value` }; }));
 const nativeSolver = nativeSolve();
-// The custom properties of an armature and its pose bones that its drivers read, and its constraints' keyed influences:
+// The custom properties of an armature and its pose bones that its drivers read, its constraints' keyed influences and
+// its B-Bones' own shapes (what an animation bends their segments by):
 // their paths from the armature (as the runtime's setPath takes them), with Main's values now, or by `read(path)` (a
 // control's reference).
 const customProperties = (arm, read = (path, value) => value) => Object.fromEntries([...[['', arm], ...[...arm.pose.bones].map((pb) => [`pose.bones${key(pb.name)}`, pb])]
   .flatMap(([base, struct]) => [...(struct.keys?.() ?? [])].filter((name) => typeof struct.get(name) === 'number').map((name) => [`${base}${key(name)}`, read(`${base}${key(name)}`, struct.get(name))])),
-  ...keyedInfluences(arm).map(({ path, constraint }) => [path, read(path, constraint.influence)])]);
+  ...keyedInfluences(arm).map(({ path, constraint }) => [path, read(path, constraint.influence)]),
+  ...[...arm.data.bones].filter((b) => b.bbone_segments > 1).flatMap((b) => bboneShape(arm.pose.bones.get(b.name)).map(([name, v]) => [`pose.bones${key(b.name)}.${name}`, read(`pose.bones${key(b.name)}.${name}`, v)]))]);
 // The influences of the armature's constraints that an action keys (its own or a clip's): the runtime takes them as the
 // page animates them, its description holding only their values now.
 const INFLUENCE = /^pose\.bones\["((?:[^"\\]|\\.)*)"\]\.constraints\["((?:[^"\\]|\\.)*)"\]\.influence$/;

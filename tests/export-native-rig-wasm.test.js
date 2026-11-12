@@ -17,8 +17,9 @@ import { writePackage } from './export-package.js';
 const FRAMES = [1, 8, 15, 21];
 // The IK solver's tolerance, as a matrix's entries.
 const TOLERANCE = 1e-3;
-// The runtime's Armature deform of the body, within 8 mm of Main's at these frames (a case sent to the clean room).
-const DEFORM_TOLERANCE = 1e-2;
+// The runtime's deform of the body, within 7.5 mm of Main's at these frames, all at the left elbow (IK with Preserve
+// Volume, a case with the clean room); its multi-segment tail as Main's, its animated B-Bone curves given to the runtime.
+const DEFORM_TOLERANCE = 8e-3;
 
 const { world, sync } = openExample('rigged-character');
 const rig = blendData().objects.get('Rig');
@@ -33,8 +34,6 @@ const C = contextStruct(), twin = C.blend_data.objects.new('Twin', body.data);
 C.scene.collection.objects.link(twin);
 Object.assign(twin, { parent: body.parent, matrix_parent_inverse: body.matrix_parent_inverse, location: body.location, rotation_euler: body.rotation_euler, scale: body.scale });
 twin.modifiers.new('Armature', 'ARMATURE').object = rig;
-// The tail as one segment: the runtime's B-Bone deform of this mesh is off by centimeters (a case sent to the clean room).
-rig.data.bones.get('tail').bbone_segments = 1;
 // The elbow corrective's and the Breathe key's drivers given an identity Generator, which the page's driver units do not
 // run: the runtime does.
 for (const name of ['Elbow.L', 'Breathe']) [...body.data.shape_keys.animation_data.drivers].find((d) => d.data_path === `key_blocks["${name}"].value`).modifiers.new('GENERATOR');

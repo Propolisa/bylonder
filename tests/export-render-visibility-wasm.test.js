@@ -24,8 +24,6 @@ const twin = data.objects.new('Twin', body.data);
 C.scene.collection.objects.link(twin);
 Object.assign(twin, { parent: body.parent, matrix_parent_inverse: body.matrix_parent_inverse, location: body.location, rotation_euler: body.rotation_euler, scale: body.scale });
 twin.modifiers.new('Armature', 'ARMATURE').object = rig;
-// The tail as one segment: the runtime's B-Bone deform is off by centimeters (a case sent to the clean room).
-rig.data.bones.get('tail').bbone_segments = 1;
 Object.assign(body.modifiers.new('Smooth', 'CORRECTIVE_SMOOTH'), { factor: 0.8, iterations: 4, use_only_smooth: true });
 const proxies = data.collections.new('Proxies'), proxy = data.objects.new('Proxy', body.data);
 C.scene.collection.children.link(proxies);

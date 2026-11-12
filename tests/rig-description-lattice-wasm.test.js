@@ -21,8 +21,6 @@ const twin = data.objects.new('Twin', body.data);
 C.scene.collection.objects.link(twin);
 Object.assign(twin, { parent: body.parent, matrix_parent_inverse: body.matrix_parent_inverse, location: body.location, rotation_euler: body.rotation_euler, scale: body.scale });
 twin.modifiers.new('Armature', 'ARMATURE').object = rig;
-// The tail as one segment: the runtime's B-Bone deform of this mesh is off by centimeters (export-native-rig-wasm.test.js).
-rig.data.bones.get('tail').bbone_segments = 1;
 const lattice = data.lattices.new('Cage'), cage = data.objects.new('Cage', lattice);
 C.scene.collection.objects.link(cage);
 Object.assign(cage, { location: [0, 0, 1], scale: [4, 4, 4] });
@@ -66,8 +64,8 @@ for (const f of [1, 11, 21]) {
   const mesh = sync.blender.evaluatedMesh(key), p = mesh.vert_positions;
   const theirs = [...mesh.corner_verts].flatMap((v) => [p[v * 3], p[v * 3 + 2], p[v * 3 + 1]]), ours = drawn.getVerticesData(VertexBuffer.PositionKind);
   const error = Math.max(...theirs.map((v, i) => Math.abs(v - ours[i])));
-  // The runtime's Armature deform of this body is within 8 mm of Main's (export-native-rig-wasm.test.js), 12 mm
-  // through the lattice.
+  // The runtime's deform of this body is within 7.5 mm of Main's at its left elbow (export-native-rig-wasm.test.js),
+  // 12 mm through the lattice.
   assert.ok(error < 1.5e-2, `frame ${f}: the body is off Main's by ${error}`);
 }
 blend.dispose();
