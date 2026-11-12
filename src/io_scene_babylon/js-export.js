@@ -342,8 +342,8 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   const volumes = asset || chosenState(states, 'volumes') === 'OFF' ? null : await exportVolumes(scene, { parity, graphOf, meshes: new Set(data.meshes.map((m) => m.id)), lights: new Set(data.lights.map((l) => l.id)) });
   if (volumes) data.materials.push(...volumes.materials);
   const bin = createSceneBin({ gzip: !hostCompression }), images = imageFiles(data);
-  // Deform Bones Only: skeletons pruned to what skins, unless their rig's constraints run in the page.
-  const pruned = deformBonesOnly ? deformSkeletons(world, data, new Set((mapped.constraints ?? []).map((c) => c.armature))) : new Map();
+  // Deform Bones Only: skeletons pruned to what skins and, on the native rig runtime, what the runtime reads.
+  const pruned = deformBonesOnly ? deformSkeletons(world, data, mapped.constraints ?? []) : new Map();
   pruneSkeletons(data, pruned);
   const geometries = new Map(), geometryLines = [];
   const objects = [...data.transformNodes.map((entry) => ({ entry })), ...data.meshes.map((entry) => ({ entry, mesh: scene.getMeshByUniqueId(entry.uniqueId) }))];

@@ -167,16 +167,18 @@ export function posedByPage(ob) {
   return (pose) => named.has(pose.name);
 }
 
-// A pose bone's controls. A skeleton without some of the rig's bones (Deform Bones Only, skeleton-export.js) is posed by
-// its clips alone, with no constraints in the page: its kept bones' transforms and custom properties only.
-function poseControls(ob, skeletons) {
+// A pose bone's controls. A skeleton pruned by Deform Bones Only (`pruned`, skeleton-export.js: by id, whether its rig
+// is native) has none for its dropped bones but their custom properties, and one its clips alone pose (not native: no
+// constraints in the page) none for constraint influences or B-Bone shapes either.
+function poseControls(ob, skeletons, prunedSkeletons) {
   const drawn = skeletons.filter((s) => s.id === ob.name || s.id.startsWith(`${ob.name} `));
   if (drawn.length !== 1) return [];
   const bones = new Set(drawn[0].bones.map((b) => b.id)), idOf = (pose) => `${drawn[0].id} ${pose.name}`;
-  const pruned = [...ob.pose.bones].some((pose) => !bones.has(idOf(pose))), posed = posedByPage(ob);
+  const native = prunedSkeletons.get(drawn[0].id), dropped = (pose) => native !== undefined && !bones.has(idOf(pose));
+  const pruned = native === false, posed = posedByPage(ob);
   return [...ob.pose.bones].flatMap((pose) => {
     const base = `objects${key(ob.name)}.pose.bones${key(pose.name)}`;
-    if (pruned && !bones.has(idOf(pose))) return customProperties(pose, base);
+    if (dropped(pose)) return customProperties(pose, base);
     return [...(posed(pose) ? transformControls(base, pose, pose.rotation_mode !== 'AXIS_ANGLE' && { node: idOf(pose), transform: { mode: pose.rotation_mode } }) : []),
       ...customProperties(pose, base), ...(pruned ? [] : [...pose.constraints].map((c) => knob(`${base}.constraints${key(c.name)}.influence`, c.influence, { type: 'FLOAT', subtype: 'FACTOR', hard_min: 0, hard_max: 1 }))),
       ...(!pruned && ob.data.bones.get(pose.name).bbone_segments > 1 ? bboneShape(pose).map(([path, v]) => knob(`${base}.${path}`, v, { type: 'FLOAT' })) : [])];
@@ -217,7 +219,7 @@ export function exportControls(world, data) {
     list.push(...objectControls(node, ob, sync.blender.transform(pointer).matrix_parent_inverse));
     if (ob.type === 'LIGHT') list.push(...lightControls(node, ob.data));
     if (ob.type === 'CAMERA') list.push(...cameraControls(node, ob.data));
-    if (ob.type === 'ARMATURE') list.push(...poseControls(ob, data.skeletons ?? []));
+    if (ob.type === 'ARMATURE') list.push(...poseControls(ob, data.skeletons ?? [], data.prunedSkeletons ?? new Map()));
     if (ob.type === 'MESH') list.push(...shapeKeyControls(node, ob, entryOf.get(node.uniqueId)));
   }
   list.push(...data.materials.flatMap(nodeMaterialControls), ...data.materials.flatMap((entry) => principledControls(entry, scene, sync)));
