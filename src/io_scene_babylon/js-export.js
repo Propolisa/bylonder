@@ -98,8 +98,11 @@ function parsedClasses(data) {
     for (const [key, v] of Object.entries(value)) (key === 'customType' || key === 'className') && typeof v === 'string' ? names.add(v) : walk(v);
   };
   walk(data);
-  return [...names].map(babylonModule).filter(Boolean);
+  return [...[...names].map(babylonModule).filter(Boolean), ...(names.has('BABYLON.NodeMaterial') ? NODE_MATERIAL_INCLUDES : [])];
 }
+// Babylon's node blocks that emit the helperFunctions include without importing it (TransformBlock, FragmentOutputBlock
+// and others), which a page that loads only its own modules would fetch from Babylon's shader folder.
+const NODE_MATERIAL_INCLUDES = ['Shaders/ShadersInclude/helperFunctions.js', 'ShadersWGSL/ShadersInclude/helperFunctions.js'];
 // The scene components the parsed objects add themselves to.
 const COMPONENTS = { shadowGenerators: 'Lights/Shadows/shadowGeneratorSceneComponent.js', effectLayers: 'Layers/effectLayerSceneComponent.js', particleSystems: 'Particles/particleSystemComponent.js' };
 // What every page uses, picking under the pointer (Ray), and the material a mesh without its own draws with.
