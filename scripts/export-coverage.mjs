@@ -60,24 +60,27 @@ const rows = Object.keys(report).filter((key) => key.endsWith(' look-webgl2')).m
   const file = join(SUMMARIES, `${id}.json`), look = report[`${id} look-webgl2`];
   const summary = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : { id, codeBuilt: true };
   const gap = look.known ?? look.verdict?.[0] ?? '';
-  return { id, summary, look, agree: look.metrics?.agree ?? null, mean: look.metrics?.mean ?? null, gap };
+  return { id, summary, look, agree: look.metrics?.agree ?? null, mean: look.metrics?.mean ?? null, eevee: look.eevee ?? null, gap };
 });
-// Worst first: the least agreement, an unmeasured or failed look before a passing one.
-const score = (r) => (r.agree ?? -1);
+// Worst first: the page's least agreement with EEVEE (Blender's own picture) where it is measured, else with the app;
+// an unmeasured or failed look before a passing one.
+const score = (r) => r.eevee?.page.agree ?? r.agree ?? -1;
 rows.sort((a, b) => score(a) - score(b));
 const pct = (v) => (v === null ? 'n/a' : `${(v * 100).toFixed(1)}%`);
 const list = (items) => (items?.length ? items.join(', ') : 'none');
 const cell = (text) => String(text).replaceAll('|', '/').replaceAll('\n', ' ');
 const table = [
-  '| Rank | Example | Agree | Mean | State | Live | Baked | Reported | Top gap |',
-  '| --- | --- | --- | --- | --- | --- | --- | --- | --- |',
-  ...rows.map((r, i) => `| ${i + 1} | ${r.id} | ${pct(r.agree)} | ${r.mean?.toFixed(1) ?? 'n/a'} | ${r.look?.state ?? 'n/a'} | ${cell(r.summary.error ? 'export failed' : r.summary.codeBuilt ? 'built by code' : list(r.summary.live))} | ${cell(list(r.summary.baked))} | ${cell(list(r.summary.reports))} | ${cell(r.gap)} |`),
+  '| Rank | Example | Page vs EEVEE | App vs EEVEE | Page vs app | Mean | State | Live | Baked | Reported | Top gap |',
+  '| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |',
+  ...rows.map((r, i) => `| ${i + 1} | ${r.id} | ${pct(r.eevee?.page.agree ?? null)} | ${pct(r.eevee?.app.agree ?? null)} | ${pct(r.agree)} | ${r.mean?.toFixed(1) ?? 'n/a'} | ${r.look?.state ?? 'n/a'} | ${cell(r.summary.error ? 'export failed' : r.summary.codeBuilt ? 'built by code' : list(r.summary.live))} | ${cell(list(r.summary.baked))} | ${cell(list(r.summary.reports))} | ${cell(r.gap)} |`),
 ];
 const measured = rows.filter((r) => r.agree !== null), passing = rows.filter((r) => r.look.state === 'ok' || r.look.state === 'fixed').length;
 writeFileSync(join(root, 'docs/export-coverage.md'), `# Export coverage
 
 What File > Export > JavaScript gives per example, ranked by the largest gap first: how much of the exported page's
-WebGL 2 picture agrees with the app's Render Image (the export parity matrix's look), what the package runs live and
+WebGL 2 picture and of the app's Render Image agree with the reference Blender's EEVEE render of the example (its .blend
+at its current frame; none for an example built by code), how much the page agrees with the app (the export parity
+matrix's look, \`--eevee\` adds EEVEE), what the package runs live and
 ships baked (its IR's entities), what the export reports it cannot run, and the top known gap. Written by
 \`node scripts/export-coverage.mjs\` from the matrix's report and each example's export; do not edit it by hand.
 

@@ -11,14 +11,17 @@
 //     --prod  the app from dist/ (npm run build) instead of the dev server; E2E_URL a running app; JOBS Node processes;
 //     LOOK_TIMEOUT  seconds one example's look may take before its row says it hangs (default 600);
 //     EXPORT_OPTIONS  File > Export's options as JSON (export-options.js) the packages are made with;
-//     --fresh  the cached results of the parts run go (a change to the checks themselves), the exports stay.
+//     --fresh  the cached results of the parts run go (a change to the checks themselves), the exports stay;
+//     --eevee  the look's app and page pictures also against the reference Blender's EEVEE render of the example's .blend
+//              at its current frame (one Blender at a time, cached per .blend and size).
 import { execFileSync, spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { availableParallelism } from 'node:os';
-import { join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { exampleBlend } from '../open-example.js';
+import { referenceBlender } from '../blender-reference.js';
 
 const root = fileURLToPath(new URL('../..', import.meta.url));
 // Pictures go where the owner follows them: the main checkout's .shots/ beside a worktree, else this one's.
@@ -175,12 +178,53 @@ async function lookChecks(ids, keys, engines, { prod }) {
         console.log(`look ${id} ${engine}: ${verdict.join('; ') || 'ok'}${verdict.length ? ` (${join(SHOTS, `${id}-${engine}.png`)})` : ''}`);
       }
     });
+    if (flag('--eevee')) for (const id of ids) for (const engine of engines) await againstEevee(browser, id, results[`${id} look-${engine}`]);
   } finally {
     await browser.close();
     served.close();
     await server.close();
   }
   return results;
+}
+
+// The reference Blender's EEVEE render of an example's .blend at its current frame and camera, at a picture's size,
+// cached per .blend and size; null for an example built by code. Its film is opaque, as the app's Render Image shows the
+// world behind the scene.
+function eeveePicture(id, picture) {
+  const blend = exampleBlend(id), blender = referenceBlender();
+  if (!blend || !blender || !existsSync(picture)) return null;
+  const png = readFileSync(picture), width = png.readUInt32BE(16), height = png.readUInt32BE(20);
+  const hash = createHash('sha1').update(readFileSync(blend)).update(blender).digest('hex').slice(0, 12);
+  const path = join(CACHE, id, `eevee-${hash}-${width}x${height}.png`), full = join(CACHE, id, `eevee-${hash}.png`);
+  if (existsSync(path)) return path;
+  mkdirSync(join(CACHE, id), { recursive: true });
+  if (!existsSync(full)) {
+    const script = `import bpy
+s = bpy.context.scene
+s.render.engine = 'BLENDER_EEVEE'
+s.render.film_transparent = False
+s.render.filepath = r'${full}'
+s.render.image_settings.file_format = 'PNG'
+bpy.ops.render.render(write_still=True)`;
+    execFileSync(blender, ['-b', fileURLToPath(blend), '--python-expr', script], { stdio: 'ignore', timeout: 600000 });
+  }
+  const ffmpeg = fileURLToPath(import.meta.resolve('ffmpeg-static')).replace(/index\.js$/, process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg');
+  execFileSync(ffmpeg, ['-y', '-loglevel', 'error', '-i', full, '-vf', `scale=${width}:${height}:flags=area`, path]);
+  return path;
+}
+
+// A look's app and page pictures against EEVEE: { app, page } each { agree, mean }, kept in its cached result.
+async function againstEevee(browser, id, r) {
+  if (!r?.pictures || r.error || r.eevee) return;
+  const eevee = eeveePicture(id, r.pictures.app);
+  if (!eevee) return;
+  const { comparePictures } = await import('./look.mjs');
+  const score = async (name) => {
+    const m = await comparePictures(browser, { app: eevee, page: r.pictures[name], ids: r.pictures.ids, legend: {}, title: `${id}   EEVEE against the ${name}` }, r.pictures[name].replace(/(app|page)-/, `eevee-$1-`));
+    return { agree: m.agree, mean: m.mean };
+  };
+  r.eevee = { app: await score('app'), page: await score('page') };
+  writeFileSync(join(dirname(r.pictures.app), `look-${basename(r.pictures.app).match(/app-(\w+)\.png/)[1]}.json`), JSON.stringify(r));
 }
 
 async function devServer() {
@@ -255,7 +299,7 @@ if (parts.node) {
 }
 if (parts.look) {
   const looks = await lookChecks(ids, keys, engines, { prod: flag('--prod') });
-  for (const [key, r] of Object.entries(looks)) results[key] = { verdict: verdictOf(key.split(' ')[0], r), metrics: r.error ? null : { agree: r.agree, mean: r.mean }, pictures: r.pictures };
+  for (const [key, r] of Object.entries(looks)) results[key] = { verdict: verdictOf(key.split(' ')[0], r), metrics: r.error ? null : { agree: r.agree, mean: r.mean }, eevee: r.eevee, pictures: r.pictures };
 }
 
 // The report: a table of example by check, and each failure's lines and pictures.
