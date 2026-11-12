@@ -25,6 +25,7 @@ import { colorRampTable, defaultColorRamp, halfFloats } from '../../blenkernel/c
 import { blackbodyTable, curveMappingGPU, defaultCurveMapping, plainCurveMapping, wavelengthTable } from '../../blenkernel/colortools.js';
 import { CurvesGeometryBlock, CurvesNormalBlock } from '../../draw/curves.js';
 import { imageTexture } from '../../imbuf/image-textures.js';
+import { tiledImageTextures } from '../../imbuf/tiled-image-textures.js';
 import { skyTexture } from '../../blenkernel/sky.js';
 import { blendData } from '../../python/bpy_rna.js';
 import { VIEW_FORWARD, viewEye, viewForward } from '../../draw/draw-view.js';
@@ -116,8 +117,13 @@ export const SHADER_NODES = {
     const steps = ['CHANNEL_PACKED', 'NONE'].includes(ima.alpha_mode) || ima.colorspace_settings.is_data ? ['color_alpha_clear']
       : !ima.is_float ? [alpha ? 'color_alpha_clear' : 'color_alpha_premultiply']
       : alpha ? ['color_alpha_unpremultiply', !premul && 'color_alpha_clear'] : [premul && 'color_alpha_clear'];
+    const vector = connected('Vector') ? 'Vector' : '$uv', cubic = ['Cubic', 'Smart'].includes(p.interpolation);
+    // A UDIM image samples its tiles' array through its tile map, as Blender's flat projection of one does.
+    const sampled = ima.source === 'TILED' && p.projection === 'FLAT'
+      ? [[cubic ? 'node_tex_tile_cubic' : 'node_tex_tile_linear', [vector, { image: ima, tiled: 'array' }, { image: ima, tiled: 'map' }], ['@Color', '@Alpha']]]
+      : imageProjection(p, vector, { image: ima }, cubic);
     return [
-      ...imageProjection(p, connected('Vector') ? 'Vector' : '$uv', { image: ima }, ['Cubic', 'Smart'].includes(p.interpolation)),
+      ...sampled,
       ...(linked('Color') ? steps.filter(Boolean).map((name) => [name, ['@Color'], ['@Color']]) : []),
     ];
   },
@@ -1059,7 +1065,7 @@ const blenderShader = (Base) => class extends Base {
           state._emitFunction(key, code, '');
         },
         free: (prefix) => state._getFreeVariableName(prefix),
-        sampler: ({ texture: table, image, sky, depth, ...sampling }) => {
+        sampler: ({ texture: table, image, sky, depth, tiled, ...sampling }) => {
           if (depth) {
             const name = state._getFreeVariableName('bl_depth'), scene = state.sharedData.scene;
             state._emit2DSampler(name, '', false, undefined, false, 'highp');
@@ -1073,6 +1079,14 @@ const blenderShader = (Base) => class extends Base {
             // Made as it is first bound: a texture array needs WebGL 2.
             const scene = state.sharedData.scene;
             this._textures.push([name, () => skyArrayTexture(sky, scene)]);
+            return name;
+          }
+          if (tiled) {
+            const name = state._getFreeVariableName(tiled === 'array' ? 'bl_tiles' : 'bl_tile_map'), scene = state.sharedData.scene;
+            if (tiled === 'array') state._emit2DArraySampler(name);
+            else state._emit2DSampler(name, '', false, undefined, false, 'highp');
+            const mode = this.properties.interpolation === 'Closest' ? Texture.NEAREST_NEAREST_MIPLINEAR : Texture.TRILINEAR_SAMPLINGMODE;
+            this._textures.push([name, () => tiledImageTextures(image, scene, { sampling: mode })?.[tiled] ?? emptyTexture(scene)]);
             return name;
           }
           const name = state._getFreeVariableName(table ? 'bl_table' : 'bl_image');
