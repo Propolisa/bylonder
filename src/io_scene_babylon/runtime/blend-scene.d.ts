@@ -99,6 +99,19 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
                     name: string;
                     frame: number;
                 }[];
+                sounds: {
+                    name: string;
+                    file: string;
+                    delay: number;
+                    channel: number;
+                    frame_start: number;
+                    frame_final_start: number;
+                    frame_final_end: number;
+                    frame_offset_start: number;
+                    frame_offset_end: number;
+                    volume: number;
+                    mute: boolean;
+                }[];
             };
         };
         ids: Record<string, {
@@ -195,6 +208,12 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
         keepRealTime(effect: import("./playhead.js").Effect, on?: boolean): void;
         dispose(): void;
     };
+    /**
+     * The scene's sequencer sound strips by name, as a page plays them: the sound's URL, when the strip starts (seconds
+     * after the scene's first frame), where in the decoded sound it starts (its start offset after the file's encoder
+     * delay) and how long it plays, in seconds; its channel, volume and whether it is muted. @type {Record<string, Sound>}
+     */
+    sounds: Record<string, Sound>;
     /** Told of each marker passed: the scene's as the playhead plays past it, an action's as its clip does. */
     onMarker: Observable<import("./clips.js").MarkerEvent>;
     /**
@@ -280,6 +299,18 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
     #private;
 }
 export type Value = number | boolean | string;
+/**
+ * A sequencer sound strip as a page plays it (BlendScene.sounds).
+ */
+export type Sound = {
+    url: string;
+    start: number;
+    offset: number;
+    duration: number;
+    channel: number;
+    volume: number;
+    mute: boolean;
+};
 /**
  * A control as Blender's RNA describes its property: its type, default and UI range, subtype and unit, and whether the
  * export suggests it to authors and UIs.

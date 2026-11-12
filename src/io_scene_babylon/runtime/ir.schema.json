@@ -24,7 +24,8 @@
           "loop": true,
           "sample_rates": {},
           "clips": {},
-          "markers": []
+          "markers": [],
+          "sounds": []
         }
       },
       "type": "object",
@@ -60,7 +61,8 @@
             "loop": true,
             "sample_rates": {},
             "clips": {},
-            "markers": []
+            "markers": [],
+            "sounds": []
           },
           "type": "object",
           "properties": {
@@ -179,6 +181,61 @@
                     "type": "number"
                   }
                 }
+              }
+            },
+            "sounds": {
+              "default": [],
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "file": {
+                    "type": "string"
+                  },
+                  "delay": {
+                    "default": 0,
+                    "type": "number"
+                  },
+                  "channel": {
+                    "default": 1,
+                    "type": "number"
+                  },
+                  "frame_start": {
+                    "default": 1,
+                    "type": "number"
+                  },
+                  "frame_final_start": {
+                    "default": 1,
+                    "type": "number"
+                  },
+                  "frame_final_end": {
+                    "default": 1,
+                    "type": "number"
+                  },
+                  "frame_offset_start": {
+                    "default": 0,
+                    "type": "number"
+                  },
+                  "frame_offset_end": {
+                    "default": 0,
+                    "type": "number"
+                  },
+                  "volume": {
+                    "default": 1,
+                    "type": "number"
+                  },
+                  "mute": {
+                    "default": false,
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "name",
+                  "file"
+                ]
               }
             }
           }

@@ -293,8 +293,8 @@ function constraintEntities(ids, constraints, time, bin) {
 // objects' constraints the page runs (`curves`, `constraints`, live-curves.js); `skeletons`, the skeleton and skinned
 // mesh of each armature by name (driver-export.js); `collections`, the scene's and its
 // collections (collections-export.js); `states`, the export's options that set
-// the states of its branches (export-options.js chosenState); `clips` and `markers`, the scene time's (runtime/ir.js TimeSchema).
-export function exportIR(world, { controls, collections = null, live, bin, animationGroups = [], sampleRates = {}, clips = {}, markers = [], curves = [], constraints = [], skeletons = {}, states = {} }) {
+// the states of its branches (export-options.js chosenState); `clips`, `markers` and `sounds`, the scene time's (runtime/ir.js TimeSchema).
+export function exportIR(world, { controls, collections = null, live, bin, animationGroups = [], sampleRates = {}, clips = {}, markers = [], sounds = [], curves = [], constraints = [], skeletons = {}, states = {} }) {
   const sync = world.mainSync, objects = world.objects.map((node) => [node, sync?.objectOf(node)]).filter(([, pointer]) => pointer);
   const { ids, references } = sync ? exportIDs(rootIDs(objects.map(([, pointer]) => pointer))) : { ids: {}, references: [] };
   for (const [node, pointer] of objects) if (ids[idKey(idStruct(pointer))]) ids[idKey(idStruct(pointer))].node = node.id;
@@ -322,6 +322,6 @@ export function exportIR(world, { controls, collections = null, live, bin, anima
   for (const entity of Object.values(entities)) if (entity.implementation) for (const [ref] of referencesIn(entity.inputs)) if ('property' in ref) properties[ref.property].suggested = true;
   // What a driver sets is its driver's, as in Blender: still a control, but not one to suggest.
   for (const entity of Object.values(entities)) if (entity.type.startsWith('driver:')) for (const target of Object.values(entity.outputs ?? {})) if (target && 'property' in target) delete properties[target.property]?.suggested;
-  return { schema: IR_SCHEMA, version: IR_VERSION, scene: { ...(collections?.scene ?? { id: null, collection: null, view_layer: null }), time: { ...sceneTime(world.animation.time.state), sample_rates: sampleRates, clips, markers } }, ids,
+  return { schema: IR_SCHEMA, version: IR_VERSION, scene: { ...(collections?.scene ?? { id: null, collection: null, view_layer: null }), time: { ...sceneTime(world.animation.time.state), sample_rates: sampleRates, clips, markers, sounds } }, ids,
     collections: collections?.collections ?? {}, references, properties, graphs, entities, order: entityOrder(entities) };
 }

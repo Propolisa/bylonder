@@ -198,6 +198,25 @@ export const ClipSchema: import("zod/mini").ZodMiniObject<{
         frame: number;
     }[], any>>>;
 }, import("zod/v4/core").$strip>;
+/**
+ * A sound strip of the scene's sequencer (Blender's SoundStrip): its sound's file in the package and the seconds of
+ * encoder delay the file's decoded sound starts with (an AAC encoder's priming), its channel, the frame its sound would
+ * start at (frame_start) and the frames it plays (frame_final_start to frame_final_end, its offsets cut from the sound's
+ * start and end), its volume and whether it is muted.
+ */
+export const SoundSchema: import("zod/mini").ZodMiniObject<{
+    name: import("zod/mini").ZodMiniString<string>;
+    file: import("zod/mini").ZodMiniString<string>;
+    delay: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNumber<number>>;
+    channel: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNumber<number>>;
+    frame_start: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNumber<number>>;
+    frame_final_start: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNumber<number>>;
+    frame_final_end: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNumber<number>>;
+    frame_offset_start: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNumber<number>>;
+    frame_offset_end: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNumber<number>>;
+    volume: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNumber<number>>;
+    mute: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniBoolean<boolean>>;
+}, import("zod/v4/core").$strip>;
 /** The scene's time as Blender's Scene holds it: the frame shown, the range played, its frame rate (fps / fps_base) and whether playback loops. */
 export const TimeSchema: import("zod/mini").ZodMiniObject<{
     frame_current: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNumber<number>>;
@@ -239,6 +258,31 @@ export const TimeSchema: import("zod/mini").ZodMiniObject<{
         name: string;
         frame: number;
     }[], any>>>;
+    sounds: import("zod/mini").ZodMiniDefault<z.ZodMiniType<{
+        name: string;
+        file: string;
+        delay: number;
+        channel: number;
+        frame_start: number;
+        frame_final_start: number;
+        frame_final_end: number;
+        frame_offset_start: number;
+        frame_offset_end: number;
+        volume: number;
+        mute: boolean;
+    }[], any, import("zod/v4/core").$ZodTypeInternals<{
+        name: string;
+        file: string;
+        delay: number;
+        channel: number;
+        frame_start: number;
+        frame_final_start: number;
+        frame_final_end: number;
+        frame_offset_start: number;
+        frame_offset_end: number;
+        volume: number;
+        mute: boolean;
+    }[], any>>>;
 }, import("zod/v4/core").$strip>;
 /** The scene the page shows: its ID, its scene collection (the collections' root), the view layer it draws and its time. */
 export const SceneSchema: import("zod/mini").ZodMiniObject<{
@@ -270,6 +314,19 @@ export const SceneSchema: import("zod/mini").ZodMiniObject<{
             name: string;
             frame: number;
         }[];
+        sounds: {
+            name: string;
+            file: string;
+            delay: number;
+            channel: number;
+            frame_start: number;
+            frame_final_start: number;
+            frame_final_end: number;
+            frame_offset_start: number;
+            frame_offset_end: number;
+            volume: number;
+            mute: boolean;
+        }[];
     }, any, import("zod/v4/core").$ZodTypeInternals<{
         frame_current: number;
         frame_start: number;
@@ -294,6 +351,19 @@ export const SceneSchema: import("zod/mini").ZodMiniObject<{
         markers: {
             name: string;
             frame: number;
+        }[];
+        sounds: {
+            name: string;
+            file: string;
+            delay: number;
+            channel: number;
+            frame_start: number;
+            frame_final_start: number;
+            frame_final_end: number;
+            frame_offset_start: number;
+            frame_offset_end: number;
+            volume: number;
+            mute: boolean;
         }[];
     }, any>>>;
 }, import("zod/v4/core").$strip>;
@@ -331,6 +401,19 @@ export const IRSchema: import("zod/mini").ZodMiniObject<{
                 name: string;
                 frame: number;
             }[];
+            sounds: {
+                name: string;
+                file: string;
+                delay: number;
+                channel: number;
+                frame_start: number;
+                frame_final_start: number;
+                frame_final_end: number;
+                frame_offset_start: number;
+                frame_offset_end: number;
+                volume: number;
+                mute: boolean;
+            }[];
         };
     }, any, import("zod/v4/core").$ZodTypeInternals<{
         id: string | null;
@@ -360,6 +443,19 @@ export const IRSchema: import("zod/mini").ZodMiniObject<{
             markers: {
                 name: string;
                 frame: number;
+            }[];
+            sounds: {
+                name: string;
+                file: string;
+                delay: number;
+                channel: number;
+                frame_start: number;
+                frame_final_start: number;
+                frame_final_end: number;
+                frame_offset_start: number;
+                frame_offset_end: number;
+                volume: number;
+                mute: boolean;
             }[];
         };
     }, any>>>;

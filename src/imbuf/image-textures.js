@@ -5,8 +5,8 @@
 import { Constants, Texture } from '@babylonjs/core';
 import { blenderModule } from '../bmesh/bmesh-wasm.js';
 import { blendData, contextStruct, pointerOf } from '../python/bpy_rna.js';
-import { files } from '../port/wasm.js';
 import { pngDataUrl, webImage } from './data-url.js';
+import { fileBytes } from '../blenkernel/packed-file.js';
 
 const { exports: x, withArrays } = blenderModule;
 // image-api.cc ImageBufferKind.
@@ -69,17 +69,6 @@ export function imageFile(texture) {
   if (!buffer) return null;
   const rgba = buffer.float ? Uint8Array.from(image.pixels, (v) => Math.min(1, Math.max(0, v)) * 255) : buffer.pixels.slice();
   return pngDataUrl(rgba, buffer.width, buffer.height);
-}
-
-// An image's file as Blender holds it: its packed file's bytes (DNA PackedFile: int size, int seek, void *data, the
-// size checked against RNA's), else the file at its path in the module's file system.
-function fileBytes(image) {
-  const packed = image.packed_file;
-  if (packed) {
-    const [size, , data] = new Int32Array(x.memory.buffer, pointerOf(packed)[2] >>> 0, 3);
-    return size === packed.size ? new Uint8Array(x.memory.buffer, data >>> 0, size).slice() : null;
-  }
-  return files.get(image.filepath_from_user()) ?? null;
 }
 
 // Every image's texture filled again from Blender's buffer (after a lost context).

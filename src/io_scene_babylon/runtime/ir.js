@@ -108,6 +108,20 @@ export const ClipSchema = z.object({
   markers: fresh(z.array(MarkerSchema), () => []),
 });
 
+/**
+ * A sound strip of the scene's sequencer (Blender's SoundStrip): its sound's file in the package and the seconds of
+ * encoder delay the file's decoded sound starts with (an AAC encoder's priming), its channel, the frame its sound would
+ * start at (frame_start) and the frames it plays (frame_final_start to frame_final_end, its offsets cut from the sound's
+ * start and end), its volume and whether it is muted.
+ */
+export const SoundSchema = z.object({
+  name: Name, file: z.string(), delay: z._default(z.number(), 0),
+  channel: z._default(z.number(), 1), frame_start: z._default(z.number(), 1),
+  frame_final_start: z._default(z.number(), 1), frame_final_end: z._default(z.number(), 1),
+  frame_offset_start: z._default(z.number(), 0), frame_offset_end: z._default(z.number(), 0),
+  volume: z._default(z.number(), 1), mute: z._default(z.boolean(), false),
+});
+
 /** The scene's time as Blender's Scene holds it: the frame shown, the range played, its frame rate (fps / fps_base) and whether playback loops. */
 export const TimeSchema = z.object({
   frame_current: z._default(z.number(), 1), frame_start: z._default(z.number(), 1), frame_end: z._default(z.number(), 250),
@@ -118,8 +132,10 @@ export const TimeSchema = z.object({
   clips: fresh(z.record(Name, ClipSchema), () => ({})),
   /** the scene's markers */
   markers: fresh(z.array(MarkerSchema), () => []),
+  /** the sound strips of the scene's sequencer */
+  sounds: fresh(z.array(SoundSchema), () => []),
 });
-const TIME = () => ({ frame_current: 1, frame_start: 1, frame_end: 250, fps: 24, fps_base: 1, loop: true, sample_rates: {}, clips: {}, markers: [] });
+const TIME = () => ({ frame_current: 1, frame_start: 1, frame_end: 250, fps: 24, fps_base: 1, loop: true, sample_rates: {}, clips: {}, markers: [], sounds: [] });
 
 /** The scene the page shows: its ID, its scene collection (the collections' root), the view layer it draws and its time. */
 export const SceneSchema = z.object({

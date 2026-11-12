@@ -88,6 +88,13 @@ Babylon's clock.
 `markers` holds the scene's timeline markers, `[{ "name": "Step", "frame": 10 }]`, which the SDK's `onMarker` tells
 as the playhead plays past them.
 
+`sounds` holds the scene's sequencer sound strips: each its `name`, its sound's `file` in the package (under
+`sounds/`, MP3 and AAC as they are, other formats transcoded to AAC in `.m4a`), the `delay` in seconds of encoder priming
+the file's decoded sound starts with (from an MP3's LAME header, an AAC file's iTunSMPB or the transcode's encoder; 0 when the file does not tell), its `channel`, `frame_start`, `frame_final_start`, `frame_final_end`,
+`frame_offset_start`, `frame_offset_end`, `volume` and `mute`. The page gives them as `blend.sounds` by strip name, with
+`url`, `start` (seconds after the scene's first frame), `offset` (seconds into the decoded sound, after its delay) and
+`duration`.
+
 `collections` holds the scene's collections by ID key, the scene collection (`GR:Scene Collection`) included, each with
 its members and metadata as Blender's outliner shows them:
 
