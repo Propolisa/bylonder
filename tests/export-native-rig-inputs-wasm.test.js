@@ -1,7 +1,8 @@
 // What the native rig runtime takes from Main besides the bones' own poses: the Rigged Character's rig, on the runtime
 // for an Action constraint, is accepted by the export and posed in the page as Main poses it at frames of its animation,
 // with its head's Damped Track weighed by a driver reading the Z rotation of a bone in YXZ order (the runtime takes that
-// bone in its own rotation mode, so the driver reads the same angle).
+// bone in its own rotation mode, so the driver reads the same angle) and its right hand's last Copy Rotation keyed from 0
+// to 1 (the runtime takes the keyed influence at each frame).
 import assert from 'node:assert/strict';
 import { NullEngine } from '@babylonjs/core';
 import { babylonMatrix } from '../src/blenkernel/main-view.js';
@@ -21,6 +22,9 @@ const driver = (path, expression) => Object.assign(ad.drivers.new(path, 0).drive
 // An Action constraint, which Blender's constraint kernels do not run: the rig goes to the native runtime.
 Object.assign(bones.get('chest').constraints.new('ACTION'), { use_eval_time: true, eval_time: 0.5, frame_start: 1, frame_end: 21, use_bone_object_action: false }).action = ad.action;
 
+// Copy Rotations of a turned target, to weigh.
+bones.get('knee_pole.L').rotation_quaternion = [0.8, 0.36, 0.36, 0.32];
+const copyOf = (bone) => Object.assign(bones.get(bone).constraints.new('COPY_ROTATION'), { target: rig, subtarget: 'knee_pole.L' });
 
 Object.assign(bones.get('hand_ik.R'), { rotation_mode: 'YXZ', rotation_euler: [0.6, 0.5, 0.7] });
 const track = [...bones.get('head').constraints].find((c) => c.type === 'DAMPED_TRACK');
@@ -28,6 +32,10 @@ const angle = driver(`pose.bones["head"].constraints["${track.name}"].influence`
 Object.assign(angle.variables.new(), { name: 'var', type: 'TRANSFORMS' });
 Object.assign(angle.variables[0].targets[0], { id: rig, bone_target: 'hand_ik.R', transform_type: 'ROT_Z', transform_space: 'LOCAL_SPACE' });
 
+const hand = copyOf('hand.R');
+const keyed = ad.action.layers[0].strips[0].channelbag(ad.action_slot).fcurves.new(`pose.bones["hand.R"].constraints["${hand.name}"].influence`, 0);
+keyed.keyframe_points.insert(1, 0);
+keyed.keyframe_points.insert(21, 1);
 sync.blender.tag(sync.objectOf(world.objects.find((n) => n.name === 'Rig')), 2);
 sync.view();
 
@@ -55,5 +63,5 @@ for (const f of FRAMES) {
 }
 blend.dispose();
 written.remove();
-console.log(`Export native rig inputs: a driver reading a YXZ bone's angle poses the rig on the native runtime as Main at ${FRAMES.length} frames`);
+console.log(`Export native rig inputs: a driver reading a YXZ bone's angle and a keyed influence pose the rig on the native runtime as Main at ${FRAMES.length} frames`);
 process.exit(0);

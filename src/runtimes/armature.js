@@ -450,7 +450,7 @@ function poseAnimations(world, mappings, bake, sampling, scene, bases = new Set(
           keys.get(bone).push({ frame, value: values[i] });
           if (bases.has(mapping)) (evaluated.get(bone) ?? evaluated.set(bone, []).get(bone)).push({ frame, value: posed[i] });
         });
-        stacks.get(mapping)?.check(values);
+        stacks.get(mapping)?.check(values, frame);
       }
     }
   };

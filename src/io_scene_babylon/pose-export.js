@@ -141,16 +141,25 @@ const drivenKeys = (keyed, description) => keyed.flatMap((ob) => description.dri
   .map((d) => { const name = JSON.parse(`"${KEY_VALUE.exec(d.data_path)[1]}"`), block = ob.data.shape_keys.key_blocks.get(name);
     return { mesh: ob.name, key: name, range: [block.slider_min, block.slider_max], property: `shape_keys${key(ob.data.shape_keys.name)}.key_blocks${key(name)}.value` }; }));
 const nativeSolver = nativeSolve();
-// The custom properties of an armature and its pose bones that its drivers read: their paths from the armature (as the
-// runtime's setPath takes them), with Main's values now, or by `read(path)` (a control's reference).
-const customProperties = (arm, read = (path, value) => value) => Object.fromEntries([['', arm], ...[...arm.pose.bones].map((pb) => [`pose.bones${key(pb.name)}`, pb])]
-  .flatMap(([base, struct]) => [...(struct.keys?.() ?? [])].filter((name) => typeof struct.get(name) === 'number').map((name) => [`${base}${key(name)}`, read(`${base}${key(name)}`, struct.get(name))])));
+// The custom properties of an armature and its pose bones that its drivers read, and its constraints' keyed influences:
+// their paths from the armature (as the runtime's setPath takes them), with Main's values now, or by `read(path)` (a
+// control's reference).
+const customProperties = (arm, read = (path, value) => value) => Object.fromEntries([...[['', arm], ...[...arm.pose.bones].map((pb) => [`pose.bones${key(pb.name)}`, pb])]
+  .flatMap(([base, struct]) => [...(struct.keys?.() ?? [])].filter((name) => typeof struct.get(name) === 'number').map((name) => [`${base}${key(name)}`, read(`${base}${key(name)}`, struct.get(name))])),
+  ...keyedInfluences(arm).map(({ path, constraint }) => [path, read(path, constraint.influence)])]);
+// The influences of the armature's constraints that an action keys (its own or a clip's): the runtime takes them as the
+// page animates them, its description holding only their values now.
+const INFLUENCE = /^pose\.bones\["((?:[^"\\]|\\.)*)"\]\.constraints\["((?:[^"\\]|\\.)*)"\]\.influence$/;
+const keyedInfluences = (arm) => [...new Set([...blendData().actions].flatMap((action) => [...action.layers].flatMap((layer) => [...layer.strips])
+  .flatMap((strip) => [...strip.channelbags]).flatMap((bag) => [...bag.fcurves].map((fc) => fc.data_path))))]
+  .flatMap((path) => { const [, bone, name] = INFLUENCE.exec(path) ?? [], constraint = bone && arm.pose.bones.get(JSON.parse(`"${bone}"`))?.constraints.get(JSON.parse(`"${name}"`));
+    return constraint ? [{ path, constraint }] : []; });
 
 const close = (a, b) => a.asArray().every((v, i) => Math.abs(v - b.asArray()[i]) <= TOLERANCE);
 
 // For an armature drawn by one skeleton, its bone constraints as the page runs them (on the kernels when an export has
 // prepared them and they cover the rig, its skeleton holding every bone): `check(evaluated)` compares the
-// page's pose with Main's at the frame Main is on (`evaluated`: each bone's local matrix as the skeleton holds it),
+// page's pose with Main's at the frame Main is on (`frame`; `evaluated`: each bone's local matrix as the skeleton holds it),
 // recording each bone's own matrix; `entity()` the IR entity's inputs once every check held, else null, the bones'
 // own matrices those of the frame Main is on then; `moved`, the bones the constraints move, and `own(bone)` a bone's
 // own matrices at the frames checked. `meshWorld()` gives the skinned mesh's
@@ -179,22 +188,25 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
   // The B-Bones whose segments the kernels shape as Main does at every frame checked.
   const shaped = new Set(rig ? [...arm.data.bones].filter((b) => b.bbone_segments > 1).map((b) => b.name) : []);
   let checked = 0, held = true;
+  const solved = new Map();
   return {
     moved,
     native: !!native,
     deforms,
     deviation,
     own: (bone) => owns.get(bone),
-    check(evaluated) {
+    check(evaluated, frame) {
       const locals = bones.map((bone, i) => ownMatrix(poses[i], bone));
       bones.forEach((bone, i) => owns.get(bone).push(locals[i]));
       const current = rig && Object.fromEntries(rig.bones.filter((b) => b.constraints.length).map((b) => [b.name, [...arm.pose.bones.get(b.name).constraints].map((c) => c.influence)]));
       const result = solve({ bones: shape, locals, mesh: meshWorld(), space: skeleton.space, stacks, kernels: rig, influences: current,
-        shapes: rig && shapes(arm, (path, v) => v), nodeWorld, native, properties: native && customProperties(arm) });
+        shapes: rig && shapes(arm, (path, v) => v), nodeWorld, native, properties: native && customProperties(arm), frame });
+      // Every bone the solver has moved is judged at every frame: a solver gives only what changed since its last solve.
       for (const [i, local] of result) {
         moved.add(bones[i]);
-        held &&= !judged.has(i) || close(local, evaluated[i]);
+        solved.set(i, local);
       }
+      for (const [i, local] of solved) held &&= !judged.has(i) || close(local, evaluated[i]);
       for (const name of shaped) {
         const pose = arm.pose.bones.get(name), ours = solve.segments(rig, name);
         if (!ours.every((m, k) => Array.from(pose.bbone_segment_matrix(k, false)).every((v, j) => Math.abs(v - m[j]) <= TOLERANCE))) shaped.delete(name);
