@@ -708,13 +708,16 @@ function redrawProbesDrawnOnce(scene) {
   const sculpted = (entry, recalc) => entry.type === 'MESH' && entry.node.metadata?.wbMode === 'SCULPT' && !!(recalc & ID_RECALC_SHADING);
   const drawsGeometry = ({ type, owned }) => (type === 'MESH' ? owned : CURVE_TYPES.includes(type) || EVALUATED.includes(type));
   // In Weight Paint Mode the weights are drawn over it (overlay-paint-weight.js), read with the mesh they are of. A mesh
-  // object whose evaluated geometry has no mesh (geometry nodes made points or curves of it) draws none.
+  // object whose evaluated geometry has no mesh (geometry nodes made points or curves of it) draws none; one Main did not
+  // evaluate (hidden from the depsgraph) draws its own Mesh, never nothing.
+  const unevaluated = (entry) => ([...idStruct(entry.ob).modifiers].some((m) => m.type === 'NODES' && m.show_viewport) ? emptyMesh() : blender.mesh(entry.ob));
   function drawGeometry(entry) {
-    const mesh = blender.evaluatedMesh(entry.ob) ?? (entry.type === 'MESH' ? emptyMesh() : null);
+    const evaluated = blender.evaluatedMesh(entry.ob), mesh = evaluated ?? (entry.type === 'MESH' ? unevaluated(entry) : null);
     if (!mesh) return;
+    // Paint weights and colors are of the mesh evaluatedMesh last gave.
     const mode = blender.mode(entry.ob);
-    const weights = mode === 'WEIGHT_PAINT' ? blender.paintWeights(entry.ob, mesh.verts_num) : null;
-    const colors = blender.paintColors(mesh.corners_num);
+    const weights = evaluated && mode === 'WEIGHT_PAINT' ? blender.paintWeights(entry.ob, mesh.verts_num) : null;
+    const colors = evaluated ? blender.paintColors(mesh.corners_num) : null;
     drawMesh(entry, mesh, blender.modifiers(entry.ob).map(({ error }) => error));
     drawEvaluatedSlots(entry);
     entry.paintWeight = paintWeightOverlay(entry.node, mesh, weights, entry.paintWeight);

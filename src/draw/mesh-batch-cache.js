@@ -115,6 +115,7 @@ export function mesh_batch_cache_apply(mesh, babylonMesh) {
   const read = meshAttributes(babylonMesh);
   const buffers = mesh.drawBuffers?.(DRAW_LINES | (read.tangents ? DRAW_TANGENTS : 0), read.names);
   setSubMeshes(babylonMesh, buffers ? drawn(babylonMesh, buffers, read.names) : built(babylonMesh, mesh));
+  removeMismatched(babylonMesh);
   fillMissingAttributes(babylonMesh, read.names.map(attributeKind));
   babylonMesh.getChildMeshes(true).filter((child) => child.metadata?.drawOwner === babylonMesh).forEach((child) => child.dispose());
   const loose = mesh.loose_edges();
@@ -171,6 +172,17 @@ function drawn(babylonMesh, { positions, normals, uvs, tris, lines, tangents, at
 }
 
 // A buffer the new geometry does not have goes (a UV map an evaluation left out), so every buffer has its vertex count.
+// Vertex buffers of an earlier topology (an attribute a built mesh does not draw), which no longer hold a value per
+// vertex: left, they would be read past their end.
+function removeMismatched(babylonMesh) {
+  const vertices = babylonMesh.getTotalVertices();
+  for (const kind of babylonMesh.getVerticesDataKinds?.() ?? []) {
+    const buffer = babylonMesh.getVertexBuffer(kind), data = buffer.getData();
+    if (buffer.getIsInstanced() || !data) continue;
+    const bytes = ArrayBuffer.isView(data) || data instanceof ArrayBuffer ? data.byteLength : data.length * 4;
+    if ((bytes - buffer.byteOffset) / buffer.byteStride < vertices) babylonMesh.removeVerticesData(kind);
+  }
+}
 function removeOthers(babylonMesh, kept) {
   for (const kind of babylonMesh.getVerticesDataKinds?.() ?? []) if (BUFFERS[kind] && !kept(kind)) babylonMesh.removeVerticesData(kind);
 }
