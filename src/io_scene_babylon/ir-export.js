@@ -42,7 +42,10 @@ const SKIP = new Set(['rna_type', 'bl_rna', 'original', 'id_data', 'users_collec
 const UI = /^(show_expanded|.*_expanded|is_active|ui_.*|bl_.*|select_.*|use_custom_color|color_tag)$/;
 // Views of what is written elsewhere: an F-Curve group's channels are its action's F-Curves, a bone's children name it
 // their parent, a bone collection's bones name it in their collections, and a pose bone's matrices are evaluated.
-const DERIVED = new Set(['ActionGroup.channels', 'Bone.children', 'BoneCollection.bones', 'PoseBone.matrix', 'PoseBone.matrix_channel']);
+const DERIVED = new Set(['ActionGroup.channels', 'Bone.children', 'BoneCollection.bones', 'PoseBone.matrix', 'PoseBone.matrix_channel',
+  // What the editors draw a channel or a bone in: an F-Curve's and its group's colors and visibility, a bone's color.
+  'FCurve.color', 'FCurve.color_mode', 'FCurve.hide', 'ActionGroup.colors', 'ActionGroup.color_set', 'ActionGroup.is_custom_color_set',
+  'Bone.color', 'PoseBone.color']);
 // A node tree's nodes, links and interface, which its graph holds.
 const GRAPHED = new Set(['nodes', 'links', 'interface']);
 // A node's place in its editor, which only the editor reads.
@@ -79,10 +82,11 @@ function walker(onReference) {
       onReference(owner, path, v);
       return { id: to };
     }
-    // A struct met again (a link's node, a socket's node) is named by where it was first written.
-    const at = `${pointer[0]}:${pointer[2]}`;
-    if (seen.has(at)) return { struct: seen.get(at) };
-    seen.set(at, path);
+    // A struct met again (a link's node, a socket's node, a pose bone's bone) is named by where it was first written,
+    // and by the ID that holds it there where that is another.
+    const at = `${pointer[0]}:${pointer[2]}`, here = idKey(owner);
+    if (seen.has(at)) { const [id, first] = seen.get(at); return id === here ? { struct: first } : { id, struct: first }; }
+    seen.set(at, [here, path]);
     return depth > 0 ? struct(owner, path, v, depth - 1) : null;
   };
   const seen = new Map();
@@ -98,7 +102,9 @@ function walker(onReference) {
       if (v === undefined || isDefault(prop, v)) continue;
       const at = path ? `${path}.${name}` : name;
       if (prop.type === 'COLLECTION') {
-        out[name] = safe(() => [...v].map((item, i) => value(owner, `${at}${named(item) ? key(item.name) : `[${i}]`}`, item, depth))) ?? [];
+        const items = safe(() => [...v].map((item, i) => value(owner, `${at}${named(item) ? key(item.name) : `[${i}]`}`, item, depth))) ?? [];
+        // A collection of bulk data whose type its property does not name (a shape key's points) is left out as such.
+        if (!items.length || items.some((item) => item !== null)) out[name] = items;
       } else out[name] = value(owner, at, v, depth);
     }
     return out;

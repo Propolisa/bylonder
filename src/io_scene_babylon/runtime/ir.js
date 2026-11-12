@@ -239,10 +239,15 @@ export function entityOrder(entities) {
  * @param {[string, string]} reference
  */
 export function dataAt(ir, [id, path]) {
-  let value = ir.ids[id]?.data;
+  let value = ir.ids[id]?.data, at = id;
+  // A struct written once and referred to elsewhere (`{ struct }`, or `{ id, struct }` in another ID) is read there.
+  const follow = () => { if (value?.constructor === Object && typeof value.struct === 'string') { at = value.id ?? at; value = dataAt(ir, [at, value.struct]); } };
   for (const [, name, index, key] of path.matchAll(/\.?(\w+)|\[(\d+)\]|\["((?:[^"\\]|\\.)*)"\]/g)) {
-    value = name !== undefined ? value?.[name] : index !== undefined ? value?.[+index] : value?.find?.((/** @type {any} */ item) => item?.name === key.replace(/\\(.)/g, '$1'));
+    follow();
+    const wanted = key?.replace(/\\(.)/g, '$1'), nameOf = (/** @type {any} */ item) => (typeof item?.struct === 'string' ? dataAt(ir, [item.id ?? at, item.struct])?.name : item?.name);
+    value = name !== undefined ? value?.[name] : index !== undefined ? value?.[+index] : value?.find?.((/** @type {any} */ item) => nameOf(item) === wanted);
   }
+  follow();
   return value;
 }
 
