@@ -1,10 +1,12 @@
 // An example opened as a project opens it (sdk.openBlend), in a world with the slices the view reads, for the export
 // tests: one per process, as Blender's module holds one Main.
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { NullEngine, Scene } from '@babylonjs/core';
 import { blenderMain } from '../src/bmesh/bmesh-wasm.js';
 import '../src/python/bpy_interface.js';
 import { setContextPointer } from '../src/python/bpy_rna.js';
+import { files } from '../src/port/wasm.js';
+import { LIBRARY_FOLDER } from '../src/blenkernel/libraries.js';
 import { createBlenderIDs } from '../src/blenkernel/blender-ids.js';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
 import { registerObjects } from '../src/blenkernel/animation/bindings.js';
@@ -42,6 +44,9 @@ export function openExample(id) {
   const animation = createAnimationModel(() => {}, { ids: createBlenderIDs(blenderMain()) });
   const objects = Object.assign([], { scene });
   const world = { scene, objects, animation };
+  // The example's libraries in the module's file system before its .blend is read, as a project opens (libraries.js).
+  const libraries = new URL(`../examples/${id}/libraries/`, import.meta.url);
+  if (existsSync(libraries)) for (const name of readdirSync(libraries).filter((f) => f.endsWith('.blend'))) files.set(`${LIBRARY_FOLDER}/${name}`, readFileSync(new URL(name, libraries)));
   const opening = createMainSync({ rna: createRNA({ world: { scene, objects: [] } }), ids: animation.ids });
   objects.push(...opening.readBlend(readFileSync(id instanceof URL || id.endsWith('.blend') ? id : exampleBlend(id)), scene).nodes);
   let camera = scene.activeCamera;
