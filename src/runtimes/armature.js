@@ -423,14 +423,16 @@ function issues(arm) {
 // `constraints`, the bones they move posed from their own location, rotation and scale; a bone whose own pose is its
 // F-Curves (live-curves.js livePose, checked at each whole frame) has them in `curves`; each bone still sampled while it
 // moves is in `gaps`. `scene`: the nodes (`nodeOf(ob)`, `meshOf(mapping)`, the skinned mesh) the page's constraints read.
-// The `bases` mappings' armature bones are keyed by their own location, rotation and scale instead (a clip of a rig the
-// native runtime poses, which solves its constraints and drivers from them). Sampled in the sampling's pass over the
-// frames (sampling.js sample): gives a function that returns them once it ran, `deforms`, the names of the meshes the
-// page's native rig runtime deforms where its pose runs live, and `natives`, the mappings it poses.
+// The `bases` mappings' armature bones are keyed by their own location, rotation and scale instead (a clip of a rig whose
+// constraints run in the page, which solves them from those). Sampled in the sampling's pass over the frames (sampling.js
+// sample): gives a function that returns them once it ran, `deforms`, the names of the meshes the page's native rig
+// runtime deforms where its pose runs live, and `live`, the mappings whose constraints the page runs; its result's
+// `poses` are the bones' matrices as Blender evaluates them (what bounds read), where they are keyed by their own.
 function poseAnimations(world, mappings, bake, sampling, scene, bases = new Set()) {
   const sync = world.mainSync, { fps, frameStart, frameEnd } = sampling.range, current = world.animation.time.frame;
   const animated = (arm) => !!arm.animation_data || [...arm.pose.bones].some((bone) => bone.constraints.length);
-  const keys = new Map(), owners = new Map(), stacks = new Map();
+  // The evaluated pose of the bones keyed by their own (`bases`), which bounds read.
+  const keys = new Map(), owners = new Map(), stacks = new Map(), evaluated = new Map();
   if (!bake && scene) for (const mapping of mappings) {
     const mesh = mapping.skeletons.size === 1 && scene.meshOf(mapping), [skeleton] = mapping.skeletons.values();
     const stack = mesh && livePoseConstraints(mapping.arm, skeleton, mesh, { nodeOf: scene.nodeOf, deformed: scene.deformed(mapping),
@@ -441,11 +443,12 @@ function poseAnimations(world, mappings, bake, sampling, scene, bases = new Set(
     for (const mapping of mappings) {
       const bones = bonesOf(mapping.arm, segmentsOf(mapping.arm));
       for (const skeleton of mapping.skeletons.values()) {
-        const values = skeleton.bones.map((bone, i) => (bases.has(mapping) && i < skeleton.armatureBones ? ownMatrix(mapping.arm.pose.bones.get(bone.name), bone)
-          : relative(bones, i, 'pose', skeleton.space)));
+        const posed = skeleton.bones.map((bone, i) => relative(bones, i, 'pose', skeleton.space));
+        const values = bases.has(mapping) ? posed.map((value, i) => (i < skeleton.armatureBones ? ownMatrix(mapping.arm.pose.bones.get(skeleton.bones[i].name), skeleton.bones[i]) : value)) : posed;
         skeleton.bones.forEach((bone, i) => {
           if (!keys.has(bone)) { keys.set(bone, []); owners.set(bone, mapping); }
           keys.get(bone).push({ frame, value: values[i] });
+          if (bases.has(mapping)) (evaluated.get(bone) ?? evaluated.set(bone, []).get(bone)).push({ frame, value: posed[i] });
         });
         stacks.get(mapping)?.check(values);
       }
@@ -454,7 +457,7 @@ function poseAnimations(world, mappings, bake, sampling, scene, bases = new Set(
   if (mappings.some((m) => animated(m.arm)) && frameEnd >= frameStart) sampling.sample(sample);
   else sample(current);
   return Object.assign(once(finish), { deforms: new Set([...stacks.values()].flatMap((stack) => stack.deforms)),
-    natives: new Set([...stacks].filter(([, stack]) => stack.native).map(([mapping]) => mapping)) });
+    live: new Set(stacks.keys()) });
   function finish() {
     // A stack the page runs where every bone it moves is posed by its own F-Curves, or not animated.
     const curves = [], gaps = [], constraints = [], posed = new Set();
@@ -489,7 +492,9 @@ function poseAnimations(world, mappings, bake, sampling, scene, bases = new Set(
       animation.setKeys(moves ? list.filter(({ frame }) => keeps(frame)) : list.slice(0, 1));
       return [{ animation, target: bone }];
     });
-    return { animations, curves, gaps, constraints };
+    // What each bone's matrix is over the frames, as bounds read it: the pose Blender evaluates.
+    const poses = animations.map(({ animation, target }) => (evaluated.has(target) ? { animation: { dataType: Animation.ANIMATIONTYPE_MATRIX, getKeys: () => evaluated.get(target) }, target } : { animation, target }));
+    return { animations, curves, gaps, constraints, poses };
   }
 }
 const once = (make) => { let made; return () => (made ??= make()); };
@@ -561,10 +566,10 @@ function exportArmatures(world, { bake, sampling, rests = appliedRests() }) {
     get gaps() { return posed().gaps; },
     get constraints() { return posed().constraints; },
     clip(clipSampling, owns) {
-      const owned = mappings.filter((m) => owns(m.arm)), clipPosed = poseAnimations(world, owned, true, clipSampling, null, posed.natives);
+      const owned = mappings.filter((m) => owns(m.arm)), clipPosed = poseAnimations(world, owned, true, clipSampling, null, posed.live);
       return once(() => {
-        const { animations } = clipPosed();
-        clipBounds(owned.filter((m) => !posed.natives.has(m)), animations, (key) => byOb.get(key)?.node);
+        const { animations, poses } = clipPosed();
+        clipBounds(owned, poses, (key) => byOb.get(key)?.node);
         return animations;
       });
     },
