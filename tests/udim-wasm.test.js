@@ -3,6 +3,7 @@
 // tile map, which Blender's tiled_image_lookup reads: UV (0.5, 0.5) samples tile 1001, (0.5, 1.5) tile 1011, and
 // (1.5, 0.5), a tile the image lacks, none.
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { BlenderMain } from '../src/bmesh/bmesh-wasm.js';
 import { blendData, setContextPointer } from '../src/python/bpy_rna.js';
 import { tileLayers } from '../src/imbuf/tiled-image-textures.js';
@@ -43,4 +44,8 @@ function sample([u, v]) {
 assert.deepEqual(sample([0.5, 0.5]), [255, 0, 0, 255], 'UV (0.5, 0.5) samples tile 1001');
 assert.deepEqual(sample([0.5, 1.5]), [0, 255, 0, 255], 'UV (0.5, 1.5) samples tile 1011');
 assert.equal(sample([1.5, 0.5]), null, 'a tile the image lacks samples none (pink in the shader)');
+// The private Babylon behaviour the WebGPU path relies on: its texture manager picks the format from _useSRGBBuffer.
+const manager = readFileSync(new URL('../node_modules/@babylonjs/core/Engines/WebGPU/webgpuTextureManager.js', import.meta.url), 'utf8');
+assert.ok(manager.includes('GetWebGPUTextureFormat(texture.type, texture.format, texture._useSRGBBuffer)'),
+  "Babylon's WebGPU texture manager no longer reads _useSRGBBuffer for a texture's format: tiled-image-textures.js's sRGB arrays need another way");
 console.log('UDIM: tiles 1001 and 1011 open as one image, packed as array layers with Blender\'s tile map, each UV sampling its tile');
