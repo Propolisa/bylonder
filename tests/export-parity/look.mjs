@@ -224,11 +224,11 @@ export async function pagePicture(browser, served, { folder, engine, width, heig
 // Two pictures compared in a page: the share of pixels within STEPS, the mean difference, the share of each that is
 // lit, and per object of the page's ID layer (`ids`, its colors' meshes in `legend`) how many of its pixels differ.
 // Saved to `out`: a title, then app, page, difference (times 4) and the ID layer side by side, each captioned.
-export async function comparePictures(browser, { app, page, ids, legend, title }, out) {
+export async function comparePictures(browser, { app, page, ids, legend, title, captions = ['app Render Image', 'exported page'] }, out) {
   const tab = await browser.newPage();
   const url = (path) => `data:image/png;base64,${readFileSync(path).toString('base64')}`;
   try {
-    const result = await tab.evaluate(async ([a, b, idImage, legend, title, steps, lit, step]) => {
+    const result = await tab.evaluate(async ([a, b, idImage, legend, title, captions, steps, lit, step]) => {
       const image = (src) => new Promise((resolve) => { const i = new Image(); i.onload = () => resolve(i); i.src = src; });
       const [x, y, z] = await Promise.all([image(a), image(b), image(idImage)]), w = x.width, h = x.height, top = 22, bottom = 18;
       const canvas = Object.assign(document.createElement('canvas'), { width: w * 4, height: h + top + bottom }), c = canvas.getContext('2d');
@@ -260,10 +260,10 @@ export async function comparePictures(browser, { app, page, ids, legend, title }
       c.font = 'bold 14px sans-serif';
       c.fillText(title, 6, 16);
       c.font = '12px sans-serif';
-      ['app Render Image', 'exported page', 'difference x4', 'page ID layer (object per color)'].forEach((caption, k) => c.fillText(caption, k * w + 6, top + h + 13));
+      [...captions, 'difference x4', 'page ID layer (object per color)'].forEach((caption, k) => c.fillText(caption, k * w + 6, top + h + 13));
       const n = w * h;
       return { agree: close / n, mean: sum / n, litApp: litApp / n, litPage: litPage / n, sizes: [x.width, x.height, y.width, y.height], blame, png: canvas.toDataURL('image/png') };
-    }, [url(app), url(page), url(ids), legend, title, STEPS, LIT, ID_STEP]);
+    }, [url(app), url(page), url(ids), legend, title, captions, STEPS, LIT, ID_STEP]);
     writeFileSync(out, Buffer.from(result.png.split(',')[1], 'base64'));
     delete result.png;
     return result;

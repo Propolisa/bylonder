@@ -44,6 +44,8 @@ for (const parity of [false, true]) {
   const lobes = scene.materials.find((m) => m.name === 'Two Lobes');
   assert.equal(classes(lobes).includes('BABYLON.ClearCoatBlock'), parity, 'the second lobe is a clearcoat with EEVEE Parity');
   assert.ok(classes(scene.materials.find((m) => m.name === 'Ramp')).includes('BABYLON.ImageSourceBlock'), "a color ramp's table is an image");
+  assert.ok(materials.every((m) => m.separateCullingPass) && scene.materials.every((m) => !m.separateCullingPass),
+    "an opaque surface draws in one pass: the page's faces never reversed, its back faces shade as back faces");
 
   // Loaded by a process that has only Babylon.
   const dir = mkdtempSync(join(tmpdir(), 'bylonder-nodes-'));
@@ -65,6 +67,10 @@ console.log(JSON.stringify({ results, meshes: scene.meshes.map((m) => m.material
   assert.deepEqual(results.map(([name, ok]) => [name, ok]), Object.keys(TREES).map((name) => [name, true]), `every material builds in plain Babylon (parity ${parity})`);
   assert.deepEqual(meshes, Object.keys(TREES).map(() => 'NodeMaterial'));
 }
+const glass = materials.find((m) => m.name === 'Glass');
+glass.alpha = 0.5;
+assert.ok((await exportNodeMaterial(glass)).separateCullingPass, 'a blended surface keeps its back faces drawn first');
+glass.alpha = 1;
 // On WebGPU, with the page's sampler specialization: a color ramp's table passed to Blender's functions compiles to WGSL.
 if (compilersPresent()) {
   const gpu = new WebGPUShaderEngine(await createCompilers()), view = new Scene(gpu);

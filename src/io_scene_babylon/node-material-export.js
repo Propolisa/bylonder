@@ -89,6 +89,8 @@ export async function exportNodeMaterial(material, { parity = false, graph = nul
     const exported = exportGraph(material, out, { parity, textures, graph, kernel, mesh });
     for (const node of [...material._vertexOutputNodes, ...material._fragmentOutputNodes]) out.addOutputNode(exported.block(node));
     for (const key of MATERIAL_SETTINGS) if (key in material) out[key] = material[key];
+    // The page's faces face as drawn (bl_reversed_faces 0): an opaque surface, whose overlap depth sorts, in one pass.
+    out.separateCullingPass &&= material.needAlphaBlending();
     const json = out.serialize();
     for (const entry of json.blocks) {
       const texture = textures.get(entry.id);

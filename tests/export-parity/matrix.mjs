@@ -220,7 +220,8 @@ async function againstEevee(browser, id, r) {
   if (!eevee) return;
   const { comparePictures } = await import('./look.mjs');
   const score = async (name) => {
-    const m = await comparePictures(browser, { app: eevee, page: r.pictures[name], ids: r.pictures.ids, legend: {}, title: `${id}   EEVEE against the ${name}` }, r.pictures[name].replace(/(app|page)-/, `eevee-$1-`));
+    const m = await comparePictures(browser, { app: eevee, page: r.pictures[name], ids: r.pictures.ids, legend: {}, title: `${id}   EEVEE against the ${name}`,
+      captions: ['Blender EEVEE render', name === 'app' ? 'app Render Image' : 'exported page'] }, r.pictures[name].replace(/(app|page)-/, `eevee-$1-`));
     return { agree: m.agree, mean: m.mean };
   };
   r.eevee = { app: await score('app'), page: await score('page') };
