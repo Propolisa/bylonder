@@ -16,6 +16,8 @@ import { BlenderVolumeOutputBlock } from '../draw/volume-blocks.js';
 import { CurvesGeometryBlock, CurvesNormalBlock } from '../draw/curves.js';
 import { glslValue, LUMINANCE } from '../nodes/blender/sockets.js';
 import { imageFile } from '../imbuf/image-textures.js';
+import { imageTiles } from '../imbuf/tiled-image-textures.js';
+import { packTiles, TileBlock } from './runtime/tiled-images.js';
 import { pngDataUrl } from '../imbuf/data-url.js';
 import { MESH_VALUE, REVERSED_FACES, REVERSED_GLOBAL } from './runtime/materials.js';
 import { AreaLitPBRBlock } from '../overrides/babylon/pbr-block-area-lights.js';
@@ -315,7 +317,8 @@ function blenderNodes(material, { closure, merge, scene, textures, systemValue, 
   const inputs = [...params].map(([name, point], i) => [`in${i}`, typeName(point.type), name])
     .concat(uniforms.map(({ name, kind }, i) => [`value${i}`, typeName(uniformType(kind)), name]));
   if (matrices) inputs.push(['world', 'Matrix', 'bl_world'], ['view', 'Matrix', 'bl_view'], ['projection', 'Matrix', 'bl_projection']);
-  const sampled = samplers.map(([name], i) => [`image${i}`, 'sampler2D', name]);
+  // A UDIM image's samplers are globals its TileBlock declares (runtime/tiled-images.js): their parameter only orders it.
+  const sampled = samplers.map(([name, texture], i) => (texture.tiled ? [`image${i}`, 'Float', `${name}_ready`] : [`image${i}`, 'sampler2D', name]));
   const outParameters = [...values.map(([name, type]) => [name, typeName(type)]), ...[...outputs].map(([point, name]) => [name, typeName(point.type)])];
   const signature = [...inputs, ...sampled].map(([, type, name]) => `${type === 'sampler2D' ? 'sampler2D' : GLSL[T[type]]} ${name}`)
     .concat(outParameters.map(([name, type]) => `out ${GLSL[T[type]]} ${name}`)).join(', ');
@@ -336,7 +339,13 @@ function blenderNodes(material, { closure, merge, scene, textures, systemValue, 
       [...params.values()].forEach((point, i) => source(point).connectTo(block.getInputByName(`in${i}`)));
       uniforms.forEach((uniform, i) => valueBlock(uniform).output.connectTo(block.getInputByName(`value${i}`)));
       if (matrices) for (const [name, value] of [['world', System.World], ['view', System.View], ['projection', System.Projection]]) systemValue(value).output.connectTo(block.getInputByName(name));
-      samplers.forEach(([, texture, path], i) => {
+      samplers.forEach(([name, texture, path], i) => {
+        if (texture.tiled) {
+          const tiles = Object.assign(new TileBlock(`udim:${texture.image.name}:${texture.tiled}`), { samplerName: name, part: texture.tiled, image: texture.image.name,
+            tiles: udimTiles(texture.image) });
+          tiles.ready.connectTo(block.getInputByName(`image${i}`));
+          return;
+        }
         const image = new ImageSourceBlock(path ?? `blender:image${i}`);
         textures.set(image.uniqueId, texture);
         image.source.connectTo(block.getInputByName(`image${i}`));
@@ -414,6 +423,11 @@ export async function exportNodeKernels(material, key, { parity = false, into = 
       if (!MATRICES[id]) (instance.mesh ??= {})[id] = mesh ? [value(mesh, scene)].flat().map(Number) : [];
     }
     for (const [k, [variable, texture]] of (node._textures ?? []).entries()) {
+      if (texture.tiled) {
+        param(variable, { texture: k, type: texture.tiled === 'array' ? 'sampler2DArray' : 'sampler2D' });
+        (instance.textures ??= [])[k] = { udim: texture.image.name, part: texture.tiled };
+        continue;
+      }
       const table = texture.metadata?.table;
       if (typeof texture === 'function' || (!table && !IMAGE_NODES.has(node.idname))) return null;
       param(variable, { texture: k, type: 'sampler2D' });
@@ -433,6 +447,16 @@ export async function exportNodeKernels(material, key, { parity = false, into = 
   }
   into.graphs[key] = { output: output.name, nodes };
   return into;
+}
+
+// A UDIM image's tiles as the page packs them (runtime/tiled-images.js): each tile's number, whether its bytes are
+// sRGB, and its pixels as a PNG, which the export writes as a file (image-files.js).
+function udimTiles(image) {
+  return imageTiles(image).map((tile) => {
+    const { layers, width, height } = /** @type {any} */ (packTiles([tile]));
+    const pixels = tile.float ? Uint8Array.from(layers, (v) => Math.round(Math.min(1, Math.max(0, v)) * 255)) : layers;
+    return { number: tile.number, srgb: tile.srgb, base64String: pngDataUrl(pixels, width, height) };
+  });
 }
 
 /**

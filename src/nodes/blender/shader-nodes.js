@@ -1086,7 +1086,8 @@ const blenderShader = (Base) => class extends Base {
             if (tiled === 'array') state._emit2DArraySampler(name);
             else state._emit2DSampler(name, '', false, undefined, false, 'highp');
             const mode = this.properties.interpolation === 'Closest' ? Texture.NEAREST_NEAREST_MIPLINEAR : Texture.TRILINEAR_SAMPLINGMODE;
-            this._textures.push([name, () => tiledImageTextures(image, scene, { sampling: mode })?.[tiled] ?? emptyTexture(scene)]);
+            // Made as it is first bound; an export writes the image's tiles instead (node-material-export.js).
+            this._textures.push([name, Object.assign(() => tiledImageTextures(image, scene, { sampling: mode })?.[tiled] ?? emptyTexture(scene), { tiled, image })]);
             return name;
           }
           const name = state._getFreeVariableName(table ? 'bl_table' : 'bl_image');
