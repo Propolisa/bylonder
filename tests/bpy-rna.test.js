@@ -24,6 +24,11 @@ ob.location[1] = 5;
 assert.equal(ob.location.y, 5);
 ob.location.z = 7;
 assert.deepEqual(blender.transform(cube).location, [1, 5, 7], 'writes reach the object');
+// A dynamic array reads as an array when it is empty too, as Python's bpy_prop_array: a Hook's vertex indices.
+const hook = ob.modifiers.new('Hook', 'HOOK');
+assert.deepEqual([...hook.vertex_indices], [], "a Hook bound to no vertices has none");
+assert.ok(typeof hook.vertex_indices !== 'number', 'not a number');
+ob.modifiers.remove(hook);
 ob.rotation_mode = 'XYZ';
 assert.equal(ob.rotation_mode, 'XYZ');
 assert.throws(() => { ob.rotation_mode = 'NOPE'; });

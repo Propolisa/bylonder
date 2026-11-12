@@ -16,7 +16,7 @@ const BOOLEAN = 0, INT = 1, FLOAT = 2, STRING = 3, ENUM = 4, POINTER = 5, COLLEC
 const FUNC_NO_SELF = 1, FUNC_REGISTER_OPTIONAL = 32 | 64;
 const PARM_REQUIRED = 1, PARM_OUTPUT = 2;
 const PROP_REGISTER_OPTIONAL = 16 | 32;
-const INFO_ENUM_FLAG = 1, INFO_EDITABLE = 2;
+const INFO_ENUM_FLAG = 1, INFO_EDITABLE = 2, INFO_DYNAMIC = 8;
 
 // ---- The module's memory: strings in a block reused by nested calls in turn, numbers in a scratch array, structs
 // from bpy_out.
@@ -292,7 +292,8 @@ function propertyGet(ptr, prop) {
   const [type, id, data] = ptr;
   switch (kind) {
     case BOOLEAN: case INT: case FLOAT: {
-      if (length) return propArray(ptr, prop);
+      // A dynamic array (a Hook's vertex indices) is an array when it is empty too.
+      if (length || flags & INFO_DYNAMIC) return propArray(ptr, prop);
       const [value] = readNumbers(ptr, prop, 1);
       return kind === BOOLEAN ? !!value : value;
     }
@@ -348,7 +349,7 @@ function writeProperty([type, id, data], prop, kind, flags, value, index) {
 const LETTERS = ['xyzw', 'rgba'];
 function propArray(ptr, prop) {
   const { kind, subtype } = propertyInfo(ptr, prop);
-  const values = readNumbers(ptr, prop, propertyInfo(ptr, prop).length).map((v) => (kind === BOOLEAN ? !!v : v));
+  const { length } = propertyInfo(ptr, prop), values = length ? readNumbers(ptr, prop, length).map((v) => (kind === BOOLEAN ? !!v : v)) : [];
   const setIndex = (i, value) => {
     writeProperty(ptr, prop, kind, 0, value, i);
     values[i] = kind === BOOLEAN ? !!value : value;
@@ -490,7 +491,7 @@ function getParameter(parms, index, [, kind, flags, , length]) {
       // A dynamic array longer than the buffer (a mesh's normals) is read again whole.
       if (n > numbersCapacity) { ensureNumbers(n); n = x.bpy_param_numbers_get(parms, index, numbersPointer, numbersCapacity); }
       const values = Array.from(numbers().subarray(0, n), kind === BOOLEAN ? Boolean : Number);
-      return length || flags & 8 ? values : values[0];
+      return length || flags & INFO_DYNAMIC ? values : values[0];
     }
     case STRING: return cString(x.bpy_param_string_get(parms, index));
     case ENUM: {

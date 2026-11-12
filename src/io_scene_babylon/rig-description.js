@@ -131,9 +131,7 @@ function surfaceBind(m) {
     normal_distance: Float32Array.from(distance), indices: Int32Array.from(indices), weights: Float32Array.from(weights),
     matrix: Float32Array.from({ length: 16 }, (_, k) => view.getFloat32(at + FALLOFF + 24 + k * 4, true)) };
 }
-const modifier = (m) => { const coords = bindCoords(m), bind = surfaceBind(m); return { ...rna(m), ...(coords && { bind_coords: coords }), ...(bind && { bind }), ...hook(m) }; };
-// A Hook's vertex indices (an empty dynamic array reads as a number).
-const hook = (m) => (m.type === 'HOOK' ? { vertex_indices: Array.isArray(m.vertex_indices) ? m.vertex_indices : [] } : {});
+const modifier = (m) => { const coords = bindCoords(m), bind = surfaceBind(m); return { ...rna(m), ...(coords && { bind_coords: coords }), ...(bind && { bind }) }; };
 
 // A lattice's points and, as a mesh's, its object's vertex groups (each point's weight), which its Hooks and its own
 // vertex group read.
