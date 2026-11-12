@@ -288,6 +288,7 @@
         {"path": "source/blender/blenlib/intern/fileops.cc", "includes": ["wasm/fstream"]},
         {"path": "source/blender/blenlib/intern/fileops_c.cc", "uses": ["zstd"], "includes": ["wasm/process"]},
         "extern/xxhash/xxhash.c",
+        {"path": "extern/nanosvg", "includes": ["extern/nanosvg"]},
         "intern/guardedalloc/intern",
         "intern/clog",
         "intern/eigen/intern",

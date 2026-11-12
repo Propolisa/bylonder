@@ -41,6 +41,8 @@
 #include "BLI_set.hh"
 #include "WM_types.hh"
 #include "interface_intern.hh"
+#include "nanosvg.h"
+#include "nanosvgrast.h"
 
 using namespace blender;
 
@@ -52,6 +54,8 @@ IMPORT(region_text_width) float region_text_width(const char *str, int len, floa
 IMPORT(region_font_ascender) float region_font_ascender(float size);
 IMPORT(region_mono_width) float region_mono_width(float size);
 IMPORT(region_font_descender) float region_font_descender(float size);
+/* An icon's SVG source by its name, its bytes into `out` when they fit; its length in bytes. */
+IMPORT(region_icon_svg) int region_icon_svg(const char *name, char *out, int capacity);
 
 /* The JSON of what one region draw recorded. */
 struct Recording {
@@ -840,6 +844,52 @@ void BLF_draw_svg_icon(uint icon_id,
     s += ",\"multicolor\":true";
   }
   s += '}';
+}
+
+/* An SVG icon as a bitmap (an alert's, About's logo, the File Browser's folder): blf_glyph.cc
+ * blf_glyph_cache_add_svg and blf.cc BLF_svg_icon_bitmap, its source from the page's icons (region_icon_svg, as
+ * BLF_draw_svg_icon draws them) where Blender's are compiled in (svg_icons.cc), rasterized by Blender's nanosvg. */
+Array<uchar> BLF_svg_icon_bitmap(uint icon_id,
+                                 float size,
+                                 int *r_width,
+                                 int *r_height,
+                                 bool multicolor,
+                                 FunctionRef<void(std::string &)> edit_source_cb)
+{
+  *r_width = *r_height = 0;
+  const char *name = ui_icon_name(int(icon_id));
+  std::string svg(size_t(region_icon_svg(name, nullptr, 0)), '\0');
+  region_icon_svg(name, svg.data(), int(svg.size()));
+  if (svg.empty()) {
+    return {};
+  }
+  if (edit_source_cb) {
+    edit_source_cb(svg);
+  }
+  NSVGimage *image = nsvgParse(svg.data(), "px", 96.0f);
+  if (!image || image->width == 0 || image->height == 0) {
+    nsvgDelete(image);
+    return {};
+  }
+  NSVGrasterizer *rast = nsvgCreateRasterizer();
+  float scale = size / 1600.0f;
+  const int w = int(ceil(image->width * scale)), h = int(ceil(image->height * scale));
+  scale = float(w) / image->width;
+  Array<uchar> bitmap(w * h * 4);
+  nsvgRasterize(rast, image, 0.0f, 0.0f, scale, bitmap.data(), w, h, w * 4);
+  nsvgDeleteRasterizer(rast);
+  nsvgDelete(image);
+  /* A monochrome icon as its coverage in every channel. */
+  if (!multicolor) {
+    for (int64_t i = 0; i < int64_t(w) * h; i++) {
+      uchar *px = &bitmap[i * 4];
+      const uchar coverage = uchar(float(srgb_to_grayscale_byte(px)) * (float(px[3]) / 255.0f));
+      px[0] = px[1] = px[2] = px[3] = coverage;
+    }
+  }
+  *r_width = w;
+  *r_height = h;
+  return bitmap;
 }
 
 }  // namespace blender
