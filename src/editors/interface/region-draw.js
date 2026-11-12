@@ -6,7 +6,7 @@ import { blenderModule } from '../../bmesh/bmesh-wasm.js';
 import { iconSvg } from './icon.js';
 import { svgSize } from './svg-context.js';
 
-const { exports: x } = blenderModule;
+const { exports: x, cString } = blenderModule;
 const decoder = new TextDecoder();
 
 const fontFamily = () => (globalThis.document && getComputedStyle(document.documentElement).getPropertyValue('--bl-font-family').trim()) || 'sans-serif';
@@ -27,6 +27,12 @@ provided.region_font_ascender = (size) => metrics('', size).ascent;
 // BLF_fixed_width: a monospace cell, whole pixels as Blender truncates it.
 provided.region_mono_width = (size) => Math.floor(metrics('0', size, true).width);
 provided.region_font_descender = (size) => -metrics('', size).descent;
+// An icon's SVG source for Blender's own rasterizing (BLF_svg_icon_bitmap): its bytes into `out` when they fit, its length.
+provided.region_icon_svg = (name, out, capacity) => {
+  const bytes = new TextEncoder().encode(iconSvg(cString(name)) ?? '');
+  if (bytes.length <= capacity) new Uint8Array(x.memory.buffer, out >>> 0, bytes.length).set(bytes);
+  return bytes.length;
+};
 
 const css = ([r, g, b, a]) => `rgb(${Math.round(r * 255)} ${Math.round(g * 255)} ${Math.round(b * 255)} / ${a})`;
 

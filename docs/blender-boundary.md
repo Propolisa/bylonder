@@ -287,6 +287,17 @@ Blender's AgX view transform (its default; views show Standard, so bright surfac
 with Blender's defaults (its graph is kept in `bylonder_node_material`), and a Standard material gives only its color,
 alpha and emission color.
 
+### Unresolved module imports
+
+Blender functions the module calls but does not define end in `src/port/wasm.js` `gap()`, which throws "Blender's ...
+is not in this WebAssembly module" (`BLENDER_WASM_MISSING=log` lists them in Node). Of the about 250 left, the font
+API the interface reaches is defined in `region-draw.cc` over the page's text metrics (`BLF_svg_icon_bitmap` with
+Blender's nanosvg, `BLF_string_wrap`, the cursor, selection and width-to-length queries). Known gaps no interface path
+reaches yet: text drawn into image buffers (`BLF_buffer`, `BLF_draw_buffer`, render stamps), font previews
+(`BLF_thumb_preview`, `BLF_display_name_from_file`), GPU draw calls of code drawn elsewhere (`GPU_*`, `imm*`), GPU
+selection (`gpu_select_*`), EEVEE light baking, OpenVDB file IO, motion tracking (`libmv_*`), TIFF and OpenEXR
+helpers, GHOST's system and process calls (`fork`, `execvp`).
+
 ### Animation
 
 Decided 2026-10-28. Animation data is Blender's, in the module's Main: each animated ID has AnimData and a layered Action (`animrig`), whose F-Curves are the truth. Bylonder's channels map onto them (`src/blenkernel/animation/model.js`): an object's position, rotation and scaling (meshes, empties, text, curves, cameras and lights, the Objects Object Mode mirrors) are its Object's `location`, `rotation_euler` and `scale` in Blender's axes; every other channel, a Babylon-native value (a node material's input, a store value, a render effect's setting, what project code binds with `animate`), is a custom property (an ID property, `["path"]`) of the ID that stands for its owner (a node material's Material) or of the Scene (`["<owner> <path>"]`), registered with `animatable(owner, path, { get, set, owner })`. Any RNA path of any ID is keyed by Blender's keying (`animrig::insert_keyframes`, `delete_keyframe`, `clear_keyframe`: `BlenderAnimation.keyInsert`, `keyDelete`, `keyClear`), and a channel's keys go in with `animrig::insert_vert_fcurve` and the Preferences' settings. Once Main is evaluated for a frame (`evaluateMain`), a channel takes its custom property's evaluated value; until then it takes its F-Curve's (`evaluate_fcurve`). Blender's operators that auto key (Object Mode's) add keys the animation takes (`model.keying`), and the 3D View's I and Alt I are Blender's `anim.keyframe_insert` and `anim.keyframe_delete_v3d`.
