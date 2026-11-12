@@ -67,6 +67,7 @@ export const KNOWN = {
   'geometry-node-editor look-webgl2': '32% of pixels agree: not yet classified, rerun once the view transform fix lands',
   'rendering look-webgl2': "88.6% of pixels agree: the app's glass carafe is grainy",
   'volumes look-webgl2': "82% of pixels agree: blocky noise in the app's fog",
+  'particle-hair look-webgl2': "73% of pixels agree: the grass strands are thin and aliased in app and page alike, so their pixels land apart; against EEVEE both are paler and brighter than its dark, soft grass (the app's hair shading and anti-aliasing, a known app gap)",
   'hair-dynamics look-webgl2': "22% of pixels agree: the app's tentacles are wider and brighter than the page's, and the water's pattern behind is offset",
   'geometry-nodes look-webgl2': '87% of pixels agree: the page draws no point clouds (the planet clouds, draw/pointcloud.js in the app)',
   'cube look-webgpu': 'the page is never ready within 180 s (a material never reports ready)',
@@ -187,6 +188,12 @@ async function lookChecks(ids, keys, engines, { prod }) {
   return results;
 }
 
+// Libraries a .blend links where Bylonder's file system keeps them (/libraries/) read from the example's libraries/.
+const LIBRARIES = `for library in bpy.data.libraries:
+    if library.filepath[:11] in ('/libraries/', '/libraries' + os.sep):
+        library.filepath = os.path.join('$FOLDER', 'libraries', library.filepath[11:])
+        library.reload()`;
+
 // The reference Blender's EEVEE render of an example's .blend at its current frame and camera, at a picture's size,
 // cached per .blend and size; null for an example built by code. Its film is opaque, as the app's Render Image shows the
 // world behind the scene.
@@ -199,7 +206,8 @@ function eeveePicture(id, picture) {
   if (existsSync(path)) return path;
   mkdirSync(join(CACHE, id), { recursive: true });
   if (!existsSync(full)) {
-    const script = `import bpy
+    const script = `import bpy, os
+${LIBRARIES.replace('$FOLDER', fileURLToPath(new URL('.', blend)).replaceAll('\\', '/'))}
 s = bpy.context.scene
 s.render.engine = 'BLENDER_EEVEE'
 s.render.film_transparent = False
