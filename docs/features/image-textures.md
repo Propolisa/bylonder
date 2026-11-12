@@ -2,7 +2,7 @@
 id: image-textures
 title: Images and Image Textures
 summary: Open, create, pack and save images with Blender's own readers and writers, view them in the Image Editor, and draw them on materials through the Image Texture node with Babylon's texture sampling, here a framed screen print, its paper grain and an oak floor, each an image.
-expect: Images open, save, pack and draw on materials with Blender's readers; colors show with the Standard view, and Clip, Cubic, Box projection and UDIM sampling are simplified.
+expect: Images open, save, pack and draw on materials with Blender's readers; colors show with the Standard view, and Clip, Cubic and Box projection are simplified; UDIM images draw every tile in the app, the first only in exported pages.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/editors/image/index.html
@@ -40,9 +40,11 @@ code:
   - src/nodes/blender/shader-nodes.js
   - src/blenkernel/material/principled-gltf.js
   - src/runtimes/image.js
+  - src/imbuf/tiled-image-textures.js
   - tools/blender-port/wasm/image-api.cc
 tests:
   - tests/images-wasm.test.js
+  - tests/udim-wasm.test.js
   - tests/texture-paint-wasm.test.js
   - tests/nodes-gpu.test.js
 limits:
@@ -52,7 +54,7 @@ limits:
   - Interpolation belongs to the image's GPU texture, so two nodes sampling one image with different interpolation share the last one.
   - Cubic and Smart interpolation sample linearly.
   - Box, Sphere and Tube projection of the Image Texture node are drawn as Flat.
-  - UDIM images draw their first tile only.
+  - UDIM images draw every tile in the app, each tile at most 2048 pixels on a side; exported pages draw the first tile only.
   - Compressed GPU texture formats are not offered.
   - A file libpng cannot read or write stops the module: libpng reports errors by longjmp, which the module cannot catch yet.
 ---
