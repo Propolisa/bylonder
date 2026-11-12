@@ -17,7 +17,7 @@ import { drawGeometry } from './mesh.js';
  * @typedef {{ run(inputs: Record<string, any>, context: { frame: number }, entity: import('./ir.js').Entity): Outputs,
  *   runChain?(run: [Record<string, any>, import('./ir.js').Entity][], context: { frame: number }): Outputs,
  *   draw?(mesh: import('./ir.js').Mesh): Promise<import('./mesh.js').DrawBuffers>, settled?(): Promise<void> }} Evaluator
- * @typedef {{ get(path: string): any, write(path: string, value: any): void, frame(id?: string): number }} Controls `frame(id)`: the frame an ID shows (its time offset applied)
+ * @typedef {{ get(path: string): any, write(path: string, value: any): void, set(path: string, value: any): void, frame(id?: string): number }} Controls `frame(id)`: the frame an ID shows (its time offset applied); `set`: a write from outside the scheduler's run, whose readers then run
  * What an implementation loads for: the page's scene, the package's URL, the IR, scene.bin's buffers and the properties.
  * @typedef {{ scene: import('@babylonjs/core').Scene, root: string, ir: import('./ir.js').IR, buffers: ArrayBufferView[], controls: Controls }} Page
  */

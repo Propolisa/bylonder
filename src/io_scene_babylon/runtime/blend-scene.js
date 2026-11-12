@@ -235,6 +235,7 @@ export class BlendScene {
     this.#scheduler = Object.keys(this.ir.entities).length ? createScheduler(this.ir, { scene, root, ir: this.ir, buffers, controls: {
       get: (path) => this.#values.get(path),
       write: (path, value) => this.#write(path, value),
+      set: (path, value) => { this.#write(path, value); this.#scheduler?.changed(path); },
       frame: (/** @type {string | undefined} */ id) => this.playhead.frameAt(id ? this.#idOffset(id) : 0),
     } }) : null;
     this.#channels(knobs);

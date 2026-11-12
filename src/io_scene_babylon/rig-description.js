@@ -168,9 +168,10 @@ function named(arm, meshes) {
 }
 
 // The description of an armature (RNA's Object) and the mesh objects it deforms; `meshOf(ob)` gives a mesh object's
-// Mesh as main-sync reads it.
-export function rigDescription(arm, meshes, meshOf) {
-  const objects = named(arm, meshes), deformed = new Set(meshes.map((ob) => ob.name)), actions = new Map(), drivers = [];
+// Mesh as main-sync reads it; `keyed`, mesh objects whose shape keys' drivers the runtime runs (their keys' values
+// published to the page), described by their keys' names alone.
+export function rigDescription(arm, meshes, meshOf, keyed = []) {
+  const objects = named(arm, [...meshes, ...keyed]), deformed = new Set(meshes.map((ob) => ob.name)), actions = new Map(), drivers = [];
   const use = (act) => act && !actions.has(act.name) && actions.set(act.name, action(act));
   const description = objects.map((ob) => {
     const ad = ob.animation_data;
@@ -188,6 +189,9 @@ export function rigDescription(arm, meshes, meshOf) {
     }
     if (ob.type === 'LATTICE') return { ...out, data: latticeData(ob.data), modifiers: [...ob.modifiers].map(rna) };
     if (ob.type === 'MESH' && deformed.has(ob.name)) return { ...out, data: meshData(ob, meshOf(ob)), modifiers: [...ob.modifiers].map(modifier) };
+    // A mesh only its shape keys' drivers run for: the Key's and its blocks' names and values, no geometry.
+    if (ob.type === 'MESH' && key) return { ...out, data: { shape_keys: { name: key.name, key_blocks: [...key.key_blocks].map((kb) => ({ name: kb.name, value: kb.value, slider_min: kb.slider_min,
+      slider_max: kb.slider_max, mute: kb.mute })) } } };
     return out;
   });
   return { schema: 'bylonder-rig', version: 1, objects: description, drivers, actions: [...actions.values()] };

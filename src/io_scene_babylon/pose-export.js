@@ -99,9 +99,10 @@ const drawnVertices = (mesh) => Int32Array.from([...mesh.corner_verts, ...Array.
 // with what draws each Babylon vertex (`draw_vertices`, drawnVertices), the page deforming them
 // (`meshes`: their nodes' ids, by name). A hidden mesh, which Main does not evaluate, stays out.
 function nativeRig(arm, nodeOf, deformed = []) {
-  const shown = (ob) => new Set(shownStack(ob).map((m) => m.name)), drawn = deformed.filter((d) => !d.source), sources = deformed.filter((d) => d.source);
+  const shown = (ob) => new Set(shownStack(ob).map((m) => m.name)), keyed = deformed.filter((d) => d.keyed).map((d) => d.ob);
+  const drawn = deformed.filter((d) => !d.source && !d.keyed), sources = deformed.filter((d) => d.source);
   const describe = (list) => {
-    const all = [...list, ...sources.filter((s) => !list.includes(s))], description = rigDescription(arm, all.map((d) => d.ob), (ob) => all.find((d) => d.ob === ob).mesh());
+    const all = [...list, ...sources.filter((s) => !list.includes(s))], description = rigDescription(arm, all.map((d) => d.ob), (ob) => all.find((d) => d.ob === ob).mesh(), keyed);
     for (const d of all) for (const m of description.objects.find((o) => o.name === d.ob.name).modifiers) m.show_viewport &&= shown(d.ob).has(m.name);
     return description;
   };
@@ -123,8 +124,22 @@ function nativeRig(arm, nodeOf, deformed = []) {
     meshes[d.ob.name] = d.node.id;
   }
   const { packed, arrays } = packDescription(description);
-  return { description: new TextEncoder().encode(JSON.stringify(packed)), arrays, armature: arm.name, objects, meshes };
+  return { description: new TextEncoder().encode(JSON.stringify(packed)), arrays, armature: arm.name, objects, meshes, published: [...driven(arm, description), ...drivenKeys(keyed, description)] };
 }
+// The armature's and its pose bones' custom properties the rig's drivers set (a corrective's input the rig computes),
+// which the runtime hands back to the page's controls after each solve so the page's drivers read them: each one's path
+// (as setPath takes it), its bone (null for the armature's own), name and control.
+const CUSTOM = /^(?:pose\.bones\["((?:[^"\\]|\\.)*)"\])?\["((?:[^"\\]|\\.)*)"\]$/;
+const driven = (arm, description) => description.drivers.filter((d) => d.id === arm.name && d.id_type === 'OBJECT' && CUSTOM.test(d.data_path))
+  .map((d) => { const [, bone = null, name] = CUSTOM.exec(d.data_path);
+    return { path: d.data_path, bone: bone && JSON.parse(`"${bone}"`), name: JSON.parse(`"${name}"`), property: `objects${key(arm.name)}${d.data_path.startsWith('[') ? '' : '.'}${d.data_path}` }; })
+  .filter((p, i, all) => all.findIndex((q) => q.path === p.path) === i);
+// The shape keys the runtime's drivers set on the `keyed` meshes (correctives the page morphs by): each one's mesh, key,
+// slider range (which Blender clamps a key's value to) and control, which the runtime's value is published to.
+const KEY_VALUE = /^key_blocks\["((?:[^"\\]|\\.)*)"\]\.value$/;
+const drivenKeys = (keyed, description) => keyed.flatMap((ob) => description.drivers.filter((d) => d.id_type === 'KEY' && d.id === ob.data.shape_keys.name && KEY_VALUE.test(d.data_path))
+  .map((d) => { const name = JSON.parse(`"${KEY_VALUE.exec(d.data_path)[1]}"`), block = ob.data.shape_keys.key_blocks.get(name);
+    return { mesh: ob.name, key: name, range: [block.slider_min, block.slider_max], property: `shape_keys${key(ob.data.shape_keys.name)}.key_blocks${key(name)}.value` }; }));
 const nativeSolver = nativeSolve();
 // The custom properties of an armature and its pose bones that its drivers read: their paths from the armature (as the
 // runtime's setPath takes them), with Main's values now, or by `read(path)` (a control's reference).

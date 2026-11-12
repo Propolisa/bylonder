@@ -16,7 +16,8 @@ import { load as loadPose } from './pose-constraints.js';
 
 /**
  * @typedef {{ bones: { name: string, parent: number, rest: Matrix }[], locals: Matrix[], mesh: Matrix, space: Matrix,
- *   native: { description: Uint8Array, arrays: ArrayLike<number>[], armature: string, objects?: Record<string, string>, meshes?: Record<string, string> }, properties?: Record<string, number>,
+ *   native: { description: Uint8Array, arrays: ArrayLike<number>[], armature: string, objects?: Record<string, string>, meshes?: Record<string, string>,
+ *     published?: { property: string, path?: string, bone?: string | null, name?: string, mesh?: string, key?: string, range?: [number, number] }[] }, properties?: Record<string, number>,
  *   frame?: number, nodeWorld?: (id: string) => Matrix | null }} NativePose
  */
 
@@ -30,7 +31,7 @@ function compile(native) {
   /** @type {WeakMap<object, { of: number[], unrest: Matrix[], last: Matrix[] }>} */
   const layouts = new WeakMap();
   return { program, rig, armature: program.objectIndex.get(native.armature), layouts, properties: new Map(), placed: new Map(), posed: /** @type {Float64Array | null} */ (null),
-    deforms: /** @type {Map<string, any>} Each deformed mesh's stack, by name. */ (new Map()), deformers: /** @type {{ update(): void }[] | null} */ (null) };
+    deforms: /** @type {Map<string, any>} Each deformed mesh's stack, by name. */ (new Map()), published: /** @type {Map<string, number>} */ (new Map()), deformers: /** @type {{ update(): void }[] | null} */ (null) };
 }
 
 /** A mesh's deform stack on an entry's rig, compiled once. @param {ReturnType<typeof compile>} entry @param {string} name */
@@ -120,10 +121,11 @@ function directState(entry, bones, shape) {
  * The solver: `solve(pose)` gives each bone's Babylon local matrix after the rig's constraints and drivers, and deforms
  * the description's meshes in `scene`; `solve.deformed(native, name)`, a mesh's positions as the last solve deforms them
  * (Blender's object space, each evaluated vertex's xyz); `solve.pass(entry)`, the page's pass over a skeleton.
- * @param {import('@babylonjs/core').Scene | null} [scene]
+ * @param {import('@babylonjs/core').Scene | null} [scene] @param {{ set(path: string, value: number): void } | null} [controls] the page's, which get
+ * the custom properties the rig's drivers set
  * @returns {((pose: NativePose) => Map<number, Matrix>) & { pass(entry: any): void, deformed(native: NativePose['native'], name: string): Float64Array }}
  */
-export function nativeSolve(scene = null) {
+export function nativeSolve(scene = null, controls = null) {
   /** Each rig by the description it was compiled from. @type {WeakMap<Uint8Array, ReturnType<typeof compile>>} */
   const rigs = new WeakMap();
   const scale = new Vector3(), turn = new Quaternion(), at = new Vector3();
@@ -146,6 +148,37 @@ export function nativeSolve(scene = null) {
     for (const [name, id] of Object.entries(native.objects ?? {})) { const world = nodeWorld(id); if (world) place(entry, program.objectIndex.get(name), world); }
     rig.setFrame(frame);
     rig.evaluate();
+    if (controls) publish(entry, native);
+  };
+  /**
+   * What the rig's drivers set that the page reads, written to its controls where it changed: custom properties (a
+   * corrective's input, which the page's drivers read; kept as given, so the next solve does not set them again) and
+   * shape keys' values (the morph targets of meshes Babylon skins).
+   * @param {ReturnType<typeof compile>} entry @param {NativePose['native']} native
+   */
+  const publish = (entry, native) => {
+    const { program, rig, armature } = entry, bones = program.objects[armature].boneIndex;
+    for (const { property, path, bone, name, mesh, key, range } of native.published ?? []) {
+      const read = mesh ? rig.shapeKeyValue(program.objectIndex.get(mesh), key) : rig.property(armature, bone ? bones.get(bone) ?? -1 : -1, name);
+      if (typeof read !== 'number') continue;
+      const value = range ? Math.min(range[1], Math.max(range[0], read)) : read;
+      // A key's morph target takes it every frame: the timeline holds the export's samples of a key whose drivers it baked.
+      if (mesh && key) { const target = morphTarget(mesh, key); if (target) target.influence = value; }
+      if (entry.published.get(property) === value) continue;
+      entry.published.set(property, value);
+      if (path) entry.properties.set(path, value);
+      /** @type {any} */ (controls).set(property, value);
+    }
+  };
+  /** A mesh's morph target of a shape key in the scene, found once. @type {Map<string, any>} */
+  const targets = new Map();
+  const morphTarget = (/** @type {string} */ mesh, /** @type {string} */ key) => {
+    const at = `${mesh}/${key}`;
+    if (!targets.has(at)) {
+      const manager = scene?.getMeshByName(mesh)?.morphTargetManager;
+      targets.set(at, manager && Array.from({ length: manager.numTargets }, (_, i) => manager.getTarget(i)).find((t) => t.name === key));
+    }
+    return targets.get(at);
   };
   /** Deforms the rig's meshes in the scene by its pose. @param {ReturnType<typeof compile>} entry @param {NativePose['native']} native */
   const deform = (entry, native) => {
@@ -282,4 +315,4 @@ export function nativeSolve(scene = null) {
 }
 
 /** The page's implementation: pose-constraints.js on the native runtime. @param {any} page */
-export const load = (page) => loadPose(page, /** @type {any} */ (nativeSolve(page.scene)));
+export const load = (page) => loadPose(page, /** @type {any} */ (nativeSolve(page.scene, page.controls)));

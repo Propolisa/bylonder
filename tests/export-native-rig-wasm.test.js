@@ -3,11 +3,13 @@
 // do not run, is posed in the page by the runtime from its bylonder-rig description (rig-description.js) at frames of
 // its animation as Main poses it, nothing sampled; its body, given a Corrective Smooth after its Armature, which
 // Babylon's skinning cannot run (its smoothing alone, which the runtime matches exactly), is deformed by the runtime in
-// the page as Main evaluates it.
+// the page as Main evaluates it; and its skinned twin's elbow corrective, a shape key driven by the arm's angle through a
+// driver the page cannot run, takes the value the runtime's drivers give it, as Main's.
 import assert from 'node:assert/strict';
 import { Matrix, NullEngine, VertexBuffer } from '@babylonjs/core';
 import { babylonMatrix } from '../src/blenkernel/main-view.js';
 import { blendData, contextStruct } from '../src/python/bpy_rna.js';
+import { setCustomProperty } from '../src/blenkernel/animation/anim-blender.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
 import { openExample } from './open-example.js';
 import { writePackage } from './export-package.js';
@@ -33,6 +35,9 @@ Object.assign(twin, { parent: body.parent, matrix_parent_inverse: body.matrix_pa
 twin.modifiers.new('Armature', 'ARMATURE').object = rig;
 // The tail as one segment: the runtime's B-Bone deform of this mesh is off by centimeters (a case sent to the clean room).
 rig.data.bones.get('tail').bbone_segments = 1;
+// The elbow corrective's and the Breathe key's drivers given an identity Generator, which the page's driver units do not
+// run: the runtime does.
+for (const name of ['Elbow.L', 'Breathe']) [...body.data.shape_keys.animation_data.drivers].find((d) => d.data_path === `key_blocks["${name}"].value`).modifiers.new('GENERATOR');
 Object.assign(body.modifiers.new('Smooth', 'CORRECTIVE_SMOOTH'), { factor: 0.8, iterations: 4, use_only_smooth: true });
 sync.view();
 const files = await exportModule(world);
@@ -66,11 +71,27 @@ for (const f of FRAMES) {
     const error = Math.max(...theirs.asArray().map((v, i) => Math.abs(v - ours.asArray()[i])));
     assert.ok(error < TOLERANCE, `frame ${f}: ${pb.name} is off by ${error}`);
   }
+  const elbow = blend.scene.getMeshByName('Twin').morphTargetManager, target = Array.from({ length: elbow.numTargets }, (_, i) => elbow.getTarget(i)).find((t) => t.name === 'Elbow.L');
+  assert.ok(Math.abs(target.influence - body.data.shape_keys.key_blocks.get('Elbow.L').value) < 2e-3, `frame ${f}: the elbow corrective ${target.influence}, Main ${body.data.shape_keys.key_blocks.get('Elbow.L').value}`);
   const ours = drawn.getVerticesData(VertexBuffer.PositionKind), theirs = mainBody();
   assert.equal(ours.length, theirs.length, "the body draws a vertex per corner of Main's");
   const error = Math.max(...theirs.map((v, i) => Math.abs(v - ours[i])));
   assert.ok(error < DEFORM_TOLERANCE, `frame ${f}: the body is off by ${error}`);
 }
+
+// The Breathe slider set through the page's control, and in Main: its shape key, whose driver the page cannot run,
+// takes the value the runtime's driver gives it, which no baked sample holds.
+const breatheOf = () => { const m = blend.scene.getMeshByName('Twin').morphTargetManager; return Array.from({ length: m.numTargets }, (_, i) => m.getTarget(i)).find((t) => t.name === 'Breathe').influence; };
+blend.set('objects["Rig"]["breathe"]', 0.7);
+const rigPointer = sync.objectOf(world.objects.find((n) => n.name === 'Rig'));
+setCustomProperty(rigPointer, 'breathe', 0.7);
+// A property set from code is an edit: Main evaluates its drivers again once the object is tagged.
+sync.blender.tag(rigPointer, 2);
+for (let i = 0; i < 2; i++) { blend.scene.render(); await blend.settled(); }
+sync.frameChanged(FRAMES.at(-1));
+const breathe = body.data.shape_keys.key_blocks.get('Breathe').value;
+assert.ok(breathe > 0.1, `the slider sets the key in Main (${breathe})`);
+assert.ok(Math.abs(breatheOf() - breathe) < 2e-3, `the key follows the slider: ${breatheOf()}, Main ${breathe}`);
 
 // A layer on the solved pose (the skeleton's onSolved, as a foot lock or a look-at): what it writes moves the deformed
 // body that frame, lasts that frame only, and leaves the solved pose as it was once removed.
@@ -91,4 +112,4 @@ await render();
 assert.ok(apart(solvedBody, bodyNow()) < 1e-5, 'without the layer the body is as solved');
 blend.dispose();
 written.remove();
-console.log(`Export native rig: a rig with an Action constraint takes Main's pose in the page at ${FRAMES.length} frames on the native runtime, its body deformed through Corrective Smooth as Main's, a layer on the solved pose moving it for one frame`);
+console.log(`Export native rig: a rig with an Action constraint takes Main's pose in the page at ${FRAMES.length} frames on the native runtime, its body deformed through Corrective Smooth as Main's, its correctives run by the runtime's drivers, a layer on the solved pose moving it for one frame`);

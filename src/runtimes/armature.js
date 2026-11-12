@@ -549,7 +549,9 @@ function exportArmatures(world, { bake, sampling, rests = appliedRests() }) {
     const ofArmature = (ob) => m.skins.has(address(ob)) || m.apart.has(address(ob));
     const surface = meshes.filter((ob) => !m.apart.has(address(ob)) && surfaceTargets(ob).some(ofArmature));
     const read = [...new Set([...m.apart.values(), ...surface].flatMap(surfaceTargets))].filter((ob) => !m.apart.has(address(ob)));
-    return [...[...m.apart.values(), ...surface].flatMap((ob) => entryOf(ob)), ...read.flatMap((ob) => entryOf(ob, true))];
+    // The skinned meshes whose shape keys drivers set: the runtime runs those drivers (`keyed`).
+    const keyed = [...m.skins.keys()].map((key) => idStruct(byOb.get(key).ob)).filter((ob) => ob.data.shape_keys?.animation_data?.drivers.length);
+    return [...[...m.apart.values(), ...surface].flatMap((ob) => entryOf(ob)), ...read.flatMap((ob) => entryOf(ob, true)), ...keyed.map((ob) => ({ ob, keyed: true }))];
   };
   const posed = poseAnimations(world, mappings, bake, sampling, { nodeOf, deformed, meshOf: (m) => byOb.get(m.skins.keys().next().value)?.node });
   // A mesh the native runtime deforms is no longer Blender's, whatever its stack.
