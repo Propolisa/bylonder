@@ -28,6 +28,8 @@ export const execOperators = () => [...operatorTypes].filter(([, i]) => x.operat
 
 // The module's exports and memory helpers, for subsystems with API files of their own (anim-api.cc).
 export const blenderModule = { exports: x, withArrays, withString, cString };
+// The project's .blend in the module's file system: the file Main is read from and written to, its libraries beside it.
+export const PROJECT_BLEND = '/project.blend';
 
 // A Blender operator with properties by name (an enum by its item's identifier, an enum flag by a list of them; the
 // rest keep their defaults), for exec, or for invoke and modal, which keep it while it runs; x.operator_free frees it.
@@ -583,11 +585,14 @@ export class BlenderMain {
     return loaded;
   }
   // A .blend opened as the Main, as Blender opens one (main_open): returns its warnings; throws when it cannot be read.
+  // Read from `filepath`, the project's file, so its links relative to it (`//libraries/...`) are the project's.
   // The undo stack starts again from the file, as reading one starts it (wm_file_read_post).
-  readBlend(bytes) {
+  readBlend(bytes, filepath = PROJECT_BLEND) {
     // A gzip-compressed file (Blender before 3.0) unzipped here: the module has no zlib (main-api.cc BLI_filereader_new_gzip).
     if (bytes[0] === 0x1f && bytes[1] === 0x8b) bytes = gunzipSync(bytes);
-    const report = withArrays([Uint8Array.from(bytes)], ([p]) => x.main_open(this.#context, p, bytes.length)) >>> 0;
+    files.set(filepath, bytes instanceof Uint8Array ? bytes : Uint8Array.from(bytes));
+    const report = withString(filepath, (p) => x.main_open(this.#context, p)) >>> 0;
+    files.delete(filepath);
     if (this.#undo) this.undoInit();
     if (!report) throw new Error('Not a .blend file Blender can read');
     // A file without a screen is opened without its UI, which Bylonder never opens.
