@@ -22,6 +22,7 @@ const bytes = (url) => async () => new Uint8Array(await (await fetch(await url()
 const text = (load) => async () => (await load()).default;
 const SOURCES = {
   'io_scene_babylon/polyfill/modifiers-worker.bundle.js': text(() => import('./polyfill/modifiers-worker.bundle.js?raw')),
+  'io_scene_babylon/polyfill/constraints-kernels.bundle.js': text(() => import('./polyfill/constraints-kernels.bundle.js?raw')),
   'io_scene_babylon/polyfill/geometry-nodes-kernels.bundle.js': text(() => import('./polyfill/geometry-nodes-kernels.bundle.js?raw')),
   'draw/curves-blocks.js': text(() => import('../draw/curves-blocks.js?raw')),
   'draw/pointcloud.js': text(() => import('../draw/pointcloud.js?raw')),

@@ -4,6 +4,7 @@ import { GEOMETRY_NODES_KERNELS } from './runtime-files.js';
 
 export const MODULES = {
   'modifiers/modifiers.wasm': async () => (await import('../modifiers/modifiers.wasm?url')).default,
+  'constraints/constraints.wasm': async () => (await import('../constraints/constraints.wasm?url')).default,
   'bmesh/bmesh.wasm': async () => (await import('../bmesh/bmesh-module.js')).BMESH_WASM,
 };
 

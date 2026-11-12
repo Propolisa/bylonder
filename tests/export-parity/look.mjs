@@ -179,9 +179,13 @@ async function exportPackage(app, dir) {
   await app.page.getByRole('menuitem', { name: /^Export/ }).first().hover();
   await app.page.getByRole('menuitem', { name: 'JavaScript (.zip)' }).click();
   // The export's settings open in the 3D Viewport's frame; the click returns once the export's synchronous part has run.
-  await app.frame().locator('[role="dialog"][aria-label^="Export"]').getByRole('button', { name: 'Export' }).click({ timeout: EXPORT_TIME });
+  const dialog = app.frame().locator('[role="dialog"][aria-label^="Export"]');
+  await dialog.getByRole('button', { name: 'Export' }).click({ timeout: EXPORT_TIME });
+  // A failed export says so in its dialog, which stays open: that is the row's error, not a hang.
+  const failed = dialog.getByRole('alert').waitFor({ timeout: EXPORT_TIME }).then(async () => { throw Error(await dialog.getByRole('alert').textContent()); });
+  failed.catch(() => {});
   const chunks = [];
-  for await (const chunk of await (await download).createReadStream()) chunks.push(chunk);
+  for await (const chunk of await (await Promise.race([download, failed])).createReadStream()) chunks.push(chunk);
   for (const [path, data] of Object.entries(unzipSync(Buffer.concat(chunks)))) {
     if (path.endsWith('/')) continue;
     mkdirSync(dirname(join(dir, path)), { recursive: true });
