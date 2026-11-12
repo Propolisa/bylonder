@@ -41,7 +41,8 @@ const STATS = String((scene, keep, camera, named = (m) => m.name) => {
   return {
     meshes: Object.fromEntries(meshes.map((m) => [named(m), m.getTotalVertices() * Math.max(1, m.thinInstanceCount || 0, (m.instances?.length ?? 0) + 1)])),
     materials: names(meshes.map((m) => m.material?.name).filter(Boolean)),
-    lights: names(scene.lights.filter((l) => l.isEnabled() && keep(l)).map((l) => l.name)),
+    // A clustered light container's lights, which Babylon keeps out of scene.lights (overrides/babylon/clustered-lights.js).
+    lights: names(scene.lights.flatMap((l) => l.lights ?? [l]).filter((l) => l.isEnabled() && keep(l)).map((l) => l.name)),
     camera,
     morphed: names(meshes.filter((m) => m.morphTargetManager?.numTargets).map(named)),
     skinned: names(meshes.filter((m) => m.skeleton).map(named)),
