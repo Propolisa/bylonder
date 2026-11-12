@@ -8,11 +8,14 @@
 import { Matrix, Quaternion, Vector3, VertexBuffer } from '@babylonjs/core';
 import { compileRig } from './native/rig/program.js';
 import { compileDeform, deformMesh } from './native/deform/mesh.js';
-import { invertAffine, mulAffine } from './native/rig/m4.js';
+import { invertAffine, mulAffine, ROT_NAMES } from './native/rig/m4.js';
+import { eulerCompatible } from './native/euler.js';
 import { CpuDeformer, GpuDeformer, gpuSupported } from './native/babylon/gpu-deform.js';
 import { swapped } from './constraints-evaluator.js';
 import { unpackDescription } from './native-rig.js';
 import { load as loadPose } from './pose-constraints.js';
+
+const EULER_ORDERS = ['XYZ', 'XZY', 'YXZ', 'YZX', 'ZXY', 'ZYX'];
 
 /**
  * @typedef {{ bones: { name: string, parent: number, rest: Matrix }[], locals: Matrix[], mesh: Matrix, space: Matrix,
@@ -128,7 +131,7 @@ function directState(entry, bones, shape) {
 export function nativeSolve(scene = null, controls = null) {
   /** Each rig by the description it was compiled from. @type {WeakMap<Uint8Array, ReturnType<typeof compile>>} */
   const rigs = new WeakMap();
-  const scale = new Vector3(), turn = new Quaternion(), at = new Vector3();
+  const scale = new Vector3(), turn = new Quaternion(), at = new Vector3(), rotation = new Matrix();
   /** The entry of a description, compiled at the first ask. @param {NativePose['native']} native */
   const entryOf = (native) => /** @type {ReturnType<typeof compile>} */ (rigs.get(native.description) ?? rigs.set(native.description, compile(native)).get(native.description));
   /**
@@ -189,7 +192,11 @@ export function nativeSolve(scene = null, controls = null) {
   /** A bone's own location, rotation and scale from its Babylon local matrix (Blender's axes). @param {any} rig @param {number} b @param {Matrix} local @param {Matrix} unrest */
   const give = (rig, b, local, unrest) => {
     swapped(local.multiply(unrest)).decompose(scale, turn, at);
-    rig.setBonePose(b, { location: at.asArray(), rotation_mode: 'QUATERNION', rotation_quaternion: [turn.w, turn.x, turn.y, turn.z], scale: scale.asArray() });
+    // In the bone's own rotation mode: a driver reading its rotation reads the Euler angles of its order, as Blender's do.
+    const mode = ROT_NAMES[rig.rotationMode[b]], euler = EULER_ORDERS.includes(mode)
+      && eulerCompatible(Matrix.FromQuaternionToRef(turn, rotation).m, mode, Array.from(rig.rotation.subarray(b * 4, b * 4 + 3)));
+    rig.setBonePose(b, { location: at.asArray(), scale: scale.asArray(), ...(euler ? { rotation_mode: mode, rotation_euler: euler }
+      : { rotation_mode: 'QUATERNION', rotation_quaternion: [turn.w, turn.x, turn.y, turn.z] }) });
   };
   /** @param {NativePose} pose */
   const solve = (pose) => {
