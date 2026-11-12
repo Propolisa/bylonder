@@ -69,6 +69,16 @@ EXPORT(image_buffer) const ImageBuffer *image_buffer(Image *ima, ImageUser *iuse
   return &buffer;
 }
 
+/* An image's buffer at one of its UDIM tiles (by number, 1001 and up), as image_buffer gives the first: read the same
+ * way. */
+EXPORT(image_tile_buffer) const ImageBuffer *image_tile_buffer(Image *ima, int tile_number)
+{
+  ImageUser iuser{};
+  BKE_imageuser_default(&iuser);
+  iuser.tile = tile_number;
+  return image_buffer(ima, &iuser);
+}
+
 /* Blender's partial updates of an image's buffers (BKE_image_partial_update.hh), as image_gpu.cc follows them for its
  * GPU textures: a user per texture, and what changed since its last collection. */
 EXPORT(image_partial_update_create) PartialUpdateUser *image_partial_update_create(const Image *ima) { return BKE_image_partial_update_create(ima); }
