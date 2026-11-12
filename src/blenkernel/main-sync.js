@@ -15,9 +15,10 @@
 // - Undo is Blender's (undo-api.cc): undoPush pushes a step of Main, undoLoad loads one and draws it.
 // - check() compares the overlap of both models; with `debug` on it runs after every flush and run.
 import { createBlenderIDs } from './blender-ids.js';
+import { layerKey } from './scene/collections.js';
 import { dnaGet, dnaSet, dnaProperty, dnaIsText } from '../makesrna/dna-struct.js';
 import { syncBindings } from '../makesrna/rna-bylonder.js';
-import { idStruct, pointerStruct, structFind } from '../python/bpy_rna.js';
+import { idStruct, pointerOf, pointerStruct, structFind } from '../python/bpy_rna.js';
 import { INFO } from '../makesrna/rna.js';
 import { mainDefinition, writeModifier, createMainModifiers } from '../modifiers/main-modifiers.js';
 import { objectMesh } from '../editors/object/object-mesh.js';
@@ -567,6 +568,22 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     set: (id, patch) => write(collections.get(id), flagsOf(patch, FLAGS)),
     setLayer: (id, patch) => write(COLLECTION_RECORDS.LayerCollection({ id }), flagsOf(patch, LAYER_FLAGS)),
   };
+  // A collection linked under several parents has a LayerCollection on each path, with flags of its own: those that
+  // differ from its first one's, by path (collections.js layerKey).
+  function pathLayers(idOf, layers) {
+    const found = {};
+    const walk = (layer, path) => {
+      for (const child of layer.children) {
+        const id = idOf(pointerOf(child.collection)[2]);
+        if (!id) continue;
+        const key = layerKey(path, id), own = { exclude: child.exclude, hideViewport: child.hide_viewport };
+        if (own.exclude !== !!layers[id].exclude || own.hideViewport !== !!layers[id].hideViewport) found[key] = own;
+        walk(child, key);
+      }
+    };
+    walk(pointerStruct(structFind('LayerCollection'), blender.scene, blender.layerCollection(blender.masterCollection)), slice().MASTER);
+    return found;
+  }
   // The slice's state as Main holds it: collections Blender's code made get new ids, removed ones go.
   function readCollections(newId = () => crypto.randomUUID()) {
     const cols = slice(), pointers = blender.ids(ID_GR);
@@ -585,6 +602,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     const flags = (struct, pointer, names) => Object.fromEntries(Object.entries(names).map(([key, name]) => [key, pointer ? dnaGet(struct, pointer, name) : false]));
     const { state } = cols, layer = cols.layer();
     const layers = Object.fromEntries(pointers.map((pointer) => [byPointer.get(pointer), flags('LayerCollection', blender.layerCollection(pointer), LAYER_FLAGS)]));
+    Object.assign(layers, pathLayers(idOf, layers));
     const next = {
       ...state,
       collections: pointers.map((pointer) => ({ id: byPointer.get(pointer), name: blender.name(pointer), ...contents(pointer), ...flags('Collection', pointer, FLAGS) })),

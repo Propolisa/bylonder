@@ -15,6 +15,8 @@ import { createCollectionVisibility } from './collections-babylon.js';
 const clone = value => JSON.parse(JSON.stringify(value));
 const viewLayersOf = ({ viewLayers, activeViewLayer }) => ({ viewLayers, activeViewLayer });
 export const MASTER = 'scene';
+// A view layer's flags of a collection on one path from the Scene Collection, where they differ from its first path's.
+export const layerKey = (parentPath, id) => `${parentPath}/${id}`;
 const DEFAULT = 'collection';
 
 export function createCollections(world, { commit = () => {} } = {}) {
@@ -40,19 +42,19 @@ export function createCollections(world, { commit = () => {} } = {}) {
   // Renders show what is not disabled in renders instead of what the viewports show.
   const evaluate = () => {
     const result = new Map(), flags = layer().layers;
-    const visit = (collectionId, visible, selectable, seen) => {
+    const visit = (collectionId, path, visible, selectable, seen) => {
       for (const id of members(collectionId)) {
         const prev = result.get(id) || { visible: false, selectable: false, inLayer: false };
         result.set(id, { inLayer: true, visible: prev.visible || visible, selectable: prev.selectable || (visible && selectable) });
       }
       for (const childId of byId(collectionId).children) {
-        const child = byId(childId), f = flags[childId] || {};
+        const key = layerKey(path, childId), child = byId(childId), f = flags[key] || flags[childId] || {};
         if (!child || f.exclude || seen.has(childId)) continue;
         const shown = render ? !child.hideRender : !f.hideViewport && !child.hideViewport;
-        visit(childId, visible && shown, selectable && !child.hideSelect, new Set([...seen, childId]));
+        visit(childId, key, visible && shown, selectable && !child.hideSelect, new Set([...seen, childId]));
       }
     };
-    visit(MASTER, true, true, new Set());
+    visit(MASTER, MASTER, true, true, new Set());
     // Linked only inside excluded collections: not in this view layer.
     for (const id of ids()) if (!result.has(id)) result.set(id, { inLayer: false, visible: false, selectable: false });
     return result;
