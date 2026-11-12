@@ -172,11 +172,22 @@ export function bboneJoints(bone, ctx, rest, debug = null) {
     const px = b1 * p1x + b2 * p2x, py = b1 * p1y + b2 * p2y + b3 * Lp, pz = b1 * p1z + b2 * p2z;
     const c0 = 3 * u * u, c1 = 6 * u * t, c2 = 3 * t * t;
     let tx = c0 * p1x + c1 * (p2x - p1x) - c2 * p2x, ty = c0 * p1y + c1 * (p2y - p1y) + c2 * (Lp - p2y), tz = c0 * p1z + c1 * (p2z - p1z) - c2 * p2z;
-    // A zero-length handle: the tangent's limit at that end.
-    if (!(tx || ty || tz)) {
-      if (t < 1) { tx = p2x; ty = p2y; tz = p2z; } else { tx = -p1x; ty = Lp - p1y; tz = -p1z; }
-      if (!(tx || ty || tz)) ty = 1;
+    // End joints (bbone.md step 4): a short end handle is lengthened by the second derivative,
+    // T = B' + lam B'' at t = 0 and B' - lam B'' at t = 1, lam = max(0, 0.05 - |B'| / |B''|).
+    if (j === 0 || j === n) {
+      const end = j === n;
+      // B'(0) = 3 P1, B''(0) = 6 (P2 - 2 P1); B'(1) = 3 (P3 - P2), B''(1) = 6 (P3 - 2 P2 + P1).
+      tx = end ? -3 * p2x : 3 * p1x; ty = end ? 3 * (Lp - p2y) : 3 * p1y; tz = end ? -3 * p2z : 3 * p1z;
+      const ax = end ? 6 * (-2 * p2x + p1x) : 6 * (p2x - 2 * p1x);
+      const ay = end ? 6 * (Lp - 2 * p2y + p1y) : 6 * (p2y - 2 * p1y);
+      const az = end ? 6 * (-2 * p2z + p1z) : 6 * (p2z - 2 * p1z);
+      const la = Math.sqrt(ax * ax + ay * ay + az * az);
+      if (la) {
+        const lam = Math.max(0, 0.05 - Math.sqrt(tx * tx + ty * ty + tz * tz) / la), s = end ? -lam : lam;
+        tx += s * ax; ty += s * ay; tz += s * az;
+      }
     }
+    if (!(tx || ty || tz)) ty = 1;
     const roll = roll1 + (roll2 - roll1) * j / n;
     const sx = scaleIn[0] + (scaleOut[0] - scaleIn[0]) * j / n, sz = scaleIn[2] + (scaleOut[2] - scaleIn[2]) * j / n;
     jointInto(out, j * 16, tx, ty, tz, roll, sx, sz, S, px, py, pz);
