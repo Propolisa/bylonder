@@ -63,7 +63,7 @@ fn qmul(a : vec4<f32>, b : vec4<f32>) -> vec4<f32> { return vec4<f32>(a.w * b.xy
       var q = dq[o]; var e = dq[o + 1u];
       let S = mat4x4<f32>(dq[o + 2u], dq[o + 3u], dq[o + 4u], dq[o + 5u]);
       if (m == 0.0) { first = q; }
-      if (dot(q, first) < 0.0) { q = -q; e = -e; }
+      if (dot(q, select(first, Q, pre[2][0][0] > 0.5)) < 0.0) { q = -q; e = -e; }
       A += w[k] * qmul(q, vec4<f32>((S * vec4<f32>(p, 1.0)).xyz, 0.0));
       Q += w[k] * q; E += w[k] * e; m += w[k];
     }
@@ -407,11 +407,11 @@ export class GpuDeformer {
     const nv = rest.length / 3, idx = new Uint32Array(nv * 8), wgt = new Float32Array(nv * 8);
     for (let i = 0; i < nv * MAX_INFLUENCES; i++) { idx[i] = binding.indices[i]; wgt[i] = binding.weights[i]; }
     if (binding.dq) {
-      const dq = new StorageBuffer(this.engine, Math.max(1, binding.joints.length) * 96, RO), pre = new StorageBuffer(this.engine, 128, RO);
+      const dq = new StorageBuffer(this.engine, Math.max(1, binding.joints.length) * 96, RO), pre = new StorageBuffer(this.engine, 192, RO);
       const update = () => {
         const d = dualQuatData(this.inst, synthetic, binding);
         dq.update(d.data);
-        pre.update(new Float32Array([...d.pre, ...d.preInv]));
+        pre.update(new Float32Array([...d.pre, ...d.preInv, binding.running ? 1 : 0, ...new Array(15).fill(0)]));
       };
       return { cs: this.newShader('skinDQ'), buffers: { dq, idx: this.buffer(idx), wgt: this.buffer(wgt), pre }, update };
     }

@@ -35,8 +35,8 @@ export class RigDualQuatPlugin extends MaterialPluginBase {
 
   getUniforms() {
     return {
-      ubo: [{ name: 'rigPre', size: 16, type: 'mat4' }, { name: 'rigPreInv', size: 16, type: 'mat4' }, { name: 'rigDQWidth', size: 1, type: 'float' }],
-      vertex: '#ifdef RIGDQ\nuniform mat4 rigPre;\nuniform mat4 rigPreInv;\nuniform float rigDQWidth;\n#endif\n',
+      ubo: [{ name: 'rigPre', size: 16, type: 'mat4' }, { name: 'rigPreInv', size: 16, type: 'mat4' }],
+      vertex: '#ifdef RIGDQ\nuniform mat4 rigPre;\nuniform mat4 rigPreInv;\n#endif\n',
     };
   }
 
@@ -45,7 +45,6 @@ export class RigDualQuatPlugin extends MaterialPluginBase {
     if (!data) return;
     ubo.updateMatrix('rigPre', data.pre);
     ubo.updateMatrix('rigPreInv', data.preInv);
-    ubo.updateFloat('rigDQWidth', data.width);
     ubo.setTexture('rigDQ', data.texture);
   }
 
@@ -55,10 +54,10 @@ export class RigDualQuatPlugin extends MaterialPluginBase {
       CUSTOM_VERTEX_DEFINITIONS: `#ifdef RIGDQ
 attribute vec4 rigJoints0; attribute vec4 rigWeights0; attribute vec4 rigJoints1; attribute vec4 rigWeights1;
 uniform sampler2D rigDQ;
-vec4 rigFetch(float joint, int k) {
-  int i = int(joint) * ${TEXELS} + k, w = int(rigDQWidth);
-  return texelFetch(rigDQ, ivec2(i - (i / w) * w, i / w), 0);
-}
+// The texture's own width (no uniform: a stale one indexed some joints into a previous mesh's layout on WebGPU).
+vec4 rigFetchIndex(int i) { int w = textureSize(rigDQ, 0).x; return texelFetch(rigDQ, ivec2(i - (i / w) * w, i / w), 0); }
+// Texel 0 holds the flag (x = 1: signs align in the vertex's weight-list order); the joints follow.
+vec4 rigFetch(float joint, int k) { return rigFetchIndex(1 + int(joint) * ${TEXELS} + k); }
 vec4 rigQmul(vec4 a, vec4 b) {
   return vec4(a.w * b.xyz + b.w * a.xyz + cross(a.xyz, b.xyz), a.w * b.w - dot(a.xyz, b.xyz));
 }
@@ -68,6 +67,7 @@ vec4 rigQmul(vec4 a, vec4 b) {
 {
   vec3 p = (rigPre * vec4(positionUpdated, 1.0)).xyz;
   vec4 Q = vec4(0.0), E = vec4(0.0), A = vec4(0.0), first = vec4(0.0);
+  bool rigRunning = rigFetchIndex(0).x > 0.5;
   float m = 0.0;
   for (int i = 0; i < 8; i++) {
     float w = i < 4 ? rigWeights0[i] : rigWeights1[i - 4];
@@ -76,7 +76,7 @@ vec4 rigQmul(vec4 a, vec4 b) {
     vec4 q = rigFetch(j, 0), e = rigFetch(j, 1);
     mat4 S = mat4(rigFetch(j, 2), rigFetch(j, 3), rigFetch(j, 4), rigFetch(j, 5));
     if (m == 0.0) first = q;
-    if (dot(q, first) < 0.0) { q = -q; e = -e; }
+    if (dot(q, rigRunning ? Q : first) < 0.0) { q = -q; e = -e; }
     A += w * rigQmul(q, vec4((S * vec4(p, 1.0)).xyz, 0.0));
     Q += w * q; E += w * e; m += w;
   }
@@ -99,19 +99,21 @@ vec4 rigQmul(vec4 a, vec4 b) {
   }
 }
 
-// The per-mesh data the plugin binds: a float texture of the joints' dual quaternion data, updated each frame.
+// The per-mesh data the plugin binds: a float texture whose texel 0 x is 1 when signs align in the vertex's
+// weight-list order (running sum), then the joints' dual quaternion data (updated each frame).
 export class DualQuatTexture {
-  constructor(scene, jointCount) {
-    const texels = Math.max(1, jointCount * TEXELS);
+  constructor(scene, jointCount, running = false) {
+    const texels = 1 + jointCount * TEXELS;
     const max = scene.getEngine().getCaps().maxTextureSize || 4096;
     this.width = Math.min(texels, max);
     this.height = Math.ceil(texels / this.width);
     this.buffer = new Float32Array(this.width * this.height * 4);
+    this.buffer[0] = running ? 1 : 0;
     this.texture = RawTexture.CreateRGBATexture(this.buffer, this.width, this.height, scene, false, false, Constants.TEXTURE_NEAREST_SAMPLINGMODE, Constants.TEXTURETYPE_FLOAT);
   }
 
   update(data) {
-    this.buffer.set(data);
+    this.buffer.set(data, 4);
     this.texture.update(this.buffer);
   }
 }

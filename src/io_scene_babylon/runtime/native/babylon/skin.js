@@ -45,6 +45,9 @@ export class RigSkin {
     this.binding = buildBinding(inst, this.deform);
     this.axis = axis ? Float64Array.from(axis.m ?? axis) : null;
     this.axisInv = this.axis ? invert(this.axis) : null;
+    // The dual quaternion plugin is WebGL 2 only: on WebGPU Preserve Volume runs in compute (GpuDeformer), and the
+    // plugin's first pipeline there can keep a wrong state (README, open items).
+    if (this.binding.dq && scene.getEngine().isWebGPU) { this.binding.supported = false; this.binding.reasons.push('Preserve Volume on WebGPU runs in compute'); }
     if (!this.binding.supported) return;
     const { indices, weights, influences } = this.binding;
     // Per Babylon vertex: its evaluated vertex's influences (draw_vertices), or the vertex's own.
@@ -62,9 +65,8 @@ export class RigSkin {
       for (const [kind, src, from] of [['rigJoints0', indices, 0], ['rigWeights0', weights, 0], ['rigJoints1', indices, 4], ['rigWeights1', weights, 4]]) {
         mesh.setVerticesData(kind, pick(src, from), false, 4);
       }
-      this.dqTexture = new DualQuatTexture(scene, this.binding.joints.length);
-      mesh.metadata = { ...mesh.metadata, rigDualQuat: { texture: this.dqTexture.texture, width: this.dqTexture.width, pre: new Matrix(), preInv: new Matrix() } };
-      // The plugin is GLSL: on WebGPU the material must be made with forceGLSL (StandardMaterial(name, scene, true)).
+      this.dqTexture = new DualQuatTexture(scene, this.binding.joints.length, !!this.binding.running);
+      mesh.metadata = { ...mesh.metadata, rigDualQuat: { texture: this.dqTexture.texture, pre: new Matrix(), preInv: new Matrix() } };
       if (mesh.material && !mesh.material.pluginManager?.getPlugin('RigDualQuat')) new RigDualQuatPlugin(mesh.material);
       return;
     }

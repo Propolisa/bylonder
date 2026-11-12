@@ -59,10 +59,10 @@ function armaturePass(inst, deform, mod) {
         if (!w) continue;
         any = true;
         const b = bone[mod.slot[r]], j0 = J.offset[b], segs = J.segments[b];
-        if (segs <= 1) { addJoint(acc, J, j0, w, px, py, pz, mod.dq); continue; }
+        if (segs <= 1) { addJoint(acc, J, j0, w, px, py, pz, mod.dq, mod.listOrder); continue; }
         const f = segmentAt(J, b, segs, j0, px, py, pz), k = Math.min(Math.floor(f), segs - 1), t = f - k;
-        addJoint(acc, J, j0 + k, w * (1 - t), px, py, pz, mod.dq);
-        addJoint(acc, J, j0 + k + 1, w * t, px, py, pz, mod.dq);
+        addJoint(acc, J, j0 + k, w * (1 - t), px, py, pz, mod.dq, mod.listOrder);
+        addJoint(acc, J, j0 + k + 1, w * t, px, py, pz, mod.dq, mod.listOrder);
       }
       let qx = px, qy = py, qz = pz;
       if (any) {
@@ -115,7 +115,7 @@ function segmentAt(J, b, n, j0, px, py, pz) {
 
 // Adds one joint's weighted contribution: linear blend (acc[0..2]), or dual quaternion sums (acc: Q 0..3, E 4..7,
 // q * (0, S p) 8..11, the first q 12..15 for the sign; armature-modifier.js blendDQ).
-function addJoint(acc, J, j, a, px, py, pz, dq) {
+function addJoint(acc, J, j, a, px, py, pz, dq, running) {
   if (!a) return;
   if (!dq) {
     const D = J.D, o = j * 16;
@@ -127,7 +127,9 @@ function addJoint(acc, J, j, a, px, py, pz, dq) {
   const d = J.dq, o = j * 24;
   let qw = d[o], qx = d[o + 1], qy = d[o + 2], qz = d[o + 3], ew = d[o + 4], ex = d[o + 5], ey = d[o + 6], ez = d[o + 7];
   if (!acc[12] && !acc[13] && !acc[14] && !acc[15]) { acc[12] = qw; acc[13] = qx; acc[14] = qy; acc[15] = qz; }
-  if (qw * acc[12] + qx * acc[13] + qy * acc[14] + qz * acc[15] < 0) { qw = -qw; qx = -qx; qy = -qy; qz = -qz; ew = -ew; ex = -ex; ey = -ey; ez = -ez; }
+  // In weight-list order against the weighted sum so far (acc[0..3]), else against the first.
+  const r = running ? 0 : 12;
+  if (qw * acc[r] + qx * acc[r + 1] + qy * acc[r + 2] + qz * acc[r + 3] < 0) { qw = -qw; qx = -qx; qy = -qy; qz = -qz; ew = -ew; ex = -ex; ey = -ey; ez = -ez; }
   const s = o + 8;
   const sx = d[s] * px + d[s + 4] * py + d[s + 8] * pz + d[s + 12];
   const sy = d[s + 1] * px + d[s + 5] * py + d[s + 9] * pz + d[s + 13];

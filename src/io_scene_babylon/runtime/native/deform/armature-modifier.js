@@ -18,20 +18,24 @@ export function bindModifier(program, mesh, m, geo) {
   const bones = program.bones.filter((b) => b.arm === armIndex && b.use_deform !== false);
   const { groups, count: nv } = geo;
   const start = new Int32Array(nv + 1), slot = [], weight = [];
+  // With each vertex's weight-list order (geo.groupOrder) its bones come in that order, which Preserve Volume's sign
+  // alignment follows; else in bone order.
+  const order = geo.groupOrder, groupNames = [...groups.keys()], slotOf = new Map(bones.map((b, k) => [b.name, k]));
   for (let v = 0; v < nv; v++) {
     start[v] = slot.length;
     if (m.use_vertex_groups === false) continue;
-    bones.forEach((b, k) => {
-      const w = groups.get(b.name)?.[v];
+    const ks = order ? order[v].map((g) => slotOf.get(groupNames[g])).filter((k) => k !== undefined) : bones.keys();
+    for (const k of ks) {
+      const w = groups.get(bones[k].name)?.[v];
       if (w) { slot.push(k); weight.push(w); }
-    });
+    }
   }
   start[nv] = slot.length;
   const mask = m.vertex_group ? groups.get(m.vertex_group) ?? [] : null;
   return {
     arm: armIndex, armObject: arm, bones, start, slot: Int32Array.from(slot), weight: Float64Array.from(weight), mask,
     invertMask: !!m.invert_vertex_group, useEnvelopes: !!m.use_bone_envelopes, dq: !!m.use_deform_preserve_volume,
-    multi: !!m.use_multi_modifier,
+    multi: !!m.use_multi_modifier, listOrder: !!order,
   };
 }
 
@@ -165,7 +169,7 @@ export function runModifier(inst, mesh, mod, src, dst) {
     let W = 0;
     for (let i = 2; i < parts.length; i += 3) W += parts[i];
     let q = p;
-    if (W > 0) q = mod.dq ? blendDQ(parts, W, dq, p) : blendLinear(parts, W, contrib, p);
+    if (W > 0) q = mod.dq ? blendDQ(parts, W, dq, p, mod.listOrder) : blendLinear(parts, W, contrib, p);
     const out = transform(preInv, q);
     dst[v * 3] = out[0]; dst[v * 3 + 1] = out[1]; dst[v * 3 + 2] = out[2];
   }
@@ -187,14 +191,17 @@ function blendLinear(parts, W, contrib, p) {
   return q;
 }
 
-function blendDQ(parts, W, dq, p) {
+// Sign alignment (armature_modifier.md): in the vertex's weight-list order each q is aligned with the weighted sum of
+// the ones before it; without that order (bone order) with the first, as before.
+function blendDQ(parts, W, dq, p, running = false) {
   let first = null;
   const Q = [0, 0, 0, 0], E = [0, 0, 0, 0], acc = [0, 0, 0, 0];
   for (let i = 0; i < parts.length; i += 3) {
     const d = dq[parts[i]][parts[i + 1]], a = parts[i + 2] / W;
     let { q, e } = d;
     if (!first) first = q;
-    if (q[0] * first[0] + q[1] * first[1] + q[2] * first[2] + q[3] * first[3] < 0) { q = q.map((x) => -x); e = e.map((x) => -x); }
+    const ref = running ? Q : first;
+    if (q[0] * ref[0] + q[1] * ref[1] + q[2] * ref[2] + q[3] * ref[3] < 0) { q = q.map((x) => -x); e = e.map((x) => -x); }
     const sp = transform(d.S, p);
     const qs = qmul(q, [0, sp[0], sp[1], sp[2]]);
     for (let k = 0; k < 4; k++) { Q[k] += a * q[k]; E[k] += a * e[k]; acc[k] += a * qs[k]; }

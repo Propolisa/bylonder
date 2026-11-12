@@ -22,7 +22,17 @@ export function geometryOf(ob, base) {
   const count = base.length / 3, faces = ob.data.faces ?? [];
   const edges = ob.data.edges?.length ? ob.data.edges : edgesFromFaces(faces, count);
   const groups = new Map((ob.data.vertex_groups ?? []).map((g) => [g.name, Float64Array.from({ length: count }, (_, i) => g.weights[i] ?? 0)]));
-  return { base, count, faces, edges, groups };
+  return { base, count, faces, edges, groups, groupOrder: groupOrderOf(ob.data.vertex_group_order, count) };
+}
+
+// Each vertex's group indices in its weight-list order (`vertex_group_order`: lists, or packed { offsets, indices });
+// null without one. Mask and Mirror carry it; Subdivision drops it (its generated vertices have none).
+function groupOrderOf(order, count) {
+  if (!order) return null;
+  if (Array.isArray(order)) return order.length === count ? order : null;
+  const { offsets, indices } = order;
+  if (offsets.length !== count + 1) return null;
+  return Array.from({ length: count }, (_, v) => Array.from(indices.slice(offsets[v], offsets[v + 1])));
 }
 
 // A stencil: rows of (source, weight, flip bits) in CSR arrays; flip bit a mirrors axis a in the mirror frame.
@@ -84,7 +94,8 @@ export function bindMask(program, ob, m, geo) {
   const faces = geo.faces.filter((f) => f.every((v) => keep[v])).map((f) => f.map((v) => map[v]));
   const edges = geo.edges.filter(([a, b]) => keep[a] && keep[b]).map(([a, b]) => [map[a], map[b]]);
   const groups = new Map([...geo.groups].map(([n, g]) => [n, Float64Array.from(g.filter((_, i) => keep[i]))]));
-  return { stencil: stencil(rows), geo: { count: rows.length, faces, edges, groups } };
+  const groupOrder = geo.groupOrder && geo.groupOrder.filter((_, i) => keep[i]);
+  return { stencil: stencil(rows), geo: { count: rows.length, faces, edges, groups, groupOrder } };
 }
 
 // --- Mirror ---
@@ -104,6 +115,10 @@ export function bindMirror(program, ob, m, geo, objectIndex) {
   let pos = Array.from({ length: geo.count }, (_, i) => framed(F, base, i));
   let { faces, edges } = geo;
   let groups = new Map([...geo.groups].map(([n, g]) => [n, Array.from(g)]));
+  // Weight-list order by group name per vertex (mask_mirror.md): a copy keeps its source's order with side groups
+  // swapped in place; a merged vertex keeps its own and appends the groups only its copy has, in the copy's order.
+  const groupNames = [...geo.groups.keys()];
+  let order = geo.groupOrder ? geo.groupOrder.map((list) => list.map((gi) => groupNames[gi])) : null;
   axes.forEach((on, a) => {
     if (!on) return;
     const bit = 1 << a;
@@ -112,6 +127,7 @@ export function bindMirror(program, ob, m, geo, objectIndex) {
       const map = []; let n = 0;
       keep.forEach((k, i) => { map[i] = k ? n++ : -1; });
       rows = rows.filter((_, i) => keep[i]); pos = pos.filter((_, i) => keep[i]);
+      if (order) order = order.filter((_, i) => keep[i]);
       faces = faces.filter((f) => f.every((v) => keep[v])).map((f) => f.map((v) => map[v]));
       edges = edges.filter(([x, y]) => keep[x] && keep[y]).map(([x, y]) => [map[x], map[y]]);
       for (const [name, g] of groups) groups.set(name, g.filter((_, i) => keep[i]));
@@ -142,11 +158,21 @@ export function bindMirror(program, ob, m, geo, objectIndex) {
       for (let i = 0; i < n; i++) if (!merged[i]) out.push(from[i]);
       nextGroups.set(name, out);
     }
+    if (order) {
+      const swap = (name) => (groupsMirror && names.has(opposite(name)) ? opposite(name) : name);
+      const next = order.map((list, i) => (merged[i] ? [...list, ...list.map(swap).filter((g) => !list.includes(g))] : list));
+      for (let i = 0; i < n; i++) if (!merged[i]) next.push(order[i].map(swap));
+      order = next;
+    }
     rows = newRows; pos = newPos; faces = [...faces, ...mirroredFaces]; edges = [...edges, ...mirroredEdges]; groups = nextGroups;
   });
+  const index = new Map([...groups.keys()].map((name, i) => [name, i]));
   return {
     stencil: stencil(rows), mirrorObject,
-    geo: { count: rows.length, faces, edges, groups: new Map([...groups].map(([k, g]) => [k, Float64Array.from(g)])) },
+    geo: {
+      count: rows.length, faces, edges, groups: new Map([...groups].map(([k, g]) => [k, Float64Array.from(g)])),
+      groupOrder: order && order.map((list) => list.map((name) => index.get(name))),
+    },
   };
 }
 

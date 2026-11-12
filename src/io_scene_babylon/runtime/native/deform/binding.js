@@ -82,20 +82,22 @@ export function buildBinding(inst, deform, { csr = false } = {}) {
   cur = cur.map((m) => new Map([...m].map(([j, w]) => [j < 0 ? j : renumber.get(j), w])));
   if (csr) return { joints, ...csrRows(cur), dq, supported: !reasons.length, reasons };
   // Pack: up to MAX_INFLUENCES largest weights per vertex, renormalized (to their sum for dual quaternions), stored
-  // by ascending joint.
+  // by ascending joint, or in the vertex's weight-list order when Preserve Volume aligns signs in it (running).
+  const running = dq && deform.modifiers.some((m) => m.listOrder);
   const identity = joints.length;
   const indices = new Float32Array(nv * MAX_INFLUENCES), weights = new Float32Array(nv * MAX_INFLUENCES);
   let used = 1, overflow = 0;
   cur.forEach((m, v) => {
-    const list = [...m].filter(([, w]) => w > 0).sort((a, b) => b[1] - a[1]);
+    const listed = [...m].map(([j, w], i) => [j, w, i]);
+    const list = listed.filter(([, w]) => w > 0).sort((a, b) => b[1] - a[1]);
     if (list.length > MAX_INFLUENCES) overflow++;
-    const kept = list.slice(0, MAX_INFLUENCES).sort((a, b) => a[0] - b[0]);
+    const kept = list.slice(0, MAX_INFLUENCES).sort((a, b) => (running ? a[2] - b[2] : a[0] - b[0]));
     const total = list.reduce((a, [, w]) => a + w, 0), sum = kept.reduce((a, [, w]) => a + w, 0) || 1;
     const scale = dq ? total / sum : 1 / sum;
     used = Math.max(used, kept.length);
     kept.forEach(([j, w], i) => { indices[v * MAX_INFLUENCES + i] = j < 0 ? identity : j; weights[v * MAX_INFLUENCES + i] = w * scale; });
   });
-  return { joints, indices, weights, influences: used <= 4 ? 4 : 8, overflow, dq, supported: !reasons.length, reasons };
+  return { joints, indices, weights, influences: used <= 4 ? 4 : 8, overflow, dq, running, supported: !reasons.length, reasons };
 }
 
 function csrRows(cur) {
@@ -194,7 +196,8 @@ export function skinDQ(base, binding, { data, pre, preInv }) {
       const o = binding.indices[v * MAX_INFLUENCES + i] * 24;
       let q = Array.from(data.subarray(o, o + 4)), e = Array.from(data.subarray(o + 4, o + 8));
       first ??= q;
-      if (q[0] * first[0] + q[1] * first[1] + q[2] * first[2] + q[3] * first[3] < 0) { q = q.map((x) => -x); e = e.map((x) => -x); }
+      const ref = binding.running ? Q : first;
+      if (q[0] * ref[0] + q[1] * ref[1] + q[2] * ref[2] + q[3] * ref[3] < 0) { q = q.map((x) => -x); e = e.map((x) => -x); }
       const sp = transform(data.subarray(o + 8, o + 24), p, 0);
       const qs = qm(q, [sp[0], sp[1], sp[2], 0]);
       for (let k = 0; k < 4; k++) { Q[k] += w * q[k]; E[k] += w * e[k]; acc[k] += w * qs[k]; }

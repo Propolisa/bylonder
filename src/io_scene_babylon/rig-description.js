@@ -82,12 +82,19 @@ function meshData(ob, mesh) {
   const faces = Array.from({ length: mesh.faces_num }, (_, f) => Array.from(corners.subarray(offsets[f], offsets[f + 1])));
   const groups = [...ob.vertex_groups].map((g) => ({ name: g.name, weights: new Array(count).fill(0) }));
   [...ob.data.vertices].forEach((v, i) => { for (const { group, weight } of v.groups) if (groups[group]) groups[group].weights[i] = weight; });
-  const key = ob.data.shape_keys;
+  const preservesVolume = [...ob.modifiers].some((m) => m.type === 'ARMATURE' && m.use_deform_preserve_volume), key = ob.data.shape_keys;
   const edges = Array.from({ length: mesh.edges_num }, (_, e) => [mesh.edges[e * 2], mesh.edges[e * 2 + 1]]);
-  return { vertices, edges, faces, vertex_groups: groups, ...(key && { shape_keys: { name: key.name, use_relative: key.use_relative, eval_time: key.eval_time,
+  return { vertices, edges, faces, vertex_groups: groups, ...(preservesVolume && { vertex_group_order: groupOrder(ob.data) }), ...(key && { shape_keys: { name: key.name, use_relative: key.use_relative, eval_time: key.eval_time,
     key_blocks: [...key.key_blocks].map((kb) => ({ name: kb.name, co: Array.from({ length: count }, (_, i) => Array.from(blockData(kb, count).subarray(i * 3, i * 3 + 3))),
       value: kb.value, slider_min: kb.slider_min, slider_max: kb.slider_max, mute: kb.mute, relative_key: kb.relative_key.name, vertex_group: kb.vertex_group,
       interpolation: kb.interpolation })) } }) };
+}
+
+// Each vertex's group indices in its weight list's order, which Preserve Volume's blend follows: `indices` from
+// `offsets[v]` to `offsets[v + 1]`.
+function groupOrder(mesh) {
+  const lists = [...mesh.vertices].map((v) => [...v.groups].map((g) => g.group));
+  return { offsets: Int32Array.from([0, ...lists.map(((n) => (list) => (n += list.length))(0))]), indices: Int32Array.from(lists.flat()) };
 }
 
 // CorrectiveSmoothModifierData's bind_coords, their sharing info and bind_coords_num, before lambda (RNA's factor).
@@ -204,7 +211,7 @@ export function rigDescription(arm, meshes, meshOf, keyed = []) {
   return { schema: 'bylonder-rig', version: 1, objects: description, drivers, actions: [...actions.values()] };
 }
 
-// The description with its bulk as typed arrays: a mesh's vertices and faces, its vertex groups' weights and its shape
+// The description with its bulk as typed arrays: a mesh's vertices and faces, its vertex groups' weights and order, its shape
 // keys' offsets from the basis (each where non-zero), the vertices it draws, its Corrective Smooth and Surface Deform binds, and F-Curves'
 // keys, as `{ array }` indices into `arrays`, which the page reads back (runtime/native-rig.js unpackDescription).
 export function packDescription(description) {
@@ -218,6 +225,7 @@ export function packDescription(description) {
     const basis = data.shape_keys?.key_blocks[0]?.co;
     return { ...data, vertices: buffer(Float32Array.from(data.vertices.flat())), edges: buffer(Int32Array.from(data.edges.flat())),
       ...(data.draw_vertices && { draw_vertices: buffer(data.draw_vertices) }),
+      ...(data.vertex_group_order && { vertex_group_order: { offsets: buffer(data.vertex_group_order.offsets), indices: buffer(data.vertex_group_order.indices) } }),
       faces: { offsets: buffer(Int32Array.from([0, ...data.faces.map(((n) => (f) => (n += f.length))(0))])), indices: buffer(Int32Array.from(data.faces.flat())) },
       vertex_groups: data.vertex_groups.map(({ name, weights }) => ({ name, count: weights.length, ...sparse(weights) })),
       ...(data.shape_keys && { shape_keys: { ...data.shape_keys, key_blocks: data.shape_keys.key_blocks.map((kb, i) => ({ ...kb, count: kb.co.length,

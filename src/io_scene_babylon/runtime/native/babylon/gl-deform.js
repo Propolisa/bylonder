@@ -55,8 +55,8 @@ void main(void) {
   }
   gl_FragColor = vec4(o, 1.0);
 }` },
-  skinDQ: { samplers: ['src', 'idx', 'wgt', 'dq'], uniforms: ['pre', 'preInv'], body: `
-uniform mat4 pre; uniform mat4 preInv;
+  skinDQ: { samplers: ['src', 'idx', 'wgt', 'dq'], uniforms: ['pre', 'preInv', 'running'], body: `
+uniform mat4 pre; uniform mat4 preInv; uniform float running;
 vec4 qmul(vec4 a, vec4 b) { return vec4(a.w * b.xyz + b.w * a.xyz + cross(a.xyz, b.xyz), a.w * b.w - dot(a.xyz, b.xyz)); }
 void main(void) {
   int v = selfIndex(); if (float(v) >= outCount) discard;
@@ -70,7 +70,7 @@ void main(void) {
       vec4 q = fetch(dq, o), e = fetch(dq, o + 1);
       mat4 S = mat4(fetch(dq, o + 2), fetch(dq, o + 3), fetch(dq, o + 4), fetch(dq, o + 5));
       if (m == 0.0) first = q;
-      if (dot(q, first) < 0.0) { q = -q; e = -e; }
+      if (dot(q, running > 0.5 ? Q : first) < 0.0) { q = -q; e = -e; }
       A += w[k] * qmul(q, vec4((S * vec4(p, 1.0)).xyz, 0.0));
       Q += w[k] * q; E += w[k] * e; m += w[k];
     }
@@ -326,7 +326,7 @@ export class GlDeformer {
         run: (src) => {
           const d = dualQuatData(this.inst, synthetic, binding, data.subarray(0, binding.joints.length * 24));
           dqTex.update(data); pre.set(d.pre); preInv.set(d.preInv);
-          this.draw(wrapper, out, (e) => { e.setTexture('src', src); e.setTexture('idx', idxTex); e.setTexture('wgt', wgtTex); e.setTexture('dq', dqTex); e.setMatrices('pre', pre); e.setMatrices('preInv', preInv); });
+          this.draw(wrapper, out, (e) => { e.setTexture('src', src); e.setTexture('idx', idxTex); e.setTexture('wgt', wgtTex); e.setTexture('dq', dqTex); e.setMatrices('pre', pre); e.setMatrices('preInv', preInv); e.setFloat('running', binding.running ? 1 : 0); });
         },
       };
     }
