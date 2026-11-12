@@ -68,6 +68,7 @@ export function exportRuntimes(world, { bake = true, sampling = world.animation 
       return () => clips.flatMap((animations) => animations?.() ?? []);
     },
     boneParent: (ob) => results.map((r) => r.boneParent?.(ob)).find(Boolean) ?? null,
+    settle: () => results.forEach((r) => r.settle?.()),
     restore: () => { results.forEach((r) => r.restore()); rests.dispose(); } };
 }
 

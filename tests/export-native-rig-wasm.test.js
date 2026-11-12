@@ -13,6 +13,7 @@ import { setCustomProperty } from '../src/blenkernel/animation/anim-blender.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
 import { openExample } from './open-example.js';
 import { writePackage } from './export-package.js';
+import { subscribeReports } from '../src/windowmanager/wm-reports.js';
 
 const FRAMES = [1, 8, 15, 21];
 // The IK solver's tolerance, as a matrix's entries.
@@ -39,10 +40,15 @@ twin.modifiers.new('Armature', 'ARMATURE').object = rig;
 for (const name of ['Elbow.L', 'Breathe']) [...body.data.shape_keys.animation_data.drivers].find((d) => d.data_path === `key_blocks["${name}"].value`).modifiers.new('GENERATOR');
 Object.assign(body.modifiers.new('Smooth', 'CORRECTIVE_SMOOTH'), { factor: 0.8, iterations: 4, use_only_smooth: true });
 sync.view();
+const reports = [];
+subscribeReports((r) => reports.push(r));
 const files = await exportModule(world);
 const entity = Object.values(JSON.parse(files['scene.ir.json']).entities).find((e) => e.type === 'constraints:POSE');
 assert.equal(entity?.implementation, 'native-rig', 'a rig with an Action constraint runs on the native runtime');
 assert.deepEqual(Object.keys(entity.inputs.native.meshes), ['Body'], 'the body, whose stack Babylon cannot skin, deforms on the runtime');
+// The export judges the runtime's deform by its vertices, each mesh within its share of its size, and says so.
+assert.ok(reports.some((r) => r.type === 'INFO' && /^Body: deformed live by the native rig runtime, within/.test(r.message)), JSON.stringify(reports.map((r) => r.message)));
+assert.ok(!reports.some((r) => /native rig runtime is off|are off from Blender/.test(r.message)), 'nothing off');
 const groups = JSON.parse(/const ANIMATION_GROUPS = (.*);\n/.exec(files['scene.js'])[1]);
 assert.deepEqual(groups.flatMap((g) => [...g.targetedAnimations.filter((t) => t.animation.keys.length > 1).map((t) => t.targetId), ...(g.bylonderTracks?.targets ?? [])]).filter((id) => /^Rig /.test(id) && !id.includes('#')), [],
   'no bone is sampled');

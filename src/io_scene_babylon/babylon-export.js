@@ -475,6 +475,7 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
   const bones = onBones && world.mainSync ? boneParents(world.mainSync, objects, mapped, content) : new Map();
   const evaluated = world.mainSync ? evaluatedFrames(world, objects, refs, [...stacks.values()], sampling) : { transforms: null, channels: new Map() };
   for (const [node, stack] of stacks) if (!stack.entity()) stacks.delete(node);
+  mapped.settle?.();
   const clips = animations !== 'TIMELINE' && world.mainSync ? sampledClips(world, objects, mapped, sampling) : [], timeline = animations !== 'CLIPS';
   const keys = transformKeys(world, objects);
   // A channel Main evaluates is its value at each frame (its NLA strips and drivers too), not its F-curve's.

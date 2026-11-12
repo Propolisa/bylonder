@@ -1,7 +1,7 @@
 // An armature's bone constraints as the page runs them (runtime/pose-constraints.js): on Blender's kernels
 // (constraints.wasm, runtime/pose-kernels.js) where they cover the rig, else on the page's own solvers where it has one
 // for each constraint; kept only where the page's pose is the one Main evaluated at every frame the export samples.
-import { Matrix } from '@babylonjs/core';
+import { Matrix, VertexBuffer } from '@babylonjs/core';
 import { posedBone } from './runtime/blend-scene.js';
 import { blendData } from '../python/bpy_rna.js';
 import { solvePose } from './runtime/pose-constraints.js';
@@ -27,6 +27,10 @@ const BONE_SPACES = ['WORLD', 'POSE', 'LOCAL'];
 const TOLERANCE = 1e-3;
 // Every how many checked frames the native runtime's deformed meshes are compared with Main's.
 const DEFORM_CHECKS = 10;
+// How far a vertex the native runtime deforms may be from Main's, as a share of its mesh's bounding-box diagonal: under
+// it, no difference shows at the mesh's own scale (about 1 cm on a body, 2 mm on a head).
+// Tests lower it to take the per-mesh fallback.
+export const vertexTolerance = { share: 0.005 };
 
 // What a constraint reads, as the page finds it: a bone of the armature, or an object's node; undefined where it
 // cannot; null where there is none.
@@ -98,25 +102,27 @@ const drawnVertices = (mesh) => Int32Array.from([...mesh.corner_verts, ...Array.
 // and the evaluated one the export draws; `source`: a mesh only another's Surface Deform reads, which goes in as data);
 // those whose stack the runtime runs to the evaluated mesh's vertices go in
 // with what draws each Babylon vertex (`draw_vertices`, drawnVertices), the page deforming them
-// (`meshes`: their nodes' ids, by name). A hidden mesh, which Main does not evaluate, stays out.
-function nativeRig(arm, nodeOf, deformed = []) {
+// (`meshes`: their nodes' ids, by name). A hidden mesh, which Main does not evaluate, stays out. `armatureOnly`: the
+// meshes as Babylon would skin them, their stacks cut to their Armature modifiers, each one's deform compared apart.
+function nativeRig(arm, nodeOf, deformed = [], armatureOnly = false) {
   const shown = (ob) => new Set(shownStack(ob).map((m) => m.name)), keyed = deformed.filter((d) => d.keyed).map((d) => d.ob);
   const drawn = deformed.filter((d) => !d.source && !d.keyed), sources = deformed.filter((d) => d.source);
   const describe = (list) => {
     const all = [...list, ...sources.filter((s) => !list.includes(s))], description = rigDescription(arm, all.map((d) => d.ob), (ob) => all.find((d) => d.ob === ob).mesh(), keyed);
-    for (const d of all) for (const m of description.objects.find((o) => o.name === d.ob.name).modifiers) m.show_viewport &&= shown(d.ob).has(m.name);
+    for (const d of all) for (const m of description.objects.find((o) => o.name === d.ob.name).modifiers) m.show_viewport &&= armatureOnly ? m.type === 'ARMATURE' : shown(d.ob).has(m.name);
     return description;
   };
   let description = describe(drawn);
   const program = drawn.length && compileRig(structuredClone(description));
-  const runs = drawn.filter((d) => {
+  const runs = armatureOnly ? drawn : drawn.filter((d) => {
     const deform = compileDeform(program, program.objectIndex.get(d.ob.name)), evaluated = d.evaluated();
     return !deform.unsupported.length && deform.geo.base.length === evaluated?.verts_num * 3 && d.node.getTotalVertices() === drawnVertices(evaluated).length;
   });
   if (runs.length < drawn.length) description = describe(runs);
   // What the runtime skips in the stacks of the lattices the meshes it deforms read (their points deform apart).
   const skipped = runs.flatMap((d) => [...d.ob.modifiers].filter((m) => m.type === 'LATTICE' && m.object && shown(d.ob).has(m.name))
-    .flatMap((m) => { const at = program.objectIndex.get(m.object.name); return at === undefined ? [] : compileDeform(program, at).unsupported.map((step) => ({ mesh: d.ob.name, lattice: m.object.name, step })); }));
+    .flatMap((m) => { const at = program.objectIndex.get(m.object.name); return at === undefined ? [] : compileDeform(program, at).unsupported.map((step) => ({ mesh: d.ob.name, lattice: m.object.name, step })); }))
+    .filter((s, i, all) => all.findIndex((t) => t.mesh === s.mesh && t.lattice === s.lattice && t.step === s.step) === i);
   const objects = {}, meshes = {};
   for (const ob of description.objects) {
     const node = ob.name !== arm.name && nodeOf(blendData().objects.get(ob.name));
@@ -126,7 +132,7 @@ function nativeRig(arm, nodeOf, deformed = []) {
     if (node) objects[ob.name] = node.id;
   }
   for (const d of runs) {
-    description.objects.find((o) => o.name === d.ob.name).data.draw_vertices = drawnVertices(d.evaluated());
+    if (!armatureOnly) description.objects.find((o) => o.name === d.ob.name).data.draw_vertices = drawnVertices(d.evaluated());
     meshes[d.ob.name] = d.node.id;
   }
   const { packed, arrays } = packDescription(description);
@@ -165,6 +171,17 @@ const keyedInfluences = (arm) => [...new Set([...blendData().actions].flatMap((a
   .flatMap((path) => { const [, bone, name] = INFLUENCE.exec(path) ?? [], constraint = bone && arm.pose.bones.get(JSON.parse(`"${bone}"`))?.constraints.get(JSON.parse(`"${name}"`));
     return constraint ? [{ path, constraint }] : []; });
 
+// The bones with weight in the skeleton's meshes Babylon skins (not `apart`), a B-Bone's segment joints as their bone.
+const skinning = (skeleton, apart, bones) => new Set(skeleton.getScene().meshes.filter((m) => m.skeleton === skeleton && !apart.has(m.id))
+  .flatMap((m) => [[VertexBuffer.MatricesIndicesKind, VertexBuffer.MatricesWeightsKind], [VertexBuffer.MatricesIndicesExtraKind, VertexBuffer.MatricesWeightsExtraKind]]
+    .flatMap(([indices, weights]) => { const i = m.getVerticesData(indices), w = m.getVerticesData(weights); return i && w ? Array.from(i).filter((_, k) => w[k] > 0) : []; }))
+  .map((j) => { const name = skeleton.bones[j].name, at = name.lastIndexOf('#'); return at > 0 ? bones.findIndex((b) => b.name === name.slice(0, at)) : j; }));
+// The largest distance between two lists of positions, vertex by vertex.
+const farthest = (a, b) => { let worst = 0; for (let v = 0; v < b.length; v += 3) worst = Math.max(worst, Math.hypot(a[v] - b[v], a[v + 1] - b[v + 1], a[v + 2] - b[v + 2])); return worst; };
+// The diagonal of positions' bounding box.
+const diagonal = (p) => { const lo = [Infinity, Infinity, Infinity], hi = [-Infinity, -Infinity, -Infinity];
+  for (let v = 0; v < p.length; v += 3) for (let k = 0; k < 3; k++) { lo[k] = Math.min(lo[k], p[v + k]); hi[k] = Math.max(hi[k], p[v + k]); }
+  return Math.hypot(hi[0] - lo[0], hi[1] - lo[1], hi[2] - lo[2]); };
 const close = (a, b) => a.asArray().every((v, i) => Math.abs(v - b.asArray()[i]) <= TOLERANCE);
 
 // For an armature drawn by one skeleton, its bone constraints as the page runs them (on the kernels when an export has
@@ -175,14 +192,20 @@ const close = (a, b) => a.asArray().every((v, i) => Math.abs(v - b.asArray()[i])
 // own matrices at the frames checked. `meshWorld()` gives the skinned mesh's
 // world matrix and `nodeWorld(id)` a node's, at the frame Main is on. On the native runtime, the `deformed` meshes it
 // runs (nativeRig) are `deforms`, their names, and each check compares some frames' deform with Main's evaluated mesh:
-// `deviation`, the largest distance of a vertex from Main's by mesh name.
+// `deviation`, the largest distance of a vertex from Main's by mesh name, which holds where within `allowed`
+// (vertexTolerance); `off`, the deforming bones whose pose is not Main's.
 export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, nodeWorld, deformed = [] }) {
   // The armature's own bones, without its B-Bones' segment joints after them.
   const bones = skeleton.bones.slice(0, skeleton.armatureBones);
   const targetOf = (ob, bone) => { const node = !bone && nodeOf(ob); return node ? { node: node.id } : undefined; };
   const rig = kernels && bones.length === arm.data.bones.length && rigOf(arm, [...arm.data.bones].map((b) => b.name), targetOf);
   const native = !rig && bones.length === arm.data.bones.length ? nativeRig(arm, nodeOf, deformed) : null;
-  const deforms = Object.keys(native?.meshes ?? {}), deviation = new Map(deforms.map((name) => [name, 0]));
+  const deforms = Object.keys(native?.meshes ?? {}), deviation = new Map(deforms.map((name) => [name, 0])), allowed = new Map();
+  // The same meshes skinned by their Armature alone, as Babylon would: a mesh the runtime deforms beyond its allowance
+  // is skinned where that is closer to Main's (`skinned`).
+  const alone = deforms.length && nativeRig(arm, nodeOf, deformed, true), skinSolver = alone && nativeSolve(), skinDeviation = new Map(deforms.map((name) => [name, 0]));
+  // Babylon's skinning, the cheaper, where it is as close.
+  const skinned = () => new Set(deforms.filter((name) => deviation.get(name) > allowed.get(name) && skinDeviation.get(name) <= deviation.get(name)));
   const evaluatedOf = new Map(deformed.map((d) => [d.ob.name, d.evaluated]));
   const stacks = rig || native ? {} : poseStacks(arm, nodeOf);
   if (!rig && !native && !stacks) return null;
@@ -192,9 +215,11 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
     length: arm.data.bones.get(bone.name).length, mode: poses[i].rotation_mode }));
   const moved = new Set(), owns = new Map(bones.map((bone) => [bone, []]));
   // The bones whose pose must be Main's: every one on the kernels and the page's solvers; on the native runtime, those
-  // that deform and their parents, as a mechanism bone off by a little moves nothing the page draws.
-  const deforming = (i) => arm.data.bones.get(bones[i].name).use_deform, judged = new Set(bones.map((_, i) => i).filter((i) => !native || deforming(i)));
+  // that skin a mesh Babylon draws and their parents (the meshes the runtime deforms are judged by their vertices).
+  const judged = native ? skinning(skeleton, new Set(Object.values(native.meshes)), bones) : new Set(bones.map((_, i) => i));
   for (const i of [...judged]) for (let p = shape[i].parent; p >= 0; p = shape[p].parent) judged.add(p);
+  // The deforming bones off from Main's pose, for the export's report.
+  const deforming = (i) => arm.data.bones.get(bones[i].name).use_deform, off = new Set();
   // The B-Bones whose segments the kernels shape as Main does at every frame checked.
   const shaped = new Set(rig ? [...arm.data.bones].filter((b) => b.bbone_segments > 1).map((b) => b.name) : []);
   let checked = 0, held = true;
@@ -214,6 +239,10 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
     native: !!native,
     deforms,
     deviation,
+    allowed,
+    skinDeviation,
+    skinned,
+    off,
     own: (bone) => owns.get(bone),
     check(evaluated, frame) {
       const locals = bones.map((bone, i) => ownMatrix(poses[i], bone));
@@ -226,24 +255,31 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
         moved.add(bones[i]);
         solved.set(i, local);
       }
-      for (const [i, local] of solved) held &&= !judged.has(i) || close(local, evaluated[i]);
-      if (native) held &&= posedByPage(locals, frame).every((m, i) => !judged.has(i) || close(m, evaluated[i]));
+      const drawn = native ? posedByPage(locals, frame) : [];
+      for (const [i, local] of [...solved, ...drawn.entries()]) {
+        if (close(local, evaluated[i])) continue;
+        if (deforming(i)) off.add(bones[i].name);
+        held &&= !judged.has(i);
+      }
       for (const name of shaped) {
         const pose = arm.pose.bones.get(name), ours = solve.segments(rig, name);
         if (!ours.every((m, k) => Array.from(pose.bbone_segment_matrix(k, false)).every((v, j) => Math.abs(v - m[j]) <= TOLERANCE))) shaped.delete(name);
       }
+      if (checked % DEFORM_CHECKS === 0 && alone) skinSolver({ bones: shape, locals, mesh: meshWorld(), space: skeleton.space, nodeWorld, native: alone, properties: customProperties(arm), frame });
       if (checked % DEFORM_CHECKS === 0) for (const name of deforms) {
         const ours = nativeSolver.deformed(native, name), theirs = evaluatedOf.get(name)().vert_positions;
-        let worst = deviation.get(name);
-        for (let v = 0; v < theirs.length; v += 3) worst = Math.max(worst, Math.hypot(ours[v] - theirs[v], ours[v + 1] - theirs[v + 1], ours[v + 2] - theirs[v + 2]));
-        deviation.set(name, worst);
+        deviation.set(name, Math.max(deviation.get(name), farthest(ours, theirs)));
+        allowed.set(name, vertexTolerance.share * diagonal(theirs));
+        const skin = skinSolver.deformed(alone, name);
+        skinDeviation.set(name, skin.length === theirs.length ? Math.max(skinDeviation.get(name), farthest(skin, theirs)) : Infinity);
       }
       checked++;
     },
     entity: () => (checked && held ? {
       skeleton: skeleton.id, mesh: mesh.id, space: skeleton.space.asArray(), constraints: influenced(arm, stacks),
       ...(rig && { kernels: rig, influences: influences(arm, rig), shapes: shapes(arm), segments: [...shaped] }),
-      ...(native && { native, properties: customProperties(arm, (path) => ({ property: `objects${key(arm.name)}${path.startsWith('[') ? '' : '.'}${path}` })) }),
+      ...(native && { native: skinned().size ? nativeRig(arm, nodeOf, [...deformed.filter((d) => !skinned().has(d.ob.name)),
+        ...deformed.filter((d) => skinned().has(d.ob.name) && d.ob.data.shape_keys?.animation_data?.drivers.length).map((d) => ({ ob: d.ob, keyed: true }))]) : native, properties: customProperties(arm, (path) => ({ property: `objects${key(arm.name)}${path.startsWith('[') ? '' : '.'}${path}` })) }),
       bones: Object.fromEntries(shape.map(({ name, length, mode }, i) => [name, { length, mode, ...(moved.has(bones[i]) && { own: ownMatrix(poses[i], bones[i]).asArray() }) }])),
     } : null),
   };
