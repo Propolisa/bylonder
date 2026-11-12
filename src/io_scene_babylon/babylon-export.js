@@ -28,7 +28,8 @@ const WORLD_SKYBOX = '__worldSkybox';
 // (a line child it draws, mesh-batch-cache.js) stay out, as Blender's glTF exporter leaves them out by default.
 // The objects and Geometry Nodes instances the view draws (main-view.js drawInstances) are thin instances of a mesh
 // sharing their source's geometry: exported as such; a particle system's display shapes are overlays.
-const instances = (node) => !!node.metadata?.instancers && !!node.metadata.workbench;
+// An instanced light is a light of its own at each instance (main-view.js drawLightInstances).
+const instances = (node) => !!node.metadata?.instancers && (!!node.metadata.workbench || node instanceof Light);
 const helper = (node) => node.doNotSerialize || (node.name.startsWith('__') && !instances(node)) || deleted(node) || !!node.metadata?.drawOwner;
 const excluded = (node) => { for (let n = node; n; n = n.parent) if (helper(n)) return true; return false; };
 const BYLONDER_METADATA = /^(wb|editable$|editing$|drawOwner$|workbench$|instances|instancers$)/;
@@ -482,6 +483,8 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
   // A constrained object the page places is written at its own transform, which its constraints start from.
   const transforms = new Map(objects.map((node) => [node.uniqueId, stacks.has(node) ? { position: stacks.get(node).own.position, rotationQuaternion: stacks.get(node).own.rotation, scaling: stacks.get(node).own.scaling }
     : bones.get(node)?.transform ?? evaluatedTransform(world.mainSync, node)]));
+  // An instanced light is placed at its instance (main-view.js drawLightInstances), as an object at its world matrix.
+  if (world.mainSync) for (const light of content.nodes) if (light instanceof Light && light.metadata?.instancers && evaluatedMatrix(light)) transforms.set(light.uniqueId, evaluatedTransform(world.mainSync, light));
   for (const node of [...stacks.keys(), ...bones.keys()]) evaluated.transforms?.delete(node);
   // Taken after the frames are evaluated, which redraw what the view draws per frame (a Grease Pencil's strokes).
   const all = [...scene.meshes, ...scene.transformNodes, ...scene.lights, ...scene.cameras];

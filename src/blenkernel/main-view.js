@@ -598,7 +598,7 @@ export function createMainView(state) {
       if (shape === 'OBJECT') displayBounds(carrier, bounded.has(source));
     }
     for (const [key, carrier] of instanced) if (!drawn.has(key)) { carrier.dispose(); instanced.delete(key); }
-    drawLightInstances(scene, lights);
+    drawLightInstances(scene, lights, byOb);
     keepCameraInstances(cameras, byOb);
     const clouds = blender.pointClouds().map((record) => Object.assign(record, { key: `${record.instancer}:${nthOf(record.instancer + ':POINTCLOUD')}` }));
     const shown = drawPointClouds(scene, clouds, pointClouds, materialFor);
@@ -613,12 +613,13 @@ function redrawProbesDrawnOnce(scene) {
 }
 // An instanced light lights at each instance, as Blender's do: a light of its settings at each instance's matrix.
   const instanceLights = new Map(); // source light -> its instances' lights
-  function drawLightInstances(scene, lights) {
+  function drawLightInstances(scene, lights, byOb) {
     for (const [source, made] of instanceLights) if (!lights.has(source)) { made.forEach((light) => light.dispose()); instanceLights.delete(source); }
     for (const [source, groups] of lights) {
       // Only its instances light where the light is in no view layer (a linked collection's).
       if (!blender.base(objects.get(source).ob)) source.setEnabled(false);
       const matrices = groups.flatMap(({ data }) => Array.from({ length: data.length / 16 }, (_, i) => Matrix.FromArray(data, i * 16)));
+      const instancers = groups.flatMap(({ data, instancer }) => Array.from({ length: data.length / 16 }, () => byOb.get(instancer)));
       const record = lightRecord(source), made = instanceLights.get(source) ?? [];
       while (made.length > matrices.length) made.pop().dispose();
       while (made.length < matrices.length) made.push(createLight('__instance ' + source.name, record.type, record, scene));
@@ -627,6 +628,8 @@ function redrawProbesDrawnOnce(scene) {
         else Object.assign(lightRecord(made[i]), record);
         deriveBabylonLight(made[i]);
         setEvaluatedMatrix(made[i], matrices[i]);
+        // Its instancer, as an instanced object's carrier has them: an export writes it, named by it (babylon-export.js).
+        made[i].metadata.instancers = instancers[i] ? [instancers[i]] : [];
       });
       instanceLights.set(source, made);
     }

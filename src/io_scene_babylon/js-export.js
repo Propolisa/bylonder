@@ -355,7 +355,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   // More lights than any device's material takes (8 at least) drawn in clusters (Clustered Lights), but where the page's
   // volumes, which read the scene's lights, would lose them; a light with a Custom Distance kept out where there is room.
   const clustered = !asset && !volumes && data.lights.length > 8 && clusteredLights.enabled(scene)
-    && data.lights.filter((l) => lightRecord(scene.getLightByName(l.name))?.use_custom_distance).map((l) => l.uniqueId);
+    && data.lights.filter((l) => { const light = scene.getLightByUniqueId(l.uniqueId); return light && lightRecord(light)?.use_custom_distance; }).map((l) => l.uniqueId);
   // Bylonder's own pipeline of a rendered view (render-babylon.js SceneLinearPipeline) turns the scene's image processing
   // off, so materials would encode to display themselves: with the view transform, which displays instead, it stays out
   // unless one of its effects is on.
