@@ -94,23 +94,24 @@ const drawnVertices = (mesh) => Int32Array.from([...mesh.corner_verts, ...Array.
 // page's animation poses the bones, so the armature plays no action of its own there, and the page places it and the
 // objects its constraints and modifiers read (`objects`: their nodes' ids, by name), so they have no parents there.
 // `deformed`: mesh objects Babylon cannot skin for their modifier stack ({ ob, node, mesh(), evaluated() }: Main's Mesh
-// and the evaluated one the export draws); those whose stack the runtime runs to the evaluated mesh's vertices go in
+// and the evaluated one the export draws; `source`: a mesh only another's Surface Deform reads, which goes in as data);
+// those whose stack the runtime runs to the evaluated mesh's vertices go in
 // with what draws each Babylon vertex (`draw_vertices`, drawnVertices), the page deforming them
 // (`meshes`: their nodes' ids, by name). A hidden mesh, which Main does not evaluate, stays out.
 function nativeRig(arm, nodeOf, deformed = []) {
-  const shown = (ob) => new Set(shownStack(ob).map((m) => m.name));
+  const shown = (ob) => new Set(shownStack(ob).map((m) => m.name)), drawn = deformed.filter((d) => !d.source), sources = deformed.filter((d) => d.source);
   const describe = (list) => {
-    const description = rigDescription(arm, list.map((d) => d.ob), (ob) => list.find((d) => d.ob === ob).mesh());
-    for (const d of list) for (const m of description.objects.find((o) => o.name === d.ob.name).modifiers) m.show_viewport &&= shown(d.ob).has(m.name);
+    const all = [...list, ...sources.filter((s) => !list.includes(s))], description = rigDescription(arm, all.map((d) => d.ob), (ob) => all.find((d) => d.ob === ob).mesh());
+    for (const d of all) for (const m of description.objects.find((o) => o.name === d.ob.name).modifiers) m.show_viewport &&= shown(d.ob).has(m.name);
     return description;
   };
-  let description = describe(deformed);
-  const program = deformed.length && compileRig(structuredClone(description));
-  const runs = deformed.filter((d) => {
+  let description = describe(drawn);
+  const program = drawn.length && compileRig(structuredClone(description));
+  const runs = drawn.filter((d) => {
     const deform = compileDeform(program, program.objectIndex.get(d.ob.name)), evaluated = d.evaluated();
     return !deform.unsupported.length && deform.geo.base.length === evaluated?.verts_num * 3 && d.node.getTotalVertices() === drawnVertices(evaluated).length;
   });
-  if (runs.length < deformed.length) description = describe(runs);
+  if (runs.length < drawn.length) description = describe(runs);
   const objects = {}, meshes = {};
   for (const ob of description.objects) {
     Object.assign(ob, { parent: null, animation_data: null });

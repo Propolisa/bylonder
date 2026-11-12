@@ -535,8 +535,17 @@ function exportArmatures(world, { bake, sampling, rests = appliedRests() }) {
     mappings.push(state.mapping);
   }
   const nodeOf = (ob) => byOb.get(address(ob))?.node;
-  const deformed = (m) => [...m.apart].flatMap(([key, ob]) => { const node = byOb.get(key)?.node;
-    return node ? [{ ob, node, mesh: () => view.blender.mesh(key), evaluated: () => view.blender.evaluatedMesh(key) }] : []; });
+  // The meshes the native runtime may deform for a mapping: those Babylon cannot skin for their stack, and those whose
+  // Surface Deform reads a mesh the armature deforms, with the meshes those read (`source`).
+  const entryOf = (ob, source = false) => { const key = address(ob), node = byOb.get(key)?.node;
+    return node ? [{ ob, node, source, mesh: () => view.blender.mesh(key), evaluated: () => view.blender.evaluatedMesh(key) }] : []; };
+  const surfaceTargets = (ob) => [...ob.modifiers].filter((m) => m.type === 'SURFACE_DEFORM' && m.show_viewport && m.target).map((m) => m.target);
+  const deformed = (m) => {
+    const ofArmature = (ob) => m.skins.has(address(ob)) || m.apart.has(address(ob));
+    const surface = meshes.filter((ob) => !m.apart.has(address(ob)) && surfaceTargets(ob).some(ofArmature));
+    const read = [...new Set([...m.apart.values(), ...surface].flatMap(surfaceTargets))].filter((ob) => !m.apart.has(address(ob)));
+    return [...[...m.apart.values(), ...surface].flatMap((ob) => entryOf(ob)), ...read.flatMap((ob) => entryOf(ob, true))];
+  };
   const posed = poseAnimations(world, mappings, bake, sampling, { nodeOf, deformed, meshOf: (m) => byOb.get(m.skins.keys().next().value)?.node });
   // A mesh the native runtime deforms is no longer Blender's, whatever its stack.
   const native = (issues) => [...issues.filter((i) => i.kind !== FALLBACK || !posed.deforms.has(i.ob)),

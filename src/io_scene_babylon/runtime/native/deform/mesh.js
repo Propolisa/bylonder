@@ -12,6 +12,7 @@ import { geometryOf, bindMask, bindMirror, bindSubsurf, applyStencil } from './t
 import { applyShapeKeys } from './shape-keys.js';
 import { bindDisplace, runDisplace } from './displace.js';
 import { bindShrinkwrap, runShrinkwrap } from './shrinkwrap.js';
+import { bindSurfaceDeform, runSurfaceDeform } from './surface-deform.js';
 import { mulAffine, invertAffine } from '../rig/m4.js';
 
 const KINDS = {
@@ -23,6 +24,7 @@ const KINDS = {
   SUBSURF: { bind: bindSubsurf, run: runStencil, topology: true },
   DISPLACE: { bind: bindDisplace, run: runDisplace },
   SHRINKWRAP: { bind: bindShrinkwrap, run: runShrinkwrap },
+  SURFACE_DEFORM: { bind: bindSurfaceDeform, run: runSurfaceDeform },
 };
 
 // `inst` (optional): driven modifier settings (levels, show_viewport ...) of that instance are applied; compile again

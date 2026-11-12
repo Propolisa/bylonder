@@ -5,7 +5,7 @@
 // arrays, with static data (influences, stencils, neighbours, corner offsets, face corners) built once. Per frame the
 // armature's joint matrices are computed once per instance and shared by every mesh; the vertex loops allocate
 // nothing. Steps without a pass here (Shrinkwrap, Displace, Multi Modifier after the first Armature) run through
-// mesh.js.
+// mesh.js. A Surface Deform target is evaluated once per evaluate() (targets.js).
 //
 //   const cpu = new CpuStack(inst, deform, { axis });  // once
 //   cpu.run();  // after inst.evaluate(): cpu.positions and cpu.normals (Float32Array xyz per drawn vertex)
@@ -16,6 +16,8 @@ import { relativeTerms, keyValue, applyShapeKeys } from './shape-keys.js';
 import { latticeFrame } from './lattice.js';
 import { runStep } from './mesh.js';
 import { applyStencil } from './topology.js';
+import { surfaceDeformInto } from './surface-deform.js';
+import { evaluatedPositions } from './targets.js';
 
 const SPLINE_KIND = { KEY_LINEAR: 0, KEY_CARDINAL: 1, KEY_CATMULL_ROM: 2, KEY_BSPLINE: 3 };
 
@@ -384,6 +386,11 @@ function cornerFrame(F, P, v, prev, next) {
   return Math.PI - Math.acos(Math.max(-1, Math.min(1, ax * bx + ay * by + az * bz)));
 }
 
+function surfaceDeformPass(inst, step) {
+  const run = (src, dst) => { dst.set(src); surfaceDeformInto(dst, src, step, evaluatedPositions(inst, step.target)); };
+  return { run, live: (out) => out };
+}
+
 // A step mesh.js runs: positions copied in and out, with its ctx (Multi Modifier's input).
 function referencePass(inst, deform, step, ctx) {
   return { run: (src, dst) => dst.set(runStep(inst, deform, step, src, ctx)), reference: true, live: (out, inCount) => new Uint8Array(inCount).fill(1) };
@@ -440,6 +447,7 @@ export class CpuStack {
       else if (step.stencil) pass = stencilPass(inst, deform, step, count);
       else if (step.type === 'LATTICE') pass = latticePass(inst, deform, step);
       else if (step.type === 'CORRECTIVE_SMOOTH') pass = correctiveSmoothPass(step, count);
+      else if (step.type === 'SURFACE_DEFORM') pass = surfaceDeformPass(inst, step);
       else pass = referencePass(inst, deform, step, ctx);
       if (step.type === 'ARMATURE') armatures++;
       const n = pass.count ?? count;

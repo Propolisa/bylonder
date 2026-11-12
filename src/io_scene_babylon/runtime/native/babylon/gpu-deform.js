@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // From babylon-blender-rig (scripts/native-rig.mjs).
 // The whole modifier stack on WebGPU compute (Babylon ComputeShader over storage buffers): Armature (linear blend over
-// joints), Mask / Mirror / Subdivision (stencils), Lattice, Corrective Smooth, then vertex normals; the last buffer is
+// joints), Mask / Mirror / Subdivision (stencils), Lattice, Corrective Smooth, Surface Deform, then vertex normals; the last buffer is
 // the mesh's position vertex buffer. Static data (influences, stencils, neighbours, corner offsets) is built once from
 // the rest geometry; per frame only joint matrices and small parameter buffers are uploaded. WebGL 2 and anything the
 // kernels do not cover run on the CPU (`CpuDeformer` below: src/deform/cpu.js, checked against src/deform/mesh.js).
@@ -17,6 +17,8 @@ import { CpuStack } from '../deform/cpu.js';
 import { applyShapeKeys } from '../deform/shape-keys.js';
 import { mulAffine, invertAffine } from '../rig/m4.js';
 import { applyStencil } from '../deform/topology.js';
+import { surfaceDeformTables } from '../deform/surface-deform.js';
+import { evaluatedPositions } from '../deform/targets.js';
 
 const WG = 64;
 const RW = Constants.BUFFER_CREATIONFLAG_READWRITE | Constants.BUFFER_CREATIONFLAG_VERTEX;
@@ -192,6 +194,29 @@ fn spline(kind : u32, t : f32) -> vec4<f32> {
   }
   dst.v[v] = vec4<f32>(n / max(length(n), 1e-30), 0.0);
 }`,
+  surfaceDeform: `${HEADER}
+@group(0) @binding(0) var<storage, read> src : P;
+@group(0) @binding(1) var<storage, read_write> dst : P;
+@group(0) @binding(2) var<storage, read> ranges : array<vec4<f32>>;
+@group(0) @binding(3) var<storage, read> bindings : array<vec4<f32>>;
+@group(0) @binding(4) var<storage, read> surface : P;
+@group(0) @binding(5) var<storage, read> mats : array<mat4x4<f32>>;
+@compute @workgroup_size(${WG}) fn main(@builtin(global_invocation_id) id : vec3<u32>) {
+  let v = id.x; if (v >= arrayLength(&dst.v)) { return; }
+  let r = ranges[v]; let c = src.v[v].xyz;
+  if (r.x < 0.0) { dst.v[v] = vec4<f32>(c, 1.0); return; }
+  var o = vec3<f32>(0.0);
+  for (var b = u32(r.x); b < u32(r.y); b++) {
+    let m = bindings[b * 3u]; let iv = vec4<u32>(bindings[b * 3u + 1u]); let w = bindings[b * 3u + 2u];
+    let P0 = surface.v[iv.x].xyz; let P1 = surface.v[iv.y].xyz; let P2 = surface.v[iv.z].xyz; let P3 = surface.v[iv.w].xyz;
+    let n = normalize(cross(P2 - P0, P3 - P1));
+    var p = w.x * P0 + w.y * P1;
+    if (m.x > 1.5) { p += w.z * 0.25 * (P0 + P1 + P2 + P3); } else { p += w.z * P2; if (m.x > 0.5) { p += w.w * P3; } }
+    o += m.y * (p + m.z * n);
+  }
+  o = (mats[0] * vec4<f32>(o, 1.0)).xyz;
+  dst.v[v] = vec4<f32>(c + r.z * (o - c), 1.0);
+}`,
   correct: `${HEADER}
 @group(0) @binding(0) var<storage, read> src : P;
 @group(0) @binding(1) var<storage, read_write> dst : P;
@@ -228,6 +253,7 @@ const BINDINGS = {
   lattice: bind(['src', 'dst', 'disp', 'mats', 'prm', 'mask']),
   smooth: bind(['src', 'dst', 'start', 'nb', 'factor']),
   correct: bind(['src', 'dst', 'start', 'corners', 'prm']),
+  surfaceDeform: bind(['src', 'dst', 'ranges', 'bindings', 'surface', 'mats']),
   faceNormals: bind(['src', 'dst', 'start', 'idx']),
   xform: bind(['src', 'dst', 'axis']),
   vertexNormals: bind(['src', 'dst', 'start', 'corners', 'faceN']),
@@ -410,6 +436,14 @@ export class GpuDeformer {
         L.range[0][0], L.range[1][0], L.range[2][0], 0, L.range[0][1], L.range[1][1], L.range[2][1], 0]));
     };
     return { cs: this.newShader('lattice'), buffers: { disp, mats, prm, mask }, update };
+  }
+
+  // The target's evaluated positions come from the CPU (targets.js, once per evaluate) and are uploaded each frame.
+  compileSURFACE_DEFORM(step, rest, count) {
+    const t = surfaceDeformTables(step, count), tCount = evaluatedPositions(this.inst, step.target).length / 3;
+    const target = this.positions(tCount);
+    const update = () => target.update(pack4(evaluatedPositions(this.inst, step.target)));
+    return { cs: this.newShader('surfaceDeform'), buffers: { ranges: this.buffer(t.ranges), bindings: this.buffer(t.bindings), surface: target, mats: this.buffer(t.matrix) }, update };
   }
 
   compileCORRECTIVE_SMOOTH(step, rest) {

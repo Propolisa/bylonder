@@ -4,7 +4,7 @@
 // The modifier stack on WebGL 2: each pass is a fragment shader writing one float texel per vertex (RGBA32F render
 // targets, ping-pong), the same kernels as the WebGPU compute deformer (gpu-deform.js): Armature (linear blend over
 // joints or dual quaternions), Mask / Mirror / Subdivision (stencils), Lattice, Corrective Smooth (smoothing passes,
-// then the corner correction), and vertex normals. The mesh draws from the last textures through RigVertexTexturePlugin
+// then the corner correction), Surface Deform (stored bind), and vertex normals. The mesh draws from the last textures through RigVertexTexturePlugin
 // (texelFetch by its vertex's welded index, through `axis`), so nothing returns to the CPU. Static data (influences,
 // stencils, neighbours, corner offsets) is uploaded once; per frame the joint data, lattice displacements and, with
 // shape keys, the input positions.
@@ -23,6 +23,8 @@ import { latticeFrame } from '../deform/lattice.js';
 import { applyStencil } from '../deform/topology.js';
 import { applyShapeKeys } from '../deform/shape-keys.js';
 import { shapeKeyInput } from '../deform/cpu.js';
+import { surfaceDeformTables } from '../deform/surface-deform.js';
+import { evaluatedPositions } from '../deform/targets.js';
 import { mulAffine, invertAffine } from '../rig/m4.js';
 
 const MAX_WIDTH = 4096;
@@ -161,6 +163,26 @@ void main(void) {
   }
   if (total > 0.0) acc *= scale / total;
   gl_FragColor = vec4(p + acc, 1.0);
+}` },
+  surfaceDeform: { samplers: ['src', 'ranges', 'bindings', 'target'], uniforms: ['bindMatrix'], body: `
+uniform mat4 bindMatrix;
+vec3 tp(int i) { return fetch(target, i).xyz; }
+void main(void) {
+  int v = selfIndex(); if (float(v) >= outCount) discard;
+  vec4 r = fetch(ranges, v); vec3 c = fetch(src, v).xyz;
+  if (r.x < 0.0) { gl_FragColor = vec4(c, 1.0); return; }
+  vec3 o = vec3(0.0);
+  for (int b = int(r.x); b < int(r.y); b++) {
+    vec4 m = fetch(bindings, b * 3), iv = fetch(bindings, b * 3 + 1), w = fetch(bindings, b * 3 + 2);
+    vec3 P0 = tp(int(iv.x)), P1 = tp(int(iv.y)), P2 = tp(int(iv.z)), P3 = tp(int(iv.w));
+    vec3 n = normalize(cross(P2 - P0, P3 - P1));
+    vec3 p = w.x * P0 + w.y * P1;
+    if (m.x > 1.5) p += w.z * 0.25 * (P0 + P1 + P2 + P3);
+    else { p += w.z * P2; if (m.x > 0.5) p += w.w * P3; }
+    o += m.y * (p + m.z * n);
+  }
+  o = (bindMatrix * vec4(o, 1.0)).xyz;
+  gl_FragColor = vec4(c + r.z * (o - c), 1.0);
 }` },
   faceNormals: { samplers: ['src', 'ranges', 'idx'], uniforms: [], body: `
 void main(void) {
@@ -391,6 +413,22 @@ export class GlDeformer {
       },
     };
     return pass;
+  }
+
+  // The target's evaluated positions come from the CPU (targets.js, once per evaluate) and are uploaded each frame.
+  compileSURFACE_DEFORM(step, rest, count) {
+    const t = surfaceDeformTables(step, count), nb = step.mode.length;
+    const ranges = this.dataTexture(t.ranges, count), bindings = this.dataTexture(t.bindings, Math.max(1, nb) * 3);
+    const tCount = evaluatedPositions(this.inst, step.target).length / 3, tData = new Float32Array(texels(tCount).size * 4), target = this.dataTexture(tData, tCount);
+    const out = this.target(count), wrapper = this.kernel('surfaceDeform');
+    return {
+      out,
+      run: (src) => {
+        pack4(evaluatedPositions(this.inst, step.target), tData);
+        target.update(tData);
+        this.draw(wrapper, out, (e) => { e.setTexture('src', src); e.setTexture('ranges', ranges); e.setTexture('bindings', bindings); e.setTexture('target', target); e.setMatrices('bindMatrix', t.matrix); });
+      },
+    };
   }
 
   // Face normals, then per vertex the angle-weighted sum over its corners (as the CPU path).

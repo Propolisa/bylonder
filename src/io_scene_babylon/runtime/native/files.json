@@ -46,6 +46,8 @@
   "deform/mesh.js",
   "deform/shape-keys.js",
   "deform/shrinkwrap.js",
+  "deform/surface-deform.js",
+  "deform/targets.js",
   "deform/topology.js",
   "deform/weights.js",
   "drivers/channels.js",

@@ -71,7 +71,38 @@ function bindCoords(m) {
   const coords = view.getUint32(at + LAMBDA - 12, true), count = view.getUint32(at + LAMBDA - 4, true);
   return coords ? new Float32Array(memory, coords >>> 0, count * 3).slice() : null;
 }
-const modifier = (m) => { const bind = bindCoords(m); return { ...rna(m), ...(bind && { bind_coords: bind }) }; };
+// SurfaceDeformModifierData's verts and bind_verts_num, by its RNA's falloff: verts, then a pointer, then falloff; the
+// number of vertices bound four fields after falloff. Each SDefVert: its bindings, their number, its vertex (12
+// bytes); each SDefBind: its vertex indices, their number, its mode, its weights, its normal distance, its influence
+// (24 bytes).
+const FALLOFF = dna.SurfaceDeformModifier.properties.falloff.offset;
+// A Surface Deform modifier's binding (Blender's Bind), as Blender stores it, which RNA does not expose: per bound
+// vertex its bindings (`vertex_offsets`), and per binding its mode, influence, distance along the normal and four
+// target vertices with their weights; `matrix`, the target's space to the mesh's at the bind (column-major, after the
+// counts and flags).
+function surfaceBind(m) {
+  if (m.type !== 'SURFACE_DEFORM' || !m.is_bound) return null;
+  const view = new DataView(blenderModule.exports.memory.buffer), at = pointerOf(m)[2];
+  const verts = view.getUint32(at + FALLOFF - 8, true), count = view.getUint32(at + FALLOFF + 8, true);
+  if (!verts) return null;
+  const offsets = [0], mode = [], influence = [], distance = [], indices = [], weights = [], vertex = [];
+  for (let i = 0; i < count; i++) {
+    const v = verts + i * 12, binds = view.getUint32(v, true), n = view.getUint32(v + 4, true);
+    vertex.push(view.getUint32(v + 8, true));
+    for (let k = 0; k < n; k++) {
+      const b = binds + k * 24, inds = view.getUint32(b, true), corners = view.getUint32(b + 4, true), w = view.getUint32(b + 12, true);
+      mode.push(view.getInt32(b + 8, true));
+      distance.push(view.getFloat32(b + 16, true));
+      influence.push(view.getFloat32(b + 20, true));
+      for (let j = 0; j < 4; j++) { indices.push(j < corners ? view.getUint32(inds + j * 4, true) : -1); weights.push(j < corners ? view.getFloat32(w + j * 4, true) : 0); }
+    }
+    offsets.push(mode.length);
+  }
+  return { vertex: Int32Array.from(vertex), vertex_offsets: Int32Array.from(offsets), mode: Int32Array.from(mode), influence: Float32Array.from(influence),
+    normal_distance: Float32Array.from(distance), indices: Int32Array.from(indices), weights: Float32Array.from(weights),
+    matrix: Float32Array.from({ length: 16 }, (_, k) => view.getFloat32(at + FALLOFF + 24 + k * 4, true)) };
+}
+const modifier = (m) => { const coords = bindCoords(m), bind = surfaceBind(m); return { ...rna(m), ...(coords && { bind_coords: coords }), ...(bind && { bind }) }; };
 
 const latticeData = (lt) => ({ points_u: lt.points_u, points_v: lt.points_v, points_w: lt.points_w, interpolation_type_u: lt.interpolation_type_u,
   interpolation_type_v: lt.interpolation_type_v, interpolation_type_w: lt.interpolation_type_w, vertex_group: lt.vertex_group,
@@ -94,14 +125,15 @@ const animationData = (ad) => ad && { action: ad.action?.name ?? null, action_sl
     action_slot: s.action_slot?.identifier ?? null, ...pick(s, ['frame_start', 'frame_end', 'action_frame_start', 'action_frame_end', 'scale', 'repeat', 'blend_type',
       'extrapolation', 'influence', 'use_animated_influence', 'blend_in', 'blend_out', 'mute']) })) })) };
 
-// The objects a character's armature and meshes name (parents, constraint and modifier targets), the armature first.
+// The objects a character's armature and meshes name (parents, constraint and modifier targets, Surface Deform's
+// meshes), the armature first.
 function named(arm, meshes) {
   const all = new Map(), visit = (ob) => {
     if (!ob || all.has(ob.name)) return;
     all.set(ob.name, ob);
     visit(ob.parent);
     for (const c of [...ob.constraints, ...(ob.pose ? [...ob.pose.bones].flatMap((pb) => [...pb.constraints]) : [])]) for (const k of ['target', 'pole_target']) visit(c[k]);
-    for (const m of ob.modifiers ?? []) visit(m.object);
+    for (const m of ob.modifiers ?? []) { visit(m.object); visit(m.target); }
   };
   [arm, ...meshes].forEach(visit);
   return [...all.values()];
@@ -134,7 +166,7 @@ export function rigDescription(arm, meshes, meshOf) {
 }
 
 // The description with its bulk as typed arrays: a mesh's vertices and faces, its vertex groups' weights and its shape
-// keys' offsets from the basis (each where non-zero), the vertices it draws, its Corrective Smooth binds, and F-Curves'
+// keys' offsets from the basis (each where non-zero), the vertices it draws, its Corrective Smooth and Surface Deform binds, and F-Curves'
 // keys, as `{ array }` indices into `arrays`, which the page reads back (runtime/native-rig.js unpackDescription).
 export function packDescription(description) {
   const arrays = [], buffer = (array) => ({ array: arrays.push(array) - 1 });
@@ -154,7 +186,8 @@ export function packDescription(description) {
   };
   const curve = ({ keyframe_points: keys, ...fc }) => ({ ...fc, keys: buffer(Float32Array.from(keys.flatMap((k) => [...k.co, ...k.handle_left, ...k.handle_right, k.back, k.amplitude, k.period]))),
     enums: keys.map((k) => [k.interpolation, k.easing, k.handle_left_type, k.handle_right_type]) });
-  const modifiers = (list) => list?.map((m) => (m.bind_coords ? { ...m, bind_coords: buffer(m.bind_coords) } : m));
+  const modifiers = (list) => list?.map((m) => ({ ...m, ...(m.bind_coords && { bind_coords: buffer(m.bind_coords) }),
+    ...(m.bind && { bind: Object.fromEntries(Object.entries(m.bind).map(([key, array]) => [key, buffer(array)])) }) }));
   const packed = { ...description, objects: description.objects.map((ob) => (ob.type === 'MESH' && ob.data?.vertices ? { ...ob, data: mesh(ob.data), modifiers: modifiers(ob.modifiers) } : ob)),
     drivers: description.drivers.map(curve), actions: description.actions.map((a) => ({ ...a, fcurves: a.fcurves.map(curve) })) };
   return { packed, arrays };
