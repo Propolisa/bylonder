@@ -32,6 +32,8 @@ def material(name, stroke, fill):
     bpy.data.materials.create_gpencil_data(ma)
     ma.grease_pencil.color = stroke
     ma.grease_pencil.fill_color = fill
+    # Drawn where its color shows (Blender's new material shows neither).
+    ma.grease_pencil.show_stroke, ma.grease_pencil.show_fill = stroke[3] > 0, fill[3] > 0
     data.materials.append(ma)
     return len(data.materials) - 1
 
@@ -66,6 +68,9 @@ add_strokes(ground.frames.new(1).drawing, [([(-3 + 0.25 * i, 0.0) for i in range
 
 shadow = data.layers.new('Shadow')
 ball = data.layers.new('Ball')
+# Flat 2D drawing: the layers take no lights (the scene has none), as a 2D Animation file's do.
+for layer in data.layers:
+    layer.use_lights = False
 for frame in range(1, FRAMES + 1, 2):
     t = (frame - 1) / FRAMES
     x = -2.2 + 4.4 * t

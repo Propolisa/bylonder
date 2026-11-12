@@ -82,6 +82,7 @@ class Layer:
 
     def __init__(self, name, depth):
         self.layer = data.layers.new(name)
+        self.layer.use_lights = False  # flat colors: the dusk is in the palette, not the world's light
         self.half = 0.36 * depth  # half the frame's width at that depth, for a 50 mm lens and a 36 mm sensor
         self.depth = depth
 
