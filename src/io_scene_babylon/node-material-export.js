@@ -17,7 +17,7 @@ import { CurvesGeometryBlock, CurvesNormalBlock } from '../draw/curves.js';
 import { glslValue, LUMINANCE } from '../nodes/blender/sockets.js';
 import { imageFile } from '../imbuf/image-textures.js';
 import { pngDataUrl } from '../imbuf/data-url.js';
-import { MESH_VALUE } from './runtime/materials.js';
+import { MESH_VALUE, REVERSED_FACES, REVERSED_GLOBAL } from './runtime/materials.js';
 import { AreaLitPBRBlock } from '../overrides/babylon/pbr-block-area-lights.js';
 
 const GLSL = { [T.Float]: 'float', [T.Vector2]: 'vec2', [T.Vector3]: 'vec3', [T.Vector4]: 'vec4', [T.Color3]: 'vec3', [T.Color4]: 'vec4', [T.Matrix]: 'mat4' };
@@ -89,7 +89,7 @@ export async function exportNodeMaterial(material, { parity = false, graph = nul
     const exported = exportGraph(material, out, { parity, textures, graph, kernel, mesh });
     for (const node of [...material._vertexOutputNodes, ...material._fragmentOutputNodes]) out.addOutputNode(exported.block(node));
     for (const key of MATERIAL_SETTINGS) if (key in material) out[key] = material[key];
-    // The page's faces face as drawn (bl_reversed_faces 0): an opaque surface, whose overlap depth sorts, in one pass.
+    // An opaque surface, whose overlap depth sorts, in one pass.
     out.separateCullingPass &&= material.needAlphaBlending();
     const json = out.serialize();
     for (const entry of json.blocks) {
@@ -304,6 +304,13 @@ function blenderNodes(material, { closure, merge, scene, textures, systemValue, 
       if (point.endpoints.some((e) => !isBlenderShader(e.ownerBlock))) outputs.set(point, `bl_out${outputs.size}`);
     }
   }
+  // Whether a face is drawn reversed (shader-nodes.js REVERSED_FACES): a material drawing its back faces in a pass of
+  // their own reverses which winding faces front there; the page sets it per pass (runtime/materials.js meshValues).
+  const reversed = [...functions.values()].some((f) => f.includes('bl_reversed_faces'));
+  if (reversed) {
+    uniforms.push({ name: 'bl_reversed', kind: 'float', value: 0, path: `${MESH_VALUE}${REVERSED_FACES}`, source: `mesh:${REVERSED_FACES}` });
+    locals.unshift('bl_reversed_faces = bl_reversed;');
+  }
   const c = closure ? closure.associatedVariableName : 'bl_closure_empty()';
   const inputs = [...params].map(([name, point], i) => [`in${i}`, typeName(point.type), name])
     .concat(uniforms.map(({ name, kind }, i) => [`value${i}`, typeName(uniformType(kind)), name]));
@@ -312,11 +319,8 @@ function blenderNodes(material, { closure, merge, scene, textures, systemValue, 
   const outParameters = [...values.map(([name, type]) => [name, typeName(type)]), ...[...outputs].map(([point, name]) => [name, typeName(point.type)])];
   const signature = [...inputs, ...sampled].map(([, type, name]) => `${type === 'sampler2D' ? 'sampler2D' : GLSL[T[type]]} ${name}`)
     .concat(outParameters.map(([name, type]) => `out ${GLSL[T[type]]} ${name}`)).join(', ');
-  // Whether a face is drawn reversed (shader-nodes.js REVERSED_FACES): a uniform of the app's separate culling pass, set
-  // between its passes; the export draws faces once, never reversed.
-  const reversed = [...functions.values()].some((f) => f.includes('bl_reversed_faces')) ? ['const float bl_reversed_faces = 0.0;'] : [];
   const surface = values === CLOSURE_OUTPUTS;
-  const code = [...reversed, ...functions.values(), `void bl_nodes(${signature}) {`, ...locals, ...built.map((node) => node.built.code),
+  const code = [...(reversed ? [REVERSED_GLOBAL] : []), ...functions.values(), `void bl_nodes(${signature}) {`, ...locals, ...built.map((node) => node.built.code),
     `BlClosure c = ${merge && surface ? `bl_closure_merge_lobes(${c})` : c};`, ...(surface ? [`BlLobe l = bl_lobe_add((${c}).lobe1, (${c}).lobe2);`] : []),
     ...values.map(([name, , value]) => `${name} = ${value};`), ...[...outputs].map(([point, name]) => `${name} = ${point.associatedVariableName};`), '}'];
   const block = customBlock('blender:nodes', 'bl_nodes', [...inputs, ...sampled], outParameters, code.join('\n').split('\n'));
@@ -422,9 +426,9 @@ export async function exportNodeKernels(material, key, { parity = false, into = 
   }
   nodes[output.name] = { piece: outputFunction(parity, into, isVolume(output)) };
   for (const [k, f] of functions) into.functions[k] ??= f;
-  // Whether a face is drawn reversed: the export draws faces once, never reversed.
+  // Whether a face is drawn reversed, as the page sets it (fuse assigns it from the material's mesh value).
   if (Object.values(into.functions).some((f) => f.includes('bl_reversed_faces'))) {
-    into.functions = { bl_reversed_faces: 'const float bl_reversed_faces = 0.0;', ...into.functions };
+    into.functions = { bl_reversed_faces: REVERSED_GLOBAL, ...into.functions };
     for (const piece of Object.values(into.pieces)) if (!piece.functions.includes('bl_reversed_faces')) piece.functions.unshift('bl_reversed_faces');
   }
   into.graphs[key] = { output: output.name, nodes };

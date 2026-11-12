@@ -1,6 +1,7 @@
 /**
  * A material's per-mesh values set for each mesh it draws, as the app gives them (a material shared by meshes of other
- * sizes spans each one's own texture space).
+ * sizes spans each one's own texture space), and whether its faces are drawn reversed: Babylon draws a separate culling
+ * pass's back faces first, their winding reversed, then its front faces (shader-nodes.js ShaderNodeOutputMaterial.bind).
  * @param {import('@babylonjs/core').Material} material
  */
 export function meshValues(material: import("@babylonjs/core").Material): void;
@@ -70,6 +71,8 @@ export function buildNodeMaterial(ir: IR, key: string, scene: Scene, { kernels, 
 }): NodeMaterial;
 /** @typedef {import('./ir.js').IR} IR */
 export const MESH_VALUE: "blender:mesh:";
+export const REVERSED_FACES: "$reversed_faces";
+export const REVERSED_GLOBAL: "float bl_reversed_faces = 0.0;";
 export type IR = import("./ir.js").IR;
 export type Graph = import("./ir.js").Graph;
 export type GraphNode = import("./ir.js").GraphNode;

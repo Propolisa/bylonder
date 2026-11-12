@@ -6,7 +6,7 @@
 // the body calls them in link order. The body fills an exported material's node block before it is parsed
 // (fillMaterials), or a NodeMaterial of Babylon's own blocks is made around it from the IR alone (buildNodeMaterial).
 import {
-  AddBlock, ColorSplitterBlock, Constants, CustomBlock, FragmentOutputBlock, ImageSourceBlock, InputBlock, NodeMaterial,
+  AddBlock, ColorSplitterBlock, Constants, CustomBlock, FragmentOutputBlock, ImageSourceBlock, InputBlock, Mesh, NodeMaterial,
   NodeMaterialBlockConnectionPointTypes as T, NodeMaterialSystemValues as System, RawTexture, ScaleBlock, Texture,
   TransformBlock, Vector3, Vector4, VertexOutputBlock,
 } from '@babylonjs/core';
@@ -30,18 +30,32 @@ function texspace(mesh) {
   const half = (/** @type {number} */ s) => (s === 0 ? 1 : s > 0 && s < 1e-5 ? 1e-5 : s);
   return [axes(min.add(max).scale(0.5)), axes(max.subtract(min).scale(0.5)).map(half)];
 }
+// Whether the face drawn is reversed (shader-nodes.js REVERSED_FACES): a mesh value the page sets per pass, and the
+// global its nodes' code reads (FrontFacing), assigned from it at the start of the nodes' body.
+export const REVERSED_FACES = '$reversed_faces';
+export const REVERSED_GLOBAL = 'float bl_reversed_faces = 0.0;';
+const reversedPasses = new WeakSet();
 /**
  * A material's per-mesh values set for each mesh it draws, as the app gives them (a material shared by meshes of other
- * sizes spans each one's own texture space).
+ * sizes spans each one's own texture space), and whether its faces are drawn reversed: Babylon draws a separate culling
+ * pass's back faces first, their winding reversed, then its front faces (shader-nodes.js ShaderNodeOutputMaterial.bind).
  * @param {import('@babylonjs/core').Material} material
  */
 export function meshValues(material) {
   if (!(material instanceof NodeMaterial)) return;
-  const blocks = material.getInputBlocks().filter((b) => b.name.startsWith(MESH_VALUE) && MESH_VALUES[b.name.slice(MESH_VALUE.length)]);
-  if (!blocks.length) return;
+  const inputs = material.getInputBlocks().filter((b) => b.name.startsWith(MESH_VALUE));
+  const blocks = inputs.filter((b) => MESH_VALUES[b.name.slice(MESH_VALUE.length)]);
+  const reversed = inputs.find((b) => b.name === MESH_VALUE + REVERSED_FACES);
+  if (!blocks.length && !reversed) return;
   material.onBindObservable.add((mesh) => {
     const effect = material.getEffect();
     for (const block of blocks) effect?.setFloat3(block.associatedVariableName, ...(/** @type {[number, number, number]} */ (MESH_VALUES[block.name.slice(MESH_VALUE.length)](mesh))));
+    if (!reversed) return;
+    const separate = material.separateCullingPass && !material.backFaceCulling;
+    effect?.setFloat(reversed.associatedVariableName, separate ? 1 : 0);
+    if (!separate || !(mesh instanceof Mesh) || reversedPasses.has(mesh)) return;
+    reversedPasses.add(mesh);
+    mesh.onBetweenPassObservable.add((subMesh) => subMesh.effect?.setFloat(reversed.associatedVariableName, 0));
   });
 }
 /** @typedef {import('./ir.js').Graph} Graph */
@@ -254,6 +268,7 @@ export function fuse(ir, key, { kernels, sources, outputs: wanted, kernel = key 
   }
 
   const results = emit(output), body = lines.slice();
+  if (helpers.has('bl_reversed_faces')) body.unshift(`bl_reversed_faces = ${sources(`mesh:${REVERSED_FACES}`, 'float') ?? '0.0'};`);
   const names = wanted ?? [...results.keys()];
   const outputs = names.map((name) => [name, results.get(name)?.[1] ?? 'float']);
   return {
