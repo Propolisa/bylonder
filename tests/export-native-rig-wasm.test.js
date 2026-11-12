@@ -5,7 +5,7 @@
 // Babylon's skinning cannot run (its smoothing alone, which the runtime matches exactly), is deformed by the runtime in
 // the page as Main evaluates it.
 import assert from 'node:assert/strict';
-import { NullEngine, VertexBuffer } from '@babylonjs/core';
+import { Matrix, NullEngine, VertexBuffer } from '@babylonjs/core';
 import { babylonMatrix } from '../src/blenkernel/main-view.js';
 import { blendData, contextStruct } from '../src/python/bpy_rna.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
@@ -71,6 +71,24 @@ for (const f of FRAMES) {
   const error = Math.max(...theirs.map((v, i) => Math.abs(v - ours[i])));
   assert.ok(error < DEFORM_TOLERANCE, `frame ${f}: the body is off by ${error}`);
 }
+
+// A layer on the solved pose (the skeleton's onSolved, as a foot lock or a look-at): what it writes moves the deformed
+// body that frame, lasts that frame only, and leaves the solved pose as it was once removed.
+const onSolved = skeleton.bylonderRig?.onSolved, chest = skeleton.bones.find((b) => b.name === 'chest');
+assert.ok(onSolved, 'a rig on the native runtime offers onSolved');
+const render = async () => { blend.scene.render(); await blend.settled(); };
+const bodyNow = () => Float32Array.from(drawn.getVerticesData(VertexBuffer.PositionKind));
+const apart = (a, b) => Math.max(...a.map((v, i) => Math.abs(v - b[i])));
+await render();
+const solvedBody = bodyNow(), layered = [];
+const layer = onSolved.add(() => { chest._matrix = Matrix.RotationX(0.4).multiply(chest._matrix); layered.push(chest._matrix.clone()); });
+await render();
+await render();
+assert.ok(apart(solvedBody, bodyNow()) > 0.01, 'a layer moves the deformed body');
+assert.ok(layered[1].equalsWithEpsilon(layered[0], 1e-6), 'a layer lasts one frame: it does not pile up');
+onSolved.remove(layer);
+await render();
+assert.ok(apart(solvedBody, bodyNow()) < 1e-5, 'without the layer the body is as solved');
 blend.dispose();
 written.remove();
-console.log(`Export native rig: a rig with an Action constraint takes Main's pose in the page at ${FRAMES.length} frames on the native runtime, its body deformed through Corrective Smooth as Main's`);
+console.log(`Export native rig: a rig with an Action constraint takes Main's pose in the page at ${FRAMES.length} frames on the native runtime, its body deformed through Corrective Smooth as Main's, a layer on the solved pose moving it for one frame`);

@@ -7,7 +7,7 @@
 // `constraint:<TYPE>` (units.js), else on its own solver here. A driver that reads a bone (a corrective shape key's) runs
 // here too, after the pose is solved, so it reads the pose the frame draws. Not yet audited as clean-room code; a clean-room
 // constraints plugin is to replace it.
-import { Matrix, Quaternion, Vector3 } from '@babylonjs/core';
+import { Matrix, Observable, Quaternion, Vector3 } from '@babylonjs/core';
 import { unitFor } from './units.js';
 import { swapped, trackTo } from './constraints-evaluator.js';
 import { evaluateDriver } from './drivers/driver.js';
@@ -328,6 +328,8 @@ function attach(inputs, entity, page, solve) {
   if (found) { Object.assign(found, { stacks: inputs.constraints, influences: inputs.influences, shapes: inputs.shapes, properties: inputs.properties, frame: inputs.frame }); return {}; }
   const skeleton = scene.getSkeletonById(inputs.skeleton), mesh = scene.getMeshById(inputs.mesh);
   if (!skeleton || !mesh) return {};
+  // A solver with a pass of its own (native-solve.js) lets the page layer on its solved pose each frame.
+  if (/** @type {any} */ (solve).pass) /** @type {any} */ (skeleton).bylonderRig ??= { onSolved: new Observable() };
   const bones = skeleton.bones, entry = { entity, skeleton, mesh, scene, solve, space: Matrix.FromArray(inputs.space), stacks: inputs.constraints,
     kernels: inputs.kernels, influences: inputs.influences, shapes: inputs.shapes, segments: inputs.segments, native: inputs.native, properties: inputs.properties, frame: inputs.frame,
     shape: bones.map((bone) => ({ name: bone.name, parent: bone.getParent() ? bones.indexOf(/** @type {any} */ (bone.getParent())) : -1, rest: bone.getRestMatrix(),

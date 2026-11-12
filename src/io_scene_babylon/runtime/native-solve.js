@@ -98,7 +98,7 @@ const writeLocal = (bone, m, written, i) => {
 /**
  * A skeleton's layout in the rig for the page's direct pass: each bone's rig index (`of`, -1 for a B-Bone joint), each
  * rig bone's skeleton index, each bone's children and inverted rest, its B-Bones' segment joints, the local matrices last
- * written and the own ones last given, and scratch matrices.
+ * written, the own ones last given and those onSolved's observers wrote, and scratch matrices.
  * @param {ReturnType<typeof compile>} entry @param {any[]} bones @param {{ parent: number, rest: Matrix }[]} shape
  */
 function directState(entry, bones, shape) {
@@ -114,7 +114,7 @@ function directState(entry, bones, shape) {
     return b === undefined ? [] : [{ i, b, k: Number(bone.name.slice(at + 1)), handles: handles(b) }]; });
   const stored = () => new Float64Array(bones.length * 16).fill(NaN);
   return { of, skeletonOf, children, joints, changed, unrest: shape.map((b) => Matrix.Invert(b.rest)), written: stored(), own: stored(), write: new Uint8Array(bones.length),
-    given: /** @type {number[]} */ ([]), local: new Matrix(), swap: new Matrix(), inverse: new Float64Array(16), relative: new Float64Array(16) };
+    given: /** @type {number[]} */ ([]), local: new Matrix(), swap: new Matrix(), inverse: new Float64Array(16), relative: new Float64Array(16), layered: stored() };
 }
 
 /**
@@ -133,7 +133,7 @@ export function nativeSolve(scene = null) {
   /**
    * Runs the rig after its inputs: the custom properties drivers read (`["name"]` of the armature, `pose.bones["B"]["name"]`
    * of a bone) where set, the armature and the objects its constraints and modifiers read where the page places them
-   * (Blender's axes), the frame; then deforms its meshes in the scene.
+   * (Blender's axes), the frame.
    * @param {ReturnType<typeof compile>} entry @param {Omit<NativePose, 'bones' | 'locals'>} pose
    */
   const run = (entry, { mesh, space, native, properties = {}, frame = 0, nodeWorld = () => null }) => {
@@ -147,6 +147,9 @@ export function nativeSolve(scene = null) {
     for (const [name, id] of Object.entries(native.objects ?? {})) { const world = nodeWorld(id); if (world) place(entry, program.objectIndex.get(name), world); }
     rig.setFrame(frame);
     rig.evaluate();
+  };
+  /** Deforms the rig's meshes in the scene by its pose. @param {ReturnType<typeof compile>} entry @param {NativePose['native']} native */
+  const deform = (entry, native) => {
     if (!scene) return;
     entry.deformers ??= Object.entries(native.meshes ?? {}).flatMap(([name, id]) => { const node = scene.getMeshById(id); return node ? [deformer(scene, entry, name, node)] : []; });
     for (const d of entry.deformers) d.update();
@@ -175,6 +178,7 @@ export function nativeSolve(scene = null) {
       give(rig, b, locals[i], unrest[i]);
     });
     run(entry, pose);
+    deform(entry, pose.native);
     // The bones whose pose or parent's pose changed since the last solve, or that were given a new own matrix (an
     // animation sets it each frame): the others keep the matrices they hold.
     /** @type {Map<number, Matrix>} */
@@ -192,19 +196,22 @@ export function nativeSolve(scene = null) {
    * The page's pass over a skeleton the runtime poses (pose-constraints.js apply): a bone whose local matrix is not the
    * one last written was given its own pose (by an animation or the page) and goes to the runtime; after it runs, the
    * bones it reports changed, their children and those given are written straight into the skeleton's local matrices, and
- * its B-Bones' segment joints from the runtime's shapes.
+ * its B-Bones' segment joints from the runtime's shapes; then `skeleton.bylonderRig.onSolved` observers may layer on the
+ * solved pose for that frame, before the runtime deforms its meshes.
    * @param {any} attached pose-constraints.js's entry
    */
   const pass = (attached) => {
     const bones = attached.skeleton.bones, entry = entryOf(attached.native), { rig } = entry;
     const state = attached.direct ??= directState(entry, bones, attached.shape);
-    const { of, skeletonOf, children, unrest, written, own, given, write } = state;
+    const { of, skeletonOf, children, unrest, written, own, given, write, layered } = state;
     given.length = 0;
     for (let i = 0; i < bones.length; i++) {
       const b = of[i];
       if (b < 0) continue;
       const m = bones[i]._matrix.m;
       if (same(m, written, i)) continue;
+      // What a layer wrote last frame (onSolved): not the bone's own pose, and written over with the solved one.
+      if (same(m, layered, i)) { written[i * 16] = NaN; given.push(i); continue; }
       given.push(i);
       if (same(m, own, i)) continue;
       own.set(m, i * 16);
@@ -212,6 +219,7 @@ export function nativeSolve(scene = null) {
     }
     run(entry, { mesh: attached.mesh.computeWorldMatrix(true), space: attached.space, native: attached.native, properties: attached.properties, frame: attached.frame,
       nodeWorld: (/** @type {string} */ id) => attached.scene.getNodeById(id)?.computeWorldMatrix(true) ?? null });
+    layered.fill(NaN);
     write.fill(0);
     for (const i of given) write[i] = 1;
     const changed = state.changed.fill(0);
@@ -247,6 +255,40 @@ export function nativeSolve(scene = null) {
       swapAxes(shaped.get(b), swap, k * 16);
       if (!same(swap.m, written, i)) writeLocal(bones[i], swap, written, i);
     }
+    // The page's layers on the solved pose (a foot lock, a look-at): what they write lasts this frame, for the skinned
+    // meshes and, carried into the runtime's pose, for those it deforms.
+    const solved = attached.skeleton.bylonderRig?.onSolved;
+    if (!solved?.hasObservers()) return deform(entry, attached.native);
+    solved.notifyObservers(attached.skeleton);
+    const restore = layer(state, bones, attached.shape, posed);
+    // The deform joints the runtime computed this evaluate from the pose before the layers, computed again.
+    for (const joints of /** @type {any} */ (rig).cpuJoints?.values() ?? []) joints.pass = joints.dqPass = -1;
+    deform(entry, attached.native);
+    for (const [k, values] of restore) posed.set(values, k);
+    for (const joints of /** @type {any} */ (rig).cpuJoints?.values() ?? []) joints.pass = joints.dqPass = -1;
+  };
+  /**
+   * Keeps what onSolved's observers wrote into bones' local matrices as layered, and puts it into the runtime's pose:
+   * each such bone posed by its parent's pose and the written local, the bones below it moved with it. Gives the pose
+   * values it replaced, by offset, to restore after the deform.
+   * @param {ReturnType<typeof directState>} state @param {any[]} bones @param {{ parent: number }[]} shape @param {Float64Array} posed
+   */
+  const layer = (state, bones, shape, posed) => {
+    const { of, written, layered, inverse, relative } = state, moved = new Uint8Array(bones.length), restore = new Map();
+    for (let i = 0; i < bones.length; i++) {
+      const b = of[i], p = shape[i].parent >= 0 ? of[shape[i].parent] : -1;
+      if (b < 0 || p < 0) continue;
+      const m = bones[i]._matrix.m, own = !same(m, written, i);
+      if (!own && !moved[shape[i].parent]) continue;
+      if (own) layered.set(m, i * 16);
+      // Blender's local of the bone: the written one, or the one it had below its parent before the layers.
+      if (own) for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) relative[r * 4 + c] = m[AXIS_ORDER[r] * 4 + AXIS_ORDER[c]];
+      else { invertAffine(inverse, 0, restore.get(p * 16) ?? posed, restore.has(p * 16) ? 0 : p * 16); mulAffine(relative, 0, inverse, 0, posed, b * 16); }
+      if (!restore.has(b * 16)) restore.set(b * 16, posed.slice(b * 16, b * 16 + 16));
+      mulAffine(posed, b * 16, posed, p * 16, relative, 0);
+      moved[i] = 1;
+    }
+    return restore;
   };
   return Object.assign(solve, {
     pass,
