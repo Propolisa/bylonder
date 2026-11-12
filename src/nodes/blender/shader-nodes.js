@@ -1386,7 +1386,7 @@ export class BlenderSurfaceBlock extends AreaLitPBRBlock {
     }
     for (const [path, value] of Object.entries(this._values)) Object.assign(this._point(path), { _blenderValue: value(closure), associatedVariableName: value(closure) });
     if (!this.lobe) {
-      const build = () => { const start = state.compilationString.length; super._buildBlock(state); this._dielectricReflectance(state, start, closure); };
+      const build = () => { const start = state.compilationString.length; this._ownRefraction(state, () => super._buildBlock(state)); this._dielectricReflectance(state, start, closure); };
       let lit = 'finalColor.rgb';
       if (this.scoped) {
         lit = state._getFreeVariableName('closureLit');
@@ -1401,7 +1401,7 @@ export class BlenderSurfaceBlock extends AreaLitPBRBlock {
     }
     const lit = state._getFreeVariableName('lobeLit');
     state.compilationString += `vec3 ${lit};\n`;
-    this._scoped(state, () => super._buildBlock(state), `${lit} = finalColor.rgb;\n`);
+    this._scoped(state, () => this._ownRefraction(state, () => super._buildBlock(state)), `${lit} = finalColor.rgb;\n`);
     // A probe's capture sees the diffuse light alone, not the reflections the lobes add.
     state.compilationString += `#ifdef ${CAPTURE}\n${lit} = vec3(0.0);\n#endif\n`;
     state.compilationString += `${state._declareOutput(this.radiance)} = ${this.under.associatedVariableName} + vec4(${lit} * bl_closure_lobe(${closure}, ${this.lobe}).weight, 0.0);\n`;
@@ -1463,6 +1463,15 @@ bl_probe_capture_front = dot(${fragment(this.worldNormal)}.xyz, ${PROBE_EYE} - $
     const ior = `bl_closure_parameter(${closure}, ${closure}.ior, 1.5)`;
     state.compilationString = `${state.compilationString.slice(0, start)}float ${f} = (${ior} - 1.0) / (${ior} + 1.0);\n`
       + `float ${f90} = clamp(2.33 / 0.33 * ${f}, 0.0, 1.0);\n${code}`;
+  }
+
+  // Babylon's defines are the material's: a surface without a refraction of its own builds with SS_REFRACTION off where
+  // another surface of the material refracts, or Babylon's code passes its sub-surface block refraction arguments it has none of.
+  _ownRefraction(state, build) {
+    if (this._helpers.refraction) return build();
+    state.compilationString += '#ifdef SS_REFRACTION\n#undef SS_REFRACTION\n#define BL_REFRACTION_ELSEWHERE\n#endif\n';
+    build();
+    state.compilationString += '#ifdef BL_REFRACTION_ELSEWHERE\n#define SS_REFRACTION\n#undef BL_REFRACTION_ELSEWHERE\n#endif\n';
   }
 
   // Babylon's PBR code declares fixed names: a second one runs in a scope of its own.
