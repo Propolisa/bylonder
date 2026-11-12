@@ -145,7 +145,9 @@ const driven = (arm, description) => description.drivers.filter((d) => d.id === 
 const KEY_VALUE = /^key_blocks\["((?:[^"\\]|\\.)*)"\]\.value$/;
 const drivenKeys = (keyed, description) => keyed.flatMap((ob) => description.drivers.filter((d) => d.id_type === 'KEY' && d.id === ob.data.shape_keys.name && KEY_VALUE.test(d.data_path))
   .map((d) => { const name = JSON.parse(`"${KEY_VALUE.exec(d.data_path)[1]}"`), block = ob.data.shape_keys.key_blocks.get(name);
-    return { mesh: ob.name, key: name, range: [block.slider_min, block.slider_max], property: `shape_keys${key(ob.data.shape_keys.name)}.key_blocks${key(name)}.value` }; }));
+    // A Key several meshes share (a skinned twin of a mesh the runtime deforms) is the runtime's on the first it holds.
+    const holder = description.objects.find((o) => o.data?.shape_keys?.name === ob.data.shape_keys.name)?.name ?? ob.name;
+    return { mesh: holder, key: name, range: [block.slider_min, block.slider_max], property: `shape_keys${key(ob.data.shape_keys.name)}.key_blocks${key(name)}.value` }; }));
 const nativeSolver = nativeSolve();
 // The custom properties of an armature and its pose bones that its drivers read, its constraints' keyed influences and
 // its B-Bones' own shapes (what an animation bends their segments by):

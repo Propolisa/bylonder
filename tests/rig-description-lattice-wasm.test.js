@@ -1,5 +1,5 @@
 // A lattice in a rig's description, as the native rig runtime reads it: its object's vertex groups (each point's
-// weight) and its Hook modifiers' settings and vertex indices. The Rigged Character's body, on the runtime for an Action
+// weight) and its Hook modifiers' settings and vertex indices; a mesh's shape keys, named as their Key. The Rigged Character's body, on the runtime for an Action
 // constraint, deformed by a lattice parented to its chest whose top points a Hook on the head pulls (as Snow's face
 // mask), deforms in the page as Main's: the runtime runs the Hook, and places the lattice, which the page does not draw,
 // by its parent bone.
@@ -37,7 +37,10 @@ sync.blender.tag(sync.objectOf(world.objects.find((n) => n.name === 'Rig')), 2);
 sync.view();
 
 const key = sync.objectOf(world.objects.find((n) => n.name === 'Body'));
-const described = rigDescription(rig, [body], () => sync.blender.mesh(key)).objects.find((o) => o.name === 'Cage');
+const description = rigDescription(rig, [body], () => sync.blender.mesh(key)), described = description.objects.find((o) => o.name === 'Cage');
+// The body's shape keys named as its Key, which the drivers of its correctives name.
+assert.equal(description.objects.find((o) => o.name === 'Body').data.shape_keys.name, body.data.shape_keys.name, "the body's Key is named");
+assert.ok(description.drivers.some((d) => d.id_type === 'KEY' && d.id === body.data.shape_keys.name), 'as its drivers name it');
 const weights = described.data.vertex_groups.find((g) => g.name === 'Top').weights;
 assert.deepEqual(weights.map((w, i) => (w ? i : -1)).filter((i) => i >= 0), TOP, 'the group holds the points assigned');
 assert.ok(TOP.every((i) => Math.abs(weights[i] - 0.75) < 1e-6), 'with their weight');

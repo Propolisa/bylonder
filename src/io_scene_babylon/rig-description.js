@@ -74,7 +74,8 @@ const bone = (b) => ({ name: b.name, parent: b.parent?.name ?? null, matrix_loca
   tail_local: [...b.tail_local], ...pick(b, BONE), bbone_custom_handle_start: b.bbone_custom_handle_start?.name ?? null, bbone_custom_handle_end: b.bbone_custom_handle_end?.name ?? null });
 const poseBone = (pb) => ({ name: pb.name, ...transform(pb), ...pick(pb, POSE), constraints: [...pb.constraints].map(constraint), properties: numbers(pb), ...withLimits(pb) });
 
-// A mesh's geometry (its edges in Blender's order, which subdivision follows), vertex groups and shape keys (`mesh`: the Mesh Main holds, as main-sync gives it).
+// A mesh's geometry (its edges in Blender's order, which subdivision follows), vertex groups and shape keys, named as
+// their Key, which drivers of its blocks name (`mesh`: the Mesh Main holds, as main-sync gives it).
 function meshData(ob, mesh) {
   const count = mesh.verts_num, offsets = mesh.face_offsets, corners = mesh.corner_verts, co = positions(ob.data);
   const vertices = Array.from({ length: count }, (_, i) => [co[i * 3], co[i * 3 + 1], co[i * 3 + 2]]);
@@ -83,7 +84,7 @@ function meshData(ob, mesh) {
   [...ob.data.vertices].forEach((v, i) => { for (const { group, weight } of v.groups) if (groups[group]) groups[group].weights[i] = weight; });
   const key = ob.data.shape_keys;
   const edges = Array.from({ length: mesh.edges_num }, (_, e) => [mesh.edges[e * 2], mesh.edges[e * 2 + 1]]);
-  return { vertices, edges, faces, vertex_groups: groups, ...(key && { shape_keys: { use_relative: key.use_relative, eval_time: key.eval_time,
+  return { vertices, edges, faces, vertex_groups: groups, ...(key && { shape_keys: { name: key.name, use_relative: key.use_relative, eval_time: key.eval_time,
     key_blocks: [...key.key_blocks].map((kb) => ({ name: kb.name, co: Array.from({ length: count }, (_, i) => Array.from(blockData(kb, count).subarray(i * 3, i * 3 + 3))),
       value: kb.value, slider_min: kb.slider_min, slider_max: kb.slider_max, mute: kb.mute, relative_key: kb.relative_key.name, vertex_group: kb.vertex_group,
       interpolation: kb.interpolation })) } }) };
