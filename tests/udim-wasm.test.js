@@ -47,5 +47,5 @@ assert.equal(sample([1.5, 0.5]), null, 'a tile the image lacks samples none (pin
 // The private Babylon behaviour the WebGPU path relies on: its texture manager picks the format from _useSRGBBuffer.
 const manager = readFileSync(new URL('../node_modules/@babylonjs/core/Engines/WebGPU/webgpuTextureManager.js', import.meta.url), 'utf8');
 assert.ok(manager.includes('GetWebGPUTextureFormat(texture.type, texture.format, texture._useSRGBBuffer)'),
-  "Babylon's WebGPU texture manager no longer reads _useSRGBBuffer for a texture's format: tiled-image-textures.js's sRGB arrays need another way");
+  "Babylon's WebGPU texture manager no longer reads _useSRGBBuffer for a texture's format: runtime/tiled-images.js's sRGB arrays need another way");
 console.log('UDIM: tiles 1001 and 1011 open as one image, packed as array layers with Blender\'s tile map, each UV sampling its tile');

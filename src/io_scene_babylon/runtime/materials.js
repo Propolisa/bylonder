@@ -11,6 +11,7 @@ import {
   TransformBlock, Vector3, Vector4, VertexOutputBlock,
 } from '@babylonjs/core';
 import { unitFor } from './units.js';
+import { TILE_BLOCK } from './tiled-images.js';
 import { webgpuSamplers } from '../../overrides/webgpu/samplers.js';
 import { AreaLitPBRBlock } from '../../overrides/babylon/pbr-block-area-lights.js';
 
@@ -294,7 +295,12 @@ export function fillMaterials(materials, ir, kernels) {
     const graph = block.options?.blender?.graph;
     if (!graph) continue;
     const { inputs, kernel } = block.options.blender, params = block.options.inParameters;
-    const byKey = new Map(params.map((/** @type {any} */ p, /** @type {number} */ i) => [inputs[i], `bl_in${i}`]));
+    // A UDIM image's samplers are the globals its TileBlock declares (tiled-images.js), not parameters.
+    const tiled = (/** @type {any} */ p) => {
+      const from = block.inputs?.find((/** @type {any} */ input) => input.name === p.name)?.targetBlockId;
+      return entry.blocks.find((/** @type {any} */ b) => b.id === from && b.customType === `BABYLON.${TILE_BLOCK}`)?.samplerName ?? null;
+    };
+    const byKey = new Map(params.map((/** @type {any} */ p, /** @type {number} */ i) => [inputs[i], tiled(p) ?? `bl_in${i}`]));
     const outputs = block.options.outParameters.map((/** @type {any} */ p) => p.name);
     const { code } = fuse(ir, graph, { kernels, sources: (key) => byKey.get(key) ?? null, outputs, kernel });
     block.options.code = code(params.map((/** @type {any} */ p, /** @type {number} */ i) => [`bl_in${i}`, glslOf(p.type)]));
