@@ -11,6 +11,7 @@ import { babylonRotation } from './runtime/blend-scene.js';
 import { babylonMatrix } from '../blenkernel/main-view.js';
 import { AREA_OFFSET, rigId } from './area-lights.js';
 import { actionFCurves } from './ir-export.js';
+import { limits } from './rig-description.js';
 
 // Blender's own (Bylonder's ID properties, add-ons' groups) stay out of an ID's custom properties.
 const OWN = /^(bylonder|_RNA_UI$|cycles)/;
@@ -20,13 +21,17 @@ export const key = (name) => `["${name.replace(/["\\]/g, (c) => '\\' + c)}"]`;
 const typeOf = (value) => (typeof value === 'boolean' ? 'BOOLEAN' : typeof value === 'string' ? 'STRING' : Number.isInteger(value) ? 'INT' : 'FLOAT');
 export const knob = (path, value, meta = {}, bind) => ({ path, type: typeOf(value), default: value, ...meta, ...(bind && { bind }) });
 
-// An ID's custom properties: numbers, booleans and strings, suggested to authors.
+// A custom property's hard limits where they bound it: not a type's whole range, as UI data defaults to.
+const UNBOUNDED = 2147483647;
+const limited = (range) => ({ ...(range?.min > -UNBOUNDED && { hard_min: range.min }), ...(range?.max < UNBOUNDED && { hard_max: range.max }) });
+// An ID's custom properties: numbers, booleans and strings, suggested to authors; a number within its hard limits.
 function customProperties(id, base) {
+  const ranges = limits(id);
   return [...(id.keys?.() ?? [])].filter((name) => !OWN.test(name)).flatMap((name) => {
-    const value = id.get(name);
+    const value = id.get(name), range = ranges[name];
     // A float holding a whole number is still a float, which an F-Curve animates.
     const type = typeof value === 'number' && customPropertyType(id, name) === 'FLOAT' ? { type: 'FLOAT' } : {};
-    return ['number', 'boolean', 'string'].includes(typeof value) ? [knob(base + key(name), value, { suggested: true, ...type })] : [];
+    return ['number', 'boolean', 'string'].includes(typeof value) ? [knob(base + key(name), value, { suggested: true, ...type, ...limited(range) })] : [];
   });
 }
 

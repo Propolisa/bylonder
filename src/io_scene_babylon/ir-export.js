@@ -178,15 +178,18 @@ function curveTarget(id, fc, properties) {
   return [`${path}[${fc.array_index}]`, path, socket && `${id.path}.${socket[1]}.properties.inputs.${socket[2]}.value`].find((p) => p && properties[p]) ?? null;
 }
 
+// The property types whose F-Curves the unit runs: an integer's and a boolean's rounded, as Blender's.
+const CURVED = ['FLOAT', 'INT', 'BOOLEAN'];
 // An object's or a pose bone's transform, whose F-Curves run live only where Main's samples confirm them (live-curves.js).
 const TRANSFORM = /^objects\[.*\]\.(pose\.bones\[.*\]\.)?(location|rotation_euler|rotation_quaternion|scale)\[\d\]$/;
 
-// A FLOAT property (a light's power, a material's input, a modifier's setting, a custom property, a Geometry Nodes
-// input) whose F-Curve the unit runs as Blender evaluates it and nothing else animates: its F-Curve as the `fcurve`
-// implementation runs it, else null. Written after Babylon's animation, it holds over any samples of the same value.
+// A number or boolean property (a light's power, a material's input, a modifier's setting, a custom property, a
+// Geometry Nodes input) whose F-Curve the unit runs as Blender evaluates it and nothing else animates: its F-Curve as
+// the `fcurve` implementation runs it, else null. Written after Babylon's animation, it holds over any samples of the
+// same value.
 function propertyCurve(animation, fc, target, property) {
-  if (TRANSFORM.test(target) || property?.type !== 'FLOAT' || animation.nla_tracks.length || [...animation.drivers].some((d) => d.data_path === fc.data_path)) return null;
-  const input = driverCurve(fc);
+  if (TRANSFORM.test(target) || !CURVED.includes(property?.type) || animation.nla_tracks.length || [...animation.drivers].some((d) => d.data_path === fc.data_path)) return null;
+  const input = driverCurve(fc, property.type !== 'FLOAT');
   if (!input) return null;
   const { keyframes, ...settings } = input;
   return { settings, keys: packKeys(keyframes) };

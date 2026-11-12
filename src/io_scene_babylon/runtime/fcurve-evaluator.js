@@ -47,5 +47,14 @@ const curves = new WeakMap();
  */
 export function run({ curve, frame }, context, entity) {
   if (!curves.has(entity)) curves.set(entity, prepareFCurve({ ...curve, keyframes: unpackKeys(curve.keyframes) }));
-  return { value: evaluateFCurve(/** @type {import('./drivers/fcurve.js').FCurve} */ (curves.get(entity)), frame ?? context.frame) };
+  return { value: curveValue(curve, /** @type {import('./drivers/fcurve.js').FCurve} */ (curves.get(entity)), frame ?? context.frame) };
+}
+
+/**
+ * A curve's value at a frame: an integer or boolean property's (`whole`) rounded, as Blender evaluates its F-Curve.
+ * @param {{ whole?: boolean }} input @param {import('./drivers/fcurve.js').FCurve} prepared @param {number} frame
+ */
+export function curveValue(input, prepared, frame) {
+  const value = evaluateFCurve(prepared, frame);
+  return input.whole ? Math.floor(value + 0.5) : value;
 }

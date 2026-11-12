@@ -20,6 +20,13 @@ export function run({ curve, frame }: Record<string, any>, context: {
 }, entity: object): {
     value: number;
 };
+/**
+ * A curve's value at a frame: an integer or boolean property's (`whole`) rounded, as Blender evaluates its F-Curve.
+ * @param {{ whole?: boolean }} input @param {import('./drivers/fcurve.js').FCurve} prepared @param {number} frame
+ */
+export function curveValue(input: {
+    whole?: boolean;
+}, prepared: import("./drivers/fcurve.js").FCurve, frame: number): number;
 export const INTERPOLATIONS: string[];
 export const EASINGS: string[];
 export const HANDLE_TYPES: string[];

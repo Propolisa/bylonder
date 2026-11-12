@@ -44,7 +44,7 @@ function propertyGroup(struct, view) {
 }
 // A struct's custom properties' hard limits (Blender's id_properties_ui(name).as_dict() min and max), which writes by
 // animation and drivers are clamped to: by name, those of numbers with UI data.
-function limits(struct) {
+export function limits(struct) {
   if (!struct.keys?.().length) return {};
   const view = new DataView(blenderModule.exports.memory.buffer), group = propertyGroup(struct, view), out = {};
   for (let c = group && view.getUint32(group + IDP.first, true); c; c = view.getUint32(c, true)) {

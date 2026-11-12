@@ -4,7 +4,8 @@
 // property it reads is set. A driver the page cannot run (Python, an F-Curve modifier, an input that is no property)
 // stays baked.
 import { compile, PYTHON_ONLY } from './runtime/drivers/expression.js';
-import { evaluateFCurve, prepareFCurve } from './runtime/drivers/fcurve.js';
+import { prepareFCurve } from './runtime/drivers/fcurve.js';
+import { curveValue } from './runtime/fcurve-evaluator.js';
 import { blendData } from '../python/bpy_rna.js';
 import { idKey } from './ir-export.js';
 
@@ -40,10 +41,10 @@ function objectData(ob, objects, reads) {
 // The F-Curve that maps a driver's value (driver.js FCurveInput), or null without keys; undefined when it has
 // modifiers the units do not evaluate, or when the units' curve misses Blender's anywhere it is sampled (some
 // Continuous Acceleration curves do, docs/clean-room/impl/RESULTS.md).
-export function driverCurve(fc) {
+export function driverCurve(fc, whole = false) {
   if ([...fc.modifiers].some((m) => m.type !== 'CYCLES')) return undefined;
   if (!fc.keyframe_points.length) return null;
-  const curve = curveInput(fc);
+  const curve = { ...curveInput(fc), ...(whole && { whole }) };
   return matchesBlender(fc, curve) ? curve : undefined;
 }
 
@@ -53,7 +54,7 @@ function matchesBlender(fc, input) {
   const curve = prepareFCurve(input), frames = input.keyframes.map((k) => k.co[0]), values = input.keyframes.map((k) => Math.abs(k.co[1]));
   const first = Math.min(...frames), last = Math.max(...frames), span = Math.max(last - first, 1), scale = Math.max(1, ...values);
   const samples = [...frames, ...Array.from({ length: 97 }, (_, i) => first - 2 * span + (i * 5 * span) / 96)];
-  return samples.every((x) => Math.abs(evaluateFCurve(curve, x) - fc.evaluate(x)) <= 2e-5 * Math.max(scale, Math.abs(fc.evaluate(x))));
+  return samples.every((x) => Math.abs(curveValue(input, curve, x) - fc.evaluate(x)) <= 2e-5 * Math.max(scale, Math.abs(fc.evaluate(x))));
 }
 
 // A driver's F-Curve as the units take it (fcurve.js FCurveInput).
