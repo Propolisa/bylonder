@@ -14,7 +14,7 @@ import { setCustomProperty } from '../src/blenkernel/animation/anim-blender.js';
 const { world, sync } = openExample('geometry-nodes');
 const data = blendData(), scene = data.scenes[0];
 const drawn = [...scene.collection.objects].filter((ob) => ob.type === 'MESH').map((ob) => ob.name);
-const [first, second] = drawn;
+const [first, second] = drawn, third = 'Guide';
 const props = data.collections.new('Props'), lamps = data.collections.new('Lamps');
 scene.collection.children.link(props);
 props.children.link(lamps);
@@ -25,6 +25,11 @@ lamps.objects.link(data.objects.get(first));
 scene.collection.objects.unlink(data.objects.get(first));
 lamps.objects.link(data.objects.get(second));
 props.objects.link(data.objects.get(second));
+// A collection Blender's render leaves out, as rigs keep their viewport-only proxies.
+const guides = data.collections.new('Guides');
+scene.collection.children.link(guides);
+guides.hide_render = true;
+guides.objects.link(data.objects.new(third, data.objects.get(first).data));
 sync.view();
 
 const files = await exportModule(world);
@@ -39,7 +44,7 @@ const { ir } = blend;
 
 assert.equal(ir.scene.collection, 'GR:Scene Collection');
 assert.equal(ir.scene.view_layer, 'ViewLayer');
-assert.deepEqual(blend.collections().map((c) => [c.name, c.depth]), [['Scene Collection', 0], ['Trees', 1], ['Props', 1], ['Lamps', 2]], 'the tree in the outliner\'s order');
+assert.deepEqual(blend.collections().map((c) => [c.name, c.depth]), [['Scene Collection', 0], ['Trees', 1], ['Props', 1], ['Lamps', 2], ['Guides', 1]], 'the tree in the outliner\'s order');
 const byName = Object.fromEntries(blend.collections().map((c) => [c.name, c]));
 assert.equal(byName.Props.color_tag, 'COLOR_04');
 assert.deepEqual(byName.Props.custom, { Weight: 2.5 });
@@ -52,6 +57,9 @@ assert.deepEqual(blend.collectionsOf(second).sort(), ['GR:Lamps', 'GR:Props', 'G
 
 const shown = (name) => blend.nodeOf(`OB:${name}`).isVisible;
 assert.deepEqual([shown(first), shown(second)], [true, true]);
+assert.equal(shown(third), false, 'an object only in a collection disabled in renders does not show, as in a render of Blender');
+blend.set('collections["Guides"].hide_render', false);
+assert.equal(shown(third), true, 'and shows once renders take it');
 blend.showCollection('Props', false);
 assert.deepEqual([shown(first), shown(second)], [false, true], 'hiding Props hides what it holds, down its children; the second still shows from the scene collection');
 assert.equal(blend.get('scenes["Scene"].view_layers["ViewLayer"].layer_collection.children["Props"].hide_viewport'), true, "the eye is the LayerCollection's Hide in Viewport, by RNA path");
@@ -65,7 +73,7 @@ blend.set(`objects["${first}"].hide_viewport`, true);
 assert.equal(shown(first), false, 'its own Hide in Viewport still hides it');
 blend.set(`objects["${first}"].hide_viewport`, false);
 blend.showCollection('Props', false, { children: true });
-assert.deepEqual(blend.collections().filter((c) => c.depth).map((c) => [c.name, c.view_layers.ViewLayer.hide_viewport, c.visible]), [['Trees', false, false], ['Props', true, false], ['Lamps', true, false]], 'the list gives the flags as set');
+assert.deepEqual(blend.collections().filter((c) => c.depth).map((c) => [c.name, c.view_layers.ViewLayer.hide_viewport, c.visible]), [['Trees', false, false], ['Props', true, false], ['Lamps', true, false], ['Guides', false, true]], 'the list gives the flags as set');
 assert.equal(blend.get('scenes["Scene"].view_layers["ViewLayer"].layer_collection.children["Props"].children["Lamps"].hide_viewport'), true, 'with children, as Shift does');
 const trees = () => blend.objectsIn('Trees').map((k) => blend.nodeOf(k).isEnabled() && blend.nodeOf(k).isVisible);
 assert.ok(trees().every((shown) => !shown), "an excluded collection's objects are exported hidden");

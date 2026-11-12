@@ -247,6 +247,8 @@ export class BlendScene {
       this.#flags.set(`${bind.collection} ${flag}`, path);
     }
     this.#hiddenAtExport = new Set([...showing(this.ir, (key, flag) => this.#flag(key, flag))].filter(([, shown]) => !shown).map(([object]) => object));
+    // The app's viewport draws what Disable in Renders hides; the page shows what Blender renders.
+    this.#showObjects([...this.#hiddenAtExport]);
     if (this.#animated()) this.playhead.play();
   }
 
