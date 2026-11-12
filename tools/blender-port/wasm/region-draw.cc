@@ -3,6 +3,7 @@
  * hit-tests (src/editors/interface/region-draw.js). Interface code above these calls is Blender's own:
  * resources.cc gives the theme, interface_style.cc the fonts' styles, interface_icons.cc the icons' sizes and colors.
  * Text is measured by JS, which draws it with the browser's fonts. */
+#include <cfloat>
 #include <cstring>
 #include <memory>
 #include <string>
@@ -20,6 +21,7 @@
 #include "BLI_math_vector.h"
 #include "BLI_rect.h"
 #include "BLI_string.h"
+#include "BLI_path_utils.hh"
 #include "BLI_string_utf8.h"
 #include "BLI_listbase_iterator.hh"
 #include "DNA_screen_types.h"
@@ -41,6 +43,8 @@
 #include "BLI_set.hh"
 #include "WM_types.hh"
 #include "interface_intern.hh"
+#include "nanosvg.h"
+#include "nanosvgrast.h"
 
 using namespace blender;
 
@@ -52,6 +56,8 @@ IMPORT(region_text_width) float region_text_width(const char *str, int len, floa
 IMPORT(region_font_ascender) float region_font_ascender(float size);
 IMPORT(region_mono_width) float region_mono_width(float size);
 IMPORT(region_font_descender) float region_font_descender(float size);
+/* An icon's SVG source by its name, its bytes into `out` when they fit; its length in bytes. */
+IMPORT(region_icon_svg) int region_icon_svg(const char *name, char *out, int capacity);
 
 /* The JSON of what one region draw recorded. */
 struct Recording {
@@ -723,6 +729,83 @@ float BLF_width(int fontid, const char *str, size_t str_len, ResultBLF * /*r_inf
 {
   return region_text_width(str, int(text_length(str, str_len)), font(fontid).size);
 }
+/* blender-port: blf_font.cc blf_font_wrap_apply and blf_font_string_wrap: a string's lines within a width (a File
+ * Browser thumbnail's name). port-override: each glyph's right edge is measured as the browser draws the text, as there
+ * are no glyph advances without FreeType. */
+Vector<StringRef> BLF_string_wrap(int fontid, StringRef str, const int max_pixel_width, BLFWrapMode mode)
+{
+  Vector<StringRef> lines;
+  const char *text = str.data();
+  const size_t len = size_t(str.size());
+  const float size = font(fontid).size, limit = max_pixel_width != -1 ? float(max_pixel_width) : FLT_MAX;
+  const auto width = [&](size_t from, size_t to) { return to > from ? region_text_width(text + from, int(to - from), size) : 0.0f; };
+  size_t start = 0, last[2] = {0, 0}, clip = 0, i = 0;
+  uint prev = 0;
+  while (i < len && text[i]) {
+    const size_t i_curr = i;
+    const uint c = BLI_str_utf8_as_unicode_step_safe(text, len, &i);
+    const bool glyph = c != '\n';
+    const bool overflows = glyph && width(start, i) >= limit && i_curr != start;
+    bool draw = false;
+    if (overflows && start != last[0]) {
+      draw = true;
+    }
+    else if (bool(mode & BLFWrapMode::HardLimit) && overflows) {
+      last[0] = last[1] = i_curr;
+      draw = true;
+      clip = 0;
+    }
+    else if (!(i < len && text[i])) {
+      last[0] = i + (c != '\n' ? 1 : 0);
+      last[1] = i;
+      draw = true;
+      clip = 0;
+    }
+    else if (c == '\n') {
+      last[0] = i_curr + 1;
+      last[1] = i;
+      draw = true;
+      clip = 1;
+    }
+    else if (c != ' ' && prev == ' ') {
+      last[0] = last[1] = i_curr;
+      clip = 1;
+    }
+    else if (bool(mode & BLFWrapMode::Path)) {
+      if (ELEM(c, SEP, ' ', '?', '&', '=')) {
+        last[0] = last[1] = i;
+        clip = 0;
+      }
+      else if (ELEM(c, '-', '_', '.', '%')) {
+        last[0] = last[1] = i_curr;
+        clip = 0;
+      }
+    }
+    else if (bool(mode & BLFWrapMode::Typographical) && !BLI_str_utf32_char_is_breaking_space(c) &&
+             BLI_str_utf32_char_is_breaking_space(prev))
+    {
+      last[0] = last[1] = i_curr;
+      clip = BLI_str_utf8_from_unicode_len(prev);
+    }
+    else if (bool(mode & BLFWrapMode::Typographical) && BLI_str_utf32_char_is_optional_break_after(c, prev)) {
+      last[0] = last[1] = i;
+      clip = 0;
+    }
+    else if (bool(mode & BLFWrapMode::Typographical) && BLI_str_utf32_char_is_optional_break_before(c, prev)) {
+      last[0] = last[1] = i_curr;
+      clip = 0;
+    }
+    if (draw) {
+      lines.append(StringRef(text + start, std::min(last[0] - start - clip, len - start)));
+      start = last[0];
+      i = last[1];
+      prev = 0;
+      continue;
+    }
+    prev = glyph ? c : 0;
+  }
+  return lines;
+}
 int BLF_height_max(int fontid)
 {
   return int(ceilf(region_font_ascender(font(fontid).size) - region_font_descender(font(fontid).size)));
@@ -738,6 +821,118 @@ void BLF_width_and_height(int fontid, const char *str, size_t str_len, float *r_
 {
   *r_width = BLF_width(fontid, str, str_len);
   *r_height = BLF_height_max(fontid);
+}
+
+/* port-override: the rest of blf.cc's font API over the page's text metrics (region_text_width), as BLF_width is:
+ * fonts are the browser's, so loading, batching and glyph caches do nothing, and positions within a string are the
+ * measured widths of its prefixes. Text drawn into image buffers (BLF_buffer, BLF_draw_buffer) is not ported. */
+void BLF_aspect(int /*fontid*/, float /*x*/, float /*y*/, float /*z*/) {}
+void BLF_color3f(int fontid, float r, float g, float b) { BLF_color4f(fontid, r, g, b, 1.0f); }
+void BLF_color4f(int fontid, float r, float g, float b, float a)
+{
+  const float rgba[4] = {r, g, b, a};
+  copy_v4_v4(font(fontid).color, rgba);
+}
+void BLF_color3ub(int fontid, unsigned char r, unsigned char g, unsigned char b)
+{
+  const uchar rgb[3] = {r, g, b};
+  BLF_color3ubv(fontid, rgb);
+}
+void BLF_wordwrap(int /*fontid*/, int /*wrap_width*/, BLFWrapMode /*mode*/) {}
+bool BLF_has_glyph(int /*fontid*/, unsigned int /*unicode*/) { return true; }
+bool BLF_is_builtin(int /*fontid*/) { return true; }
+bool BLF_is_loaded_id(int fontid) { return fontid >= 0 && fontid < int(ARRAY_SIZE(fonts)); }
+void BLF_addref_id(int /*fontid*/) {}
+void BLF_unload(const char * /*filepath*/) {}
+void BLF_reset_fonts() {}
+void BLF_exit() {}
+void BLF_batch_discard() {}
+void BLF_batch_draw_flush() {}
+int BLF_default_weight(int /*fontid*/) { return 400; }
+bool BLF_has_variable_weight(int /*fontid*/) { return false; }
+/* The widest glyph stands in as the font's "W". */
+int BLF_width_max(int fontid) { return int(ceilf(BLF_width(fontid, "W", 1))); }
+bool BLF_bounds_max(int fontid, rctf *r_bounds)
+{
+  BLI_rctf_init(r_bounds, 0.0f, float(BLF_width_max(fontid)), region_font_descender(font(fontid).size), region_font_ascender(font(fontid).size));
+  return true;
+}
+void BLF_boundbox(int fontid, const char *str, size_t str_len, rcti *r_box, ResultBLF * /*r_info*/)
+{
+  BLI_rcti_init(r_box, 0, int(ceilf(BLF_width(fontid, str, str_len))), int(region_font_descender(font(fontid).size)), int(region_font_ascender(font(fontid).size)));
+}
+/* The bytes of whole characters from the string's start (or, rstrlen, its end) that fit a width, and their width. */
+size_t BLF_width_to_strlen(int fontid, const char *str, size_t str_len, float width, float *r_width)
+{
+  const size_t len = text_length(str, str_len);
+  size_t fit = 0, i = 0;
+  float fit_width = 0.0f;
+  while (i < len) {
+    BLI_str_utf8_as_unicode_step_safe(str, len, &i);
+    const float w = BLF_width(fontid, str, i);
+    if (w > width) {
+      break;
+    }
+    fit = i, fit_width = w;
+  }
+  if (r_width) {
+    *r_width = fit_width;
+  }
+  return fit;
+}
+size_t BLF_width_to_rstrlen(int fontid, const char *str, size_t str_len, float width, float *r_width)
+{
+  const size_t len = text_length(str, str_len);
+  size_t fit = len;
+  float fit_width = 0.0f;
+  for (size_t i = len; i > 0;) {
+    i = size_t(BLI_str_find_prev_char_utf8(str + i, str) - str);
+    const float w = BLF_width(fontid, str + i, len - i);
+    if (w > width) {
+      break;
+    }
+    fit = i, fit_width = w;
+  }
+  if (r_width) {
+    *r_width = fit_width;
+  }
+  return fit;
+}
+int BLF_str_offset_to_cursor(int fontid, const char *str, size_t str_len, size_t str_offset, int /*cursor_width*/)
+{
+  return int(BLF_width(fontid, str, std::min(str_offset, text_length(str, str_len))));
+}
+/* The offset of the character boundary nearest a position. */
+size_t BLF_str_offset_from_cursor_position(int fontid, const char *str, size_t str_len, int location_x)
+{
+  const size_t len = text_length(str, str_len);
+  size_t best = 0, i = 0;
+  float best_distance = fabsf(float(location_x));
+  while (i < len) {
+    BLI_str_utf8_as_unicode_step_safe(str, len, &i);
+    const float distance = fabsf(BLF_width(fontid, str, i) - float(location_x));
+    if (distance < best_distance) {
+      best = i, best_distance = distance;
+    }
+  }
+  return best;
+}
+bool BLF_str_offset_to_glyph_bounds(int fontid, const char *str, size_t str_offset, rcti *r_glyph_bounds)
+{
+  const size_t len = strlen(str);
+  if (str_offset >= len) {
+    return false;
+  }
+  size_t next = str_offset;
+  BLI_str_utf8_as_unicode_step_safe(str, len, &next);
+  BLI_rcti_init(r_glyph_bounds, int(BLF_width(fontid, str, str_offset)), int(ceilf(BLF_width(fontid, str, next))),
+                int(region_font_descender(font(fontid).size)), int(region_font_ascender(font(fontid).size)));
+  return true;
+}
+Vector<Bounds<int>> BLF_str_selection_boxes(int fontid, const char *str, size_t str_len, size_t sel_start, size_t sel_length)
+{
+  const size_t len = text_length(str, str_len), end = std::min(sel_start + sel_length, len);
+  return {Bounds<int>(int(BLF_width(fontid, str, std::min(sel_start, len))), int(ceilf(BLF_width(fontid, str, end))))};
 }
 
 void BLF_draw(int fontid, const char *str, size_t str_len, ResultBLF * /*r_info*/)
@@ -840,6 +1035,52 @@ void BLF_draw_svg_icon(uint icon_id,
     s += ",\"multicolor\":true";
   }
   s += '}';
+}
+
+/* An SVG icon as a bitmap (an alert's, About's logo, the File Browser's folder): blf_glyph.cc
+ * blf_glyph_cache_add_svg and blf.cc BLF_svg_icon_bitmap, its source from the page's icons (region_icon_svg, as
+ * BLF_draw_svg_icon draws them) where Blender's are compiled in (svg_icons.cc), rasterized by Blender's nanosvg. */
+Array<uchar> BLF_svg_icon_bitmap(uint icon_id,
+                                 float size,
+                                 int *r_width,
+                                 int *r_height,
+                                 bool multicolor,
+                                 FunctionRef<void(std::string &)> edit_source_cb)
+{
+  *r_width = *r_height = 0;
+  const char *name = ui_icon_name(int(icon_id));
+  std::string svg(size_t(region_icon_svg(name, nullptr, 0)), '\0');
+  region_icon_svg(name, svg.data(), int(svg.size()));
+  if (svg.empty()) {
+    return {};
+  }
+  if (edit_source_cb) {
+    edit_source_cb(svg);
+  }
+  NSVGimage *image = nsvgParse(svg.data(), "px", 96.0f);
+  if (!image || image->width == 0 || image->height == 0) {
+    nsvgDelete(image);
+    return {};
+  }
+  NSVGrasterizer *rast = nsvgCreateRasterizer();
+  float scale = size / 1600.0f;
+  const int w = int(ceil(image->width * scale)), h = int(ceil(image->height * scale));
+  scale = float(w) / image->width;
+  Array<uchar> bitmap(w * h * 4);
+  nsvgRasterize(rast, image, 0.0f, 0.0f, scale, bitmap.data(), w, h, w * 4);
+  nsvgDeleteRasterizer(rast);
+  nsvgDelete(image);
+  /* A monochrome icon as its coverage in every channel. */
+  if (!multicolor) {
+    for (int64_t i = 0; i < int64_t(w) * h; i++) {
+      uchar *px = &bitmap[i * 4];
+      const uchar coverage = uchar(float(srgb_to_grayscale_byte(px)) * (float(px[3]) / 255.0f));
+      px[0] = px[1] = px[2] = px[3] = coverage;
+    }
+  }
+  *r_width = w;
+  *r_height = h;
+  return bitmap;
 }
 
 }  // namespace blender
