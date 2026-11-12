@@ -262,14 +262,15 @@ export function nativeSolve(scene = null, controls = null) {
     // The bones whose pose relative to their parent's the runtime changed, and those given (an animation wrote their own
     // pose over the solved one): their local matrices, Babylon's axes.
     write.fill(0);
-    for (const i of given) write[i] = 1;
+    // A given bone's matrix holds what was given, not what was last written: it is written whatever it was.
+    for (const i of given) write[i] = 2;
     for (const b of rig.changedLocalPoses()) if (skeletonOf[b] >= 0) write[skeletonOf[b]] = 1;
     const posed = rig.pose, locals = rig.localPoseView, { swap } = state;
     for (let i = 0; i < bones.length; i++) {
       if (!write[i]) continue;
       swapAxes(locals[of[i]], swap);
       if (attached.shape[i].parent < 0) swap.multiplyToRef(attached.space, swap);
-      if (!same(swap.m, written, i)) writeLocal(bones[i], swap, written, i);
+      if (write[i] === 2 || !same(swap.m, written, i)) writeLocal(bones[i], swap, written, i);
     }
     // Each segment joint as the runtime shapes its B-Bone, in its bone's space, where it moved.
     const changed = state.changed.fill(0);

@@ -2,7 +2,9 @@
 // for an Action constraint, is accepted by the export and posed in the page as Main poses it at frames of its animation,
 // with its head's Damped Track weighed by a driver reading the Z rotation of a bone in YXZ order (the runtime takes that
 // bone in its own rotation mode, so the driver reads the same angle) and its right hand's last Copy Rotation keyed from 0
-// to 1 (the runtime takes the keyed influence at each frame).
+// to 1 (the runtime takes the keyed influence at each frame); and its spine, whose location its animation keys, turned
+// halfway by a Copy Rotation (the page writes the constrained pose over the keyed one each frame, and the export's check
+// judges the pose as the page writes it).
 import assert from 'node:assert/strict';
 import { NullEngine } from '@babylonjs/core';
 import { babylonMatrix } from '../src/blenkernel/main-view.js';
@@ -36,6 +38,8 @@ const hand = copyOf('hand.R');
 const keyed = ad.action.layers[0].strips[0].channelbag(ad.action_slot).fcurves.new(`pose.bones["hand.R"].constraints["${hand.name}"].influence`, 0);
 keyed.keyframe_points.insert(1, 0);
 keyed.keyframe_points.insert(21, 1);
+// A Copy Rotation on a bone its animation keys (the spine's location): the page keeps the constrained pose over the keyed one.
+copyOf('spine').influence = 0.5;
 sync.blender.tag(sync.objectOf(world.objects.find((n) => n.name === 'Rig')), 2);
 sync.view();
 
@@ -63,5 +67,5 @@ for (const f of FRAMES) {
 }
 blend.dispose();
 written.remove();
-console.log(`Export native rig inputs: a driver reading a YXZ bone's angle and a keyed influence pose the rig on the native runtime as Main at ${FRAMES.length} frames`);
+console.log(`Export native rig inputs: a driver reading a YXZ bone's angle, a keyed influence and a keyed bone's constraint pose the rig on the native runtime as Main at ${FRAMES.length} frames`);
 process.exit(0);

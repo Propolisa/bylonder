@@ -1,6 +1,7 @@
 // An armature's bone constraints as the page runs them (runtime/pose-constraints.js): on Blender's kernels
 // (constraints.wasm, runtime/pose-kernels.js) where they cover the rig, else on the page's own solvers where it has one
 // for each constraint; kept only where the page's pose is the one Main evaluated at every frame the export samples.
+import { Matrix } from '@babylonjs/core';
 import { posedBone } from './runtime/blend-scene.js';
 import { blendData } from '../python/bpy_rna.js';
 import { solvePose } from './runtime/pose-constraints.js';
@@ -189,6 +190,16 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
   const shaped = new Set(rig ? [...arm.data.bones].filter((b) => b.bbone_segments > 1).map((b) => b.name) : []);
   let checked = 0, held = true;
   const solved = new Map();
+  // The pose the page draws, by the runtime's pass over the skeleton's bones as the page holds them, each given its own
+  // pose each frame as the page's animation gives it.
+  const page = native && { skeleton: { bones: skeleton.bones.map((bone) => ({ name: bone.name, _localMatrix: new Matrix(), get _matrix() { return this._localMatrix; }, markAsDirty() {} })) },
+    shape: skeleton.bones.map((bone) => ({ parent: skeleton.bones.indexOf(bone.getParent()), rest: bone.getRestMatrix() })), native, space: skeleton.space,
+    mesh: { computeWorldMatrix: meshWorld }, scene: { getNodeById: (id) => ({ computeWorldMatrix: () => nodeWorld(id) }) } };
+  const posedByPage = (locals, frame) => {
+    page.skeleton.bones.forEach((bone, i) => { if (i < locals.length) bone._localMatrix.copyFrom(locals[i]); });
+    nativeSolver.pass(Object.assign(page, { properties: customProperties(arm), frame }));
+    return page.skeleton.bones.slice(0, locals.length).map((bone) => bone._matrix);
+  };
   return {
     moved,
     native: !!native,
@@ -207,6 +218,7 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
         solved.set(i, local);
       }
       for (const [i, local] of solved) held &&= !judged.has(i) || close(local, evaluated[i]);
+      if (native) held &&= posedByPage(locals, frame).every((m, i) => !judged.has(i) || close(m, evaluated[i]));
       for (const name of shaped) {
         const pose = arm.pose.bones.get(name), ours = solve.segments(rig, name);
         if (!ours.every((m, k) => Array.from(pose.bbone_segment_matrix(k, false)).every((v, j) => Math.abs(v - m[j]) <= TOLERANCE))) shaped.delete(name);
