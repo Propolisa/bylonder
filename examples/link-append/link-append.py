@@ -59,9 +59,9 @@ iron = material("Iron", (0.02, 0.022, 0.025, 1), roughness=0.35, metallic=1.0)
 glass = material("Lantern Glass", (1.0, 0.75, 0.4, 1), roughness=0.2, emission=(1.0, 0.62, 0.28, 1), strength=12.0)
 post = join("Post", [
     mesh("Base", bpy.ops.mesh.primitive_cylinder_add, [iron], vertices=16, radius=0.16, depth=0.5, location=(0, 0, 0.25)),
-    mesh("Pole", bpy.ops.mesh.primitive_cylinder_add, [], vertices=12, radius=0.06, depth=3.4, location=(0, 0, 2.0)),
-    mesh("Cap", bpy.ops.mesh.primitive_cone_add, [], vertices=4, radius1=0.32, depth=0.28, location=(0, 0, 4.25), rotation=(0, 0, math.pi / 4)),
-    mesh("Frame", bpy.ops.mesh.primitive_cylinder_add, [], vertices=4, radius=0.17, depth=0.06, location=(0, 0, 3.72), rotation=(0, 0, math.pi / 4)),
+    mesh("Pole", bpy.ops.mesh.primitive_cylinder_add, [iron], vertices=12, radius=0.06, depth=3.4, location=(0, 0, 2.0)),
+    mesh("Cap", bpy.ops.mesh.primitive_cone_add, [iron], vertices=4, radius1=0.32, depth=0.28, location=(0, 0, 4.25), rotation=(0, 0, math.pi / 4)),
+    mesh("Frame", bpy.ops.mesh.primitive_cylinder_add, [iron], vertices=4, radius=0.17, depth=0.06, location=(0, 0, 3.72), rotation=(0, 0, math.pi / 4)),
 ])
 bpy.ops.object.shade_smooth()
 lantern = mesh("Lantern", bpy.ops.mesh.primitive_cylinder_add, [glass], vertices=4, radius=0.2, depth=0.4, location=(0, 0, 3.95), rotation=(0, 0, math.pi / 4))
@@ -78,11 +78,8 @@ for child in (lantern, light_ob):
 bpy.context.view_layer.active_layer_collection = bpy.context.view_layer.layer_collection
 wood = material("Weathered Wood", (0.32, 0.18, 0.09, 1), roughness=0.7)
 slats = [mesh(f"Slat {i}", bpy.ops.mesh.primitive_cube_add, [wood], location=(0, -0.2 + 0.14 * i, 0.45), scale=(0.8, 0.055, 0.025)) for i in range(4)]
-back = [mesh(f"Back {i}", bpy.ops.mesh.primitive_cube_add, [], location=(0, 0.27, 0.7 + 0.13 * i), scale=(0.8, 0.025, 0.05), rotation=(-0.25, 0, 0)) for i in range(2)]
+back = [mesh(f"Back {i}", bpy.ops.mesh.primitive_cube_add, [wood], location=(0, 0.27, 0.7 + 0.13 * i), scale=(0.8, 0.025, 0.05), rotation=(-0.25, 0, 0)) for i in range(2)]
 legs = [mesh(f"Leg {i}", bpy.ops.mesh.primitive_cube_add, [iron], location=(x, 0.05, 0.4), scale=(0.03, 0.27, 0.4)) for i, x in enumerate((-0.7, 0.7))]
-for leg in legs:
-    leg.data.materials.clear()
-    leg.data.materials.append(iron)
 join("Bench", slats + back + legs)
 cobble = material("Cobblestone", (0.09, 0.08, 0.075, 1), roughness=0.25)
 cobble.use_fake_user = True
