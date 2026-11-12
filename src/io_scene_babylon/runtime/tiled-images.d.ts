@@ -45,11 +45,14 @@ export class TileBlock extends NodeMaterialBlock {
     }[];
     /** @type {import('@babylonjs/core').BaseTexture | null} */
     texture: import("@babylonjs/core").BaseTexture | null;
+    loading: boolean;
+    /** Ready once its tiles have loaded, or failed to, so a page's first frames draw them. */
+    isReady(): boolean;
     get ready(): import("@babylonjs/core").NodeMaterialConnectionPoint;
     /** @param {any} state */
     _buildBlock(state: any): this;
-    /** @param {import('@babylonjs/core').Effect} effect */
-    bind(effect: import("@babylonjs/core").Effect): void;
+    /** @param {import('@babylonjs/core').Effect} effect @param {import('@babylonjs/core').NodeMaterial} material */
+    bind(effect: import("@babylonjs/core").Effect, material: import("@babylonjs/core").NodeMaterial): void;
     /** @param {any} serialized @param {import('@babylonjs/core').Scene} scene @param {string} rootUrl */
     _deserialize(serialized: any, scene: import("@babylonjs/core").Scene, rootUrl: string): void;
 }

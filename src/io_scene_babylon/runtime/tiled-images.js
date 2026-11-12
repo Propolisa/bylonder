@@ -120,10 +120,19 @@ function pageTextures(scene, image, files) {
   loaded.set(scene, byImage);
   if (!byImage.has(image)) {
     byImage.set(image, typeof createImageBitmap === 'function' && files.length
-      ? decodeTiles(files).then((tiles) => { const packed = packTiles(tiles); return packed && tileTextures(scene, packed, image); })
+      ? decodeTiles(files).then((tiles) => { const packed = packTiles(tiles); return packed && tileTextures(scene, packed, image); },
+        (error) => { console.warn(`${image}: its UDIM tiles did not load (${error?.message ?? error})`); return null; })
       : Promise.resolve(null));
   }
   return /** @type {Promise<ReturnType<typeof tileTextures> | null>} */ (byImage.get(image));
+}
+
+/** @type {WeakMap<import('@babylonjs/core').Scene, ReturnType<typeof tileTextures>>} */
+const empties = new WeakMap();
+/** A scene's stand-in tiles: one layer and a map with no tile, which samples nothing (pink, as Blender's). @param {import('@babylonjs/core').Scene} scene */
+function emptyTiles(scene) {
+  if (!empties.has(scene)) empties.set(scene, tileTextures(scene, { layers: new Uint8Array(4), width: 1, height: 1, depth: 1, float: false, srgb: false, map: new Float32Array(8).fill(-1), mapWidth: 1 }, 'empty'));
+  return /** @type {ReturnType<typeof tileTextures>} */ (empties.get(scene));
 }
 
 export const TILE_BLOCK = 'TileBlock';
@@ -145,21 +154,30 @@ export class TileBlock extends NodeMaterialBlock {
     this.tiles = [];
     /** @type {import('@babylonjs/core').BaseTexture | null} */
     this.texture = null;
+    this.loading = false;
+  }
+  /** Ready once its tiles have loaded, or failed to, so a page's first frames draw them. */
+  isReady() {
+    return !this.loading;
   }
   getClassName() { return TILE_BLOCK; }
   get ready() { return this._outputs[0]; }
   /** @param {any} state */
   _buildBlock(state) {
     super._buildBlock(state);
+    // Bound each draw, and waited for while its tiles load.
+    state.sharedData.bindableBlocks.push(this);
+    state.sharedData.blockingBlocks.push(this);
     if (this.part === 'array') state._emit2DArraySampler(this.samplerName);
     else state._emit2DSampler(this.samplerName, '', false, undefined, false, 'highp');
     state.compilationString += `${state._declareOutput(this.ready)} = 1.0;
 `;
     return this;
   }
-  /** @param {import('@babylonjs/core').Effect} effect */
-  bind(effect) {
-    if (this.texture) effect.setTexture(this.samplerName, this.texture);
+  /** @param {import('@babylonjs/core').Effect} effect @param {import('@babylonjs/core').NodeMaterial} material */
+  bind(effect, material) {
+    // Until its tiles have loaded, an empty texture of its kind: a sampler left unbound shares unit 0 with others.
+    effect.setTexture(this.samplerName, this.texture ?? emptyTiles(material.getScene())[this.part]);
   }
   serialize() {
     return { ...super.serialize(), samplerName: this.samplerName, part: this.part, image: this.image, tiles: this.tiles };
@@ -169,7 +187,11 @@ export class TileBlock extends NodeMaterialBlock {
     super._deserialize(serialized, scene, rootUrl);
     Object.assign(this, { samplerName: serialized.samplerName, part: serialized.part, image: serialized.image, tiles: serialized.tiles ?? [] });
     const files = this.tiles.map((t) => ({ number: t.number, srgb: t.srgb, url: rootUrl + (t.url ?? t.name ?? '') }));
-    pageTextures(scene, this.image, files).then((textures) => { if (textures) this.texture = textures[this.part]; });
+    this.loading = true;
+    pageTextures(scene, this.image, files).then((textures) => {
+      if (textures) this.texture = textures[this.part];
+      this.loading = false;
+    });
   }
 }
 RegisterClass(`BABYLON.${TILE_BLOCK}`, TileBlock);

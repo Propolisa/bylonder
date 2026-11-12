@@ -29,6 +29,11 @@ const FIXES = [
     'WGSL has no NaN constant: the NaN that restarts a strip is made at run time'],
   ['line_unit_sphere_intersect_dist', 'dot(line_origin, line_origin) - 1;', 'dot(line_origin, line_origin) - 1.0;', INT_TO_FLOAT],
   ['line_unit_sphere_intersect_dist', 'determinant >= 0)', 'determinant >= 0.0)', INT_TO_FLOAT],
+  ['tiled_image_lookup', /tile_pos\.([xy]) (<|>=) (\d+)\b/g, 'tile_pos.$1 $2 $3.0', INT_TO_FLOAT],
+  ['tiled_image_lookup', 'tile_layer < 0)', 'tile_layer < 0.0)', INT_TO_FLOAT],
+  ['tiled_image_lookup', '10 * tile_pos.y', '10.0 * tile_pos.y', INT_TO_FLOAT],
+  ['tiled_image_lookup', 'tile >= textureSize(map, 0).x', 'tile >= float(textureSize(map, 0).x)', INT_TO_FLOAT],
+  ['tiled_image_lookup', /(?:int2|ivec2)\(tile, ([01])\)/g, 'ivec2(int(tile), $1)', 'GLSL ES has no implicit float to int conversion'],
 ];
 
 const PREFIX = 'bl_';

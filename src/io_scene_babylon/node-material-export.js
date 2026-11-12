@@ -17,8 +17,10 @@ import { CurvesGeometryBlock, CurvesNormalBlock } from '../draw/curves.js';
 import { glslValue, LUMINANCE } from '../nodes/blender/sockets.js';
 import { imageFile } from '../imbuf/image-textures.js';
 import { imageTiles } from '../imbuf/tiled-image-textures.js';
-import { packTiles, TileBlock } from './runtime/tiled-images.js';
-import { pngDataUrl } from '../imbuf/data-url.js';
+import { MAX_TILE, packTiles, TileBlock } from './runtime/tiled-images.js';
+import { fileBytes } from '../blenkernel/packed-file.js';
+import { files } from '../port/wasm.js';
+import { pngDataUrl, webImage } from '../imbuf/data-url.js';
 import { MESH_VALUE, REVERSED_FACES, REVERSED_GLOBAL } from './runtime/materials.js';
 import { AreaLitPBRBlock } from '../overrides/babylon/pbr-block-area-lights.js';
 
@@ -450,13 +452,24 @@ export async function exportNodeKernels(material, key, { parity = false, into = 
 }
 
 // A UDIM image's tiles as the page packs them (runtime/tiled-images.js): each tile's number, whether its bytes are
-// sRGB, and its pixels as a PNG, which the export writes as a file (image-files.js).
+// sRGB, and its file as the export writes any image's (image-textures.js imageFile): the tile's own file when Blender
+// holds it unchanged in a format browsers read and within the tile size, else its pixels as a PNG.
 function udimTiles(image) {
   return imageTiles(image).map((tile) => {
+    const own = !image.is_dirty && tile.width <= MAX_TILE && tile.height <= MAX_TILE && webImage(tileFile(image, tile.number));
+    if (own) return { number: tile.number, srgb: tile.srgb, base64String: own };
     const { layers, width, height } = /** @type {any} */ (packTiles([tile]));
     const pixels = tile.float ? Uint8Array.from(layers, (v) => Math.round(Math.min(1, Math.max(0, v)) * 255)) : layers;
     return { number: tile.number, srgb: tile.srgb, base64String: pngDataUrl(pixels, width, height) };
   });
+}
+
+// A tile's file: packed with the image (its ImagePackedFile by tile number), else at the image's path with the tile's
+// number for <UDIM>.
+function tileFile(image, number) {
+  const packed = [...image.packed_files].find((p) => p.tile_number === number);
+  if (packed) return fileBytes(packed);
+  return files.get(image.filepath_from_user().replace('<UDIM>', String(number))) ?? null;
 }
 
 /**

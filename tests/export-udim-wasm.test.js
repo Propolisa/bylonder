@@ -28,6 +28,9 @@ if (process.argv[2] === '--make') {
   const tiled = [...blendData().images].find((i) => i.source === 'TILED');
   tiled.pack();
   blendData().materials.get('Print').node_tree.nodes.get('Image Texture').image = tiled;
+  // The print's UVs stretched over both tiles: its lower half on 1001, its upper half on 1011.
+  const print = [...blendData().objects].find((ob) => ob.type === 'MESH' && [...ob.material_slots].some((s) => s.material?.name === 'Print'));
+  for (const corner of print.data.uv_layers.active.data) corner.uv = [corner.uv[0], corner.uv[1] * 2];
   writeFileSync(process.argv[3], sync.writeBlend('/udim.blend'));
   process.exit(0);
 }
