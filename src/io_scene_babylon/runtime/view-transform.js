@@ -62,7 +62,8 @@ export const DISPLAY_UNIFORMS = ['exposure', 'range', 'exponent', 'latticed', 'b
 export function viewTransform(camera, { exposure, exponent, lattice }) {
   const scene = camera.getScene(), name = `bylonderDisplay${lattice?.size ?? 0}_${lattice?.stops ?? 0}`;
   Effect.ShadersStore[`${name}FragmentShader`] ??= displayTransformShader(lattice?.size ?? 2, lattice?.stops ?? 1);
-  const texture = lattice && new RawTexture3D(lattice.texels, lattice.size, lattice.size, lattice.size, Constants.TEXTUREFORMAT_RGBA, scene, false, false,
+  // A Null engine (Node) draws nothing and makes no 3D texture: the transform there is the gamma's alone.
+  const texture = lattice && scene.getEngine().getRenderingCanvas() && new RawTexture3D(lattice.texels, lattice.size, lattice.size, lattice.size, Constants.TEXTUREFORMAT_RGBA, scene, false, false,
     Constants.TEXTURE_BILINEAR_SAMPLINGMODE, Constants.TEXTURETYPE_HALF_FLOAT);
   if (texture) texture.wrapU = texture.wrapV = texture.wrapR = Constants.TEXTURE_CLAMP_ADDRESSMODE;
   Object.assign(scene.imageProcessingConfiguration, { applyByPostProcess: true, toneMappingEnabled: false, contrast: 1, exposure: 1 });

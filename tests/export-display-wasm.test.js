@@ -1,6 +1,7 @@
-// An exported page displays as the app's rendered view on the Standard view transform (Lava): its materials and the
-// world's clear color draw in scene linear and the camera's last post process encodes them to sRGB, not left linear by
-// Bylonder's own pipeline turning the scene's image processing off.
+// An exported page displays as the app's rendered view through its .blend's view transform (Lava's AgX, kept through
+// Node's view as a project keeps it): its materials and the world's clear color draw in scene linear and the camera's
+// last post process displays them through Blender's transform, not left linear by Bylonder's own pipeline turning the
+// scene's image processing off.
 import assert from 'node:assert/strict';
 import { NullEngine } from '@babylonjs/core';
 import { openExample } from './open-example.js';
@@ -10,13 +11,15 @@ import { idStruct } from '../src/python/bpy_rna.js';
 
 const { world, sync } = openExample('lava');
 sync.view();
-assert.equal(idStruct(sync.blender.scene).view_settings.view_transform, 'Standard');
-const written = writePackage(await exportModule(world));
+assert.equal(idStruct(sync.blender.scene).view_settings.view_transform, 'AgX', "the .blend's view transform stays Main's");
+const files = await exportModule(world);
+assert.ok(JSON.parse(/const DISPLAY = (.*);/.exec(files['scene.js'])[1]).lattice, 'the page displays through AgX, not Standard');
+const written = writePackage(files);
 const blend = await (await import(written.url)).load(new NullEngine());
 const { scene } = blend, posts = scene.activeCamera._postProcesses.filter(Boolean);
 assert.equal(posts.at(-1)?.name, 'Display Transform', 'the camera ends in the display transform');
 assert.ok(scene.imageProcessingConfiguration.applyByPostProcess, 'materials draw in scene linear');
 blend.dispose();
 written.remove();
-console.log('Export display: a Standard view transform encodes to sRGB in a post process, as the app does');
+console.log("Export display: the .blend's view transform (AgX) displays the page in a post process, as the app does");
 process.exit(0);

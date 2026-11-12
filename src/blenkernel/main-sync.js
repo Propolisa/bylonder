@@ -25,7 +25,7 @@ import { mesh_serialize } from './mesh/mesh.js';
 import { nodeId, deleted } from '../editors/object/identity.js';
 import { watchObject } from './main-sync-hooks.js';
 import { CurveObject, CURVE_TARGETS } from './curve/curve.js';
-import { viewTransforms, looks } from './scene/render-babylon.js';
+import { viewTransforms, viewTransformOf, looks } from './scene/render-babylon.js';
 import { createDisplayLut } from '../render/display-lut.js';
 import { BlenderAnimation } from './animation/anim-blender.js';
 import { Camera, MultiMaterial, VertexData } from '@babylonjs/core';
@@ -134,6 +134,20 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     const settings = rna.pointer('Scene', world).view_settings;
     return { view_transform: viewTransforms[settings.view_transform]?.ocioView ?? settings.view_transform ?? 'Standard', look: looks[settings.look]?.[0] ?? settings.look ?? 'None' };
   };
+  // Main's view transform and look are the scene's (AgX, Filmic...); Bylonder's slice holds the Babylon tone map nearest to
+  // them. The slice takes them when a file is read, and Main takes the slice's only when it changes (the user chose one).
+  let viewShown = null;
+  const viewChanged = () => {
+    const names = viewNames(), same = viewShown.view_transform === names.view_transform && viewShown.look === names.look;
+    viewShown = names;
+    return !same;
+  };
+  function pullViewNames() {
+    const main = idStruct(blender.scene).view_settings, settings = rna.pointer('Scene', world).view_settings;
+    settings.view_transform = Object.keys(viewTransforms).find((key) => viewTransforms[key] === viewTransformOf(main.view_transform));
+    settings.look = Object.keys(looks).find((key) => main.look === looks[key][0] || main.look.endsWith(` - ${looks[key][0]}`)) ?? 'NONE';
+    viewShown = viewNames();
+  }
   let scheduled = false, sceneChanged = true, listed = -1;
   // The objects hooks saw change since the last flush.
   const dirty = new Set();
@@ -407,7 +421,9 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   // The scene: its values, its camera and world, and what operators read of its tool settings.
   function pushScene() {
     for (const record of sceneRecords()) push(record, world);
-    if (world.renderSettings) for (const [name, value] of Object.entries(viewNames())) {
+    // Before its first push the slice takes Main's (a Main made without a read file: startup's, a test's).
+    if (world.renderSettings && !viewShown) pullViewNames();
+    else if (world.renderSettings && viewChanged()) for (const [name, value] of Object.entries(viewNames())) {
       if (dnaGet('ColorManagedViewSettings', view.ptr, name) === value) continue;
       dnaSet('ColorManagedViewSettings', view.ptr, name, value);
       blender.tag(blender.scene, ID_RECALC_SHADING);
@@ -728,8 +744,11 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       compareTree(`World "${entry.name}"`, record.wo, rna.pointer('World', entry));
     }
     for (const record of sceneRecords()) compare(record.struct, record, world);
-    if (world.renderSettings) for (const [name, value] of Object.entries(viewNames())) {
-      if (dnaGet('ColorManagedViewSettings', view.ptr, name) !== value) diffs.push(`Scene.view_settings.${name}: Babylon "${value}", Main "${dnaGet('ColorManagedViewSettings', view.ptr, name)}"`);
+    // The slice's tone map is the one nearest Main's view transform (AgX's is Filmic's).
+    if (world.renderSettings) {
+      const main = { view_transform: dnaGet('ColorManagedViewSettings', view.ptr, 'view_transform'), look: dnaGet('ColorManagedViewSettings', view.ptr, 'look') }, names = viewNames();
+      if (viewTransformOf(main.view_transform) !== viewTransformOf(names.view_transform)) diffs.push(`Scene.view_settings.view_transform: Babylon "${names.view_transform}", Main "${main.view_transform}"`);
+      if (main.look !== names.look && !main.look.endsWith(` - ${names.look}`)) diffs.push(`Scene.view_settings.look: Babylon "${names.look}", Main "${main.look}"`);
     }
     if (blender.world !== (worlds.get(world.worlds?.active()?.id)?.wo ?? 0)) diffs.push('Scene.world differs');
     const cols = slice();
@@ -879,6 +898,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       const { nodes, warnings } = mainView.adopt(scene);
       if (world.collections) mainView.adoptScene();
       else ids.read = true;
+      if (world.renderSettings) pullViewNames();
       return { nodes, warnings: [...read, ...warnings] };
     },
     adopt: (scene) => mainView.adopt(scene),
