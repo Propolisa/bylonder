@@ -715,7 +715,9 @@ export class RigInstance {
         // Any constraint setting: booleans by value != 0, arrays by component, numbers as they are.
         const s = w.constraint.s, cur = s[w.prop];
         if (typeof cur === 'boolean') s[w.prop] = value !== 0;
-        else if (w.prop === 'influence') s[w.prop] = Math.min(1, Math.max(0, value));
+        // Settings with a 0..1 range in Blender's RNA: a driver writing past it is clamped (Action eval_time: Snow's
+        // eyebrow drivers reach 1.33).
+        else if (w.prop === 'influence' || w.prop === 'eval_time') s[w.prop] = Math.min(1, Math.max(0, value));
         else if (Array.isArray(cur)) { s[w.prop] = cur.slice(); s[w.prop][w.index ?? 0] = value; }
         else s[w.prop] = value;
         break;
