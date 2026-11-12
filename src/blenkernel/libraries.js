@@ -13,6 +13,6 @@ export const loadLibraries = (paths, read) => Promise.all(paths.filter(isLibrary
 
 // Main's libraries the project does not keep yet (`kept`: paths of the project), as [path, bytes].
 export const unkeptLibraries = (kept) => [...blendData().libraries]
-  .map((library) => library.filepath.slice(1))
+  .map((library) => library.filepath.replace(/^\/+/, ''))
   .filter((path) => isLibrary(path) && !kept.has(path) && files.has(`/${path}`))
   .map((path) => [path, files.get(`/${path}`)]);

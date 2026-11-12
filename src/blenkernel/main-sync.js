@@ -35,7 +35,7 @@ import { setOutputFrame } from '../runtime/object-transform.js';
 import { armatureData, setArmatureData } from './armature/armature.js';
 import { armatureChanged } from '../draw/overlay-armature.js';
 import { createMainView, babylonMatrix, blenderMatrix, mainPBR, ID_GR, ID_MA, ID_WO, CURVE_TYPES, PROPERTIES, plain, same } from './main-view.js';
-import { ID_RECALC_TRANSFORM, ID_RECALC_SHADING, ID_RECALC_SYNC_TO_EVAL } from '../bmesh/bmesh-wasm.js';
+import { ID_RECALC_TRANSFORM, ID_RECALC_SHADING, ID_RECALC_SYNC_TO_EVAL, PROJECT_BLEND } from '../bmesh/bmesh-wasm.js';
 import { differencesPBR } from './material/principled-gltf.js';
 import { drawnSlots } from './material/library.js';
 
@@ -904,7 +904,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     // The scene as a .blend file (its bytes), written by Blender's writer from Main.
     writeBlend: (filepath) => api.withMeshes(() => blender.writeBlend(filepath)),
     // Main as a project saves it: meshes Babylon built keep their stand-ins as they are (the project's code builds them).
-    projectBlend: () => { flush(); return blender.writeBlend('/project.blend'); },
+    projectBlend: () => { flush(); return blender.writeBlend(PROJECT_BLEND); },
     // A .blend's data read into Main and made Babylon's in `scene` (the view's adopt); returns the Babylon objects it
     // made and Blender's and Bylonder's warnings. Its scene settings and collections follow when the scene sync of the
     // world starts (ids.read).

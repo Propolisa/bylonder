@@ -1562,10 +1562,11 @@ EXPORT(main_context_refresh) void main_context_refresh(BlenderMain *ctx)
   collections_synced(ctx);
 }
 
-/* A .blend opened as Blender's File > Open does without its UI (wm_file_read_post with G_FILE_NO_UI): read
- * (BLO_read_from_memory) and set up as the Main (BKE_blendfile_read_setup_readfile), whose scene and view layer become
- * the context's. Returns the warnings Blender reported, one per line, or null when the file could not be read. */
-EXPORT(main_open) const char *main_open(BlenderMain *ctx, const void *data, int size)
+/* A .blend opened as Blender's File > Open does without its UI (wm_file_read_post with G_FILE_NO_UI): read from its
+ * path in the file system (BLO_read_from_file), which paths relative to it (`//libraries/...`) resolve from, and set up
+ * as the Main (BKE_blendfile_read_setup_readfile), whose scene and view layer become the context's. Returns the
+ * warnings Blender reported, one per line, or null when the file could not be read. */
+EXPORT(main_open) const char *main_open(BlenderMain *ctx, const char *filepath)
 {
   static std::string warnings;
   warnings.clear();
@@ -1573,7 +1574,7 @@ EXPORT(main_open) const char *main_open(BlenderMain *ctx, const void *data, int 
   BKE_reports_init(&reports, RPT_STORE);
   BlendFileReadReport read_report = {};
   read_report.reports = &reports;
-  BlendFileData *bfd = BLO_read_from_memory(data, size, BLO_READ_SKIP_USERDEF, &reports);
+  BlendFileData *bfd = BLO_read_from_file(filepath, BLO_READ_SKIP_USERDEF, &read_report);
   if (bfd) {
     BlendFileReadParams params = {};
     params.skip_flags = BLO_READ_SKIP_USERDEF;
