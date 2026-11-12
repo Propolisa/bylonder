@@ -59,12 +59,13 @@ export function shownStack(ob) {
 
 // The modifiers of a mesh object an applied rest holds, or null when it needs none or cannot have one: all before its
 // one Armature modifier and all after it (afterArmature), all still; `nearly`, those after it that give nearly the same.
-export function restModifiers(ob) {
+// `forced`: all of them whatever they are, for a mesh that would otherwise not move (each after it then `nearly`).
+export function restModifiers(ob, forced = false) {
   const stack = shownStack(ob), at = stack.findIndex((m) => m.type === 'ARMATURE');
   if (at < 0 || stack.filter((m) => m.type === 'ARMATURE').length > 1) return null;
   const after = stack.slice(at + 1), applied = [...stack.slice(0, at), ...after], animated = animatedPaths(ob, false), driven = drivenPaths(ob);
-  if (!applied.length || after.some((m) => !afterArmature(m)) || !applied.every((m) => still(ob, m, animated))) return null;
-  return { applied, nearly: after.filter((m) => afterArmature(m) === 'NEARLY').map((m) => m.name), driven: applied.filter((m) => driven.some(settingOf(m))).map((m) => m.name) };
+  if (!applied.length || (!forced && (after.some((m) => !afterArmature(m)) || !applied.every((m) => still(ob, m, animated))))) return null;
+  return { applied, nearly: after.filter((m) => afterArmature(m) !== 'SAME').map((m) => m.name), driven: applied.filter((m) => driven.some(settingOf(m))).map((m) => m.name) };
 }
 
 // Sets each of `list`'s [struct, property, value] and returns a function that sets them back.
@@ -117,24 +118,31 @@ function makeRest(ob, { applied, nearly, driven }) {
 }
 
 // The applied rests an export makes, by mesh Object address: `of(ob)` makes one at the first ask (null when the object
-// needs none), `byAddress` finds it, and dispose() removes the temporary objects and meshes.
+// needs none), `byAddress` finds it, `force(ob)` makes the next one of every modifier of it (restModifiers' `forced`),
+// and dispose() removes the temporary objects and meshes.
 export function appliedRests() {
-  const rests = new Map();
+  const rests = new Map(), forced = new Set();
+  const remove = (rest) => {
+    if (!rest) return;
+    const data = blendData(), mesh = rest.ob.data;
+    data.objects.remove(rest.ob);
+    data.meshes.remove(mesh);
+  };
   return {
     of(ob) {
       const at = address(ob);
-      if (!rests.has(at)) { const modifiers = restModifiers(ob); rests.set(at, modifiers && makeRest(ob, modifiers)); }
+      if (!rests.has(at)) { const modifiers = restModifiers(ob, forced.has(at)); rests.set(at, modifiers && makeRest(ob, modifiers)); }
       return rests.get(at);
+    },
+    force(ob) {
+      const at = address(ob);
+      forced.add(at);
+      remove(rests.get(at));
+      rests.delete(at);
     },
     byAddress: (at) => rests.get(at) ?? null,
     dispose() {
-      const data = blendData();
-      for (const rest of rests.values()) {
-        if (!rest) continue;
-        const mesh = rest.ob.data;
-        data.objects.remove(rest.ob);
-        data.meshes.remove(mesh);
-      }
+      rests.forEach(remove);
       rests.clear();
     },
   };

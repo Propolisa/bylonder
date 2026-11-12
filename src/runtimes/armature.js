@@ -566,15 +566,22 @@ function exportArmatures(world, { bake, sampling, rests = appliedRests() }) {
     return [...[...m.apart.values(), ...surface].flatMap((ob) => entryOf(ob)), ...read.flatMap((ob) => entryOf(ob, true)), ...keyed.map((ob) => ({ ob, keyed: true }))];
   };
   const posed = poseAnimations(world, mappings, bake, sampling, { nodeOf, deformed, meshOf: (m) => byOb.get(m.skins.keys().next().value)?.node });
-  // A mesh the native runtime deforms is no longer Blender's, whatever its stack.
-  const native = (issues) => [...issues.filter((i) => i.kind !== FALLBACK || !posed.deforms.has(i.ob)),
-    ...[...new Set(issues.map((i) => i.ob))].filter((name) => posed.deforms.has(name)).map((name) => issue(APPROXIMATION, { name }, 'modifiers', 'its modifiers deform on the native rig runtime'))];
+  // The meshes of an export's mapping Babylon cannot skin for their stack that the native runtime does not deform
+  // either: skinned by their Armature with their other modifiers applied to their rest (settle), so none stands still.
+  const unmoved = (m) => (temporary.some((state) => state.mapping === m) ? [...m.apart.values()].filter((ob) => !posed.deforms.has(ob.name)).map((ob) => ob.name) : []);
+  // A mesh the native runtime deforms, or one skinned for it, is no longer Blender's, whatever its stack.
+  const native = (m, issues) => {
+    const skinned = new Set(unmoved(m)), moved = (name) => posed.deforms.has(name) || skinned.has(name);
+    return [...issues.filter((i) => i.kind !== FALLBACK || !moved(i.ob)),
+      ...[...new Set(issues.map((i) => i.ob))].filter(moved).map((name) => issue(APPROXIMATION, { name }, 'modifiers',
+        skinned.has(name) ? 'skinned by its Armature, its other modifiers applied to its rest, as the native rig runtime does not deform it' : 'its modifiers deform on the native rig runtime'))];
+  };
   for (const state of temporary) {
     drawSkins({ ...view, world: { animation: { playing: true } } }, state, meshOf);
     for (const key of state.applied.keys()) exporting.add(key);
   }
   return {
-    reports: mappings.map((m) => ({ title: `${m.arm.name}: exported`, issues: native([...m.issues.filter((i) => !i.silent), ...skeletonIssues(m, byOb)]) })),
+    reports: mappings.map((m) => ({ title: `${m.arm.name}: exported`, issues: native(m, [...m.issues.filter((i) => !i.silent), ...skeletonIssues(m, byOb)]) })),
     get animations() { return posed().animations; },
     get curves() { return posed().curves; },
     get gaps() { return posed().gaps; },
@@ -589,11 +596,13 @@ function exportArmatures(world, { bake, sampling, rests = appliedRests() }) {
     },
     boneParent: (ob) => boneParent(mappings, ob, byOb),
     // Once the frames are checked: the meshes the native rig runtime deforms further from Blender than their Armature
-    // alone are skinned, before the scene is written.
+    // alone are skinned, before the scene is written; so are those it does not deform, which would otherwise stand still,
+    // with every modifier of theirs applied into the rest they skin.
     settle() {
       for (const state of temporary) {
-        const skinned = posed.skinned(state.mapping);
+        const still = unmoved(state.mapping), skinned = new Set([...posed.skinned(state.mapping), ...still]);
         if (!skinned.size) continue;
+        for (const ob of state.mapping.apart.values()) if (still.includes(ob.name)) rests.force(ob);
         state.mapping.update({ ...state.options, skinned });
         drawSkins({ ...view, world: { animation: { playing: true } } }, state, meshOf);
       }
