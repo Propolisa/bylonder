@@ -20,7 +20,14 @@ export const LIGHT_SPECULAR = {
   search: /(info\.(?:specular|clearCoat)=compute(?:Anisotropic)?(?:Specular|ClearCoat)Lighting\([^;]*,)diffuse(\d+|\{X\})\.rgb\);/g,
   replace: '$1light$2.vLightSpecular.rgb);',
 };
-const FORMULA = { [`!${AREA_SPECULAR.search.source}`]: AREA_SPECULAR.replace, [`!${LIGHT_SPECULAR.search.source}`]: LIGHT_SPECULAR.replace };
+// So do clustered lights (overrides/babylon/clustered-lights.js), whose specular Babylon lights with their diffuse color
+// too, in the clustered lighting function.
+export const CLUSTERED_SPECULAR = {
+  search: /(info\.specular=compute(?:Anisotropic)?SpecularLighting\([^;]*,)light\.vLightDiffuse\.rgb\);/g,
+  replace: '$1light.vLightSpecular.rgb);',
+};
+const FORMULA = { [`!${AREA_SPECULAR.search.source}`]: AREA_SPECULAR.replace, [`!${LIGHT_SPECULAR.search.source}`]: LIGHT_SPECULAR.replace,
+  [`!${CLUSTERED_SPECULAR.search.source}`]: CLUSTERED_SPECULAR.replace };
 
 class BlenderAreaSpecularPlugin extends MaterialPluginBase {
   constructor(material) {

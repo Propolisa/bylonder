@@ -32,7 +32,7 @@ import { eeveeParity, eeveeParityChanged } from '../../draw/eevee-parity.js';
 import { DITHER_FUNCTIONS, ditherOffset } from '../../render/dither.js';
 import { readsSceneDepth, sceneDepth } from '../../render/scene-depth.js';
 import { BlenderFroxelPositionBlock, bindVolumeBounds, FROXEL_CLIP, FROXEL_CORNER, FROXEL_SLICE, VOLUME_BOUNDS, VOLUME_MATERIAL, VOLUME_TARGETS, volumeWrite } from '../../draw/volume-blocks.js';
-import { AREA_SPECULAR, LIGHT_SPECULAR } from '../../blenkernel/light/area-specular.js';
+import { AREA_SPECULAR, CLUSTERED_SPECULAR, LIGHT_SPECULAR } from '../../blenkernel/light/area-specular.js';
 import { usesAreaLights } from '../../overrides/babylon/area-light-used.js';
 import { AREA_PRE_LIGHTING } from '../../overrides/webgpu/area-light-inline.js';
 import '../../overrides/babylon/graph-roots.js';
@@ -1443,6 +1443,9 @@ bl_probe_capture_front = dot(${fragment(this.worldNormal)}.xyz, ${PROBE_EYE} - $
     // Its area light function marked for inlining on WebGPU (AREA_PRE_LIGHTING).
     const setup = 'pbrDirectLightingSetupFunctions';
     if (state.sharedData.scene.getEngine().isWebGPU && state.functions[setup]?.includes(`#include<${setup}>`)) state.functions[setup] = store[setup].replace(AREA_PRE_LIGHTING.search, AREA_PRE_LIGHTING.replace);
+    // The clustered lights' specular color (CLUSTERED_SPECULAR), in the clustered lighting function the block emits.
+    const clustered = 'pbrClusteredLightingFunctions';
+    if (state.functions[clustered]?.includes(`#include<${clustered}>`)) state.functions[clustered] = store[clustered].replace(CLUSTERED_SPECULAR.search, CLUSTERED_SPECULAR.replace);
     // The lights' specular color (LIGHT_SPECULAR), in code emitted inline and in an include of the lights of its own name.
     store[LIGHT_FRAGMENT] ??= store.lightFragment.replace(LIGHT_SPECULAR.search, LIGHT_SPECULAR.replace);
     state.compilationString = state.compilationString.replaceAll('#include<lightFragment>', `#include<${LIGHT_FRAGMENT}>`).replace(LIGHT_SPECULAR.search, LIGHT_SPECULAR.replace);
