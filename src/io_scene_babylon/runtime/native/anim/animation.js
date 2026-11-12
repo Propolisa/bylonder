@@ -13,9 +13,16 @@ import { parsePath, resolveProperty } from '../drivers/drivers.js';
 const DEFAULT = { scale: 1, rotation_quaternion: [1, 0, 0, 0], rotation_axis_angle: [0, 0, 1, 0] };
 const defaultOf = (prop, i) => (Array.isArray(DEFAULT[prop]) ? DEFAULT[prop][i] : DEFAULT[prop] ?? 0);
 
+// The slot a user of an action reads: `action_slot` when the action has a slot by that name, else the slot named by
+// `last_slot_identifier` (Blender keeps it when the slot pointer does not survive export), else the first slot.
+export function slotName(action, slot, lastIdentifier) {
+  const names = (action?.slots ?? []).map((s) => s.name);
+  return [slot, lastIdentifier].find((n) => n && names.includes(n)) ?? names[0];
+}
+
 // The F-Curves an object reads from an action: its slot's (or every curve when the action has no slots named).
-function slotCurves(action, slot) {
-  const name = slot ?? action?.slots?.[0]?.name;
+function slotCurves(action, slot, lastIdentifier) {
+  const name = slotName(action, slot, lastIdentifier);
   return (action?.fcurves ?? []).filter((fc) => !fc.slot || !name || fc.slot === name);
 }
 
@@ -37,14 +44,14 @@ export function compileAnimations(program) {
         const action = program.actions.get(s.action), [a0, a1] = [s.action_frame_start, s.action_frame_end].every((v) => v != null) ? [s.action_frame_start, s.action_frame_end] : actionRange(action);
         const scale = s.scale ?? 1, repeat = s.repeat ?? 1, start = s.frame_start ?? a0;
         return {
-          curves: slotCurves(action, s.action_slot), a0, a1, start, end: s.frame_end ?? start + (a1 - a0) * scale * repeat, length: (a1 - a0) * scale,
+          curves: slotCurves(action, s.action_slot, s.last_slot_identifier), a0, a1, start, end: s.frame_end ?? start + (a1 - a0) * scale * repeat, length: (a1 - a0) * scale,
           blend: s.blend_type ?? 'REPLACE', extrapolation: s.extrapolation ?? (k === 0 ? 'HOLD' : 'HOLD_FORWARD'),
           influence: s.use_animated_influence ? s.influence ?? 1 : 1, blendIn: s.blend_in ?? 0, blendOut: s.blend_out ?? 0,
         };
       });
       if (strips.length) layers.push({ strips });
     }
-    const active = ad.action ? { curves: slotCurves(program.actions.get(ad.action), ad.action_slot), blend: ad.action_blend_type ?? 'REPLACE', influence: ad.action_influence ?? 1 } : null;
+    const active = ad.action ? { curves: slotCurves(program.actions.get(ad.action), ad.action_slot, ad.last_slot_identifier), blend: ad.action_blend_type ?? 'REPLACE', influence: ad.action_influence ?? 1 } : null;
     // Channels by property path: the write target and which indices are animated.
     const channels = new Map();
     const curvesOf = [...layers.flatMap((l) => l.strips.map((s) => s.curves)), ...(active ? [active.curves] : [])];

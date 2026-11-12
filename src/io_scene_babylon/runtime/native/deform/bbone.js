@@ -7,8 +7,9 @@
 // bboneJoints(bone, ctx, rest) -> Float64Array((n + 1) * 16), joint j at j * 16, column-major.
 //   bone: the program's bone record (edit values and handle settings by RNA name, pose values on bone.pose).
 //   ctx: { matrix(b, rest) -> 4x4 pose or rest matrix of bone index b (armature space), poseValue(b, name),
-//          scale(b) -> the pose bone's own scale channels, bones, connectedChild(b), parent(b) }.
-import { invert, normalize, cross, dot, len, sub, scaleV, add } from '../math.js';
+//          scale(b) -> the handle bone's scale in its LOCAL space, bones, connectedChild(b), parent(b) }.
+import { invert, mul, normalize, cross, dot, len, sub, scaleV, add } from '../math.js';
+import { toSpace } from '../spaces.js';
 
 const DEFAULTS = {
   bbone_curveinx: 0, bbone_curveinz: 0, bbone_curveoutx: 0, bbone_curveoutz: 0, bbone_rollin: 0, bbone_rollout: 0,
@@ -75,9 +76,11 @@ const apply = (R, v) => [0, 1, 2].map((r) => R[0][r] * v[0] + R[1][r] * v[1] + R
 const compose3 = (A, B) => B.map((c) => apply(A, c)); // A @ B, columns
 
 // Angle about Y of y_to(F.y)^T @ F (F as columns).
+// For a sheared handle frame (non-orthogonal columns) the mean of the angles read from its X and Z columns (bbone.md
+// Open: the spec's best approximation, exact wherever the frame is orthogonal).
 function rollOf(F) {
   const T = compose3(transpose(arc([0, 1, 0], normalize(F[1]))), F);
-  return Math.atan2(T[2][0], T[0][0]);
+  return 0.5 * (Math.atan2(-T[0][2], T[0][0]) + Math.atan2(T[2][0], T[2][2]));
 }
 const transpose = (R) => [0, 1, 2].map((c) => [R[0][c], R[1][c], R[2][c]]);
 
@@ -227,7 +230,13 @@ export function bboneContext(inst) {
     parent: (b) => P.parent[b],
     connectedChild: (b) => P.connectedChild[b],
     indexOf: (arm, name) => P.objects[arm].boneIndex.get(name) ?? -1,
-    scale: (b) => Array.from(inst.scale.subarray(b * 3, b * 3 + 3)),
+    // A handle bone's scale for the handle scale flags: the axis lengths of its final pose in its LOCAL space (its
+    // channels when no constraint scales it; fitted on two Snow rigs: a handle given its scale by Copy Scale under an
+    // Inherit Scale None parent, and a handle that only inherits scale; bbone.md says channels).
+    scale: (b) => {
+      const P = inst.program, L = toSpace('LOCAL', mul(inst.worldView[P.bones[b].arm], inst.poseView[b]), inst.targetEnt[b]);
+      return [0, 1, 2].map((c) => Math.hypot(L[c * 4], L[c * 4 + 1], L[c * 4 + 2]));
+    },
     // Pose and edit B-Bone values with this instance's driven ones over the description's.
     posed: (bone) => overlay(bone.pose, posed, bone.index),
     edit: (bone) => overlay(bone, edit, bone.index),

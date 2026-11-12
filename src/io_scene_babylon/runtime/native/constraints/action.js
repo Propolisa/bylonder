@@ -7,6 +7,7 @@ import { evaluateFCurve } from '../drivers/fcurve.js';
 import { composeBasis, ROT } from '../rig/m4.js';
 import { mixInto } from '../rig/mix.js';
 import { ringMatrix } from '../spaces.js';
+import { slotName } from '../anim/animation.js';
 
 // ACTION (specs/action.md): the owner's transform from an Action at a frame chosen by a target channel or by
 // Evaluation Time, mixed with the owner as Copy Transforms mixes.
@@ -24,7 +25,7 @@ export default {
   compile(s, { program, owner }) {
     const action = program.actions.get(s.action);
     if (!action) return;
-    const slot = s.action_slot ?? action.slots?.[0]?.name;
+    const slot = slotName(action, s.action_slot, s.last_slot_identifier);
     const prefix = owner.bone >= 0 && !s.use_bone_object_action ? `pose.bones["${program.bones[owner.bone].name}"].` : '';
     const channels = {};
     for (const fc of action.fcurves ?? []) {

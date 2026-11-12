@@ -29,7 +29,19 @@ const yAxis = (m) => col(m, 1);
 const tailOf = (m, length) => add(translation(m), scaleV(yAxis(m), length));
 const project = (v, n) => sub(v, scaleV(n, dot(v, n)));
 
+// The root's scale is kept out of the solve (ik.md, a scaled chain): Blender turns the root's whole start pose by one
+// world rotation, so the solver works on the root's unscaled frame and the scale is put back after.
 export function solveChain(chain, target, pole, s, targetMatrix) {
+  const S = [0, 1, 2].map((c) => len(col(chain[0].pose, c)));
+  if (Math.abs(S[0] - S[1]) + Math.abs(S[1] - S[2]) < 1e-9) return solveScaled(chain, target, pole, s, targetMatrix);
+  const unscale = mul(chain[0].pose, scaleMatrix(S.map((x) => 1 / x)));
+  const poses = solveScaled([{ ...chain[0], pose: unscale, length: chain[0].length * S[1] }, ...chain.slice(1)], target, pole, s, targetMatrix);
+  return [mul(poses[0], scaleMatrix(S)), ...poses.slice(1)];
+}
+
+const scaleMatrix = ([x, y, z]) => new Float64Array([x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1]);
+
+function solveScaled(chain, target, pole, s, targetMatrix) {
   const start = chain.map((b) => b.pose);
   const joints = s.use_tail ? chain : chain.slice(0, -1);
   if (!joints.length) return start;

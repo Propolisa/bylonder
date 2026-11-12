@@ -26,6 +26,34 @@ function rna(struct) {
   }
   return out;
 }
+// An IDProperty in the module's memory (wasm32): its name at 12, a group's first child at 84 and each child's next at 0,
+// its UI data at 112; there an int's hard range at 20 and 24, a float's or double's as doubles at 32 and 40
+// (IDPropertyUIDataInt, IDPropertyUIDataFloat), as read from the module.
+const IDP = { name: 12, type: 8, first: 84, ui: 112 }, IDP_INT = 1, IDP_FLOAT = 2, IDP_DOUBLE = 8, IDP_GROUP = 6;
+const RANGES = { [IDP_INT]: (v, ui) => [v.getInt32(ui + 20, true), v.getInt32(ui + 24, true)],
+  [IDP_FLOAT]: (v, ui) => [v.getFloat64(ui + 32, true), v.getFloat64(ui + 40, true)], [IDP_DOUBLE]: (v, ui) => [v.getFloat64(ui + 32, true), v.getFloat64(ui + 40, true)] };
+const nameAt = (v, at) => { let s = ''; for (let i = 0; i < 64; i++) { const c = v.getUint8(at + i); if (!c) break; s += String.fromCharCode(c); } return s; };
+// Where in a struct of each type its custom properties' group is: found once, by the struct's first key.
+const groupOffsets = new Map();
+function propertyGroup(struct, view) {
+  const [type, , at] = pointerOf(struct), first = struct.keys()[0], size = view.byteLength;
+  const isGroup = (p) => p > 0 && p < size - 128 && view.getUint8(p + IDP.type) === IDP_GROUP && (() => { const c = view.getUint32(p + IDP.first, true); return c > 0 && c < size - 128 && nameAt(view, c + IDP.name) === first; })();
+  if (!groupOffsets.has(type)) for (let o = 0; o < 1024; o += 4) if (isGroup(view.getUint32(at + o, true))) { groupOffsets.set(type, o); break; }
+  const group = groupOffsets.has(type) ? view.getUint32(at + groupOffsets.get(type), true) : 0;
+  return isGroup(group) ? group : 0;
+}
+// A struct's custom properties' hard limits (Blender's id_properties_ui(name).as_dict() min and max), which writes by
+// animation and drivers are clamped to: by name, those of numbers with UI data.
+function limits(struct) {
+  if (!struct.keys?.().length) return {};
+  const view = new DataView(blenderModule.exports.memory.buffer), group = propertyGroup(struct, view), out = {};
+  for (let c = group && view.getUint32(group + IDP.first, true); c; c = view.getUint32(c, true)) {
+    const range = RANGES[view.getUint8(c + IDP.type)], ui = view.getUint32(c + IDP.ui, true);
+    if (range && ui) { const [min, max] = range(view, ui); out[nameAt(view, c + IDP.name)] = { min, max }; }
+  }
+  return out;
+}
+const withLimits = (struct) => { const ui = limits(struct); return Object.keys(ui).length ? { properties_ui: ui } : {}; };
 // A struct's custom properties that are numbers, which drivers read.
 const numbers = (struct) => Object.fromEntries([...(struct.keys?.() ?? [])].map((k) => [k, struct.get(k)]).filter(([, v]) => typeof v === 'number' || typeof v === 'boolean').map(([k, v]) => [k, Number(v)]));
 const transform = (x) => ({ location: [...x.location], rotation_mode: x.rotation_mode, rotation_quaternion: [...x.rotation_quaternion],
@@ -44,7 +72,7 @@ const pick = (struct, keys) => Object.fromEntries(keys.filter((k) => struct[k] !
 
 const bone = (b) => ({ name: b.name, parent: b.parent?.name ?? null, matrix_local: rows(b.matrix_local), length: b.length, head_local: [...b.head_local],
   tail_local: [...b.tail_local], ...pick(b, BONE), bbone_custom_handle_start: b.bbone_custom_handle_start?.name ?? null, bbone_custom_handle_end: b.bbone_custom_handle_end?.name ?? null });
-const poseBone = (pb) => ({ name: pb.name, ...transform(pb), ...pick(pb, POSE), constraints: [...pb.constraints].map(constraint), properties: numbers(pb) });
+const poseBone = (pb) => ({ name: pb.name, ...transform(pb), ...pick(pb, POSE), constraints: [...pb.constraints].map(constraint), properties: numbers(pb), ...withLimits(pb) });
 
 // A mesh's geometry (its edges in Blender's order, which subdivision follows), vertex groups and shape keys (`mesh`: the Mesh Main holds, as main-sync gives it).
 function meshData(ob, mesh) {
@@ -152,7 +180,7 @@ export function rigDescription(arm, meshes, meshOf) {
     const key = ob.type === 'MESH' ? ob.data.shape_keys : null;
     if (key?.animation_data) drivers.push(...[...key.animation_data.drivers].map(driver(key, 'KEY')));
     const out = { name: ob.name, type: ob.type, parent: ob.parent?.name ?? null, parent_type: ob.parent_type, parent_bone: ob.parent_bone || null,
-      matrix_parent_inverse: rows(ob.matrix_parent_inverse), ...transform(ob), constraints: [...ob.constraints].map(constraint), properties: numbers(ob),
+      matrix_parent_inverse: rows(ob.matrix_parent_inverse), ...transform(ob), constraints: [...ob.constraints].map(constraint), properties: numbers(ob), ...withLimits(ob),
       animation_data: animationData(ad) };
     if (ob.type === 'ARMATURE') {
       for (const pb of ob.pose.bones) for (const c of pb.constraints) if (c.type === 'ACTION') use(c.action);

@@ -121,6 +121,19 @@ export class RigProgram {
   }
 
   // Constraints other than chains, with settings merged over the type's defaults and targets resolved.
+  // The bones whose poses shape a B-Bone besides itself: its parent and connected child (automatic handles) and its
+  // custom handles.
+  bboneShapeBones(b) {
+    const bone = this.bones[b], arm = this.objects[bone.arm], out = [];
+    if (this.parent[b] >= 0 && bone.use_connect) out.push(this.parent[b]);
+    for (const k of this.bones) if (this.parent[k.index] === b && k.use_connect) out.push(k.index);
+    for (const end of ['start', 'end']) {
+      const i = arm.boneIndex.get(bone[`bbone_custom_handle_${end}`] ?? '');
+      if (i !== undefined) out.push(i);
+    }
+    return out;
+  }
+
   compileStack(constraints, owner) {
     const out = [];
     for (const c of constraints) {
@@ -152,7 +165,14 @@ export class RigProgram {
     const driverOp = this.drivers.map((d, i) => ops.push({ kind: OP_DRIVER, node: i }) - 1);
     const animOp = this.animations.map((a, i) => ops.push({ kind: OP_ANIM, node: i }) - 1);
     const finalOf = (r) => (r.bone < 0 ? objectOp[r.object] : this.chainOf[r.bone] >= 0 ? chainOp[this.chainOf[r.bone]] : boneOp[r.bone]);
-    const stackDeps = (stack) => stack.flatMap((e) => [e.target, e.custom, ...(e.targets ?? []).map((t) => t.ref)].filter(Boolean).map(finalOf));
+    // A constraint reading a B-Bone's segments (Armature targets, Follow B-Bone Shape) also waits for the bones that
+    // shape them: the B-Bone's handles.
+    const shapeRefs = (r) => (r.bone >= 0 && (this.bones[r.bone].bbone_segments ?? 1) > 1 ? this.bboneShapeBones(r.bone).map((bone) => ({ object: r.object, bone })) : []);
+    const stackDeps = (stack) => stack.flatMap((e) => [
+      e.target, e.custom, ...(e.targets ?? []).map((t) => t.ref),
+      ...(e.raw.type === 'ARMATURE' ? (e.targets ?? []).flatMap((t) => shapeRefs(t.ref)) : []),
+      ...(e.raw.use_bbone_shape && e.target ? shapeRefs(e.target) : []),
+    ].filter(Boolean).map(finalOf));
     const inputOp = (r) => (r.bone >= 0 ? boneOp[r.bone] : objectOp[r.object]);
     // The op a driver's written property feeds, and the op whose inputs a driver reads.
     const writesTo = (w) => {
@@ -304,6 +324,12 @@ export class RigInstance {
     this.worldInv = new Float64Array(nO * 16);
     this.armIdentity = new Uint8Array(nO);
     this.stackIn = new Float64Array(16);
+    // Custom properties' hard limits (`properties_ui`: { name: { min, max } }): animation and drivers write within them,
+    // as Blender clamps an RNA write (CloudRig's parent switches are keyed past their last option).
+    P.propertyRanges ??= new Map([
+      ...P.objects.flatMap((o, i) => Object.entries(o.properties_ui ?? {}).map(([k, r]) => [`p${i}/-1/${k}`, r])),
+      ...P.bones.flatMap((b) => Object.entries(b.pose.properties_ui ?? {}).map(([k, r]) => [`p${b.arm}/${b.index}/${k}`, r])),
+    ]);
     P.objects.forEach((o, i) => {
       if (o.matrix_basis) this.setObjectBasis(i, o.matrix_basis);
       else this.setObjectTransform(i, o);
@@ -544,7 +570,11 @@ export class RigInstance {
       };
     };
     this.targetEnt = P.bones.map((b) => boneEnt(b, (p) => this.poseView[p]));
-    this.boneRec = P.bones.map((b) => ({ rest: this.restView[b.index] }));
+    // A target bone: its rest and, for a B-Bone, its segment joints now (pose) and at rest (Armature constraint).
+    this.boneRec = P.bones.map((b) => ({
+      rest: this.restView[b.index], bone: b,
+      segments: (b.bbone_segments ?? 1) > 1 ? (rest) => bboneJoints(b, bboneContext(this), rest) : null,
+    }));
     this.ownerEnt = P.bones.map((b) => (P.parentReadsPre(b.index) ? boneEnt(b, (p) => this.preView[p]) : this.targetEnt[b.index]));
   }
 
@@ -676,7 +706,11 @@ export class RigInstance {
   writeProperty(w, value) {
     switch (w.kind) {
       case 'transform': this.setTransformValue(w.object, w.bone, w.prop, w.index, value); break;
-      case 'property': this.properties.set(sourceKey(w), value); break;
+      case 'property': {
+        const key = sourceKey(w), r = this.program.propertyRanges.get(key);
+        this.properties.set(key, r ? Math.min(r.max ?? Infinity, Math.max(r.min ?? -Infinity, value)) : value);
+        break;
+      }
       case 'setting': {
         // Any constraint setting: booleans by value != 0, arrays by component, numbers as they are.
         const s = w.constraint.s, cur = s[w.prop];
