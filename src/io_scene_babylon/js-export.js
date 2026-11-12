@@ -9,6 +9,7 @@ import { objectMatrix } from '../runtime/object-transform.js';
 import { CLOCK, sampledGaps, serializeScene } from './babylon-export.js';
 import { binaryClipKeys, CLIP_KEYS_SOURCE, irClips, isClip } from './clip-export.js';
 import { binaryMorphTargets, MORPH_KEYS_SOURCE } from './morph-export.js';
+import { deformSkeletons, pruneSkeletons, remappedIndices } from './skeleton-export.js';
 import { exportRuntimes } from '../runtimes/runtimes.js';
 import { exportSampling } from './sampling.js';
 import { prepareKernels } from './pose-export.js';
@@ -125,11 +126,12 @@ const SCREEN_SPACE_PIPELINES = {
 // Vertex buffers by Babylon kind, with their sizes, and the indices, as buffers of scene.bin: one entry per geometry,
 // shared by its meshes. A thin instance buffer (world0 to world3, per instance) is the mesh's thinInstances, written
 // with its node.
-function geometryCode(mesh, bin) {
+function geometryCode(mesh, bin, pruned) {
   const kinds = mesh.getVerticesDataKinds().filter((kind) => !mesh.getVertexBuffer(kind).getIsInstanced());
+  const map = mesh.skeleton && pruned?.get(mesh.skeleton.id);
   const buffers = kinds.map((kind) => {
-    const size = mesh.getVertexBuffer(kind).getSize();
-    return `${json(kind)}: [${size}, buffers[${bin.add(Float32Array.from(mesh.getVerticesData(kind, false, false)))}]]`;
+    const size = mesh.getVertexBuffer(kind).getSize(), data = Float32Array.from(mesh.getVerticesData(kind, false, false));
+    return `${json(kind)}: [${size}, buffers[${bin.add(map ? remappedIndices(kind, data, map, mesh.skeleton.bones.length) : data)}]]`;
   });
   const indices = mesh.getIndices();
   const wide = mesh.getTotalVertices() > 65535;
@@ -295,9 +297,10 @@ function selectedWorld(world, selected) {
 // `replace`, the type keys of units the page registers itself, which the package ships none of (unit-manifest.js); `bundle`,
 // whether the package is then bundled (bundle.js); `branchState` and `branches`, the states of the scene's branches
 // (export-options.js chosenState); `scope`, the whole scene or its `selected` objects (export-options.js SCOPES);
-// `clipCompression`, how clips' bone keys are compressed (export-options.js CLIP_COMPRESSION).
+// `clipCompression`, how clips' bone keys are compressed (export-options.js CLIP_COMPRESSION); `deformBonesOnly`,
+// skeletons with only the bones that skin (skeleton-export.js).
 
-export async function exportModule(whole, { scope = 'SCENE', selected = [], live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, animations = 'TIMELINE', clipCompression = 'STANDARD', target = 'BOTH', runtime = null, runtimes = {}, replace = [], bundle = false, controlPanel = true, devTools = 'CDN', navigation = 'FIXED', navigationModes = {}, branchState = null, branches = {}, sampleRate = {} } = {}) {
+export async function exportModule(whole, { scope = 'SCENE', selected = [], live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, animations = 'TIMELINE', clipCompression = 'STANDARD', deformBonesOnly = false, target = 'BOTH', runtime = null, runtimes = {}, replace = [], bundle = false, controlPanel = true, devTools = 'CDN', navigation = 'FIXED', navigationModes = {}, branchState = null, branches = {}, sampleRate = {} } = {}) {
   const world = scope === 'SELECTED' ? selectedWorld(whole, selected) : whole;
   const states = { branchState, branches }, stackState = (node) => chosenState(states, 'modifiers', node.name) ?? (keepLive ? 'LIVE' : 'BAKED');
   const live = new Map(world.objects.filter((node) => stackState(node) === 'LIVE').map((node) => [node, liveStack(world, node)]).filter(([, stack]) => stack));
@@ -307,13 +310,13 @@ export async function exportModule(whole, { scope = 'SCENE', selected = [], live
   const sampling = exportSampling(world.animation.time.state, sampleRate);
   const mapped = exportRuntimes(world, { bake: bakeAnimation, runtime, runtimes, sampling });
   try {
-    return await moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, animations, clipCompression, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states, sampling });
+    return await moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, animations, clipCompression, deformBonesOnly, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states, sampling });
   } finally {
     mapped.restore();
   }
 }
 
-async function moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, animations, clipCompression, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states, sampling }) {
+async function moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, animations, clipCompression, deformBonesOnly, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states, sampling }) {
   const graphs = [], graphOf = materialGraphs(world, graphs), asset = !!world.only;
   const data = await serializeScene(world, { geometry: false, live, mapped, parity, graphOf, bake: bakeAnimation, sampling, only: world.only, animations, onBones: true });
   if (chosenState(states, 'postProcessing') === 'OFF') Object.assign(data, { renderingPipelines: [], postProcesses: [] });
@@ -325,11 +328,14 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   const volumes = asset || chosenState(states, 'volumes') === 'OFF' ? null : await exportVolumes(scene, { parity, graphOf, meshes: new Set(data.meshes.map((m) => m.id)), lights: new Set(data.lights.map((l) => l.id)) });
   if (volumes) data.materials.push(...volumes.materials);
   const bin = createSceneBin({ gzip: !hostCompression }), images = imageFiles(data);
+  // Deform Bones Only: skeletons pruned to what skins, unless their rig's constraints run in the page.
+  const pruned = deformBonesOnly ? deformSkeletons(world, data, new Set((mapped.constraints ?? []).map((c) => c.armature))) : new Map();
+  pruneSkeletons(data, pruned);
   const geometries = new Map(), geometryLines = [];
   const objects = [...data.transformNodes.map((entry) => ({ entry })), ...data.meshes.map((entry) => ({ entry, mesh: scene.getMeshByUniqueId(entry.uniqueId) }))];
   for (const { mesh } of objects) if (mesh?.geometry && !geometries.has(mesh.geometry)) {
     geometries.set(mesh.geometry, `geometries[${geometries.size}]`);
-    geometryLines.push(`  ${geometryCode(mesh, bin)},`);
+    geometryLines.push(`  ${geometryCode(mesh, bin, pruned)},`);
   }
   const compositorState = chosenState(states, 'compositor') ?? 'LIVE';
   const composited = !asset && data.cameras.length && compositorState !== 'OFF' ? exportCompositor(world) : null;
@@ -381,7 +387,8 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   volumes?.dispose();
   parentInstances(objects);
   const parented = [...data.transformNodes, ...data.meshes, ...data.lights, ...data.cameras].filter((e) => e.parentId !== undefined);
-  const onBones = [...data.transformNodes, ...data.meshes].filter((e) => e.parentBone);
+  const onBones = [...data.transformNodes, ...data.meshes].filter((e) => e.parentBone)
+    .map((e) => (pruned.has(e.parentBone.skeletonId) ? { ...e, parentBone: { ...e.parentBone, index: pruned.get(e.parentBone.skeletonId).get(e.parentBone.index) } } : e));
   const pipelineTypes = [...new Set(data.renderingPipelines.map((p) => p.customType))];
   const pipelineClasses = pipelineTypes.filter((type) => !SCREEN_SPACE_PIPELINES[type] && babylonModule(type));
   const parse = (name, list, code) => (list?.length ? `  for (const entry of ${name}) ${code};\n` : '');

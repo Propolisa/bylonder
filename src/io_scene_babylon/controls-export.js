@@ -167,15 +167,19 @@ export function posedByPage(ob) {
   return (pose) => named.has(pose.name);
 }
 
+// A pose bone's controls. A skeleton without some of the rig's bones (Deform Bones Only, skeleton-export.js) is posed by
+// its clips alone, with no constraints in the page: its kept bones' transforms and custom properties only.
 function poseControls(ob, skeletons) {
   const drawn = skeletons.filter((s) => s.id === ob.name || s.id.startsWith(`${ob.name} `));
   if (drawn.length !== 1) return [];
-  const posed = posedByPage(ob);
+  const bones = new Set(drawn[0].bones.map((b) => b.id)), idOf = (pose) => `${drawn[0].id} ${pose.name}`;
+  const pruned = [...ob.pose.bones].some((pose) => !bones.has(idOf(pose))), posed = posedByPage(ob);
   return [...ob.pose.bones].flatMap((pose) => {
     const base = `objects${key(ob.name)}.pose.bones${key(pose.name)}`;
-    return [...(posed(pose) ? transformControls(base, pose, pose.rotation_mode !== 'AXIS_ANGLE' && { node: `${drawn[0].id} ${pose.name}`, transform: { mode: pose.rotation_mode } }) : []),
-      ...customProperties(pose, base), ...[...pose.constraints].map((c) => knob(`${base}.constraints${key(c.name)}.influence`, c.influence, { type: 'FLOAT', subtype: 'FACTOR', hard_min: 0, hard_max: 1 })),
-      ...(ob.data.bones.get(pose.name).bbone_segments > 1 ? bboneShape(pose).map(([path, v]) => knob(`${base}.${path}`, v, { type: 'FLOAT' })) : [])];
+    if (pruned && !bones.has(idOf(pose))) return customProperties(pose, base);
+    return [...(posed(pose) ? transformControls(base, pose, pose.rotation_mode !== 'AXIS_ANGLE' && { node: idOf(pose), transform: { mode: pose.rotation_mode } }) : []),
+      ...customProperties(pose, base), ...(pruned ? [] : [...pose.constraints].map((c) => knob(`${base}.constraints${key(c.name)}.influence`, c.influence, { type: 'FLOAT', subtype: 'FACTOR', hard_min: 0, hard_max: 1 }))),
+      ...(!pruned && ob.data.bones.get(pose.name).bbone_segments > 1 ? bboneShape(pose).map(([path, v]) => knob(`${base}.${path}`, v, { type: 'FLOAT' })) : [])];
   });
 }
 

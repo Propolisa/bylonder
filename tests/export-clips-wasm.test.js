@@ -109,8 +109,9 @@ async function deskLamp() {
   const { world, sync, node } = openExample('desk-lamp');
   sync.view();
   const lamp = node('Lamp');
-  // Exact clips, which pose the lamp as Main does; tests/clip-compression.test.js checks the compressed ones' bounds.
-  const files = await exportModule(world, { animations: 'CLIPS', clipCompression: 'OFF', scope: 'SELECTED', selected: [lamp], runtimes: { ARMATURE: { runtime: 'MAPPED', instances: {} } } });
+  // Exact clips, which pose the lamp as Main does; tests/clip-compression.test.js checks the compressed ones' bounds. Its
+  // skeleton has only the bones that skin (Deform Bones Only).
+  const files = await exportModule(world, { animations: 'CLIPS', clipCompression: 'OFF', deformBonesOnly: true, scope: 'SELECTED', selected: [lamp], runtimes: { ARMATURE: { runtime: 'MAPPED', instances: {} } } });
   const groups = groupsOf(files);
   assert.deepEqual(groups.map((g) => g.name), ['RigAction']);
   const table = groups[0].bylonderTracks;
@@ -127,6 +128,7 @@ async function deskLamp() {
     new FreeCamera('Eye', Vector3.Zero(), scene);
     assert.ok(scene.animationGroups.length === 1 && !scene.animationGroups[0].isStarted, "loaded into the page's scene, the clip waits");
     const mesh = blend.entries.meshes.find((m) => m.name === 'Lamp');
+    assert.ok(mesh.skeleton.bones.every((b) => skins(rig.data.bones.get(b.name.split('#')[0]))), 'a skeleton of the bones that skin');
     // Main's corners of the lamp at a frame (Babylon's axes), and the page's, skinned on the CPU.
     const corners = (frame) => {
       sync.frameChanged(frame);

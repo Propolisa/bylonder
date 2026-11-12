@@ -122,6 +122,15 @@ function driverEntity(collection, id, fc, properties, time, skeletons) {
     outputs: { value: { property: written } } }];
 }
 
+/** The names of an armature's bones whose transforms the drivers of every ID read (a bone target off a Single Property). */
+export function bonesDriversRead(arm) {
+  const data = blendData(), names = new Set();
+  for (const collection of Object.values(COLLECTIONS)) for (const id of data[collection] ?? []) for (const fc of id.animation_data?.drivers ?? []) {
+    for (const variable of fc.driver.variables) if (variable.type !== 'SINGLE_PROP') for (const t of variable.targets) if (t.id?.name === arm.name && t.bone_target) names.add(t.bone_target);
+  }
+  return names;
+}
+
 // The drivers of every ID that the page can run on `properties`, as IR entities by key; `skeletons`, the skeleton
 // and skinned mesh drawing each armature, by its name, for drivers that read bones.
 export function driverEntities(properties, skeletons = {}) {

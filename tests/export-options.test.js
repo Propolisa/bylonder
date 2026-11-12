@@ -8,14 +8,14 @@ import { exportSampling } from '../src/io_scene_babylon/sampling.js';
 const warnings = [];
 console.warn = (message) => warnings.push(message);
 
-assert.deepEqual(exportOptions(), { scope: 'SCENE', eeveeParity: false, hostCompression: false, bakeAnimation: false, animations: 'TIMELINE', clipCompression: 'STANDARD', sampleRate: { rate: null, instances: {} }, bundle: true, minify: true, controlPanel: true, navigation: 'FIXED', navigationModes: {}, devTools: 'CDN', target: 'BOTH', runtime: null, replace: [], runtimes: {}, branchState: null, branches: {} }, 'defaults');
+assert.deepEqual(exportOptions(), { scope: 'SCENE', eeveeParity: false, hostCompression: false, bakeAnimation: false, deformBonesOnly: false, animations: 'TIMELINE', clipCompression: 'STANDARD', sampleRate: { rate: null, instances: {} }, bundle: true, minify: true, controlPanel: true, navigation: 'FIXED', navigationModes: {}, devTools: 'CDN', target: 'BOTH', runtime: null, replace: [], runtimes: {}, branchState: null, branches: {} }, 'defaults');
 assert.deepEqual(TARGETS.map(([id]) => id), ['BOTH', 'WEBGPU', 'WEBGL2'], "the targets' identifiers");
 for (const [id] of TARGETS) assert.equal(exportOptions({ target: id }).target, id, `${id} is kept`);
 for (const id of ['TIMELINE', 'CLIPS', 'BOTH']) assert.equal(exportOptions({ animations: id }).animations, id, `Animations ${id} is kept`);
 for (const id of ['OFF', 'FINE', 'STANDARD', 'SMALL']) assert.equal(exportOptions({ clipCompression: id }).clipCompression, id, `Clip Compression ${id} is kept`);
 
 const repaired = exportOptions({ eeveeParity: true, hostCompression: 'yes', minify: false, target: 'WEBGL1' });
-assert.deepEqual(repaired, { scope: 'SCENE', eeveeParity: true, hostCompression: false, bakeAnimation: false, animations: 'TIMELINE', clipCompression: 'STANDARD', sampleRate: { rate: null, instances: {} }, bundle: true, minify: false, controlPanel: true, navigation: 'FIXED', navigationModes: {}, devTools: 'CDN', target: 'BOTH', runtime: null, replace: [], runtimes: {}, branchState: null, branches: {} }, 'bad values repaired, good ones kept');
+assert.deepEqual(repaired, { scope: 'SCENE', eeveeParity: true, hostCompression: false, bakeAnimation: false, deformBonesOnly: false, animations: 'TIMELINE', clipCompression: 'STANDARD', sampleRate: { rate: null, instances: {} }, bundle: true, minify: false, controlPanel: true, navigation: 'FIXED', navigationModes: {}, devTools: 'CDN', target: 'BOTH', runtime: null, replace: [], runtimes: {}, branchState: null, branches: {} }, 'bad values repaired, good ones kept');
 assert.equal(warnings.length, 2, 'one warning per repaired value');
 assert.match(warnings.join('\n'), /target: "WEBGL1" is not valid, "BOTH" used/);
 assert.equal(exportOptions({ scope: 'SELECTED' }).bundle, false, "Selected Objects default to modules, loading with the page's own Babylon.js");

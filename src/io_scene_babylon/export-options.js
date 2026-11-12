@@ -107,6 +107,8 @@ export const ExportOptionsSchema = z.object({
   hostCompression: repaired('hostCompression', z.boolean(), false),
   /** a package's animation sampled per frame where Babylon cannot play its F-Curves, instead of run as F-Curves in the page */
   bakeAnimation: repaired('bakeAnimation', z.boolean(), false),
+  /** skeletons with only the bones that skin (skeleton-export.js) */
+  deformBonesOnly: repaired('deformBonesOnly', z.boolean(), false),
   /** what the animation exports as (ANIMATIONS): the timeline's group, a group per action (clips), or both */
   animations: repaired('animations', z.enum(ANIMATIONS.map(([id]) => id)), 'TIMELINE'),
   /** how clips' bone keys are compressed (CLIP_COMPRESSION) */
