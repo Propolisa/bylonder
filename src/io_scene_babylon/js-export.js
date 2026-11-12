@@ -95,7 +95,12 @@ function parsedClasses(data) {
     if (!value || typeof value !== 'object') return;
     if (value.isCube) names.add(value.isRenderTarget ? 'RenderTargetTexture' : 'CubeTexture');
     else if (value.isRenderTarget) names.add(value.mirrorPlane ? 'MirrorTexture' : 'RenderTargetTexture');
-    for (const [key, v] of Object.entries(value)) (key === 'customType' || key === 'className') && typeof v === 'string' ? names.add(v) : walk(v);
+    for (const [key, v] of Object.entries(value)) {
+      if ((key === 'customType' || key === 'className') && typeof v === 'string') names.add(v);
+      // A StandardMaterial's Fresnel parameters, which its parse reads through the registry.
+      else if (key.endsWith('FresnelParameters') && v) names.add('FresnelParameters');
+      else walk(v);
+    }
   };
   walk(data);
   return [...[...names].map(babylonModule).filter(Boolean), ...(names.has('BABYLON.NodeMaterial') ? NODE_MATERIAL_INCLUDES : [])];
