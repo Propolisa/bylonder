@@ -58,7 +58,8 @@ export function bboneSegments(inst, b, rest = false) {
   }
   // The pose shape depends on the bone and its handle bones only (driven values wake the bone): kept until one changes.
   if (e && e.stamp === inst.pass) return e.joints;
-  if (e && inst.boneChangedPass && handlesOf(inst, b).every((h) => inst.boneChangedPass[h] < e.stamp)) { e.stamp = inst.pass; return e.joints; }
+  // During evaluate() the change record is the previous pass's: keep only this pass's shapes then.
+  if (e && !inst.evaluating && inst.boneChangedPass && handlesOf(inst, b).every((h) => inst.boneChangedPass[h] < e.stamp)) { e.stamp = inst.pass; return e.joints; }
   const joints = bboneJoints(inst.program.bones[b], c.ctx, false);
   map.set(b, { stamp: inst.pass, joints });
   return joints;

@@ -213,8 +213,17 @@ function jointInto(out, o, tx, ty, tz, roll, sx, sz, S, px, py, pz) {
 }
 const JOINT = new Float64Array(9);
 
-// The context bboneJoints reads, over a RigInstance (pose: final pose matrices; rest: rest matrices).
+// The context bboneJoints reads, over a RigInstance (pose: final pose matrices; rest: rest matrices). It reads the
+// instance live; only its grouping of driven B-Bone values is kept, until a driver writes one again.
 export function bboneContext(inst) {
+  const version = inst.bboneValuesVersion ?? 0;
+  if (inst.bboneCtx?.version === version) return inst.bboneCtx.ctx;
+  const ctx = makeContext(inst);
+  inst.bboneCtx = { version, ctx };
+  return ctx;
+}
+
+function makeContext(inst) {
   const P = inst.program;
   if (!P.connectedChild) {
     P.connectedChild = new Int32Array(P.bones.length).fill(-1);

@@ -53,7 +53,7 @@ function contributions(targets, origin) {
     const restInv = t.bone.restInv ??= invert(rest);
     const pose = mul(Ai, t.world);
     if (!t.bone.segments) { parts.push({ w, D: mul(pose, restInv), B: rest, A, Ai }); continue; }
-    const Jp = t.bone.segments(false), Jr = t.bone.restSegments ??= t.bone.segments(true), n = t.bone.bone.bbone_segments;
+    const Jp = t.bone.segments(false), Jr = t.bone.segments(true), n = t.bone.bone.bbone_segments;
     const B = (j) => mul(rest, Jr.subarray(j * 16, j * 16 + 16));
     const Dj = (j) => mul(mul(pose, Jp.subarray(j * 16, j * 16 + 16)), invert(B(j)));
     // Straight mapping: the origin's rest Y along the bone, scaled to 0..n.

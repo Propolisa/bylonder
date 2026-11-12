@@ -256,7 +256,7 @@ export class RigProgram {
     // Drivers that read the frame (the `frame` name in an expression, or a Context Property).
     this.frameDriverOp = at(driverOp.filter((_, i) => {
       const d = this.drivers[i];
-      return d.variables.some((v) => v.kind === 'context') || /frame/.test(d.expression?.source ?? '');
+      return d.variables.some((v) => v.kind === 'context') || /\bframe\b/.test(d.expression?.source ?? '');
     }));
     // Drivers to rerun when an input is set: those that read it, and those that write it (a driven channel wins).
     this.driversOn = new Map();
@@ -573,7 +573,7 @@ export class RigInstance {
     // A target bone: its rest and, for a B-Bone, its segment joints now (pose) and at rest (Armature constraint).
     this.boneRec = P.bones.map((b) => ({
       rest: this.restView[b.index], bone: b,
-      segments: (b.bbone_segments ?? 1) > 1 ? (rest) => bboneJoints(b, bboneContext(this), rest) : null,
+      segments: (b.bbone_segments ?? 1) > 1 ? (rest) => bboneSegments(this, b.index, rest) : null,
     }));
     this.ownerEnt = P.bones.map((b) => (P.parentReadsPre(b.index) ? boneEnt(b, (p) => this.preView[p]) : this.targetEnt[b.index]));
   }
@@ -625,6 +625,7 @@ export class RigInstance {
   evaluate() {
     const { ops } = this.program, dirty = this.dirty, changed = this.changed, runs = this.runs;
     this.pass = (this.pass ?? 0) + 1;
+    this.evaluating = true;
     let count = 0;
     for (let i = 0; i < ops.length; i++) {
       let need = dirty[i];
@@ -635,6 +636,7 @@ export class RigInstance {
       changed[i] = 0;
       if (need) { changed[i] = runs[i]() === false ? 0 : 1; dirty[i] = 0; count++; }
     }
+    this.evaluating = false;
     this.lastRun = count;
     // The bones whose final pose this evaluation may have changed (their op or their IK chain ran).
     const P = this.program;
@@ -724,8 +726,9 @@ export class RigInstance {
       }
       // Properties with a range store the value clamped to it (a target weight is 0..1).
       case 'armatureWeight': if (w.constraint.targetList[w.index]) w.constraint.targetList[w.index].weight = Math.min(1, Math.max(0, value)); break;
-      case 'boneData': (this.boneData ??= new Map()).set(`${w.bone}/${w.prop}`, value); break;
+      case 'boneData': (this.boneData ??= new Map()).set(`${w.bone}/${w.prop}`, value); this.bboneValuesVersion = (this.bboneValuesVersion ?? 0) + 1; break;
       case 'poseValue': {
+        this.bboneValuesVersion = (this.bboneValuesVersion ?? 0) + 1;
         const cur = this.poseValues?.get(`${w.bone}/${w.prop}`) ?? this.program.bones[w.bone].pose[w.prop];
         let v = value;
         if (Array.isArray(cur)) { v = cur.slice(); v[w.index ?? 0] = value; }
