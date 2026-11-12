@@ -5,8 +5,7 @@
 // file or that name it, the smoke checks of its areas (scripts/smoke-select.mjs), the workflows when every smoke check
 // is needed, the perf guard when drawing, rendering or evaluation changed, the export parity matrix
 // (tests/export-parity/matrix.mjs) on the examples the changes reach: its Node checks beside the unit tests, its browser
-// checks on the build after the production check. When every unit test is needed, the fast tier runs (npm run
-// test:fast); --full runs everything; --list only lists.
+// checks on the build after the production check. --full runs everything; --list only lists.
 import { spawn, execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { selectChecks } from './smoke-select.mjs';
@@ -51,7 +50,7 @@ const smokeEnv = selection.full ? {} : { SMOKE_CHECKS: selection.checks.join('\n
 // The production build alone first: its bundler needs most of the machine's memory.
 const results = [await run('build', 'npm', ['run', 'build'])];
 results.push(...await Promise.all([
-  ...(units?.length === 0 ? [] : [run('unit', process.execPath, ['scripts/run-tests.mjs', ...(units?.map((t) => t.slice('tests/'.length)) ?? (full ? [] : ['--fast']))], { JOBS: '2' })]),
+  ...(units?.length === 0 ? [] : [run('unit', process.execPath, ['scripts/run-tests.mjs', ...(units ?? []).map((t) => t.slice('tests/'.length))], { JOBS: '2' })]),
   parity('node'),
   ...(results[0].code ? [] : [
     ...shards('e2e', 'tests/e2e/smoke.mjs', Number(process.env.E2E_SHARDS) || 2, smokeEnv),

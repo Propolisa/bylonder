@@ -15,10 +15,9 @@ saying what a user gets. No WIP commits reach `main`; branches merge with `git m
 `main`: `node scripts/gates.mjs` passes. It runs the build and the production check, and of the rest only what the
 change can reach: the unit tests whose imports reach a changed file, the smoke checks of its areas, the workflows when
 every check is needed, the perf guard when drawing, rendering or evaluation changed (`--list` shows the selection,
-`--full` runs everything). When every unit test is needed, the gates run the fast tier (`npm run test:fast`, which
-leaves out tests marked `// Full suite only:`); CI's gates and the Pages deploy run every unit test, the build and the
-production check. This lighter local gate holds until the full suite is fast (target: `npm test` under about 15 min
-with `JOBS=1`); then the full suite runs locally again.
+`--full` runs everything). When every unit test is needed, the gates run them all (`npm test`); CI's gates and the
+Pages deploy do too, with the build and the production check. `npm run test:fast` is a quicker check while working: it
+leaves out tests marked `// Full suite only:`.
 
 ## Roadmap
 
@@ -44,7 +43,7 @@ When work is split across background agents, the coordinating session owns relea
 - One build at a time on the machine (`npm run build` and module builds share memory): an agent asks for the build
   slot and says when it is done. One agent at a time holds the right to rebuild the WASM module; others write seam
   source and hand it over.
-- An agent's work lands as one commit with a user-facing subject, after `npm run test:fast`, `npm run build` and
+- An agent's work lands as one commit with a user-facing subject, after `npm test`, `npm run build` and
   `npm run test:prod` pass on the merged tree. Each stable increment goes to `main` and its deploy is checked.
 
 ## Feature docs
