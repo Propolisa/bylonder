@@ -15,10 +15,13 @@ export const blenderMatrix = (matrix) => swapped(matrix.m);
 // module's memory into a buffer that grows by doubling and is otherwise reused, the bounds over the instances drawn.
 export function drawThinInstances(carrier, groups) {
   const metadata = (carrier.metadata ??= {}), length = groups.reduce((sum, group) => sum + group.data.length, 0);
-  let buffer = metadata.instances;
-  if (!(buffer?.length >= length)) {
-    buffer = metadata.instances = new Float32Array(Math.max(16, 2 ** Math.ceil(Math.log2(length))));
+  const grow = !(metadata.instances?.length >= length);
+  if (grow) metadata.instances = new Float32Array(Math.max(16, 2 ** Math.ceil(Math.log2(length))));
+  const buffer = metadata.instances;
+  // Set again on a geometry the carrier was given since (its source's, rebuilt): Babylon keeps the buffers on it.
+  if (grow || metadata.instancesGeometry !== carrier.geometry) {
     carrier.thinInstanceSetBuffer('matrix', buffer, 16, false);
+    metadata.instancesGeometry = carrier.geometry;
   }
   groups.reduce((offset, group) => { buffer.set(group.data, offset); return offset + group.data.length; }, 0);
   carrier.thinInstanceBufferUpdated('matrix');
