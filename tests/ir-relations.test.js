@@ -1,13 +1,16 @@
-// Full suite only: every example opened in a process of its own (90 s).
+// Full suite only: every example opened in a process of its own.
 // The IR's relation gaps (docs/licence-free-live.md, Relation gaps) on the examples: what a walk of ID pointers does not
 // see, and which of it the depsgraph's relations (deg-relations.cc), added to the IR's references, close. Kinds: `time`
 // (a driver reading `frame`, a Scene Time node, an image sequence), `camera` (the scene's active camera read through the
 // context), `view-layer` (a collection excluded in a view layer, an Is Viewport node), `info-link` (an Object or
 // Collection Info node given its ID by a link), `self` (Self Object). What stays open is listed per example.
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import { existsSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+
+const run = promisify(execFile);
 
 // The examples whose .blend has relations a pointer walk misses (Blender's demo files are not checked here), and those
 // the IR's references still miss once the depsgraph's are in them.
@@ -72,7 +75,10 @@ const id = process.argv[2];
 if (id) console.log(JSON.stringify(await gapsOf(id)));
 else {
   const examples = readdirSync(new URL('../examples/', import.meta.url)).filter((name) => existsSync(new URL(`../examples/${name}/${name}.blend`, import.meta.url)));
-  const found = Object.fromEntries(examples.map((name) => [name, JSON.parse(execFileSync(process.execPath, [fileURLToPath(import.meta.url), name], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] }).trim().split('\n').at(-1))]));
+  // Four examples at a time, each in its own process.
+  const gapsIn = async (name) => [name, JSON.parse((await run(process.execPath, [fileURLToPath(import.meta.url), name], { encoding: 'utf8', maxBuffer: 1 << 26 })).stdout.trim().split('\n').at(-1))];
+  const queue = [...examples], found = {};
+  await Promise.all(Array.from({ length: 4 }, async () => { while (queue.length) { const [name, kinds] = await gapsIn(queue.shift()); found[name] = kinds; } }));
   const listed = (key) => Object.fromEntries(Object.entries(found).filter(([name, kinds]) => kinds[key]?.length || GAPS[name]).map(([name, kinds]) => [name, kinds[key]]));
   const expected = (table) => Object.fromEntries(Object.entries(table).filter(([name]) => found[name]));
   assert.deepEqual(listed('gaps'), expected(GAPS), `relation gaps changed: ${JSON.stringify(listed('gaps'))}`);

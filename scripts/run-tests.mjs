@@ -24,16 +24,17 @@ const skipped = [...(ports ? [] : matching.filter(testsPort)), ...(fast ? matchi
 const tests = matching.filter((t) => !skipped.includes(t)).sort((a, b) => (times[b] ?? Infinity) - (times[a] ?? Infinity));
 if (skipped.length) console.log(`skip ${skipped.join(', ')} (ports the app does not ship, or full suite only)`);
 
-// A test's peak in MB: its process's and its largest child's (a test's children run one after another), or, not yet
+// A test's peak in MB: the most its processes held at once, each counted at its own peak while it ran, or, not yet
 // measured, a typical test's.
 const TYPICAL_MB = 600, RESERVE_MB = 2048;
 const peakOf = (test) => peaks[test] ?? TYPICAL_MB;
 const preload = `--import=${pathToFileURL('scripts/test-peak.mjs')}`;
 function readPeak(file) {
   try {
-    const [first, second = 0] = readFileSync(file, 'utf8').split('\n').filter(Boolean).map(Number).sort((a, b) => b - a);
+    const processes = readFileSync(file, 'utf8').split('\n').filter(Boolean).map((line) => line.split(' ').map(Number));
     rmSync(file);
-    return first + second;
+    const heldAt = (time) => processes.filter(([start, end]) => start <= time && time <= end).reduce((mb, [, , peak]) => mb + peak, 0);
+    return processes.length ? Math.max(...processes.map(([start]) => heldAt(start))) : undefined;
   } catch {
     return undefined;
   }
