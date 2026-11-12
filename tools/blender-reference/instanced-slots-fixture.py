@@ -1,5 +1,6 @@
-# Writes tests/fixtures/objects/instanced-slots.blend: a cube of two material slots (Red on its top, Blue elsewhere) in a
-# collection that two empties instance, the source collection excluded from the view layer.
+# Writes tests/fixtures/instanced-slots.blend: a cube of two material slots (Red on its top, Blue elsewhere) in a
+# collection that two empties instance, the source collection excluded from the view layer, and a cube Plain whose top
+# is in an empty slot.
 # usage: blender -b --factory-startup --python tools/blender-reference/instanced-slots-fixture.py -- OUT_FILE
 import bpy, sys
 
@@ -24,4 +25,11 @@ for x in (-2, 2):
     empty = bpy.data.objects.new(f"Instance {x}", None)
     empty.instance_type, empty.instance_collection, empty.location = "COLLECTION", props, (x, 0, 0)
     scene.collection.objects.link(empty)
+bpy.ops.mesh.primitive_cube_add(location=(0, 3, 0))
+plain = bpy.context.object
+plain.name = "Plain"
+plain.data.materials.append(bpy.data.materials["Blue"])
+plain.data.materials.append(None)
+for polygon in plain.data.polygons:
+    polygon.material_index = 1 if polygon.normal.z > 0.5 else 0
 bpy.ops.wm.save_as_mainfile(filepath=out)

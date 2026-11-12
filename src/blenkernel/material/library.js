@@ -9,14 +9,17 @@ import { declaration, defaults } from '../../nodes/blender/declarations.js';
 export const materialId = material => material.metadata?.wbId || material.name;
 // Slots as a MultiMaterial draws them: an empty one with Blender's default surface, as Babylon draws none there and waits
 // for ever on its shadows.
-export const drawnSlots = (scene, list) => list.map(m => m || scene.defaultMaterial);
+export const drawnSlots = (scene, list) => list.map(m => m || defaultSurface(scene));
 const imageFile = /\.(png|jpe?g|webp|gif|bmp|ktx2?|dds|env|hdr)$/i;
 
 // What an object without a material shows: Blender's default surface (material_default_surface_init), a Principled
-// BSDF at its defaults on a Material at its defaults (drawn from both sides).
+// BSDF at its defaults on a Material at its defaults (drawn from both sides); one per scene, made when first drawn.
+const surfaces = new WeakMap();
 function defaultSurface(scene) {
+  if (surfaces.has(scene)) return surfaces.get(scene);
   const material = new PBRMaterial('__defaultSurface', scene);
   applyPBR(material, principledPBR(defaults(declaration('shader', 'ShaderNodeBsdfPrincipled')).values, { use_backface_culling: false }));
+  surfaces.set(scene, material);
   return material;
 }
 
