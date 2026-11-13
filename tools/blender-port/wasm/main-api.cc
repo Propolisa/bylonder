@@ -714,6 +714,17 @@ EXPORT(object_mesh_eval) const ExtractionHeader *object_mesh_eval(BlenderMain *c
   return &ctx->extraction;
 }
 
+/* Whether instancing hides an object itself, in the viewport or a render: BKE_object_visibility on its evaluated copy
+ * (an instancer without Show Instancer for that mode) and, in a render, an object its parent instances on vertices or
+ * faces, as depsgraph_query_iter.cc's deg_object_hide_original decides (static there, so its test is repeated here). */
+EXPORT(object_instancing_hides) bool object_instancing_hides(BlenderMain *ctx, Object *ob, bool render)
+{
+  const Object *evaluated = DEG_get_evaluated(depsgraph_of(ctx), ob);
+  const int visibility = BKE_object_visibility(evaluated, render ? DAG_EVAL_RENDER : DAG_EVAL_VIEWPORT);
+  const bool instanced = render && ob->parent && (ob->parent->transflag & (OB_DUPLIVERTS | OB_DUPLIFACES));
+  return (visibility && !(visibility & OB_VISIBLE_SELF)) || instanced;
+}
+
 /* The draw buffers of the mesh object_mesh_eval last gave (draw-mesh.cc), with the index buffers `what` asks for
  * (DrawRequest), valid until the next call or draw_buffers_free. */
 /* `attributes`: the generic attributes its materials read, one name per line. */
