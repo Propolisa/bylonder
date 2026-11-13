@@ -473,8 +473,8 @@ import { unitFor } from './bylonder/units.js';` : ''}${blenderSpecular ? `
 import { blenderAreaSpecular } from './${AREA_SPECULAR}';` : ''}
 ${BABYLON_IMPORTS}
 
-// Images and scene.bin sit beside this module.
-const ROOT = new URL('./', import.meta.url).href;${areaLights ? `
+// Images and scene.bin sit beside this module (its folder by text: bundlers such as Vite rewrite new URL('./', ...)).
+const ROOT = import.meta.url.replace(/[^/]*$/, '');${areaLights ? `
 // Babylon's assets too, unless the page has its own: its area lights' LTC table, ${AREA_LIGHTS_LTC}.
 Tools.AssetBaseUrl ||= new URL('${BABYLON_ASSETS}', ROOT).href;` : ''}
 let geometryCount = 0;
