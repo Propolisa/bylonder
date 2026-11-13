@@ -9,16 +9,15 @@ import { dataAt } from '../src/io_scene_babylon/runtime/ir.js';
 import { openExample } from './open-example.js';
 
 const near = (a, b) => Math.abs(a - b) < 1e-6;
-const read = async (example) => {
-  const { world, sync } = openExample(example);
+const { world, sync } = openExample('rigged-character');
+const read = async () => {
   sync.view();
-  const files = await exportModule(world, { animations: 'CLIPS' });
-  return JSON.parse(files['scene.ir.json']);
+  return JSON.parse((await exportModule(world, { animations: 'CLIPS' }))['scene.ir.json']);
 };
 
 // A rig: its pose bones, each one's bone and constraints, and the actions they play.
 {
-  const ir = await read('rigged-character'), rig = [...blendData().objects].find((ob) => ob.type === 'ARMATURE');
+  const ir = await read(), rig = [...blendData().objects].find((ob) => ob.type === 'ARMATURE');
   const pose = rig.pose.bones[1], key = `OB:${rig.name}`;
   assert.equal(dataAt(ir, [key, `pose.bones["${pose.name}"].rotation_mode`]) ?? 'QUATERNION', pose.rotation_mode, 'a pose bone');
   const head = dataAt(ir, [key, `pose.bones["${pose.name}"].bone.head_local`]);
@@ -32,7 +31,6 @@ const read = async (example) => {
 // parents past the depth it writes structs to, and names each by where it is written in full instead of losing it
 // (a Rigify rig's DEF bone reaching the head's ROOT bone this way).
 {
-  const { world, sync } = openExample('rigged-character');
   const rig = [...blendData().objects].find((ob) => ob.type === 'ARMATURE'), C = contextStruct();
   C.view_layer.objects.active = rig;
   sync.blender.run('object.mode_set', { mode: 'EDIT' });
@@ -41,8 +39,7 @@ const read = async (example) => {
   chain.forEach((bone, i) => { if (i) bone.parent = chain[i - 1]; });
   Object.assign(lead, { bbone_segments: 2, bbone_handle_type_end: 'ABSOLUTE', bbone_custom_handle_end: chain.at(-1) });
   sync.blender.run('object.mode_set', { mode: 'OBJECT' });
-  sync.view();
-  const ir = JSON.parse((await exportModule(world, { animations: 'CLIPS' }))['scene.ir.json']), key = `OB:${rig.name}`;
+  const ir = await read(), key = `OB:${rig.name}`;
   for (let i = 0; i < chain.length; i++) {
     const at = (path) => dataAt(ir, [key, path])?.[2];
     assert.ok(near(at(`pose.bones["Chain-${i}"].bone.head_local`) ?? NaN, (i + 1) * 0.1), `Chain-${i}'s bone`);

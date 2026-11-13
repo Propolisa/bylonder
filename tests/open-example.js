@@ -40,7 +40,11 @@ export function exampleBlend(id) {
 }
 
 // `id`: an example's, or a .blend file's path or URL.
+let opened = null;
 export function openExample(id) {
+  // A second file would leave the first's world on its freed Main: wrong exports, then a corrupted heap.
+  if (opened) throw new Error(`openExample(${JSON.stringify(id)}): ${opened} is open already; Blender's module holds one Main, so open one file per process (spawn a child process for the next)`);
+  opened = JSON.stringify(String(id));
   // NullEngine has no GL to upload an image's pixels to.
   const engine = Object.assign(new NullEngine(), { updateTextureData() {} }), scene = new Scene(engine);
   const animation = createAnimationModel(() => {}, { ids: createBlenderIDs(blenderMain()) });

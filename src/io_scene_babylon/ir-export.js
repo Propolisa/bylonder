@@ -54,6 +54,22 @@ const LAYOUT = new Set(['location', 'color']);
 const BULK = /^(Keyframe|FCurveSample|MeshNormalValue|ReadOnlyInteger|Mesh(Vertex|Edge|Polygon|Loop|LoopTriangle|LoopColor|UVLoop|VertColor|Normal)|.*Attribute|.*AttributeValue|FloatVectorValueReadOnly|AttributeGroup.*|BezierSplinePoint|SplinePoint|ShapeKeyPoint|ShapeKeyBezierPoint|ShapeKeyCurvePoint|LatticePoint|Particle|ParticleKey|ChildParticle|ParticleHairKey|CurvePoint|CurveSlice|.*Stroke.*|GreasePencilFrame|GreasePencilDrawing|Depsgraph.*|ViewLayerEEVEE|UIList|Region.*|Area.*|Screen.*|KeyMap.*|Window.*)$/;
 
 const safe = (fn) => { try { return fn(); } catch { return undefined; } };
+/**
+ * A float RNA gives (RNA_property_float_get gives a C float) as the shortest number that reads back as the same float32,
+ * so the IR does not spell float32 values with float64's digits; arrays and anything else as they are.
+ */
+// A FLOAT property's values and limits, which RNA gives as floats, at their shortest float32 text.
+const FLOAT_FIELDS = ['default', 'soft_min', 'soft_max', 'hard_min', 'hard_max', 'blender_default'];
+const floatFields = (property) => ({ ...property, ...Object.fromEntries(FLOAT_FIELDS.filter((name) => name in property).map((name) => [name, float32(property[name])])) });
+export function float32(v) {
+  if (Array.isArray(v)) return v.map(float32);
+  if (typeof v !== 'number' || !Number.isFinite(v) || Math.fround(v) !== v) return v;
+  for (let digits = 1; digits < 9; digits++) {
+    const short = +v.toPrecision(digits);
+    if (Math.fround(short) === v) return short;
+  }
+  return +v.toPrecision(9);
+}
 // An ID, not a struct sharing its ID's data (an Object's display settings): the ID it belongs to is of its own type.
 const isID = (v, pointer) => pointer[1] === pointer[2] && pointerOf(v.id_data)?.[0] === pointer[0];
 const named = (item) => typeof item?.bl_rna === 'object' && [...item.bl_rna.properties].some((p) => p.identifier === 'name');
@@ -118,7 +134,7 @@ function walker(onReference) {
         const items = safe(() => [...v].map((item, i) => value(owner, `${at}${named(item) ? key(item.name) : `[${i}]`}`, item, depth))) ?? [];
         // A collection of bulk data whose type its property does not name (a shape key's points) is left out as such.
         if (!items.length || items.some((item) => item !== null)) out[name] = items;
-      } else out[name] = value(owner, at, v, depth);
+      } else out[name] = prop.type === 'FLOAT' ? float32(value(owner, at, v, depth)) : value(owner, at, v, depth);
     }
     return out;
   };
@@ -320,7 +336,7 @@ export function exportIR(world, { controls, collections = null, live, bin, anima
     writeGraph(tree, idKey(tree), graphs);
     return idKey(tree);
   }, readsFrame, states) } : {};
-  const properties = Object.fromEntries(controls.map(({ path, bind, ...property }) => [path, { id: pathID(path), ...property, ...(bind && { bind }) }]));
+  const properties = Object.fromEntries(controls.map(({ path, bind, ...property }) => [path, { id: pathID(path), ...(property.type === 'FLOAT' ? floatFields(property) : property), ...(bind && { bind }) }]));
   if (sync) {
     evaluatedIDs(ids, graphs, entities, sync, bin);
     idGraphs(ids, properties, graphs, sync.blender);
