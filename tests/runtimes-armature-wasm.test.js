@@ -366,15 +366,19 @@ bodyData.modifiers.remove(subdivision);
 blender.tag(bodyOb, 2);
 sync.view();
 
-// A second mesh the rig skins, placed apart from the body, needs a skeleton of its own: the export says so, naming it.
+// A second mesh the rig skins, placed apart from the body, reads the body's skeleton through its pose matrix (Babylon's
+// needInitialSkinMatrix), which the export writes with it.
 const apart = blendData().objects.new('Apart', bodyData.data);
 Object.assign(apart.modifiers.new('Armature', 'ARMATURE'), { object: rig });
 apart.location = [0, 0, 0.5];
 blendData().scenes[0].collection.objects.link(apart);
 sync.view();
 reports.length = 0;
-await serializeScene(world);
-assert.ok(reports.some((r) => r.type === 'WARNING' && /Apart: placed apart from Body, so Rig needs a skeleton per mesh/.test(r.message)), JSON.stringify(reports.map((r) => r.message)));
+const both = await serializeScene(world), entryOf = (name) => both.meshes.find((m) => m.name === name);
+assert.equal(entryOf('Apart').skeletonId, entryOf('Body').skeletonId, 'one skeleton');
+assert.ok(both.skeletons.find((s) => s.id === entryOf('Body').skeletonId).needInitialSkinMatrix, "which reads each mesh's pose matrix");
+assert.deepEqual(Array.from(entryOf('Apart').poseMatrix).slice(12, 15).map((v) => +v.toFixed(6)), [0, -0.5, 0], 'the mesh apart is half a metre up, Babylon Y');
+assert.ok(!reports.some((r) => r.type === 'WARNING'), JSON.stringify(reports.map((r) => r.message)));
 blendData().objects.remove(apart);
 sync.view();
 

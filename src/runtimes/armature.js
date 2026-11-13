@@ -216,17 +216,24 @@ export function mapArmature(arm, scene) {
       if (!view.length && (!stack.length || skinned.has(ob.name))) deformed.set(address(ob), ob);
       else if (!view.length) mapping.apart.set(address(ob), ob);
     }
-    const used = new Set();
+    const used = new Set(), spaceOf = (ob) => armatureWorld.multiply(Matrix.Invert(matrix(ob.matrix_world)));
+    // One skeleton in one mesh's space (the one it has, while its bones' rest holds); a mesh placed apart reads it
+    // through its pose matrix, the change from that space to its own (Babylon's needInitialSkinMatrix).
+    const [first] = deformed.values(), kept = [...skeletons.entries()].find(([id, skeleton]) => id === restSignature(bones, skeleton.space));
+    const base = kept?.[1].space ?? (first && spaceOf(first)), id = base && restSignature(bones, base);
+    if (first && !skeletons.has(id)) skeletons.set(id, skeletonOf(deformed.size > 1 ? `${arm.name} ${first.name}` : arm.name, bones, base, scene));
+    const poses = new Map([...deformed].map(([key, ob]) => [key, Matrix.Invert(base).multiply(spaceOf(ob))]));
+    const apart = [...poses.values()].some((pose) => !pose.isIdentity());
+    if (first) skeletons.get(id).needInitialSkinMatrix = apart;
     for (const [key, ob] of deformed) {
-      const space = armatureWorld.multiply(Matrix.Invert(matrix(ob.matrix_world))), id = restSignature(bones, space);
-      if (!skeletons.has(id)) skeletons.set(id, skeletonOf(deformed.size > 1 ? `${arm.name} ${ob.name}` : arm.name, bones, space, scene));
+      const space = spaceOf(ob), pose = poses.get(key);
       const skeleton = skeletons.get(id), modifier = armatureModifiers(ob, arm).mine[0];
       used.add(skeleton);
       let skin = skins.get(key);
       const dualQuaternions = modifier.use_deform_preserve_volume && dualQuaternionsOf(arm);
-      if (!skin || skin.skeleton !== skeleton || skin.setting !== influencers || skin.dualQuaternions !== dualQuaternions || changed(ob)) {
+      if (!skin || skin.skeleton !== skeleton || skin.apart !== apart || !skin.pose.equalsWithEpsilon(pose, 1e-6) || skin.setting !== influencers || skin.dualQuaternions !== dualQuaternions || changed(ob)) {
         const { perVertex, keyed } = vertexWeights(rests.get(key)?.ob ?? ob, bones, modifier, arm, Matrix.Invert(space));
-        skin = { ob: key, skeleton, setting: influencers, keyed, dualQuaternions, ...skinBuffers(meshOf(key), perVertex, influencersFor(influencers, perVertex)) };
+        skin = { ob: key, skeleton, pose, apart, setting: influencers, keyed, dualQuaternions, ...skinBuffers(meshOf(key), perVertex, influencersFor(influencers, perVertex)) };
         skins.set(key, skin);
       }
       issues.push(...meshApproximations(ob, arm, modifier).filter((i) => !issues.some((j) => j.setting === i.setting)), ...skinIssues(ob, skin));
@@ -260,6 +267,9 @@ export function applySkin(node, skin) {
   INDICES.forEach((kind, i) => (skin.indices[i] ? node.setVerticesData(kind, skin.indices[i], false, 4) : node.removeVerticesData(kind)));
   WEIGHTS.forEach((kind, i) => (skin.weights[i] ? node.setVerticesData(kind, skin.weights[i], false, 4) : node.removeVerticesData(kind)));
   node.numBoneInfluencers = skin.influencers;
+  // A skeleton that reads each mesh's pose matrix holds the meshes given it once it does.
+  if (skin.skeleton.needInitialSkinMatrix && node.skeleton === skin.skeleton) node.skeleton = null;
+  node.updatePoseMatrix(skin.pose);
   node.skeleton = skin.skeleton;
   dualQuaternions(node, skin.dualQuaternions);
 }
@@ -522,16 +532,6 @@ function boneParent(mappings, ob, byOb) {
   return null;
 }
 
-// A mapping that needs a skeleton per mesh space (a mesh placed apart from the others): the page then samples its bones,
-// without its pose controls, drivers or live constraints, which read one skeleton; each mesh apart, as a fallback.
-function skeletonIssues(mapping, byOb) {
-  if (mapping.skeletons.size < 2) return [];
-  const [first] = mapping.skeletons.values(), skins = [...mapping.skins], ob = (key) => idStruct(byOb.get(key).ob);
-  const anchor = ob(skins.find(([, skin]) => skin.skeleton === first)[0]).name;
-  return skins.filter(([, skin]) => skin.skeleton !== first).map(([key]) => issue(FALLBACK, ob(key), 'matrix_world',
-    `placed apart from ${anchor}, so ${mapping.arm.name} needs a skeleton per mesh: its bones are sampled, without pose controls, drivers or live constraints`));
-}
-
 // Export: every armature mapped that skins a mesh the export writes (all of the scene's, or of its selected objects:
 // `world.only`), those on Blender for the export's duration (their meshes skinned, then drawn as Blender evaluated them
 // again), with their issues and their pose's animation.
@@ -581,7 +581,7 @@ function exportArmatures(world, { bake, sampling, rests = appliedRests() }) {
     for (const key of state.applied.keys()) exporting.add(key);
   }
   return {
-    reports: mappings.map((m) => ({ title: `${m.arm.name}: exported`, issues: native(m, [...m.issues.filter((i) => !i.silent), ...skeletonIssues(m, byOb)]) })),
+    reports: mappings.map((m) => ({ title: `${m.arm.name}: exported`, issues: native(m, [...m.issues.filter((i) => !i.silent)]) })),
     get animations() { return posed().animations; },
     get curves() { return posed().curves; },
     get gaps() { return posed().gaps; },

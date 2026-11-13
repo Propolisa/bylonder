@@ -528,6 +528,11 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
     const entry = json.meshes.find((e) => e.uniqueId === node.uniqueId) ?? json.transformNodes?.find((e) => e.uniqueId === node.uniqueId);
     if (entry) entry.parentBone = { skeletonId: bone.getSkeleton().id, index: bone.getIndex(), meshId: mesh.uniqueId };
   }
+  // A mesh placed apart from its skeleton's space reads it through its pose matrix, which Babylon does not serialize.
+  for (const entry of json.meshes) {
+    const mesh = scene.getMeshByUniqueId(entry.uniqueId);
+    if (mesh?.skeleton?.needInitialSkinMatrix) entry.poseMatrix = mesh.getPoseMatrix().asArray();
+  }
   for (const entry of [...json.meshes, ...(json.transformNodes ?? []), ...json.lights, ...json.cameras]) {
     const transform = transforms.get(entry.uniqueId);
     if (!transform || entry.type === AREA_LIGHT) continue;

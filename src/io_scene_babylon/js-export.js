@@ -403,6 +403,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   volumes?.dispose();
   parentInstances(objects);
   const parented = [...data.transformNodes, ...data.meshes, ...data.lights, ...data.cameras].filter((e) => e.parentId !== undefined);
+  const posed = data.meshes.filter((e) => e.poseMatrix);
   const onBones = [...data.transformNodes, ...data.meshes].filter((e) => e.parentBone)
     .map((e) => (pruned.has(e.parentBone.skeletonId) ? { ...e, parentBone: { ...e.parentBone, index: pruned.get(e.parentBone.skeletonId).get(e.parentBone.index) } } : e));
   const pipelineTypes = [...new Set(data.renderingPipelines.map((p) => p.customType))];
@@ -657,7 +658,9 @@ ${objectLines}
 ${parse('LIGHTS', data.lights, `nodes[entry.uniqueId] = ${areaLights ? 'parseLight(entry, scene, AreaLight)' : 'Light.Parse(entry, scene)'}`)}${parse('CAMERAS', data.cameras, 'nodes[entry.uniqueId] = orthoScaled(parseCamera(entry, scene))')}
 ${parented.map((e) => `  nodes[${e.uniqueId}].parent = nodes[${e.parentId}] ?? null;`).join('\n')}${onBones.length ? `
   // Objects parented to bones, hung from them as the bones' meshes are skinned.
-${onBones.map((e) => `  nodes[${e.uniqueId}].attachToBone(lookup.getSkeletonById(${json(e.parentBone.skeletonId)}).bones[${e.parentBone.index}], nodes[${e.parentBone.meshId}]);`).join('\n')}` : ''}${data.lights.some((l) => l.excludedMeshesIds?.length || l.includedOnlyMeshesIds?.length) ? `
+${onBones.map((e) => `  nodes[${e.uniqueId}].attachToBone(lookup.getSkeletonById(${json(e.parentBone.skeletonId)}).bones[${e.parentBone.index}], nodes[${e.parentBone.meshId}]);`).join('\n')}` : ''}${posed.length ? `
+  // Meshes placed apart from their skeleton's space, which they read through their pose matrices.
+${posed.map((e) => `  nodes[${e.uniqueId}].updatePoseMatrix(Matrix.FromArray(${json(Array.from(e.poseMatrix))}));`).join('\n')}` : ''}${data.lights.some((l) => l.excludedMeshesIds?.length || l.includedOnlyMeshesIds?.length) ? `
   // The meshes each light leaves out or lights alone, by id, as Babylon's loader resolves them once the meshes exist.
   const meshes = (ids) => ids.map((id) => lookup.getMeshById(id)).filter(Boolean);
   for (const entry of LIGHTS) {

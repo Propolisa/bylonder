@@ -4,7 +4,7 @@
 // apart has a skeleton of its own, and the armature keeps its controls, the properties the runtime reads among them, as
 // Snow's helper meshes need.
 import assert from 'node:assert/strict';
-import { NullEngine, VertexBuffer } from '@babylonjs/core';
+import { Matrix, NullEngine, Vector3, VertexBuffer } from '@babylonjs/core';
 import { blendData, contextStruct } from '../src/python/bpy_rna.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
 import { subscribeReports } from '../src/windowmanager/wm-reports.js';
@@ -58,6 +58,21 @@ const center = (f) => {
 };
 const moved = center(1).subtract(center(11)).length();
 assert.ok(moved > 1e-3, `the body moves between frames 1 and 11 (${moved})`);
+// The mesh placed apart reads the same skeleton through its pose matrix.
+const placed = blend.scene.getMeshByName('Apart');
+assert.equal(placed.skeleton, drawn.skeleton, 'one skeleton for the armature');
+const centerOf = (mesh, f) => { blend.set(frame, f); blend.scene.render(); mesh.refreshBoundingInfo({ applySkeleton: true }); return mesh.getBoundingInfo().boundingBox.centerWorld.clone(); };
+// Main's evaluated box center of a mesh object at a frame, in Babylon's axes.
+const mainCenter = (name, f) => {
+  sync.frameChanged(f);
+  const p = sync.blender.evaluatedMesh(sync.objectOf(world.objects.find((n) => n.name === name))).vert_positions, w = Matrix.FromArray(Array.from(data.objects.get(name).matrix_world).flatMap((c) => (typeof c === 'object' ? Array.from(c) : [c])));
+  const lo = [Infinity, Infinity, Infinity], hi = [-Infinity, -Infinity, -Infinity];
+  for (let v = 0; v < p.length; v += 3) { const q = Vector3.TransformCoordinates(new Vector3(p[v], p[v + 1], p[v + 2]), w); [q.x, q.z, q.y].forEach((x, k) => { lo[k] = Math.min(lo[k], x); hi[k] = Math.max(hi[k], x); }); }
+  return new Vector3(...lo.map((x, k) => (x + hi[k]) / 2));
+};
+// Within the Solidify the rest holds (a centimetre).
+for (const f of [1, 11]) assert.ok(centerOf(placed, f).subtract(mainCenter('Apart', f)).length() < 0.01, `frame ${f}: the mesh apart follows the pose as Main's`);
+assert.ok(centerOf(placed, 1).subtract(centerOf(placed, 11)).length() > 0.1, 'and moves');
 assert.equal(drawn.getTotalVertices(), drawn.getVerticesData(VertexBuffer.MatricesWeightsKind).length / 4, 'every vertex is weighted');
 blend.dispose();
 written.remove();
