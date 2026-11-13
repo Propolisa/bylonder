@@ -5,7 +5,7 @@
 import { Constants, Texture } from '@babylonjs/core';
 import { blenderModule } from '../bmesh/bmesh-wasm.js';
 import { blendData, contextStruct, pointerOf } from '../python/bpy_rna.js';
-import { pngDataUrl, webImage } from './data-url.js';
+import { imageDataUrl, webImage } from './data-url.js';
 import { fileBytes } from '../blenkernel/packed-file.js';
 
 const { exports: x, withArrays } = blenderModule;
@@ -55,8 +55,9 @@ function upload(engine, image, pointer) {
 
 // An image's texture as an export writes it, from Blender's data rather than a GPU read-back, so a headless export
 // writes the same file: the image's own file (packed, or read) when Blender has it unchanged in a format browsers
-// load; else its buffer as a PNG, a float buffer straight as Babylon's own materials sample it and at 8 bits as
-// Babylon's read-back encodes it (GenerateBase64StringFromPixelData). Either way its rows are top first, so its
+// load; else its buffer (data-url.js imageDataUrl: opaque sRGB color as a JPEG, the rest as a PNG), a float buffer
+// straight as Babylon's own materials sample it and at 8 bits as Babylon's read-back encodes it
+// (GenerateBase64StringFromPixelData). Either way its rows are top first, so its
 // texture inverts Y. null for a texture of no Image.
 export function imageFile(texture) {
   const internal = texture.getInternalTexture();
@@ -68,7 +69,7 @@ export function imageFile(texture) {
   const buffer = imageBuffer(pointerOf(image)[2]);
   if (!buffer) return null;
   const rgba = buffer.float ? Uint8Array.from(image.pixels, (v) => Math.min(1, Math.max(0, v)) * 255) : buffer.pixels.slice();
-  return pngDataUrl(rgba, buffer.width, buffer.height);
+  return imageDataUrl(rgba, buffer.width, buffer.height, { srgb: buffer.srgb });
 }
 
 // Every image's texture filled again from Blender's buffer (after a lost context).

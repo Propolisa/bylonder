@@ -1,6 +1,7 @@
 // Image files as data URLs, encoded the same way in the browser and in Node (no canvas): an export writes identical
 // image files from either.
 import { zlibSync } from 'fflate';
+import { encodeJpeg } from './jpeg.js';
 
 function crc32(bytes) {
   let crc = ~0;
@@ -47,4 +48,11 @@ export function pngDataUrl(rgba, width, height) {
   const png = new Uint8Array(parts.reduce((n, part) => n + part.length, 0));
   parts.reduce((at, part) => (png.set(part, at), at + part.length), 0);
   return dataUrl('image/png', png);
+}
+
+// Converted pixels as an export writes them: opaque sRGB color as a JPEG (about a fifth of the PNG's size), anything
+// else (data, alpha, a float buffer's bytes) as a lossless PNG.
+export function imageDataUrl(rgba, width, height, { srgb = false } = {}) {
+  const opaque = () => { for (let i = 3; i < rgba.length; i += 4) if (rgba[i] !== 255) return false; return true; };
+  return srgb && opaque() ? dataUrl('image/jpeg', encodeJpeg(rgba, width, height)) : pngDataUrl(rgba, width, height);
 }
