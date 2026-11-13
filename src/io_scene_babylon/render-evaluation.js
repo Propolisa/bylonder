@@ -17,7 +17,10 @@ const LEVELED = { SUBSURF: ['levels', 'render_levels'], MULTIRES: ['levels', 're
 export function evaluateForRender(world) {
   if (!world.mainSync) return () => {};
   const scene = sceneOf(world.mainSync);
-  const shown = [...collectionTree(scene.collection).slice(1), ...scene.objects].filter((id) => id.hide_viewport && !id.hide_render);
+  // With them, what a driver of Disable in Renders may switch on in the page (a rig's other look), shown but left out
+  // of renders as it is, so the export reads it too.
+  const switchable = (id) => [...(id.animation_data?.drivers ?? [])].some((fc) => fc.data_path === 'hide_render');
+  const shown = [...collectionTree(scene.collection).slice(1), ...scene.objects].filter((id) => id.hide_viewport && (!id.hide_render || switchable(id)));
   const modifiers = [...scene.objects].flatMap((ob) => [...(ob.modifiers ?? [])].filter((m) => !m.show_viewport && m.show_render).map((m) => [ob, m]));
   for (const [ob, m] of [...scene.objects].flatMap((o) => [...(o.modifiers ?? [])].map((m) => [o, m]))) {
     const [viewport, render] = LEVELED[m.type] ?? [];
