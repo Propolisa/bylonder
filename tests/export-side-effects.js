@@ -1,8 +1,8 @@
 // Every example's exported package loads on its own, as a page loads it: a process that imports only the package's
 // scene.js (its ES modules as shipped, @babylonjs/core resolvable) and Babylon's NullEngine, then the same package
 // bundled. A Babylon module the package uses without importing it (a "needs to be imported" side effect: the collision
-// coordinator, ColorCurves' parser) throws there, as on a page. Each example exports in a process of its own (one Main).
-import assert from 'node:assert/strict';
+// coordinator, ColorCurves' parser) throws there, as on a page. Each example exports in a process of its own (one Main);
+// the examples are checked in batches (export-side-effects-<n>-wasm.test.js), each a test of its own.
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -45,13 +45,17 @@ if (id) {
 
 // Examples whose scene loads files from the network as Node runs it (as examples.test.js skips them).
 const SKIPPED = { text: 'loads its font from Google Fonts', materials: 'loads its environment from assets.babylonjs.com' };
-const examples = readdirSync(new URL('../examples/', import.meta.url)).filter((name) => !name.includes('.') && !SKIPPED[name]).sort();
-const failures = [];
-for (const example of examples) {
-  const output = execFileSync(process.execPath, [fileURLToPath(import.meta.url), example], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] });
-  const { shipped, bundled } = JSON.parse(output.trim().split('\n').at(-1));
-  if (shipped) failures.push(`${example} as shipped: ${shipped}`);
-  if (bundled) failures.push(`${example} bundled: ${bundled}`);
+export const BATCHES = 4;
+/** The examples of batch `index` (of BATCHES) whose packages do not load alone, with why. */
+export function failingExamples(index) {
+  const examples = readdirSync(new URL('../examples/', import.meta.url)).filter((name) => !name.includes('.') && !SKIPPED[name]).sort()
+    .filter((_, i) => i % BATCHES === index);
+  const failures = [];
+  for (const example of examples) {
+    const output = execFileSync(process.execPath, [fileURLToPath(import.meta.url), example], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+    const { shipped, bundled } = JSON.parse(output.trim().split('\n').at(-1));
+    if (shipped) failures.push(`${example} as shipped: ${shipped}`);
+    if (bundled) failures.push(`${example} bundled: ${bundled}`);
+  }
+  return { examples, failures };
 }
-assert.deepEqual(failures, [], 'every example package loads alone');
-console.log(`Export side effects: ${examples.length} examples' packages load alone, as shipped and bundled`);

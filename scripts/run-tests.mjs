@@ -40,8 +40,10 @@ function readPeak(file) {
   }
 }
 
-// A test that runs five times its last time, and at least two minutes, is stopped with the processes it started.
-const limitOf = (test) => Math.max(120, 5 * (times[test] ?? 0)) * 1000;
+// A test that runs five times its last time, and at least two minutes or the limit its first line gives
+// (`// Time limit: <seconds> s`), is stopped with the processes it started.
+const declaredLimit = (test) => Number(/^\/\/ Time limit: (\d+) s/.exec(readFileSync(test, 'utf8'))?.[1] ?? 0);
+const limitOf = (test) => Math.max(120, declaredLimit(test), 5 * (times[test] ?? 0)) * 1000;
 const stop = (child) => (process.platform === 'win32' ? spawn('taskkill', ['/pid', String(child.pid), '/t', '/f']) : child.kill('SIGKILL'));
 
 let started = 0;
