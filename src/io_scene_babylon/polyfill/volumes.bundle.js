@@ -488,7 +488,26 @@ function jitterProjection(m, [dx, dy], width, height, orthographic = false) {
 }
 
 // src/overrides/webgpu/samplers.js
-import { ShaderStore } from "@babylonjs/core";
+import { MaterialPluginBase, PBRBaseMaterial, RegisterMaterialPlugin, ShaderStore } from "@babylonjs/core";
+var AREA_PRE_LIGHTING = { search: /preLightingInfo computeAreaPreLightingInfo\(/, replace: "\n#define inline\n$&" };
+var AreaLightInlinePlugin = class extends MaterialPluginBase {
+  /** @param {import('@babylonjs/core').Material} material */
+  constructor(material) {
+    super(material, "BlenderAreaLightInline", 300, {}, true, true);
+    this.doNotSerialize = true;
+  }
+  getClassName() {
+    return "BlenderAreaLightInlinePlugin";
+  }
+  isCompatible() {
+    return true;
+  }
+  /** @param {string} shaderType @param {number} [shaderLanguage] */
+  getCustomCode(shaderType, shaderLanguage = 0) {
+    return shaderType === "fragment" && shaderLanguage === 0 ? { [`!${AREA_PRE_LIGHTING.search.source}`]: AREA_PRE_LIGHTING.replace } : null;
+  }
+};
+RegisterMaterialPlugin("BlenderAreaLightInline", (material) => material instanceof PBRBaseMaterial && material.getScene().getEngine().isWebGPU ? new AreaLightInlinePlugin(material) : null);
 function callArguments(text, at) {
   const args = [];
   let depth = 0, start = at;

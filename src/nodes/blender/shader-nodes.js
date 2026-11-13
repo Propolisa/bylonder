@@ -35,7 +35,7 @@ import { readsSceneDepth, sceneDepth } from '../../render/scene-depth.js';
 import { BlenderFroxelPositionBlock, bindVolumeBounds, FROXEL_CLIP, FROXEL_CORNER, FROXEL_SLICE, VOLUME_BOUNDS, VOLUME_MATERIAL, VOLUME_TARGETS, volumeWrite } from '../../draw/volume-blocks.js';
 import { AREA_SPECULAR, CLUSTERED_SPECULAR, LIGHT_SPECULAR } from '../../blenkernel/light/area-specular.js';
 import { usesAreaLights } from '../../overrides/babylon/area-light-used.js';
-import { AREA_PRE_LIGHTING } from '../../overrides/webgpu/area-light-inline.js';
+import { AREA_PRE_LIGHTING } from '../../overrides/webgpu/samplers.js';
 import '../../overrides/babylon/graph-roots.js';
 import { AreaLitPBRBlock } from '../../overrides/babylon/pbr-block-area-lights.js';
 import { SharedShadowDepthWrapper } from '../../overrides/babylon/shared-shadow-depth.js';

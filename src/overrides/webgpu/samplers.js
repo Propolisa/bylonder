@@ -2,11 +2,27 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // Override of WebGPU's rules for GLSL: a function that takes an image as an argument gets a copy for each image it is called with, as WebGPU's GLSL (Vulkan's) takes a sampler only where it samples it; for the app's node materials and an exported page's; goes when Babylon's conversion does this itself.
 
-import { ShaderStore } from '@babylonjs/core';
+import { MaterialPluginBase, PBRBaseMaterial, RegisterMaterialPlugin, ShaderStore } from '@babylonjs/core';
 
 // Babylon's area light function, which takes the LTC images as arguments, marked `#define inline` so Babylon's WebGPU
 // engine inlines it (ShaderCodeInliner), sampling them in place; in a node material its include is written out marked.
 export const AREA_PRE_LIGHTING = { search: /preLightingInfo computeAreaPreLightingInfo\(/, replace: '\n#define inline\n$&' };
+// A PBR material's area light function marked so too, on WebGPU, by a plugin every PBR material made there carries
+// (an exported page's and the app's: a page that imports this file).
+class AreaLightInlinePlugin extends MaterialPluginBase {
+  /** @param {import('@babylonjs/core').Material} material */
+  constructor(material) {
+    super(material, 'BlenderAreaLightInline', 300, {}, true, true);
+    this.doNotSerialize = true;
+  }
+  getClassName() { return 'BlenderAreaLightInlinePlugin'; }
+  isCompatible() { return true; }
+  /** @param {string} shaderType @param {number} [shaderLanguage] */
+  getCustomCode(shaderType, shaderLanguage = 0) {
+    return shaderType === 'fragment' && shaderLanguage === 0 ? { [`!${AREA_PRE_LIGHTING.search.source}`]: AREA_PRE_LIGHTING.replace } : null;
+  }
+}
+RegisterMaterialPlugin('BlenderAreaLightInline', (material) => (material instanceof PBRBaseMaterial && material.getScene().getEngine().isWebGPU ? new AreaLightInlinePlugin(material) : null));
 const AREA_SETUP = 'pbrDirectLightingSetupFunctions';
 /** @param {string} text */
 const inlineAreaLights = (text) => {

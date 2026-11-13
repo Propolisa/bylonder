@@ -19,7 +19,7 @@ import { CurvesPlugin } from '../src/draw/curves.js';
 import { BlenderNodeMaterial, blenderDefaultTree, buildMaterial } from '../src/nodes/blender/shader-nodes.js';
 import { RigVertexTexturePlugin } from '../src/io_scene_babylon/runtime/native/babylon/gl-deform.js';
 import '../src/overrides/babylon/area-light-used.js';
-import '../src/overrides/webgpu/area-light-inline.js';
+import '../src/overrides/webgpu/samplers.js';
 
 if (!compilersPresent()) {
   console.log('WebGPU shaders: skipped, no public/webgpu compilers (npm run dev or npm run build fetches them)');
