@@ -37,6 +37,23 @@ export const REVERSED_FACES = '$reversed_faces';
 export const REVERSED_GLOBAL = 'float bl_reversed_faces = 0.0;';
 const reversedPasses = new WeakSet();
 /**
+ * A node material refracting the scene's environment, built again when one appears or goes: Babylon's refraction block
+ * declares its samplers only for an environment present at the build, while its define follows the scene's, so a
+ * material built before the world's environment no longer compiles once it is there.
+ * @param {import('@babylonjs/core').Material} material
+ */
+export function refractionFollowsEnvironment(material) {
+  if (!(material instanceof NodeMaterial)) return;
+  const refraction = /** @type {import('@babylonjs/core').RefractionBlock | null} */ (material.getBlockByPredicate((b) => b.getClassName() === 'RefractionBlock'));
+  if (!refraction || refraction.texture) return;
+  const scene = material.getScene();
+  let withEnvironment = !!scene.environmentTexture;
+  material.onBuildObservable.add(() => { withEnvironment = !!scene.environmentTexture; });
+  const observer = scene.onEnvironmentTextureChangedObservable.add(() => { if (!!scene.environmentTexture !== withEnvironment) material.build(); });
+  material.onDisposeObservable.addOnce(() => scene.onEnvironmentTextureChangedObservable.remove(observer));
+}
+
+/**
  * A material's per-mesh values set for each mesh it draws, as the app gives them (a material shared by meshes of other
  * sizes spans each one's own texture space), and whether its faces are drawn reversed: Babylon draws a separate culling
  * pass's back faces first, their winding reversed, then its front faces (shader-nodes.js ShaderNodeOutputMaterial.bind).

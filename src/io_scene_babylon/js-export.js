@@ -414,6 +414,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   const pieces = stripPieces(ir, shipped, replace), kernels = pieces && kernelsFile(pieces);
   const curves = Object.values(ir.entities).some((e) => e.implementation === 'curves');
   const meshValued = data.materials.some((m) => m.blocks?.some((b) => b.name.startsWith(MESH_VALUE)));
+  const refracting = data.materials.some((m) => m.blocks?.some((b) => b.customType === 'BABYLON.RefractionBlock'));
   // A composite convolving with Glare's Fog Glow kernel (compositor-replay.js fogGlowRecording), Blender's unless replaced,
   // with the Fog Glow render setting on.
   const fogGlow = !!composited && json(composited.compositor).includes('"op":"fogGlow"') && fogGlowOnGPU.enabled(world.scene), blenderFogGlow = fogGlow && !replaces(replace, FOG_GLOW_UNIT);
@@ -497,8 +498,8 @@ import './bylonder/overrides/babylon/srgb-texture-parse.js';
 import { lightBudget, reachLights } from './bylonder/overrides/babylon/light-reach.js';${clustered ? `
 import { clusterLights } from './bylonder/overrides/babylon/clustered-lights.js';` : ''}
 import { parseCamera } from './bylonder/overrides/babylon/camera-quaternion.js';
-import { orthoScaled } from './bylonder/ortho-scale.js';${kernels || meshValued ? `
-import { ${[kernels && 'fillMaterials', meshValued && 'meshValues'].filter(Boolean).join(', ')} } from './bylonder/materials.js';` : ''}${kernels ? `
+import { orthoScaled } from './bylonder/ortho-scale.js';${kernels || meshValued || refracting ? `
+import { ${[kernels && 'fillMaterials', meshValued && 'meshValues', refracting && 'refractionFollowsEnvironment'].filter(Boolean).join(', ')} } from './bylonder/materials.js';` : ''}${kernels ? `
 import kernels from './${NODE_KERNELS}';` : ''}${curves ? `
 // The curves blocks the materials drawing curves use, before they are parsed.
 import './${CURVES_GLSL_FILE}';` : ''}${volumes ? `
@@ -690,7 +691,9 @@ ${kernels ? `  // Blender's nodes of each material and world, made from the IR's
       // Node materials' samplers as WebGPU binds them.
       if (material.getClassName() === 'NodeMaterial') webgpuSamplers(material);` : ''}${meshValued ? `
       // Each mesh's own texture space, in the materials it shares.
-      meshValues(material);` : ''}${areaSpecular ? `
+      meshValues(material);` : ''}${refracting ? `
+      // A refraction of the scene's environment, built again as one appears or goes.
+      refractionFollowsEnvironment(material);` : ''}${areaSpecular ? `
       if (areaSpecular && material.getClassName() === 'PBRMaterial') areaSpecular(material);` : ''}
       return material;
     }`)}${parser(data.multiMaterials, 'multiMaterials', `(entry, key, made) => {
