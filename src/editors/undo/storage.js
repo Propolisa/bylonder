@@ -149,6 +149,15 @@ export function applyNative(objects, rows) {
   }
 }
 
+// Animation channels set back to a step's values: only those that differ, as each set writes Main and evaluates it, and
+// Main's undo has restored most already; so an undo costs what it changed, not how much the scene has.
+export function restoreChannels(channels, values = {}) {
+  for (const [ref, value] of Object.entries(values ?? {})) {
+    const channel = channels.get(ref);
+    if (channel && JSON.stringify(channel.get()) !== JSON.stringify(value)) channel.set(value);
+  }
+}
+
 // One undo history (docs/model.md): each step is a step of Blender's undo stack, Main's state (main-sync.js undoPush,
 // undo-api.cc), with what Babylon owns at that moment: its objects' native data and the extras' capture. Undo and redo
 // load Blender's step, which the view draws, then restore Babylon's.

@@ -36,7 +36,7 @@ import { createView3D } from "./editors/space_view3d/view3d.js";
 import "@babylonjs/core/Debug/debugLayer";
 
 import { createEditor } from "./editors/object/editor";
-import { createHistory } from "./editors/undo/storage";
+import { createHistory, restoreChannels } from "./editors/undo/storage";
 import { projectState, projectStateInWorker } from "./runtime/project-state.js";
 import { createWorld } from "./runtime/world.js";
 import { createRenderHost } from "./editors/render/host.js";
@@ -448,7 +448,7 @@ history = createHistory(world.objects, () => {
   registerObjects(animation, objects);
   for(const system of systems)for(const [key,value] of Object.entries(data?.stores?.[system.id]||{}))system.store.set(key,value);
   documentState.apply(data?.document);
-  for(const [ref,value] of Object.entries(data?.properties||{}))animation.channels.get(ref)?.set(value);
+  restoreChannels(animation.channels,data?.properties);
   world.modifiers.refresh();
   animation.load(data?.animation,{apply:false});
 },beforeCommit:()=>{animation.captureEdits();},main:()=>world.mainSync});
