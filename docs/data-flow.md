@@ -49,3 +49,20 @@ Each is checked by code; the column names where.
 | IR `entities` | Their inputs by reference | Exporter sends the entity; the scheduler reruns it and its readers |
 | IR `properties` | Their ID | Exporter; the page keeps the value a page set |
 | Buffers | Their entry | By content hash: sent only when new |
+
+## Built
+
+The exporter writes the tables (`scene-tables.js`), and `scene-patch.js` makes a patch by comparing two exports' entry
+hashes, so an export is still whole; exporting only what a datablock changed comes next. A page applies a patch with
+`blend.patch(patch)`, which resolves to the scene that shows it:
+
+- Tables, IR properties, IDs, collections, graphs and computed entities apply in place: a moved object keeps its node, a
+  changed material or geometry is swapped onto the meshes using it, a replaced entity runs again with what reads it.
+- A clip made again plays on in its new group from the frame it was at, as it was asked to play.
+- A patch from another version, or one changing the scene's own settings (world, pipelines, post-processes, compositor,
+  volumes, display), loads the package again, reported.
+- A patch naming a key, unique id or buffer the scene would not hold is not applied, reported, and the scene stays.
+
+Tests: `tests/export-patch-wasm.test.js`, `tests/export-patch-apply-wasm.test.js`, `tests/export-patch-entities-wasm.test.js`,
+`tests/export-patch-clips-wasm.test.js`. Not yet: the tables' own schemas (each table is read as written), and characters
+(`docs/character-animation.md`), which take a patched clip once their layers name actions by key.

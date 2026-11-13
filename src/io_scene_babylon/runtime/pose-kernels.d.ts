@@ -13,6 +13,7 @@ export function kernelSolve(kernels: any): ((pose: KernelPose) => Map<number, Ma
  */
 export function load(page: import("./scheduler.js").Page): Promise<{
     run: (inputs: any, context: any, entity: any) => {};
+    detach: (entity: any) => void;
 }>;
 export type KernelPose = {
     bones: {

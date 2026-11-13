@@ -26,6 +26,8 @@ export function load(page: {
     };
 }, solve?: (pose: any) => Map<number, Matrix>): {
     run: (inputs: any, context: any, entity: any) => {};
+    /** Forgets an entity a patch replaced or removed, or whose skeleton, mesh or morph targets it made again (the scheduler attaches it again on its next run). @param {any} entity */
+    detach: (entity: any) => void;
 };
 /**
  * A bone constraint as the export writes it, in Blender's terms. IK names its chain's bones, root first.

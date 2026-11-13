@@ -41,12 +41,14 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
      * @param {import('@babylonjs/core').Scene} scene
      * @param {any} ir the scene's IR (scene.ir.json), read with readIR
      * @param {{ root?: string, world?: { set(color: number[]): void }, compositor?: import('@babylonjs/core').NodeRenderGraph,
-     *   buffers?: import('./buffers.js').Buffers, entries?: import('./asset.js').Entries, dispose?: () => void }} [options]
+     *   buffers?: import('./buffers.js').Buffers, entries?: import('./asset.js').Entries, dispose?: () => void,
+     *   tables?: ReturnType<typeof import('./scene-tables.js').sceneTables>, reload?: (old: BlendScene<any>) => Promise<BlendScene<any>> }} [options]
      * the package's URL, which relative image URLs resolve against, the world of one color its background controls set
      * (world.js), the compositor its pass controls set (bylonder-blocks.js), scene.bin's buffers, which its entities
-     * read; loaded into a scene of the page's own, what was added there and what removes it (asset.js)
+     * read; loaded into a scene of the page's own, what was added there and what removes it (asset.js); the scene's tables,
+     * which `patch` changes, and what loads the package again in its place
      */
-    constructor(scene: import("@babylonjs/core").Scene, ir: any, { root, world, compositor, buffers, entries, dispose }?: {
+    constructor(scene: import("@babylonjs/core").Scene, ir: any, { root, world, compositor, buffers, entries, dispose, tables, reload }?: {
         root?: string;
         world?: {
             set(color: number[]): void;
@@ -55,6 +57,8 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
         buffers?: import("./buffers.js").Buffers;
         entries?: import("./asset.js").Entries;
         dispose?: () => void;
+        tables?: ReturnType<typeof import("./scene-tables.js").sceneTables>;
+        reload?: (old: BlendScene<any>) => Promise<BlendScene<any>>;
     });
     /** Told of each control's new value. @type {Observable<Change>} */
     onChanged: Observable<Change>;
@@ -290,6 +294,17 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
      * @param {Controls[P]} value
      */
     set<P extends keyof Controls & string>(path: P, value: Controls[P]): void;
+    /**
+     * Applies a patch of the package, made by exporting the same scene again after an edit, undo or redo
+     * (docs/data-flow.md): the entries it changes are made and swapped in at once, and the controls keep the page's values,
+     * those it has not set taking the patch's defaults. A patch from another version than the one shown, or of what a patch
+     * does not reach yet (computed entities, graphs, the scene's settings), loads the package again, reported. One that
+     * names what the scene would not hold is not applied, reported, and the scene stays as it was. Gives the scene that
+     * shows the result: this one, or the one loaded again.
+     * @param {import('./scene-tables.js').Patch} patch
+     * @returns {Promise<BlendScene<Controls>>}
+     */
+    patch(patch: import("./scene-tables.js").Patch): Promise<BlendScene<Controls>>;
     /** Resolves once what the last changes set going has run (an evaluator's first load). */
     settled(): Promise<void>;
     /** The controls, as Blender's RNA describes them. @returns {Control[]} */

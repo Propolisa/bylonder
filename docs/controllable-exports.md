@@ -121,6 +121,7 @@ blend.showCollection('Lane', false);                  // the outliner's eye; { c
 blend.playhead.pause();                               // the scene's one clock: play(), pause(), seek(12.5), frame, playing
 blend.playhead.snap = true;                           // whole frames only, as Blender's Frame Dropping shows them
 blend.playhead.keepRealTime(group);                   // an AnimationGroup or particle system left on Babylon's own clock
+blend = await blend.patch(patch);                     // a patch of the package after an edit (docs/data-flow.md)
 blend.dispose();
 ```
 

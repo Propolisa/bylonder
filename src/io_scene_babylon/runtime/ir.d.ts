@@ -28,6 +28,13 @@ export function explain({ issues }: {
     issues: any[];
 }, label?: string): string;
 /**
+ * A patch's entries of the IR's keyed parts as this runtime reads them, defaults filled (null where one is gone);
+ * throws, naming the path, what was expected and what is there, on one it cannot read.
+ * @param {Record<string, Record<string, any>>} tables
+ * @returns {Record<string, Record<string, any>>}
+ */
+export function readEntries(tables: Record<string, Record<string, any>>): Record<string, Record<string, any>>;
+/**
  * An IR file's data as this runtime reads it: an older version migrated, omitted fields given their defaults, and what
  * can be solved repaired with a warning (a property's type from its default, a reference to what the IR lacks dropped,
  * an implementation this runtime does not ship left baked, `order` made whole). Throws on what cannot be read, naming

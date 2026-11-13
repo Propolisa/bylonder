@@ -36,7 +36,7 @@ export function readAttribute(geometry: Geometry, component: Component, name: st
  */
 export function writeAttribute(geometry: Geometry, component: Component, name: string, domain: Domain, type: AttributeType, values: any[]): void;
 /** An attribute's values per element: numbers, booleans or tuples. @param {Attribute} attribute */
-export function elements({ type, data }: Attribute): number[] | boolean[] | any[][];
+export function elements({ type, data }: Attribute): number[] | any[][] | boolean[];
 /** An attribute of per-element values. @param {Domain} domain @param {AttributeType} type @param {any[]} values @returns {Attribute} */
 export function attribute(domain: Domain, type: AttributeType, values: any[]): Attribute;
 /** @typedef {'POINT' | 'EDGE' | 'FACE' | 'CORNER' | 'CURVE' | 'INSTANCE'} Domain */

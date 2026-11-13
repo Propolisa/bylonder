@@ -18,6 +18,20 @@ export function createClips(scene: import("@babylonjs/core").Scene, time: import
      * @param {PlayOptions} [options]
      */
     play(name: string, { loop, speed, weight }?: PlayOptions): import("@babylonjs/core").AnimationGroup;
+    /**
+     * The clips again once a patch made some of their groups again (BlendScene.patch): a clip playing plays on in its new
+     * group from the frame it was at, as it was asked to play; a clip gone stops.
+     * @param {Map<string, { frame: number, options: PlayOptions }>} playing the frame of each clip that was playing and how it was asked to play, by name
+     */
+    refresh(playing: Map<string, {
+        frame: number;
+        options: PlayOptions;
+    }>): void;
+    /** Each playing clip's frame and how it was asked to play, by name, for refresh. */
+    playing: () => Map<string, {
+        frame: number;
+        options: PlayOptions;
+    }>;
     /** Stops a clip, its targets left where it set them until the timeline or another clip sets them. @param {string} name */
     stop(name: string): void;
     /** Sets a clip's weight. @param {string} name @param {number} weight */

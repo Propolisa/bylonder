@@ -7,16 +7,17 @@
 // animation plays the baked samples, and the scheduler writes the live value after them each frame, running again
 // what reads the frame.
 import { runUnit, unitFor } from './units.js';
-import { dataAt, holdsReference, isReference, referencesIn } from './ir.js';
+import { dataAt, entityOrder, holdsReference, isReference, referencesIn } from './ir.js';
 import { drawGeometry } from './mesh.js';
 
 /**
  * An implementation the package ships: it runs an entity on its resolved inputs; `runChain` runs a chain of entities
- * that each read the one before, in one call, giving the last one's outputs; `draw` gives an IR mesh's draw buffers.
+ * that each read the one before, in one call, giving the last one's outputs; `draw` gives an IR mesh's draw buffers;
+ * `detach` lets go of what it holds for an entity a patch replaced or whose objects it made again.
  * @typedef {Record<string, any> | Promise<Record<string, any>>} Outputs
  * @typedef {{ run(inputs: Record<string, any>, context: { frame: number }, entity: import('./ir.js').Entity): Outputs,
  *   runChain?(run: [Record<string, any>, import('./ir.js').Entity][], context: { frame: number }): Outputs,
- *   draw?(mesh: import('./ir.js').Mesh): Promise<import('./mesh.js').DrawBuffers>, settled?(): Promise<void> }} Evaluator
+ *   draw?(mesh: import('./ir.js').Mesh): Promise<import('./mesh.js').DrawBuffers>, settled?(): Promise<void>, detach?(entity: import('./ir.js').Entity): void }} Evaluator
  * @typedef {{ get(path: string): any, write(path: string, value: any): void, set(path: string, value: any): void, frame(id?: string): number }} Controls `frame(id)`: the frame an ID shows (its time offset applied); `set`: a write from outside the scheduler's run, whose readers then run
  * What an implementation loads for: the page's scene, the package's URL, the IR, scene.bin's buffers and the properties.
  * @typedef {{ scene: import('@babylonjs/core').Scene, root: string, ir: import('./ir.js').IR, buffers: import('./buffers.js').Buffers, controls: Controls }} Page
@@ -41,36 +42,29 @@ const UNBAKED = ['curves', 'pointcloud']; // What a package draws only by runnin
 export const NATIVE = ['native'];
 const isTime = (/** @type {string} */ path) => path.endsWith('.frame_current');
 
-/**
- * @param {import('./ir.js').IR} ir
- * @param {Page} page
- */
+/** @param {import('./ir.js').IR} ir @param {Page} page */
 export function createScheduler(ir, page) {
   const { scene, controls } = page, { entities } = ir;
-  // Each entity's references, found once: its inputs are walked again only where they hold one.
+  // Each entity's references, found once (again when a patch replaces entities): inputs are walked only where they hold one.
   const readers = /** @type {Map<string, string[]>} */ (new Map()), timed = /** @type {string[]} */ ([]);
-  const references = new Map(Object.entries(entities).map(([key, entity]) => [key, [...referencesIn(entity.inputs)].map(([ref]) => ref)]));
-  for (const [key, refs] of references) for (const ref of refs) {
-    const from = 'property' in ref ? ref.property : 'entity' in ref ? ref.entity : null;
-    if (from) readers.set(from, [...(readers.get(from) ?? []), key]);
-    if ('property' in ref && isTime(ref.property)) timed.push(key);
-  }
+  const references = /** @type {Map<string, import('./ir.js').Reference[]>} */ (new Map());
+  const index = () => {
+    readers.clear(); references.clear(); timed.length = 0;
+    for (const [key, entity] of Object.entries(entities)) references.set(key, [...referencesIn(entity.inputs)].map(([ref]) => ref));
+    for (const [key, refs] of references) for (const ref of refs) {
+      const from = 'property' in ref ? ref.property : 'entity' in ref ? ref.entity : 'graph' in ref ? ref.graph : null;
+      if (from) readers.set(from, [...(readers.get(from) ?? []), key]);
+      if ('property' in ref && isTime(ref.property)) timed.push(key);
+    }
+  };
+  index();
   const dirty = new Set(), outputs = new Map(), loaded = new Map();
-  /** Meshes drawn with the modifier kernel's draw step where the package ships it. @type {import('./mesh.js').Drawing} */
-  const drawing = { nodeOf: (id) => ir.ids[id]?.node };
-  // Blender's kernels load only for an entity no registered unit runs.
-  if (Object.values(entities).some((e) => e.implementation === 'modifiers' && !unitFor(e.type))) {
-    drawing.meshBuffers = async (mesh) => /** @type {any} */ (await evaluator('modifiers')).draw(mesh);
-  }
-  if (Object.values(entities).some((e) => e.implementation === 'grease_pencil')) {
-    drawing.greasePencil = async (node, layer) => /** @type {any} */ (await evaluator('grease_pencil')).drawLayer(scene, node, layer);
-  }
-  if (Object.values(entities).some((e) => e.implementation === 'curves')) {
-    drawing.curves = async (node, curves) => /** @type {any} */ (await evaluator('curves')).drawCurves(node, curves);
-  }
-  if (Object.values(entities).some((e) => e.implementation === 'pointcloud')) {
-    drawing.pointcloud = async (node, cloud) => /** @type {any} */ (await evaluator('pointcloud')).drawPointCloud(node, cloud);
-  }
+  // What draws by its implementation, loaded when first drawn; meshes with the modifier kernel's draw step where the
+  // package ships it, Blender's kernels loading only for an entity no registered unit runs.
+  const by = (/** @type {string} */ name, /** @type {string} */ method) => async (/** @type {any[]} */ ...args) => /** @type {any} */ (await evaluator(name))[method](...args);
+  /** @type {import('./mesh.js').Drawing} */
+  const drawing = { nodeOf: (id) => ir.ids[id]?.node, greasePencil: (node, layer) => by('grease_pencil', 'drawLayer')(scene, node, layer), curves: by('curves', 'drawCurves'), pointcloud: by('pointcloud', 'drawPointCloud') };
+  if (Object.values(entities).some((e) => e.implementation === 'modifiers' && !unitFor(e.type))) drawing.meshBuffers = by('modifiers', 'draw');
   /** @type {Promise<void> | null} */
   let pending = null, frame = NaN;
 
@@ -125,9 +119,7 @@ export function createScheduler(ir, page) {
   const soleReader = (key) => (readers.get(key)?.length === 1 ? readers.get(key)?.[0] : undefined);
 
   /** @param {Promise<any>} promise */
-  const wait = (promise) => {
-    pending = promise.catch((error) => console.warn(error.message)).then(() => { pending = null; run(); });
-  };
+  const wait = (promise) => { pending = promise.catch((error) => console.warn(error.message)).then(() => { pending = null; run(); }); };
 
   /** Runs the marked entities in order, until one answers later. */
   const run = () => {
@@ -161,29 +153,36 @@ export function createScheduler(ir, page) {
 
   // After Babylon's animation: what reads the frame runs again when it changed, and live values are written over the baked ones.
   const replay = scene.onAfterAnimationsObservable.add(() => {
-    if (controls.frame() !== frame) {
-      frame = controls.frame();
-      timedLive().forEach(mark);
-      run();
-    }
+    if (controls.frame() !== frame) { frame = controls.frame(); timedLive().forEach(mark); run(); }
     for (const [key, result] of outputs) for (const [name, target] of Object.entries(entities[key].outputs)) {
       if (target && 'property' in target && result?.[name] !== undefined) controls.write(target.property, result[name]);
     }
   });
 
-  // What reads the frame loads its implementation now, so it runs as the first frame draws; a load that fails (the
-  // scene disposed and its files gone first) fails again when the entity runs, where it is reported.
+  // What reads the frame loads its implementation now, to run as the first frame draws (a failed load is reported then).
   timedLive().forEach((key) => Promise.resolve(implementation(key)).catch(() => {}));
-  // What the package bakes none of (curves, point clouds) and reads no property or entity runs once: nothing runs it later. What the
-  // package bakes (a modifier's mesh in scene.bin) stays as baked.
+  // What the package bakes none of (curves, point clouds) and reads nothing runs once; what it bakes stays as baked.
   Object.keys(entities).filter((key) => UNBAKED.includes(entities[key].implementation ?? '')
     && !(references.get(key) ?? []).some((ref) => 'property' in ref || 'entity' in ref)).forEach(mark);
   run();
 
   return {
     /** A property was set. @param {string} path */
-    changed(path) {
-      readers.get(path)?.forEach(mark);
+    changed: (path) => { readers.get(path)?.forEach(mark); run(); },
+    /** A patch replaced entities (null where gone), graphs, and the objects of those whose implementation `remade` names:
+     * each is let go of (`detach`), the order made again, and they, readers of a replaced graph and their readers run.
+     * @param {Record<string, import('./ir.js').Entity | null>} replaced @param {string[]} graphs @param {(name: string) => boolean} remade */
+    replace(replaced, graphs, remade) {
+      const again = Object.keys(entities).filter((key) => key in replaced || remade(entities[key].implementation ?? ''));
+      for (const key of again) {
+        /** @type {any} */ (loaded.get(entities[key].implementation ?? ''))?.detach?.(entities[key]);
+        outputs.delete(key);
+        if (replaced[key] === null) delete entities[key];
+      }
+      for (const [key, entity] of Object.entries(replaced)) if (entity) entities[key] = entity;
+      ir.order = entityOrder(entities);
+      index();
+      [...again, ...Object.keys(replaced), ...graphs.flatMap((graph) => readers.get(graph) ?? [])].filter((key) => entities[key]).forEach(mark);
       run();
     },
     /** The frames IDs show changed (a time offset): what reads the frame runs again. */

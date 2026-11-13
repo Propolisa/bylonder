@@ -58,11 +58,13 @@ export function tableKeys(world, ir, meshes) {
 }
 
 // The IR's parts as tables (docs/ir.md): IDs, collections, properties, graphs and entities by their keys, references by
-// the ID they start from, the scene's own settings as one entry. `order` is made again from the entities.
+// the ID they start from, the rate each baked object is sampled at by its name, and the scene's own settings as one
+// entry. `order` is made again from the entities.
 export function irTables({ ids, collections, properties, graphs, entities, references, scene }) {
   const referencesFrom = {};
   for (const reference of references) (referencesFrom[reference.from] ??= []).push(reference);
-  return { ids, collections, properties, graphs, entities, references: referencesFrom, irScene: { scene } };
+  const { sample_rates: sampleRates, ...time } = scene.time;
+  return { ids, collections, properties, graphs, entities, references: referencesFrom, sampleRates, irScene: { scene: { ...scene, time } } };
 }
 
 /**

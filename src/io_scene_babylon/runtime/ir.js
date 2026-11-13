@@ -298,6 +298,24 @@ export function explain({ issues }, label = '') {
   }).join('\n');
 }
 
+/** The schema of each of the IR's keyed parts, which a patch's entries take (BlendScene.patch). */
+const PARTS = { ids: IDSchema, collections: CollectionSchema, properties: PropertySchema, graphs: GraphSchema, entities: EntitySchema };
+
+/**
+ * A patch's entries of the IR's keyed parts as this runtime reads them, defaults filled (null where one is gone);
+ * throws, naming the path, what was expected and what is there, on one it cannot read.
+ * @param {Record<string, Record<string, any>>} tables
+ * @returns {Record<string, Record<string, any>>}
+ */
+export function readEntries(tables) {
+  return Object.fromEntries(Object.entries(tables).filter(([part]) => part in PARTS).map(([part, entries]) => [part, Object.fromEntries(Object.entries(entries).map(([key, entry]) => {
+    if (entry === null) return [key, null];
+    const parsed = z.safeParse(PARTS[/** @type {keyof typeof PARTS} */ (part)], entry, { reportInput: true });
+    if (!parsed.success) throw new Error(explain(parsed.error, `ir.${part}[${JSON.stringify(key)}]`));
+    return [key, parsed.data];
+  }))]));
+}
+
 /**
  * An IR file's data as this runtime reads it: an older version migrated, omitted fields given their defaults, and what
  * can be solved repaired with a warning (a property's type from its default, a reference to what the IR lacks dropped,

@@ -27,6 +27,7 @@ import { exportCompositor } from './compositor-export.js';
 import { fogGlowOnGPU } from '../compositor/compositor-replay.js';
 import { exportIR, idKey } from './ir-export.js';
 import { animationTables, irTables, keyed, tableKeys } from './scene-tables.js';
+import { packageState } from './scene-patch.js';
 import { channels, liveStack } from './modifiers-export.js';
 import { AREA_LIGHTS_LTC, AREA_SPECULAR, FOG_GLOW, PANEL_ICONS, BABYLON_ASSETS, CHUNKS, COMPILER_FOLDER, gplFolders, NODE_KERNELS, UNITS_FILE } from './runtime-files.js';
 import { AREA_SPECULAR_UNIT, FOG_GLOW_UNIT, PANEL_ICONS_UNIT, replaces, stripEntities, stripPieces, unitManifest } from './unit-manifest.js';
@@ -75,8 +76,8 @@ export async function createEngine(canvas, options = {}) {
 };
 // Where scene.js imports Babylon: the names its code uses, and the modules its data needs registered.
 const BABYLON_IMPORTS = '/* @babylonjs/core imports */';
-// Where scene.js names its scene.bin and IR's version, filled once they are written.
-const VERSION = '@scene-files-version@';
+// Where scene.js names its scene.bin and IR's version, and its tables', filled once they are written.
+const VERSION = '@scene-files-version@', TABLES_VERSION = '@scene-tables-version@';
 const number = (v) => +v.toFixed(7);
 const vector = (values) => values.map(number).join(', ');
 
@@ -550,7 +551,9 @@ const ANIMATION_GROUPS = ${json(tables.animationGroups)};
 const ANIMATIONS = ${json(tables.animations)};
 const RENDERING_PIPELINES = ${json(data.renderingPipelines)};
 const POST_PROCESSES = ${json(data.postProcesses)};
-const BUFFERS = ${json(bin.views)};${volumes ? `
+const BUFFERS = ${json(bin.views)};
+// The tables' version (scene-patch.js), which a patch names as its base.
+const TABLES_VERSION = '${TABLES_VERSION}';${volumes ? `
 const VOLUMES = ${json(volumes.config)};` : ''}${display ? `
 const DISPLAY = ${json(display)};` : ''}${composited ? `
 const COMPOSITOR = ${json(composited.compositor)};` : ''}
@@ -564,7 +567,7 @@ const SCREEN_SPACE = {${pipelineTypes.filter((type) => SCREEN_SPACE_PIPELINES[ty
 const PIPELINES = { ${pipelineClasses.join(', ')} };
 ` : ''}
 // Each built scene's IR, world, compositor and scene.bin buffers, which load gives its controls.
-const IRS = new WeakMap(), WORLDS = new WeakMap(), COMPOSITORS = new WeakMap(), SCENE_BUFFERS = new WeakMap();${bundle && webgpu ? `
+const IRS = new WeakMap(), WORLDS = new WeakMap(), COMPOSITORS = new WeakMap(), SCENE_BUFFERS = new WeakMap(), TABLES = new WeakMap();${bundle && webgpu ? `
 // Babylon's GLSL to WGSL compilers, which WebGPU needs, in the package.
 const compiler = (name) => ({ jsPath: new URL(\`${COMPILER_FOLDER}/\${name}.js\`, ROOT).href, wasmPath: new URL(\`${COMPILER_FOLDER}/\${name}.wasm\`, ROOT).href });
 const COMPILERS = { glslangOptions: compiler('glslang'), twgslOptions: compiler('twgsl') };` : ''}
@@ -577,7 +580,7 @@ ${engines(bundle)[target]}
 export async function load(target) {
   if (target.scene || target.instance) {
     const { ir, buffers } = target.instance ?? await readData(), options = { root: target.root,
-      controller: (view, entries, dispose) => new BlendScene(view, ir, { root: ROOT, buffers, entries, dispose }) };
+      controller: (view, entries, dispose) => new BlendScene(view, ir, { root: ROOT, buffers, entries, dispose, reload: (old) => { old.dispose(); return load(target); } }) };
     if (target.instance) return cloneAsset(target.instance.entries, options);
     const added = addAsset(target.scene, (into, lookup) => addObjects(into, { ir, buffers }, lookup), options);
     await shadersCompiled(target.scene);
@@ -587,7 +590,8 @@ export async function load(target) {
   warnUnlessMaximumLimits(engine);` : ''}
   const scene = await createScene(engine, engine.getRenderingCanvas());
   await shadersCompiled(scene);
-  ${controlPanel ? 'const blend = ' : 'return '}new BlendScene(scene, IRS.get(scene), { root: ROOT, world: WORLDS.get(scene), compositor: COMPOSITORS.get(scene), buffers: SCENE_BUFFERS.get(scene) });${controlPanel ? `
+  ${controlPanel ? 'const blend = ' : 'return '}new BlendScene(scene, IRS.get(scene), { root: ROOT, world: WORLDS.get(scene), compositor: COMPOSITORS.get(scene), buffers: SCENE_BUFFERS.get(scene), tables: TABLES.get(scene),
+    reload: (old) => { old.dispose(); return load(engine); } });${controlPanel ? `
   // The page's control panel, at the canvas's top right corner (none in Node).
   controlPanel(blend, ${json({ tools: devTools, navigation, offer: NAVIGATION.map(([id]) => id).filter((id) => navigationModes[id] !== false) }).replace('}', `, root: ROOT${panelIcons ? `, icons: () => Promise.resolve(unitFor('${PANEL_ICONS_UNIT}')?.icons${blenderIcons ? ` ?? import('./${PANEL_ICONS}').then((m) => m.default)` : ''})` : ''} }`)});
   return blend;` : ''}
@@ -644,7 +648,8 @@ ${settings.environment ? `  const env = SCENE.environment;
   const data = await readData(), { buffers } = data;
   SCENE_BUFFERS.set(scene, buffers);
   IRS.set(scene, data.ir);
-  const materials = addObjects(scene, data);
+  const made = addObjects(scene, data), materials = made.materialsByKey;
+  TABLES.set(scene, made.state);
   if (SCENE.defaultMaterial !== null) scene.defaultMaterial = materials[SCENE.defaultMaterial];
   // The world lights the scene: its color, or its nodes baked once their shader is ready.
   const world = SCENE.world;
@@ -721,7 +726,7 @@ ${kernels ? `  // Blender's nodes of each material and world, made from the IR's
   };
   return loadTables({ scene, lookup, buffers, parsers }, { materials, multiMaterials: MULTI_MATERIALS, skeletons: SKELETONS, morphTargets: MORPH_TARGETS, geometries: GEOMETRIES,
     nodes: NODES, lights: LIGHTS, cameras: CAMERAS, reflectionProbes: REFLECTION_PROBES, shadowGenerators: SHADOW_GENERATORS, particleSystems: PARTICLE_SYSTEMS,
-    animationGroups: ANIMATION_GROUPS, animations: ANIMATIONS }).materialsByKey;
+    animationGroups: ANIMATION_GROUPS, animations: ANIMATIONS }, TABLES_VERSION);
 }
 `;
   const unmaterialed = settings.defaultMaterial === null && data.meshes.some((m) => m.materialUniqueId === undefined);
@@ -734,6 +739,6 @@ import { ${[...usedNames(source), ...pipelineClasses].join(', ')} } from '@babyl
   // What a patch is made from (scene-patch.js): the tables, the scene's own settings and the IR's, and the buffers.
   Object.assign(tables, { scene: { [ir.scene.id ?? 'scene']: { settings, imageProcessing: data.imageProcessingConfiguration, code, effectLayers: data.effectLayers ?? [],
     renderingPipelines: data.renderingPipelines, postProcesses: data.postProcesses, volumes: volumes?.config ?? null, display, compositor: composited?.compositor ?? null } }, ...irTables(ir) });
-  const files = { 'scene.js': source.replace(BABYLON_IMPORTS, babylonImports).replaceAll(VERSION, version), 'scene.d.ts': controlTypes(Object.entries(ir.properties).map(([path, { type }]) => ({ path, type }))), 'scene.ir.json': irJson, [UNITS_FILE]: units, ...(kernels && { [NODE_KERNELS]: kernels }), ...(curves && { [CURVES_GLSL_FILE]: curvesGlslFile() }), 'scene.bin': binBytes, [ASSET_FILE]: ASSET_MANIFEST, 'package.json': `${JSON.stringify(manifest, null, 2)}\n`, ...images, ...soundFiles };
+  const files = { 'scene.js': source.replace(BABYLON_IMPORTS, babylonImports).replaceAll(VERSION, version).replace(TABLES_VERSION, packageState({ tables }).version), 'scene.d.ts': controlTypes(Object.entries(ir.properties).map(([path, { type }]) => ({ path, type }))), 'scene.ir.json': irJson, [UNITS_FILE]: units, ...(kernels && { [NODE_KERNELS]: kernels }), ...(curves && { [CURVES_GLSL_FILE]: curvesGlslFile() }), 'scene.bin': binBytes, [ASSET_FILE]: ASSET_MANIFEST, 'package.json': `${JSON.stringify(manifest, null, 2)}\n`, ...images, ...soundFiles };
   return { files, tables, buffers: bin.arrays() };
 }

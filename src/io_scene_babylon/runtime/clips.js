@@ -33,14 +33,17 @@ export function createClips(scene, time, playhead, set = () => {}) {
   const exported = new Map([...groups.values()].map((group) => [group, { speed: group.speedRatio, weight: group.weight }]));
   /** @type {Map<AnimationGroup, () => void>} */
   const endings = new Map();
+  /** How each playing clip was asked to play. @type {Map<AnimationGroup, PlayOptions>} */
+  const asked = new Map();
 
   // An action's markers as events on its clip's first animation, a copy of its own: a copy of an asset shares its animations.
-  for (const [name, group] of groups) {
+  const markersOn = (/** @type {string} */ name, /** @type {AnimationGroup} */ group) => {
     const { action, frame_start } = group.metadata.bylonder, markers = time.clips[action]?.markers ?? [], first = group.targetedAnimations[0];
-    if (!markers.length || !first) continue;
+    if (!markers.length || !first) return;
     first.animation = first.animation.clone();
     for (const marker of markers) first.animation.addEvent(new AnimationEvent(marker.frame - frame_start, () => onMarker.notifyObservers({ ...marker, clip: name })));
-  }
+  };
+  for (const [name, group] of groups) markersOn(name, group);
 
   // The scene's markers as the playhead passes them playing, through the loop back to the start too.
   let last = playhead.frame;
@@ -86,7 +89,7 @@ export function createClips(scene, time, playhead, set = () => {}) {
     endings.delete(group);
   };
 
-  return {
+  const api = {
     onMarker,
     /** The clips: each one's name and Babylon's animation group. */
     list: () => [...groups].map(([name, group]) => ({ name, group })),
@@ -97,6 +100,7 @@ export function createClips(scene, time, playhead, set = () => {}) {
      */
     play(name, { loop, speed, weight } = {}) {
       const group = clip(name), own = /** @type {{ speed: number, weight: number }} */ (exported.get(group));
+      asked.set(group, { loop, speed, weight });
       const repeat = Math.max(1, Math.round(time.clips[group.metadata.bylonder.action]?.repeat ?? 1));
       const times = loop ?? (repeat > 1 ? repeat : true);
       unwatch(group);
@@ -117,6 +121,28 @@ export function createClips(scene, time, playhead, set = () => {}) {
       retime();
       return group;
     },
+    /**
+     * The clips again once a patch made some of their groups again (BlendScene.patch): a clip playing plays on in its new
+     * group from the frame it was at, as it was asked to play; a clip gone stops.
+     * @param {Map<string, { frame: number, options: PlayOptions }>} playing the frame of each clip that was playing and how it was asked to play, by name
+     */
+    refresh(playing) {
+      const now = new Map(scene.animationGroups.filter(isClip).map((group) => [group.name, group]));
+      for (const [name, old] of groups) if (now.get(name) !== old) { unwatch(old); exported.delete(old); groups.delete(name); }
+      for (const [name, group] of now) {
+        if (groups.has(name)) continue;
+        groups.set(name, group);
+        exported.set(group, { speed: group.speedRatio, weight: group.weight });
+        markersOn(name, group);
+        const was = playing.get(name);
+        if (!was) continue;
+        api.play(name, was.options);
+        group.goToFrame(was.frame);
+      }
+      retime();
+    },
+    /** Each playing clip's frame and how it was asked to play, by name, for refresh. */
+    playing: () => new Map(playing().map((group) => [group.name, { frame: group.animatables[0]?.masterFrame ?? group.from, options: asked.get(group) ?? {} }])),
     /** Stops a clip, its targets left where it set them until the timeline or another clip sets them. @param {string} name */
     stop(name) {
       const group = clip(name);
@@ -165,4 +191,5 @@ export function createClips(scene, time, playhead, set = () => {}) {
       onMarker.clear();
     },
   };
+  return api;
 }

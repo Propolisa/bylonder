@@ -127,7 +127,7 @@ function directState(entry, bones, shape) {
  * (Blender's object space, each evaluated vertex's xyz); `solve.pass(entry)`, the page's pass over a skeleton.
  * @param {import('@babylonjs/core').Scene | null} [scene] @param {{ get(path: string): any, set(path: string, value: number): void } | null} [controls] the page's, which get
  * the custom properties the rig's drivers set
- * @returns {((pose: NativePose) => Map<number, Matrix>) & { pass(entry: any): void, deformed(native: NativePose['native'], name: string): Float64Array }}
+ * @returns {((pose: NativePose) => Map<number, Matrix>) & { pass(entry: any): void, detach(entry: any): void, deformed(native: NativePose['native'], name: string): Float64Array }}
  */
 export function nativeSolve(scene = null, controls = null) {
   /** Each rig by the description it was compiled from. @type {WeakMap<Uint8Array, ReturnType<typeof compile>>} */
@@ -340,6 +340,16 @@ export function nativeSolve(scene = null, controls = null) {
   };
   return Object.assign(solve, {
     pass,
+    /**
+     * Forgets what a pose attached (pose-constraints.js detach): its meshes' deformers, found again with the copies of
+     * their geometry they write, its last pose, so the bones of a skeleton made again are all written, and the morph
+     * targets found. @param {any} attached
+     */
+    detach(attached) {
+      if (!attached.native) return;
+      Object.assign(entryOf(attached.native), { deformers: null, posed: null });
+      targets.clear();
+    },
     /** @param {NativePose['native']} native @param {string} name */
     deformed: (native, name) => deformMesh(entryOf(native).rig, deformOf(entryOf(native), name)),
   });

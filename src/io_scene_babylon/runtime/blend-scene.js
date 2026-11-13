@@ -4,8 +4,9 @@
 // bpy.data (`objects["Cube"].location[0]`) whose value the page sets, and which lands on the Babylon objects it binds to.
 import { BoundingInfo, Matrix, Observable, Quaternion, Texture, Vector3 } from '@babylonjs/core';
 import { createScheduler, EVALUATORS, NATIVE } from './scheduler.js';
+import { TABLES } from './scene-tables.js';
 import { nodeById } from '../../overrides/babylon/clustered-lights.js';
-import { readIR, referencesIn } from './ir.js';
+import { readEntries, readIR, referencesIn } from './ir.js';
 import { createPlayhead } from './playhead.js';
 import { createClips, isClip } from './clips.js';
 import { collectionKey, collectionTree, objectsIn, showing } from './collections.js';
@@ -169,6 +170,18 @@ function hide(node, hidden) {
   else node.setEnabled(!hidden);
 }
 
+// The tables a patch reaches: the scene's objects (scene-tables.js) and the IR's IDs, collections and properties (its
+// references are what the export follows; the page reads none).
+const IR_TABLES = new Set(['ids', 'collections', 'properties', 'graphs']);
+// The tables whose objects a rig's runtime holds, and the implementations that hold them.
+const REMADE = ['skeletons', 'morphTargets', 'nodes', 'geometries'], RIGS = ['pose', 'pose-kernels', 'native-rig'];
+// A buffer's key as entries name it (scene-bin.js contentKey).
+const BUFFER_KEY = /"((?:f32|u16|u32|i32|u8|i8|i16)\.[0-9a-z]+)"/g;
+const PATCHED = new Set([...TABLES, 'animations', 'references', 'entities', 'irScene', 'sampleRates', ...IR_TABLES]);
+// What of the scene's time a patch may change in place (the clips' ranges, the markers; what is baked has a table of
+// its own): the rest (its range, rate and loop, which the playhead runs on) loads the package again.
+const RETIMED = ['clips', 'markers'], CLOCK = ['frame_start', 'frame_end', 'fps', 'fps_base', 'loop'];
+
 /**
  * The exported scene and its controls.
  * @template {Record<string, Value>} [Controls=Record<string, Value>]
@@ -180,6 +193,10 @@ export class BlendScene {
   #knobs;
   /** @type {Map<string, Value>} */
   #values;
+  /** The scene's tables and what they made (scene-tables.js), which a patch changes. @type {ReturnType<typeof import('./scene-tables.js').sceneTables> | undefined} */
+  #tables;
+  /** Loads the package again in place of this scene. @type {(old: BlendScene<any>) => Promise<BlendScene<any>>} */
+  #reload;
 
   /** @type {string} */
   #root;
@@ -195,12 +212,16 @@ export class BlendScene {
    * @param {import('@babylonjs/core').Scene} scene
    * @param {any} ir the scene's IR (scene.ir.json), read with readIR
    * @param {{ root?: string, world?: { set(color: number[]): void }, compositor?: import('@babylonjs/core').NodeRenderGraph,
-   *   buffers?: import('./buffers.js').Buffers, entries?: import('./asset.js').Entries, dispose?: () => void }} [options]
+   *   buffers?: import('./buffers.js').Buffers, entries?: import('./asset.js').Entries, dispose?: () => void,
+   *   tables?: ReturnType<typeof import('./scene-tables.js').sceneTables>, reload?: (old: BlendScene<any>) => Promise<BlendScene<any>> }} [options]
    * the package's URL, which relative image URLs resolve against, the world of one color its background controls set
    * (world.js), the compositor its pass controls set (bylonder-blocks.js), scene.bin's buffers, which its entities
-   * read; loaded into a scene of the page's own, what was added there and what removes it (asset.js)
+   * read; loaded into a scene of the page's own, what was added there and what removes it (asset.js); the scene's tables,
+   * which `patch` changes, and what loads the package again in its place
    */
-  constructor(scene, ir, { root = '', world, compositor, buffers = {}, entries, dispose = () => scene.dispose() } = {}) {
+  constructor(scene, ir, { root = '', world, compositor, buffers = {}, entries, dispose = () => scene.dispose(), tables, reload } = {}) {
+    this.#tables = tables;
+    this.#reload = reload ?? (() => Promise.reject(new Error('This scene cannot load its package again')));
     /** Babylon's scene: loaded into a scene of the page's own, a view of it that holds what was loaded alone. */
     this.scene = scene;
     /** Loaded into a scene of the page's own: what was added there, as ImportMeshAsync gives a .glb's (meshes[0] the root). */
@@ -252,13 +273,9 @@ export class BlendScene {
       frame: (/** @type {string | undefined} */ id) => this.playhead.frameAt(id ? this.#idOffset(id) : 0),
     } }) : null;
     this.#channels(knobs);
-    for (const { path, bind } of knobs) if (bind?.offset) this.#offsetPaths.set(/** @type {string} */ (bind.collection), path);
+    this.#indexKnobs();
     this.playhead.offsetOf = (/** @type {any} */ target) => this.#targetOffsets.get(target) ?? 0;
     this.#retime();
-    for (const { path, bind } of knobs) if (bind?.collection && !bind.offset) {
-      const flag = path.endsWith('.exclude') ? 'exclude' : path.endsWith('.hide_render') ? 'hide_render' : path.includes('.layer_collection') ? 'layer_hide_viewport' : 'hide_viewport';
-      this.#flags.set(`${bind.collection} ${flag}`, path);
-    }
     this.#hiddenAtExport = new Set([...showing(this.ir, (key, flag) => this.#flag(key, flag))].filter(([, shown]) => !shown).map(([object]) => object));
     // The app's viewport draws what Disable in Renders hides; the page shows what Blender renders.
     this.#showObjects([...this.#hiddenAtExport, ...Object.keys(this.ir.ids).filter((key) => this.ir.ids[key].data?.hide_render === true)]);
@@ -502,7 +519,7 @@ export class BlendScene {
   #channels(knobs) {
     for (const { path, default: initial, bind } of knobs) {
       const holder = bind?.channel !== undefined && /** @type {any} */ (nodeById(this.scene, bind.node ?? ''))?.metadata?.bylonderChannels;
-      if (!holder) continue;
+      if (!holder || Object.getOwnPropertyDescriptor(holder, /** @type {string} */ (bind?.channel))?.get) continue;
       Object.defineProperty(holder, /** @type {string} */ (bind?.channel), {
         get: () => this.#values.get(path),
         set: (value) => {
@@ -511,6 +528,107 @@ export class BlendScene {
         },
       });
     }
+  }
+
+  /**
+   * Applies a patch of the package, made by exporting the same scene again after an edit, undo or redo
+   * (docs/data-flow.md): the entries it changes are made and swapped in at once, and the controls keep the page's values,
+   * those it has not set taking the patch's defaults. A patch from another version than the one shown, or of what a patch
+   * does not reach yet (computed entities, graphs, the scene's settings), loads the package again, reported. One that
+   * names what the scene would not hold is not applied, reported, and the scene stays as it was. Gives the scene that
+   * shows the result: this one, or the one loaded again.
+   * @param {import('./scene-tables.js').Patch} patch
+   * @returns {Promise<BlendScene<Controls>>}
+   */
+  async patch(patch) {
+    const unreached = Object.keys(patch.tables).filter((table) => !PATCHED.has(table));
+    const stale = !this.#tables ? 'it was not loaded from tables' : patch.base !== this.#tables.version ? `the patch is from version ${patch.base}, the page shows ${this.#tables.version}`
+      : unreached.length ? `the patch changes ${unreached.join(', ')}, which a patch does not reach yet`
+      : patch.tables.entities && !this.#scheduler ? 'the patch adds what the page computes to a scene that computed nothing'
+      : patch.tables.irScene && !this.#sameClock(patch.tables.irScene) ? "the patch changes the scene's time or its root" : null;
+    if (stale || !this.#tables) {
+      console.warn(`Bylonder: the package is loaded again: ${stale}`);
+      return this.#reload(this);
+    }
+    const notApplied = (/** @type {unknown} */ error) => {
+      console.warn(`Bylonder: a patch is not applied, the scene stays as it was: ${/** @type {Error} */ (error).message}`);
+      return this;
+    };
+    const reload = (/** @type {unknown} */ error) => {
+      console.warn(`Bylonder: the package is loaded again, as a patch failed once applied: ${/** @type {Error} */ (error).message}`);
+      return this.#reload(this);
+    };
+    /** @type {Record<string, Record<string, any>>} */
+    let entries;
+    try {
+      entries = readEntries(patch.tables);
+    } catch (error) {
+      return notApplied(error);
+    }
+    const playing = this.#clips.playing(), tables = this.#tables.tables, ir = /** @type {Record<string, any>} */ (this.ir);
+    const replaced = JSON.stringify(Object.entries(patch.tables).map(([table, part]) => Object.keys(part).map((key) => (tables[table] ?? ir[table])?.[key])));
+    try {
+      this.#tables.apply(patch);
+    } catch (error) {
+      return /** @type {any} */ (error).reload ? reload(error) : notApplied(error);
+    }
+    try {
+      for (const [table, part] of Object.entries(entries)) if (IR_TABLES.has(table)) {
+        const into = /** @type {Record<string, any>} */ (this.ir)[table];
+        for (const [key, entry] of Object.entries(part)) entry === null ? delete into[key] : (into[key] = entry);
+      }
+      for (const [path, property] of Object.entries(entries.properties ?? {})) {
+        const knob = this.#knobs.get(path), unset = !knob || this.#values.get(path) === knob.default;
+        if (!property) { this.#knobs.delete(path); this.#values.delete(path); continue; }
+        const { id, ...fields } = property;
+        this.#knobs.set(path, /** @type {Knob} */ ({ path, ...fields }));
+        if (unset) this.#values.set(path, property.default);
+      }
+      for (const scene of Object.values(patch.tables.irScene ?? {})) Object.assign(this.ir.scene.time, Object.fromEntries(RETIMED.map((name) => [name, scene.time[name]])));
+      const rates = this.ir.scene.time.sample_rates;
+      for (const [name, rate] of Object.entries(patch.tables.sampleRates ?? {})) rate === null ? delete rates[name] : (rates[name] = rate);
+      this.#indexKnobs();
+      this.#channels([...this.#knobs.values()]);
+      if (patch.tables.animationGroups || patch.tables.animations) this.#clips.refresh(playing);
+      // What a rig runs on holds its skeleton, meshes and morph targets: made again, it attaches to the new ones.
+      const remade = REMADE.some((table) => patch.tables[table]);
+      if (entries.entities || entries.graphs || remade) this.#scheduler?.replace(entries.entities ?? {}, Object.keys(entries.graphs ?? {}), (name) => remade && RIGS.includes(name));
+      this.#retime();
+      // What a binding writes is the control's, on the objects the patch made too.
+      for (const [path, knob] of this.#knobs) if (knob.bind) this.#write(path, /** @type {Value} */ (this.#values.get(path)));
+    } catch (error) {
+      return reload(error);
+    }
+    this.#dropUnusedBuffers(replaced);
+    return this;
+  }
+
+  /** Whether a patch's scene part keeps the scene's root, view layer and clock. @param {Record<string, any>} part */
+  #sameClock(part) {
+    const clock = (/** @type {any} */ scene) => JSON.stringify([scene.id, scene.collection, scene.view_layer, ...CLOCK.map((name) => scene.time?.[name])]);
+    return Object.values(part).every((scene) => scene && clock(scene) === clock(this.ir.scene));
+  }
+
+  /** The collections' time offsets and visibility flags, by the controls that set them. */
+  #indexKnobs() {
+    this.#offsetPaths.clear();
+    this.#flags.clear();
+    for (const { path, bind } of this.#knobs.values()) {
+      if (bind?.offset) this.#offsetPaths.set(/** @type {string} */ (bind.collection), path);
+      else if (bind?.collection) {
+        const flag = path.endsWith('.exclude') ? 'exclude' : path.endsWith('.hide_render') ? 'hide_render' : path.includes('.layer_collection') ? 'layer_hide_viewport' : 'hide_viewport';
+        this.#flags.set(`${bind.collection} ${flag}`, path);
+      }
+    }
+  }
+
+  /** Lets go of the buffers `replaced` (the entries a patch replaced) named that no table entry or IR value names now. @param {string} replaced */
+  #dropUnusedBuffers(replaced) {
+    const keys = (/** @type {string} */ text) => [...text.matchAll(BUFFER_KEY)].map((m) => m[1]);
+    const candidates = new Set(keys(replaced));
+    if (!candidates.size) return;
+    for (const key of keys(JSON.stringify(this.#tables?.tables) + JSON.stringify(this.ir))) candidates.delete(key);
+    for (const key of candidates) delete this.buffers[key];
   }
 
   /** Resolves once what the last changes set going has run (an evaluator's first load). */

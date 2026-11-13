@@ -415,5 +415,20 @@ function apply(entry) {
  * @param {(pose: any) => Map<number, Matrix>} [solve] what poses a rig: this file's solvers, or Blender's kernels (pose-kernels.js)
  */
 export function load(page, solve = solvePose) {
-  return { run: (/** @type {any} */ inputs, /** @type {any} */ context, /** @type {any} */ entity) => (entity.type.startsWith('driver:') ? attachDriver(inputs, entity, page) : attach(inputs, entity, page, solve)) };
+  return {
+    run: (/** @type {any} */ inputs, /** @type {any} */ context, /** @type {any} */ entity) => (entity.type.startsWith('driver:') ? attachDriver(inputs, entity, page) : attach(inputs, entity, page, solve)),
+    /** Forgets an entity a patch replaced or removed, or whose skeleton, mesh or morph targets it made again (the scheduler attaches it again on its next run). @param {any} entity */
+    detach: (/** @type {any} */ entity) => detach(page.scene, entity, solve),
+  };
+}
+
+/** Removes an entity's pose or driver from the scene's lists, and what its solver holds for the pose. @param {any} scene @param {any} entity @param {any} solve */
+function detach(scene, entity, solve) {
+  const lists = listOf(scene);
+  for (const list of [lists.poses, lists.drivers]) {
+    const at = list.findIndex((/** @type {any} */ e) => e.entity === entity);
+    if (at < 0) continue;
+    const [entry] = list.splice(at, 1);
+    if (list === lists.poses) /** @type {any} */ (solve).detach?.(entry);
+  }
 }
