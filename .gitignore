@@ -50,3 +50,8 @@ src/bmesh/bmesh.wasm.key
 src/bmesh/python313.zip
 src/bmesh/scripts.zip
 src/bmesh/addons.zip
+
+# Demo packages, fetched by scripts/module.mjs from the release demo-packages (docs/demos/packages.json)
+docs/demos/*/world/
+# A copy of docs/demos/run.js for a server whose root is one demo folder (the playtest servers)
+docs/demos/*/run.js

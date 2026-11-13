@@ -346,6 +346,22 @@ try {
     }
   });
 
+  // The live demos whose packages are release assets (docs/demos/packages.json): each one's package is in the build and
+  // its page loads it. A missing package fails here, naming the demo, rather than a page that loads nothing.
+  await step("demo packages", async () => {
+    const { demoPackages } = await import("../../scripts/module.mjs");
+    for (const { demo, dir, asset } of demoPackages()) {
+      const response = await fetch(new URL(`${dir}/scene.js`, server.url));
+      assert.ok(response.ok, `the ${demo} demo's package (${asset}) is not in the build: run npm run module before npm run build`);
+      const page = await browser.newPage(), errors = [];
+      page.on("pageerror", (error) => errors.push(error.message));
+      await page.goto(new URL(`docs/demos/${demo}/index.html?step`, server.url).href);
+      await page.waitForFunction(() => window.demo, null, { timeout: 5 * 60 * 1000 });
+      assert.deepEqual(errors, [], `the ${demo} demo's page errors`);
+      await page.close();
+    }
+  });
+
   // The manual (docs.html): the features index shows a card per page with its thumbnail, a feature page its GIFs, and
   // its Open in Bylonder link points at this build's app.
   await step("docs", async () => {

@@ -198,6 +198,21 @@ precedence = "override"
 SPDX-FileCopyrightText = "Quaternius"
 SPDX-License-Identifier = "CC0-1.0"
 
+# Quaternius's Universal Animation Library mannequin and motion, in the Basic Character example.
+[[annotations]]
+path = "examples/basic-character/basic-character.blend"
+precedence = "override"
+SPDX-FileCopyrightText = "Quaternius"
+SPDX-License-Identifier = "CC0-1.0"
+
+# Snow's feet in the Walk, Jog and Sprint as Blender evaluates them (Snow Rig, Blender Studio; motion from Quaternius'
+# Universal Animation Library), a test fixture.
+[[annotations]]
+path = "tests/fixtures/snow-feet.json"
+precedence = "override"
+SPDX-FileCopyrightText = ["Blender Foundation (studio.blender.org)", "Quaternius"]
+SPDX-License-Identifier = "CC-BY-4.0"
+
 # Fonts.
 [[annotations]]
 path = "public/fonts/Inter.woff2"
@@ -262,6 +277,13 @@ SPDX-License-Identifier = "CC0-1.0"
 path = "docs/demos/noodle-shop/sounds/rain.*"
 precedence = "override"
 SPDX-FileCopyrightText = "ultradust"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# Snow's bones (Snow by Blender Studio), read from the Character Controller example by snow-rig.extract.mjs.
+[[annotations]]
+path = "tests/fixtures/snow-rig.json"
+precedence = "override"
+SPDX-FileCopyrightText = "Blender Studio"
 SPDX-License-Identifier = "CC-BY-4.0"
 
 # The root license texts GitHub and npm detect (the dual layout), copies of LICENSES/MIT.txt and LICENSES/Apache-2.0.txt.
