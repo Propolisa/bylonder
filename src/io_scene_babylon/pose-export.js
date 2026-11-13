@@ -11,6 +11,7 @@ import { nativeSolve } from './runtime/native-solve.js';
 import { packDescription, rigDescription } from './rig-description.js';
 import { compileRig } from './runtime/native/rig/program.js';
 import { compileDeform } from './runtime/native/deform/mesh.js';
+import { CpuStack } from './runtime/native/deform/cpu.js';
 import { shownStack } from '../runtimes/applied-rest.js';
 import { blockData } from '../runtimes/key-blocks.js';
 import { loadConstraints } from './polyfill/constraints.js';
@@ -137,8 +138,20 @@ function nativeRig(arm, nodeOf, deformed = [], armatureOnly = false) {
     if (!armatureOnly) description.objects.find((o) => o.name === d.ob.name).data.draw_vertices = drawnVertices(d.evaluated());
     meshes[d.ob.name] = d.node.id;
   }
+  if (!armatureOnly) deformsOnPage(description, runs.map((d) => d.ob.name));
   const { packed, arrays } = packDescription(description);
   return { description: new TextEncoder().encode(JSON.stringify(packed)), arrays, armature: arm.name, objects, meshes, skipped, published: [...driven(arm, description), ...drivenKeys(keyed, description)] };
+}
+// Each mesh the page deforms, run once on a rig compiled from the description the page gets: one the page could not
+// deform (a Surface Deform's surface left out) fails the export rather than the page.
+export function deformsOnPage(description, names) {
+  const program = compileRig(structuredClone(description)), rig = program.instance();
+  rig.evaluate();
+  for (const name of names) {
+    try { new CpuStack(rig, compileDeform(program, program.objectIndex.get(name), rig), { normals: false }).run(); } catch (error) {
+      throw new Error(`${description.objects[0].name}: the native rig runtime cannot deform ${name} with what the export describes (${/** @type {Error} */ (error).message})`);
+    }
+  }
 }
 // The armature's and its pose bones' custom properties the rig's drivers set (a corrective's input the rig computes),
 // which the runtime hands back to the page's controls after each solve so the page's drivers read them: each one's path
@@ -351,8 +364,9 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
     entity: () => (checked && held ? {
       skeleton: skeleton.id, mesh: mesh.id, space: skeleton.space.asArray(), constraints: influenced(arm, stacks),
       ...(rig && { kernels: rig, influences: influences(arm, rig), shapes: shapes(arm), segments: [...shaped] }),
-      ...(native && { native: skinned().size ? nativeRig(arm, nodeOf, [...deformed.filter((d) => !skinned().has(d.ob.name)),
-        ...deformed.filter((d) => skinned().has(d.ob.name) && d.ob.data.shape_keys?.animation_data?.drivers.length).map((d) => ({ ob: d.ob, keyed: true }))]) : native, properties: customProperties(arm, (path) => ({ property: `objects${key(arm.name)}${path.startsWith('[') ? '' : '.'}${path}` })) }),
+      // A mesh Babylon skins stays in as a Surface Deform's surface (its source entry) or for its driven keys.
+      ...(native && { native: skinned().size ? nativeRig(arm, nodeOf, [...deformed.filter((d) => d.source || !skinned().has(d.ob.name)),
+        ...deformed.filter((d) => !d.source && skinned().has(d.ob.name) && d.ob.data.shape_keys?.animation_data?.drivers.length).map((d) => ({ ob: d.ob, keyed: true }))]) : native, properties: customProperties(arm, (path) => ({ property: `objects${key(arm.name)}${path.startsWith('[') ? '' : '.'}${path}` })) }),
       bones: Object.fromEntries(shape.map(({ name, length, mode }, i) => [name, { length, mode, ...(moved.has(bones[i]) && { own: ownMatrix(poses[i], bones[i]).asArray() }) }])),
     } : null),
   };
