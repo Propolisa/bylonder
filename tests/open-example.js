@@ -1,6 +1,7 @@
 // An example opened as a project opens it (sdk.openBlend), in a world with the slices the view reads, for the export
 // tests: one per process, as Blender's module holds one Main.
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { register } from 'node:module';
 import { NullEngine, Scene } from '@babylonjs/core';
 import { blenderMain } from '../src/bmesh/bmesh-wasm.js';
 import '../src/python/bpy_interface.js';
@@ -27,6 +28,7 @@ import '../src/runtimes/image.js';
 import '../src/runtimes/grease-pencil.js';
 import '../src/runtimes/shape-keys.js';
 import { bylonderIcon } from '../src/python/bpy_icons.js';
+import { hasMesh, identify } from '../src/editors/object/identity.js';
 
 // The runtimes the app registers (main.js): what an export writes of shape keys, armatures and images.
 registerRuntimeTypes(bylonderIcon());
@@ -49,9 +51,34 @@ export function openExample(id) {
   if (existsSync(libraries)) for (const name of readdirSync(libraries).filter((f) => f.endsWith('.blend'))) files.set(`${LIBRARY_FOLDER}/${name}`, readFileSync(new URL(name, libraries)));
   const opening = createMainSync({ rna: createRNA({ world: { scene, objects: [] } }), ids: animation.ids });
   objects.push(...opening.readBlend(readFileSync(id instanceof URL || id.endsWith('.blend') ? id : exampleBlend(id)), scene).nodes);
+  return withSlices(world);
+}
+
+// An example built by its code (examples/<id>/index.js), as the app runs it (examples.test.js): its createScene with the
+// project SDK on a NullEngine, then the same slices.
+export async function openCodeExample(id) {
+  register('./fixtures/example-loader.mjs', import.meta.url);
+  // A project's files (sdk.asset) are its example folder's.
+  const fetchURL = globalThis.fetch;
+  globalThis.location ??= { origin: '' };
+  globalThis.fetch = (url, ...rest) => (String(url).startsWith('file:') ? Promise.resolve(new Response(readFileSync(new URL(url)))) : fetchURL(url, ...rest));
+  const BABYLON = await import('@babylonjs/core'), { createSDK } = await import('../src/runtime/sdk.js');
+  const engine = Object.assign(new NullEngine(), { updateTextureData() {} }), base = new URL(`../examples/${id}/`, import.meta.url);
+  const sdk = createSDK(base.href, {}, () => {});
+  sdk.animation.ids ??= createBlenderIDs(blenderMain());
+  Object.assign(globalThis, { BABYLON: { ...BABYLON }, engine, canvas: null, workbench: sdk });
+  const scene = await (await import(new URL('index.js', base))).createScene();
+  const objects = Object.assign(scene.meshes.filter((m) => hasMesh(m) && m.metadata?.editable !== false), { scene });
+  objects.forEach(identify);
+  return withSlices({ scene, objects, animation: sdk.animation }, { authored: sdk.authoredRender });
+}
+
+// The slices the view reads, on a world of a scene and its objects; and its Main.
+function withSlices(world, render) {
+  const { scene, objects, animation } = world;
   let camera = scene.activeCamera;
   world.sceneSettings = createSceneSettings(world, { cameras: { list: () => scene.cameras, get: () => camera, set: (c) => { camera = c; } } });
-  world.renderSettings = createRenderSettings(world);
+  world.renderSettings = createRenderSettings(world, render);
   world.collections = createCollections(world);
   world.materials = createMaterialLibrary(world);
   world.worlds = createWorlds(world);
