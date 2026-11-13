@@ -4,7 +4,8 @@
 // color lights through a cube of that color with its spherical harmonics; a world of nodes is its material drawn on a
 // box around the eye, baked once into a reflection probe, filtered with Babylon's HDRFiltering, which then lights the
 // scene.
-import { Color4, Constants, CreateBox, CubeMapToSphericalPolynomialTools, HDRFiltering, ReflectionProbe, RenderTargetTexture } from '@babylonjs/core';
+import { BaseTexture, Color4, Constants, CreateBox, CubeMapToSphericalPolynomialTools, HDRFiltering, ReflectionProbe, RenderTargetTexture, Texture } from '@babylonjs/core';
+import { cubeHarmonics } from '../../overrides/babylon/cube-harmonics.js';
 import { WORLD_CUBE_TYPE } from '../../overrides/webgpu/float-world-cube.js';
 
 /** @typedef {import('@babylonjs/core').Scene} Scene */
@@ -36,32 +37,39 @@ export function worldColor(scene, color) {
 
 /**
  * A world of nodes: its material on a box around the eye, and baked into the probe that lights the scene once its
- * shader is ready (a GPU's work: a page without one shows the box but bakes nothing). The probe is the scene's
- * environment at once, before the other materials are made (their PBR blocks leave out an environment made later).
+ * shader is ready (a GPU's work: a page without one shows the box but bakes nothing). The scene's environment is a
+ * cube of its own from the start, before the other materials are made (their PBR blocks leave out an environment made
+ * later), which takes the baked and filtered cube's texture: a probe's texture bound while it is filtered is destroyed
+ * under the materials, which then draw nothing on WebGPU.
  * @param {Scene} scene
  * @param {Material} material
  */
 export function worldNodes(scene, material) {
   const box = CreateBox('world', { size: 2 }, scene);
   Object.assign(box, { material, infiniteDistance: true, isPickable: false, applyFog: false, alwaysSelectAsActiveMesh: true });
-  const probe = new ReflectionProbe('world', 256, scene, true, true, true), drawn = probe.cubeTexture;
-  Object.assign(drawn, { gammaSpace: false, refreshRate: RenderTargetTexture.REFRESHRATE_RENDER_ONCE });
-  probe.renderList?.push(box);
-  scene.environmentTexture = drawn;
+  const environment = Object.assign(new BaseTexture(scene), { name: 'world', isCube: true, gammaSpace: false, coordinatesMode: Texture.CUBIC_MODE });
+  scene.environmentTexture = environment;
   const bake = async () => {
     // Not ready: tried again after a while (an observer added while the observable notifies would run at once).
     if (!box.subMeshes.every((subMesh) => material.isReadyForSubMesh(box, subMesh))) return void setTimeout(bake, 16);
+    const probe = new ReflectionProbe('world', 256, scene, true, true, true), drawn = probe.cubeTexture;
+    Object.assign(drawn, { gammaSpace: false, refreshRate: RenderTargetTexture.REFRESHRATE_RENDER_ONCE });
+    probe.renderList?.push(box);
     if (scene.activeCamera) probe.position.copyFrom(scene.activeCamera.globalPosition);
     // The probe takes the world clamped (its Sun Threshold), as the export's `world:probe` input says.
     const clamp = /** @type {any} */ (material).getBlockByName?.('world:probe');
     if (clamp) clamp.value = 1;
     drawn.render();
     if (clamp) clamp.value = 0;
-    const polynomial = await CubeMapToSphericalPolynomialTools.ConvertCubeMapTextureToSphericalPolynomial(drawn);
+    const polynomial = await cubeHarmonics(drawn);
     // Unfiltered where the engine cannot prefilter (a NullEngine, in Node).
     if (scene.getEngine()._features.allowTexturePrefiltering) await new HDRFiltering(scene.getEngine()).prefilter(drawn);
-    drawn.sphericalPolynomial = polynomial;
-    // Its light now drawn: the materials take its spherical harmonics.
+    const baked = drawn.getInternalTexture();
+    baked?.incrementReferences();
+    Object.assign(environment, { _texture: baked, lodGenerationScale: drawn.lodGenerationScale, lodGenerationOffset: drawn.lodGenerationOffset, _prefiltered: true });
+    environment.sphericalPolynomial = polynomial;
+    probe.dispose();
+    // Its light now drawn: the materials take its texture and spherical harmonics.
     scene.markAllMaterialsAsDirty(Constants.MATERIAL_TextureDirtyFlag);
   };
   scene.onBeforeRenderObservable.addOnce(bake);

@@ -2,6 +2,7 @@ import { Color3, Color4, Constants, Vector3, CubeMapToSphericalPolynomialTools, 
 import { RAY_TYPE, setRayType } from '../../nodes/blender/shader-nodes.js';
 import { createLight, deriveBabylonLight, lightRecord } from '../light/light-home.js';
 import { StudioLightTexture, firstBand } from './world-sun.js';
+import { cubeHarmonics } from '../../overrides/babylon/cube-harmonics.js';
 import { PrefilteredEXRCubeTexture } from '../../overrides/webgpu/prefiltered-ready.js';
 import { WORLD_CUBE_TYPE } from '../../overrides/webgpu/float-world-cube.js';
 
@@ -238,7 +239,7 @@ function worldNodesView(scene, onTexture) {
     const render = (type) => { setRayType(scene, type); try { drawn.render(); } finally { setRayType(scene, RAY_TYPE.CAMERA); } };
     const lightPath = material.attachedBlocks.some((block) => block.idname === 'ShaderNodeLightPath');
     render(lightPath ? RAY_TYPE.DIFFUSE : RAY_TYPE.GLOSSY);
-    const sh = CubeMapToSphericalPolynomialTools.ConvertCubeMapTextureToSphericalPolynomial(drawn);
+    const sh = cubeHarmonics(drawn);
     if (lightPath) render(RAY_TYPE.GLOSSY);
     box.metadata.baked = true;
     const polynomial = await sh;
