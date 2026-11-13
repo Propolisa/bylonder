@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // A scene exported from Bylonder, with its controls: the IR's properties (docs/ir.md), each a Blender RNA path from
 // bpy.data (`objects["Cube"].location[0]`) whose value the page sets, and which lands on the Babylon objects it binds to.
-import { BoundingInfo, Matrix, Observable, Quaternion, Texture, Vector3 } from '@babylonjs/core';
+import { AbstractMesh, BoundingInfo, Matrix, Observable, Quaternion, Texture, Vector3 } from '@babylonjs/core';
 import { createScheduler, EVALUATORS, NATIVE } from './scheduler.js';
 import { TABLES } from './scene-tables.js';
 import { nodeById } from '../../overrides/babylon/clustered-lights.js';
@@ -164,9 +164,12 @@ function assign(owner, path, value) {
   keys.reduce((o, key) => o[key], owner)[last] = value;
 }
 
-/** Hides a mesh alone, as Blender hides an object and not its children, or another node with its children. @param {any} node @param {boolean} hidden */
+/**
+ * Hides a mesh alone, as Blender hides an object and not its children, or another node (a light: its light is off) with
+ * its children. @param {any} node @param {boolean} hidden
+ */
 function hide(node, hidden) {
-  if ('isVisible' in node) node.isVisible = !hidden;
+  if (node instanceof AbstractMesh) node.isVisible = !hidden;
   else node.setEnabled(!hidden);
 }
 
