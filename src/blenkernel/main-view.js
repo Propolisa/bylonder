@@ -10,7 +10,7 @@ import { BLENDER, createLight, deriveBabylonLight, isBlenderLight, lightRecord }
 import { createWorld } from './scene/world.js';
 import { createMesh, mesh_serialize } from './mesh/mesh.js';
 import { nodeId, deleted, setHidden } from '../editors/object/identity.js';
-import { meshHidden } from './scene/mesh-hiding.js';
+import { hideMesh, meshHidden } from './scene/mesh-hiding.js';
 import { CurveObject } from './curve/curve.js';
 import { mesh_batch_cache_apply } from '../draw/mesh-batch-cache.js';
 import { asObject, setEvaluatedMatrix } from '../runtime/object-transform.js';
@@ -75,6 +75,12 @@ const MAKERS = {
 
 // A mesh object's Mesh as Main holds it is its recipe (its Mesh data, for saving), Main owning it; the view draws it as
 // the depsgraph evaluates it.
+// An object disabled in viewports (Disable in Viewports, its own; its collections' hide it as collections.js says) is
+// not drawn, as BKE_base_eval_flags leaves it out of the viewport.
+function showEnabled(node, ob) {
+  if ('isVisible' in node) hideMesh(node, 'disabled', !!idStruct(ob).hide_viewport);
+}
+
 function keepMesh(entry, blender) {
   entry.node.metadata = { ...entry.node.metadata, wbCreation: { mesh: mesh_serialize(blender.mesh(entry.ob)) } };
   [entry.creation, entry.owned] = [entry.node.metadata.wbCreation, true];
@@ -285,6 +291,7 @@ export function createMainView(state) {
         const { node, ob } = entry;
         // Hidden as the file keeps it (H), once its kind is known.
         if (blender.base(ob)?.hidden) setHidden(node, true);
+        showEnabled(node, ob);
         foldUndrawn(entry);
         if (blender.camera === ob) scene.activeCamera = node;
       }
@@ -452,6 +459,7 @@ export function createMainView(state) {
         if (base?.selected) chosen.push(node);
         if (base?.active) active = node;
         if (base && data.hide_get() !== base.hidden) setHidden(node, base.hidden);
+        showEnabled(node, ob);
         if (entry.type === 'MESH') displayAs(node, idStruct(ob).display_type);
         extraDisplay(entry);
         // A stand-in Blender's code changed becomes Main's; one an undo step read again stays Babylon's.
