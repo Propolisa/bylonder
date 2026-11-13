@@ -10,14 +10,15 @@ function decoded(dataUrl) {
 }
 
 // A file's identity by its length and FNV-1a hash, so an image met again under another data URL is written once.
-function digest(bytes) {
+export function digest(bytes) {
   let hash = 0x811c9dc5;
   for (let i = 0; i < bytes.length; i++) hash = Math.imul(hash ^ bytes[i], 0x01000193);
   return `${bytes.length}:${hash >>> 0}`;
 }
 
-// Every texture of `data` (the serialized scene) moved to a file; gives the files by path. With `files`, those made
-// before (by an earlier call, for materials made since) are added to, numbered on.
+// Every texture of `data` (the serialized scene) moved to a file, named by its path and its content's version (so a
+// cache never serves another export's image in its place); gives the files by path. With `files`, those made before
+// (by an earlier call, for materials made since) are added to, numbered on.
 export function imageFiles(data, files = {}) {
   const byUrl = new Map(), byBytes = new Map(Object.entries(files).map(([path, bytes]) => [digest(bytes), path]));
   const file = (dataUrl) => {
@@ -32,10 +33,11 @@ export function imageFiles(data, files = {}) {
     byUrl.set(dataUrl, path);
     return path;
   };
+  const versioned = (path) => path && `${path}?v=${digest(files[path]).replace(':', '.')}`;
   const visit = (value) => {
     if (!value || typeof value !== 'object') return;
     if (typeof value.base64String === 'string' && value.base64String.startsWith('data:')) {
-      const path = file(value.base64String);
+      const path = versioned(file(value.base64String));
       if (path) {
         delete value.base64String;
         Object.assign(value, { name: path, url: path });
@@ -46,6 +48,6 @@ export function imageFiles(data, files = {}) {
   visit(data.materials);
   visit(data.multiMaterials);
   visit(data.particleSystems);
-  if (typeof data.environmentTexture === 'string' && data.environmentTexture.startsWith('data:')) data.environmentTexture = file(data.environmentTexture) ?? data.environmentTexture;
+  if (typeof data.environmentTexture === 'string' && data.environmentTexture.startsWith('data:')) data.environmentTexture = versioned(file(data.environmentTexture)) ?? data.environmentTexture;
   return files;
 }

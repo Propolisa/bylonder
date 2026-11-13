@@ -45,7 +45,7 @@ const blocks = [...files['scene.js'].matchAll(/"samplerName":"([^"]+)","part":"(
 assert.deepEqual(blocks.map((b) => b.part).sort(), ['array', 'map'], 'a TileBlock for the array and one for the map');
 const urls = [...new Set([...files['scene.js'].matchAll(/"number":(10\d\d),"srgb":(true|false),"name":"(images\/[^"]+)"/g)].map(([, n, , url]) => `${n} ${url}`))];
 assert.equal(urls.length, 2, `each tile is a file: ${urls.join(', ')}`);
-for (const entry of urls) assert.ok(files[entry.split(' ')[1]]?.length, `${entry} is in the package`);
+for (const entry of urls) assert.ok(files[entry.split(' ')[1].split('?')[0]]?.length, `${entry} is in the package`);
 
 // The page's packing from the tiles' pixels gives the app's layers and map.
 const page = packTiles(imageTiles(tiled)), app = tileLayers(tiled);

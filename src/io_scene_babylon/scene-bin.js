@@ -20,7 +20,8 @@ export function createSceneBin({ gzip = true } = {}) {
     bytes() {
       const out = new Uint8Array(length);
       arrays.forEach((array, i) => out.set(new Uint8Array(array.buffer, array.byteOffset, array.byteLength), views[i][0]));
-      return gzip ? gzipSync(out, { level: 9 }) : out;
+      // No time in its header: the same scene writes the same bytes.
+      return gzip ? gzipSync(out, { level: 9, mtime: 0 }) : out;
     },
   };
 }

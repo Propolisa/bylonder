@@ -89,7 +89,7 @@ const SCENARIOS = {
     // loadBlendScene on the package's file URL: each image is a texture of its file, whose rows are top first.
     const { loadBlendScene } = await import(new URL('bylonder/blend-scene.js', written.url).href);
     const blend = await loadBlendScene(new NullEngine(), written.url);
-    const texture = (path) => blend.scene.textures.find((t) => t.url?.endsWith(path));
+    const texture = (path) => blend.scene.textures.find((t) => t.url?.split('?')[0].endsWith(path));
     assert.deepEqual([jpg, print, grain].map((path) => texture(path)?.invertY), [true, true, true], 'each image is a texture of its file, its rows top first');
     blend.dispose();
     written.remove();

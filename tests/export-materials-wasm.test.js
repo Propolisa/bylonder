@@ -46,8 +46,8 @@ const SCENARIOS = {
   async 'framed-print'() {
     const { blend, written, inputs } = await load('framed-print');
     const image = inputs.find((c) => c.path.endsWith('.image'));
-    // Its default is the package's file of the image.
-    assert.ok(image && image.type === 'STRING' && /^images\/\d+\.png$/.test(image.default), `an image is a control: ${JSON.stringify(image)}`);
+    // Its default is the package's file of the image, by its version.
+    assert.ok(image && image.type === 'STRING' && /^images\/\d+\.png\?v=[\d.]+$/.test(image.default), `an image is a control: ${JSON.stringify(image)}`);
     assert.equal(blendData().materials.get(/^materials\["(.+?)"\]/.exec(image.path)[1]).node_tree.nodes.get(/nodes\["(.+?)"\]/.exec(image.path)[1]).bl_idname, 'ShaderNodeTexImage', 'its path names the Image Texture node');
     const block = nodeMaterial(blend, image.path).getBlockByName(blockName(image.path)), before = block.texture;
     blend.set(image.path, 'https://example.com/poster.png');

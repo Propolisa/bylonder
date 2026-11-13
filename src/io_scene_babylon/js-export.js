@@ -22,7 +22,7 @@ import { fillMaterials, MESH_VALUE } from './runtime/materials.js';
 import { exportSounds } from './sound-export.js';
 import { worldNodes } from '../blenkernel/scene/world-babylon.js';
 import { createSceneBin } from './scene-bin.js';
-import { imageFiles } from './image-files.js';
+import { digest, imageFiles } from './image-files.js';
 import { exportCompositor } from './compositor-export.js';
 import { fogGlowOnGPU } from '../compositor/compositor-replay.js';
 import { exportIR, idKey } from './ir-export.js';
@@ -74,6 +74,8 @@ export async function createEngine(canvas, options = {}) {
 };
 // Where scene.js imports Babylon: the names its code uses, and the modules its data needs registered.
 const BABYLON_IMPORTS = '/* @babylonjs/core imports */';
+// Where scene.js names its scene.bin and IR's version, filled once they are written.
+const VERSION = '@scene-files-version@';
 const number = (v) => +v.toFixed(7);
 const vector = (values) => values.map(number).join(', ');
 
@@ -564,11 +566,12 @@ export async function loadAssetContainer(scene) {
   return assetContainer(blend, (root) => load({ instance: blend, root }));
 }
 
-// scene.bin's buffers and the IR.
+// scene.bin's buffers and the IR, asked for by this export's version of them, so a cache never pairs them with
+// another export's scene.js.
 async function readData() {
-  const buffers = await readBuffers(new URL('scene.bin', ROOT), BUFFERS, ${!hostCompression});
+  const buffers = await readBuffers(new URL('scene.bin?v=${VERSION}', ROOT), BUFFERS, ${!hostCompression});
   // The IR as data: read as bytes, as Node's fetch reads no file: URL.
-  const ir = JSON.parse(new TextDecoder().decode(await readBytes(new URL('scene.ir.json', ROOT))));
+  const ir = JSON.parse(new TextDecoder().decode(await readBytes(new URL('scene.ir.json?v=${VERSION}', ROOT))));
   return { buffers, ir };
 }
 
@@ -695,5 +698,6 @@ ${parse('PARTICLE_SYSTEMS', data.particleSystems, "ParticleSystem.Parse(entry, s
 import { ${[...usedNames(source), ...pipelineClasses].join(', ')} } from '@babylonjs/core';`;
   // An ES module package in Node too (the headless SDK), needing only Babylon.
   const manifest = { name: name.toLowerCase().replace(/[^a-z0-9-]+/g, '-'), type: 'module', main: 'scene.js', types: 'scene.d.ts', peerDependencies: { '@babylonjs/core': AbstractEngine.Version } };
-  return { 'scene.js': source.replace(BABYLON_IMPORTS, babylonImports), 'scene.d.ts': controlTypes(Object.entries(ir.properties).map(([path, { type }]) => ({ path, type }))), 'scene.ir.json': irJson, [UNITS_FILE]: units, ...(kernels && { [NODE_KERNELS]: kernels }), ...(curves && { [CURVES_GLSL_FILE]: curvesGlslFile() }), 'scene.bin': bin.bytes(), [ASSET_FILE]: ASSET_MANIFEST, 'package.json': `${JSON.stringify(manifest, null, 2)}\n`, ...images, ...soundFiles };
+  const binBytes = bin.bytes(), version = [binBytes, new TextEncoder().encode(irJson)].map((bytes) => digest(bytes).replace(':', '.')).join('-');
+  return { 'scene.js': source.replace(BABYLON_IMPORTS, babylonImports).replaceAll(VERSION, version), 'scene.d.ts': controlTypes(Object.entries(ir.properties).map(([path, { type }]) => ({ path, type }))), 'scene.ir.json': irJson, [UNITS_FILE]: units, ...(kernels && { [NODE_KERNELS]: kernels }), ...(curves && { [CURVES_GLSL_FILE]: curvesGlslFile() }), 'scene.bin': binBytes, [ASSET_FILE]: ASSET_MANIFEST, 'package.json': `${JSON.stringify(manifest, null, 2)}\n`, ...images, ...soundFiles };
 }
