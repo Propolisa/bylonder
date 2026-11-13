@@ -4,12 +4,13 @@
 // passed to their Parse functions as Babylon's .babylon loader does, with images as files beside it. `load(engine)`
 // gives the scene with its controls (runtime/blend-scene.js), `createScene(engine, canvas)` the scene alone. The scene's IR
 // (docs/ir.md), its properties and computed entities among it, is scene.ir.json beside it.
+import { findRoles } from './runtime/character/roles.js';
 import { AbstractEngine, Animation, Matrix } from '@babylonjs/core';
 import { objectMatrix } from '../runtime/object-transform.js';
 import { CLOCK, sampledGaps, serializeScene } from './babylon-export.js';
 import { binaryClipKeys, CLIP_KEYS_SOURCE, irClips, isClip } from './clip-export.js';
 import { binaryMorphTargets, MORPH_KEYS_SOURCE } from './morph-export.js';
-import { deformSkeletons, pruneSkeletons, remappedIndices } from './skeleton-export.js';
+import { remappedIndices, skinSkeletons } from './skeleton-export.js';
 import { exportRuntimes } from '../runtimes/runtimes.js';
 import { exportSampling } from './sampling.js';
 import { prepareKernels } from './pose-export.js';
@@ -84,12 +85,35 @@ const vector = (values) => values.map(number).join(', ');
 // Babylon's classes the scene's data names, which parse only once their modules have registered them: each customType
 // and className (BABYLON.PBRMaterial, a node material's blocks), each light's and camera's constructor, and the
 // textures Texture.Parse makes through another module.
-// The skeleton drawing each armature that skins one mesh, by the armature's name, and that mesh.
+// The rig skeleton of each armature that skins one mesh, by the armature's name, its skin skeleton and that mesh.
 function skeletonsOf(data) {
-  return Object.fromEntries((data.skeletons ?? []).flatMap((s) => {
-    const meshes = data.meshes.filter((m) => m.skeletonId === s.id);
-    return meshes.length === 1 ? [[s.name, { skeleton: s.id, mesh: meshes[0].id }]] : [];
+  return Object.fromEntries((data.skeletons ?? []).filter((s) => !s.rig).flatMap((s) => {
+    const skin = data.skeletons.find((k) => k.rig === s.id), meshes = data.meshes.filter((m) => m.skeletonId === (skin?.id ?? s.id));
+    return meshes.length === 1 ? [[s.name, { skeleton: s.id, ...(skin && { skin: skin.id }), mesh: meshes[0].id }]] : [];
   }));
+}
+
+// Each armature with clips: the names its character takes (controls-export.js characterNames).
+function armatureNames(data, ir) {
+  /** @type {Record<string, { actions: string[], markers: string[], groups: string[], roles: string[], properties: string[] }>} */
+  const armatures = {};
+  for (const clip of data.clips ?? []) {
+    for (const id of clip.ids ?? []) {
+      if (!id.pose) continue;
+      const bones = [...id.pose.bones].map((b) => b.name);
+      const entry = armatures[id.name] ??= { actions: [], markers: [], groups: [...(id.data?.collections_all ?? [])].map((c) => c.name), roles: Object.keys(findRoles(bones)), properties: [] };
+      entry.actions.push(clip.name);
+      entry.markers.push(...[...(clip.action?.pose_markers ?? [])].map((m) => m.name));
+    }
+  }
+  for (const [name, entry] of Object.entries(armatures)) {
+    const own = `objects[${JSON.stringify(name)}]`;
+    for (const path of Object.keys(ir.properties)) {
+      const m = path.startsWith(own) && /\["((?:[^"\\]|\\.)*)"\]$/.exec(path);
+      if (m) entry.properties.push(JSON.parse(`"${m[1]}"`));
+    }
+  }
+  return armatures;
 }
 
 function parsedClasses(data) {
@@ -116,8 +140,9 @@ function parsedClasses(data) {
 const NODE_MATERIAL_INCLUDES = ['Shaders/ShadersInclude/helperFunctions.js', 'ShadersWGSL/ShadersInclude/helperFunctions.js'];
 // The scene components the parsed objects add themselves to.
 const COMPONENTS = { shadowGenerators: 'Lights/Shadows/shadowGeneratorSceneComponent.js', effectLayers: 'Layers/effectLayerSceneComponent.js', particleSystems: 'Particles/particleSystemComponent.js' };
-// What every page uses, picking under the pointer (Ray), and the material a mesh without its own draws with.
-const PAGE_MODULES = ['Culling/ray.js'], DEFAULT_MATERIAL = 'Materials/standardMaterial.js';
+// What every page uses: picking under the pointer (Ray) and the color curves its image processing parses; and the
+// material a mesh without its own draws with.
+const PAGE_MODULES = ['Culling/ray.js', 'Materials/colorCurves.js'], DEFAULT_MATERIAL = 'Materials/standardMaterial.js';
 // The names scene.js imports from @babylonjs/core, each only where its code uses it.
 const BABYLON_NAMES = ['Animation', 'AnimationGroup', 'Camera', 'CascadedShadowGenerator', 'Color3', 'Color4', 'Constants', 'CubeTexture', 'EffectLayer', 'Engine', 'Geometry', 'HDRCubeTexture', 'Light',
   'LinesMesh', 'Material', 'Matrix', 'Mesh', 'MorphTargetManager', 'MultiMaterial', 'ParticleSystem', 'Quaternion', 'ReflectionProbe', 'Scene', 'SerializationHelper', 'ShadowGenerator', 'Skeleton',
@@ -140,9 +165,9 @@ const SCREEN_SPACE_PIPELINES = {
 // A geometry's vertex buffers by Babylon kind, with their sizes, and its indices, as buffers of scene.bin: one entry per
 // geometry, shared by its meshes. A thin instance buffer (world0 to world3, per instance) is the mesh's thinInstances,
 // written with its node.
-function geometryEntry(mesh, bin, pruned) {
+function geometryEntry(mesh, bin, skins) {
   const kinds = mesh.getVerticesDataKinds().filter((kind) => !mesh.getVertexBuffer(kind).getIsInstanced());
-  const map = mesh.skeleton && pruned?.get(mesh.skeleton.id);
+  const map = mesh.skeleton && skins?.get(mesh.skeleton.id)?.map;
   const vertices = Object.fromEntries(kinds.map((kind) => {
     const size = mesh.getVertexBuffer(kind).getSize(), data = Float32Array.from(mesh.getVerticesData(kind, false, false));
     return [kind, [size, bin.add(map ? remappedIndices(kind, data, map, mesh.skeleton.bones.length) : data)]];
@@ -334,13 +359,12 @@ function selectedWorld(world, selected) {
 // `replace`, the type keys of units the page registers itself, which the package ships none of (unit-manifest.js); `bundle`,
 // whether the package is then bundled (bundle.js); `branchState` and `branches`, the states of the scene's branches
 // (export-options.js chosenState); `scope`, the whole scene or its `selected` objects (export-options.js SCOPES);
-// `clipCompression`, how clips' bone keys are compressed (export-options.js CLIP_COMPRESSION); `deformBonesOnly`,
-// skeletons with only the bones that skin (skeleton-export.js).
+// `clipCompression`, how clips' bone keys are compressed (export-options.js CLIP_COMPRESSION).
 
 export const exportModule = async (world, options) => (await exportPackage(world, options)).files;
 
 // The package's files, its tables by datablock and its buffers by key (scene-patch.js makes a patch of two).
-export async function exportPackage(whole, { scope = 'SCENE', selected = [], live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, animations = 'TIMELINE', clipCompression = 'STANDARD', deformBonesOnly = false, target = 'BOTH', runtime = null, runtimes = {}, replace = [], bundle = false, controlPanel = true, devTools = 'CDN', navigation = 'FIXED', navigationModes = {}, branchState = null, branches = {}, sampleRate = {} } = {}) {
+export async function exportPackage(whole, { scope = 'SCENE', selected = [], live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, animations = 'TIMELINE', clipCompression = 'STANDARD', target = 'BOTH', runtime = null, runtimes = {}, replace = [], bundle = false, controlPanel = true, devTools = 'CDN', navigation = 'FIXED', navigationModes = {}, branchState = null, branches = {}, sampleRate = {} } = {}) {
   const world = scope === 'SELECTED' ? selectedWorld(whole, selected) : whole;
   const states = { branchState, branches }, stackState = (node) => chosenState(states, 'modifiers', node.name) ?? (keepLive ? 'LIVE' : 'BAKED');
   const live = new Map(world.objects.filter((node) => stackState(node) === 'LIVE').map((node) => [node, liveStack(world, node)]).filter(([, stack]) => stack));
@@ -352,7 +376,7 @@ export async function exportPackage(whole, { scope = 'SCENE', selected = [], liv
     const sampling = exportSampling(world.animation.time.state, sampleRate);
     const mapped = exportRuntimes(world, { bake: bakeAnimation, runtime, runtimes, sampling });
     try {
-      return await moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, animations, clipCompression, deformBonesOnly, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states, sampling });
+      return await moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, animations, clipCompression, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states, sampling });
     } finally {
       mapped.restore();
     }
@@ -361,7 +385,7 @@ export async function exportPackage(whole, { scope = 'SCENE', selected = [], liv
   }
 }
 
-async function moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, animations, clipCompression, deformBonesOnly, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states, sampling }) {
+async function moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, animations, clipCompression, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states, sampling }) {
   const graphs = [], graphOf = materialGraphs(world, graphs), asset = !!world.only;
   const data = await serializeScene(world, { geometry: false, live, mapped, parity, graphOf, bake: bakeAnimation, sampling, only: world.only, animations, onBones: true });
   if (chosenState(states, 'postProcessing') === 'OFF') Object.assign(data, { renderingPipelines: [], postProcesses: [] });
@@ -373,15 +397,14 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   const volumes = asset || chosenState(states, 'volumes') === 'OFF' ? null : await exportVolumes(scene, { parity, graphOf, meshes: new Set(data.meshes.map((m) => m.id)), lights: new Set(data.lights.map((l) => l.id)) });
   if (volumes) data.materials.push(...volumes.materials);
   const bin = createSceneBin({ gzip: !hostCompression }), images = imageFiles(data);
-  // Deform Bones Only: skeletons pruned to what skins and, on the native rig runtime, what the runtime reads.
-  const pruned = deformBonesOnly ? deformSkeletons(world, data, mapped.constraints ?? []) : new Map();
-  pruneSkeletons(data, pruned);
+  // The skin skeletons the meshes skin to, of the rig skeletons' bones they weight.
+  const skins = skinSkeletons(scene, data);
   // Each geometry once, by the id of the first node using it.
   const geometries = new Map(), geometryEntries = [];
   const objects = [...data.transformNodes.map((entry) => ({ entry })), ...data.meshes.map((entry) => ({ entry, mesh: scene.getMeshByUniqueId(entry.uniqueId) }))];
   for (const { entry, mesh } of objects) if (mesh?.geometry && !geometries.has(mesh.geometry)) {
     geometries.set(mesh.geometry, entry.id);
-    geometryEntries.push([entry.id, geometryEntry(mesh, bin, pruned)]);
+    geometryEntries.push([entry.id, geometryEntry(mesh, bin, skins)]);
   }
   const compositorState = chosenState(states, 'compositor') ?? 'LIVE';
   const composited = !asset && data.cameras.length && compositorState !== 'OFF' ? exportCompositor(world) : null;
@@ -434,8 +457,6 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   } }));
   volumes?.dispose();
   parentInstances(objects);
-  // Objects parented to bones hang from the bones the pruned skeletons keep.
-  for (const { entry: e } of objects) if (e.parentBone && pruned.has(e.parentBone.skeletonId)) e.parentBone = { ...e.parentBone, index: pruned.get(e.parentBone.skeletonId).get(e.parentBone.index) };
   const pipelineTypes = [...new Set(data.renderingPipelines.map((p) => p.customType))];
   const pipelineClasses = pipelineTypes.filter((type) => !SCREEN_SPACE_PIPELINES[type] && babylonModule(type));
   const parse = (name, list, code) => (list?.length ? `  for (const entry of ${name}) ${code};\n` : '');
@@ -480,7 +501,9 @@ import { readBuffers, readBytes } from './bylonder/buffers.js';
 import { worldColor, worldNodes } from './bylonder/world.js';
 import { cameraEffects, pipelineEffect, postProcessEffect } from './bylonder/camera-effects.js';
 import { BlendScene } from './bylonder/blend-scene.js';
+import { whenDrawable } from './bylonder/ready.js';
 import { loadTables } from './bylonder/scene-tables.js';
+import { mirrored } from './bylonder/skin-skeleton.js';
 import { addAsset, assetContainer, cloneAsset } from './bylonder/asset.js';${controlPanel ? `
 import { controlPanel } from './bylonder/control-panel.js';` : ''}
 ${webgpu ? `import { derivativeUniformity } from './bylonder/overrides/webgpu/derivative-uniformity.js';
@@ -573,6 +596,10 @@ const IRS = new WeakMap(), WORLDS = new WeakMap(), COMPOSITORS = new WeakMap(), 
 const compiler = (name) => ({ jsPath: new URL(\`${COMPILER_FOLDER}/\${name}.js\`, ROOT).href, wasmPath: new URL(\`${COMPILER_FOLDER}/\${name}.wasm\`, ROOT).href });
 const COMPILERS = { glslangOptions: compiler('glslang'), twgslOptions: compiler('twgsl') };` : ''}
 ${engines(bundle)[target]}
+${data.skeletons?.length ? `// The character animation system (docs/character-animation.md), for the page's characters.
+export * from './bylonder/character/api.js';
+export * from './bylonder/character/effects/index.js';
+` : ''}
 // The scene with its controller: load(engine) builds it in a scene of its own, as the page does, with the scene's
 // settings${controlPanel ? ' and the control panel' : ''}; load({ scene, root }) adds its objects to a scene of yours, as a .glb's are, under
 // a root of their own, "__root__" (bylonder/asset.js), itself under \`root\` (a node of yours) if given, with none of the
@@ -584,18 +611,28 @@ export async function load(target) {
       controller: (view, entries, dispose) => new BlendScene(view, ir, { root: ROOT, buffers, entries, dispose, reload: (old) => { old.dispose(); return load(target); } }) };
     if (target.instance) return cloneAsset(target.instance.entries, options);
     const added = addAsset(target.scene, (into, lookup) => addObjects(into, { ir, buffers }, lookup), options);
+    await entitiesRun(target.scene, added);
     await shadersCompiled(target.scene);
     return added;
   }
   const engine = target;${webgpu ? `
   warnUnlessMaximumLimits(engine);` : ''}
   const scene = await createScene(engine, engine.getRenderingCanvas());
-  await shadersCompiled(scene);
-  ${controlPanel ? 'const blend = ' : 'return '}new BlendScene(scene, IRS.get(scene), { root: ROOT, world: WORLDS.get(scene), compositor: COMPOSITORS.get(scene), buffers: SCENE_BUFFERS.get(scene), tables: TABLES.get(scene),
-    reload: (old) => { old.dispose(); return load(engine); } });${controlPanel ? `
+  const blend = new BlendScene(scene, IRS.get(scene), { root: ROOT, world: WORLDS.get(scene), compositor: COMPOSITORS.get(scene), buffers: SCENE_BUFFERS.get(scene), tables: TABLES.get(scene),
+    reload: (old) => { old.dispose(); return load(engine); } });
+  await entitiesRun(scene, blend);
+  await shadersCompiled(scene);${controlPanel ? `
   // The page's control panel, at the canvas's top right corner (none in Node).
   controlPanel(blend, ${json({ tools: devTools, navigation, offer: NAVIGATION.map(([id]) => id).filter((id) => navigationModes[id] !== false) }).replace('}', `, root: ROOT${panelIcons ? `, icons: () => Promise.resolve(unitFor('${PANEL_ICONS_UNIT}')?.icons${blenderIcons ? ` ?? import('./${PANEL_ICONS}').then((m) => m.default)` : ''})` : ''} }`)});
-  return blend;` : ''}
+` : ''}
+  return blend;
+}
+
+// A frame's entities run once and settled, so what they make (a rig the page's native runtime solves, its solver attached)
+// is in place before the load resolves: the scheduler runs them after a frame's animations.
+async function entitiesRun(scene, blend) {
+  scene.animate();
+  await blend.settled?.();
 }
 
 // Once the scene's shaders are compiled, so that a page's first frames do not stall on them: a frame drawn (its time
@@ -608,7 +645,7 @@ async function shadersCompiled(scene) {
   engine.beginFrame();
   scene.render(true, true);
   engine.endFrame();
-  await scene.whenReadyAsync(true);
+  await whenDrawable(scene);
 }
 
 // The objects in an AssetContainer, as LoadAssetContainerAsync gives a .glb's: instantiate() loads a copy with its own controller.
@@ -717,7 +754,7 @@ ${kernels ? `  // Blender's nodes of each material and world, made from the IR's
       const multi = MultiMaterial.ParseMultiMaterial(entry, scene);
       multi.subMaterials = (entry.materialsUniqueIds ?? []).map((key) => made.materials[key] ?? null);
       return multi;
-    }`)}${parser(data.skeletons, 'skeletons', '(entry) => Skeleton.Parse(entry, scene)')}${parser(data.morphTargetManagers, 'morphTargets', '(entry) => MorphTargetManager.Parse(morphKeys(entry, buffers), scene)')}${parser(data.meshes.filter((m) => m.type === 'LinesMesh'), 'linesMesh', '(entry) => new LinesMesh(entry.name, scene)')}${parser(data.lights, 'lights', `(entry) => ${areaLights ? 'parseLight(entry, scene, AreaLight)' : 'Light.Parse(entry, scene)'}`)}${parser(data.cameras, 'cameras', '(entry) => orthoScaled(parseCamera(entry, scene))')}${parser(data.reflectionProbes, 'reflectionProbes', '(entry) => ReflectionProbe.Parse(entry, scene, ROOT)')}${parser(data.shadowGenerators, 'shadowGenerators', "(entry) => Object.assign((entry.className === 'CascadedShadowGenerator' ? CascadedShadowGenerator : ShadowGenerator).Parse(entry, lookup), { customShaderOptions: entry.customShaderOptions })")}
+    }`)}${parser(data.skeletons, 'skeletons', '(entry) => (entry.rig ? mirrored(Skeleton.Parse(entry, scene), entry.rig, lookup) : Skeleton.Parse(entry, scene))')}${parser(data.morphTargetManagers, 'morphTargets', '(entry) => Object.assign(MorphTargetManager.Parse(morphKeys(entry, buffers), scene), { optimizeInfluencers: false })')}${parser(data.meshes.filter((m) => m.type === 'LinesMesh'), 'linesMesh', '(entry) => new LinesMesh(entry.name, scene)')}${parser(data.lights, 'lights', `(entry) => ${areaLights ? 'parseLight(entry, scene, AreaLight)' : 'Light.Parse(entry, scene)'}`)}${parser(data.cameras, 'cameras', '(entry) => orthoScaled(parseCamera(entry, scene))')}${parser(data.reflectionProbes, 'reflectionProbes', '(entry) => ReflectionProbe.Parse(entry, scene, ROOT)')}${parser(data.shadowGenerators, 'shadowGenerators', "(entry) => Object.assign((entry.className === 'CascadedShadowGenerator' ? CascadedShadowGenerator : ShadowGenerator).Parse(entry, lookup), { customShaderOptions: entry.customShaderOptions })")}
     // Every material takes as many lights as its shader holds, each mesh the package's lights that reach it, the strongest
     // first (EEVEE has no cap); lights the page adds come first where they light.
     worldMade: (material) => { if (SCENE.world?.material !== null) WORLDS.set(scene, worldNodes(scene, material)); },
@@ -751,6 +788,6 @@ import { ${[...usedNames(source), ...pipelineClasses].join(', ')} } from '@babyl
   // What a patch is made from (scene-patch.js): the tables, the scene's own settings and the IR's, and the buffers.
   Object.assign(tables, { scene: { [ir.scene.id ?? 'scene']: { settings, imageProcessing: data.imageProcessingConfiguration, code, effectLayers: data.effectLayers ?? [],
     renderingPipelines: data.renderingPipelines, postProcesses: data.postProcesses, volumes: volumes?.config ?? null, display, compositor: composited?.compositor ?? null } }, ...irTables(ir) });
-  const files = { 'scene.js': source.replace(BABYLON_IMPORTS, babylonImports).replaceAll(VERSION, version).replace(TABLES_VERSION, packageState({ tables }).version), 'scene.d.ts': controlTypes(Object.entries(ir.properties).map(([path, { type }]) => ({ path, type }))), 'scene.ir.json': irJson, [UNITS_FILE]: units, ...(kernels && { [NODE_KERNELS]: kernels }), ...(curves && { [CURVES_GLSL_FILE]: curvesGlslFile() }), 'scene.bin': binBytes, [ASSET_FILE]: ASSET_MANIFEST, 'package.json': `${JSON.stringify(manifest, null, 2)}\n`, ...images, ...soundFiles };
+  const files = { 'scene.js': source.replace(BABYLON_IMPORTS, babylonImports).replaceAll(VERSION, version).replace(TABLES_VERSION, packageState({ tables }).version), 'scene.d.ts': controlTypes(Object.entries(ir.properties).map(([path, { type }]) => ({ path, type })), armatureNames(data, ir), !!data.skeletons?.length), 'scene.ir.json': irJson, [UNITS_FILE]: units, ...(kernels && { [NODE_KERNELS]: kernels }), ...(curves && { [CURVES_GLSL_FILE]: curvesGlslFile() }), 'scene.bin': binBytes, [ASSET_FILE]: ASSET_MANIFEST, 'package.json': `${JSON.stringify(manifest, null, 2)}\n`, ...images, ...soundFiles };
   return { files, tables, buffers: bin.arrays() };
 }
