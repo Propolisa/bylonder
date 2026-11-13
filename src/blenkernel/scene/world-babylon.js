@@ -21,7 +21,7 @@ export function readAuthoredWorld(scene, defaults) {
     home: blender ? defaults.home : 'BABYLON',
     background: texture
       ? { ...defaults.background, input: 'ENVIRONMENT', image: 'scene', color: linear(scene.clearColor), strength: scene.environmentIntensity, rotation: texture.rotationY || 0 }
-      : { ...defaults.background, input: 'COLOR', color: blender?.color ?? linear(scene.clearColor), strength: blender?.strength ?? 1 },
+      : { ...defaults.background, input: 'COLOR', color: blender?.color ?? linear(scene.clearColor), strength: blender?.strength ?? 1, node: blender?.node ?? defaults.background.node },
     volume: { type: Object.entries(fogModes).find(([, mode]) => mode === scene.fogMode)?.[0] || 'NONE', color: rgb(scene.fogColor), density: scene.fogDensity, start: scene.fogStart, end: scene.fogEnd },
     visibility: { camera: texture ? skyboxes.some(m => m.isEnabled(false)) : true },
   };

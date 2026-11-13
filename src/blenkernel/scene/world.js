@@ -14,7 +14,7 @@ const clone = value => JSON.parse(JSON.stringify(value));
 // Blender's default world: Background node with 0.05 grey, strength 1.
 export const worldDefaults = {
   home: BLENDER,
-  background: { input: 'COLOR', color: [0.05, 0.05, 0.05], image: STUDIO, rotation: 0, strength: 1 },
+  background: { input: 'COLOR', color: [0.05, 0.05, 0.05], image: STUDIO, rotation: 0, strength: 1, node: 'Background' },
   volume: { type: 'NONE', color: [0.8, 0.8, 0.8], density: 0.05, start: 10, end: 100 },
   visibility: { camera: true },
 };
@@ -28,8 +28,8 @@ export const getPath = (entry, path) => { const { owner, key } = resolve(entry, 
 
 // A scene's world as Blender's (bpy.data.worlds.new as scene.world): its color, linear, times its strength lights the
 // scene; or its node tree's material (`nodes`), drawn as its background and lighting.
-export function createWorld(scene, { color = worldDefaults.background.color, strength = worldDefaults.background.strength, nodes = null } = {}) {
-  scene.metadata = { ...scene.metadata, wbWorld: { color, strength } };
+export function createWorld(scene, { color = worldDefaults.background.color, strength = worldDefaults.background.strength, node, nodes = null } = {}) {
+  scene.metadata = { ...scene.metadata, wbWorld: { color, strength, node } };
   if (nodes) worldNodes.set(scene, nodes); else worldNodes.delete(scene);
 }
 

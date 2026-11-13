@@ -138,9 +138,12 @@ function frameControl(world, scene) {
   return knob(`scenes${key(scene.name)}.frame_current`, scene.frame_current, { type: 'INT', soft_min: frameStart, soft_max: frameEnd, suggested: true }, { frame: true });
 }
 
-// A world of one color: its Background node's Color and Strength, which light the page's scene (runtime/world.js).
+// A world of one color: the Color and Strength of the Background node its output draws (else its first), which light
+// the page's scene (runtime/world.js).
 function worldControls(scene) {
-  const background = scene.world?.node_tree?.nodes && [...scene.world.node_tree.nodes].find((node) => node.bl_idname === 'ShaderNodeBackground');
+  const tree = scene.world?.node_tree, isBackground = (node) => node?.bl_idname === 'ShaderNodeBackground';
+  const drawn = tree?.links && [...tree.links].find((link) => link.to_node.bl_idname === 'ShaderNodeOutputWorld' && link.to_socket.identifier === 'Surface')?.from_node;
+  const background = isBackground(drawn) ? drawn : tree?.nodes && [...tree.nodes].find(isBackground);
   if (!background) return [];
   const inputs = `worlds${key(scene.world.name)}.node_tree.nodes${key(background.name)}.inputs`, color = [...background.inputs[0].default_value];
   return [...color.slice(0, 3).map((v, i) => knob(`${inputs}[0].default_value[${i}]`, v, { type: 'FLOAT', subtype: 'COLOR', soft_min: 0, soft_max: 1, suggested: true }, { world: true })),

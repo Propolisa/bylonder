@@ -367,15 +367,22 @@ export function createMainView(state) {
   // A read World: the scene's world as Blender's, which Bylonder's authored world reads; a tree of more than a
   // Background is drawn as EEVEE draws it (world-babylon.js), its nodes as a material's.
   const BACKGROUND_TREE = ['ShaderNodeBackground', 'ShaderNodeOutputWorld'];
+  // The Background node the World Output's Surface draws, else the first one.
+  const surfaceBackground = (tree) => {
+    const outputs = new Set(tree?.nodes.filter((node) => node.idname === 'ShaderNodeOutputWorld').map((node) => node.name));
+    const drawn = tree?.links.find(([, , to, socket]) => socket === 'Surface' && outputs.has(to))?.[0];
+    const backgrounds = tree?.nodes.filter((node) => node.idname === 'ShaderNodeBackground') ?? [];
+    return backgrounds.find((node) => node.name === drawn) ?? backgrounds[0];
+  };
   function adoptWorld(wo, scene, warnings) {
     const name = blender.name(wo), tree = nodeTreeOf(wo, warnings, 'World');
-    const background = tree?.nodes.find((node) => node.idname === 'ShaderNodeBackground');
+    const background = surfaceBackground(tree);
     const color = background?.values.Color ?? dnaGet('World', wo, 'color');
     const nodes = tree && !(tree.nodes.every((node) => BACKGROUND_TREE.includes(node.idname)) && tree.links.length <= 1)
       ? nodeMaterialFromTree(`__world ${name}`, scene, tree) : null;
     if (nodes?.missing.length) warnings.push(`World "${name}": its ${nodes.missing.join(', ')} nodes are not opened`);
     if (nodes) nodes.material.blenderProbeClamp = [idStruct(wo).sun_threshold, idStruct(blender.scene).eevee.clamp_surface_indirect];
-    createWorld(scene, color && { color: [...color].slice(0, 3), strength: background?.values.Strength, nodes: nodes?.material });
+    createWorld(scene, color && { color: [...color].slice(0, 3), strength: background?.values.Strength, node: background?.name, nodes: nodes?.material });
     ids.adopted.set('world', wo);
   }
   // A material's or world's values and node tree from Main. A PBR material is its Principled BSDF as Blender's glTF

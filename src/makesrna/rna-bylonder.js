@@ -608,7 +608,7 @@ const STRUCTS = {
     name: { get: () => entry.name, set: (owner, name, r) => r.world.worlds.rename(entry, name) },
     use_nodes: () => true,
     node_tree: (owner, r) => nodeTree(r, ['World Output', 'ShaderNodeOutputWorld', [
-      ['Surface', 'NodeSocketShader', ['Background', 'ShaderNodeBackground', [
+      ['Surface', 'NodeSocketShader', [entry.background.node ?? 'Background', 'ShaderNodeBackground', [
         ['Color', 'NodeSocketColor', rgba(() => entry.background.color, (value) => r.world.worlds.set(entry, 'background.color', value, false))],
         ['Strength', 'NodeSocketFloat', worldValue(r, entry, 'background.strength')]]]],
       ['Volume', 'NodeSocketShader', entry.volume.type === 'NONE' ? null : ['Volume Scatter', 'ShaderNodeVolumeScatter', [
