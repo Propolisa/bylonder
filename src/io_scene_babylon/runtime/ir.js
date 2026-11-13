@@ -96,9 +96,19 @@ export const CollectionSchema = z.object({
 /** A marker: a named frame, the scene's (timeline_markers) or an action's (pose_markers, at the action's frames). */
 export const MarkerSchema = z.object({ name: z._default(z.string(), ''), frame: z._default(z.number(), 0) });
 /**
+ * When each foot of an action is down, found at export from Blender's evaluation of its rig: per leg of the role `legs`
+ * (in its order), the deform bone measured and its contacts as [start, end) frames from the clip's start; and the
+ * ground speed its feet imply, in metres per second.
+ */
+export const ContactsSchema = z.object({
+  fps: z.number().check(z.refine((fps) => fps > 0)),
+  speed: z._default(z.number(), 0),
+  legs: z.array(z.object({ foot: Name, down: fresh(z.array(z.tuple([z.number(), z.number()])), () => []) })),
+});
+/**
  * An action exported as a clip (an animation group of its own, named by the action): its frame range, and how the first
  * NLA strip using it plays it, its blending (REPLACE, ADD, or COMBINE played as ADD), influence, speed (1 / its scale) and
- * repeat; its pose markers.
+ * repeat; its pose markers; its foot contacts, where it animates an armature with legs.
  */
 export const ClipSchema = z.object({
   action: Name,
@@ -106,6 +116,7 @@ export const ClipSchema = z.object({
   blend: z._default(z.enum(['REPLACE', 'ADD', 'SUBTRACT', 'MULTIPLY', 'COMBINE']), 'REPLACE'),
   influence: z._default(z.number(), 1), speed: z._default(z.number().check(z.refine((speed) => speed > 0)), 1), repeat: z._default(z.number(), 1),
   markers: fresh(z.array(MarkerSchema), () => []),
+  contacts: z._default(z.nullable(ContactsSchema), null),
 });
 
 /**

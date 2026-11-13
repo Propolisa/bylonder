@@ -10,6 +10,7 @@ import { imageFile } from '../imbuf/image-textures.js';
 import { exportNodeMaterial } from './node-material-export.js';
 import { exactAnimation, fcurveKeys, stripKeys } from './exact-keys.js';
 import { actionClips, additive, clipGroup, ownedBy, withAction } from './clip-export.js';
+import { sampleContacts } from './contacts-export.js';
 import { actionFCurves } from './ir-export.js';
 import { sceneOf } from './controls-export.js';
 import { exportSampling } from './sampling.js';
@@ -252,12 +253,15 @@ function sampledClips(world, nodes, mapped, sampling) {
   const clips = actionClips(ids).map((clip) => {
     const owns = ownedBy(clip.ids), owned = nodes.filter((node) => owns(objectOf(node))), isAdditive = clip.blend !== 'REPLACE';
     const range = sampling.over({ frameStart: clip.frame_start, frameEnd: clip.frame_end });
+    let contacts = null;
     const animations = withAction(clip.ids, clip.action, () => {
+      const feet = sampleContacts(clip, range);
       const runtimes = mapped.clip(range, owns), { transforms } = evaluatedFrames(world, owned, [], [], range), keys = transformKeys(world, owned, { clip: true });
+      contacts = feet();
       return [...[...(transforms ?? [])].flatMap(([node, frames]) => transformAnimations(node, keys.get(node), frames, range.range, range).map((animation) => ({ animation, target: node }))),
         ...runtimes()];
     }, { additive: isAdditive });
-    return { ...clip, animations: animations.filter(skins).map(({ animation, target }) => ({ animation: isAdditive ? additive(animation, target) : animation, target })) };
+    return { ...clip, contacts, animations: animations.filter(skins).map(({ animation, target }) => ({ animation: isAdditive ? additive(animation, target) : animation, target })) };
   });
   sync.frameChanged(world.animation.time.frame);
   return nativeTracks(clips, mapped).filter((clip) => clip.animations.length);
@@ -491,6 +495,8 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
   const all = [...scene.meshes, ...scene.transformNodes, ...scene.lights, ...scene.cameras];
   const restores = [
     setFor(all, 'doNotSerialize', (n) => !content.nodes.has(n)),
+    // A page shows what a render does: an instancer without Show Instancer for Render, an original its parent instances.
+    setFor(scene.meshes.filter((n) => world.mainSync?.objectOf(n)), 'isVisible', (n) => n.isVisible && !world.mainSync.blender.instancingHides(world.mainSync.objectOf(n), true)),
     setFor(scene.materials, 'doNotSerialize', (m) => !content.materials.has(m)),
     // The skeletons of the rigs the export writes, skinning a mesh or not (the page poses them), not the scene's other
     // rigs (a Selected Objects export).

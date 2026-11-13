@@ -7,16 +7,6 @@ import { rendered } from "./scene-view.mjs";
 const NLA = "#nla-section", HEADER = 26, VIEW = '[data-section="viewport"]';
 const SCENE = { part: [0.08, 0.06, 0.92, 0.94] };
 
-const openNla = async (r) => {
-  const { app, page } = r;
-  const timeline = await app.locator("#timeline-section").boundingBox();
-  await page.mouse.click(timeline.x + 25, timeline.y - HEADER / 2);
-  await r.pause(400);
-  await app.frame().getByRole("menuitem", { name: "Nonlinear Animation", exact: true }).last().click();
-  await app.settled();
-  await r.drag([timeline.x + 500, timeline.y - HEADER], [timeline.x + 500, 430]);
-};
-
 await record("nla", { example: "cube", node: "Cube" }, async (r) => {
   const { app } = r;
   const type = async (...keys) => { for (const key of keys) await r.keys(key, key.toLowerCase()); };
@@ -48,7 +38,7 @@ await record("nla", { example: "carousel", node: "Platform" }, async (r) => {
     await r.pause(5000);
     await r.keys("Space", " ");
   }, SCENE);
-  await openNla(r);
+  await r.timelineAs("Nonlinear Animation");
   await app.hover();
   await r.keys("A", "a");
   const nla = await app.locator(NLA).boundingBox();

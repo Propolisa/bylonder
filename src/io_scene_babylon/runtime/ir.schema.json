@@ -159,6 +159,62 @@
                         }
                       }
                     }
+                  },
+                  "contacts": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "fps": {
+                            "type": "number"
+                          },
+                          "speed": {
+                            "default": 0,
+                            "type": "number"
+                          },
+                          "legs": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "foot": {
+                                  "type": "string"
+                                },
+                                "down": {
+                                  "default": [],
+                                  "type": "array",
+                                  "items": {
+                                    "type": "array",
+                                    "prefixItems": [
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "number"
+                                      }
+                                    ],
+                                    "items": false,
+                                    "minItems": 2,
+                                    "maxItems": 2
+                                  }
+                                }
+                              },
+                              "required": [
+                                "foot"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "fps",
+                          "legs"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
                   }
                 },
                 "required": [

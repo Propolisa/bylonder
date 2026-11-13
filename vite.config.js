@@ -143,7 +143,7 @@ export default defineConfig({
   // Agents' worktrees live under .claude/: their edits must not reload this checkout's pages (a worktree's own server
   // watches its own files).
   // Blender's backups (*.blend1, written beside a saved .blend) and the dev tools never reload the page.
-  server: { watch: { ignored: [`${fileURLToPath(new URL("./.claude", import.meta.url)).replaceAll("\\", "/")}/**`, "**/*.blend1", "**/.tools/**", "**/.shots/**"] } },
+  server: { watch: { ignored: [`${fileURLToPath(new URL("./.claude", import.meta.url)).replaceAll("\\", "/")}/**`, "**/*.blend1", "**/.tools/**", "**/.shots/**", "**/examples/*/downloads/**"] } },
   build: {
     target: "esnext",
     rollupOptions: {

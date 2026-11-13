@@ -3,7 +3,7 @@
 // its frame range.
 import assert from 'node:assert/strict';
 import { register } from 'node:module';
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 register('./fixtures/example-loader.mjs', import.meta.url);
 
 const BABYLON = await import('@babylonjs/core');
@@ -15,8 +15,9 @@ const { createWorlds } = await import('../src/blenkernel/scene/world.js');
 const { hasMesh, identify } = await import('../src/editors/object/identity.js');
 
 // Examples that need the network.
-const SKIPPED = { text: 'loads its font from Google Fonts', materials: 'loads its environment from assets.babylonjs.com' };
 const root = new URL('../examples/', import.meta.url);
+const SKIPPED = { text: 'loads its font from Google Fonts', materials: 'loads its environment from assets.babylonjs.com',
+  ...(!existsSync(new URL('character-controller/character-controller.blend', root)) && { 'character-controller': 'its .blend is built by its script from downloads' }) };
 // A project's files (sdk.asset) are its example folder's.
 const fetchURL = globalThis.fetch;
 globalThis.location = { origin: '' };

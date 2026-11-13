@@ -5,7 +5,7 @@ import { coverageText, frontMatter, LIMITS, LIVE_SITE, REFERENCE, SOURCE } from 
 import './theme.css';
 import './docs.css';
 
-const raw = { 'README.md': (await import('../README.md?raw')).default, ...Object.fromEntries(Object.entries(import.meta.glob(['../docs/**/*.md', '../examples/**/*.md'], { query: '?raw', import: 'default', eager: true })).map(([path, text]) => [path.slice(3), text])) };
+const raw = { 'README.md': (await import('../README.md?raw')).default, ...Object.fromEntries(Object.entries(import.meta.glob(['../docs/**/*.md', '../examples/**/*.md', '!**/downloads/**'], { query: '?raw', import: 'default', eager: true })).map(([path, text]) => [path.slice(3), text])) };
 const media = Object.fromEntries(Object.entries(import.meta.glob('../docs/media/**/*', { query: '?url', import: 'default', eager: true })).map(([path, url]) => [path.slice(3), url]));
 const pages = Object.fromEntries(Object.entries(raw).map(([path, text]) => {
   const { data, body } = frontMatter(text);

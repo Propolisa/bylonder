@@ -92,6 +92,39 @@ function posedBone(bones, name) {
 
 const encode = (...args) => execFileSync(ffmpeg, ["-y", "-loglevel", "error", ...args]);
 
+// A GIF of a page while `steps()` runs, then `hold` ms more: a CDP screencast cropped to `crop` (page pixels of a
+// `size` viewport at `scale`), smaller until it is under 1 MB.
+export async function screencastGif(page, file, steps, { crop, size, scale = 1, hold = 1200 }) {
+  const cdp = await page.context().newCDPSession(page);
+  const frames = [];
+  cdp.on("Page.screencastFrame", ({ data, metadata, sessionId }) => {
+    frames.push({ data, time: metadata.timestamp });
+    cdp.send("Page.screencastFrameAck", { sessionId }).catch(() => {});
+  });
+  await cdp.send("Page.startScreencast", { format: "jpeg", quality: 92, everyNthFrame: 1 });
+  await page.waitForTimeout(300);
+  await steps();
+  await page.waitForTimeout(hold);
+  await cdp.send("Page.stopScreencast");
+  await cdp.detach();
+  const end = frames.at(-1).time + 0.1;
+  const dir = mkdtempSync(`${tmpdir()}/bylonder-gif-`);
+  const list = frames.map((f, i) => {
+    writeFileSync(`${dir}/${i}.jpg`, Buffer.from(f.data, "base64"));
+    return `file '${dir}/${i}.jpg'\nduration ${((frames[i + 1]?.time ?? end) - f.time).toFixed(3)}`;
+  });
+  writeFileSync(`${dir}/list.txt`, list.join("\n") + `\nfile '${dir}/${frames.length - 1}.jpg'\n`);
+  for (const [width, colors, fps] of [[640, 128, 12], [560, 96, 10], [480, 64, 10], [400, 48, 8], [320, 32, 6]]) {
+    encode("-f", "concat", "-safe", "0", "-i", `${dir}/list.txt`, "-vf",
+      `scale=${size.width * scale}:${size.height * scale},crop=${crop.width * scale}:${crop.height * scale}:${crop.x * scale}:${crop.y * scale},fps=${fps},scale='min(${width},iw)':-2:flags=lanczos,split[a][b];[a]palettegen=max_colors=${colors}:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4:diff_mode=rectangle`,
+      "-loop", "0", file);
+    if (statSync(file).size < MAX_GIF) break;
+  }
+  rmSync(dir, { recursive: true });
+  console.log(`${file.split("/").at(-1)} ${(statSync(file).size / 1024).toFixed(0)} KB, ${frames.length} frames`);
+  return file;
+}
+
 // Opens the app on `example` (its #example= link; none: the Default Cube from the splash) and returns the recorder.
 // `media` is the folder under docs/media/ the files go to (default: the feature's); `touch`, a touch device, driven by
 // `r.fingers` (tests/e2e/touch.mjs).
@@ -177,6 +210,29 @@ export async function recorder(feature, { example, node, size = SIZE, scale = 1,
       for (const key of modifiers) await app.page.keyboard.up(key);
       await app.settled();
     },
+    // The Timeline turned into another editor (its header's editor type menu), dragged taller.
+    async timelineAs(editor) {
+      const timeline = await app.locator("#timeline-section").boundingBox();
+      await app.page.mouse.click(timeline.x + 25, timeline.y - 13);
+      await r.pause(400);
+      await app.frame().getByRole("menuitem", { name: editor, exact: true }).last().click();
+      await app.settled();
+      await r.drag([timeline.x + 500, timeline.y - 26], [timeline.x + 500, 430]);
+    },
+    // File > Export > JavaScript's dialog, a row of its tree by name, and a row's setting chosen from its menu.
+    async exportDialog() {
+      await app.page.click('[data-blender="TOPBAR_MT_file"]');
+      await app.page.getByRole("menuitem", { name: /^Export/ }).first().hover();
+      await app.page.getByRole("menuitem", { name: "JavaScript (.zip)" }).click();
+      const dialog = app.frame().locator('[role="dialog"][aria-label="Export JavaScript"]');
+      await dialog.waitFor();
+      const row = (name) => dialog.locator(`[role="treeitem"][aria-label="${name}"]`).first();
+      const choose = async (name, value) => {
+        await row(name).getByRole("button", { name: new RegExp(`^${name}:`) }).click();
+        await app.frame().getByRole("menuitem", { name: value }).click();
+      };
+      return { dialog, row, choose };
+    },
     tab: async (name) => { await app.locator(`[role="tab"][aria-label="${name}"]`).click(); await app.settled(); },
     // A point of the scene in Blender's axes (Z up), in page coordinates of the 3D Viewport.
     async screenOf([x, y, z]) {
@@ -230,36 +286,7 @@ export async function recorder(feature, { example, node, size = SIZE, scale = 1,
     async gif(name, region, steps, { part, hold = 1200 } = {}) {
       const crop = await box(region, part);
       keyAt = [crop.x + crop.width / 2, crop.y + crop.height - 24];
-      const cdp = await app.page.context().newCDPSession(app.page);
-      const frames = [];
-      cdp.on("Page.screencastFrame", ({ data, metadata, sessionId }) => {
-        frames.push({ data, time: metadata.timestamp });
-        cdp.send("Page.screencastFrameAck", { sessionId }).catch(() => {});
-      });
-      await cdp.send("Page.startScreencast", { format: "jpeg", quality: 92, everyNthFrame: 1 });
-      await app.page.waitForTimeout(300);
-      await steps();
-      await app.settled();
-      await app.page.waitForTimeout(hold);
-      await cdp.send("Page.stopScreencast");
-      await cdp.detach();
-      const end = frames.at(-1).time + 0.1;
-      const dir = mkdtempSync(`${tmpdir()}/bylonder-gif-`);
-      const list = frames.map((f, i) => {
-        writeFileSync(`${dir}/${i}.jpg`, Buffer.from(f.data, "base64"));
-        return `file '${dir}/${i}.jpg'\nduration ${((frames[i + 1]?.time ?? end) - f.time).toFixed(3)}`;
-      });
-      writeFileSync(`${dir}/list.txt`, list.join("\n") + `\nfile '${dir}/${frames.length - 1}.jpg'\n`);
-      const file = `${out}${name}.gif`;
-      for (const [width, colors, fps] of [[640, 128, 12], [560, 96, 10], [480, 64, 10], [400, 48, 8], [320, 32, 6]]) {
-        encode("-f", "concat", "-safe", "0", "-i", `${dir}/list.txt`, "-vf",
-          `scale=${size.width * scale}:${size.height * scale},crop=${crop.width * scale}:${crop.height * scale}:${crop.x * scale}:${crop.y * scale},fps=${fps},scale='min(${width},iw)':-2:flags=lanczos,split[a][b];[a]palettegen=max_colors=${colors}:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4:diff_mode=rectangle`,
-          "-loop", "0", file);
-        if (statSync(file).size < MAX_GIF) break;
-      }
-      rmSync(dir, { recursive: true });
-      console.log(`${name}.gif ${(statSync(file).size / 1024).toFixed(0)} KB, ${frames.length} frames`);
-      return file;
+      return screencastGif(app.page, `${out}${name}.gif`, async () => { await steps(); await app.settled(); }, { crop, size, scale, hold });
     },
     async close() {
       if (app.errors.length) console.log("Page errors:\n" + app.errors.join("\n"));

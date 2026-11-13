@@ -2,8 +2,8 @@ import { binaryFile, textFile } from "./project-model.js";
 
 // Each example is a project folder under examples/, shipped as text, and its .blend files as assets fetched when it
 // opens.
-const sources = import.meta.glob(["../../examples/**/*", "!**/*.blend"], { query: "?raw", import: "default", eager: true });
-const blends = import.meta.glob("../../examples/**/*.blend", { query: "?url", import: "default", eager: true });
+const sources = import.meta.glob(["../../examples/**/*", "!**/*.blend", "!**/*.blend1", "!**/downloads/**"], { query: "?raw", import: "default", eager: true });
+const blends = import.meta.glob(["../../examples/**/*.blend", "!**/downloads/**"], { query: "?url", import: "default", eager: true });
 const json = (value) => textFile(JSON.stringify(value, null, 2));
 const inExample = (id, all) => Object.entries(all).filter(([path]) => path.startsWith(`../../examples/${id}/`)).map(([path, value]) => [path.slice(`../../examples/${id}/`.length), value]);
 const files = async (id) => ({
@@ -15,6 +15,7 @@ const files = async (id) => ({
 
 export const examples = [
   // Newest first, as the splash lists them.
+  { id: "character-controller", title: "Snow at the Bar" },
   { id: "compositor", title: "Akari Noodle House" },
   { id: "volumes", title: "Temple Light" },
   { id: "light-probes", title: "Reading Corner" },
@@ -47,6 +48,7 @@ export const examples = [
   { id: "texture-paint", title: "Texture Paint" },
   { id: "lava", title: "Lava Sphere" },
   { id: "rigged-character", title: "Rigged Character" },
+  { id: "basic-character", title: "Basic Character" },
   { id: "hair-dynamics", title: "Sea Anemone" },
   { id: "island", title: "Volcanic Island" },
   { id: "still-life", title: "Still Life" },

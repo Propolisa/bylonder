@@ -50,7 +50,10 @@ export function shadowJitter(index, radius, axis = null) {
 }
 
 // A mesh of the scene's objects (not an overlay or a helper), and whether it casts.
-export const shadedObject = (mesh) => !mesh.name.startsWith('__') && !mesh.metadata?.overlay && mesh.getTotalVertices() > 0;
+// The view's own meshes ("__") are not, but for the thin instances it draws objects' instances as (main-view.js
+// drawInstances), which cast and receive shadows as the objects would.
+const drawnInstances = (mesh) => !!mesh.metadata?.instancers && !!mesh.metadata.workbench;
+export const shadedObject = (mesh) => (!mesh.name.startsWith('__') || drawnInstances(mesh)) && !mesh.metadata?.overlay && mesh.getTotalVertices() > 0;
 // A material without a surface (a Volume alone) casts no surface shadow; a light that lights no mesh draws no shadow.
 // Lines (loose edges) have no surface to cast with.
 const casts = (mesh) => shadedObject(mesh) && !(mesh instanceof LinesMesh) && mesh.metadata?.wbVisibleShadow !== false && mesh.isEnabled() && mesh.isVisible && !mesh.material?.blenderNoSurface;

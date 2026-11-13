@@ -1,5 +1,110 @@
 [
  {
+  "id": "character-animation",
+  "title": "Character Animation",
+  "summary": "Make a rigged character with a few baked actions walk, run, turn and jump in an exported page, its actions chosen from how it moves, its feet planted on uneven ground and its head turned toward what is near.",
+  "expect": "A skeleton with only Idle, Walk, Run and Jump walks, runs, stops, turns and jumps without pops, its foot contacts and gait speeds found from the actions themselves, and a production rig plays through its own constraints as in Blender; planted feet hold within about 3 cm through curves and pivots (rare contacts at a curve's edge up to 9 cm), a turn in place steps the feet round without a Turn action, and Turn actions, Havok physics and an editor for layers and effects are not there yet.",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/animation/actions.html",
+   "https://docs.blender.org/manual/en/5.2/animation/markers.html",
+   "https://docs.blender.org/manual/en/5.2/editors/nla/index.html",
+   "https://docs.blender.org/manual/en/5.2/animation/armatures/bones/bone_collections.html"
+  ],
+  "example": "basic-character",
+  "thumbnail": "character-animation/thumbnail.png",
+  "media": [
+   "character-animation/actions.png",
+   "character-animation/export.png",
+   "character-animation/walk.gif",
+   "character-animation/ground.gif"
+  ],
+  "ui": [
+   "NLA_EDITOR",
+   "NLA_HT_header",
+   "NLA_MT_tracks",
+   "DOPESHEET_MT_marker",
+   "DATA_PT_bone_collections",
+   "TOPBAR_MT_file_export",
+   "POSE"
+  ],
+  "operators": [
+   "marker.add",
+   "marker.rename",
+   "nla.bake",
+   "nla.mute_toggle"
+  ],
+  "code": [
+   "src/io_scene_babylon/runtime/character/api.js",
+   "src/io_scene_babylon/runtime/character/core.js",
+   "src/io_scene_babylon/runtime/character/roles.js",
+   "src/io_scene_babylon/runtime/character/input.js",
+   "src/io_scene_babylon/runtime/character/movement.js",
+   "src/io_scene_babylon/runtime/character/contacts.js",
+   "src/io_scene_babylon/runtime/character/locomotion.js",
+   "src/io_scene_babylon/runtime/character/rootmotion.js",
+   "src/io_scene_babylon/runtime/character/camera.js",
+   "src/io_scene_babylon/runtime/character/effects/feet.js",
+   "src/io_scene_babylon/runtime/character/effects/gaze.js",
+   "src/io_scene_babylon/runtime/character/effects/lean.js",
+   "src/io_scene_babylon/runtime/character/effects/reach.js",
+   "src/io_scene_babylon/runtime/character/effects/impact.js",
+   "src/io_scene_babylon/runtime/character/effects/springs.js",
+   "src/io_scene_babylon/runtime/character/effects/breathe.js",
+   "src/io_scene_babylon/runtime/character/effects/eyes.js",
+   "src/io_scene_babylon/runtime/character/effects/limbs.js",
+   "src/io_scene_babylon/runtime/character/quality.js",
+   "src/io_scene_babylon/clip-export.js"
+  ],
+  "tests": [
+   "tests/character-core.test.js",
+   "tests/character-movement.test.js",
+   "tests/character-steer.test.js",
+   "tests/character-contacts.test.js",
+   "tests/character-locomotion.test.js",
+   "tests/character-rootmotion.test.js",
+   "tests/character-camera.test.js",
+   "tests/character-effects-feet.test.js",
+   "tests/character-effects-gaze.test.js",
+   "tests/character-effects-reach.test.js",
+   "tests/character-effects-impact.test.js",
+   "tests/character-effects-lean.test.js",
+   "tests/character-effects-springs.test.js",
+   "tests/character-effects-idle.test.js",
+   "tests/character-effects-limbs.test.js",
+   "tests/character-quality.test.js",
+   "tests/character-schedule.test.js",
+   "tests/character-basic-wasm.test.js",
+   "tests/export-clips-wasm.test.js"
+  ],
+  "limits": [
+   "Planted feet hold within about 3 cm through curves and pivots; a rare contact at a curve's edge slides up to 9 cm",
+   "A turn in place is stepped procedurally; Turn actions (an animator's own turning clips) come later",
+   "Walls are a capsule against the scene's meshes; Babylon's PhysicsCharacterController with Havok comes later",
+   "Layers, sources and effects are written in code (or a JSON preset); Bylonder has no editor for them",
+   "Saving the .blend does not yet reload its actions in a running page",
+   "The Character Controller example's retargeted Sprint plants its left ball 0.8 cm off where the source mannequin's lands (the cause is not yet found; the leg's solve is the first suspect)",
+   "In the Character Controller example's retarget check, the first frame of Walk's and Jog's loops differs from Blender's (a longer stride, straight knees); the cause, the feet effect or the check's capture, is not yet confirmed",
+   "Without L and R markers, foot contacts are found where a foot is low and still, which noisy motion capture can misplace",
+   "On a rig whose constraints move its feet after the pose (Snow's CloudRig legs), a planted foot holds within about 3 cm on most contacts through curves and pivots; a few contacts at a pivot's first step or a sharp jogging turn slide 6 to 9 cm"
+  ],
+  "page": "docs/features/character-animation.md",
+  "open": "https://propolisa.github.io/bylonder/#example=basic-character",
+  "example_title": "Basic Character",
+  "coverage": {
+   "operators": {
+    "supported": 16,
+    "partial": 10,
+    "total": 32
+   },
+   "ui": {
+    "supported": 6,
+    "partial": 1,
+    "total": 9
+   }
+  }
+ },
+ {
   "id": "compositor",
   "title": "Compositor",
   "summary": "Finish a render in Blender's Compositor, here a ramen bar's neon sign in a wet lane at night with Glare's Fog Glow, Lens Distortion, a Color Balance grade and a vignette, composited by Blender's own code.",
@@ -821,6 +926,7 @@
    "The control panel's navigation copies the chosen camera's view onto the exported one each frame, so the view transform and compositor stay; a camera's roll is not kept, and Walk finds the floor by casting down from the camera.",
    "On Screen measures the materials' shares from a 64 pixel wide drawing of the scene, a few times a second while the panel is open: a material smaller than a pixel there shows no share, and a material's share counts where it is drawn, behind transparent ones too. A material's icon colour is the average of the frame's pixels there, at the same size, so it mixes its lit and shaded sides; where it is not seen, the icon shows its Base Color (or Color) if it has one as a control, else the plain icon.",
    "File > Export's Sample Rate keys what is baked (sampled) on Blender's frame grid, for every object or one object; Babylon interpolates between the keys (rotations and bone poses spherically), so a rate below the scene's rounds off quick motion. Exact keys and F-Curves the page runs ignore it, and a boolean is keyed at each frame it changes at.",
+   "UDIM images (tiled textures) do not export: a material reading one gets Babylon's missing-texture checker. A single-tile UDIM could be written as a plain image of its 1001 tile at export; several tiles need an atlas or a texture array.",
    "A collection's Time Offset is the page's own: Blender has no such setting, so the app plays every collection on the scene's frame. An object in two collections takes the first in the outliner's order; a material's animation and particle systems ignore it.",
    "An exported page plays the scene's frames on one clock through sub-frames, smoother than Blender's whole frames; its playhead's snap shows whole frames. Particle systems pause with it but do not seek.",
    "An armature's bone constraints run in the page on Blender's constraint kernels (bylonder-constraints/, 1.6 MB of WebAssembly, about 280 KB brotli, GPL) where its skeleton holds every bone and every constraint reads matrices alone: all types but Follow Path, Clamp To, Spline IK, Shrinkwrap, Action, the motion tracking ones, Transform Cache and Geometry Attribute, both IK solvers, B-Bones. Elsewhere the page's own solvers run IK of one or two bones, Damped Track, Track To, Copy Rotation of all axes (Replace) and Limit Rotation. The export keeps them only where they give Blender's pose at every sampled frame; otherwise the pose is sampled as before. A constraint's influence is a control, so a driver (an IK/FK switch) or the page sets it; its other settings keep their exported values. A B-Bone's segments bend with the constraints that move its handles and with its animated B-Bone shape (its curve, roll, ease and scale are controls).",

@@ -214,7 +214,9 @@ runs the `image.*`, `uv.*` and `paint.*` operators with its keymaps. Images are 
 libraries in the module (libjpeg-turbo, libpng, OpenEXR, OpenImageIO, OpenColorIO). Babylon draws the main region:
 the image through the region's View2D and the edit mesh's UVs with Blender's overlay flags (`image-api.cc`
 `view_edit_uv_extract`). Image > Open and Save As use the browser's file dialog and a download. The view transform
-(AgX, Filmic) is not applied to what Babylon draws yet.
+(AgX, Filmic) is not applied to what Babylon draws yet. The module is built without libwebp (OpenImageIO's
+`DISABLE_WEBP` in `tools/blender-port/manifest.json`), so a WebP image, packed or on disk, does not load; Blender reads
+it. To fix in a module build.
 
 ## paint.image_paint
 Texture Paint and Vertex Paint are Blender's modes on Main (`src/editors/object/main-modes.js`); strokes run Blender's

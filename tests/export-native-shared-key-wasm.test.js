@@ -1,7 +1,7 @@
 // Two meshes holding one Key, as a character's looks on one Mesh do (Snow's head and its tattooed copy): its driven
 // corrective, run by the native rig runtime once for the Key, shapes both in the page as Main shapes them.
 import assert from 'node:assert/strict';
-import { NullEngine, VertexBuffer } from '@babylonjs/core';
+import { MorphTarget, MorphTargetManager, NullEngine, VertexBuffer } from '@babylonjs/core';
 import { blendData, contextStruct } from '../src/python/bpy_rna.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
 import { subscribeReports } from '../src/windowmanager/wm-reports.js';
@@ -41,6 +41,12 @@ for (const name of ['Body', 'Copy']) {
 
 const written = writePackage(files);
 const blend = await (await import(written.url)).load(new NullEngine());
+// One writer per vertex position: morph targets left on a mesh the runtime deforms (a package's, once it was skinned)
+// would pull its deform back toward their rest shapes on the GPU.
+const stale = new MorphTargetManager(blend.scene), target = new MorphTarget('stale', 1, blend.scene);
+target.setPositions(blend.scene.getMeshByName('Copy').getVerticesData(VertexBuffer.PositionKind));
+stale.addTarget(target);
+blend.scene.getMeshByName('Copy').morphTargetManager = stale;
 await blend.settled();
 blend.playhead.pause();
 const frame = blend.controls().find((c) => c.path.endsWith('.frame_current')).path;
@@ -56,6 +62,10 @@ for (const f of FRAMES) {
     assert.ok(error < TOLERANCE, `frame ${f}: ${name} is off Main's by ${error}`);
     worst = Math.max(worst, error);
   }
+}
+for (const name of Object.keys(entity.inputs.native.meshes)) {
+  const mesh = blend.scene.getMeshByName(name);
+  assert.ok(!mesh.morphTargetManager && !mesh.skeleton, `${name}: deformed by the runtime, and by ${mesh.morphTargetManager ? 'morph targets' : 'a skeleton'} too`);
 }
 blend.dispose();
 written.remove();

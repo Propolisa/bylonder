@@ -98,6 +98,14 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
                         name: string;
                         frame: number;
                     }[];
+                    contacts: {
+                        fps: number;
+                        speed: number;
+                        legs: {
+                            foot: string;
+                            down: [number, number][];
+                        }[];
+                    } | null;
                 }>;
                 markers: {
                     name: string;

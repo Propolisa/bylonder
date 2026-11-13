@@ -76,9 +76,12 @@ const MAKERS = {
 // A mesh object's Mesh as Main holds it is its recipe (its Mesh data, for saving), Main owning it; the view draws it as
 // the depsgraph evaluates it.
 // An object disabled in viewports (Disable in Viewports, its own; its collections' hide it as collections.js says) is
-// not drawn, as BKE_base_eval_flags leaves it out of the viewport.
-function showEnabled(node, ob) {
-  if ('isVisible' in node) hideMesh(node, 'disabled', !!idStruct(ob).hide_viewport);
+// not drawn, as BKE_base_eval_flags leaves it out of the viewport; nor one its instancing hides (Show Instancer, and in
+// a render an original its parent instances).
+function showEnabled(node, ob, blender, rendering) {
+  if (!('isVisible' in node)) return;
+  hideMesh(node, 'disabled', !!idStruct(ob).hide_viewport);
+  hideMesh(node, 'instancing', blender.instancingHides(ob, rendering));
 }
 
 function keepMesh(entry, blender) {
@@ -291,7 +294,7 @@ export function createMainView(state) {
         const { node, ob } = entry;
         // Hidden as the file keeps it (H), once its kind is known.
         if (blender.base(ob)?.hidden) setHidden(node, true);
-        showEnabled(node, ob);
+        showEnabled(node, ob, blender, !!world.collections?.rendering);
         foldUndrawn(entry);
         if (blender.camera === ob) scene.activeCamera = node;
       }
@@ -466,7 +469,7 @@ export function createMainView(state) {
         if (base?.selected) chosen.push(node);
         if (base?.active) active = node;
         if (base && data.hide_get() !== base.hidden) setHidden(node, base.hidden);
-        showEnabled(node, ob);
+        showEnabled(node, ob, blender, !!world.collections?.rendering);
         if (entry.type === 'MESH') displayAs(node, idStruct(ob).display_type);
         extraDisplay(entry);
         // A stand-in Blender's code changed becomes Main's; one an undo step read again stays Babylon's.

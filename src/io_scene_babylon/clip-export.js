@@ -150,10 +150,13 @@ function clipProperties({ action, ids = [], frame_start, frame_end }) {
   return Object.keys(out).length ? out : null;
 }
 
-/** The clips as the IR's scene time records them (runtime/ir.js ClipSchema), by name, with their actions' pose markers. */
-export const irClips = (clips) => Object.fromEntries(clips.map(({ name, action, frame_start, frame_end, blend, influence, speed, repeat }) => [name, {
+/**
+ * The clips as the IR's scene time records them (runtime/ir.js ClipSchema), by name, with their actions' pose markers
+ * and the foot contacts found from Blender's evaluation (contacts-export.js).
+ */
+export const irClips = (clips) => Object.fromEntries(clips.map(({ name, action, frame_start, frame_end, blend, influence, speed, repeat, contacts }) => [name, {
   action: action.name, frame_start, frame_end, blend, influence, speed, repeat,
-  markers: [...(action.pose_markers ?? [])].map((m) => ({ name: m.name, frame: m.frame })) }]));
+  markers: [...(action.pose_markers ?? [])].map((m) => ({ name: m.name, frame: m.frame })), ...(contacts && { contacts }) }]));
 
 // Clip compression, after ACL (Nicholas Frechette's Animation Compression Library): each bone track's keys reduced to
 // those its neighbours' interpolation cannot stand in for within an error bound, then quantized: rotation as the

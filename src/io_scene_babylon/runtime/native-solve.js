@@ -35,6 +35,7 @@ function compile(native) {
   const layouts = new WeakMap();
   return { program, rig, armature: program.objectIndex.get(native.armature), layouts, properties: new Map(), placed: new Map(), posed: /** @type {Float64Array | null} */ (null),
     deforms: /** @type {Map<string, any>} Each deformed mesh's stack, by name. */ (new Map()), published: /** @type {Map<string, number>} */ (new Map()), deformers: /** @type {{ update(): void }[] | null} */ (null),
+    offline: /** @type {{ rig: any, unrest: Map<string, Matrix> } | null} The second instance solveAt evaluates. */ (null),
     sharedKeys: /** @type {{ name: string, from: number, blocks: string[] }[] | null} Meshes holding another's Key (shareKeys). */ (null) };
 }
 
@@ -51,6 +52,9 @@ const AXIS = /** @type {any} */ (Matrix.FromArray([1, 0, 0, 0, 0, 0, 1, 0, 0, 1,
  */
 function deformer(scene, entry, name, mesh) {
   const deform = deformOf(entry, name), engine = scene.getEngine();
+  // The deform is the one writer of its vertex positions: it applies the shape keys and the Armature, which morph
+  // targets (pulling toward their rest shapes) and a skeleton would apply again on the GPU.
+  Object.assign(mesh, { morphTargetManager: null, skeleton: null });
   if (engine.isWebGPU && gpuSupported(deform).supported) {
     const gpu = new GpuDeformer(engine, entry.rig, deform, mesh, { axis: AXIS });
     let ready = false;
@@ -305,7 +309,13 @@ export function nativeSolve(scene = null, controls = null) {
     }
     // The page's layers on the solved pose (a foot lock, a look-at): what they write lasts this frame, for the skinned
     // meshes and, carried into the runtime's pose, for those it deforms.
-    const solved = attached.skeleton.bylonderRig?.onSolved;
+    const api = attached.skeleton.bylonderRig;
+    // solveAt follows the pose attached now (a patch or reload attaches a new one).
+    if (api) {
+      api.solving = attached;
+      api.solveAt ??= (/** @type {Map<string, Matrix>} */ bases, /** @type {number} */ frame = 0) => solveAt(api.solving, bases, frame);
+    }
+    const solved = api?.onSolved;
     if (!solved?.hasObservers()) return deform(entry, attached.native);
     solved.notifyObservers(attached.skeleton);
     const restore = layer(state, bones, attached.shape, posed);
@@ -314,6 +324,32 @@ export function nativeSolve(scene = null, controls = null) {
     deform(entry, attached.native);
     for (const [k, values] of restore) posed.set(values, k);
     for (const joints of /** @type {any} */ (rig).cpuJoints?.values() ?? []) joints.pass = joints.dqPass = -1;
+  };
+  /**
+   * The rig solved offline for a pose (the page's own is left alone): a second instance of its program, given `bases`
+   * (Babylon local matrices by bone name) and every other bone at rest, so a result never depends on an earlier call,
+   * at `frame`. Gives each bone's world matrix by name (Babylon's axes, the skeleton's mesh where it is now).
+   * @param {any} attached @param {Map<string, Matrix>} bases @param {number} frame
+   */
+  const solveAt = (attached, bases, frame) => {
+    const entry = entryOf(attached.native), program = /** @type {any} */ (entry.program), index = program.objects[entry.armature].boneIndex;
+    const offline = entry.offline ??= { rig: program.instance(), unrest: new Map(attached.shape.map((/** @type {any} */ b) => [b.name, Matrix.Invert(b.rest)])) };
+    for (const [path, value] of entry.properties) offline.rig.setPath(attached.native.armature, path, value);
+    const placed = swapped(attached.space.multiply(attached.mesh.computeWorldMatrix(true)));
+    offline.rig.setObjectBasis(entry.armature, Float64Array.from(placed.m));
+    for (const { name, rest } of attached.shape) {
+      const b = index.get(name), unrest = offline.unrest.get(name);
+      if (b !== undefined && unrest) give(offline.rig, b, bases.get(name) ?? rest, unrest);
+    }
+    offline.rig.setFrame(frame);
+    offline.rig.evaluate();
+    const posed = offline.rig.pose, root = attached.space.multiply(attached.mesh.computeWorldMatrix(true)), m = new Matrix();
+    return (/** @type {string} */ name) => {
+      const b = index.get(name);
+      if (b === undefined) return null;
+      swapAxes(posed, m, b * 16);
+      return m.multiply(root);
+    };
   };
   /**
    * Keeps what onSolved's observers wrote into bones' local matrices as layered, and puts it into the runtime's pose:
@@ -347,7 +383,7 @@ export function nativeSolve(scene = null, controls = null) {
      */
     detach(attached) {
       if (!attached.native) return;
-      Object.assign(entryOf(attached.native), { deformers: null, posed: null });
+      Object.assign(entryOf(attached.native), { deformers: null, posed: null, offline: null });
       targets.clear();
     },
     /** @param {NativePose['native']} native @param {string} name */

@@ -617,6 +617,8 @@ export class BlenderMain {
     return flag < 0 ? null : { flag, selected: !!(flag & BASE_SELECTED), hidden: !!(flag & BASE_HIDDEN), active: !!(flag & BASE_ACTIVE) };
   }
   parent(ob) { return x.object_parent(ob) >>> 0; }
+  // Whether instancing hides the object itself in the viewport or a `render` (main-api.cc object_instancing_hides).
+  instancingHides(ob, render) { return !!x.object_instancing_hides(this.#context, ob, render); }
 
   // Blender's operators that run without a modal session, by idname.
   operators() { return execOperators(); }

@@ -179,9 +179,22 @@ export const MarkerSchema: import("zod/mini").ZodMiniObject<{
     frame: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNumber<number>>;
 }, import("zod/v4/core").$strip>;
 /**
+ * When each foot of an action is down, found at export from Blender's evaluation of its rig: per leg of the role `legs`
+ * (in its order), the deform bone measured and its contacts as [start, end) frames from the clip's start; and the
+ * ground speed its feet imply, in metres per second.
+ */
+export const ContactsSchema: import("zod/mini").ZodMiniObject<{
+    fps: import("zod/mini").ZodMiniNumber<number>;
+    speed: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNumber<number>>;
+    legs: import("zod/mini").ZodMiniArray<import("zod/mini").ZodMiniObject<{
+        foot: import("zod/mini").ZodMiniString<string>;
+        down: import("zod/mini").ZodMiniDefault<z.ZodMiniType<[number, number][], any, import("zod/v4/core").$ZodTypeInternals<[number, number][], any>>>;
+    }, import("zod/v4/core").$strip>>;
+}, import("zod/v4/core").$strip>;
+/**
  * An action exported as a clip (an animation group of its own, named by the action): its frame range, and how the first
  * NLA strip using it plays it, its blending (REPLACE, ADD, or COMBINE played as ADD), influence, speed (1 / its scale) and
- * repeat; its pose markers.
+ * repeat; its pose markers; its foot contacts, where it animates an armature with legs.
  */
 export const ClipSchema: import("zod/mini").ZodMiniObject<{
     action: import("zod/mini").ZodMiniString<string>;
@@ -204,6 +217,14 @@ export const ClipSchema: import("zod/mini").ZodMiniObject<{
         name: string;
         frame: number;
     }[], any>>>;
+    contacts: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNullable<import("zod/mini").ZodMiniObject<{
+        fps: import("zod/mini").ZodMiniNumber<number>;
+        speed: import("zod/mini").ZodMiniDefault<import("zod/mini").ZodMiniNumber<number>>;
+        legs: import("zod/mini").ZodMiniArray<import("zod/mini").ZodMiniObject<{
+            foot: import("zod/mini").ZodMiniString<string>;
+            down: import("zod/mini").ZodMiniDefault<z.ZodMiniType<[number, number][], any, import("zod/v4/core").$ZodTypeInternals<[number, number][], any>>>;
+        }, import("zod/v4/core").$strip>>;
+    }, import("zod/v4/core").$strip>>>;
 }, import("zod/v4/core").$strip>;
 /**
  * A sound strip of the scene's sequencer (Blender's SoundStrip): its sound's file in the package and the seconds of
@@ -245,6 +266,14 @@ export const TimeSchema: import("zod/mini").ZodMiniObject<{
             name: string;
             frame: number;
         }[];
+        contacts: {
+            fps: number;
+            speed: number;
+            legs: {
+                foot: string;
+                down: [number, number][];
+            }[];
+        } | null;
     }>, any, import("zod/v4/core").$ZodTypeInternals<Record<string, {
         action: string;
         frame_start: number;
@@ -257,6 +286,14 @@ export const TimeSchema: import("zod/mini").ZodMiniObject<{
             name: string;
             frame: number;
         }[];
+        contacts: {
+            fps: number;
+            speed: number;
+            legs: {
+                foot: string;
+                down: [number, number][];
+            }[];
+        } | null;
     }>, any>>>;
     markers: import("zod/mini").ZodMiniDefault<z.ZodMiniType<{
         name: string;
@@ -316,6 +353,14 @@ export const SceneSchema: import("zod/mini").ZodMiniObject<{
                 name: string;
                 frame: number;
             }[];
+            contacts: {
+                fps: number;
+                speed: number;
+                legs: {
+                    foot: string;
+                    down: [number, number][];
+                }[];
+            } | null;
         }>;
         markers: {
             name: string;
@@ -354,6 +399,14 @@ export const SceneSchema: import("zod/mini").ZodMiniObject<{
                 name: string;
                 frame: number;
             }[];
+            contacts: {
+                fps: number;
+                speed: number;
+                legs: {
+                    foot: string;
+                    down: [number, number][];
+                }[];
+            } | null;
         }>;
         markers: {
             name: string;
@@ -403,6 +456,14 @@ export const IRSchema: import("zod/mini").ZodMiniObject<{
                     name: string;
                     frame: number;
                 }[];
+                contacts: {
+                    fps: number;
+                    speed: number;
+                    legs: {
+                        foot: string;
+                        down: [number, number][];
+                    }[];
+                } | null;
             }>;
             markers: {
                 name: string;
@@ -446,6 +507,14 @@ export const IRSchema: import("zod/mini").ZodMiniObject<{
                     name: string;
                     frame: number;
                 }[];
+                contacts: {
+                    fps: number;
+                    speed: number;
+                    legs: {
+                        foot: string;
+                        down: [number, number][];
+                    }[];
+                } | null;
             }>;
             markers: {
                 name: string;
