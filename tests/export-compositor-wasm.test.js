@@ -57,7 +57,7 @@ console.log(JSON.stringify(graph.attachedBlocks.map((b) => [b.name, b.getClassNa
   // Controls: a uniform and an uploaded value set by their Blender paths, without a rebuild.
   const blend = await (await import(written.url)).load(new NullEngine());
   // Lights as the app draws them: a point light has no direction (Babylon would draw its shadow as a spot's).
-  const lights = constant('LIGHTS');
+  const lights = Object.values(constant('LIGHTS'));
   assert.ok(lights.filter((l) => l.type === 0).every((l) => !l.direction), 'point lights carry no direction');
   // Its 16 lights as EEVEE draws them, with no cap per material: each material takes as many as a shader holds (8 here)
   // and each mesh the lights that reach it, the strongest at it first (overrides/babylon/light-reach.js), not the first 4.
@@ -92,7 +92,7 @@ console.log(JSON.stringify(graph.attachedBlocks.map((b) => [b.name, b.getClassNa
   assert.equal(clustered.nodeOf(`OB:${lamp.name}`), lamp, 'nodeOf finds a clustered light');
   // A joined object's material slots: its multi-material holds each slot's material, not Babylon's default.
   const slots = blend.scene.getMeshByName('Shop Front').material;
-  assert.deepEqual(slots.subMaterials.map((m) => m?.name), constant('MULTI_MATERIALS').find((m) => m.name === slots.name).materials, "the Shop Front's slots hold its materials");
+  assert.deepEqual(slots.subMaterials.map((m) => m?.name), Object.values(constant('MULTI_MATERIALS')).find((m) => m.name === slots.name).materials, "the Shop Front's slots hold its materials");
   const block = (name) => blend.compositor.attachedBlocks.find((b) => b.name === name);
   const gain = 'node_groups["Compositor Nodes"].nodes["Color Balance"].inputs[8].default_value[0]';
   const { uniform, component } = JSON.parse(files['scene.ir.json']).properties[gain].bind;

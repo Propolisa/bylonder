@@ -38,8 +38,9 @@ export const idKey = (id) => `${codeOf(id)}:${id.name}${id.library ? '@' + id.li
 const SKIP = new Set(['rna_type', 'bl_rna', 'original', 'id_data', 'users_collection', 'users_scene', 'session_uid', 'is_evaluated', 'preview',
   'is_runtime_data', 'tag', 'is_missing', 'override_library', 'asset_data', 'bound_box', 'library_weak_reference', 'matrix_world', 'matrix_local',
   'matrix_basis', 'dimensions', 'name_full', 'is_editable', 'id_type', 'location_absolute', 'width', 'height', 'select', 'hide_select', 'is_active_output', 'users', 'is_editmode']);
-// UI-only state: what a panel or a node shows expanded, selected or active.
-const UI = /^(show_expanded|.*_expanded|is_active|ui_.*|bl_.*|select_.*|use_custom_color|color_tag)$/;
+// UI-only state: what a panel or a node shows expanded, selected or active, and the editors' tool settings (which an undo
+// step writes the active object into).
+const UI = /^(show_expanded|.*_expanded|is_active|ui_.*|bl_.*|select_.*|use_custom_color|color_tag|tool_settings)$/;
 // Views of what is written elsewhere: an F-Curve group's channels are its action's F-Curves, a bone's children name it
 // their parent, a bone collection's bones name it in their collections, and a pose bone's matrices are evaluated.
 const DERIVED = new Set(['ActionGroup.channels', 'Bone.children', 'BoneCollection.bones', 'PoseBone.matrix', 'PoseBone.matrix_channel',

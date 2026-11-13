@@ -41,7 +41,7 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
      * @param {import('@babylonjs/core').Scene} scene
      * @param {any} ir the scene's IR (scene.ir.json), read with readIR
      * @param {{ root?: string, world?: { set(color: number[]): void }, compositor?: import('@babylonjs/core').NodeRenderGraph,
-     *   buffers?: ArrayBufferView[], entries?: import('./asset.js').Entries, dispose?: () => void }} [options]
+     *   buffers?: import('./buffers.js').Buffers, entries?: import('./asset.js').Entries, dispose?: () => void }} [options]
      * the package's URL, which relative image URLs resolve against, the world of one color its background controls set
      * (world.js), the compositor its pass controls set (bylonder-blocks.js), scene.bin's buffers, which its entities
      * read; loaded into a scene of the page's own, what was added there and what removes it (asset.js)
@@ -52,7 +52,7 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
             set(color: number[]): void;
         };
         compositor?: import("@babylonjs/core").NodeRenderGraph;
-        buffers?: ArrayBufferView[];
+        buffers?: import("./buffers.js").Buffers;
         entries?: import("./asset.js").Entries;
         dispose?: () => void;
     });
@@ -65,11 +65,11 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
     /** The compositor, a NodeRenderGraph of the blocks library's passes, when the scene composites. */
     compositor: import("@babylonjs/core").NodeRenderGraph | undefined;
     /** scene.bin's arrays, which the IR's `{ buffer }` inputs name. */
-    buffers: ArrayBufferView<ArrayBufferLike>[];
+    buffers: import("./buffers.js").Buffers;
     /** The scene's IR, as this runtime reads it. */
     ir: {
         schema: "bylonder-ir";
-        version: 1;
+        version: 2;
         scene: {
             id: string | null;
             collection: string | null;

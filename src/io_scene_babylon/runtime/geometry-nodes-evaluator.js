@@ -16,19 +16,19 @@ const keys = (/** @type {any[] | undefined} */ list) => (list ?? []).map((item) 
 /**
  * A value with scene.bin's arrays in place of its buffer references.
  * @param {any} value
- * @param {ArrayBufferView[]} buffers
+ * @param {import('./buffers.js').Buffers} buffers
  * @returns {any}
  */
 const withBuffers = (value, buffers) => {
   if (value?.constructor !== Object) return value;
-  if (typeof value.buffer === 'number') return buffers[value.buffer];
+  if (typeof value.buffer === 'string') return buffers[value.buffer];
   return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, withBuffers(v, buffers)]));
 };
 
 /**
  * The IDs a graph reads, by IR key, as the kernels take them.
  * @param {import('./ir.js').IR} ir
- * @param {ArrayBufferView[]} buffers
+ * @param {import('./buffers.js').Buffers} buffers
  * @returns {(key: string) => import('./geometry-nodes/kernels.js').ResolvedID | null}
  */
 export function idResolver(ir, buffers) {
@@ -48,7 +48,7 @@ export function idResolver(ir, buffers) {
 /**
  * The `modifier:NODES` unit of an IR, its kernels in `exports` (a loaded Geometry Nodes module).
  * @param {import('./ir.js').IR} ir
- * @param {ArrayBufferView[]} buffers
+ * @param {import('./buffers.js').Buffers} buffers
  * @param {import('./geometry-nodes/kernels.js').Exports} [exports] none when units run every node
  */
 export function geometryNodes(ir, buffers, exports) {

@@ -195,12 +195,12 @@ export class BlendScene {
    * @param {import('@babylonjs/core').Scene} scene
    * @param {any} ir the scene's IR (scene.ir.json), read with readIR
    * @param {{ root?: string, world?: { set(color: number[]): void }, compositor?: import('@babylonjs/core').NodeRenderGraph,
-   *   buffers?: ArrayBufferView[], entries?: import('./asset.js').Entries, dispose?: () => void }} [options]
+   *   buffers?: import('./buffers.js').Buffers, entries?: import('./asset.js').Entries, dispose?: () => void }} [options]
    * the package's URL, which relative image URLs resolve against, the world of one color its background controls set
    * (world.js), the compositor its pass controls set (bylonder-blocks.js), scene.bin's buffers, which its entities
    * read; loaded into a scene of the page's own, what was added there and what removes it (asset.js)
    */
-  constructor(scene, ir, { root = '', world, compositor, buffers = [], entries, dispose = () => scene.dispose() } = {}) {
+  constructor(scene, ir, { root = '', world, compositor, buffers = {}, entries, dispose = () => scene.dispose() } = {}) {
     /** Babylon's scene: loaded into a scene of the page's own, a view of it that holds what was loaded alone. */
     this.scene = scene;
     /** Loaded into a scene of the page's own: what was added there, as ImportMeshAsync gives a .glb's (meshes[0] the root). */

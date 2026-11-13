@@ -1,4 +1,4 @@
-// Reading an IR file (runtime/ir.js readIR): a version 1 file written before later schema changes still loads, omitted
+// Reading an IR file (runtime/ir.js readIR): a version 1 file written before later schema changes still loads, migrated, omitted
 // fields take their defaults, what can be solved is repaired with a warning, and what cannot names the path, what was
 // expected and what is there. The JSON Schema made from the same schema accepts what readIR does.
 import assert from 'node:assert/strict';
@@ -16,11 +16,14 @@ const validate = new Ajv2020({ strict: false }).compile(JSON.parse(readFileSync(
 const v1 = read(file());
 assert.deepEqual(v1.warnings, [], 'a version 1 file loads as it is');
 assert.equal(v1.ir.properties['objects["Cube"].location[2]'].default, 1.25);
-assert.ok(validate(file()), JSON.stringify(validate.errors));
+assert.ok(validate(v1.ir), JSON.stringify(validate.errors));
+// Version 1 numbered scene.bin's buffers; version 2 names them, and a number reads as its name.
+assert.deepEqual(read({ schema: 'bylonder-ir', version: 1, entities: { 'OB:A/modifier/Bevel': { type: 'modifier:BEVEL', id: 'OB:A', inputs: { mesh: { edges: { buffer: 3 } } } } } })
+  .ir.entities['OB:A/modifier/Bevel'].inputs.mesh.edges, { buffer: '3' });
 
 // Omitted fields take their defaults.
 const bare = read({ schema: 'bylonder-ir', version: 1 });
-assert.deepEqual(bare.ir, { schema: 'bylonder-ir', version: 1, scene: { id: null, collection: null, view_layer: null, time: { frame_current: 1, frame_start: 1, frame_end: 250, fps: 24, fps_base: 1, loop: true, sample_rates: {}, clips: {}, markers: [], sounds: [] } }, ids: {}, collections: {}, references: [], properties: {}, graphs: {},
+assert.deepEqual(bare.ir, { schema: 'bylonder-ir', version: 2, scene: { id: null, collection: null, view_layer: null, time: { frame_current: 1, frame_start: 1, frame_end: 250, fps: 24, fps_base: 1, loop: true, sample_rates: {}, clips: {}, markers: [], sounds: [] } }, ids: {}, collections: {}, references: [], properties: {}, graphs: {},
   entities: {}, order: [] });
 assert.deepEqual(read({ schema: 'bylonder-ir', version: 1, entities: { 'OB:A/driver/x': { type: 'driver:SCRIPTED', id: 'OB:A' } } }).ir.entities['OB:A/driver/x'],
   { type: 'driver:SCRIPTED', id: 'OB:A', inputs: {}, outputs: {} });
@@ -52,7 +55,7 @@ assert.deepEqual(tree.ir.collections['GR:A'], { name: 'A', children: ['GR:B'], o
 assert.deepEqual(tree.ir.collections['GR:B'].children, [], 'a collection holding one that holds it lets go');
 assert.deepEqual(tree.ir.collections['GR:B'].view_layers.ViewLayer, { exclude: true, hide_viewport: false, holdout: false, indirect_only: false });
 assert.equal(tree.warnings.length, 5, tree.warnings.join('\n'));
-assert.ok(validate({ schema: 'bylonder-ir', version: 1, collections: { 'GR:A': { name: 'A' } } }), JSON.stringify(validate.errors));
+assert.ok(validate({ schema: 'bylonder-ir', version: 2, collections: { 'GR:A': { name: 'A' } } }), JSON.stringify(validate.errors));
 
 // What cannot be read throws, naming the path, what was expected and what is there.
 const corrupt = (change, message) => {
@@ -62,6 +65,6 @@ const corrupt = (change, message) => {
 };
 corrupt((raw) => { raw.entities['OB:Cube/modifier/Bevel'].type = 5; }, /^Error: ir\.entities\["OB:Cube\/modifier\/Bevel"\]\.type: expected string, got 5$/);
 corrupt((raw) => { raw.properties['objects["Cube"].location[2]'].default = null; }, /ir\.properties\["objects\[\\"Cube\\"\]\.location\[2\]"\]\.default: .*got null/);
-corrupt((raw) => { raw.version = 2; }, /ir\.version is 2: this runtime reads versions up to 1/);
+corrupt((raw) => { raw.version = 3; }, /ir\.version is 3: this runtime reads versions up to 2/);
 corrupt((raw) => { raw.schema = 'gltf'; }, /Not a Bylonder IR/);
 console.log('IR read: a version 1 file loads, defaults fill omitted fields, solvable problems are repaired with a warning and corruption names its path');

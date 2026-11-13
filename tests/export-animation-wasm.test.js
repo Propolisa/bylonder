@@ -16,7 +16,7 @@ import { blendData, idStruct } from '../src/python/bpy_rna.js';
 import { actionFCurves } from '../src/io_scene_babylon/ir-export.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
 import { openExample } from './open-example.js';
-import { writePackage } from './export-package.js';
+import { writePackage, sceneTable } from './export-package.js';
 
 // Per example: frames to check, and the least share of its tracks that must be exact keys (not a sample per frame).
 const EXAMPLES = { 'drivers-and-graph-editor': [1, 7, 13, 30, 61, 96], nla: [1, 10, 25, 49, 60, 80], compositor: [1, 37, 120, 240], 'shape-keys': [1, 18, 25, 48],
@@ -43,12 +43,12 @@ async function check(id, { bake = false, elastic = false, slide = false, half = 
   // Material inputs the Compositor example animates (an ad's mapping, lights' emission) run on the unit too.
   if (id === 'compositor' && !bake) assert.ok(live.filter(([, e]) => e.outputs.value.property.startsWith('materials[')).length >= 3, `${id}: material inputs run live`);
   if (slide) {
-    const box = JSON.parse(/const ANIMATION_GROUPS = (.*);\n/.exec(files['scene.js'])[1])[0].targetedAnimations.filter((t) => t.targetId === 'Box').map((t) => t.animation.property);
+    const box = sceneTable(files, 'ANIMATION_GROUPS')[0].targetedAnimations.filter((t) => t.targetId === 'Box').map((t) => t.animation.property);
     assert.ok(box.length && box.every((p) => /^position\.[xyz]$/.test(p)), `the Slide strip's location plays as Babylon's keys, not sampled (${box})`);
   }
   if (eased) assert.ok(live.some(([key, e]) => key === eased && 'buffer' in e.inputs.curve.keyframes), `${eased}: the Elastic curve runs live, its keys in scene.bin`);
   // Materials of one node structure share one code body; their values are tunable inputs.
-  const code = JSON.parse(/const CODE = (.*);/.exec(files['scene.js'])[1]), materials = JSON.parse(/const MATERIALS = (.*);/.exec(files['scene.js'])[1]).filter((m) => m.customType === 'BABYLON.NodeMaterial');
+  const code = JSON.parse(/const CODE = (.*);/.exec(files['scene.js'])[1]), materials = sceneTable(files, 'MATERIALS').filter((m) => m.customType === 'BABYLON.NodeMaterial');
   assert.ok(code.length <= materials.length, `${id}: ${code.length} code bodies for ${materials.length} node materials`);
   assert.ok(materials.every((m) => !m.blocks.some((b) => /^BABYLON\.(Blender|ShaderNode)/.test(b.customType))), `${id}: node materials hold only Babylon's blocks`);
   const written = writePackage(files);

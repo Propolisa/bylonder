@@ -20,10 +20,10 @@ assert.ok(table && written[0].targetedAnimations.length === 0, 'compressed into 
 assert.deepEqual(table.targets, ['Rig hips', 'Rig chest']);
 
 // The page's decoder on the bin's arrays.
-const bytes = bin.bytes(), buffers = bin.views.map(([offset, length, type]) => {
+const bytes = bin.bytes(), buffers = Object.fromEntries(Object.entries(bin.views).map(([key, [offset, length, type]]) => {
   const Type = { f32: Float32Array, u16: Uint16Array, u32: Uint32Array }[type];
-  return new Type(bytes.buffer, bytes.byteOffset + offset, length);
-});
+  return [key, new Type(bytes.buffer, bytes.byteOffset + offset, length)];
+}));
 const clipKeys = new Function(`${CLIP_KEYS_SOURCE}; return clipKeys;`)();
 const start = performance.now();
 const decoded = clipKeys(structuredClone(written[0]), buffers);

@@ -21,7 +21,7 @@ mesh.morphTargetManager = manager;
 const serialized = manager.serialize(), bin = createSceneBin({ gzip: false });
 const [written] = binaryMorphTargets([serialized], scene.meshes, bin);
 assert.ok(written.bylonderBasis && written.targets.every((t) => t.bylonderSparse && !t.positions), 'targets as sparse offsets');
-const bytes = bin.bytes(), buffers = bin.views.map(([offset, length, type]) => new ({ f32: Float32Array, u32: Uint32Array }[type])(bytes.buffer, bytes.byteOffset + offset, length));
+const bytes = bin.bytes(), buffers = Object.fromEntries(Object.entries(bin.views).map(([key, [offset, length, type]]) => [key, new ({ f32: Float32Array, u32: Uint32Array }[type])(bytes.buffer, bytes.byteOffset + offset, length)]));
 assert.equal(buffers[written.targets[0].bylonderSparse.vertices].length, 3, 'the smile moves three vertices');
 assert.equal(buffers[written.targets[1].bylonderSparse.vertices].length, 0, 'the rest key moves none');
 const morphKeys = new Function(`${MORPH_KEYS_SOURCE}; return morphKeys;`)();

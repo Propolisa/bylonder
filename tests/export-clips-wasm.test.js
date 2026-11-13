@@ -14,10 +14,10 @@ import { sceneOf } from '../src/io_scene_babylon/controls-export.js';
 import { withAction } from '../src/io_scene_babylon/clip-export.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
 import { openExample } from './open-example.js';
-import { writePackage } from './export-package.js';
+import { writePackage, sceneTable } from './export-package.js';
 
 const near = (a, b, what) => a.forEach((v, i) => assert.ok(Math.abs(v - b[i]) < 1e-4, `${what}: ${v} is not ${b[i]} at ${i}`));
-const groupsOf = (files) => JSON.parse(/const ANIMATION_GROUPS = (.*);\n/.exec(files['scene.js'])[1]);
+const groupsOf = (files) => sceneTable(files, 'ANIMATION_GROUPS');
 // A clip held at a frame of its action, drawn.
 function at(blend, name, frame) {
   const group = blend.clips().find((c) => c.name === name).group;

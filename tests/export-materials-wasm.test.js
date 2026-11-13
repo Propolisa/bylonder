@@ -8,7 +8,7 @@ import { NullEngine } from '@babylonjs/core';
 import { blendData } from '../src/python/bpy_rna.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
 import { openExample } from './open-example.js';
-import { writePackage } from './export-package.js';
+import { writePackage, sceneTable } from './export-package.js';
 import { nodeWorld } from './node-world.js';
 
 async function load(id) {
@@ -75,7 +75,7 @@ const SCENARIOS = {
     sync.view();
     nodeWorld(scene);
     const files = await exportModule(world), written = writePackage(files);
-    const materials = JSON.parse(/const MATERIALS = (.*);/.exec(files['scene.js'])[1]), entry = materials.find((m) => m.name === '__world World');
+    const materials = sceneTable(files, 'MATERIALS'), entry = materials.find((m) => m.name === '__world World');
     assert.ok(entry && entry.blocks.every((b) => !/^BABYLON\.(Blender|ShaderNode)/.test(b.customType)), "the world is a material of Babylon's blocks");
     const blend = await (await import(written.url)).load(new NullEngine());
     assert.ok(entry.blocks.some((b) => b.name === 'world:probe') && entry.blocks.some((b) => b.customType === 'BABYLON.ClampBlock'), "its probe clamp (Sun Threshold) is Babylon's math blocks");

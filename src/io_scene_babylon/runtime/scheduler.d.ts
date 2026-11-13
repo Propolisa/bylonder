@@ -20,7 +20,7 @@ export function createScheduler(ir: import("./ir.js").IR, page: Page): {
  *   draw?(mesh: import('./ir.js').Mesh): Promise<import('./mesh.js').DrawBuffers>, settled?(): Promise<void> }} Evaluator
  * @typedef {{ get(path: string): any, write(path: string, value: any): void, set(path: string, value: any): void, frame(id?: string): number }} Controls `frame(id)`: the frame an ID shows (its time offset applied); `set`: a write from outside the scheduler's run, whose readers then run
  * What an implementation loads for: the page's scene, the package's URL, the IR, scene.bin's buffers and the properties.
- * @typedef {{ scene: import('@babylonjs/core').Scene, root: string, ir: import('./ir.js').IR, buffers: ArrayBufferView[], controls: Controls }} Page
+ * @typedef {{ scene: import('@babylonjs/core').Scene, root: string, ir: import('./ir.js').IR, buffers: import('./buffers.js').Buffers, controls: Controls }} Page
  */
 /** The implementations a package ships, by name, each loaded on first use. @type {Record<string, (page: Page) => Promise<Evaluator>>} */
 export const EVALUATORS: Record<string, (page: Page) => Promise<Evaluator>>;
@@ -63,6 +63,6 @@ export type Page = {
     scene: import("@babylonjs/core").Scene;
     root: string;
     ir: import("./ir.js").IR;
-    buffers: ArrayBufferView[];
+    buffers: import("./buffers.js").Buffers;
     controls: Controls;
 };

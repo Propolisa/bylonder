@@ -9,7 +9,7 @@ renderer of it. The page's scheduler walks it and runs each computed entity thro
 A package ships it as data, `scene.ir.json` beside `scene.js`, which reads it. The schema is defined once, in Zod
 (`zod/mini`) in `src/io_scene_babylon/runtime/ir.js`; its JSON Schema `runtime/ir.schema.json` is generated from it
 (`node scripts/ir-runtime.mjs`), and its types (`IR`, `Entity`, `Mesh` and the rest) are inferred from it into
-`runtime/ir.d.ts`. Packages carry Zod's bundled copy, `bylonder/zod.js` (MIT). Version 1.
+`runtime/ir.d.ts`. Packages carry Zod's bundled copy, `bylonder/zod.js` (MIT). Version 2.
 
 ```json
 {
@@ -28,7 +28,7 @@ A package ships it as data, `scene.ir.json` beside `scene.js`, which reads it. T
   "graphs": {},
   "entities": {
     "OB:Cube/modifier/Bevel": { "type": "modifier:BEVEL", "id": "OB:Cube", "implementation": "modifiers",
-      "inputs": { "mesh": { "vert_positions": { "buffer": 4 }, "edges": { "buffer": 5 }, "...": "..." }, "width": { "property": "objects[\"Cube\"].modifiers[\"Bevel\"].width" },
+      "inputs": { "mesh": { "vert_positions": { "buffer": "f32.1x9k2m0q7c" }, "edges": { "buffer": "i32.0b4n8w5s2e" }, "...": "..." }, "width": { "property": "objects[\"Cube\"].modifiers[\"Bevel\"].width" },
         "kernel": { "type": 17, "layouts": { "...": "..." } } },
       "outputs": { "mesh": { "draw": "Cube" } } }
   },
@@ -44,7 +44,7 @@ A package ships it as data, `scene.ir.json` beside `scene.js`, which reads it. T
 draws as, when it has one) and `data`: its properties as Blender's RNA holds them, read at export, settable or not,
 leaving out values equal to their RNA default and runtime-only and UI-only properties.
 Nested structs are objects, collections arrays (each item with its `name` where it has one), an ID pointer
-`{ "id": key }` or null, and bulk arrays (vertices, keyframes of a long F-Curve) `{ "buffer": n }` into `scene.bin`.
+`{ "id": key }` or null, and bulk arrays (vertices, keyframes of a long F-Curve) `{ "buffer": key }` into `scene.bin`.
 So a scene's collections and their hierarchy, view layers and their visibility flags, render and view settings, world,
 active camera, actions with their F-Curves, keyframes, easing and modifiers, NLA tracks, and the compositor's node
 group are all in `ids`. An object a Geometry Nodes graph reads (directly or through a collection) also has `evaluated`:
@@ -150,7 +150,7 @@ An entity's input is a plain JSON value or a reference:
 |---|---|
 | `{ "property": path }` | the current value of a property |
 | `{ "entity": key, "output": name }` | an output of another entity |
-| `{ "buffer": n }` | a typed array of `scene.bin` |
+| `{ "buffer": key }` | a typed array of `scene.bin`, named by its content: its type and a hash of its bytes (`f32.1x9k2m0q7c`) |
 | `{ "data": [id, path] }` | a value of an ID's `data`, by RNA path (an action's F-Curve) |
 | `{ "graph": key }` | a node graph of `graphs` |
 
@@ -249,4 +249,5 @@ the path, what was expected and what is there (`ir.entities["OB:Cube/modifier/Be
 ## Versioning
 
 `version` grows when a field changes meaning; a reader refuses a version it does not know. New fields and new type keys
-do not change the version.
+do not change the version. Version 2 names `scene.bin`'s buffers by their content where version 1 numbered them; reading
+a version 1 file turns each number into its key, the same number as text.

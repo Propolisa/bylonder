@@ -4,13 +4,17 @@
  */
 export function readBytes(url: URL): Promise<Uint8Array<ArrayBuffer>>;
 /**
- * Every view of the binary file at `url`, gzipped or not.
+ * Every view of the binary file at `url`, gzipped or not, by its key (its content's name).
  * @param {URL} url
- * @param {BufferView[]} views
+ * @param {Record<string, BufferView>} views
  * @param {boolean} [gzip]
- * @returns {Promise<ArrayBufferView[]>}
+ * @returns {Promise<Buffers>}
  */
-export function readBuffers(url: URL, views: BufferView[], gzip?: boolean): Promise<ArrayBufferView[]>;
+export function readBuffers(url: URL, views: Record<string, BufferView>, gzip?: boolean): Promise<Buffers>;
+/**
+ * scene.bin's buffers by key.
+ */
+export type Buffers = Record<string, ArrayBufferView>;
 /**
  * One buffer of scene.bin: where its bytes start once inflated, how many values it has, and their type.
  */

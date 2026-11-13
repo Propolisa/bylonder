@@ -145,7 +145,7 @@ export const SceneSchema = z.object({
   time: fresh(TimeSchema, TIME),
 });
 
-export const IR_SCHEMA = 'bylonder-ir', IR_VERSION = 1;
+export const IR_SCHEMA = 'bylonder-ir', IR_VERSION = 2;
 export const IRSchema = z.object({
   schema: z.literal(IR_SCHEMA),
   version: z.literal(IR_VERSION),
@@ -194,7 +194,7 @@ export const GeometrySchema = z.object({ mesh: z.optional(MeshSchema), points: z
  * @typedef {z.infer<typeof CollectionSchema>} Collection
  * @typedef {z.infer<typeof LayerCollectionSchema>} LayerCollection
  * A reference an entity's input may hold, resolved before a unit runs.
- * @typedef {{ property: string } | { entity: string, output: string } | { buffer: number } | { data: [string, string] } | { graph: string }} Reference
+ * @typedef {{ property: string } | { entity: string, output: string } | { buffer: string } | { data: [string, string] } | { graph: string }} Reference
  */
 
 const REFERENCES = ['property', 'entity', 'buffer', 'data', 'graph'];
@@ -267,8 +267,18 @@ export function dataAt(ir, [id, path]) {
   return value;
 }
 
+/** A value with each buffer reference's index of version 1 as its key of version 2: the same index, as text. @param {any} value @returns {any} */
+const bufferKeys = (value) => {
+  if (Array.isArray(value)) return value.map(bufferKeys);
+  if (value?.constructor !== Object) return value;
+  if (isReference(value) && 'buffer' in value && typeof value.buffer === 'number') return { ...value, buffer: String(value.buffer) };
+  return Object.fromEntries(Object.entries(value).map(([key, v]) => [key, bufferKeys(v)]));
+};
 /** Steps from each older version to the next: `MIGRATIONS[n]` takes an IR of version n to n + 1. @type {Record<number, (ir: any) => any>} */
-export const MIGRATIONS = {};
+export const MIGRATIONS = {
+  // Version 2 names scene.bin's buffers by their content, a string, where version 1 numbered them.
+  1: (ir) => ({ ...bufferKeys(ir), version: 2 }),
+};
 
 const typeOf = (/** @type {unknown} */ value) => (typeof value === 'boolean' ? 'BOOLEAN' : typeof value === 'string' ? 'STRING' : Number.isInteger(value) ? 'INT' : 'FLOAT');
 /** @param {PropertyKey[]} path */

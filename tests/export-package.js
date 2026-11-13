@@ -7,6 +7,7 @@ import { dirname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { appFiles, gplFiles, packagedModules, packagedRuntime, packageOverrides, packageRuntime } from '../src/io_scene_babylon/runtime-files.js';
 import { bundlePackage } from '../src/io_scene_babylon/bundle.js';
+import { groupEntry } from '../src/io_scene_babylon/runtime/scene-tables.js';
 
 const CORE = import.meta.resolve('@babylonjs/core').replace(/index\.js$/, '');
 const src = (path) => readFileSync(new URL(`../src/${path}`, import.meta.url));
@@ -39,3 +40,10 @@ export function writePackage(files, dir = mkdtempSync(join(tmpdir(), 'bylonder-p
   }
   return { dir, url: pathToFileURL(join(dir, 'scene.js')).href, remove: () => rmSync(dir, { recursive: true }) };
 }
+
+// A table of scene.js (runtime/scene-tables.js) as a list of its entries, `name` its constant's (MATERIALS); its
+// animation groups (ANIMATION_GROUPS) as the page assembles them from their tracks.
+const tableOf = (files, name) => JSON.parse(new RegExp(`const ${name} = (.*);\n`).exec(files['scene.js'])[1]);
+export const sceneTable = (files, name) => (name === 'ANIMATION_GROUPS'
+  ? Object.entries(tableOf(files, name)).map(([key, settings]) => groupEntry(key, settings, tableOf(files, 'ANIMATIONS')))
+  : Object.values(tableOf(files, name)));

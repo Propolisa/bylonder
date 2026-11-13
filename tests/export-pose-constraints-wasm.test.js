@@ -15,7 +15,7 @@ import { blendData } from '../src/python/bpy_rna.js';
 import { setCustomProperty } from '../src/blenkernel/animation/anim-blender.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
 import { openExample } from './open-example.js';
-import { writePackage } from './export-package.js';
+import { writePackage, sceneTable } from './export-package.js';
 
 const FRAMES = [1, 12, 18, 30, 40, 50, 64];
 // The IK solver's tolerance, as a matrix's entries.
@@ -31,7 +31,7 @@ assert.equal(entity?.implementation, 'pose-kernels', 'the page runs the rig cons
 assert.deepEqual(Object.keys(entity.inputs.influences).sort(), ['forearm.L', 'forearm.R', 'hand.L', 'hand.R', 'head', 'shin.L', 'shin.R']);
 assert.ok('buffer' in entity.inputs.kernels, 'the rig compiled once into scene.bin');
 assert.deepEqual(entity.inputs.segments, ['tail'], 'the kernels bend the tail, its animated B-Bone shape fed from its controls');
-const groups = JSON.parse(/const ANIMATION_GROUPS = (.*);\n/.exec(files['scene.js'])[1]);
+const groups = sceneTable(files, 'ANIMATION_GROUPS');
 // The tracks that move, in JSON or in a group's table of scene.bin.
 const sampled = groups.flatMap((g) => [...g.targetedAnimations.filter((t) => t.animation.keys.length > 1).map((t) => t.targetId), ...(g.bylonderTracks?.targets ?? [])]).filter((id) => /^Rig /.test(id));
 const joints = Array.from({ length: 9 }, (_, k) => `Rig tail#${k}`);
@@ -183,7 +183,7 @@ sync.view();
 const drivenFiles = await exportModule(world), drivenIR = JSON.parse(drivenFiles['scene.ir.json']);
 assert.ok(Object.values(drivenIR.entities).some((e) => e.type === 'constraints:POSE'), 'the rig with a driven bone runs its constraints in the page');
 assert.ok(Object.values(drivenIR.entities).some((e) => e.outputs?.value?.property === `objects["Rig"].pose.bones["${drivenBone.name}"].location[2]`), 'the driver runs in the page');
-const drivenGroups = JSON.parse(/const ANIMATION_GROUPS = (.*);\n/.exec(drivenFiles['scene.js'])[1]);
+const drivenGroups = sceneTable(drivenFiles, 'ANIMATION_GROUPS');
 assert.ok(!drivenGroups.flatMap((g) => g.targetedAnimations).some((t) => t.targetId === `Rig ${drivenBone.name}` && t.animation.keys.length > 1), 'the driven bone is not sampled');
 const drivenPage = writePackage(drivenFiles), driven = await (await import(drivenPage.url)).load(new NullEngine());
 await driven.settled();

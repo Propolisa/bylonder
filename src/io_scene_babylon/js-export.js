@@ -26,6 +26,7 @@ import { digest, imageFiles } from './image-files.js';
 import { exportCompositor } from './compositor-export.js';
 import { fogGlowOnGPU } from '../compositor/compositor-replay.js';
 import { exportIR, idKey } from './ir-export.js';
+import { animationTables, irTables, keyed, tableKeys } from './scene-tables.js';
 import { channels, liveStack } from './modifiers-export.js';
 import { AREA_LIGHTS_LTC, AREA_SPECULAR, FOG_GLOW, PANEL_ICONS, BABYLON_ASSETS, CHUNKS, COMPILER_FOLDER, gplFolders, NODE_KERNELS, UNITS_FILE } from './runtime-files.js';
 import { AREA_SPECULAR_UNIT, FOG_GLOW_UNIT, PANEL_ICONS_UNIT, replaces, stripEntities, stripPieces, unitManifest } from './unit-manifest.js';
@@ -135,60 +136,57 @@ const SCREEN_SPACE_PIPELINES = {
   SSAO2RenderingPipeline: '(entry, scene) => new SSAO2RenderingPipeline(entry._name, scene, entry._ratio, undefined, true, Constants.TEXTURETYPE_HALF_FLOAT)',
 };
 
-// Vertex buffers by Babylon kind, with their sizes, and the indices, as buffers of scene.bin: one entry per geometry,
-// shared by its meshes. A thin instance buffer (world0 to world3, per instance) is the mesh's thinInstances, written
-// with its node.
-function geometryCode(mesh, bin, pruned) {
+// A geometry's vertex buffers by Babylon kind, with their sizes, and its indices, as buffers of scene.bin: one entry per
+// geometry, shared by its meshes. A thin instance buffer (world0 to world3, per instance) is the mesh's thinInstances,
+// written with its node.
+function geometryEntry(mesh, bin, pruned) {
   const kinds = mesh.getVerticesDataKinds().filter((kind) => !mesh.getVertexBuffer(kind).getIsInstanced());
   const map = mesh.skeleton && pruned?.get(mesh.skeleton.id);
-  const buffers = kinds.map((kind) => {
+  const vertices = Object.fromEntries(kinds.map((kind) => {
     const size = mesh.getVertexBuffer(kind).getSize(), data = Float32Array.from(mesh.getVerticesData(kind, false, false));
-    return `${json(kind)}: [${size}, buffers[${bin.add(map ? remappedIndices(kind, data, map, mesh.skeleton.bones.length) : data)}]]`;
-  });
+    return [kind, [size, bin.add(map ? remappedIndices(kind, data, map, mesh.skeleton.bones.length) : data)]];
+  }));
   const indices = mesh.getIndices();
   const wide = mesh.getTotalVertices() > 65535;
-  const index = indices?.length ? `, buffers[${bin.add(wide ? Uint32Array.from(indices) : Uint16Array.from(indices))}]` : '';
-  return `geometry(scene, { ${buffers.join(', ')} }${index})`;
+  return { vertices, ...(indices?.length && { indices: bin.add(wide ? Uint32Array.from(indices) : Uint16Array.from(indices)) }) };
 }
 
 const DEFAULTS = { isVisible: true, visibility: 1, receiveShadows: false, pickable: true, billboardMode: 0, checkCollisions: false, infiniteDistance: false, layerMask: 0x0fffffff, alwaysSelectAsActiveMesh: false, isBlocker: false, hasVertexAlpha: false };
-const PROPERTIES = { pickable: 'isPickable' };
+const numbers = (values) => values.map(number);
+const identity = (matrix) => matrix.every((x, i) => x === (i % 5 === 0 ? 1 : 0));
 
-// One node's initialization code, from its serialization (`entry`) and, for a mesh, its Babylon mesh.
-function nodeCode(entry, mesh, geometries, live, bin) {
-  const lines = [];
-  const v = (name) => `node.${name}`;
-  if (mesh) {
-    const lines_ = entry.type === 'LinesMesh';
-    lines.push(`const node = new ${lines_ ? 'LinesMesh' : 'Mesh'}(${json(entry.name)}, scene);`);
-    if (lines_) lines.push(`node.color = new Color3(${vector(mesh.color.asArray())});`, mesh.alpha !== 1 ? `node.alpha = ${mesh.alpha};` : '');
-    // A points mesh without indices (a PointsCloudSystem's) draws its vertices in order, as in the app.
-    if (mesh.material?.pointsCloud && !mesh.getIndices()?.length) lines.push('node.isUnIndexed = true;');
-    if (mesh.geometry) lines.push(`${geometries.get(mesh.geometry)}.applyToMesh(node);`);
-  } else lines.push(`const node = new TransformNode(${json(entry.name)}, scene);`);
-  lines.push(`node.id = ${json(entry.id)};`);
-  lines.push(`node.position.set(${vector(entry.position)});`);
-  if (entry.rotationQuaternion) lines.push(`node.rotationQuaternion = new Quaternion(${vector(entry.rotationQuaternion)});`);
-  else if (entry.rotation?.some(Boolean)) lines.push(`node.rotation.set(${vector(entry.rotation)});`);
-  if (entry.scaling?.some((s) => s !== 1)) lines.push(`node.scaling.set(${vector(entry.scaling)});`);
-  if (entry.pivotMatrix && entry.pivotMatrix.some((x, i) => x !== (i % 5 === 0 ? 1 : 0))) lines.push(`node.setPivotMatrix(Matrix.FromArray(${json(entry.pivotMatrix.map(number))}), false);`);
-  if (entry.isEnabled === false) lines.push('node.setEnabled(false);');
-  for (const [key, def] of Object.entries(DEFAULTS)) if (key in entry && entry[key] !== def) lines.push(`${v(PROPERTIES[key] ?? key)} = ${json(entry[key])};`);
-  if (entry.alphaIndex !== undefined && entry.alphaIndex !== Number.MAX_VALUE && entry.alphaIndex !== null) lines.push(`node.alphaIndex = ${entry.alphaIndex};`);
-  if (entry.materialUniqueId !== undefined && mesh?.material) lines.push(`node.material = materials[${json(entry.materialUniqueId)}] ?? null;`);
-  if (mesh && entry.subMeshes?.length > 1) lines.push(`node.subMeshes = [];`, ...entry.subMeshes.map((s) => `new SubMesh(${s.materialIndex}, ${s.verticesStart}, ${s.verticesCount}, ${s.indexStart}, ${s.indexCount}, node);`));
-  if (entry.skeletonId !== undefined) lines.push(`node.skeleton = lookup.getSkeletonById(${json(entry.skeletonId)});`, `node.numBoneInfluencers = ${entry.numBoneInfluencers};`);
-  if (entry.morphTargetManagerId !== undefined) lines.push(`node.morphTargetManager = morphTargets[${json(entry.morphTargetManagerId)}];`);
-  if (entry.thinInstances?.instancesCount) lines.push(`node.thinInstanceSetBuffer('matrix', buffers[${bin.add(Float32Array.from(entry.thinInstances.matrixData.slice(0, entry.thinInstances.instancesCount * 16)))}], 16, true);`);
-  for (const instance of entry.instances ?? []) {
-    lines.push(`{ const instance = node.createInstance(${json(instance.name)}); instance.position.set(${vector(instance.position)}); ${instance.rotationQuaternion ? `instance.rotationQuaternion = new Quaternion(${vector(instance.rotationQuaternion)});` : `instance.rotation.set(${vector(instance.rotation)});`} instance.scaling.set(${vector(instance.scaling)}); }`);
-  }
-  if (entry.animations?.length) lines.push(`node.animations = ${json(entry.animations)}.map((a) => Animation.Parse(a));`);
-  // Its channels, and dual quaternion skinning (armature.js), which BlendScene turns on.
+// One node's entry (runtime/scene-tables.js makes it), from its serialization (`entry`) and, for a mesh, its Babylon
+// mesh and its geometry's key.
+function nodeEntry(entry, mesh, geometry, live, bin) {
+  const lines = entry.type === 'LinesMesh', set = Object.fromEntries(Object.entries(DEFAULTS).filter(([key, def]) => key in entry && entry[key] !== def).map(([key]) => [key, entry[key]]));
   const metadata = { ...(live && { bylonderChannels: channels(live) }), ...(entry.metadata?.bylonderDualQuaternions && { bylonderDualQuaternions: true }), ...(entry.metadata?.bylonderBounds && { bylonderBounds: entry.metadata.bylonderBounds }) };
-  if (Object.keys(metadata).length) lines.push(`node.metadata = ${json(metadata)};`);
-  lines.push(`nodes[${entry.uniqueId}] = node;`);
-  return lines.filter(Boolean);
+  return {
+    type: mesh ? (lines ? 'LinesMesh' : 'Mesh') : 'TransformNode', name: entry.name, id: entry.id, uniqueId: entry.uniqueId,
+    ...(mesh && lines && { color: numbers(mesh.color.asArray()), ...(mesh.alpha !== 1 && { alpha: mesh.alpha }) }),
+    // A points mesh without indices (a PointsCloudSystem's) draws its vertices in order, as in the app.
+    ...(mesh?.material?.pointsCloud && !mesh.getIndices()?.length && { unIndexed: true }),
+    ...(mesh?.geometry && { geometry }),
+    position: numbers(entry.position),
+    ...(entry.rotationQuaternion ? { rotationQuaternion: numbers(entry.rotationQuaternion) } : entry.rotation?.some(Boolean) && { rotation: numbers(entry.rotation) }),
+    ...(entry.scaling?.some((s) => s !== 1) && { scaling: numbers(entry.scaling) }),
+    ...(entry.pivotMatrix && !identity(entry.pivotMatrix) && { pivotMatrix: numbers(entry.pivotMatrix) }),
+    ...(entry.isEnabled === false && { enabled: false }),
+    ...(Object.keys(set).length && { set }),
+    ...(entry.alphaIndex !== undefined && entry.alphaIndex !== Number.MAX_VALUE && entry.alphaIndex !== null && { alphaIndex: entry.alphaIndex }),
+    ...(entry.materialUniqueId !== undefined && mesh?.material && { material: entry.materialUniqueId }),
+    ...(mesh && entry.subMeshes?.length > 1 && { subMeshes: entry.subMeshes.map((s) => [s.materialIndex, s.verticesStart, s.verticesCount, s.indexStart, s.indexCount]) }),
+    ...(entry.skeletonId !== undefined && { skeleton: entry.skeletonId, numBoneInfluencers: entry.numBoneInfluencers }),
+    ...(entry.morphTargetManagerId !== undefined && { morphTargets: entry.morphTargetManagerId }),
+    ...(entry.thinInstances?.instancesCount && { thinInstances: bin.add(Float32Array.from(entry.thinInstances.matrixData.slice(0, entry.thinInstances.instancesCount * 16))) }),
+    ...(entry.instances?.length && { instances: entry.instances.map(({ name, position, rotationQuaternion, rotation, scaling }) => ({ name, position: numbers(position),
+      ...(rotationQuaternion ? { rotationQuaternion: numbers(rotationQuaternion) } : { rotation: numbers(rotation) }), scaling: numbers(scaling) })) }),
+    ...(entry.animations?.length && { animations: entry.animations }),
+    // Its channels, and dual quaternion skinning (armature.js), which BlendScene turns on.
+    ...(Object.keys(metadata).length && { metadata }),
+    ...(entry.parentId !== undefined && { parentId: entry.parentId }),
+    ...(entry.parentBone && { parentBone: entry.parentBone }),
+    ...(entry.poseMatrix && { poseMatrix: Array.from(entry.poseMatrix) }),
+  };
 }
 
 // Remesh's Voxel mode needs OpenVDB, which the kernels module is built without: such a stack stays applied.
@@ -206,7 +204,33 @@ function parentInstances(objects) {
   }
 }
 
-const indent = (lines, by = '    ') => lines.map((l) => by + l).join('\n');
+
+// A node graph's blocks (a node material's, the compositor's render graph) named by their place in it, as their unique
+// ids are new at each export.
+function blocksByPlace(graph) {
+  if (!graph?.blocks) return;
+  const places = new Map(graph.blocks.map((block, i) => [block.id, i + 1])), place = (id) => places.get(id) ?? id;
+  for (const block of graph.blocks) {
+    block.id = place(block.id);
+    for (const input of block.inputs ?? []) if (input.targetBlockId !== undefined) input.targetBlockId = place(input.targetBlockId);
+  }
+  if (graph.outputNodes) graph.outputNodes = graph.outputNodes.map(place);
+  if (graph.outputNodeId !== undefined) graph.outputNodeId = place(graph.outputNodeId);
+  for (const location of graph.editorData?.locations ?? []) location.blockId = place(location.blockId);
+}
+
+// Entries name materials by key, as their unique ids are new at each export: nodes, multi-materials, the scene's
+// default and world materials and the volumes' domains.
+function stableMaterialReferences(tables, settings, volumes) {
+  const keys = new Map(Object.entries({ ...tables.materials, ...tables.multiMaterials }).map(([key, entry]) => [entry.uniqueId, key]));
+  const key = (id) => keys.get(id) ?? null;
+  for (const node of Object.values(tables.nodes)) if (node.material !== undefined) node.material = key(node.material);
+  for (const multi of Object.values(tables.multiMaterials)) multi.materialsUniqueIds = multi.materialsUniqueIds?.map(key);
+  if (settings.defaultMaterial !== null) settings.defaultMaterial = key(settings.defaultMaterial);
+  if (settings.world?.material != null) settings.world.material = key(settings.world.material);
+  for (const domain of volumes?.domains ?? []) domain[1] = key(domain[1]);
+  for (const entry of [...Object.values(tables.materials), ...Object.values(tables.multiMaterials)]) delete entry.uniqueId;
+}
 
 // The world's node material, as the export writes a material's, or null for a world of one color.
 async function worldMaterial(scene, parity, graphOf) {
@@ -312,7 +336,10 @@ function selectedWorld(world, selected) {
 // `clipCompression`, how clips' bone keys are compressed (export-options.js CLIP_COMPRESSION); `deformBonesOnly`,
 // skeletons with only the bones that skin (skeleton-export.js).
 
-export async function exportModule(whole, { scope = 'SCENE', selected = [], live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, animations = 'TIMELINE', clipCompression = 'STANDARD', deformBonesOnly = false, target = 'BOTH', runtime = null, runtimes = {}, replace = [], bundle = false, controlPanel = true, devTools = 'CDN', navigation = 'FIXED', navigationModes = {}, branchState = null, branches = {}, sampleRate = {} } = {}) {
+export const exportModule = async (world, options) => (await exportPackage(world, options)).files;
+
+// The package's files, its tables by datablock and its buffers by key (scene-patch.js makes a patch of two).
+export async function exportPackage(whole, { scope = 'SCENE', selected = [], live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, animations = 'TIMELINE', clipCompression = 'STANDARD', deformBonesOnly = false, target = 'BOTH', runtime = null, runtimes = {}, replace = [], bundle = false, controlPanel = true, devTools = 'CDN', navigation = 'FIXED', navigationModes = {}, branchState = null, branches = {}, sampleRate = {} } = {}) {
   const world = scope === 'SELECTED' ? selectedWorld(whole, selected) : whole;
   const states = { branchState, branches }, stackState = (node) => chosenState(states, 'modifiers', node.name) ?? (keepLive ? 'LIVE' : 'BAKED');
   const live = new Map(world.objects.filter((node) => stackState(node) === 'LIVE').map((node) => [node, liveStack(world, node)]).filter(([, stack]) => stack));
@@ -348,11 +375,12 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   // Deform Bones Only: skeletons pruned to what skins and, on the native rig runtime, what the runtime reads.
   const pruned = deformBonesOnly ? deformSkeletons(world, data, mapped.constraints ?? []) : new Map();
   pruneSkeletons(data, pruned);
-  const geometries = new Map(), geometryLines = [];
+  // Each geometry once, by the id of the first node using it.
+  const geometries = new Map(), geometryEntries = [];
   const objects = [...data.transformNodes.map((entry) => ({ entry })), ...data.meshes.map((entry) => ({ entry, mesh: scene.getMeshByUniqueId(entry.uniqueId) }))];
-  for (const { mesh } of objects) if (mesh?.geometry && !geometries.has(mesh.geometry)) {
-    geometries.set(mesh.geometry, `geometries[${geometries.size}]`);
-    geometryLines.push(`  ${geometryCode(mesh, bin, pruned)},`);
+  for (const { entry, mesh } of objects) if (mesh?.geometry && !geometries.has(mesh.geometry)) {
+    geometries.set(mesh.geometry, entry.id);
+    geometryEntries.push([entry.id, geometryEntry(mesh, bin, pruned)]);
   }
   const compositorState = chosenState(states, 'compositor') ?? 'LIVE';
   const composited = !asset && data.cameras.length && compositorState !== 'OFF' ? exportCompositor(world) : null;
@@ -404,13 +432,13 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   } }));
   volumes?.dispose();
   parentInstances(objects);
-  const parented = [...data.transformNodes, ...data.meshes, ...data.lights, ...data.cameras].filter((e) => e.parentId !== undefined);
-  const posed = data.meshes.filter((e) => e.poseMatrix);
-  const onBones = [...data.transformNodes, ...data.meshes].filter((e) => e.parentBone)
-    .map((e) => (pruned.has(e.parentBone.skeletonId) ? { ...e, parentBone: { ...e.parentBone, index: pruned.get(e.parentBone.skeletonId).get(e.parentBone.index) } } : e));
+  // Objects parented to bones hang from the bones the pruned skeletons keep.
+  for (const { entry: e } of objects) if (e.parentBone && pruned.has(e.parentBone.skeletonId)) e.parentBone = { ...e.parentBone, index: pruned.get(e.parentBone.skeletonId).get(e.parentBone.index) };
   const pipelineTypes = [...new Set(data.renderingPipelines.map((p) => p.customType))];
   const pipelineClasses = pipelineTypes.filter((type) => !SCREEN_SPACE_PIPELINES[type] && babylonModule(type));
   const parse = (name, list, code) => (list?.length ? `  for (const entry of ${name}) ${code};\n` : '');
+  // A table's parser (bylonder/scene-tables.js), where the scene has entries for it.
+  const parser = (list, name, code) => (list?.length ? `\n    ${name}: ${code},` : '');
   const settings = {
     clearColor: data.clearColor, ambientColor: data.ambientColor, gravity: data.gravity, autoClear: data.autoClear, collisionsEnabled: data.collisionsEnabled,
     fog: data.fogMode ? { fogMode: data.fogMode, fogColor: data.fogColor, fogStart: data.fogStart, fogEnd: data.fogEnd, fogDensity: data.fogDensity } : null,
@@ -418,8 +446,20 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
     world: !asset && !data.environmentTexture && scene.metadata?.wbWorld ? { color: scene.metadata.wbWorld.color.map((v) => v * (scene.metadata.wbWorld.strength ?? 1)), material: worldEntry?.uniqueId ?? null } : null,
     defaultMaterial: data.defaultMaterialId ?? null, environmentProbe: data.environmentProbe ?? null, environmentIntensity: data.environmentIntensity, iblIntensity: data.iblIntensity, useRightHandedSystem: data.useRightHandedSystem,
   };
-  // Written before the module's tables: they add thin instance buffers to scene.bin.
-  const objectLines = objects.map(({ entry, mesh }) => `  // ${entry.name}\n  {\n${indent(nodeCode(entry, mesh, geometries, live.get(mesh), bin))}\n  }`).join('\n');
+  // The scene's tables by datablock (scene-tables.js); nodes first, as they add thin instance buffers to scene.bin.
+  const keys = tableKeys(world, ir, data.meshes), table = (name, list) => keyed(list ?? [], keys[name]);
+  const nodes = keyed(objects.map(({ entry, mesh }) => nodeEntry(entry, mesh, mesh?.geometry && keys.geometries(geometries.get(mesh.geometry)), live.get(mesh), bin)), keys.nodes);
+  const tables = { materials: table('materials', data.materials), multiMaterials: table('multiMaterials', data.multiMaterials), skeletons: table('skeletons', data.skeletons),
+    morphTargets: table('morphTargets', binaryMorphTargets(data.morphTargetManagers ?? [], world.scene.meshes, bin)),
+    geometries: Object.fromEntries(geometryEntries.map(([user, entry]) => [keys.geometries(user), entry])), nodes, lights: table('lights', data.lights), cameras: table('cameras', data.cameras),
+    shadowGenerators: table('shadowGenerators', data.shadowGenerators), reflectionProbes: table('reflectionProbes', data.reflectionProbes), particleSystems: table('particleSystems', data.particleSystems),
+    ...animationTables(data.animationGroups, keys, (groups) => binaryClipKeys(groups, bin, CLIP_COMPRESSION.find(([id]) => id === clipCompression)?.[3] ?? 1)) };
+  // Nodes name their morph targets by key: a manager's id is new at each export.
+  const morphKeys = new Map(Object.entries(tables.morphTargets).map(([key, { id }]) => [id, key]));
+  for (const node of Object.values(nodes)) if (node.morphTargets !== undefined) node.morphTargets = morphKeys.get(node.morphTargets);
+  for (const entry of Object.values(tables.morphTargets)) delete entry.id;
+  stableMaterialReferences(tables, settings, volumes?.config);
+  for (const graph of [...Object.values(tables.materials), composited?.compositor.graph]) blocksByPlace(graph);
   const name = world.sceneSettings.state.name || 'Scene', webgpu = target !== 'WEBGL2';
   const source = `// ${name}, exported from Bylonder: load(engine) gives it with its controls, createScene(engine, canvas) builds it
 // alone, with Babylon.js ${AbstractEngine.Version}; createEngine(canvas) makes the engine it is exported for: ${TARGET_NAMES[target]}.${bundle ? `
@@ -437,6 +477,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
 import { readBuffers, readBytes } from './bylonder/buffers.js';
 import { worldColor, worldNodes } from './bylonder/world.js';
 import { BlendScene } from './bylonder/blend-scene.js';
+import { loadTables } from './bylonder/scene-tables.js';
 import { addAsset, assetContainer, cloneAsset } from './bylonder/asset.js';${controlPanel ? `
 import { controlPanel } from './bylonder/control-panel.js';` : ''}
 ${webgpu ? `import { derivativeUniformity } from './bylonder/overrides/webgpu/derivative-uniformity.js';
@@ -491,17 +532,21 @@ function geometry(scene, vertices, indices) {
 const SCENE = ${json(settings)};
 const IMAGE_PROCESSING = ${json(data.imageProcessingConfiguration)};
 const CODE = ${json(code)};
-const MATERIALS = ${json(data.materials)};
-const MULTI_MATERIALS = ${json(data.multiMaterials)};
-const SKELETONS = ${json(data.skeletons)};
-const MORPH_TARGETS = ${json(binaryMorphTargets(data.morphTargetManagers ?? [], world.scene.meshes, bin))};
-const LIGHTS = ${json(data.lights)};
-const CAMERAS = ${json(data.cameras)};
-const SHADOW_GENERATORS = ${json(data.shadowGenerators ?? [])};
+// The scene's tables, each entry keyed by the datablock it is made from (bylonder/scene-tables.js).
+const MATERIALS = ${json(tables.materials)};
+const MULTI_MATERIALS = ${json(tables.multiMaterials)};
+const SKELETONS = ${json(tables.skeletons)};
+const MORPH_TARGETS = ${json(tables.morphTargets)};
+const GEOMETRIES = ${json(tables.geometries)};
+const NODES = ${json(tables.nodes)};
+const LIGHTS = ${json(tables.lights)};
+const CAMERAS = ${json(tables.cameras)};
+const SHADOW_GENERATORS = ${json(tables.shadowGenerators)};
 const EFFECT_LAYERS = ${json(data.effectLayers ?? [])};
-const REFLECTION_PROBES = ${json(data.reflectionProbes ?? [])};
-const PARTICLE_SYSTEMS = ${json(data.particleSystems)};
-const ANIMATION_GROUPS = ${json(binaryClipKeys(data.animationGroups, bin, CLIP_COMPRESSION.find(([id]) => id === clipCompression)?.[3] ?? 1))};
+const REFLECTION_PROBES = ${json(tables.reflectionProbes)};
+const PARTICLE_SYSTEMS = ${json(tables.particleSystems)};
+const ANIMATION_GROUPS = ${json(tables.animationGroups)};
+const ANIMATIONS = ${json(tables.animations)};
 const RENDERING_PIPELINES = ${json(data.renderingPipelines)};
 const POST_PROCESSES = ${json(data.postProcesses)};
 const BUFFERS = ${json(bin.views)};${volumes ? `
@@ -631,65 +676,49 @@ ${MORPH_KEYS_SOURCE}
 // The exported objects added to \`scene\` at once, without awaiting: \`lookup\` finds by id what this call made
 // (bylonder/asset.js). Gives the materials by their exported unique ids.
 function addObjects(scene, { buffers, ir }, lookup = scene) {
-  const materials = {}, entries = structuredClone(MATERIALS);
+  const materials = structuredClone(MATERIALS);
   // A custom block's code is written once for every material that shares it.
-  for (const entry of entries) for (const block of entry.blocks ?? []) if (typeof block.options?.code === 'number') block.options.code = CODE[block.options.code];
+  for (const entry of Object.values(materials)) for (const block of entry.blocks ?? []) if (typeof block.options?.code === 'number') block.options.code = CODE[block.options.code];
 ${kernels ? `  // Blender's nodes of each material and world, made from the IR's graphs.
-  fillMaterials(entries, ir, kernels);
-` : ''}  for (const entry of entries) materials[entry.uniqueId] = Material.Parse(entry, scene, ROOT);${webgpu ? `
-  // Node materials' samplers as WebGPU binds them.
-  for (const material of Object.values(materials)) if (material.getClassName() === 'NodeMaterial') webgpuSamplers(material);` : ''}${meshValued ? `
-  // Each mesh's own texture space, in the materials it shares.
-  for (const material of Object.values(materials)) meshValues(material);` : ''}${areaSpecular ? `
-  // Lights' specular as a registered unit gives it${blenderSpecular ? `, else as EEVEE's, as the app's PBR materials have it` : ', else as Babylon lights them'}.
+  fillMaterials(Object.values(materials), ir, kernels);
+` : ''}${areaSpecular ? `  // Lights' specular as a registered unit gives it${blenderSpecular ? `, else as EEVEE's, as the app's PBR materials have it` : ', else as Babylon lights them'}.
   const areaSpecular = unitFor('${AREA_SPECULAR_UNIT}')?.apply${blenderSpecular ? ' ?? blenderAreaSpecular' : ''};
-  if (areaSpecular) for (const material of Object.values(materials)) if (material.getClassName() === 'PBRMaterial') areaSpecular(material);` : ''}
-  // A multi-material's slots by the exported materials' unique ids, as Babylon's loader resolves them after parsing.
-  for (const entry of MULTI_MATERIALS) {
-    const multi = materials[entry.uniqueId] = MultiMaterial.ParseMultiMaterial(entry, scene);
-    multi.subMaterials = (entry.materialsUniqueIds ?? []).map((id) => materials[id] ?? null);
-  }
-  for (const entry of SKELETONS) Skeleton.Parse(entry, scene);
-  const morphTargets = {};
-  for (const entry of MORPH_TARGETS) morphTargets[entry.id] = MorphTargetManager.Parse(morphKeys(entry, buffers), scene);
-  const geometries = [
-${geometryLines.join('\n')}
-  ];
-
-  const nodes = {};
-${objectLines}
-${parse('LIGHTS', data.lights, `nodes[entry.uniqueId] = ${areaLights ? 'parseLight(entry, scene, AreaLight)' : 'Light.Parse(entry, scene)'}`)}${parse('CAMERAS', data.cameras, 'nodes[entry.uniqueId] = orthoScaled(parseCamera(entry, scene))')}
-${parented.map((e) => `  nodes[${e.uniqueId}].parent = nodes[${e.parentId}] ?? null;`).join('\n')}${onBones.length ? `
-  // Objects parented to bones, hung from them as the bones' meshes are skinned.
-${onBones.map((e) => `  nodes[${e.uniqueId}].attachToBone(lookup.getSkeletonById(${json(e.parentBone.skeletonId)}).bones[${e.parentBone.index}], nodes[${e.parentBone.meshId}]);`).join('\n')}` : ''}${posed.length ? `
-  // Meshes placed apart from their skeleton's space, which they read through their pose matrices.
-${posed.map((e) => `  nodes[${e.uniqueId}].updatePoseMatrix(Matrix.FromArray(${json(Array.from(e.poseMatrix))}));`).join('\n')}` : ''}${data.lights.some((l) => l.excludedMeshesIds?.length || l.includedOnlyMeshesIds?.length) ? `
-  // The meshes each light leaves out or lights alone, by id, as Babylon's loader resolves them once the meshes exist.
-  const meshes = (ids) => ids.map((id) => lookup.getMeshById(id)).filter(Boolean);
-  for (const entry of LIGHTS) {
-    const light = nodes[entry.uniqueId];
-    if (entry.excludedMeshesIds?.length) light.excludedMeshes = meshes(entry.excludedMeshesIds);
-    if (entry.includedOnlyMeshesIds?.length) light.includedOnlyMeshes = meshes(entry.includedOnlyMeshesIds);
-  }` : ''}
-
-${parse('REFLECTION_PROBES', data.reflectionProbes, "ReflectionProbe.Parse(entry, scene, ROOT)")}${parse('SHADOW_GENERATORS', data.shadowGenerators, "Object.assign((entry.className === 'CascadedShadowGenerator' ? CascadedShadowGenerator : ShadowGenerator).Parse(entry, lookup), { customShaderOptions: entry.customShaderOptions })")}  // Every material takes as many lights as its shader holds, each mesh the package's lights that reach it, the strongest
-  // first (EEVEE has no cap); lights the page adds come first where they light.
-  const lights = LIGHTS.map((entry) => nodes[entry.uniqueId]);${clustered ? `
-  // Its point and spot lights in clusters where it has more lights than a material takes, as EEVEE has no cap; a light
-  // with a Custom Distance out of them while there is room, as a cluster cuts it only per screen tile.
-  const exact = new Set(${json(clustered)}.map((id) => nodes[id])), cut = clusterLights(scene, lights, lightBudget(scene.getEngine()), (light) => exact.has(light))?.cutPerTile;
-  if (cut?.length) console.warn(\`Clustered with their Custom Distance cut per screen tile: \${cut.map((light) => light.name).join(', ')}\`);` : ''}
-  reachLights(scene, lights);
-${parse('PARTICLE_SYSTEMS', data.particleSystems, "ParticleSystem.Parse(entry, scene, ROOT)")}${data.animationGroups.some((g) => g.targetedAnimations.some((t) => t.animation.property === CLOCK)) ? `  // The frame Babylon's animation keeps where the page's F-Curves are all that moves.
-  for (const entry of ANIMATION_GROUPS) for (const { animation, targetId } of entry.targetedAnimations) if (animation.property === '${CLOCK}') lookup.getNodeById(targetId).${CLOCK} = entry.from;
 ` : ''}${data.animationGroups.some((g) => g.targetedAnimations.some((t) => t.animation.dataType === Animation.ANIMATIONTYPE_MATRIX)) ? `  // Bones' poses interpolated between their keys, as between frames and on a grid sparser than the frames.
   Animation.AllowMatricesInterpolation = true;
-` : ''}  // Started and held: the page's playhead (playhead.js) sets them to its frame; a clip (an action's) waits to be played.
-  for (const entry of ANIMATION_GROUPS) {
-    const group = AnimationGroup.Parse(clipKeys(entry, buffers), lookup);
-    if (!entry.metadata?.bylonder?.clip) group.start(entry.loopAnimation).pause();
-  }
-  return materials;
+` : ''}  const parsers = {${parser(data.materials, 'materials', `(entry) => {
+      const material = Material.Parse(entry, scene, ROOT);${webgpu ? `
+      // Node materials' samplers as WebGPU binds them.
+      if (material.getClassName() === 'NodeMaterial') webgpuSamplers(material);` : ''}${meshValued ? `
+      // Each mesh's own texture space, in the materials it shares.
+      meshValues(material);` : ''}${areaSpecular ? `
+      if (areaSpecular && material.getClassName() === 'PBRMaterial') areaSpecular(material);` : ''}
+      return material;
+    }`)}${parser(data.multiMaterials, 'multiMaterials', `(entry, key, made) => {
+      // Its slots by the materials' keys, as Babylon's loader resolves them after parsing.
+      const multi = MultiMaterial.ParseMultiMaterial(entry, scene);
+      multi.subMaterials = (entry.materialsUniqueIds ?? []).map((key) => made.materials[key] ?? null);
+      return multi;
+    }`)}${parser(data.skeletons, 'skeletons', '(entry) => Skeleton.Parse(entry, scene)')}${parser(data.morphTargetManagers, 'morphTargets', '(entry) => MorphTargetManager.Parse(morphKeys(entry, buffers), scene)')}${parser(data.meshes.filter((m) => m.type === 'LinesMesh'), 'linesMesh', '(entry) => new LinesMesh(entry.name, scene)')}${parser(data.lights, 'lights', `(entry) => ${areaLights ? 'parseLight(entry, scene, AreaLight)' : 'Light.Parse(entry, scene)'}`)}${parser(data.cameras, 'cameras', '(entry) => orthoScaled(parseCamera(entry, scene))')}${parser(data.reflectionProbes, 'reflectionProbes', '(entry) => ReflectionProbe.Parse(entry, scene, ROOT)')}${parser(data.shadowGenerators, 'shadowGenerators', "(entry) => Object.assign((entry.className === 'CascadedShadowGenerator' ? CascadedShadowGenerator : ShadowGenerator).Parse(entry, lookup), { customShaderOptions: entry.customShaderOptions })")}
+    // Every material takes as many lights as its shader holds, each mesh the package's lights that reach it, the strongest
+    // first (EEVEE has no cap); lights the page adds come first where they light.
+    lightsMade: (lights, key, made) => {${clustered ? `
+      // Its point and spot lights in clusters where it has more lights than a material takes, as EEVEE has no cap; a light
+      // with a Custom Distance out of them while there is room, as a cluster cuts it only per screen tile.
+      const exact = new Set(${json(clustered)}.map((id) => made.nodesById[id])), cut = clusterLights(scene, lights, lightBudget(scene.getEngine()), (light) => exact.has(light))?.cutPerTile;
+      if (cut?.length) console.warn(\`Clustered with their Custom Distance cut per screen tile: \${cut.map((light) => light.name).join(', ')}\`);` : ''}
+      reachLights(scene, lights);
+    },${parser(data.particleSystems, 'particleSystems', '(entry) => ParticleSystem.Parse(entry, scene, ROOT)')}${parser(data.animationGroups, 'animationGroups', `(entry) => {${data.animationGroups.some((g) => g.targetedAnimations.some((t) => t.animation.property === CLOCK)) ? `
+      // The frame Babylon's animation keeps where the page's F-Curves are all that moves.
+      for (const { animation, targetId } of entry.targetedAnimations) if (animation.property === '${CLOCK}') lookup.getNodeById(targetId).${CLOCK} = entry.from;` : ''}
+      // Started and held: the page's playhead (playhead.js) sets them to its frame; a clip (an action's) waits to be played.
+      const group = AnimationGroup.Parse(clipKeys(entry, buffers), lookup);
+      if (!entry.metadata?.bylonder?.clip) group.start(entry.loopAnimation).pause();
+      return group;
+    }`)}
+  };
+  return loadTables({ scene, lookup, buffers, parsers }, { materials, multiMaterials: MULTI_MATERIALS, skeletons: SKELETONS, morphTargets: MORPH_TARGETS, geometries: GEOMETRIES,
+    nodes: NODES, lights: LIGHTS, cameras: CAMERAS, reflectionProbes: REFLECTION_PROBES, shadowGenerators: SHADOW_GENERATORS, particleSystems: PARTICLE_SYSTEMS,
+    animationGroups: ANIMATION_GROUPS, animations: ANIMATIONS }).materialsByKey;
 }
 `;
   const unmaterialed = settings.defaultMaterial === null && data.meshes.some((m) => m.materialUniqueId === undefined);
@@ -699,5 +728,9 @@ import { ${[...usedNames(source), ...pipelineClasses].join(', ')} } from '@babyl
   // An ES module package in Node too (the headless SDK), needing only Babylon.
   const manifest = { name: name.toLowerCase().replace(/[^a-z0-9-]+/g, '-'), type: 'module', main: 'scene.js', types: 'scene.d.ts', peerDependencies: { '@babylonjs/core': AbstractEngine.Version } };
   const binBytes = bin.bytes(), version = [binBytes, new TextEncoder().encode(irJson)].map((bytes) => digest(bytes).replace(':', '.')).join('-');
-  return { 'scene.js': source.replace(BABYLON_IMPORTS, babylonImports).replaceAll(VERSION, version), 'scene.d.ts': controlTypes(Object.entries(ir.properties).map(([path, { type }]) => ({ path, type }))), 'scene.ir.json': irJson, [UNITS_FILE]: units, ...(kernels && { [NODE_KERNELS]: kernels }), ...(curves && { [CURVES_GLSL_FILE]: curvesGlslFile() }), 'scene.bin': binBytes, [ASSET_FILE]: ASSET_MANIFEST, 'package.json': `${JSON.stringify(manifest, null, 2)}\n`, ...images, ...soundFiles };
+  // What a patch is made from (scene-patch.js): the tables, the scene's own settings and the IR's, and the buffers.
+  Object.assign(tables, { scene: { [ir.scene.id ?? 'scene']: { settings, imageProcessing: data.imageProcessingConfiguration, code, effectLayers: data.effectLayers ?? [],
+    renderingPipelines: data.renderingPipelines, postProcesses: data.postProcesses, volumes: volumes?.config ?? null, display, compositor: composited?.compositor ?? null } }, ...irTables(ir) });
+  const files = { 'scene.js': source.replace(BABYLON_IMPORTS, babylonImports).replaceAll(VERSION, version), 'scene.d.ts': controlTypes(Object.entries(ir.properties).map(([path, { type }]) => ({ path, type }))), 'scene.ir.json': irJson, [UNITS_FILE]: units, ...(kernels && { [NODE_KERNELS]: kernels }), ...(curves && { [CURVES_GLSL_FILE]: curvesGlslFile() }), 'scene.bin': binBytes, [ASSET_FILE]: ASSET_MANIFEST, 'package.json': `${JSON.stringify(manifest, null, 2)}\n`, ...images, ...soundFiles };
+  return { files, tables, buffers: bin.arrays() };
 }

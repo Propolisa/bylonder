@@ -23,7 +23,7 @@ const SCENARIOS = {
     assert.ok(instanced.length && instanced.every((m) => m.name.endsWith('Instances')), `instances are exported: ${json.meshes.map((m) => m.name)}`);
     assert.ok(instanced.every((m) => m.thinInstances.matrixData.length >= 16 * m.thinInstances.instancesCount && json.geometries.vertexData.some((g) => g.id === m.geometryId)),
       'each with its matrices and its source geometry');
-    assert.match((await exportModule(world))['scene.js'], /thinInstanceSetBuffer/, 'the JavaScript export writes them too');
+    assert.match((await exportModule(world))['scene.js'], /"thinInstances":"f32\./, 'the JavaScript export writes them too');
   },
   async driver() {
   // The Steam Engine's crosshead, moved by a driver only, slides in the export as it does in Blender.

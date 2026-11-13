@@ -9,7 +9,7 @@ import { babylonMatrix } from '../src/blenkernel/main-view.js';
 import { blendData } from '../src/python/bpy_rna.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
 import { openExample } from './open-example.js';
-import { writePackage } from './export-package.js';
+import { writePackage, sceneTable } from './export-package.js';
 
 const CASES = {
   COPY_LOCATION: (c) => { c.use_z = false; },
@@ -30,7 +30,7 @@ async function check(type) {
   const files = await exportModule(world);
   const ir = JSON.parse(files['scene.ir.json']);
   assert.ok(Object.values(ir.entities).some((e) => e.type === 'constraints:OBJECT' && e.implementation === 'constraints'), `${type}: the page applies it`);
-  const groups = JSON.parse(/const ANIMATION_GROUPS = (.*);\n/.exec(files['scene.js'])[1]);
+  const groups = sceneTable(files, 'ANIMATION_GROUPS');
   assert.ok(!groups.some((g) => g.targetedAnimations.some((t) => t.targetId === 'Ground')), `${type}: the Ground is not sampled`);
   const written = writePackage(files);
   const blend = await (await import(written.url)).load(new NullEngine());

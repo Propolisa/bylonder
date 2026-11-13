@@ -3,10 +3,11 @@
 import assert from 'node:assert/strict';
 import { openExample } from './open-example.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
+import { sceneTable } from './export-package.js';
 
 const { world, sync } = openExample('link-append');
 sync.view();
-const lights = JSON.parse(/const LIGHTS = (.*);/.exec((await exportModule(world))['scene.js'])[1]);
+const lights = sceneTable(await exportModule(world), 'LIGHTS');
 const lamps = lights.filter((l) => l.name.endsWith('Instances') && l.isEnabled !== false);
 assert.equal(lamps.length, 8, `each of the eight street lamps brings its light (${lights.map((l) => l.name).join(', ')})`);
 assert.equal(new Set(lamps.map((l) => l.position.map((v) => v.toFixed(2)).join())).size, 8, 'each where its lamp stands');

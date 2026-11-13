@@ -12,7 +12,7 @@ import { blendData, contextStruct } from '../src/python/bpy_rna.js';
 import { setCustomProperty } from '../src/blenkernel/animation/anim-blender.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
 import { openExample } from './open-example.js';
-import { writePackage } from './export-package.js';
+import { writePackage, sceneTable } from './export-package.js';
 import { subscribeReports } from '../src/windowmanager/wm-reports.js';
 
 const FRAMES = [1, 8, 15, 21];
@@ -49,7 +49,7 @@ assert.deepEqual(Object.keys(entity.inputs.native.meshes), ['Body'], 'the body, 
 // The export judges the runtime's deform by its vertices, each mesh within its share of its size, and says so.
 assert.ok(reports.some((r) => r.type === 'INFO' && /^Body: deformed live by the native rig runtime, within/.test(r.message)), JSON.stringify(reports.map((r) => r.message)));
 assert.ok(!reports.some((r) => /native rig runtime is off|are off from Blender/.test(r.message)), 'nothing off');
-const groups = JSON.parse(/const ANIMATION_GROUPS = (.*);\n/.exec(files['scene.js'])[1]);
+const groups = sceneTable(files, 'ANIMATION_GROUPS');
 assert.deepEqual(groups.flatMap((g) => [...g.targetedAnimations.filter((t) => t.animation.keys.length > 1).map((t) => t.targetId), ...(g.bylonderTracks?.targets ?? [])]).filter((id) => /^Rig /.test(id) && !id.includes('#')), [],
   'no bone is sampled');
 

@@ -8,6 +8,11 @@
 const TYPES = { f32: Float32Array, u16: Uint16Array, u32: Uint32Array, i32: Int32Array, u8: Uint8Array, i8: Int8Array, i16: Int16Array };
 
 /**
+ * scene.bin's buffers by key.
+ * @typedef {Record<string, ArrayBufferView>} Buffers
+ */
+
+/**
  * One buffer of scene.bin: where its bytes start once inflated, how many values it has, and their type.
  * @typedef {[byteOffset: number, length: number, type: keyof typeof TYPES]} BufferView
  */
@@ -36,14 +41,14 @@ export async function readBytes(url) {
 }
 
 /**
- * Every view of the binary file at `url`, gzipped or not.
+ * Every view of the binary file at `url`, gzipped or not, by its key (its content's name).
  * @param {URL} url
- * @param {BufferView[]} views
+ * @param {Record<string, BufferView>} views
  * @param {boolean} [gzip]
- * @returns {Promise<ArrayBufferView[]>}
+ * @returns {Promise<Buffers>}
  */
 export async function readBuffers(url, views, gzip = true) {
   const body = await bodyOf(url);
   const inflated = await new Response(gzip ? body.pipeThrough(new DecompressionStream('gzip')) : body).arrayBuffer();
-  return views.map(([offset, length, type]) => new (/** @type {Float32ArrayConstructor} */ (TYPES[type]))(inflated, offset, length));
+  return Object.fromEntries(Object.entries(views).map(([key, [offset, length, type]]) => [key, new (/** @type {Float32ArrayConstructor} */ (TYPES[type]))(inflated, offset, length)]));
 }

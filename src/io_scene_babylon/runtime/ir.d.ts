@@ -368,10 +368,10 @@ export const SceneSchema: import("zod/mini").ZodMiniObject<{
     }, any>>>;
 }, import("zod/v4/core").$strip>;
 export const IR_SCHEMA: "bylonder-ir";
-export const IR_VERSION: 1;
+export const IR_VERSION: 2;
 export const IRSchema: import("zod/mini").ZodMiniObject<{
     schema: import("zod/mini").ZodMiniLiteral<"bylonder-ir">;
-    version: import("zod/mini").ZodMiniLiteral<1>;
+    version: import("zod/mini").ZodMiniLiteral<2>;
     scene: import("zod/mini").ZodMiniDefault<z.ZodMiniType<{
         id: string | null;
         collection: string | null;
@@ -755,7 +755,7 @@ export type Reference = {
     entity: string;
     output: string;
 } | {
-    buffer: number;
+    buffer: string;
 } | {
     data: [string, string];
 } | {
