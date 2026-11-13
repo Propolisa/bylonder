@@ -258,7 +258,7 @@ export class BlendScene {
     }
     this.#hiddenAtExport = new Set([...showing(this.ir, (key, flag) => this.#flag(key, flag))].filter(([, shown]) => !shown).map(([object]) => object));
     // The app's viewport draws what Disable in Renders hides; the page shows what Blender renders.
-    this.#showObjects([...this.#hiddenAtExport]);
+    this.#showObjects([...this.#hiddenAtExport, ...Object.keys(this.ir.ids).filter((key) => this.ir.ids[key].data?.hide_render === true)]);
     if (this.#animated()) this.playhead.play();
   }
 
@@ -446,16 +446,21 @@ export class BlendScene {
     for (const object of objects) {
       const node = /** @type {any} */ (this.nodeOf(object)), path = this.ir.ids[object]?.path;
       if (!node) continue;
-      const hidden = !(shown.get(object) ?? true) || this.#hidden(path);
+      const hidden = !(shown.get(object) ?? true) || this.#hidden(path, object);
       // An object its collections hid at export is a disabled node (an instance source's, an excluded collection's).
       if (this.#hiddenAtExport.has(object)) node.setEnabled(!hidden);
       hide(node, hidden);
     }
   }
 
-  /** Whether an object's own Hide in Viewport or Disable in Renders hides it. @param {string | null | undefined} path its RNA path */
-  #hidden(path) {
-    return ['viewport', 'render'].some((kind) => this.#values.get(`${path}.hide_${kind}`) === true);
+  /**
+   * Whether an object's own Hide in Viewport or Disable in Renders hides it: its controls', else its Disable in Renders
+   * as exported (a mesh a rig keeps for another look, which Blender's render leaves out).
+   * @param {string | null | undefined} path its RNA path @param {string} [object] its key
+   */
+  #hidden(path, object) {
+    const control = (/** @type {string} */ kind) => this.#values.get(`${path}.hide_${kind}`);
+    return control('viewport') === true || (control('render') ?? (object && this.ir.ids[object]?.data?.hide_render)) === true;
   }
 
   /** @type {ReturnType<typeof createScheduler> | null} */

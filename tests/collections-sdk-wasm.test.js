@@ -30,6 +30,10 @@ const guides = data.collections.new('Guides');
 scene.collection.children.link(guides);
 guides.hide_render = true;
 guides.objects.link(data.objects.new(third, data.objects.get(first).data));
+// An object Blender's render leaves out by its own Disable in Renders, as Snow's overlay shells.
+const shell = data.objects.new('Shell', data.objects.get(first).data);
+scene.collection.objects.link(shell);
+shell.hide_render = true;
 sync.view();
 
 const files = await exportModule(world);
@@ -60,6 +64,7 @@ assert.deepEqual([shown(first), shown(second)], [true, true]);
 assert.equal(shown(third), false, 'an object only in a collection disabled in renders does not show, as in a render of Blender');
 blend.set('collections["Guides"].hide_render', false);
 assert.equal(shown(third), true, 'and shows once renders take it');
+assert.equal(shown('Shell'), false, 'an object disabled in renders by its own flag does not show either');
 blend.showCollection('Props', false);
 assert.deepEqual([shown(first), shown(second)], [false, true], 'hiding Props hides what it holds, down its children; the second still shows from the scene collection');
 assert.equal(blend.get('scenes["Scene"].view_layers["ViewLayer"].layer_collection.children["Props"].hide_viewport'), true, "the eye is the LayerCollection's Hide in Viewport, by RNA path");
