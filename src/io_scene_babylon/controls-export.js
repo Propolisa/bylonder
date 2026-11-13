@@ -177,22 +177,17 @@ export function posedByPage(ob) {
   return (pose) => named.has(pose.name);
 }
 
-// A pose bone's controls. A skeleton pruned by Deform Bones Only (`pruned`, skeleton-export.js: by id, whether its rig
-// is native) has none for its dropped bones but their custom properties, and one its clips alone pose (not native: no
-// constraints in the page) none for constraint influences or B-Bone shapes either.
-function poseControls(ob, skeletons, prunedSkeletons) {
-  // The armature's controls, bound to its first skeleton where meshes in other spaces have their own.
-  const drawn = skeletons.find((s) => s.id === ob.name) ?? skeletons.find((s) => s.id.startsWith(`${ob.name} `));
+// A pose bone's controls, on the armature's rig skeleton (skeleton-export.js; not its skin skeleton), bound to its first
+// where meshes in other spaces have their own.
+function poseControls(ob, skeletons) {
+  const rigs = skeletons.filter((s) => !s.rig), drawn = rigs.find((s) => s.id === ob.name) ?? rigs.find((s) => s.id.startsWith(`${ob.name} `));
   if (!drawn) return [];
-  const bones = new Set(drawn.bones.map((b) => b.id)), idOf = (pose) => `${drawn.id} ${pose.name}`;
-  const native = prunedSkeletons.get(drawn.id), dropped = (pose) => native !== undefined && !bones.has(idOf(pose));
-  const pruned = native === false, posed = posedByPage(ob);
+  const idOf = (pose) => `${drawn.id} ${pose.name}`, posed = posedByPage(ob);
   return [...ob.pose.bones].flatMap((pose) => {
     const base = `objects${key(ob.name)}.pose.bones${key(pose.name)}`;
-    if (dropped(pose)) return customProperties(pose, base);
     return [...(posed(pose) ? transformControls(base, pose, pose.rotation_mode !== 'AXIS_ANGLE' && { node: idOf(pose), transform: { mode: pose.rotation_mode } }) : []),
-      ...customProperties(pose, base), ...(pruned ? [] : [...pose.constraints].map((c) => knob(`${base}.constraints${key(c.name)}.influence`, c.influence, { type: 'FLOAT', subtype: 'FACTOR', hard_min: 0, hard_max: 1 }))),
-      ...(!pruned && ob.data.bones.get(pose.name).bbone_segments > 1 ? bboneShape(pose).map(([path, v]) => knob(`${base}.${path}`, v, { type: 'FLOAT' })) : [])];
+      ...customProperties(pose, base), ...[...pose.constraints].map((c) => knob(`${base}.constraints${key(c.name)}.influence`, c.influence, { type: 'FLOAT', subtype: 'FACTOR', hard_min: 0, hard_max: 1 })),
+      ...(ob.data.bones.get(pose.name).bbone_segments > 1 ? bboneShape(pose).map(([path, v]) => knob(`${base}.${path}`, v, { type: 'FLOAT' })) : [])];
   });
 }
 
@@ -230,7 +225,7 @@ export function exportControls(world, data) {
     list.push(...objectControls(node, ob, sync.blender.transform(pointer).matrix_parent_inverse));
     if (ob.type === 'LIGHT') list.push(...lightControls(node, ob.data));
     if (ob.type === 'CAMERA') list.push(...cameraControls(node, ob.data));
-    if (ob.type === 'ARMATURE') list.push(...poseControls(ob, data.skeletons ?? [], data.prunedSkeletons ?? new Map()));
+    if (ob.type === 'ARMATURE') list.push(...poseControls(ob, data.skeletons ?? []));
     if (ob.type === 'MESH') list.push(...shapeKeyControls(node, ob, entryOf.get(node.uniqueId)));
   }
   list.push(...data.materials.flatMap(nodeMaterialControls), ...data.materials.flatMap((entry) => principledControls(entry, scene, sync)));
@@ -274,7 +269,29 @@ export const withUI = (controls) => controls.map((control) => ({ ...uiOf(control
 
 const TS_TYPES ={ FLOAT: 'number', INT: 'number', BOOLEAN: 'boolean', STRING: 'string' };
 // scene.d.ts: the package's controls as a type, so `set` and `get` complete the scene's paths and check their values.
-export function controlTypes(controls) {
+/**
+ * The names each armature's character takes (runtime/character/names.d.ts): its actions and their markers, its bone
+ * collections, roles and keyed properties, as string-literal unions augmenting CharacterNames.
+ * @param {Record<string, { actions: string[], markers: string[], groups: string[], roles: string[], properties: string[] }>} armatures
+ */
+function characterNames(armatures) {
+  const entries = Object.entries(armatures);
+  if (!entries.length) return '';
+  const union = (/** @type {string[]} */ names) => (names.length ? [...new Set(names)].map((n) => `'${n.replace(/['\\]/g, (c) => '\\' + c)}'`).join(' | ') : 'never');
+  return `
+declare module './bylonder/character/names.js' {
+  interface CharacterNames {
+${entries.map(([name, n]) => `    '${name.replace(/['\\]/g, (c) => '\\' + c)}': { actions: ${union(n.actions)}, markers: ${union(n.markers)}, groups: ${union(n.groups)}, roles: ${union(n.roles)}, properties: ${union(n.properties)} };`).join('\n')}
+  }
+}
+`;
+}
+
+/**
+ * @param {{ path: string, type: string }[]} controls @param {Parameters<typeof characterNames>[0]} [armatures]
+ * @param {boolean} [characters] whether the scene has an armature, so its package exports the character system
+ */
+export function controlTypes(controls, armatures = {}, characters = Object.keys(armatures).length > 0) {
   return `// The controls of this scene, by Blender RNA path. Generated by Bylonder's export.
 import type { AbstractEngine, AssetContainer, Scene, TransformNode } from '@babylonjs/core';
 import type { BlendScene } from './bylonder/blend-scene.js';
@@ -290,5 +307,7 @@ export function createScene(engine: AbstractEngine, canvas?: HTMLCanvasElement |
 export function loadAssetContainer(scene: Scene): Promise<AssetContainer & { blend: BlendScene<Controls>, instantiate(root?: TransformNode): Promise<BlendScene<Controls>> }>;
 /** The engine the package is exported for: WebGPU, WebGL 2, or WebGPU where the browser has it, else WebGL 2. */
 export function createEngine(canvas: HTMLCanvasElement, options?: object): Promise<AbstractEngine>;
-`;
+${characters ? `export * from './bylonder/character/api.js';
+export * from './bylonder/character/effects/index.js';
+${characterNames(armatures)}` : ''}`;
 }

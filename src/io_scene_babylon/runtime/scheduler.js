@@ -89,19 +89,18 @@ export function createScheduler(ir, page) {
     return name && EVALUATORS[name] ? evaluator(name) : null;
   };
 
+  // What reads no property or entity (buffers, graphs: a rig's description) resolves once, again after a patch's replace.
+  let fixed = new WeakMap(); const live = new WeakMap();
+  /** @param {any} v @returns {boolean} */ const readsLive = (v) => !!v && typeof v === 'object' && !ArrayBuffer.isView(v) && holdsReference(v) && (live.get(v) ?? live.set(v, isReference(v) ? 'property' in v || 'entity' in v || ('data' in v && readsLive(dataAt(ir, v.data))) : (Array.isArray(v) ? v : Object.values(v)).some(readsLive)).get(v));
   /** An entity's inputs, read at the frame its ID shows; what holds no reference as it is. @param {any} value @param {string} id @returns {any} */
-  const resolve = (value, id) => {
-    if (!holdsReference(value)) return value;
-    if (isReference(value)) {
-      if ('property' in value) return isTime(value.property) ? controls.frame(id) : controls.get(value.property);
-      if ('entity' in value) return outputs.get(value.entity)?.[value.output];
-      if ('buffer' in value) return page.buffers[value.buffer];
-      return 'data' in value ? resolve(dataAt(ir, value.data), id) : ir.graphs[value.graph];
-    }
-    if (Array.isArray(value)) return value.map((v) => resolve(v, id));
-    return value?.constructor === Object ? Object.fromEntries(Object.entries(value).map(([k, v]) => [k, resolve(v, id)])) : value;
+  const resolve = (value, id) => (!holdsReference(value) ? value : readsLive(value) ? resolveEach(value, id) : fixed.get(value) ?? fixed.set(value, resolveEach(value, id)).get(value));
+  const resolveEach = (/** @type {any} */ value, /** @type {string} */ id) => {
+    if (!isReference(value)) return Array.isArray(value) ? value.map((v) => resolve(v, id)) : value?.constructor === Object ? Object.fromEntries(Object.entries(value).map(([k, v]) => [k, resolve(v, id)])) : value;
+    if ('property' in value) return isTime(value.property) ? controls.frame(id) : controls.get(value.property);
+    if ('entity' in value) return outputs.get(value.entity)?.[value.output];
+    if ('buffer' in value) return page.buffers[value.buffer];
+    return 'data' in value ? resolve(dataAt(ir, value.data), id) : ir.graphs[value.graph];
   };
-
   /** What an entity gives, written to its properties and drawn; a Promise while a mesh is drawn. @param {string} key @param {Record<string, any>} result */
   const land = (key, result) => {
     outputs.set(key, result);
@@ -173,6 +172,7 @@ export function createScheduler(ir, page) {
      * each is let go of (`detach`), the order made again, and they, readers of a replaced graph and their readers run.
      * @param {Record<string, import('./ir.js').Entity | null>} replaced @param {string[]} graphs @param {(name: string) => boolean} remade */
     replace(replaced, graphs, remade) {
+      fixed = new WeakMap();
       const again = Object.keys(entities).filter((key) => key in replaced || remade(entities[key].implementation ?? ''));
       for (const key of again) {
         /** @type {any} */ (loaded.get(entities[key].implementation ?? ''))?.detach?.(entities[key]);

@@ -276,7 +276,19 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
   // allowance or closer to Main's than the runtime beyond it; a mesh Babylon can skin that the runtime does not run too.
   const alone = deforms.length && nativeRig(arm, nodeOf, deformed, true), skinSolver = alone && nativeSolve(), skinDeviation = new Map(deforms.map((name) => [name, 0]));
   const skinnable = deformed.filter((d) => d.skinnable).map((d) => d.ob.name), babylonDeviation = new Map();
-  const skinned = () => new Set([...deforms.filter((name) => skinDeviation.get(name) <= allowed.get(name) || (deviation.get(name) > allowed.get(name) && skinDeviation.get(name) <= deviation.get(name))),
+  // Only a mesh with an Armature of this rig can be skinned: one deformed otherwise (a Surface Deform alone, as Snow's lower
+  // teeth) would stand still, however close its rest looks at the frames checked.
+  const skins = new Set(deformed.filter((d) => [...d.ob.modifiers].some((m) => m.type === 'ARMATURE' && m.object?.name === arm.name)).map((d) => d.ob.name));
+  // The runtime's description of the meshes it deforms, made again only when the skinned meshes change. A mesh Babylon
+  // skins stays in as a Surface Deform's surface (its source entry) or for its driven keys.
+  let described = null;
+  const runtimeMeshes = () => {
+    const skins = skinned(), signature = JSON.stringify([...skins].sort());
+    if (described?.signature !== signature) described = { signature, native: skins.size ? nativeRig(arm, nodeOf, [...deformed.filter((d) => d.source || !skins.has(d.ob.name)),
+      ...deformed.filter((d) => !d.source && skins.has(d.ob.name) && d.ob.data.shape_keys?.animation_data?.drivers.length).map((d) => ({ ob: d.ob, keyed: true }))]) : native };
+    return described.native;
+  };
+  const skinned = () => new Set([...deforms.filter((name) => skins.has(name) && (skinDeviation.get(name) <= allowed.get(name) || (deviation.get(name) > allowed.get(name) && skinDeviation.get(name) <= deviation.get(name)))),
     ...skinnable.filter((name) => !deforms.includes(name))]);
   const evaluatedOf = new Map(deformed.map((d) => [d.ob.name, d.evaluated]));
   const stacks = rig || native ? {} : poseStacks(arm, nodeOf);
@@ -320,15 +332,21 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
     skinned,
     off,
     own: (bone) => owns.get(bone),
-    check(evaluated, frame) {
+    // `clip`: a frame of a clip the page plays, judged as the timeline's are (the rig's pose and the meshes' deform), its
+    // bones' own matrices not recorded as the timeline's keys.
+    check(evaluated, frame, clip = false) {
       const locals = bones.map((bone, i) => ownMatrix(poses[i], bone));
-      bones.forEach((bone, i) => owns.get(bone).push(locals[i]));
+      if (!clip) bones.forEach((bone, i) => owns.get(bone).push(locals[i]));
+      // Which frames compare the meshes' deform: every DEFORM_CHECKS-th of the timeline's, every one of the clips' the
+      // caller judges (armature.js, already spaced).
+      const deformsChecked = clip || checked % DEFORM_CHECKS === 0;
       const current = rig && Object.fromEntries(rig.bones.filter((b) => b.constraints.length).map((b) => [b.name, [...arm.pose.bones.get(b.name).constraints].map((c) => c.influence)]));
       const result = solve({ bones: shape, locals, mesh: meshWorld(), space: skeleton.space, stacks, kernels: rig, influences: current,
         shapes: rig && shapes(arm, (path, v) => v), nodeWorld, native, properties: native && propertyValues(properties), frame });
       // Every bone the solver has moved is judged at every frame: a solver gives only what changed since its last solve.
       for (const [i, local] of result) {
-        moved.add(bones[i]);
+        // The timeline's own poses of the bones it moves are exported live; a clip's come with its tracks.
+        if (!clip) moved.add(bones[i]);
         solved.set(i, local);
       }
       const drawn = native ? posedByPage(locals, frame) : [];
@@ -341,8 +359,8 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
         const pose = arm.pose.bones.get(name), ours = solve.segments(rig, name);
         if (!ours.every((m, k) => Array.from(pose.bbone_segment_matrix(k, false)).every((v, j) => Math.abs(v - m[j]) <= TOLERANCE))) shaped.delete(name);
       }
-      if (checked % DEFORM_CHECKS === 0 && alone) skinSolver({ bones: shape, locals, mesh: meshWorld(), space: skeleton.space, nodeWorld, native: alone, properties: propertyValues(properties), frame });
-      if (checked % DEFORM_CHECKS === 0) for (const name of deforms) {
+      if (deformsChecked && alone) skinSolver({ bones: shape, locals, mesh: meshWorld(), space: skeleton.space, nodeWorld, native: alone, properties: propertyValues(properties), frame });
+      if (deformsChecked) for (const name of deforms) {
         const ours = nativeSolver.deformed(native, name), theirs = evaluatedOf.get(name)().vert_positions;
         deviation.set(name, Math.max(deviation.get(name), farthest(ours, theirs)));
         allowed.set(name, vertexTolerance.distance);
@@ -350,7 +368,7 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
         skinDeviation.set(name, skin.length === theirs.length ? Math.max(skinDeviation.get(name), farthest(skin, theirs)) : Infinity);
       }
       // A mesh Babylon can skin, judged by what Babylon's skinning draws of it.
-      if (checked % DEFORM_CHECKS === 0 && page) {
+      if (deformsChecked && page) {
         const matrices = skinMatrices(page);
         for (const d of deformed.filter((e) => e.skinnable)) {
           const distance = skinDistance(d.skin(), d.rest(), d.evaluated(), matrices, d.ob);
@@ -361,13 +379,15 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
       }
       checked++;
     },
-    entity: () => (checked && held ? {
-      skeleton: skeleton.id, mesh: mesh.id, space: skeleton.space.asArray(), constraints: influenced(arm, stacks),
-      ...(rig && { kernels: rig, influences: influences(arm, rig), shapes: shapes(arm), segments: [...shaped] }),
-      // A mesh Babylon skins stays in as a Surface Deform's surface (its source entry) or for its driven keys.
-      ...(native && { native: skinned().size ? nativeRig(arm, nodeOf, [...deformed.filter((d) => d.source || !skinned().has(d.ob.name)),
-        ...deformed.filter((d) => !d.source && skinned().has(d.ob.name) && d.ob.data.shape_keys?.animation_data?.drivers.length).map((d) => ({ ob: d.ob, keyed: true }))]) : native, properties: customProperties(arm, (path) => ({ property: `objects${key(arm.name)}${path.startsWith('[') ? '' : '.'}${path}` })) }),
-      bones: Object.fromEntries(shape.map(({ name, length, mode }, i) => [name, { length, mode, ...(moved.has(bones[i]) && { own: ownMatrix(poses[i], bones[i]).asArray() }) }])),
-    } : null),
+    entity: () => {
+      if (!checked || !held) return null;
+      const out = {
+        skeleton: skeleton.id, mesh: mesh.id, space: skeleton.space.asArray(), constraints: influenced(arm, stacks),
+        ...(rig && { kernels: rig, influences: influences(arm, rig), shapes: shapes(arm), segments: [...shaped] }),
+        ...(native && { properties: customProperties(arm, (path) => ({ property: `objects${key(arm.name)}${path.startsWith('[') ? '' : '.'}${path}` })) }),
+        bones: Object.fromEntries(shape.map(({ name, length, mode }, i) => [name, { length, mode, ...(moved.has(bones[i]) && { own: ownMatrix(poses[i], bones[i]).asArray() }) }])),
+      };
+      return native ? { ...out, native: runtimeMeshes() } : out;
+    },
   };
 }

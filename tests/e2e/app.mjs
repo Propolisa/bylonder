@@ -15,14 +15,17 @@ const playwright = createRequire(import.meta.url)("playwright");
 const proxy = process.env.HTTPS_PROXY && { proxy: { server: process.env.HTTPS_PROXY, bypass: "localhost,127.0.0.1" } };
 // CHROMIUM_CDP: a running Chromium to drive instead (e.g. one on the Windows side of WSL, on its GPU), started with
 // --remote-debugging-port; closing the browser only disconnects from it.
+// A caller's `args` add to the GL arguments, never replace them: without them Chromium may draw on another adapter (one
+// with an 8192 texel limit, or SwiftShader) than the page's on the machine.
+const withGl = (options = {}) => ({ ...proxy, executablePath: E2E_CHROME, ...options, args: [...gl, ...(options.args ?? [])] });
 export const chromium = {
-  launch: (options) => (process.env.CHROMIUM_CDP ? playwright.chromium.connectOverCDP(process.env.CHROMIUM_CDP) : playwright.chromium.launch({ ...proxy, args: gl, executablePath: E2E_CHROME, ...options })),
+  launch: (options) => (process.env.CHROMIUM_CDP ? playwright.chromium.connectOverCDP(process.env.CHROMIUM_CDP) : playwright.chromium.launch(withGl(options))),
 };
 // Chromium's incognito contexts crash on file handles read back from IndexedDB (the Sequencer's media library): checks
 // that reload with media open the app in a profile of its own.
 async function persistentContext(options) {
   const profile = mkdtempSync(`${tmpdir()}/bylonder-profile-`);
-  const context = await playwright.chromium.launchPersistentContext(profile, { ...proxy, args: gl, executablePath: E2E_CHROME, ...options });
+  const context = await playwright.chromium.launchPersistentContext(profile, withGl(options));
   // Windows keeps the profile's files busy for a moment after the browser exits.
   context.on("close", () => { try { rmSync(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 }); } catch {} });
   return context;

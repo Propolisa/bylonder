@@ -13,6 +13,10 @@ import { livePoseConstraints, ownMatrix } from '../io_scene_babylon/pose-export.
 import { keyedVertices } from './key-blocks.js';
 import { useDualQuaternionSkinning } from '../io_scene_babylon/runtime/dual-quaternion-skinning.js';
 import { appliedRests, shownStack, smoothByAngle } from './applied-rest.js';
+import { actionClips, withAction } from '../io_scene_babylon/clip-export.js';
+
+// Every how many frames of each action the export ships as a clip the live rig is judged.
+const CLIP_JUDGE_STEP = 4;
 
 // A vertex Blender's Armature modifier leaves in place: its weights sum to no more than this (armature_deform.cc).
 const CONTRIBUTION = 0.0001;
@@ -221,7 +225,8 @@ export function mapArmature(arm, scene) {
     // through its pose matrix, the change from that space to its own (Babylon's needInitialSkinMatrix).
     const [first] = deformed.values(), kept = [...skeletons.entries()].find(([id, skeleton]) => id === restSignature(bones, skeleton.space));
     const base = kept?.[1].space ?? (first && spaceOf(first)), id = base && restSignature(bones, base);
-    if (first && !skeletons.has(id)) skeletons.set(id, skeletonOf(deformed.size > 1 ? `${arm.name} ${first.name}` : arm.name, bones, base, scene));
+    // Named after its armature; another of the same armature (a rest of its own) after its first mesh too.
+    if (first && !skeletons.has(id)) skeletons.set(id, skeletonOf(skeletons.size ? `${arm.name} ${first.name}` : arm.name, bones, base, scene));
     const poses = new Map([...deformed].map(([key, ob]) => [key, Matrix.Invert(base).multiply(spaceOf(ob))]));
     const apart = [...poses.values()].some((pose) => !pose.isIdentity());
     // The skeleton stays when no mesh skins to it any more (all on the native runtime): the page poses it.
@@ -455,6 +460,18 @@ function poseAnimations(world, mappings, bake, sampling, scene, bases = new Set(
     // A skeleton the page poses is exported, whether or not a mesh skins to it.
     if (stack) { stacks.set(mapping, stack); skeleton.posedByPage = true; }
   }
+  // What the page plays judges the route too: each action the export ships as a clip, every CLIP_JUDGE_STEP-th frame,
+  // checked as the timeline's are (the rig's pose and its meshes' deform), before anything is decided from the checks.
+  for (const [mapping, stack] of stacks) for (const clip of actionClips([mapping.arm])) {
+    withAction(clip.ids, clip.action, () => {
+      for (let frame = Math.ceil(clip.frame_start); frame <= clip.frame_end; frame += CLIP_JUDGE_STEP) {
+        sync.frameChanged(frame);
+        const bones = bonesOf(mapping.arm, segmentsOf(mapping.arm));
+        for (const skeleton of mapping.skeletons.values()) stack.check(skeleton.bones.map((bone, i) => relative(bones, i, 'pose', skeleton.space)), frame, true);
+      }
+    });
+  }
+  if (stacks.size) sync.frameChanged(current);
   const sample = (frame) => {
     for (const mapping of mappings) {
       const bones = bonesOf(mapping.arm, segmentsOf(mapping.arm));
@@ -482,7 +499,7 @@ function poseAnimations(world, mappings, bake, sampling, scene, bases = new Set(
     // A stack the page runs where every bone it moves is posed by its own F-Curves, or not animated.
     const curves = [], gaps = [], constraints = [], posed = new Set();
     for (const [mapping, stack] of stacks) {
-      const entity = stack.entity(), own = entity && [...stack.moved].map((bone) => {
+const entity = stack.entity(), own = entity && [...stack.moved].map((bone) => {
         if (drivenPose(mapping.arm, mapping.arm.pose.bones.get(bone.name))) return [];
         const whole = keys.get(bone).map((k, i) => ({ ...k, own: stack.own(bone)[i] })).filter((k) => Number.isInteger(k.frame));
         return livePose(mapping.arm, mapping.arm.pose.bones.get(bone.name), bone, whole.map((k) => k.own), whole[0].frame);

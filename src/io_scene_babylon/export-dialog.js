@@ -7,7 +7,6 @@ import { contextStruct, idStruct } from '../python/bpy_rna.js';
 import { sceneUnits } from './unit-manifest.js';
 
 const PARITY_NOTE = "Lights materials as Blender's EEVEE does (view vector, second reflection as clearcoat). Off: Babylon's own lighting; Blender's texture nodes still export as one custom block.";
-const DEFORM_NOTE = 'Each skeleton keeps only the bones that deform its meshes, those above them, and those whose transforms drivers read or objects hang from. A rig whose constraints run in the page keeps every bone.';
 const BAKE_NOTE = "Samples every animated value the page cannot play as its F-Curve at each frame, as Babylon keys. Off: F-Curves Babylon plays exactly stay its keys and the others run as F-Curves in the page; what the page cannot run yet is still sampled, each named in the Info editor.";
 const HOST_NOTE = "scene.bin uncompressed, for a host that serves it with Brotli (most CDNs): about half the size there, about four times it elsewhere. Off: gzipped in the file, the same size on any host.";
 
@@ -173,9 +172,9 @@ export async function exportDialog(world, format, title, run) {
     import('../editors/interface/components/tailwind.css'),
   ]);
   const js = format !== 'babylon';
-  const values = reactive({ eeveeParity: false, hostCompression: false, bakeAnimation: false, deformBonesOnly: false, scope: null, target: null, animations: null, clipCompression: null, bundle: null, minify: null, controlPanel: null, devTools: null, navigation: null });
+  const values = reactive({ eeveeParity: false, hostCompression: false, bakeAnimation: false, scope: null, target: null, animations: null, clipCompression: null, bundle: null, minify: null, controlPanel: null, devTools: null, navigation: null });
   const fields = [{ name: 'eeveeParity', label: 'EEVEE Parity', note: PARITY_NOTE },
-    ...(js ? [{ name: 'hostCompression', label: 'Host Compresses Geometry', note: HOST_NOTE }, { name: 'bakeAnimation', label: 'Bake Animation', note: BAKE_NOTE }, { name: 'deformBonesOnly', label: 'Deform Bones Only', note: DEFORM_NOTE }] : [])];
+    ...(js ? [{ name: 'hostCompression', label: 'Host Compresses Geometry', note: HOST_NOTE }, { name: 'bakeAnimation', label: 'Bake Animation', note: BAKE_NOTE }] : [])];
   const branches = js ? sceneBranches(world, { live: format === 'js-live' }) : {};
   const tree = settingsTree(values, js, branches, world);
   const note = branches.geometryNodes ? await geometryNodesNote() : undefined;

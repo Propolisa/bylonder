@@ -72,5 +72,13 @@ written.remove();
 const meshOf = (ob) => sync.blender.mesh(sync.objectOf(world.objects.find((n) => n.name === ob.name)));
 assert.throws(() => deformsOnPage(rigDescription(rig, [follower], meshOf), ['Follower']), /cannot deform Follower/);
 deformsOnPage(rigDescription(rig, [follower, helper], meshOf), ['Follower']);
+// With the rig still at the frames the export checks (no action of its own), the follower's rest matches Main there,
+// yet nothing but the runtime moves it once the page poses the rig: it stays on the runtime (Snow's lower teeth stood
+// still at their rest while the head moved).
+rig.animation_data.action = null;
+sync.blender.tag(sync.objectOf(world.objects.find((n) => n.name === 'Rig')), 2);
+sync.view();
+const still = Object.values(JSON.parse((await exportModule(world))['scene.ir.json']).entities).find((e) => e.type === 'constraints:POSE');
+assert.ok(Object.keys(still?.inputs.native?.meshes ?? {}).includes('Follower'), `a mesh without an Armature stays on the runtime (${Object.keys(still?.inputs.native?.meshes ?? {})})`);
 console.log("Export native surface source: a Surface Deform following a hidden helper deforms on the page as in Blender, and the export's check fails a mesh the page could not deform");
 process.exit(0);

@@ -110,17 +110,17 @@ async function deskLamp() {
   sync.view();
   const lamp = node('Lamp');
   // Exact clips, which pose the lamp as Main does; tests/clip-compression.test.js checks the compressed ones' bounds. Its
-  // skeleton has only the bones that skin (Deform Bones Only).
-  const files = await exportModule(world, { animations: 'CLIPS', clipCompression: 'OFF', deformBonesOnly: true, scope: 'SELECTED', selected: [lamp], runtimes: { ARMATURE: { runtime: 'MAPPED', instances: {} } } });
+  // clips write the rig skeleton; the lamp skins to a skin skeleton of only the bones that skin.
+  const files = await exportModule(world, { animations: 'CLIPS', clipCompression: 'OFF', scope: 'SELECTED', selected: [lamp], runtimes: { ARMATURE: { runtime: 'MAPPED', instances: {} } } });
   const groups = groupsOf(files);
   assert.deepEqual(groups.map((g) => g.name), ['RigAction']);
   const table = groups[0].bylonderTracks;
   assert.ok(table?.targets.length && table.property === '_matrix', "the rig's bones, in one table of scene.bin, not JSON");
   
-  // Only bones that skin, or have bones that skin below them: the rig's constraints are sampled, not run in the page.
+  // The tracks write the rig skeleton (the rig's constraints are sampled, not run in the page), never its skin skeleton.
   const rig = [...blendData().objects].find((ob) => ob.type === 'ARMATURE'), skins = (bone) => bone.use_deform || [...bone.children].some(skins);
-  const tracked = [...table.targets, ...groups[0].targetedAnimations.map((t) => t.targetId)].map((id) => id.slice(rig.name.length + 1).split('#')[0]);
-  assert.ok(tracked.every((name) => skins(rig.data.bones.get(name))), `tracks of bones that skin: ${tracked.join(', ')}`);
+  const tracked = [...table.targets, ...groups[0].targetedAnimations.map((t) => t.targetId)];
+  assert.ok(tracked.every((id) => id.startsWith(`${rig.name} `) && !id.startsWith(`${rig.name} skin `)), `tracks of the rig skeleton: ${tracked.slice(0, 4).join(', ')}`);
   const written = writePackage(files);
   try {
     const { load, loadAssetContainer } = await import(written.url);
@@ -128,7 +128,7 @@ async function deskLamp() {
     new FreeCamera('Eye', Vector3.Zero(), scene);
     assert.ok(scene.animationGroups.length === 1 && !scene.animationGroups[0].isStarted, "loaded into the page's scene, the clip waits");
     const mesh = blend.entries.meshes.find((m) => m.name === 'Lamp');
-    assert.ok(mesh.skeleton.bones.every((b) => skins(rig.data.bones.get(b.name.split('#')[0]))), 'a skeleton of the bones that skin');
+    assert.ok(mesh.skeleton.rigId && mesh.skeleton.bones.every((b) => skins(rig.data.bones.get(b.name.split('#')[0]))), 'a skin skeleton of the bones that skin');
     // Main's corners of the lamp at a frame (Babylon's axes), and the page's, skinned on the CPU.
     const corners = (frame) => {
       sync.frameChanged(frame);

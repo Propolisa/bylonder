@@ -15,16 +15,22 @@ import { exportModule } from '../../src/io_scene_babylon/js-export.js';
 import { blendData, idStruct } from '../../src/python/bpy_rna.js';
 
 // The tea break's woman, as the noodle shop's player, and the lane she walks.
-const GAMES = { 'noodle-shop': { example: 'compositor', player: ['girl', ['Tea Break', 'Tea Cup', 'Tea Steam Card', 'Tea Steam Emitter']], scene: 'street' } };
+const GAMES = { 'noodle-shop': { example: 'compositor', player: ['girl', ['Tea Break', 'Tea Cup', 'Tea Steam Card', 'Tea Steam Emitter']], scene: 'street' },
+  // Snow on his ground, one package with his actions as clips, which the character controller plays, and only the bones
+  // that skin him or that his rig's runtime reads.
+  'character-controller': { example: 'character-controller', scene: 'world', animations: 'CLIPS' },
+  // Quaternius' mannequin, the character animation guide's basic path, in one package with its actions as clips.
+  'basic-character': { example: 'basic-character', scene: 'world', animations: 'CLIPS' } };
 
 const NAME = process.argv[2] ?? 'compositor', game = GAMES[NAME];
 // The files the app serves from public/ that a package ships (its area lights' LTC table), fetched where missing.
 execFileSync(process.execPath, ['scripts/babylon-assets.mjs'], { cwd: fileURLToPath(new URL('../..', import.meta.url)), stdio: 'inherit' });
 const dir = fileURLToPath(new URL(`../../docs/demos/${NAME}/`, import.meta.url));
-const { world, sync } = openExample(game?.example ?? NAME);
+// BLEND: another file of the example to export (one with extra actions, kept out of git).
+const { world, sync } = openExample(process.env.BLEND ?? game?.example ?? NAME);
 // Armatures skin on Babylon, so a game poses their bones.
 if (game) sync.view();
-const OPTIONS = { target: 'WEBGL2', controlPanel: !game, devTools: 'CDN', ...(game && { runtimes: { ARMATURE: { runtime: 'MAPPED', instances: {} } } }) };
+const OPTIONS = { target: 'WEBGL2', controlPanel: !game, devTools: 'CDN', ...(process.env.CLIP_COMPRESSION && { clipCompression: process.env.CLIP_COMPRESSION }), ...(game && { runtimes: { ARMATURE: { runtime: 'MAPPED', instances: {} } } }) };
 
 // Type declarations and package.json are for code importing the package, not for the page.
 function write(folder, files) {
@@ -39,7 +45,9 @@ function write(folder, files) {
   return files;
 }
 
-if (game) {
+if (game && !game.player) {
+  write(join(dir, game.scene), packageFiles(await exportModule(world, { ...OPTIONS, animations: game.animations })));
+} else if (game) {
   const [player, names] = game.player, selected = world.objects.filter((n) => names.includes(n.name));
   write(join(dir, player), packageFiles(await exportModule(world, { ...OPTIONS, scope: 'SELECTED', selected, animations: 'CLIPS' })));
   // The scene with the player's objects deleted, as she brings her own.

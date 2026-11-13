@@ -4,7 +4,9 @@ import { DEV_TOOLS } from './runtime/dev-tools.js';
 import native from './runtime/native/files.json' with { type: 'json' };
 
 const declared = (...names) => names.flatMap((name) => [`${name}.js`, `${name}.d.ts`]);
-export const RUNTIME_FILES = [...declared('blend-scene', 'collections', 'playhead', 'clips', 'buffers', 'world', 'scheduler', 'ir', 'units', 'mesh', 'ortho-scale', 'zod', 'asset', 'scene-loader', 'dual-quaternion-skinning', 'tiled-images', 'scene-tables', 'camera-effects'), 'ir.schema.json', 'implementations.json', 'LICENSE.md'];
+// The character animation system (runtime/character/), for a scene.js that exports it (a scene with an armature).
+export const CHARACTER_FILES = declared(...['api', 'names', 'core', 'pose-api', 'roles', 'movement', 'collision', 'input', 'contacts', 'locomotion', 'camera', 'sound', 'rootmotion', 'clip', 'pose', 'rig', 'procedural', 'mirror', 'quality', 'collections', ...['index', 'aim', 'feet', 'gaze', 'impact', 'lean', 'limbs', 'reach', 'space', 'springs', 'breathe', 'eyes'].map((n) => `effects/${n}`)].map((n) => `character/${n}`));
+export const RUNTIME_FILES = [...declared('blend-scene', 'collections', 'playhead', 'clips', 'buffers', 'world', 'scheduler', 'ready', 'skin-skeleton', 'ir', 'units', 'mesh', 'ortho-scale', 'zod', 'asset', 'scene-loader', 'dual-quaternion-skinning', 'tiled-images', 'scene-tables', 'camera-effects'), 'ir.schema.json', 'implementations.json', 'LICENSE.md'];
 // GPL's notice and text, beside Blender's code in a package (src/ paths).
 const NOTICE = { 'LICENSE.md': 'io_scene_babylon/blender-code.LICENSE.md', COPYING: '../LICENSES/GPL-3.0-or-later.txt' };
 // Stopgap: the scene module stands in as a package's Geometry Nodes kernels (its gn_* entry points, one node a call)
@@ -113,5 +115,5 @@ export const MATERIAL_FILES = declared('materials');
 export const PANEL_FILES = declared('control-panel', 'control-panel-ui', 'control-panel-model', 'control-panel-camera', 'control-panel-coverage', 'dev-tools');
 // The runtime/ files a package with these files ships: [package path, runtime/ file name].
 export const packageRuntime = (files) => [...RUNTIME_FILES, ...evaluatorsOf(files).flatMap((e) => e.runtime),
-  ...(text(files).includes("from './bylonder/materials.js'") ? MATERIAL_FILES : []), ...(text(files).includes("from './bylonder/control-panel.js'") ? PANEL_FILES : [])].map((name) => [`bylonder/${name}`, name])
+  ...(text(files).includes("from './bylonder/materials.js'") ? MATERIAL_FILES : []), ...(text(files).includes("from './bylonder/character/api.js'") ? CHARACTER_FILES : []), ...(text(files).includes("from './bylonder/control-panel.js'") ? PANEL_FILES : [])].map((name) => [`bylonder/${name}`, name])
   .concat(Object.entries(BLOCK_FILES).filter(([path]) => text(files).includes(`from './${path}'`)));

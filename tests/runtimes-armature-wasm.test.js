@@ -298,7 +298,7 @@ const blend = await (await import(written.url)).load(new NullEngine());
 await blend.settled();
 const built = blend.scene;
 written.remove();
-assert.equal(built.getMeshByName('Body').skeleton.name, 'Rig');
+assert.equal(built.getMeshByName('Body').skeleton.rigId, 'Rig', 'the body skins to the skin skeleton of the Rig');
 blend.playhead.pause();
 for (const frame of [6, 16]) {
   blend.playhead.seek(frame);
