@@ -89,7 +89,8 @@ export function pageDriver(fc) {
 function driverEntity(collection, id, fc, properties, time, skeletons) {
   const exact = pathOf(collection, id.name, `${fc.data_path}[${fc.array_index}]`), written = [exact, pathOf(collection, id.name, fc.data_path)].find((p) => properties[p]);
   const { driver } = fc, curve = driverCurve(fc);
-  if (!written || curve === undefined || driver.use_self) return null;
+  // Disable in Viewports switches what a viewport shows (a rig's proxy meshes); the page shows what Blender renders.
+  if (!written || curve === undefined || driver.use_self || fc.data_path === 'hide_viewport') return null;
   const variables = [], objects = {}, reads = [];
   let bones = false;
   for (const variable of driver.variables) {

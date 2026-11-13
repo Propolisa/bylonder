@@ -71,7 +71,9 @@ function transformControls(base, owner, bind) {
 function objectControls(node, ob, parentInverse) {
   const base = `objects${key(ob.name)}`, property = { QUATERNION: 'rotation_quaternion', AXIS_ANGLE: 'rotation_axis_angle' }[ob.rotation_mode] ?? 'rotation_euler';
   const list = transformControls(base, ob, transformBinding(node, ob, [...ob[property]], parentInverse));
-  for (const hide of ['viewport', 'render']) list.push(knob(`${base}.hide_${hide}`, !!ob[`hide_${hide}`], {}, { node: node.id, hide }));
+  // A driven Disable in Viewports switches a viewport's proxies (driver-export.js leaves it out): the page shows renders.
+  const driven = (hide) => hide === 'viewport' && [...(ob.animation_data?.drivers ?? [])].some((fc) => fc.data_path === 'hide_viewport');
+  for (const hide of ['viewport', 'render']) list.push(knob(`${base}.hide_${hide}`, !driven(hide) && !!ob[`hide_${hide}`], {}, { node: node.id, hide }));
   return [...list, ...customProperties(ob, base)];
 }
 

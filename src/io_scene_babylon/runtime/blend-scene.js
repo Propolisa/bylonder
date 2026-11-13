@@ -11,6 +11,9 @@ import { createClips, isClip } from './clips.js';
 import { collectionKey, collectionTree, objectsIn, showing } from './collections.js';
 import { useDualQuaternionSkinning } from './dual-quaternion-skinning.js';
 
+// A 32-bit float's step at 1.
+const FLOAT_EPSILON = 1.1920928955078125e-7;
+
 /** @typedef {number | boolean | string} Value */
 /** A sequencer sound strip as a page plays it (BlendScene.sounds). @typedef {{ url: string, start: number, offset: number, duration: number, channel: number, volume: number, mute: boolean }} Sound */
 
@@ -522,8 +525,10 @@ export class BlendScene {
    */
   #write(path, value) {
     const knob = /** @type {Knob} */ (this.#knobs.get(path));
-    // Clamped to its hard range, as Blender's RNA sets a property (a driver's value too).
-    if (typeof value === 'number') value = Math.min(knob.hard_max ?? Infinity, Math.max(knob.hard_min ?? -Infinity, value));
+    // A number given a switch (a driver's value) is on only from 1 down by a float's precision, as Blender's drivers
+    // set one; any other is clamped to its hard range, as Blender's RNA sets a property.
+    if (typeof value === 'number' && knob.type === 'BOOLEAN') value = value > 1 - FLOAT_EPSILON;
+    else if (typeof value === 'number') value = Math.min(knob.hard_max ?? Infinity, Math.max(knob.hard_min ?? -Infinity, value));
     this.#values.set(path, value);
     if (knob.bind) this.#apply(knob.bind, path, value);
     this.onChanged.notifyObservers({ path, value });
