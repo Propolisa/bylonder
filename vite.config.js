@@ -9,6 +9,7 @@ import { createReadStream, readdirSync, readFileSync, statSync } from "node:fs";
 import { zipSync } from "fflate";
 import { babylonArchive } from "./src/io_scene_babylon/babylon-sources.js";
 import { demoFile } from "./scripts/demo-files.mjs";
+import { staleModule } from "./scripts/module.mjs";
 import pkg from "./package.json" with { type: "json" };
 
 // Commits for the splash's version and changelog, newest first, without merges and work-in-progress commits; none when
@@ -101,6 +102,24 @@ const demos = () => ({
   },
 });
 
+// A dev server on a source tree whose Blender module is out of date says so, in its terminal and on the app's page,
+// instead of the app failing later on a function the old module lacks.
+const moduleCheck = () => ({
+  name: "module-check",
+  apply: "serve",
+  configureServer(server) {
+    const stale = staleModule();
+    if (stale) server.config.logger.warn(`
+Blender's module is ${stale}, built for another source tree: run npm run module
+`);
+  },
+  transformIndexHtml() {
+    const stale = staleModule();
+    return stale ? [{ tag: "div", injectTo: "body-prepend", attrs: { style: "position:fixed;inset:0 0 auto 0;z-index:99999;padding:8px 16px;background:#7a1f1f;color:#fff;font:14px system-ui" },
+      children: `Blender's module (${stale}) is out of date for this source tree: run npm run module, then reload.` }] : [];
+  },
+});
+
 // Cross-origin isolation for Blender's threads (SharedArrayBuffer), as the site's service worker gives it
 // (public/workspace-sw.js): every page and file but the docs viewer's page, whose embeds are other sites' pages.
 const isolation = () => ({
@@ -118,7 +137,7 @@ const isolation = () => ({
 
 export default defineConfig({
   base: process.env.BASE_PATH || "/",
-  plugins: [vue(), tailwindcss(), blenderCoverage(), blenderIconSet(), changelog(), demoFiles(), babylonSources(), demos(), isolation()],
+  plugins: [vue(), tailwindcss(), blenderCoverage(), blenderIconSet(), changelog(), demoFiles(), babylonSources(), demos(), isolation(), moduleCheck()],
   define: { __BYLONDER_VERSION__: JSON.stringify(pkg.version), __BYLONDER_CHANGE__: JSON.stringify(commits()[0] ?? null) },
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
   // Agents' worktrees live under .claude/: their edits must not reload this checkout's pages (a worktree's own server

@@ -8,11 +8,18 @@
 // the frames of a crash reported from the live site.
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { pathToFileURL } from 'node:url';
 
 const REPO = 'Propolisa/bylonder';
 const DIR = 'src/bmesh', FILES = ['bmesh.wasm', 'python313.zip', 'scripts.zip', 'addons.zip'];
 const MODULE = `${DIR}/bmesh.wasm`, MARK = `${MODULE}.key`;
 const key = () => `module-${execFileSync('git', ['rev-parse', 'HEAD:tools/blender-port'], { encoding: 'utf8' }).trim()}`;
+
+/** The installed module's key when it is a fetched one that this tree no longer wants, else null (a local build has none). */
+export function staleModule(mark = MARK) {
+  const installed = existsSync(mark) && readFileSync(mark, 'utf8').trim();
+  return installed && installed !== key() ? installed : null;
+}
 
 // GitHub's release downloads answer 5xx at times: retried, a missing release (404) is not.
 async function fetchRetried(url, tries = 6) {
@@ -40,5 +47,7 @@ async function fetchModule(force) {
   console.log(`${MODULE}: ${wanted}`);
 }
 
-if (process.argv[2] === 'key') console.log(key());
-else await fetchModule(process.argv.includes('--force'));
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  if (process.argv[2] === 'key') console.log(key());
+  else await fetchModule(process.argv.includes('--force'));
+}
