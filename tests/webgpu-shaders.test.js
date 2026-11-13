@@ -17,6 +17,7 @@ import { declarationLists } from '../src/overrides/webgpu/declaration-lists.js';
 import { readFileSync } from 'node:fs';
 import { CurvesPlugin } from '../src/draw/curves.js';
 import { BlenderNodeMaterial, blenderDefaultTree, buildMaterial } from '../src/nodes/blender/shader-nodes.js';
+import { RigVertexTexturePlugin } from '../src/io_scene_babylon/runtime/native/babylon/gl-deform.js';
 import '../src/overrides/babylon/area-light-used.js';
 import '../src/overrides/webgpu/area-light-inline.js';
 
@@ -62,6 +63,15 @@ const nodes = new BlenderNodeMaterial('Node hair', scene);
 blenderDefaultTree(nodes);
 buildMaterial(nodes);
 await compiled('node material hair', hair(nodes));
+// A mesh an exported page's rig deforms on the GPU draws its positions and normals from the deformer's textures
+// (RigVertexTexturePlugin): WebGPU's GLSL takes them only where it samples them, not as a function's arguments.
+const rigged = new PBRMaterial('Rigged', scene);
+new RigVertexTexturePlugin(rigged);
+await compiled('a mesh a rig deforms on the GPU', () => {
+  const mesh = Object.assign(MeshBuilder.CreateBox('Rigged', {}, scene), { material: rigged, metadata: { rigVertexTexture: { hasNormals: true } } });
+  mesh.setVerticesData('rigVertex', new Float32Array(mesh.getTotalVertices()), false, 1);
+  return () => rigged.isReadyForSubMesh(mesh, mesh.subMeshes[0]);
+});
 // A shader naming its uniform, attribute, sampler and a parameter what WGSL reserves converts, its names WGSL's own in
 // the code only: the effect binds them by the names it was given.
 const reserved = new ShaderMaterial('Reserved names', scene, {

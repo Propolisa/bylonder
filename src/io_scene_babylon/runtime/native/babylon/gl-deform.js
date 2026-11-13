@@ -37,7 +37,7 @@ precision highp int;
 precision highp sampler2D;
 uniform float outWidth;
 uniform float outCount;
-vec4 fetch(sampler2D s, int i) { int w = textureSize(s, 0).x; return texelFetch(s, ivec2(i - (i / w) * w, i / w), 0); }
+ivec2 texelOf(int i, int w) { return ivec2(i - (i / w) * w, i / w); }
 int selfIndex() { return int(gl_FragCoord.y) * int(outWidth) + int(gl_FragCoord.x); }
 `;
 const KERNELS = {
@@ -228,6 +228,19 @@ void main(void) {
 }` },
 };
 
+// A kernel's fragment source. Samplers are never passed to functions (WebGPU's GLSL path rejects that): each
+// `fetch(s, i)` of the kernel bodies becomes a read of the named sampler at its texel.
+export function kernelSource(name) {
+  const k = KERNELS[name];
+  const reads = k.samplers.map((s) => `vec4 fetch_${s}(int i) { return texelFetch(${s}, texelOf(i, textureSize(${s}, 0).x), 0); }\n`).join('');
+  const body = k.body.replace(/\bfetch\((\w+), /g, 'fetch_$1(');
+  return COMMON + k.samplers.map((s) => `uniform sampler2D ${s};\n`).join('') + reads + body;
+}
+
+// For tests: the kernels' names and the GLSL the vertex-texture plugin injects.
+export const kernelNames = () => Object.keys(KERNELS);
+export const pluginVertexCode = () => RigVertexTexturePlugin.prototype.getCustomCode.call(null, 'vertex');
+
 // Whether the WebGL 2 deformer covers a compiled deform (else CpuDeformer).
 export function glSupported(deform) {
   const reasons = [...deform.unsupported];
@@ -291,7 +304,7 @@ export class GlDeformer {
   kernel(name) {
     const k = KERNELS[name];
     const w = new EffectWrapper({
-      engine: this.engine, name: `rig-${name}`, vertexShader: VERTEX, fragmentShader: COMMON + k.samplers.map((s) => `uniform sampler2D ${s};\n`).join('') + k.body,
+      engine: this.engine, name: `rig-${name}`, vertexShader: VERTEX, fragmentShader: kernelSource(name),
       attributeNames: ['position'], uniformNames: ['outWidth', 'outCount', ...k.uniforms], samplerNames: k.samplers, shaderLanguage: ShaderLanguage.GLSL,
     });
     this.wrappers.push(w);
@@ -587,13 +600,14 @@ uniform highp sampler2D rigPositions;
 #ifdef RIGVTEXNORMAL
 uniform highp sampler2D rigNormals;
 #endif
-vec4 rigFetch(highp sampler2D s, int i) { int w = textureSize(s, 0).x; return texelFetch(s, ivec2(i - (i / w) * w, i / w), 0); }
+// Texel coordinates of a vertex; each sampler is read where it is named (WebGPU's GLSL path rejects sampler parameters).
+ivec2 rigTexel(int i, int w) { return ivec2(i - (i / w) * w, i / w); }
 #endif
 `,
       CUSTOM_VERTEX_UPDATE_POSITION: `#ifdef RIGVTEX
-positionUpdated = (rigAxis * vec4(rigFetch(rigPositions, int(rigVertex)).xyz, 1.0)).xyz;
+positionUpdated = (rigAxis * vec4(texelFetch(rigPositions, rigTexel(int(rigVertex), textureSize(rigPositions, 0).x), 0).xyz, 1.0)).xyz;
 #if defined(NORMAL) && defined(RIGVTEXNORMAL)
-normalUpdated = mat3(rigAxis) * rigFetch(rigNormals, int(rigVertex)).xyz;
+normalUpdated = mat3(rigAxis) * texelFetch(rigNormals, rigTexel(int(rigVertex), textureSize(rigNormals, 0).x), 0).xyz;
 #endif
 #endif
 `,
