@@ -25,11 +25,22 @@ export function evaluateForRender(world) {
   }
   if (!shown.length && !modifiers.length) return () => {};
   const view = () => world.mainSync.view();
-  for (const id of shown) id.hide_viewport = false;
+  // An object's Disable in Viewports is its node's (rna-bylonder.js), which each view gives Main; a driver of it (a rig's
+  // quality switch between proxy and render meshes) would hide it again, so it rests meanwhile.
+  const nodes = new Map(world.objects.map((node) => [node.name, node]));
+  const drivers = shown.flatMap((id) => [...(id.animation_data?.drivers ?? [])].filter((fc) => fc.data_path === 'hide_viewport' && !fc.mute));
+  const hide = (id, value) => {
+    const node = id.type && nodes.get(id.name);
+    if (node) node.metadata = { ...node.metadata, wbHideViewport: value };
+    id.hide_viewport = value;
+  };
+  for (const fc of drivers) fc.mute = true;
+  for (const id of shown) hide(id, false);
   for (const [, m] of modifiers) m.show_viewport = true;
   view();
   return () => {
-    for (const id of shown) id.hide_viewport = true;
+    for (const fc of drivers) fc.mute = false;
+    for (const id of shown) hide(id, true);
     for (const [, m] of modifiers) m.show_viewport = false;
     view();
   };

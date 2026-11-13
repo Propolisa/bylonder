@@ -1,5 +1,5 @@
-// What the export draws is what Blender renders: the Rigged Character's body, disabled in viewports but rendered, as
-// rigs keep their render meshes (Snow's eyes), is evaluated for the export as a render evaluates it, so its page deforms
+// What the export draws is what Blender renders: the Rigged Character's body, disabled in viewports by a driver but
+// rendered, as rigs switch to their render meshes by a quality setting (Snow's eyes), is evaluated for the export as a render evaluates it, so its page deforms
 // it as Main does, through a Lattice off in viewports but rendered (as Snow's face lattices); its viewport stand-in, in
 // a collection disabled in renders, does not show in the page.
 import assert from 'node:assert/strict';
@@ -29,7 +29,8 @@ const proxies = data.collections.new('Proxies'), proxy = data.objects.new('Proxy
 C.scene.collection.children.link(proxies);
 proxies.objects.link(proxy);
 proxies.hide_render = true;
-body.hide_viewport = true;
+const quality = Object.assign((body.animation_data ?? body.animation_data_create()).drivers.new('hide_viewport', 0), {});
+Object.assign(quality.driver, { type: 'SCRIPTED', expression: '1' });
 const lattice = data.lattices.new('Cage'), cage = data.objects.new('Cage', lattice);
 C.scene.collection.objects.link(cage);
 cage.scale = [2, 2, 2];
@@ -39,6 +40,7 @@ sync.view();
 
 const files = await exportModule(world);
 assert.equal(body.hide_viewport, true, 'the export leaves Disable in Viewports as it was');
+assert.equal(quality.mute, false, 'and its driver running');
 assert.equal(widen.show_viewport, false, "and the Lattice's Realtime toggle");
 const entity = Object.values(JSON.parse(files['scene.ir.json']).entities).find((e) => e.type === 'constraints:POSE');
 assert.ok(entity && Object.keys(entity.inputs.native.meshes).includes('Body'), 'the body, disabled in viewports, deforms on the runtime');
@@ -54,6 +56,7 @@ assert.ok(drawn.isEnabled() && drawn.isVisible, 'the body shows');
 assert.ok(!blend.scene.getMeshByName('Proxy').isVisible || !blend.scene.getMeshByName('Proxy').isEnabled(), 'its stand-in, disabled in renders, does not');
 
 // Main's evaluated body, shown in its viewport to read it.
+quality.mute = true;
 body.hide_viewport = false;
 widen.show_viewport = true;
 sync.view();
