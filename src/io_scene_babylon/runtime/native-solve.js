@@ -34,7 +34,8 @@ function compile(native) {
   /** @type {WeakMap<object, { of: number[], unrest: Matrix[], last: Matrix[] }>} */
   const layouts = new WeakMap();
   return { program, rig, armature: program.objectIndex.get(native.armature), layouts, properties: new Map(), placed: new Map(), posed: /** @type {Float64Array | null} */ (null),
-    deforms: /** @type {Map<string, any>} Each deformed mesh's stack, by name. */ (new Map()), published: /** @type {Map<string, number>} */ (new Map()), deformers: /** @type {{ update(): void }[] | null} */ (null) };
+    deforms: /** @type {Map<string, any>} Each deformed mesh's stack, by name. */ (new Map()), published: /** @type {Map<string, number>} */ (new Map()), deformers: /** @type {{ update(): void }[] | null} */ (null),
+    sharedKeys: /** @type {{ name: string, from: number, blocks: string[] }[] | null} Meshes holding another's Key (shareKeys). */ (null) };
 }
 
 /** A mesh's deform stack on an entry's rig, compiled once. @param {ReturnType<typeof compile>} entry @param {string} name */
@@ -154,7 +155,25 @@ export function nativeSolve(scene = null, controls = null) {
     for (const [name, id] of Object.entries(native.objects ?? {})) { const world = nodeWorld(id); if (world) place(entry, program.objectIndex.get(name), world); }
     rig.setFrame(frame);
     rig.evaluate();
+    shareKeys(entry);
     if (controls) publish(entry, native);
+  };
+  /**
+   * A Key several meshes hold, as one datablock: its drivers set the values of the mesh they resolve to (its first
+   * holder), and every other holder takes them.
+   * @param {ReturnType<typeof compile>} entry
+   */
+  const shareKeys = (entry) => {
+    const { program, rig } = entry;
+    const objects = /** @type {any[]} */ (program.objects);
+    const shared = entry.sharedKeys ??= objects.flatMap((ob, i) => {
+      const key = ob.data?.shape_keys, first = key && objects.findIndex((o) => o.data?.shape_keys?.name === key.name);
+      return key && first !== i ? [{ name: ob.name, from: first, blocks: key.key_blocks.map((/** @type {any} */ kb) => kb.name) }] : [];
+    });
+    for (const { name, from, blocks } of shared) for (const block of blocks) {
+      const value = rig.shapeKeyValue(from, block);
+      if (value !== undefined) rig.setShapeKeyValue(name, block, value);
+    }
   };
   /**
    * What the rig's drivers set that the page reads, written to its controls where it changed: custom properties (a
