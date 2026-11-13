@@ -4,7 +4,7 @@
 // them as key.cc's key_evaluate_relative_float3 does: Basis plus each unmuted key's value times its offset from its
 // relative key, scaled by its vertex group. Only the normals differ: Babylon blends the keys' own normals linearly where
 // Blender recomputes them from the blended positions.
-import { Animation, BoundingInfo, MorphTarget, MorphTargetManager, Vector3 } from '@babylonjs/core';
+import { Animation, BoundingInfo, MorphTarget, MorphTargetManager, Vector3, VertexBuffer } from '@babylonjs/core';
 import { idStruct, pointerOf } from '../python/bpy_rna.js';
 import { modifierStack } from '../modifiers/stack.js';
 import { mesh_batch_cache_corner_buffers, mesh_batch_cache_flat } from '../draw/mesh-batch-buffers.js';
@@ -98,10 +98,11 @@ function influences(ob, key, names) {
 // the applied rest's Mesh and keys.
 function morph(view, entry, ob, key, rest = null) {
   const mesh = view.blender.mesh(rest?.address ?? entry.ob), source = rest ? { ob: rest.ob, key: rest.key } : { ob, key };
-  const basis = blockData(source.key.reference_key, mesh.verts_num), positions = mesh.vert_positions;
-  for (let i = 0; i < basis.length; i++) if (basis[i] !== positions[i]) return null;
+  if (source.key.reference_key.data.length !== mesh.verts_num) return null;
   // A skinned mesh draws the Mesh Main holds already (armature.js), its skin with it.
   if (!entry.node.skeleton) view.drawMesh(entry, mesh);
+  const base = basisDrawn(mesh, source.key);
+  if (base) drawBase(entry.node, base);
   const manager = new MorphTargetManager(view.scene), targets = targetsOf(source.ob, source.key, mesh);
   for (const target of targets) {
     const made = new MorphTarget(target.name, 0, view.scene);
@@ -111,10 +112,26 @@ function morph(view, entry, ob, key, rest = null) {
   }
   entry.node.morphTargetManager = manager;
   const { minimum, maximum } = entry.node.getBoundingInfo();
-  return { manager, targets, signature: signatureOf(key, mesh.verts_num), count: mesh.verts_num, bounds: [minimum.clone(), maximum.clone()] };
+  return { manager, targets, base, signature: signatureOf(key, mesh.verts_num), count: mesh.verts_num, bounds: [minimum.clone(), maximum.clone()] };
 }
+// Basis in Babylon's corners, with its own normals, where the Mesh's positions differ from it (written through RNA,
+// not through Edit Mode): Blender evaluates a mesh with keys from Basis (key.cc BKE_key_evaluate_object_ex), not from the
+// Mesh's positions. Null where they are Basis.
+function basisDrawn(mesh, key) {
+  const basis = blockData(key.reference_key, mesh.verts_num), positions = mesh.vert_positions;
+  if (basis.every((v, i) => v === positions[i])) return null;
+  const kb = key.reference_key, custom = !!mesh.corner_normals?.();
+  return mesh_batch_cache_corner_buffers(mesh, basis, custom ? { corner: kb.normals_split_get() }
+    : { face: kb.normals_polygon_get(), vert: mesh_batch_cache_flat(mesh) ? null : kb.normals_vertex_get() });
+}
+const drawBase = (node, base) => {
+  node.setVerticesData(VertexBuffer.PositionKind, base.positions, true);
+  node.setVerticesData(VertexBuffer.NormalKind, base.normals, true);
+};
 // Babylon's settings applied, influences set and bounds grown by each target's offsets at its influence.
 function blend(entry, state, ob, key) {
+  // Basis drawn again where the Mesh was drawn over it (a skin applied again, armature.js).
+  if (state.base && entry.node.getVerticesData(VertexBuffer.PositionKind) !== state.base.positions) drawBase(entry.node, state.base);
   const settings = key.bylonder.babylon;
   state.manager.useTextureToStoreTargets = settings.use_texture_for_targets;
   state.manager.enableNormalMorphing = settings.use_normal_morphing;
@@ -167,7 +184,7 @@ function evaluate(view) {
       morphed.delete(entry.ob);
       state = morph(view, entry, ob, key);
       if (!state) {
-        issuesByKey.get(address(key)).push(issue(FALLBACK, keyPath(key, 'reference_key'), `${ob.name}: the mesh's positions differ from ${key.reference_key.name}`));
+        issuesByKey.get(address(key)).push(issue(FALLBACK, keyPath(key, 'reference_key'), `${ob.name}: ${key.reference_key.name} has another vertex count than the mesh`));
         entry.node.morphTargetManager = null;
         view.drawGeometry(entry);
         continue;
