@@ -478,6 +478,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
 // Includes GPL code: ${PANEL_ICONS}, Blender's icons, loaded when the control panel opens (GPL-3.0-or-later, ${PANEL_ICONS.split('/')[0]}/LICENSE.md).` : ''}
 import { readBuffers, readBytes } from './bylonder/buffers.js';
 import { worldColor, worldNodes } from './bylonder/world.js';
+import { cameraEffects, pipelineEffect, postProcessEffect } from './bylonder/camera-effects.js';
 import { BlendScene } from './bylonder/blend-scene.js';
 import { loadTables } from './bylonder/scene-tables.js';
 import { addAsset, assetContainer, cloneAsset } from './bylonder/asset.js';${controlPanel ? `
@@ -664,17 +665,24 @@ ${pipelineTypes.length ? `  for (const entry of RENDERING_PIPELINES) {
     if (make) SerializationHelper.Parse(() => make(entry, scene), entry, scene, ROOT);
     else parsedPipeline(PIPELINES[entry.customType]?.Parse(entry, scene, ROOT), entry);
   }
-` : ''}${parse('POST_PROCESSES', data.postProcesses, 'parsePostProcess(entry, scene, ROOT)').trimEnd()}${volumes ? `
-  // EEVEE's volumes, resolved over each camera's render before its other post-processes.
-  sceneVolumes(scene, VOLUMES, materials, WORLDS.get(scene)?.box ?? null);` : ''}${display ? `
+  for (const pipeline of scene.postProcessRenderPipelineManager.supportedPipelines) cameraEffects(scene).add(pipelineEffect(scene, pipeline._name), true);
+` : ''}${parse('POST_PROCESSES', data.postProcesses, 'cameraEffects(scene).add(postProcessEffect(parsePostProcess(entry, scene, ROOT)), true)').trimEnd()}${volumes ? `
+  // EEVEE's volumes, resolved over the active camera's render before its other post-processes.
+  const volumesOn = new Map(), box = WORLDS.get(scene)?.box ?? null;
+  cameraEffects(scene).add({
+    attach: (camera) => volumesOn.set(camera, sceneVolumes(scene, VOLUMES, materials, box, [camera])[0]),
+    detach: (camera) => { volumesOn.get(camera)?.dispose(); volumesOn.delete(camera); },
+  });` : ''}${display ? `
   // Displayed as Blender's rendered view: scene linear, ${composited ? 'composited, ' : ''}then the view transform.
   const camera = scene.activeCamera;
   if (camera) {
-    const display = viewTransform(camera, { ...DISPLAY, lattice: DISPLAY.lattice && { ...DISPLAY.lattice, texels: buffers[DISPLAY.lattice.texels] } });${composited ? `${fogGlow ? `
+    const display = cameraEffects(scene).add(postProcessEffect(viewTransform(camera, { ...DISPLAY, lattice: DISPLAY.lattice && { ...DISPLAY.lattice, texels: buffers[DISPLAY.lattice.texels] } })), true).post;${composited ? `${fogGlow ? `
     // Glare's Fog Glow: its kernel a registered unit gives, else Blender's, convolved by an FFT on the GPU.
     const fogGlowKernel = unitFor('${FOG_GLOW_UNIT}')?.value${blenderFogGlow ? ' ?? fogGlowKernelValue' : ''};
     if (fogGlowKernel) ReplayTask.operations.fogGlow = (task, step, read) => fftConvolution(task, step, read, fogGlowKernel);` : ''}
-    COMPOSITORS.set(scene, (await compositor(scene, camera, COMPOSITOR, display)).graph);` : ''}
+    const composited = await compositor(scene, COMPOSITOR, display);
+    if (composited.render) cameraEffects(scene).add(postProcessEffect(composited.render, display));
+    COMPOSITORS.set(scene, composited.graph);` : ''}
   }` : ''}
   if (canvas) scene.activeCamera?.attachControl(canvas, true);
   return scene;

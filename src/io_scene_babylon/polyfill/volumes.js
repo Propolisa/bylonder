@@ -7,15 +7,16 @@ import { NullEngine } from '@babylonjs/core';
 import { cameraVolumes, drawable } from '../../draw/volume-passes.js';
 import '../../draw/volume-blocks.js';
 
-// Each camera's volumes, from the export's `config` (volumes-export.js): the scene's Volumes settings, the domains (a
-// mesh's id, or null for the world's box `worldBox`, and the unique id of its volume material in `materials`) and the
-// lights' Blender Light settings by light id. None without a GPU (a NullEngine, in Node), which cannot draw them.
-export function sceneVolumes(scene, { settings, domains, lights }, materials, worldBox = null) {
+// The volumes of `cameras` (the scene's, by default), from the export's `config` (volumes-export.js): the scene's
+// Volumes settings, the domains (a mesh's id, or null for the world's box `worldBox`, and the unique id of its volume
+// material in `materials`) and the lights' Blender Light settings by light id. None without a GPU (a NullEngine, in
+// Node), which cannot draw them.
+export function sceneVolumes(scene, { settings, domains, lights }, materials, worldBox = null, cameras = scene.cameras) {
   if (scene.getEngine() instanceof NullEngine) return [];
   const volumes = new Map(domains.map(([id, material]) => [id === null ? worldBox : scene.getMeshById(id), materials[material]]).filter(([mesh, material]) => mesh && material));
   const host = {
     settings: () => settings, isWorld: (mesh) => mesh === worldBox, material: (mesh) => volumes.get(mesh), lightRecord: (light) => lights[light.id] ?? null,
     domains: (camera) => [...volumes.keys()].filter((mesh) => drawable(mesh, camera)),
   };
-  return scene.cameras.map((camera) => cameraVolumes(scene, camera, host));
+  return cameras.map((camera) => cameraVolumes(scene, camera, host));
 }

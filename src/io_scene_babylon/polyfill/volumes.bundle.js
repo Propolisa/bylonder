@@ -992,7 +992,7 @@ function packLights(scene, camera, domains, lightRecord) {
 }
 
 // src/io_scene_babylon/polyfill/volumes.js
-function sceneVolumes(scene, { settings, domains, lights: lights2 }, materials, worldBox = null) {
+function sceneVolumes(scene, { settings, domains, lights: lights2 }, materials, worldBox = null, cameras = scene.cameras) {
   if (scene.getEngine() instanceof NullEngine) return [];
   const volumes = new Map(domains.map(([id, material]) => [id === null ? worldBox : scene.getMeshById(id), materials[material]]).filter(([mesh, material]) => mesh && material));
   const host = {
@@ -1002,7 +1002,7 @@ function sceneVolumes(scene, { settings, domains, lights: lights2 }, materials, 
     lightRecord: (light) => lights2[light.id] ?? null,
     domains: (camera) => [...volumes.keys()].filter((mesh) => drawable(mesh, camera))
   };
-  return scene.cameras.map((camera) => cameraVolumes(scene, camera, host));
+  return cameras.map((camera) => cameraVolumes(scene, camera, host));
 }
 export {
   sceneVolumes

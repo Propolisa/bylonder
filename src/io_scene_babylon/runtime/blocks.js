@@ -523,15 +523,14 @@ export function textureCopier(engine) {
 }
 
 /**
- * The export's compositor (`source`, a NodeRenderGraph's serialization whose Render Layers input is the render) on a
- * camera's render: it runs once the render is drawn, before `display` (the camera's display transform, a post process
- * of the camera), at the size its plans were recorded for (`width`, `height`), and writes its composite back.
+ * The export's compositor (`source`, a NodeRenderGraph's serialization whose Render Layers input is the render): its
+ * pass `render`, which the caller puts on a camera just before `display` (the display transform, a post process), runs
+ * once the render is drawn, at the size its plans were recorded for (`width`, `height`), and writes its composite back.
  * @param {Scene} scene
- * @param {Camera} camera
  * @param {{ graph: any, width: number, height: number }} source
  * @param {PostProcess} display
  */
-export async function compositor(scene, camera, { graph: json, width, height }, display) {
+export async function compositor(scene, { graph: json, width, height }, display) {
   const engine = scene.getEngine(), graph = new NodeRenderGraph('Compositing', scene, { rebuildGraphOnEngineResize: false });
   graph.parseSerializedObject(structuredClone(json));
   const layers = /** @type {any} */ (graph.getInputBlocks().find((b) => b.isAnyTexture()));
@@ -545,7 +544,6 @@ export async function compositor(scene, camera, { graph: json, width, height }, 
   const output = /** @type {CompositeOutputBlock} */ (graph.outputBlock), copy = textureCopier(engine);
   // The render as the display transform takes it, drawn by a pass of its own just before it.
   const render = new PassPostProcess('Render Layers', 1, null, Constants.TEXTURE_BILINEAR_SAMPLINGMODE, engine, false, Constants.TEXTURETYPE_HALF_FLOAT);
-  camera.attachPostProcess(render, camera._postProcesses.indexOf(display));
   render.onAfterRenderObservable.add(() => {
     const into = display.inputTexture;
     if (!into?.texture) return;
@@ -554,5 +552,5 @@ export async function compositor(scene, camera, { graph: json, width, height }, 
     const result = output.result === null ? null : graph.frameGraph.textureManager.getTextureFromHandle(output.result);
     if (result && result !== target.texture) copy(result, into);
   });
-  return { graph, dispose: () => { camera.detachPostProcess(render); render.dispose(); graph.dispose(); target.dispose(); } };
+  return { graph, render, dispose: () => { render.dispose(); graph.dispose(); target.dispose(); } };
 }

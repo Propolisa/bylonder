@@ -77,11 +77,12 @@ export function viewTransform(camera, { exposure, exponent, lattice }) {
     effect.setFloat('range', lattice?.range ?? 1);
     if (texture) effect.setTexture('lattice', texture);
   };
-  // Last: a pipeline that builds its post processes again appends them after it.
+  // Last on the active camera (camera-effects.js moves it there): a pipeline that builds its post processes again
+  // appends them after it.
   const last = scene.onBeforeCameraRenderObservable.add((rendering) => {
-    if (rendering !== camera || camera._postProcesses.filter(Boolean).at(-1) === post) return;
-    camera.detachPostProcess(post);
-    camera.attachPostProcess(post);
+    if (rendering !== scene.activeCamera || rendering._postProcesses.filter(Boolean).at(-1) === post) return;
+    rendering.detachPostProcess(post);
+    rendering.attachPostProcess(post);
   });
   post.onDisposeObservable.add(() => { scene.onBeforeCameraRenderObservable.remove(last); texture?.dispose(); });
   return post;

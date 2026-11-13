@@ -63,20 +63,24 @@ export function setUniform(effect: Effect, name: string, type: string, v: number
  */
 export function textureCopier(engine: AbstractEngine): (source: any, target: any) => void;
 /**
- * The export's compositor (`source`, a NodeRenderGraph's serialization whose Render Layers input is the render) on a
- * camera's render: it runs once the render is drawn, before `display` (the camera's display transform, a post process
- * of the camera), at the size its plans were recorded for (`width`, `height`), and writes its composite back.
+ * The export's compositor (`source`, a NodeRenderGraph's serialization whose Render Layers input is the render): its
+ * pass `render`, which the caller puts on a camera just before `display` (the display transform, a post process), runs
+ * once the render is drawn, at the size its plans were recorded for (`width`, `height`), and writes its composite back.
  * @param {Scene} scene
- * @param {Camera} camera
  * @param {{ graph: any, width: number, height: number }} source
  * @param {PostProcess} display
  */
-export function compositor(scene: Scene, camera: Camera, { graph: json, width, height }: {
+export function compositor(scene: Scene, { graph: json, width, height }: {
     graph: any;
     width: number;
     height: number;
 }, display: PostProcess): Promise<{
     graph: NodeRenderGraph;
+    dispose: () => void;
+    render?: undefined;
+} | {
+    graph: NodeRenderGraph;
+    render: PassPostProcess;
     dispose: () => void;
 }>;
 export function formatChannels(format: string): 1 | 2 | 3 | 4;
@@ -233,6 +237,7 @@ export type Pass = {
     plan?: Plan | undefined;
 };
 import { NodeRenderGraph } from '@babylonjs/core';
+import { PassPostProcess } from '@babylonjs/core';
 import { FrameGraphPostProcessTask } from '@babylonjs/core';
 import { FrameGraphTask } from '@babylonjs/core';
 import { NodeRenderGraphBlock } from '@babylonjs/core';
