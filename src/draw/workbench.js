@@ -5,6 +5,7 @@
 // Workbench material for its pass only, and views in Material Preview or Rendered keep the scene's materials and lights.
 import { ShaderMaterial } from '@babylonjs/core/Materials/shaderMaterial.js';
 import { Material } from '@babylonjs/core/Materials/material.js';
+import { MultiMaterial } from '@babylonjs/core/Materials/multiMaterial.js';
 import { Constants } from '@babylonjs/core/Engines/constants.js';
 import { RawTexture } from '@babylonjs/core/Materials/Textures/rawTexture.js';
 import { LinesMesh } from '@babylonjs/core/Meshes/linesMesh.js';
@@ -320,8 +321,13 @@ export function createWorkbench(scene, { wireColor = () => theme.wire, paintText
     material.setArray4('lightDirection', STUDIO_LIGHT_DEFAULT.flatMap(([d]) => [...d, 0]));
     material.setArray4('lightDiffuseWrap', STUDIO_LIGHT_DEFAULT.flatMap(([, c]) => c));
     material.setArray4('lightSpecular', STUDIO_LIGHT_DEFAULT.flatMap(([, , s]) => [...s, 0]));
+    // Each material slot shows its own color (workbench_material.cc): the part being drawn's slot of a MultiMaterial.
+    let part = null;
+    const bindForSubMesh = material.bindForSubMesh.bind(material);
+    material.bindForSubMesh = (world, mesh, subMesh) => { part = subMesh; bindForSubMesh(world, mesh, subMesh); };
     material.onBindObservable.add((mesh) => {
-      const { color, roughness, metallic } = solidSurface(mesh.material, current);
+      const own = mesh.material instanceof MultiMaterial ? mesh.material.subMaterials[part?.materialIndex ?? 0] : mesh.material;
+      const { color, roughness, metallic } = solidSurface(own, current);
       const effect = material.getEffect();
       effect.setFloat3('baseColor', color[0], color[1], color[2]);
       effect.setFloat('roughness', roughness);
