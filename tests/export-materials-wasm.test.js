@@ -61,7 +61,8 @@ const SCENARIOS = {
     // NullEngine makes no GPU texture to hold the spherical harmonics: the world's cube is the scene's environment.
     assert.equal(environment?.name, 'world', 'the world lights the scene');
     const base = `worlds["${wo}"].node_tree.nodes["${background.name}"].inputs`, color = [...background.inputs[0].default_value];
-    assert.deepEqual([0, 1, 2].map((i) => blend.get(`${base}[0].default_value[${i}]`)), color.slice(0, 3), 'the Background color is a control');
+    // The package writes Blender's floats at their float32 value (ir-export.js float32).
+    assert.deepEqual([0, 1, 2].map((i) => Math.fround(blend.get(`${base}[0].default_value[${i}]`))), color.slice(0, 3), 'the Background color is a control');
     blend.set(`${base}[1].default_value`, 2);
     assert.ok(Math.abs(environment.clearColor.r - 2 * color[0]) < 1e-6, 'its Strength relights the scene');
     console.log(`framed-print: ${inputs.filter((c) => c.path.endsWith('.image')).length} images are controls, swapped by URL; the world's Background lights and is tunable`);
