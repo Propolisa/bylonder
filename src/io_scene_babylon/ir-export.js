@@ -67,6 +67,8 @@ function isDefault(prop, v) {
   return v === fallback || (typeof v === 'number' && Math.fround(v) === Math.fround(fallback)) || (v instanceof Set && !v.size);
 }
 
+const DEEP = Symbol('past the depth');
+
 // An RNA value as IR data: IDs by key (recording the reference), nested structs walked to `depth`.
 function walker(onReference) {
   const value = (owner, path, v, depth) => {
@@ -85,11 +87,21 @@ function walker(onReference) {
     // A struct met again (a link's node, a socket's node, a pose bone's bone) is named by where it was first written,
     // and by the ID that holds it there where that is another.
     const at = `${pointer[0]}:${pointer[2]}`, here = idKey(owner);
-    if (seen.has(at)) { const [id, first] = seen.get(at); return id === here ? { struct: first } : { id, struct: first }; }
+    if (seen.has(at)) return reference(at, here);
+    // Past the depth, a struct written elsewhere later is named by where (resolve), else left out.
+    if (depth <= 0) return { [DEEP]: at, here };
     seen.set(at, [here, path]);
-    return depth > 0 ? struct(owner, path, v, depth - 1) : null;
+    return struct(owner, path, v, depth - 1);
   };
   const seen = new Map();
+  const reference = (at, here) => { const [id, first] = seen.get(at); return id === here ? { struct: first } : { id, struct: first }; };
+  // The data with each struct met past the depth named by where it was written, or null where it never was.
+  const resolve = (data) => {
+    if (!data || typeof data !== 'object') return data;
+    if (DEEP in data) return seen.has(data[DEEP]) ? reference(data[DEEP], data.here) : null;
+    for (const k of Object.keys(data)) data[k] = resolve(data[k]);
+    return data;
+  };
   const struct = (owner, path, s, depth) => {
     if (BULK.test(s.rna_type.identifier)) return null;
     const out = {};
@@ -109,7 +121,7 @@ function walker(onReference) {
     }
     return out;
   };
-  return struct;
+  return Object.assign(struct, { resolve });
 }
 
 // The IDs reachable from `roots` (RNA ID structs), each with its data, and the references between them.
@@ -126,6 +138,7 @@ export function exportIDs(roots, depth = 6) {
     ids[k] = { type: id.rna_type.identifier.toUpperCase(), name: id.name, path: collection ? `${collection}${key(id.name)}` : null, data: null };
     ids[k].data = struct(id, '', id, depth);
   }
+  for (const entry of Object.values(ids)) entry.data = struct.resolve(entry.data);
   return { ids, references };
 }
 
