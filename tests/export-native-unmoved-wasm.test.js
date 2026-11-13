@@ -1,6 +1,8 @@
 // A mesh on an armature the native rig runtime poses, whose stack the runtime cannot run (a Solidify after its Armature),
 // moves in the page: Babylon skins it by its Armature with its other modifiers applied to the rest it skins, reported,
-// instead of standing as Main evaluated it at the frame exported (the Bar Scene's eyes, corneas and eyebrows).
+// instead of standing as Main evaluated it at the frame exported (the Bar Scene's eyes, corneas and eyebrows). One placed
+// apart has a skeleton of its own, and the armature keeps its controls, the properties the runtime reads among them, as
+// Snow's helper meshes need.
 import assert from 'node:assert/strict';
 import { NullEngine, VertexBuffer } from '@babylonjs/core';
 import { blendData, contextStruct } from '../src/python/bpy_rna.js';
@@ -20,6 +22,12 @@ C.scene.collection.objects.link(twin);
 Object.assign(twin, { parent: body.parent, matrix_parent_inverse: body.matrix_parent_inverse, location: body.location, rotation_euler: body.rotation_euler, scale: body.scale });
 twin.modifiers.new('Armature', 'ARMATURE').object = rig;
 body.modifiers.new('Shell', 'SOLIDIFY').thickness = 0.01;
+// Another such mesh placed apart, which has a skeleton of its own.
+const apart = data.objects.new('Apart', body.data);
+C.scene.collection.objects.link(apart);
+Object.assign(apart, { parent: body.parent, matrix_parent_inverse: body.matrix_parent_inverse, location: [body.location[0] + 2, body.location[1], body.location[2]], rotation_euler: body.rotation_euler, scale: body.scale });
+apart.modifiers.new('Armature', 'ARMATURE').object = rig;
+apart.modifiers.new('Shell', 'SOLIDIFY').thickness = 0.01;
 sync.blender.tag(sync.objectOf(world.objects.find((n) => n.name === 'Rig')), 2);
 sync.view();
 
@@ -31,6 +39,10 @@ assert.equal(entity?.implementation, 'native-rig', 'the rig runs on the native r
 assert.ok(!Object.keys(entity.inputs.native.meshes ?? {}).includes('Body'), 'the runtime does not deform the body');
 assert.ok(reports.some((r) => /^Rig: exported: approximated, Body: skinned by its Armature, its other modifiers applied to its rest/.test(r.message)), JSON.stringify(reports.map((r) => r.message)));
 assert.ok(!reports.some((r) => /evaluated as Blender, Body/.test(r.message)), 'not left as Blender evaluated it');
+
+const ir = JSON.parse(files['scene.ir.json']);
+assert.ok(ir.properties['objects["Rig"].pose.bones["spine"].location[0]'], "the armature's pose controls stay");
+assert.ok(Object.keys(entity.inputs.properties ?? {}).length && Object.values(entity.inputs.properties).every((ref) => ir.properties[ref.property]), 'every property the runtime reads is a control');
 
 const written = writePackage(files);
 const blend = await (await import(written.url)).load(new NullEngine());

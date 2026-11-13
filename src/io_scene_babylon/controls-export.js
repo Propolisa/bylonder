@@ -181,10 +181,11 @@ export function posedByPage(ob) {
 // is native) has none for its dropped bones but their custom properties, and one its clips alone pose (not native: no
 // constraints in the page) none for constraint influences or B-Bone shapes either.
 function poseControls(ob, skeletons, prunedSkeletons) {
-  const drawn = skeletons.filter((s) => s.id === ob.name || s.id.startsWith(`${ob.name} `));
-  if (drawn.length !== 1) return [];
-  const bones = new Set(drawn[0].bones.map((b) => b.id)), idOf = (pose) => `${drawn[0].id} ${pose.name}`;
-  const native = prunedSkeletons.get(drawn[0].id), dropped = (pose) => native !== undefined && !bones.has(idOf(pose));
+  // The armature's controls, bound to its first skeleton where meshes in other spaces have their own.
+  const drawn = skeletons.find((s) => s.id === ob.name) ?? skeletons.find((s) => s.id.startsWith(`${ob.name} `));
+  if (!drawn) return [];
+  const bones = new Set(drawn.bones.map((b) => b.id)), idOf = (pose) => `${drawn.id} ${pose.name}`;
+  const native = prunedSkeletons.get(drawn.id), dropped = (pose) => native !== undefined && !bones.has(idOf(pose));
   const pruned = native === false, posed = posedByPage(ob);
   return [...ob.pose.bones].flatMap((pose) => {
     const base = `objects${key(ob.name)}.pose.bones${key(pose.name)}`;
