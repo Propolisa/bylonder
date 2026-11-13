@@ -2,7 +2,8 @@
 // tools/blender-reference/keyed-properties-fixture.py, as a rig's IK parent switch and a toggle) play in the page as
 // Blender evaluates them: run on the F-Curve unit, the integer rounded between its keys (0.8 is 1) and held to its hard
 // maximum (3, where its keys reach 4), the boolean switched at its key. Before, neither ran: the page held their
-// defaults. Its clip, played, sets them too, as the clip plays, held to the same limits.
+// defaults. Its clip, played, sets them too, as the clip plays, held to the same limits; a curve keying a missing
+// property sets nothing (before, the page threw "No control" as the clip played).
 import assert from 'node:assert/strict';
 import { NullEngine } from '@babylonjs/core';
 import { blendData } from '../src/python/bpy_rna.js';
@@ -20,6 +21,10 @@ sync.view();
 const main = IK_PARENTS.map((_, i) => { sync.frameChanged(i + 1); return [rig.pose.bones.get('Properties').get('ik_parents'), Number(rig.get('toggle'))]; });
 assert.deepEqual(main.map(([v]) => v), IK_PARENTS, "Main evaluates the integer as Blender");
 assert.deepEqual(main.map(([, v]) => v), TOGGLE, "and the boolean");
+
+// A curve keying a property the bone lacks (as a rig's leftover gizmo keys do) sets nothing, in Blender as in the page.
+const bag = [...rig.animation_data.action.layers].flatMap((l) => [...l.strips]).flatMap((s) => [...s.channelbags])[0];
+bag.fcurves.new('pose.bones["Properties"]["enable_bone_gizmo"]').keyframe_points.insert(1, 1);
 
 const files = await exportModule(world, { animations: 'BOTH' });
 const entities = JSON.parse(files['scene.ir.json']).entities;

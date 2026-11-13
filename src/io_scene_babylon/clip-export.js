@@ -140,7 +140,10 @@ function clipProperties({ action, ids = [], frame_start, frame_end }) {
   for (const fc of [...action.layers].flatMap((l) => [...l.strips]).flatMap((s) => [...s.channelbags]).flatMap((bag) => [...bag.fcurves])) {
     if (!/\]\["|^\["/.test(fc.data_path)) continue;
     const [, bone, name] = /^(?:pose\.bones\["((?:[^"\\]|\\.)*)"\])?\["((?:[^"\\]|\\.)*)"\]$/.exec(fc.data_path) ?? [];
-    const struct = bone ? objects[0].pose?.bones?.get?.(JSON.parse(`"${bone}"`)) : objects[0], flag = typeof struct?.get?.(name && JSON.parse(`"${name}"`)) === 'boolean';
+    const struct = bone ? objects[0].pose?.bones?.get?.(JSON.parse(`"${bone}"`)) : objects[0], current = struct?.get?.(name && JSON.parse(`"${name}"`));
+    // A curve whose property is missing (a rig's leftover gizmo keys) sets nothing, as in Blender.
+    if (typeof current !== 'number' && typeof current !== 'boolean') continue;
+    const flag = typeof current === 'boolean';
     const values = Array.from({ length: frame_end - frame_start + 1 }, (_, f) => (flag ? fc.evaluate(frame_start + f) >= 0.5 : Math.fround(fc.evaluate(frame_start + f))));
     out[`${owner}${fc.data_path.startsWith('[') ? '' : '.'}${fc.data_path}`] = values.every((v) => v === values[0]) ? values[0] : values;
   }

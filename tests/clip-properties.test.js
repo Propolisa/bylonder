@@ -1,6 +1,6 @@
 // Exported clips play what Blender plays: an action whose one slot is not named for the rig (a pose library's "Legacy
 // Slot") still animates it, the rig's own pose comes back after each clip is sampled, and a clip carries the custom
-// properties its action keys (a rig's settings), per frame or as one value where they hold still.
+// properties its action keys (a rig's settings), per frame or as one value where they hold still, and none the rig lacks.
 import assert from 'node:assert/strict';
 import { clipGroup, withAction } from '../src/io_scene_babylon/clip-export.js';
 
@@ -13,8 +13,12 @@ const action = actionOf([
   fcurve('pose.bones["Jaw"]["teeth_follow_mouth"]', (f) => (f - 10) / 10),
   fcurve('pose.bones["Jaw"].location', () => 0.2),
   fcurve('["armature_setting"]', () => 3),
+  fcurve('pose.bones["Jaw"]["enable_bone_gizmo"]', () => 1),
 ]);
-const rig = { name: 'RIG-Snow', pose: { bones: [] }, location: [0, 0, 0] };
+// The rig's own properties and its bones': a curve keying one it lacks ("enable_bone_gizmo") sets nothing.
+const holding = (...names) => ({ get: (name) => (names.includes(name) ? 0 : undefined) });
+const bones = { Properties: holding('ik_left_upperarm'), Jaw: holding('teeth_follow_mouth') };
+const rig = { name: 'RIG-Snow', ...holding('armature_setting'), pose: { bones: { get: (name) => bones[name] } }, location: [0, 0, 0] };
 const group = clipGroup({ name: 'Acting', action, ids: [rig], frame_start: 10, frame_end: 12, blend: 'REPLACE', influence: 1, speed: 1 }, []);
 assert.deepEqual(group.metadata.bylonder.properties, {
   'objects["RIG-Snow"].pose.bones["Properties"]["ik_left_upperarm"]': 1,
