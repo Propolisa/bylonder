@@ -1,4 +1,11 @@
 /**
+ * A node material refracting the scene's environment, built again when one appears or goes: Babylon's refraction block
+ * declares its samplers only for an environment present at the build, while its define follows the scene's, so a
+ * material built before the world's environment no longer compiles once it is there.
+ * @param {import('@babylonjs/core').Material} material
+ */
+export function refractionFollowsEnvironment(material: import("@babylonjs/core").Material): void;
+/**
  * A material's per-mesh values set for each mesh it draws, as the app gives them (a material shared by meshes of other
  * sizes spans each one's own texture space), and whether its faces are drawn reversed: Babylon draws a separate culling
  * pass's back faces first, their winding reversed, then its front faces (shader-nodes.js ShaderNodeOutputMaterial.bind).

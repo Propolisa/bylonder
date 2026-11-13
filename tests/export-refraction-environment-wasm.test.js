@@ -22,9 +22,22 @@ const built = async () => {
 };
 cornea.build();
 assert.doesNotMatch(await built(), new RegExp(`samplerCube ${refraction._cubeSamplerName}`), 'built without an environment, no refraction sampler');
-scene.environmentTexture = Object.assign(new BaseTexture(scene), { isCube: true });
+const environment = Object.assign(new BaseTexture(scene), { isCube: true });
+scene.environmentTexture = environment;
+scene.render();
 const code = await built(), uses = code.split(refraction._cubeSamplerName).length - 1;
 assert.ok(uses > 1 && code.includes(`samplerCube ${refraction._cubeSamplerName}`), `with the environment, the sampler it reads is declared (${uses} uses)`);
+// A probe that is the environment clears it while it draws, each frame (environment-probe.js): the material is not
+// built again for that, so it becomes ready.
+let builds = 0;
+const build = cornea.build.bind(cornea);
+cornea.build = (...args) => { builds++; return build(...args); };
+for (let frame = 0; frame < 10; frame++) {
+  scene.environmentTexture = null;
+  scene.environmentTexture = environment;
+  scene.render();
+}
+assert.equal(builds, 0, 'a probe pass clearing the environment does not build it again');
 written.remove();
 console.log('Refraction environment: a refracting material builds again as the environment arrives, its sampler declared');
 process.exit(0);

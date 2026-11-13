@@ -46,11 +46,16 @@ export function refractionFollowsEnvironment(material) {
   if (!(material instanceof NodeMaterial)) return;
   const refraction = /** @type {import('@babylonjs/core').RefractionBlock | null} */ (material.getBlockByPredicate((b) => b.getClassName() === 'RefractionBlock'));
   if (!refraction || refraction.texture) return;
+  // Checked before each frame, not as the environment changes: a probe that is the environment clears it while it
+  // draws (environment-probe.js), which would build the material twice a frame.
   const scene = material.getScene();
-  let withEnvironment = !!scene.environmentTexture;
-  material.onBuildObservable.add(() => { withEnvironment = !!scene.environmentTexture; });
-  const observer = scene.onEnvironmentTextureChangedObservable.add(() => { if (!!scene.environmentTexture !== withEnvironment) material.build(); });
-  material.onDisposeObservable.addOnce(() => scene.onEnvironmentTextureChangedObservable.remove(observer));
+  let built = !!scene.environmentTexture;
+  const observer = scene.onBeforeRenderObservable.add(() => {
+    if (!!scene.environmentTexture === built) return;
+    built = !built;
+    material.build();
+  });
+  material.onDisposeObservable.addOnce(() => scene.onBeforeRenderObservable.remove(observer));
 }
 
 /**
