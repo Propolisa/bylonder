@@ -1,7 +1,8 @@
 // An armature's bone constraints as the page runs them (runtime/pose-constraints.js): on Blender's kernels
 // (constraints.wasm, runtime/pose-kernels.js) where they cover the rig, else on the page's own solvers where it has one
 // for each constraint; kept only where the page's pose is the one Main evaluated at every frame the export samples.
-import { Matrix, VertexBuffer } from '@babylonjs/core';
+import { Matrix, Vector3, VertexBuffer } from '@babylonjs/core';
+import { packDualQuaternions, skinPoint } from './runtime/dual-quaternion-skinning.js';
 import { posedBone } from './runtime/blend-scene.js';
 import { blendData } from '../python/bpy_rna.js';
 import { solvePose } from './runtime/pose-constraints.js';
@@ -11,6 +12,7 @@ import { packDescription, rigDescription } from './rig-description.js';
 import { compileRig } from './runtime/native/rig/program.js';
 import { compileDeform } from './runtime/native/deform/mesh.js';
 import { shownStack } from '../runtimes/applied-rest.js';
+import { blockData } from '../runtimes/key-blocks.js';
 import { loadConstraints } from './polyfill/constraints.js';
 import { rigOf } from './rig-export.js';
 import { bboneShape, key } from './controls-export.js';
@@ -27,10 +29,9 @@ const BONE_SPACES = ['WORLD', 'POSE', 'LOCAL'];
 const TOLERANCE = 1e-3;
 // Every how many checked frames the native runtime's deformed meshes are compared with Main's.
 const DEFORM_CHECKS = 10;
-// How far a vertex the native runtime deforms may be from Main's, as a share of its mesh's bounding-box diagonal: under
-// it, no difference shows at the mesh's own scale (about 1 cm on a body, 2 mm on a head).
-// Tests lower it to take the per-mesh fallback.
-export const vertexTolerance = { share: 0.005 };
+// How far, in metres, a vertex a page deforms (on the native runtime, or by Babylon's skinning) may be from Main's;
+// beyond it the closer of the two is kept and reported. Tests lower it to take the per-mesh fallback.
+export const vertexTolerance = { distance: 1e-4 };
 
 // What a constraint reads, as the page finds it: a bone of the armature, or an object's node; undefined where it
 // cannot; null where there is none.
@@ -183,12 +184,62 @@ const skinning = (skeleton, apart, bones) => new Set(skeleton.getScene().meshes.
   .flatMap((m) => [[VertexBuffer.MatricesIndicesKind, VertexBuffer.MatricesWeightsKind], [VertexBuffer.MatricesIndicesExtraKind, VertexBuffer.MatricesWeightsExtraKind]]
     .flatMap(([indices, weights]) => { const i = m.getVerticesData(indices), w = m.getVerticesData(weights); return i && w ? Array.from(i).filter((_, k) => w[k] > 0) : []; }))
   .map((j) => { const name = skeleton.bones[j].name, at = name.lastIndexOf('#'); return at > 0 ? bones.findIndex((b) => b.name === name.slice(0, at)) : j; }));
+// What plain linear skinning of a mesh object by `arm` misses of Blender's Armature: Preserve Volume, B-Bones, modifiers after it.
+const approximated = (arm, ob) => {
+  const stack = shownStack(ob), at = stack.findIndex((m) => m.type === 'ARMATURE' && m.object === arm);
+  return [...(stack[at]?.use_deform_preserve_volume ? ['Preserve Volume'] : []), ...([...arm.data.bones].some((b) => b.bbone_segments > 1) ? ['B-Bones'] : []),
+    ...stack.slice(at + 1).map((m) => m.name)];
+};
+// The skin matrices of a page's skeleton at its pose (Babylon's: inverse rest, then pose, both from the mesh's space).
+function skinMatrices({ skeleton, shape }) {
+  const posed = [], rests = [];
+  shape.forEach(({ parent, rest }, i) => {
+    const local = skeleton.bones[i]._matrix;
+    posed[i] = parent < 0 ? local.clone() : local.multiply(posed[parent]);
+    rests[i] = parent < 0 ? rest.clone() : rest.multiply(rests[parent]);
+  });
+  return posed.map((m, i) => Matrix.Invert(rests[i]).multiply(m));
+}
+// A rest's vertex positions with its object's shape keys at their values now, as its morph targets give them to the
+// skinning; the rest's own where its vertices are not the object's (a rest with its modifiers applied).
+function keyedRest(ob, rest) {
+  const key = ob.data.shape_keys, count = rest.vert_positions.length / 3;
+  if (!key || count !== ob.data.vertices.length) return rest.vert_positions;
+  const blocks = [...key.key_blocks], basis = blockData(blocks[0], count), out = Float64Array.from(basis);
+  for (const kb of blocks.slice(1)) {
+    const value = ob.show_only_shape_key || kb.mute ? 0 : kb.value;
+    if (!value) continue;
+    const data = blockData(kb, count), base = kb.relative_key === kb ? basis : blockData(kb.relative_key, count);
+    for (let i = 0; i < count * 3; i++) out[i] += value * (data[i] - base[i]);
+  }
+  return out;
+}
+// How far what Babylon's skinning draws of a mesh (its skin's influences on its rest's face corners, blended linearly or
+// as dual quaternions, read through its pose matrix) is from Main's evaluated mesh, at its farthest face corner;
+// Infinity where their corners differ.
+function skinDistance(skin, rest, evaluated, matrices, ob) {
+  if (!skin || !evaluated || evaluated.corners_num !== rest.corners_num) return Infinity;
+  const shaped = keyedRest(ob, rest);
+  const inverse = Matrix.Invert(skin.pose), own = skin.pose.isIdentity() ? matrices : matrices.map((m) => inverse.multiply(m).multiply(skin.pose));
+  const packed = skin.dualQuaternions && packDualQuaternions(Float32Array.from(own.flatMap((m) => Array.from(m.m))));
+  const corner = (mesh, c) => { const v = mesh.corner_verts[c], p = mesh.vert_positions; return [p[v * 3], p[v * 3 + 2], p[v * 3 + 1]]; };
+  let worst = 0;
+  for (let c = 0; c < rest.corners_num; c++) {
+    const influences = [];
+    for (let i = 0; i < skin.influencers; i++) { const w = skin.weights[i >> 2][c * 4 + (i & 3)]; if (w) influences.push([skin.indices[i >> 2][c * 4 + (i & 3)], w]); }
+    if (!influences.length) continue;
+    influences.sort((a, b) => b[1] - a[1]);
+    const p = corner({ corner_verts: rest.corner_verts, vert_positions: shaped }, c), q = corner(evaluated, c);
+    const ours = packed ? skinPoint(packed, influences, p) : influences.reduce((sum, [b, w]) => {
+      const t = Vector3.TransformCoordinates(Vector3.FromArray(p), own[b]);
+      return [sum[0] + w * t.x, sum[1] + w * t.y, sum[2] + w * t.z];
+    }, [0, 0, 0]);
+    worst = Math.max(worst, Math.hypot(ours[0] - q[0], ours[1] - q[1], ours[2] - q[2]));
+  }
+  return worst;
+}
 // The largest distance between two lists of positions, vertex by vertex.
 const farthest = (a, b) => { let worst = 0; for (let v = 0; v < b.length; v += 3) worst = Math.max(worst, Math.hypot(a[v] - b[v], a[v + 1] - b[v + 1], a[v + 2] - b[v + 2])); return worst; };
-// The diagonal of positions' bounding box.
-const diagonal = (p) => { const lo = [Infinity, Infinity, Infinity], hi = [-Infinity, -Infinity, -Infinity];
-  for (let v = 0; v < p.length; v += 3) for (let k = 0; k < 3; k++) { lo[k] = Math.min(lo[k], p[v + k]); hi[k] = Math.max(hi[k], p[v + k]); }
-  return Math.hypot(hi[0] - lo[0], hi[1] - lo[1], hi[2] - lo[2]); };
 const close = (a, b) => a.asArray().every((v, i) => Math.abs(v - b.asArray()[i]) <= TOLERANCE);
 
 // For an armature drawn by one skeleton, its bone constraints as the page runs them (on the kernels when an export has
@@ -208,11 +259,12 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
   const rig = kernels && bones.length === arm.data.bones.length && rigOf(arm, [...arm.data.bones].map((b) => b.name), targetOf);
   const native = !rig && bones.length === arm.data.bones.length ? nativeRig(arm, nodeOf, deformed) : null;
   const deforms = Object.keys(native?.meshes ?? {}), deviation = new Map(deforms.map((name) => [name, 0])), allowed = new Map();
-  // The same meshes skinned by their Armature alone, as Babylon would: a mesh the runtime deforms beyond its allowance
-  // is skinned where that is closer to Main's (`skinned`).
+  // The same meshes skinned by their Armature alone, as Babylon would (`skinned`): the cheaper, where it is within the
+  // allowance or closer to Main's than the runtime beyond it; a mesh Babylon can skin that the runtime does not run too.
   const alone = deforms.length && nativeRig(arm, nodeOf, deformed, true), skinSolver = alone && nativeSolve(), skinDeviation = new Map(deforms.map((name) => [name, 0]));
-  // Babylon's skinning, the cheaper, where it is as close.
-  const skinned = () => new Set(deforms.filter((name) => deviation.get(name) > allowed.get(name) && skinDeviation.get(name) <= deviation.get(name)));
+  const skinnable = deformed.filter((d) => d.skinnable).map((d) => d.ob.name), babylonDeviation = new Map();
+  const skinned = () => new Set([...deforms.filter((name) => skinDeviation.get(name) <= allowed.get(name) || (deviation.get(name) > allowed.get(name) && skinDeviation.get(name) <= deviation.get(name))),
+    ...skinnable.filter((name) => !deforms.includes(name))]);
   const evaluatedOf = new Map(deformed.map((d) => [d.ob.name, d.evaluated]));
   const stacks = rig || native ? {} : poseStacks(arm, nodeOf);
   if (!rig && !native && !stacks) return null;
@@ -245,8 +297,11 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
   return {
     moved,
     native: !!native,
+    // On the kernels, meshes Babylon skins with what plain skinning approximates, which no check compares with Main's.
+    unchecked: rig ? deformed.filter((d) => d.skinnable).map(({ ob }) => [ob.name, approximated(arm, ob)]).filter(([, what]) => what.length) : [],
     deforms,
     deviation,
+    babylonDeviation,
     allowed,
     skinDeviation,
     skinned,
@@ -277,9 +332,19 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
       if (checked % DEFORM_CHECKS === 0) for (const name of deforms) {
         const ours = nativeSolver.deformed(native, name), theirs = evaluatedOf.get(name)().vert_positions;
         deviation.set(name, Math.max(deviation.get(name), farthest(ours, theirs)));
-        allowed.set(name, vertexTolerance.share * diagonal(theirs));
+        allowed.set(name, vertexTolerance.distance);
         const skin = skinSolver.deformed(alone, name);
         skinDeviation.set(name, skin.length === theirs.length ? Math.max(skinDeviation.get(name), farthest(skin, theirs)) : Infinity);
+      }
+      // A mesh Babylon can skin, judged by what Babylon's skinning draws of it.
+      if (checked % DEFORM_CHECKS === 0 && page) {
+        const matrices = skinMatrices(page);
+        for (const d of deformed.filter((e) => e.skinnable)) {
+          const distance = skinDistance(d.skin(), d.rest(), d.evaluated(), matrices, d.ob);
+          babylonDeviation.set(d.ob.name, Math.max(babylonDeviation.get(d.ob.name) ?? 0, distance));
+          if (deforms.includes(d.ob.name)) skinDeviation.set(d.ob.name, babylonDeviation.get(d.ob.name));
+          allowed.set(d.ob.name, vertexTolerance.distance);
+        }
       }
       checked++;
     },

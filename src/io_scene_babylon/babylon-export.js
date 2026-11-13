@@ -492,8 +492,9 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
   const restores = [
     setFor(all, 'doNotSerialize', (n) => !content.nodes.has(n)),
     setFor(scene.materials, 'doNotSerialize', (m) => !content.materials.has(m)),
-    // The skeletons skinning what the export writes, not the scene's other rigs (a Selected Objects export).
-    setFor(scene.skeletons, 'doNotSerialize', (s) => s.doNotSerialize || !content.meshes.some((mesh) => mesh.skeleton === s)),
+    // The skeletons of the rigs the export writes, skinning a mesh or not (the page poses them), not the scene's other
+    // rigs (a Selected Objects export).
+    setFor(scene.skeletons, 'doNotSerialize', (s) => s.doNotSerialize || !(content.meshes.some((mesh) => mesh.skeleton === s) || /** @type {any} */ (s).posedByPage)),
     geometry ? () => {} : withoutGeometry(scene.getGeometries()),
     setFor(scene.textures.filter((t) => t instanceof Texture && !t.isRenderTarget), '_forceSerialize', (t) => t._forceSerialize || !portable(t.url ?? '')),
     // Babylon's serializer leaves out a texture without a name (one made from code, a RawTexture).

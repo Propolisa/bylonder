@@ -32,12 +32,13 @@ sync.view();
 
 const reports = [];
 subscribeReports((r) => reports.push(r));
-vertexTolerance.share = 0;
+vertexTolerance.distance = 0;
 const files = await exportModule(world);
-vertexTolerance.share = 0.005;
+vertexTolerance.distance = 1e-4;
 const entity = Object.values(JSON.parse(files['scene.ir.json']).entities).find((e) => e.type === 'constraints:POSE');
 assert.equal(entity?.implementation, 'native-rig', 'the rig stays live');
-assert.deepEqual(Object.keys(entity.inputs.native.meshes), ['Body'], 'the body stays on the runtime, its copy does not');
+const onRuntime = Object.keys(entity.inputs.native.meshes);
+assert.ok(onRuntime.includes('Body') && !onRuntime.includes('Still'), `the body stays on the runtime, its copy does not (${onRuntime})`);
 const warning = (name) => reports.find((r) => r.type === 'WARNING' && r.message.startsWith(`${name}: `))?.message ?? '';
 assert.match(warning('Body'), /^Body: deformed by the native rig runtime, the closer to Blender's \(the runtime [\d.]+ mm, its Armature alone [\d.]+ mm, 0\.0 mm allowed\)$/);
 assert.match(warning('Still'), /^Still: skinned by its Armature alone, the closer to Blender's \(the runtime [\d.]+ mm, its Armature alone [\d.]+ mm, 0\.0 mm allowed\)$/);

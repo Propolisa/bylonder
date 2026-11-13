@@ -203,7 +203,7 @@ export function mapArmature(arm, scene) {
   // view's own (a mesh Babylon draws itself); influencers: the setting; restOf(ob): an export's applied rest of it
   // (applied-rest.js), whose Mesh meshOf gives and whose weights it skins by; skinned: those skinned by their Armature
   // alone, whatever else their stacks hold (an export's choice, armature.js poseAnimations).
-  function update({ objects, meshOf, changed = () => false, fallbacks = () => [], influencers = 'AUTO', restOf = () => null, skinned = new Set() }) {
+  function update({ objects, meshOf, changed = () => false, fallbacks = () => [], influencers = 'AUTO', restOf = () => null, skinned = new Set(), native = new Set() }) {
     bones = bonesOf(arm, segmentsOf(arm));
     const armatureWorld = matrix(arm.matrix_world);
     const issues = [], deformed = new Map(), rests = new Map();
@@ -213,7 +213,7 @@ export function mapArmature(arm, scene) {
       if (rest) rests.set(address(ob), rest);
       const stack = meshFallbacks(ob, arm, rest?.applied), view = fallbacks(ob);
       issues.push(...stack, ...view);
-      if (!view.length && (!stack.length || skinned.has(ob.name))) deformed.set(address(ob), ob);
+      if (!view.length && (!stack.length || skinned.has(ob.name)) && !native.has(ob.name)) deformed.set(address(ob), ob);
       else if (!view.length) mapping.apart.set(address(ob), ob);
     }
     const used = new Set(), spaceOf = (ob) => armatureWorld.multiply(Matrix.Invert(matrix(ob.matrix_world)));
@@ -224,6 +224,8 @@ export function mapArmature(arm, scene) {
     if (first && !skeletons.has(id)) skeletons.set(id, skeletonOf(deformed.size > 1 ? `${arm.name} ${first.name}` : arm.name, bones, base, scene));
     const poses = new Map([...deformed].map(([key, ob]) => [key, Matrix.Invert(base).multiply(spaceOf(ob))]));
     const apart = [...poses.values()].some((pose) => !pose.isIdentity());
+    // The skeleton stays when no mesh skins to it any more (all on the native runtime): the page poses it.
+    if (kept) used.add(kept[1]);
     if (first) skeletons.get(id).needInitialSkinMatrix = apart;
     for (const [key, ob] of deformed) {
       const space = spaceOf(ob), pose = poses.get(key);
@@ -450,7 +452,8 @@ function poseAnimations(world, mappings, bake, sampling, scene, bases = new Set(
     const mesh = mapping.skeletons.size === 1 && scene.meshOf(mapping), [skeleton] = mapping.skeletons.values();
     const stack = mesh && livePoseConstraints(mapping.arm, skeleton, mesh, { nodeOf: scene.nodeOf, deformed: scene.deformed(mapping),
       meshWorld: () => sync.worldMatrix(mesh), nodeWorld: (id) => sync.worldMatrix(world.scene.getNodeById(id)) });
-    if (stack) stacks.set(mapping, stack);
+    // A skeleton the page poses is exported, whether or not a mesh skins to it.
+    if (stack) { stacks.set(mapping, stack); skeleton.posedByPage = true; }
   }
   const sample = (frame) => {
     for (const mapping of mappings) {
@@ -472,6 +475,8 @@ function poseAnimations(world, mappings, bake, sampling, scene, bases = new Set(
   return Object.assign(once(finish), { deforms: new Set([...stacks.values()].flatMap((stack) => stack.deforms)),
     // The meshes of each mapping skinned by their Armature alone, once its frames are checked.
     skinned: (mapping) => stacks.get(mapping)?.skinned() ?? new Set(),
+    // Those it deforms in the end, Babylon's skinning missing them.
+    native: (mapping) => { const stack = stacks.get(mapping), skinned = stack?.skinned(); return new Set(stack?.deforms.filter((name) => !skinned.has(name)) ?? []); },
     live: new Set(stacks.keys()) });
   function finish() {
     // A stack the page runs where every bone it moves is posed by its own F-Curves, or not animated.
@@ -489,11 +494,14 @@ function poseAnimations(world, mappings, bake, sampling, scene, bases = new Set(
       }
       const skinned = stack.skinned(), mm = (distance) => `${(distance * 1000).toFixed(1)} mm`;
       for (const [name, distance] of stack.deviation) {
+        // Babylon's skinning, within the allowance, as plain as it gets.
+        if (skinned.has(name) && stack.skinDeviation.get(name) <= stack.allowed.get(name)) continue;
         if (distance <= stack.allowed.get(name)) report('INFO', `${name}: deformed live by the native rig runtime, within ${distance.toPrecision(2)} m of Blender's evaluated mesh`);
         else report('WARNING', `${name}: ${skinned.has(name) ? 'skinned by its Armature alone' : 'deformed by the native rig runtime'}, the closer to Blender's (the runtime ${mm(distance)}, its Armature alone ${Number.isFinite(stack.skinDeviation.get(name)) ? mm(stack.skinDeviation.get(name)) : 'not comparable: its stack changes its vertices'}, ${mm(stack.allowed.get(name))} allowed)`);
       }
       for (const { mesh, lattice, step } of entity.native?.skipped ?? []) report('WARNING', `${mesh}: the native rig runtime does not run ${lattice}'s ${step} modifier, so the lattice deforms it without it`);
       if (stack.off.size) report('WARNING', `${mapping.arm.name}: on the native rig runtime, bones ${named(stack.off)} are off from Blender within what its meshes show`);
+      if (stack.unchecked.length) report('WARNING', `${mapping.arm.name}: not vertex-checked against Blender, skinned by Babylon with ${stack.unchecked.map(([name, what]) => `${name} (${what.join(', ')})`).join(', ')}`);
       curves.push(...own.flat());
       constraints.push({ armature: scene.nodeOf(mapping.arm)?.id, pose: entity });
       stack.moved.forEach((bone) => posed.add(bone));
@@ -561,9 +569,9 @@ function exportArmatures(world, { bake, sampling, rests = appliedRests() }) {
     const ofArmature = (ob) => m.skins.has(address(ob)) || m.apart.has(address(ob));
     const surface = meshes.filter((ob) => !m.apart.has(address(ob)) && surfaceTargets(ob).some(ofArmature));
     const read = [...new Set([...m.apart.values(), ...surface].flatMap(surfaceTargets))].filter((ob) => !m.apart.has(address(ob)));
-    // The skinned meshes whose shape keys drivers set: the runtime runs those drivers (`keyed`).
-    const keyed = [...m.skins.keys()].map((key) => idStruct(byOb.get(key).ob)).filter((ob) => ob.data.shape_keys?.animation_data?.drivers.length);
-    return [...[...m.apart.values(), ...surface].flatMap((ob) => entryOf(ob)), ...read.flatMap((ob) => entryOf(ob, true)), ...keyed.map((ob) => ({ ob, keyed: true }))];
+    // The meshes Babylon skins too, each checked: the runtime deforms one Babylon's skinning misses (`skinnable`).
+    const skinnable = [...m.skins.keys()].flatMap((key) => entryOf(idStruct(byOb.get(key).ob)).map((entry) => ({ ...entry, skinnable: true, skin: () => m.skins.get(key), rest: () => meshOf(key) })));
+    return [...[...m.apart.values(), ...surface].flatMap((ob) => entryOf(ob)), ...skinnable, ...read.flatMap((ob) => entryOf(ob, true))];
   };
   const posed = poseAnimations(world, mappings, bake, sampling, { nodeOf, deformed, meshOf: (m) => byOb.get(m.skins.keys().next().value)?.node });
   // The meshes of an export's mapping Babylon cannot skin for their stack that the native runtime does not deform
@@ -571,7 +579,8 @@ function exportArmatures(world, { bake, sampling, rests = appliedRests() }) {
   const unmoved = (m) => (temporary.some((state) => state.mapping === m) ? [...m.apart.values()].filter((ob) => !posed.deforms.has(ob.name)).map((ob) => ob.name) : []);
   // A mesh the native runtime deforms, or one skinned for it, is no longer Blender's, whatever its stack.
   const native = (m, issues) => {
-    const skinned = new Set(unmoved(m)), moved = (name) => posed.deforms.has(name) || skinned.has(name);
+    const skinned = new Set(unmoved(m)), runtime = posed.native(m), apart = new Set([...m.apart.values()].map((ob) => ob.name));
+    const moved = (name) => runtime.has(name) || skinned.has(name) || (apart.has(name) && posed.deforms.has(name));
     return [...issues.filter((i) => i.kind !== FALLBACK || !moved(i.ob)),
       ...[...new Set(issues.map((i) => i.ob))].filter(moved).map((name) => issue(APPROXIMATION, { name }, 'modifiers',
         skinned.has(name) ? 'skinned by its Armature, its other modifiers applied to its rest, as the native rig runtime does not deform it' : 'its modifiers deform on the native rig runtime'))];
@@ -600,10 +609,10 @@ function exportArmatures(world, { bake, sampling, rests = appliedRests() }) {
     // with every modifier of theirs applied into the rest they skin.
     settle() {
       for (const state of temporary) {
-        const still = unmoved(state.mapping), skinned = new Set([...posed.skinned(state.mapping), ...still]);
-        if (!skinned.size) continue;
+        const still = unmoved(state.mapping), skinned = new Set([...posed.skinned(state.mapping), ...still]), native = posed.native(state.mapping);
+        if (!skinned.size && !native.size) continue;
         for (const ob of state.mapping.apart.values()) if (still.includes(ob.name)) rests.force(ob);
-        state.mapping.update({ ...state.options, skinned });
+        state.mapping.update({ ...state.options, skinned, native });
         drawSkins({ ...view, world: { animation: { playing: true } } }, state, meshOf);
       }
     },
