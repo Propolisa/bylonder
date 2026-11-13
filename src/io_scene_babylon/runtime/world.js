@@ -36,19 +36,21 @@ export function worldColor(scene, color) {
 
 /**
  * A world of nodes: its material on a box around the eye, and baked into the probe that lights the scene once its
- * shader is ready (a GPU's work: a page without one shows the box but bakes nothing).
+ * shader is ready (a GPU's work: a page without one shows the box but bakes nothing). The probe is the scene's
+ * environment at once, before the other materials are made (their PBR blocks leave out an environment made later).
  * @param {Scene} scene
  * @param {Material} material
  */
 export function worldNodes(scene, material) {
   const box = CreateBox('world', { size: 2 }, scene);
   Object.assign(box, { material, infiniteDistance: true, isPickable: false, applyFog: false, alwaysSelectAsActiveMesh: true });
+  const probe = new ReflectionProbe('world', 256, scene, true, true, true), drawn = probe.cubeTexture;
+  Object.assign(drawn, { gammaSpace: false, refreshRate: RenderTargetTexture.REFRESHRATE_RENDER_ONCE });
+  probe.renderList?.push(box);
+  scene.environmentTexture = drawn;
   const bake = async () => {
     // Not ready: tried again after a while (an observer added while the observable notifies would run at once).
     if (!box.subMeshes.every((subMesh) => material.isReadyForSubMesh(box, subMesh))) return void setTimeout(bake, 16);
-    const probe = new ReflectionProbe('world', 256, scene, true, true, true), drawn = probe.cubeTexture;
-    Object.assign(drawn, { gammaSpace: false, refreshRate: RenderTargetTexture.REFRESHRATE_RENDER_ONCE });
-    probe.renderList?.push(box);
     if (scene.activeCamera) probe.position.copyFrom(scene.activeCamera.globalPosition);
     // The probe takes the world clamped (its Sun Threshold), as the export's `world:probe` input says.
     const clamp = /** @type {any} */ (material).getBlockByName?.('world:probe');
@@ -59,7 +61,8 @@ export function worldNodes(scene, material) {
     // Unfiltered where the engine cannot prefilter (a NullEngine, in Node).
     if (scene.getEngine()._features.allowTexturePrefiltering) await new HDRFiltering(scene.getEngine()).prefilter(drawn);
     drawn.sphericalPolynomial = polynomial;
-    scene.environmentTexture = drawn;
+    // Its light now drawn: the materials take its spherical harmonics.
+    scene.markAllMaterialsAsDirty(Constants.MATERIAL_TextureDirtyFlag);
   };
   scene.onBeforeRenderObservable.addOnce(bake);
   return { box };

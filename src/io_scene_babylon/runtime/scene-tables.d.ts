@@ -10,7 +10,8 @@ export function groupEntry(key: string, settings: Record<string, any>, animation
 /**
  * The scene's tables and the objects made from them, which `apply(patch)` changes all or nothing: a patch from another
  * version than the one shown, or naming what the tables would not hold, throws and changes nothing (its caller loads
- * the package again). `parsers.lightsMade(lights)` runs once the lights and shadows are made. Gives `made`: the objects
+ * the package again). `parsers.worldMade(material)` runs once the world's material is made, before the other materials;
+ * `parsers.lightsMade(lights)` once the lights and shadows are made. Gives `made`: the objects
  * by table and key, the materials and multi-materials by key, and the nodes by their exported unique ids.
  * @param {Loading} loading
  */

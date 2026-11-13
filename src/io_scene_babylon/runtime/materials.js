@@ -37,24 +37,22 @@ export const REVERSED_FACES = '$reversed_faces';
 export const REVERSED_GLOBAL = 'float bl_reversed_faces = 0.0;';
 const reversedPasses = new WeakSet();
 /**
- * A node material refracting the scene's environment, built again when one appears or goes: Babylon's refraction block
- * declares its samplers only for an environment present at the build, while its define follows the scene's, so a
- * material built before the world's environment no longer compiles once it is there.
+ * A node material lit or refracting by the scene's environment, built again when one appears or goes: Babylon's PBR
+ * block writes the environment's light (its reflection) and its refraction samplers only for an environment present at
+ * the build, while their defines follow the scene's, so a material built before the world's environment stays unlit by
+ * it (black in shade) or, refracting, no longer compiles once it is there.
  * @param {import('@babylonjs/core').Material} material
  */
-export function refractionFollowsEnvironment(material) {
+export function followsEnvironment(material) {
   if (!(material instanceof NodeMaterial)) return;
-  const refraction = /** @type {import('@babylonjs/core').RefractionBlock | null} */ (material.getBlockByPredicate((b) => b.getClassName() === 'RefractionBlock'));
-  if (!refraction || refraction.texture) return;
+  const reads = material.getBlockByPredicate((b) => ['ReflectionBlock', 'RefractionBlock'].includes(b.getClassName()) && !(/** @type {any} */ (b).texture));
+  if (!reads) return;
   // Checked before each frame, not as the environment changes: a probe that is the environment clears it while it
-  // draws (environment-probe.js), which would build the material twice a frame.
+  // draws (environment-probe.js), which would build the material twice a frame; a build in that pass is set right once.
   const scene = material.getScene();
   let built = !!scene.environmentTexture;
-  const observer = scene.onBeforeRenderObservable.add(() => {
-    if (!!scene.environmentTexture === built) return;
-    built = !built;
-    material.build();
-  });
+  material.onBuildObservable.add(() => { built = !!scene.environmentTexture; });
+  const observer = scene.onBeforeRenderObservable.add(() => { if (!!scene.environmentTexture !== built) material.build(); });
   material.onDisposeObservable.addOnce(() => scene.onBeforeRenderObservable.remove(observer));
 }
 

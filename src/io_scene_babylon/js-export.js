@@ -415,7 +415,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   const pieces = stripPieces(ir, shipped, replace), kernels = pieces && kernelsFile(pieces);
   const curves = Object.values(ir.entities).some((e) => e.implementation === 'curves');
   const meshValued = data.materials.some((m) => m.blocks?.some((b) => b.name.startsWith(MESH_VALUE)));
-  const refracting = data.materials.some((m) => m.blocks?.some((b) => b.customType === 'BABYLON.RefractionBlock'));
+  const environmentLit = data.materials.some((m) => m.blocks?.some((b) => ['BABYLON.ReflectionBlock', 'BABYLON.RefractionBlock'].includes(b.customType)));
   // A composite convolving with Glare's Fog Glow kernel (compositor-replay.js fogGlowRecording), Blender's unless replaced,
   // with the Fog Glow render setting on.
   const fogGlow = !!composited && json(composited.compositor).includes('"op":"fogGlow"') && fogGlowOnGPU.enabled(world.scene), blenderFogGlow = fogGlow && !replaces(replace, FOG_GLOW_UNIT);
@@ -449,7 +449,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
     defaultMaterial: data.defaultMaterialId ?? null, environmentProbe: data.environmentProbe ?? null, environmentIntensity: data.environmentIntensity, iblIntensity: data.iblIntensity, useRightHandedSystem: data.useRightHandedSystem,
   };
   // The scene's tables by datablock (scene-tables.js); nodes first, as they add thin instance buffers to scene.bin.
-  const keys = tableKeys(world, ir, data.meshes), table = (name, list) => keyed(list ?? [], keys[name]);
+  const keys = tableKeys(world, ir, data.meshes, worldEntry?.uniqueId ?? null), table = (name, list) => keyed(list ?? [], keys[name]);
   const nodes = keyed(objects.map(({ entry, mesh }) => nodeEntry(entry, mesh, mesh?.geometry && keys.geometries(geometries.get(mesh.geometry)), live.get(mesh), bin)), keys.nodes);
   const tables = { materials: table('materials', data.materials), multiMaterials: table('multiMaterials', data.multiMaterials), skeletons: table('skeletons', data.skeletons),
     morphTargets: table('morphTargets', binaryMorphTargets(data.morphTargetManagers ?? [], world.scene.meshes, bin)),
@@ -499,8 +499,8 @@ import './bylonder/overrides/babylon/srgb-texture-parse.js';
 import { lightBudget, reachLights } from './bylonder/overrides/babylon/light-reach.js';${clustered ? `
 import { clusterLights } from './bylonder/overrides/babylon/clustered-lights.js';` : ''}
 import { parseCamera } from './bylonder/overrides/babylon/camera-quaternion.js';
-import { orthoScaled } from './bylonder/ortho-scale.js';${kernels || meshValued || refracting ? `
-import { ${[kernels && 'fillMaterials', meshValued && 'meshValues', refracting && 'refractionFollowsEnvironment'].filter(Boolean).join(', ')} } from './bylonder/materials.js';` : ''}${kernels ? `
+import { orthoScaled } from './bylonder/ortho-scale.js';${kernels || meshValued || environmentLit ? `
+import { ${[kernels && 'fillMaterials', meshValued && 'meshValues', environmentLit && 'followsEnvironment'].filter(Boolean).join(', ')} } from './bylonder/materials.js';` : ''}${kernels ? `
 import kernels from './${NODE_KERNELS}';` : ''}${curves ? `
 // The curves blocks the materials drawing curves use, before they are parsed.
 import './${CURVES_GLSL_FILE}';` : ''}${volumes ? `
@@ -648,12 +648,15 @@ ${settings.environment ? `  const env = SCENE.environment;
   const data = await readData(), { buffers } = data;
   SCENE_BUFFERS.set(scene, buffers);
   IRS.set(scene, data.ir);
+  // The world lights the scene: its color, or its nodes baked once their shader is ready. Its environment exists before
+  // the other materials are made, as Babylon's PBR block leaves out the light of an environment made after it.
+  const world = SCENE.world;
+  if (world?.material === null) WORLDS.set(scene, worldColor(scene, world.color));
   const made = addObjects(scene, data), materials = made.materialsByKey;
   TABLES.set(scene, made.state);
   if (SCENE.defaultMaterial !== null) scene.defaultMaterial = materials[SCENE.defaultMaterial];
-  // The world lights the scene: its color, or its nodes baked once their shader is ready.
-  const world = SCENE.world;
-  if (world) WORLDS.set(scene, world.material !== null ? worldNodes(scene, materials[world.material]) : worldColor(scene, world.color));
+  // A world of nodes the tables did not make first (one not keyed by a World, as code makes it).
+  if (world && !WORLDS.has(scene)) WORLDS.set(scene, worldNodes(scene, materials[world.material]));
 ${parse('EFFECT_LAYERS', data.effectLayers, "EffectLayer.Parse(entry, scene, ROOT)")}  if (SCENE.environmentProbe) scene.environmentTexture = scene.reflectionProbes.find((p) => p.name === SCENE.environmentProbe)?.cubeTexture ?? scene.environmentTexture;
   scene.activeCamera = scene.getCameraById(${json(data.activeCameraID ?? null)}) ?? scene.cameras[0] ?? null;
 ${pipelineTypes.length ? `  for (const entry of RENDERING_PIPELINES) {
@@ -696,9 +699,9 @@ ${kernels ? `  // Blender's nodes of each material and world, made from the IR's
       // Node materials' samplers as WebGPU binds them.
       if (material.getClassName() === 'NodeMaterial') webgpuSamplers(material);` : ''}${meshValued ? `
       // Each mesh's own texture space, in the materials it shares.
-      meshValues(material);` : ''}${refracting ? `
-      // A refraction of the scene's environment, built again as one appears or goes.
-      refractionFollowsEnvironment(material);` : ''}${areaSpecular ? `
+      meshValues(material);` : ''}${environmentLit ? `
+      // Lit or refracting by the scene's environment, built again as one appears or goes.
+      followsEnvironment(material);` : ''}${areaSpecular ? `
       if (areaSpecular && material.getClassName() === 'PBRMaterial') areaSpecular(material);` : ''}
       return material;
     }`)}${parser(data.multiMaterials, 'multiMaterials', `(entry, key, made) => {
@@ -709,6 +712,7 @@ ${kernels ? `  // Blender's nodes of each material and world, made from the IR's
     }`)}${parser(data.skeletons, 'skeletons', '(entry) => Skeleton.Parse(entry, scene)')}${parser(data.morphTargetManagers, 'morphTargets', '(entry) => MorphTargetManager.Parse(morphKeys(entry, buffers), scene)')}${parser(data.meshes.filter((m) => m.type === 'LinesMesh'), 'linesMesh', '(entry) => new LinesMesh(entry.name, scene)')}${parser(data.lights, 'lights', `(entry) => ${areaLights ? 'parseLight(entry, scene, AreaLight)' : 'Light.Parse(entry, scene)'}`)}${parser(data.cameras, 'cameras', '(entry) => orthoScaled(parseCamera(entry, scene))')}${parser(data.reflectionProbes, 'reflectionProbes', '(entry) => ReflectionProbe.Parse(entry, scene, ROOT)')}${parser(data.shadowGenerators, 'shadowGenerators', "(entry) => Object.assign((entry.className === 'CascadedShadowGenerator' ? CascadedShadowGenerator : ShadowGenerator).Parse(entry, lookup), { customShaderOptions: entry.customShaderOptions })")}
     // Every material takes as many lights as its shader holds, each mesh the package's lights that reach it, the strongest
     // first (EEVEE has no cap); lights the page adds come first where they light.
+    worldMade: (material) => { if (SCENE.world?.material !== null) WORLDS.set(scene, worldNodes(scene, material)); },
     lightsMade: (lights, key, made) => {${clustered ? `
       // Its point and spot lights in clusters where it has more lights than a material takes, as EEVEE has no cap; a light
       // with a Custom Distance out of them while there is room, as a cluster cuts it only per screen tile.

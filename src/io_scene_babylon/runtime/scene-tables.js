@@ -101,6 +101,10 @@ export function groupEntry(key, settings, animations) {
   return { ...settings, targetedAnimations: parts.flatMap((part) => part.targetedAnimations), ...(tables.length && { bylonderTracks: tables.length === 1 ? tables[0] : tables }) };
 }
 
+/** A table's changed keys in the order their objects are made: the world's material first, as materials built before the
+ * scene has an environment leave its light out (`parsers.worldMade` makes it). @param {string} table @param {Set<string> | undefined} keys */
+const ordered = (table, keys) => [...(keys ?? [])].sort((a, b) => (table === 'materials' ? Number(b.startsWith('WO:')) - Number(a.startsWith('WO:')) : 0));
+
 /** The tables with a patch's entries in them, null ones removed. @param {Tables} tables @param {Tables} patch */
 const merged = (tables, patch) => Object.fromEntries([...new Set([...Object.keys(tables), ...Object.keys(patch)])].map((table) => {
   const entries = { ...tables[table], ...patch[table] };
@@ -134,7 +138,8 @@ function missing(tables, buffers, patch) {
 /**
  * The scene's tables and the objects made from them, which `apply(patch)` changes all or nothing: a patch from another
  * version than the one shown, or naming what the tables would not hold, throws and changes nothing (its caller loads
- * the package again). `parsers.lightsMade(lights)` runs once the lights and shadows are made. Gives `made`: the objects
+ * the package again). `parsers.worldMade(material)` runs once the world's material is made, before the other materials;
+ * `parsers.lightsMade(lights)` once the lights and shadows are made. Gives `made`: the objects
  * by table and key, the materials and multi-materials by key, and the nodes by their exported unique ids.
  * @param {Loading} loading
  */
@@ -228,7 +233,7 @@ export function sceneTables(loading) {
       const fresh = new Set();
       let reset = false;
       try {
-        for (const table of TABLES) for (const key of changed.get(table) ?? []) {
+        for (const table of TABLES) for (const key of ordered(table, changed.get(table))) {
           const entry = next[table]?.[key];
           if (keeps(next, table, key)) continue;
           replaced.push([table, key, made[table][key], tables[table]?.[key]]);
@@ -239,6 +244,7 @@ export function sceneTables(loading) {
           const object = make(table, key, entry, next);
           fresh.add(object);
           index(table, key, object, entry);
+          if (table === 'materials' && key.startsWith('WO:')) parsers.worldMade?.(object, key, made);
         }
       } catch (error) {
         for (const object of fresh) object.dispose?.();

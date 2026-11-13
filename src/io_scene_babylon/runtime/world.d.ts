@@ -11,7 +11,8 @@ export function worldColor(scene: Scene, color: number[]): {
 };
 /**
  * A world of nodes: its material on a box around the eye, and baked into the probe that lights the scene once its
- * shader is ready (a GPU's work: a page without one shows the box but bakes nothing).
+ * shader is ready (a GPU's work: a page without one shows the box but bakes nothing). The probe is the scene's
+ * environment at once, before the other materials are made (their PBR blocks leave out an environment made later).
  * @param {Scene} scene
  * @param {Material} material
  */

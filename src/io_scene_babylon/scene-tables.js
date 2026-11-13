@@ -21,13 +21,15 @@ export function keyed(entries, keyOf) {
  * The key of each table's entries, by table: an object's node, light and camera by its object's key in the IR; a
  * material by its Material's (or World's) key; what belongs to an object (its geometry, by the id of the node first
  * using it, shape keys, shadows, an armature's skeleton) by the object's key and what it is; an action's clip by the
- * action's key. `meshes`: the serialized meshes, which name their materials and morph target managers.
+ * action's key. `meshes`: the serialized meshes, which name their materials and morph target managers; `worldMaterial`, the
+ * unique id of the world's material, keyed by the World.
  */
-export function tableKeys(world, ir, meshes) {
-  const sync = world.mainSync, { scene } = world;
+export function tableKeys(world, ir, meshes, worldMaterial = null) {
+  const sync = world.mainSync, { scene } = world, mainWorld = sync && idStruct(sync.blender.scene)?.world;
   const objectKeys = new Map(Object.entries(ir.ids).filter(([, id]) => id.node !== undefined).map(([key, id]) => [id.node, key]));
   const objectKey = (id, fallback) => objectKeys.get(id) ?? fallback;
   const materialKey = (entry) => {
+    if (mainWorld && entry.uniqueId === worldMaterial) return idKey(mainWorld);
     const ma = sync?.materialOf(scene.getMaterialByUniqueId(entry.uniqueId));
     return ma ? idKey(idStruct(ma)) : `material:${entry.name}`;
   };
