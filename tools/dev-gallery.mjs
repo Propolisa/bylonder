@@ -14,6 +14,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, watch as fs
 import { networkInterfaces } from "node:os";
 import { readdir, stat } from "node:fs/promises";
 import zlib, { createBrotliCompress } from "node:zlib";
+import { pipeline } from "node:stream";
 import { dirname, extname, join, normalize } from "node:path";
 import { build } from "vite";
 import vue from "@vitejs/plugin-vue";
@@ -204,7 +205,12 @@ function serveThumb(req, res) {
 }
 const thumbOf = (path, mtime) => join(thumbs, createHash("sha1").update(path + mtime).digest("hex") + ".jpg");
 // The last day's pictures get their thumbnails ahead, so a phone finds them ready; one a phone asks for goes first.
-const prepare = (list) => list.filter((p) => p.mtime > Date.now() - 86400000).forEach((p) => { const t = thumbOf(p.path, p.mtime); if (!existsSync(t)) thumbnail(p.path, t).catch(() => {}); });
+// A picture ffmpeg cannot read is not tried again every minute.
+const failed = new Set();
+const prepare = (list) => list.filter((p) => p.mtime > Date.now() - 86400000).forEach((p) => {
+  const t = thumbOf(p.path, p.mtime);
+  if (!existsSync(t) && !failed.has(t)) thumbnail(p.path, t).catch(() => failed.add(t));
+});
 // Thumbnails are made a few at a time: a phone asks for a page of them at once.
 const making = new Map(), waiting = [];
 let running = 0;
@@ -265,15 +271,18 @@ function compressor(req, up) {
 for (const port of DEV_PORTS) {
   const proxy = createServer(server, (req, res) => {
     if (!signedIn(req)) { res.writeHead(302, { Location: `https://${lan}:${PORT}/` }); return res.end(); }
+    // pipeline destroys every stream when any ends early (a phone that leaves mid-download), so a half-read response
+    // never keeps its socket, its compressor and its buffers alive.
     const upstream = request({ host: "localhost", port, path: req.url, method: req.method, headers: { ...req.headers, host: `localhost:${port}` }, autoSelectFamily: true, agent: keepAlive }, (up) => {
       const zip = compressor(req, up);
-      if (!zip) { res.writeHead(up.statusCode, up.headers); return up.pipe(res); }
+      if (!zip) { res.writeHead(up.statusCode, up.headers); return pipeline(up, res, () => {}); }
       const { "content-length": _, ...headers } = up.headers;
       res.writeHead(up.statusCode, { ...headers, "content-encoding": "br", vary: "accept-encoding" });
-      up.pipe(zip).pipe(res);
+      pipeline(up, zip, res, () => {});
     });
-    upstream.on("error", () => { res.writeHead(502); res.end("Dev server not running"); });
-    req.pipe(upstream);
+    upstream.on("error", () => { if (!res.headersSent) res.writeHead(502); res.end("Dev server not running"); });
+    res.on("close", () => upstream.destroy());
+    pipeline(req, upstream, () => {});
   });
   proxy.on("upgrade", (req, socket, head) => {
     if (!signedIn(req)) return socket.destroy();
@@ -282,6 +291,9 @@ for (const port of DEV_PORTS) {
       up.write(head);
       socket.pipe(up).pipe(socket);
     });
+    // Either side closing ends the other, so a reconnecting HMR client leaves no socket behind.
+    up.on("close", () => socket.destroy());
+    socket.on("close", () => up.destroy());
     up.on("error", () => socket.destroy());
     socket.on("error", () => up.destroy());
   });
