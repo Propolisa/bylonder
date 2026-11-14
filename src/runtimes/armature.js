@@ -14,6 +14,7 @@ import { keyedVertices } from './key-blocks.js';
 import { useDualQuaternionSkinning } from '../io_scene_babylon/runtime/dual-quaternion-skinning.js';
 import { appliedRests, shownStack, smoothByAngle } from './applied-rest.js';
 import { actionClips, withAction } from '../io_scene_babylon/clip-export.js';
+import { idKey } from '../io_scene_babylon/ir-export.js';
 
 // Every how many frames of each action the export ships as a clip the live rig is judged.
 const CLIP_JUDGE_STEP = 4;
@@ -446,6 +447,21 @@ function issues(arm) {
 // sample): gives a function that returns them once it ran, `deforms`, the names of the meshes the page's native rig
 // runtime deforms where its pose runs live, and `live`, the mappings whose constraints the page runs; its result's
 // `poses` are the bones' matrices as Blender evaluates them (what bounds read), where they are keyed by their own.
+// A bone's sampled keys, copied: an export reduces and compresses its own in place.
+const copied = (list) => list.map(({ frame, value }) => ({ frame, value: value.clone() }));
+// A sampled bone's name across exports: a mapping's skeletons (its rig's and its skin's) share bone names.
+const sampleName = (bone) => `${bone.getSkeleton().id}/${bone.name}`;
+// What an armature's sampled pose reads, by IR key: the armature and its data, its actions (active and NLA), and the
+// objects its bone constraints and drivers target.
+function rigInputs(arm) {
+  const keys = new Set([idKey(arm), idKey(arm.data)]), data = arm.animation_data;
+  const add = (id) => { if (id) keys.add(idKey(id)); };
+  add(data?.action);
+  for (const track of data?.nla_tracks ?? []) for (const strip of track.strips) add(strip.action);
+  for (const bone of arm.pose.bones) for (const constraint of bone.constraints) add(constraint.target);
+  for (const driver of data?.drivers ?? []) for (const variable of driver.driver.variables) for (const target of variable.targets) add(target.id);
+  return keys;
+}
 // Names for a report: the first eight, and how many more.
 const named = (names) => { const list = [...names]; return `${list.slice(0, 8).join(', ')}${list.length > 8 ? ` and ${list.length - 8} more` : ''}`; };
 // `live`: a live re-export's (scoped-export.js), which takes each rig's verdict from the last full export (`world.rigVerdicts`,
@@ -490,8 +506,25 @@ function poseAnimations(world, mappings, bake, sampling, scene, bases = new Set(
       }
     }
   };
-  if (mappings.some((m) => animated(m.arm)) && frameEnd >= frameStart) sampling.sample(sample);
-  else sample(current);
+  // A live re-export reuses a rig's samples from the last full export when the edit changed none of its inputs.
+  const kept = new Map(live ? mappings.flatMap((mapping) => {
+    const last = world.rigSamples?.get(mapping.arm.name);
+    return last && last.frames === sampling.frames.join() && changed?.size && ![...last.inputs].some((key) => changed.has(key)) ? [[mapping, last]] : [];
+  }) : []);
+  for (const [mapping, last] of kept) {
+    for (const skeleton of mapping.skeletons.values()) skeleton.bones.forEach((bone) => {
+      const name = sampleName(bone);
+      if (!last.keys.has(name)) return;
+      keys.set(bone, copied(last.keys.get(name)));
+      owners.set(bone, mapping);
+      if (last.evaluated.has(name)) evaluated.set(bone, copied(last.evaluated.get(name)));
+    });
+    stacks.get(mapping)?.adopt(new Map([...last.owns].map(([name, list]) => [name, list.map((m) => m.clone())])));
+  }
+  const resampled = mappings.filter((mapping) => !kept.has(mapping));
+  if (resampled.length < mappings.length) mappings = resampled;
+  if (mappings.length && mappings.some((m) => animated(m.arm)) && frameEnd >= frameStart) sampling.sample(sample);
+  else if (mappings.length) sample(current);
   return Object.assign(once(finish), { deforms: new Set([...stacks.values()].flatMap((stack) => stack.deforms)),
     // The meshes of each mapping skinned by their Armature alone, once its frames are checked.
     skinned: (mapping) => stacks.get(mapping)?.skinned() ?? new Set(),
@@ -499,8 +532,13 @@ function poseAnimations(world, mappings, bake, sampling, scene, bases = new Set(
     native: (mapping) => { const stack = stacks.get(mapping), skinned = stack?.skinned(); return new Set(stack?.deforms.filter((name) => !skinned.has(name)) ?? []); },
     live: new Set(stacks.keys()) });
   function finish() {
-    // A full export's verdicts, which live re-exports take until the next.
+    // A full export's verdicts and samples, which live re-exports take until the next.
     if (!live) for (const [mapping, stack] of stacks) (world.rigVerdicts ??= new Map()).set(mapping.arm.name, stack.verdict());
+    if (!live) for (const mapping of mappings) (world.rigSamples ??= new Map()).set(mapping.arm.name, {
+      frames: sampling.frames.join(), inputs: rigInputs(mapping.arm),
+      owns: new Map([...stacks.get(mapping)?.ownsByName() ?? []].map(([name, list]) => [name, list.map((m) => m.clone())])),
+      keys: new Map([...keys].filter(([bone]) => owners.get(bone) === mapping).map(([bone, list]) => [sampleName(bone), copied(list)])),
+      evaluated: new Map([...evaluated].filter(([bone]) => owners.get(bone) === mapping).map(([bone, list]) => [sampleName(bone), copied(list)])) });
     // A stack the page runs where every bone it moves is posed by its own F-Curves, or not animated.
     const curves = [], gaps = [], constraints = [], posed = new Set();
     for (const [mapping, stack] of stacks) {

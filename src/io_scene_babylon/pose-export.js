@@ -352,6 +352,13 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
     skinned,
     off,
     own: (bone) => owns.get(bone),
+    // Each bone's own matrices by name, and the same taken from a last export's (a live re-export reusing its samples).
+    ownsByName: () => new Map([...owns].map(([bone, list]) => [bone.name, list])),
+    adopt: (byName) => {
+      bones.forEach((bone) => { if (byName.has(bone.name)) owns.set(bone, byName.get(bone.name)); });
+      // The frames those were checked at count as checked here.
+      checked = Math.max(checked, ...[...byName.values()].map((list) => list.length), 0);
+    },
     // `clip`: a frame of a clip the page plays, judged as the timeline's are (the rig's pose and the meshes' deform), its
     // bones' own matrices not recorded as the timeline's keys.
     check(evaluated, frame, clip = false) {
