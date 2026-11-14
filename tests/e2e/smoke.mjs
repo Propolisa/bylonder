@@ -36,8 +36,10 @@ async function previewDraws(area, start, status, title) {
     const image = await createImageBitmap(await (await fetch(`data:image/png;base64,${png}`)).blob());
     const ctx = new OffscreenCanvas(image.width, image.height).getContext("2d");
     ctx.drawImage(image, 0, 0);
-    const red = [...ctx.getImageData(0, 0, image.width, image.height).data].filter((_, i) => i % 4 === 0);
-    return Math.max(...red) - Math.min(...red);
+    const { data } = ctx.getImageData(0, 0, image.width, image.height);
+    let low = 255, high = 0;
+    for (let i = 0; i < data.length; i += 4) { low = Math.min(low, data[i]); high = Math.max(high, data[i]); }
+    return high - low;
   }, shot.toString("base64"));
   assert.ok(spread > 40, `the page draws the scene, not a blank frame (red spread ${spread})`);
 }

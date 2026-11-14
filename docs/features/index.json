@@ -358,6 +358,62 @@
   }
  },
  {
+  "id": "game",
+  "title": "Game",
+  "summary": "Bylonder's own editor that plays the scene as File > Export > JavaScript ships it, run by the exported page's runtime, while edits, undo and redo made in the app reach the running game.",
+  "expect": "Play exports the scene in memory and runs its page in the area; each edit, undo or redo reaches the running game as a patch once the app is idle (about a second on Rigged Character), and the game's own state never writes back to the scene; Reset starts the game again from the scene as it is now; Play takes as long as an export.",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/files/import_export.html"
+  ],
+  "example": "rigged-character",
+  "thumbnail": "game/thumbnail.png",
+  "media": [
+   "game/play.gif",
+   "game/edit.gif"
+  ],
+  "ui": [
+   "TOPBAR_MT_file_export"
+  ],
+  "operators": [
+   "ed.undo",
+   "ed.redo"
+  ],
+  "code": [
+   "src/editors/space_game/game-view.js",
+   "src/editors/space_game/GameView.vue",
+   "src/editors/space_package/package-preview.js",
+   "src/io_scene_babylon/scoped-export.js",
+   "src/io_scene_babylon/scene-patch.js"
+  ],
+  "tests": [
+   "tests/live-package-wasm.test.js",
+   "tests/package-preview-wasm.test.js",
+   "tests/export-scoped-wasm.test.js"
+  ],
+  "limits": [
+   "The game runs in a frame of its own (its page), not yet on the app's engine; a separate window is not built yet.",
+   "The page draws with WebGL 2 for now, not WebGPU.",
+   "A change of the scene, its world, a node group or a collection exports the whole scene, so on a large scene it reaches the game after an export's time.",
+   "Game code (game.js) does not run in it yet."
+  ],
+  "page": "docs/features/game.md",
+  "open": "https://propolisa.github.io/bylonder/#example=rigged-character",
+  "example_title": "Rigged Character",
+  "coverage": {
+   "operators": {
+    "supported": 2,
+    "partial": 10,
+    "total": 12
+   },
+   "ui": {
+    "supported": 0,
+    "partial": 1,
+    "total": 1
+   }
+  }
+ },
+ {
   "id": "geometry-node-editor",
   "title": "Geometry Node Editor",
   "summary": "Show and edit the node group of the active Geometry Nodes modifier: add nodes from Shift A's search, link sockets and set values, here to lay out a sunflower's seeds by the golden angle.",
@@ -1400,6 +1456,66 @@
     "supported": 15,
     "partial": 0,
     "total": 22
+   }
+  }
+ },
+ {
+  "id": "package-view",
+  "title": "Package View",
+  "summary": "Bylonder's own editor that shows the scene as File > Export > JavaScript writes it, loaded in a frame with plain Babylon.js, and keeps it current as you edit, undo and redo.",
+  "expect": "Reload writes the package in memory and shows its page as an exported page draws it; after each edit, undo or redo the page takes a patch of what changed once the app is idle, keeping its controls and playing clips; a change exports the objects it reaches again, and the whole scene when it reaches the scene's own settings, so a large scene's Reload takes as long as its export.",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/files/import_export.html"
+  ],
+  "example": "rigged-character",
+  "thumbnail": "package-view/thumbnail.png",
+  "media": [
+   "package-view/open.gif",
+   "package-view/follow.gif"
+  ],
+  "ui": [
+   "TOPBAR_MT_file_export"
+  ],
+  "operators": [
+   "ed.undo",
+   "ed.redo"
+  ],
+  "code": [
+   "src/editors/space_package/package-view.js",
+   "src/editors/space_package/package-preview.js",
+   "src/editors/space_package/PackageView.vue",
+   "src/io_scene_babylon/scoped-export.js",
+   "src/io_scene_babylon/scene-patch.js",
+   "src/io_scene_babylon/runtime/scene-tables.js"
+  ],
+  "tests": [
+   "tests/package-preview-wasm.test.js",
+   "tests/export-scoped-wasm.test.js",
+   "tests/live-package-wasm.test.js",
+   "tests/export-patch-wasm.test.js",
+   "tests/export-patch-apply-wasm.test.js",
+   "tests/export-patch-integrity-wasm.test.js"
+  ],
+  "limits": [
+   "A change exports again the objects it reaches (per datablock); a change of the scene, its world, a node group or a collection exports the whole scene.",
+   "The page draws with WebGL 2 for now, not WebGPU.",
+   "The scene's own settings (world, render pipelines, post-processes, compositor, its frame range and rate) load the page again instead of patching it.",
+   "Runtime scripts (docs/sdk-model.md) do not run in it yet."
+  ],
+  "page": "docs/features/package-view.md",
+  "open": "https://propolisa.github.io/bylonder/#example=rigged-character",
+  "example_title": "Rigged Character",
+  "coverage": {
+   "operators": {
+    "supported": 2,
+    "partial": 10,
+    "total": 12
+   },
+   "ui": {
+    "supported": 0,
+    "partial": 1,
+    "total": 1
    }
   }
  },

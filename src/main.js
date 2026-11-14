@@ -38,6 +38,7 @@ import "@babylonjs/core/Debug/debugLayer";
 import { createEditor } from "./editors/object/editor";
 import { createHistory, restoreChannels } from "./editors/undo/storage";
 import { mountPackageView } from "./editors/space_package/package-view.js";
+import { mountGameView } from "./editors/space_game/game-view.js";
 import { projectState, projectStateInWorker } from "./runtime/project-state.js";
 import { createWorld } from "./runtime/world.js";
 import { createRenderHost } from "./editors/render/host.js";
@@ -199,7 +200,7 @@ const engine = await createEngine(workCanvas, { stencil: true });
 applyRenderSettings(engine);
 sizeToCanvas(engine, canvas);
 let saveOverrides = () => {};
-let history, packageView;
+let history, packageView, gameView;
 const commit = () => history?.commit();
 let views;
 // The 3D Viewports among the engine views (the compositor backdrop is the other kind).
@@ -317,6 +318,8 @@ const settled = async () => {
   await world.modifiers.settled();
 };
 window.__bylonder ={ world, renderHost, runOperator, settled, bylonderPreferences, dock: viewportDock,
+  // The Game area's play mode, for tests.
+  get game() { return gameView; },
   // The volume probes' baked caches, by object name.
   lightProbeCaches: (name) => volumeProbeCaches(world.scene, name),
   // The Preferences and the key configurations, for tests.
@@ -440,6 +443,7 @@ let ui;
 let sceneChanged = () => {};
 history = createHistory(world.objects, () => {
   packageView?.changed();
+  gameView?.changed();
   saveOverrides();
   world.particles.refresh();
   registerObjects(animation, objects);
@@ -672,6 +676,7 @@ const editObject = () => {
   return edit ? { ob, mesh: edit.mesh } : null;
 };
 packageView = mountPackageView(document.querySelector("#package-section"), { world });
+gameView = mountGameView(document.querySelector("#game-section"), { world });
 const imageEditor = mountImageEditor(document.querySelector("#image-section"), { header: viewportDock.header("image"), engine, views, sync: world.mainSync, editObject });
 let inspectorBusy = false;
 async function inspector() {
@@ -680,7 +685,7 @@ async function inspector() {
   try {
     if (world.scene.debugLayer.isVisible()) world.scene.debugLayer.hide();
     else {
-      notify("Loading Babylon Inspector…");
+      notify("Loading Babylon Inspectorâ€¦");
       await import("@babylonjs/inspector");
       await world.scene.debugLayer.show({ embedMode: true });
     }
@@ -1003,6 +1008,7 @@ function dispose() {
   world.texts.flush();
   scriptingEditors.forEach((area) => area.dispose());
   imageEditor.dispose();
+  gameView?.dispose();
   engine.onBeginFrameObservable.remove(perFrame);
   for (const view of viewports()) view.dispose();
   views.dispose();
