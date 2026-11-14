@@ -197,7 +197,7 @@ export function rigMemo(arm, changed) {
   const memo = (changed && memos.get(arm.name)) || new Map();
   if (changed) for (const [key, part] of memo) if (part.ids.some((id) => changed.has(id))) memo.delete(key);
   memos.set(arm.name, memo);
-  return memo;
+  return Object.assign(memo, { live: !!changed });
 }
 
 // An object's description apart from its mesh data and modifiers, with the drivers and actions it names; read once

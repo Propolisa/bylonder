@@ -80,6 +80,8 @@ const CASES = {
     assert.equal(now.get('Rig'), kept.get('Rig'), "the rig's description is kept");
     assert.equal(now.get('data:Body'), kept.get('data:Body'), "the body's data is kept");
     assert.ok(kept.get('data:Smooth') && now.get('data:Smooth') !== kept.get('data:Smooth'), "the widened mesh's is read again");
+    // Its vertices counted as before, the runtime's judgement of it is kept: no rig compiled to judge it again.
+    assert.ok(kept.get('runs:Smooth')?.runs && now.get('runs:Smooth') === kept.get('runs:Smooth'), 'the judgement that the runtime runs it is kept');
   }),
   driver: () => same('drivers-and-graph-editor', null, () => { blendData().objects.get('Flywheel').rotation_euler[1] += 0.7; }, 'a changed driver input'),
   // A moved rig: the live re-export takes the rig's verdict from the full export before it (no checks again) and still

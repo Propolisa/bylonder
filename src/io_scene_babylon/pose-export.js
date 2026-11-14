@@ -125,15 +125,28 @@ function nativeRig(arm, nodeOf, deformed = [], armatureOnly = false, memo = new 
     return description;
   };
   let description = describe(drawn);
-  const program = drawn.length && compileRig(structuredClone(description));
-  const runs = armatureOnly ? drawn : drawn.filter((d) => {
-    const deform = compileDeform(program, program.objectIndex.get(d.ob.name)), evaluated = d.evaluated();
-    return !deform.unsupported.length && deform.geo.base.length === evaluated?.verts_num * 3 && d.node.getTotalVertices() === drawnVertices(evaluated).length;
-  });
+  // Each mesh's vertices as described, as Main evaluates them and as the page draws them, with the vertices it draws.
+  const drawnOf = new Map(armatureOnly ? [] : drawn.map((d) => { const evaluated = d.evaluated(), draw = evaluated && drawnVertices(evaluated);
+    // What the judgement reads: these counts, and the stacks of the mesh and of the lattices it reads, as described.
+    const stacks = [d.ob.name, ...[...d.ob.modifiers].filter((m) => m.type === 'LATTICE' && m.object).map((m) => m.object.name)]
+      .map((name) => description.objects.find((o) => o.name === name)?.modifiers);
+    return [d, { draw, counts: JSON.stringify([meshDataOf(d.ob, d, memo).vertices.length, evaluated?.verts_num, d.node.getTotalVertices(), draw?.length, stacks]) }]; }));
+  // Whether the runtime runs a mesh and what it skips of its lattices, as an export that read the same judged it (rigMemo
+  // keeps it): a live export takes it, a full one, or one with any mesh unknown or changed, judges by compiling the rig.
+  const judged = (d) => { const known = memo.get(`runs:${d.ob.name}`); return known?.counts === drawnOf.get(d).counts ? known : null; };
+  const known = memo.live && !armatureOnly && drawn.length && drawn.every(judged);
+  const program = !known && drawn.length && compileRig(structuredClone(description));
+  const latticeSteps = (d) => [...d.ob.modifiers].filter((m) => m.type === 'LATTICE' && m.object && shown(d.ob).has(m.name))
+    .flatMap((m) => { const at = program.objectIndex.get(m.object.name); return at === undefined ? [] : compileDeform(program, at).unsupported.map((step) => ({ mesh: d.ob.name, lattice: m.object.name, step })); });
+  if (!known && !armatureOnly) for (const d of drawn) {
+    const deform = compileDeform(program, program.objectIndex.get(d.ob.name)), { draw } = drawnOf.get(d), evaluated = d.evaluated();
+    const runs = !deform.unsupported.length && deform.geo.base.length === evaluated?.verts_num * 3 && d.node.getTotalVertices() === draw.length;
+    memo.set(`runs:${d.ob.name}`, { ids: [], counts: drawnOf.get(d).counts, runs, skipped: runs ? latticeSteps(d) : [] });
+  }
+  const runs = armatureOnly ? drawn : drawn.filter((d) => memo.get(`runs:${d.ob.name}`).runs);
   if (runs.length < drawn.length) description = describe(runs);
   // What the runtime skips in the stacks of the lattices the meshes it deforms read (their points deform apart).
-  const skipped = runs.flatMap((d) => [...d.ob.modifiers].filter((m) => m.type === 'LATTICE' && m.object && shown(d.ob).has(m.name))
-    .flatMap((m) => { const at = program.objectIndex.get(m.object.name); return at === undefined ? [] : compileDeform(program, at).unsupported.map((step) => ({ mesh: d.ob.name, lattice: m.object.name, step })); }))
+  const skipped = (armatureOnly ? runs.flatMap(latticeSteps) : runs.flatMap((d) => memo.get(`runs:${d.ob.name}`).skipped))
     .filter((s, i, all) => all.findIndex((t) => t.mesh === s.mesh && t.lattice === s.lattice && t.step === s.step) === i);
   const objects = {}, meshes = {};
   for (const ob of description.objects) {
@@ -145,10 +158,11 @@ function nativeRig(arm, nodeOf, deformed = [], armatureOnly = false, memo = new 
     if (node) objects[ob.name] = node.id;
   }
   for (const d of runs) {
-    if (!armatureOnly) description.objects.find((o) => o.name === d.ob.name).data.draw_vertices = drawnVertices(d.evaluated());
+    if (!armatureOnly) description.objects.find((o) => o.name === d.ob.name).data.draw_vertices = drawnOf.get(d).draw;
     meshes[d.ob.name] = d.node.id;
   }
-  if (!armatureOnly) deformsOnPage(description, runs.map((d) => d.ob.name));
+  // A full judgement runs each mesh once on the page's rig; one known from before was run then.
+  if (!armatureOnly && !known) deformsOnPage(description, runs.map((d) => d.ob.name));
   const whole = packDescription(description), { packed, arrays, meshes: data } = splitMeshes(whole.packed, whole.arrays, (name) => idKey(blendData().objects.get(name).data));
   return { description: new TextEncoder().encode(JSON.stringify(packed)), arrays, data, armature: arm.name, objects, meshes, skipped, published: [...driven(arm, description), ...drivenKeys(keyed, description)] };
 }
