@@ -470,6 +470,17 @@ function rigInputs(arm) {
   for (const driver of data?.drivers ?? []) for (const variable of driver.driver.variables) for (const target of variable.targets) add(target.id);
   return keys;
 }
+// What an armature's sampled pose depends on of the armature itself, as text to compare: each pose bone's own channels
+// and constraints, its drivers, and its bones' rest; not where the armature object stands.
+function poseState(arm) {
+  const values = (v) => [...v].map((x) => +x.toFixed(6));
+  const bones = [...arm.data.bones].map((bone) => [bone.name, bone.parent?.name ?? '', values(bone.matrix_local.flat?.() ?? [...bone.matrix_local].flatMap((row) => [...row]))]);
+  const poses = [...arm.pose.bones].map((pose) => [pose.name, pose.rotation_mode, values(pose.location), values(pose.rotation_quaternion), values(pose.rotation_euler), values(pose.scale),
+    [...pose.constraints].map((c) => [c.type, c.name, c.mute, +c.influence.toFixed(6), c.target?.name ?? '', c.subtarget ?? ''])]);
+  const drivers = [...arm.animation_data?.drivers ?? []].map((fcurve) => [fcurve.data_path, fcurve.array_index, fcurve.driver.expression,
+    [...fcurve.driver.variables].map((v) => [v.name, v.type, [...v.targets].map((t) => [t.id?.name ?? '', t.data_path, t.bone_target ?? ''])])]);
+  return JSON.stringify([bones, poses, drivers]);
+}
 // Names for a report: the first eight, and how many more.
 const named = (names) => { const list = [...names]; return `${list.slice(0, 8).join(', ')}${list.length > 8 ? ` and ${list.length - 8} more` : ''}`; };
 // `live`: a live re-export's (scoped-export.js), which takes each rig's verdict from the last full export (`world.rigVerdicts`,
@@ -519,7 +530,10 @@ function poseAnimations(world, mappings, bake, sampling, scene, bases = new Set(
   // A live re-export reuses a rig's samples from the last full export when the edit changed none of its inputs.
   const kept = new Map(live ? mappings.flatMap((mapping) => {
     const last = world.rigSamples?.get(mapping.arm.name);
-    return last && last.frames === sampling.frames.join() && changed?.size && ![...last.inputs].some((key) => changed.has(key)) ? [[mapping, last]] : [];
+    if (!last || last.frames !== sampling.frames.join() || !changed?.size) return [];
+    // An edit of the rig's own object or armature data that leaves its pose state alone (a move) keeps the samples too.
+    const own = new Set([idKey(mapping.arm), idKey(mapping.arm.data)]), touched = [...last.inputs].filter((key) => changed.has(key));
+    return !touched.length || (touched.every((key) => own.has(key)) && poseState(mapping.arm) === last.state) ? [[mapping, last]] : [];
   }) : []);
   for (const [mapping, last] of kept) {
     for (const skeleton of mapping.skeletons.values()) skeleton.bones.forEach((bone) => {
@@ -532,6 +546,9 @@ function poseAnimations(world, mappings, bake, sampling, scene, bases = new Set(
     stacks.get(mapping)?.adopt(new Map([...last.owns].map(([name, list]) => [name, list.map((m) => m.clone())])));
   }
   const resampled = mappings.filter((mapping) => !kept.has(mapping));
+  // The rigs the timeline's pass samples again, by name (a live re-export's reuse shows here), kept on the world's samples:
+  // a live re-export's world is its Selected Objects view of the scene's.
+  if (scene) (world.rigSamples ??= new Map()).sampled = resampled.map((mapping) => mapping.arm.name);
   if (resampled.length < mappings.length) mappings = resampled;
   if (mappings.length && mappings.some((m) => animated(m.arm)) && frameEnd >= frameStart) sampling.sample(sample);
   else if (mappings.length) sample(current);
@@ -545,7 +562,7 @@ function poseAnimations(world, mappings, bake, sampling, scene, bases = new Set(
     // A full export's verdicts and samples, which live re-exports take until the next.
     if (!live) for (const [mapping, stack] of stacks) (world.rigVerdicts ??= new Map()).set(mapping.arm.name, stack.verdict());
     if (!live) for (const mapping of mappings) (world.rigSamples ??= new Map()).set(mapping.arm.name, {
-      frames: sampling.frames.join(), inputs: rigInputs(mapping.arm),
+      frames: sampling.frames.join(), inputs: rigInputs(mapping.arm), state: poseState(mapping.arm),
       owns: new Map([...stacks.get(mapping)?.ownsByName() ?? []].map(([name, list]) => [name, list.map((m) => m.clone())])),
       keys: new Map([...keys].filter(([bone]) => owners.get(bone) === mapping).map(([bone, list]) => [sampleName(bone), copied(list)])),
       evaluated: new Map([...evaluated].filter(([bone]) => owners.get(bone) === mapping).map(([bone, list]) => [sampleName(bone), copied(list)])) });

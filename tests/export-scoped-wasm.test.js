@@ -84,10 +84,26 @@ const CASES = {
   driver: () => same('drivers-and-graph-editor', null, () => { blendData().objects.get('Flywheel').rotation_euler[1] += 0.7; }, 'a changed driver input'),
   // A moved rig: the live re-export takes the rig's verdict from the full export before it (no checks again) and still
   // patches what a whole export patches, as the rig's own inputs did not change.
-  rig: () => same('rigged-character', null, (world) => {
-    assert.ok(world.rigVerdicts?.has('Rig'), "the full export kept the rig's verdict");
-    blendData().objects.get('Rig').location[0] += 0.6;
-  }, 'a moved rig'),
+  // A moved rig: the live re-export takes the rig's verdict and its sampled pose from the full export before it (its pose
+  // is the armature's own, which a move leaves alone) and still patches what a whole export patches.
+  rig: () => {
+    let world;
+    return same('rigged-character', null, (w) => {
+      world = w;
+      assert.ok(world.rigVerdicts?.has('Rig'), "the full export kept the rig's verdict");
+      blendData().objects.get('Rig').location[0] += 0.6;
+    }, 'a moved rig', null, () => assert.deepEqual(world.rigSamples.sampled, [], "the move keeps the rig's sampled pose"));
+  },
+  // A posed bone: the rig's pose changed, so the live re-export samples it again.
+  pose: () => {
+    let world;
+    return same('rigged-character', null, (w) => {
+      world = w;
+      const bone = blendData().objects.get('Rig').pose.bones.get('chest') ?? [...blendData().objects.get('Rig').pose.bones][1];
+      bone.rotation_mode = 'XYZ';
+      bone.rotation_euler[0] += 0.4;
+    }, 'a posed bone', null, () => assert.deepEqual(world.rigSamples.sampled, ['Rig'], 'a pose edit samples the rig again'));
+  },
   // A material's own node tree is the material's change, which reaches the objects using it, not the scene as a whole.
   material: () => same('rigged-character', null, () => {
     const material = [...blendData().materials].find((m) => m.node_tree?.nodes.get('Principled BSDF'));
