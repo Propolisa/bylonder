@@ -40,21 +40,24 @@ function readPeak(file) {
   }
 }
 
-// A test that runs five times its last time, and at least two minutes or the limit its first line gives
-// (`// Time limit: <seconds> s`), is stopped with the processes it started.
+// A test that runs twice its last time, and at least two minutes or the limit its first line gives
+// (`// Time limit: <seconds> s`), is stopped with the processes it started: on POSIX its own process group.
 const declaredLimit = (test) => Number(/^\/\/ Time limit: (\d+) s/.exec(readFileSync(test, 'utf8'))?.[1] ?? 0);
-const limitOf = (test) => Math.max(120, declaredLimit(test), 5 * (times[test] ?? 0)) * 1000;
-const stop = (child) => (process.platform === 'win32' ? spawn('taskkill', ['/pid', String(child.pid), '/t', '/f']) : child.kill('SIGKILL'));
+const limitOf = (test) => Math.max(120, declaredLimit(test), 2 * (times[test] ?? 0)) * 1000;
+const POSIX = process.platform !== 'win32';
+const stop = (child) => (POSIX ? process.kill(-child.pid, 'SIGKILL') : spawn('taskkill', ['/pid', String(child.pid), '/t', '/f']));
 
 let started = 0;
 const run = (test) => new Promise((resolve) => {
   const peakFile = join(tmpdir(), `test-peak-${process.pid}-${started++}`);
   const env = { ...process.env, TEST_PEAK_FILE: peakFile, NODE_OPTIONS: `${process.env.NODE_OPTIONS ?? ''} ${preload}`.trim() };
-  const start = performance.now(), child = spawn(process.execPath, [test], { stdio: ['ignore', 'pipe', 'pipe'], env });
+  const start = performance.now(), child = spawn(process.execPath, [test], { stdio: ['ignore', 'pipe', 'pipe'], env, detached: POSIX });
   let output = '';
   const timer = setTimeout(() => { output += `\nstopped after ${limitOf(test) / 1000} s\n`; stop(child); }, limitOf(test));
   child.stdout.on('data', (d) => { output += d; });
   child.stderr.on('data', (d) => { output += d; });
+  // A process the test started that outlives it keeps its output open: the test ends when its own process does.
+  child.on('exit', () => setTimeout(() => { child.stdout.destroy(); child.stderr.destroy(); }, 2000).unref());
   child.on('close', (code) => {
     clearTimeout(timer);
     resolve({ test, code, output, seconds: (performance.now() - start) / 1000, mb: readPeak(peakFile) });
