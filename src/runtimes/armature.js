@@ -27,24 +27,32 @@ const issue = (kind, ob, path, message) => ({ kind, ob: ob.name, setting: `bpy.d
 
 // The armature's bones, parents first, each with its rest and evaluated pose matrices in armature space (Babylon's
 // axes); then, with `segments`, the joints of each deforming B-Bone's segments (Blender's bbone_segment_matrix, in the
-// bone's space) as bones of its own, `segment` the bone's index and the joint's.
-function bonesOf(arm, segments = false) {
+// bone's space) as bones of its own, `segment` the bone's index and the joint's. Given `shapes` (a Map an export keeps
+// over its frames), what does not change from frame to frame (the bones' order, rest and pose channels) is read once.
+function bonesOf(arm, segments = false, shapes = null) {
+  const shape = shapes?.get(arm) ?? restShape(arm);
+  shapes?.set(arm, shape);
+  const bones = shape.bones.map(({ name, parent, deform, rest }, i) => ({ name, parent, deform, rest: rest.clone(), pose: matrix(shape.channels[i].matrix) }));
+  if (!segments) return bones;
+  for (const { i, count } of shape.bbones) {
+    const pose = shape.channels[i];
+    for (let k = 0; k <= count; k++) bones.push({ name: `${bones[i].name}#${k}`, parent: i, deform: false, segment: [i, k],
+      rest: matrix(pose.bbone_segment_matrix(k, true)).multiply(bones[i].rest), pose: matrix(pose.bbone_segment_matrix(k, false)).multiply(bones[i].pose) });
+  }
+  return bones;
+}
+// An armature's bones parents first, their rest, and each one's pose channel, in that order.
+function restShape(arm) {
   const ordered = [];
   const visit = (bone) => { ordered.push(bone); for (const child of bone.children) visit(child); };
   for (const bone of arm.data.bones) if (!bone.parent) visit(bone);
   const index = new Map(ordered.map((bone, i) => [bone.name, i]));
-  const bones = ordered.map((bone) => ({
-    name: bone.name, parent: bone.parent ? index.get(bone.parent.name) : -1, deform: bone.use_deform,
-    rest: matrix(bone.matrix_local), pose: matrix(arm.pose.bones.get(bone.name).matrix),
-  }));
-  if (!segments) return bones;
-  ordered.forEach((bone, i) => {
-    if (!bbone(bone)) return;
-    const pose = arm.pose.bones.get(bone.name);
-    for (let k = 0; k <= bone.bbone_segments; k++) bones.push({ name: `${bone.name}#${k}`, parent: i, deform: false, segment: [i, k],
-      rest: matrix(pose.bbone_segment_matrix(k, true)).multiply(bones[i].rest), pose: matrix(pose.bbone_segment_matrix(k, false)).multiply(bones[i].pose) });
-  });
-  return bones;
+  const byName = new Map([...arm.pose.bones].map((pose) => [pose.name, pose]));
+  return {
+    bones: ordered.map((bone) => ({ name: bone.name, parent: bone.parent ? index.get(bone.parent.name) : -1, deform: bone.use_deform, rest: matrix(bone.matrix_local) })),
+    channels: ordered.map((bone) => byName.get(bone.name)),
+    bbones: ordered.flatMap((bone, i) => (bbone(bone) ? [{ i, count: bone.bbone_segments }] : [])),
+  };
 }
 // Whether a deforming bone is posed with scale or shear, which dual quaternion skinning blends otherwise than Blender.
 function scaledBones(bones) {
@@ -471,6 +479,8 @@ function poseAnimations(world, mappings, bake, sampling, scene, bases = new Set(
   const animated = (arm) => !!arm.animation_data || [...arm.pose.bones].some((bone) => bone.constraints.length);
   // The evaluated pose of the bones keyed by their own (`bases`), which bounds read.
   const keys = new Map(), owners = new Map(), stacks = new Map(), evaluated = new Map();
+  // The rigs' bones as they stay over the frames sampled, read once.
+  const shapes = new Map();
   if (!bake && scene) for (const mapping of mappings) {
     const mesh = mapping.skeletons.size === 1 && scene.meshOf(mapping), [skeleton] = mapping.skeletons.values();
     const verdict = live ? world.rigVerdicts?.get(mapping.arm.name) ?? null : null;
@@ -485,7 +495,7 @@ function poseAnimations(world, mappings, bake, sampling, scene, bases = new Set(
     withAction(clip.ids, clip.action, () => {
       for (let frame = Math.ceil(clip.frame_start); frame <= clip.frame_end; frame += CLIP_JUDGE_STEP) {
         sync.frameChanged(frame);
-        const bones = bonesOf(mapping.arm, segmentsOf(mapping.arm));
+        const bones = bonesOf(mapping.arm, segmentsOf(mapping.arm), shapes);
         for (const skeleton of mapping.skeletons.values()) stack.check(skeleton.bones.map((bone, i) => relative(bones, i, 'pose', skeleton.space)), frame, true);
       }
     });
@@ -493,7 +503,7 @@ function poseAnimations(world, mappings, bake, sampling, scene, bases = new Set(
   if (stacks.size) sync.frameChanged(current);
   const sample = (frame) => {
     for (const mapping of mappings) {
-      const bones = bonesOf(mapping.arm, segmentsOf(mapping.arm));
+      const bones = bonesOf(mapping.arm, segmentsOf(mapping.arm), shapes);
       for (const skeleton of mapping.skeletons.values()) {
         const posed = skeleton.bones.map((bone, i) => relative(bones, i, 'pose', skeleton.space));
         const values = bases.has(mapping) ? posed.map((value, i) => (i < skeleton.armatureBones ? ownMatrix(mapping.arm.pose.bones.get(skeleton.bones[i].name), skeleton.bones[i]) : value)) : posed;
