@@ -5,11 +5,12 @@
 // so it stays on the native rig runtime, exact (Snow's head was skinned from the timeline's frames and swelled in his
 // dialogue).
 import assert from 'node:assert/strict';
+import { fileURLToPath } from 'node:url';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
 import { subscribeReports } from '../src/windowmanager/wm-reports.js';
 import { openExample } from './open-example.js';
 
-const { world, sync } = openExample(new URL('./fixtures/skin-check-rig.blend', import.meta.url).pathname.slice(1));
+const { world, sync } = openExample(fileURLToPath(new URL('./fixtures/skin-check-rig.blend', import.meta.url)));
 sync.view();
 const reports = [];
 subscribeReports((r) => reports.push(r.message));

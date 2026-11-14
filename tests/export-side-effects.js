@@ -4,7 +4,7 @@
 // coordinator, ColorCurves' parser) throws there, as on a page. Each example exports in a process of its own (one Main);
 // the examples are checked in batches (export-side-effects-<n>-wasm.test.js), each a test of its own.
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -44,7 +44,8 @@ if (id) {
 }
 
 // Examples whose scene loads files from the network as Node runs it (as examples.test.js skips them).
-const SKIPPED = { text: 'loads its font from Google Fonts', materials: 'loads its environment from assets.babylonjs.com' };
+const SKIPPED = { text: 'loads its font from Google Fonts', materials: 'loads its environment from assets.babylonjs.com',
+  ...(!existsSync(new URL('../examples/character-controller/character-controller.blend', import.meta.url)) && { 'character-controller': 'its .blend is built by its script from downloads' }) };
 export const BATCHES = 4;
 /** The examples of batch `index` (of BATCHES) whose packages do not load alone, with why. */
 export function failingExamples(index) {
