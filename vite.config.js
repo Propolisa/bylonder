@@ -9,6 +9,7 @@ import { createReadStream, readdirSync, readFileSync, statSync } from "node:fs";
 import { zipSync } from "fflate";
 import { babylonArchive } from "./src/io_scene_babylon/babylon-sources.js";
 import { demoFile } from "./scripts/demo-files.mjs";
+import { bundleDemo, demoGames } from "./tools/docs/demo-bundle.mjs";
 import { staleModule } from "./scripts/module.mjs";
 import pkg from "./package.json" with { type: "json" };
 
@@ -93,12 +94,16 @@ const babylonSources = () => {
   };
 };
 
-// The live demos of exported pages (tools/docs/export-demo.mjs), published as they are: built, they would be bundled.
+// The live demos of exported pages (tools/docs/export-demo.mjs), published as they are, games bundled with Babylon
+// (demo-bundle.mjs) so they load as a few files.
 const demos = () => ({
   name: "export-demos",
-  generateBundle() {
+  async generateBundle() {
+    const games = demoGames();
     for (const path of readdirSync("docs/demos", { recursive: true }).map((path) => `docs/demos/${path.replaceAll("\\", "/")}`))
-      if (statSync(path).isFile()) this.emitFile({ type: "asset", fileName: path, source: readFileSync(path) });
+      if (statSync(path).isFile() && !games.includes(path.split("/")[2])) this.emitFile({ type: "asset", fileName: path, source: readFileSync(path) });
+    for (const game of games)
+      for (const [path, source] of Object.entries(await bundleDemo(`docs/demos/${game}`))) this.emitFile({ type: "asset", fileName: `docs/demos/${game}/${path}`, source });
   },
 });
 
