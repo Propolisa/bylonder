@@ -40,10 +40,11 @@ function readPeak(file) {
   }
 }
 
-// A test that runs twice its last time, and at least two minutes or the limit its first line gives
-// (`// Time limit: <seconds> s`), is stopped with the processes it started: on POSIX its own process group.
+// A test is stopped with the processes it started (on POSIX its own process group) once it runs twice its last time,
+// at least five minutes or the limit its first line gives (`// Time limit: <seconds> s`); a test with no last time (a
+// fresh checkout, CI) gets fifteen minutes, as nothing says how slow it is there.
 const declaredLimit = (test) => Number(/^\/\/ Time limit: (\d+) s/.exec(readFileSync(test, 'utf8'))?.[1] ?? 0);
-const limitOf = (test) => Math.max(120, declaredLimit(test), 2 * (times[test] ?? 0)) * 1000;
+const limitOf = (test) => (times[test] ? Math.max(300, declaredLimit(test), 2 * times[test]) : Math.max(900, declaredLimit(test))) * 1000;
 const POSIX = process.platform !== 'win32';
 const stop = (child) => (POSIX ? process.kill(-child.pid, 'SIGKILL') : spawn('taskkill', ['/pid', String(child.pid), '/t', '/f']));
 
