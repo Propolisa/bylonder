@@ -427,6 +427,16 @@ export const SceneSchema: import("zod/mini").ZodMiniObject<{
         }[];
     }, any>>>;
 }, import("zod/v4/core").$strip>;
+/** A Mesh datablock's data an entity reads (a native rig's: rig-description.js splitMeshes), packed in scene.bin; `key`, its buffers' names. */
+export const MeshDataSchema: import("zod/mini").ZodMiniObject<{
+    key: import("zod/mini").ZodMiniString<string>;
+    description: import("zod/mini").ZodMiniObject<{
+        buffer: import("zod/mini").ZodMiniString<string>;
+    }, import("zod/v4/core").$strip>;
+    arrays: import("zod/mini").ZodMiniArray<import("zod/mini").ZodMiniObject<{
+        buffer: import("zod/mini").ZodMiniString<string>;
+    }, import("zod/v4/core").$strip>>;
+}, import("zod/v4/core").$strip>;
 export const IR_SCHEMA: "bylonder-ir";
 export const IR_VERSION: 2;
 export const IRSchema: import("zod/mini").ZodMiniObject<{
@@ -654,6 +664,23 @@ export const IRSchema: import("zod/mini").ZodMiniObject<{
         links: [string, string, string, string][];
         interface: Record<string, any>[];
     }>, any>>>;
+    meshes: import("zod/mini").ZodMiniDefault<z.ZodMiniType<Record<string, {
+        key: string;
+        description: {
+            buffer: string;
+        };
+        arrays: {
+            buffer: string;
+        }[];
+    }>, any, import("zod/v4/core").$ZodTypeInternals<Record<string, {
+        key: string;
+        description: {
+            buffer: string;
+        };
+        arrays: {
+            buffer: string;
+        }[];
+    }>, any>>>;
     entities: import("zod/mini").ZodMiniDefault<z.ZodMiniType<Record<string, {
         type: string;
         id: string;
@@ -836,5 +863,7 @@ export type Reference = {
     data: [string, string];
 } | {
     graph: string;
+} | {
+    meshData: string;
 };
 import * as z from './zod.js';

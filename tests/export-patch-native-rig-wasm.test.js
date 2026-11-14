@@ -1,6 +1,7 @@
 // A patch of a page whose rig runs on the native runtime (BlendScene.patch, pose-constraints.js detach): the rig's
 // entity made again replaces its pose (no second solve left posing with the old inputs), and a skeleton made again is
-// posed and its meshes deformed (no solve left posing the old one). Each patched page poses and deforms as a new export of the same scene does.
+// posed and its meshes deformed (no solve left posing the old one); a mesh's data patched alone is put into the rig
+// the page compiled. Each patched page poses and deforms as a new export of the same scene does.
 import assert from 'node:assert/strict';
 import { NullEngine, VertexBuffer } from '@babylonjs/core';
 import { blendData, contextStruct } from '../src/python/bpy_rna.js';
@@ -29,7 +30,7 @@ const loaded = async ({ made }) => {
   const written = writePackage(made.files), blend = await (await import(written.url)).load(new NullEngine());
   await blend.settled();
   blend.playhead.pause();
-  return { blend, remove: written.remove };
+  return { blend, remove: written.remove, url: written.url };
 };
 const frame = (blend) => blend.controls().find((c) => c.path.endsWith('.frame_current')).path;
 // The bones' local matrices and the meshes' drawn positions at a frame.
@@ -86,6 +87,23 @@ const refreshed = await loaded(third);
 await same(page.blend, refreshed.blend, 'a skeleton made again');
 refreshed.blend.dispose();
 refreshed.remove();
+
+// The copy's Mesh widened: the patch replaces its data alone, which the page puts into the rig it compiled.
+const { compiled } = await import(new URL('bylonder/native-solve.js', page.url).href);
+const rigs = compiled.rigs;
+const widen = (p) => { p.co = [p.co[0] * 1.3, p.co[1] * 1.3, p.co[2]]; };
+for (const v of smooth.data.vertices) widen(v);
+for (const block of smooth.data.shape_keys?.key_blocks ?? []) for (const p of block.data) widen(p);
+smooth.data.update();
+tag();
+const fourth = await exported(), widened = tablesPatch(third.state, fourth.state);
+assert.ok(widened.tables.meshes && !widened.tables.entities, `the patch replaces the Mesh's data, not the rig's entity: ${Object.keys(widened.tables)}`);
+assert.equal(await page.blend.patch({ ...widened, buffers: fourth.made.buffers }), page.blend, 'and applies to the open page');
+const reshapen = await loaded(fourth);
+await same(page.blend, reshapen.blend, 'a widened mesh');
+assert.equal(compiled.rigs, rigs, 'and compiles no rig again');
+reshapen.blend.dispose();
+reshapen.remove();
 page.blend.dispose();
 page.remove();
 console.log('Export patch native rig: a patched rig poses and deforms as a new export, its old pose and deformers let go');

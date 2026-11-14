@@ -153,6 +153,7 @@ An entity's input is a plain JSON value or a reference:
 | `{ "buffer": key }` | a typed array of `scene.bin`, named by its content: its type and a hash of its bytes (`f32.1x9k2m0q7c`) |
 | `{ "data": [id, path] }` | a value of an ID's `data`, by RNA path (an action's F-Curve) |
 | `{ "graph": key }` | a node graph of `graphs` |
+| `{ "meshData": key }` | a Mesh's data of `meshes` |
 
 References may nest inside arrays and objects (a driver's variables). The scheduler resolves them before a unit runs:
 a unit sees numbers, strings, arrays and IR geometry only.
@@ -185,6 +186,14 @@ instances of their references' meshes, points as a point cloud.
 Ramp's stops), `inputs` map socket identifiers to values or property references, `links` are
 `[from node, output, to node, input]`. A graph's evaluator (material builder, Geometry Nodes evaluator, compositor)
 resolves each node's type key through the registry as the scheduler resolves an entity's.
+
+## Meshes
+
+`meshes` holds Mesh datablocks' data an entity reads, by the Mesh's key (`ME:Body`), as Blender's objects reference
+their Mesh: `{ description, arrays }`, its JSON (vertices, edges, faces, vertex groups' weights, shape keys) and the
+typed arrays it names, in `scene.bin`. A native rig's description (`constraints:POSE` on `native-rig`) references each
+mesh it deforms this way and keeps what is the object's (its modifiers, the vertices it draws), so an edit of a mesh
+patches its entry alone and the page puts it into the rig it compiled.
 
 ## Entities
 

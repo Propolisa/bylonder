@@ -6,6 +6,7 @@ import { exportPackage } from './js-export.js';
 import { packageState } from './scene-patch.js';
 import { idKey } from './ir-export.js';
 import { idStruct } from '../python/bpy_rna.js';
+import { referencesIn } from './runtime/ir.js';
 
 // An updated ID's IR key, or null where it has none.
 const keyOfPointer = (pointer) => { try { return idKey(idStruct(pointer)) ?? null; } catch { return null; } };
@@ -20,8 +21,10 @@ const ownerOf = (table, key, entry) => (table === 'properties' ? entry?.id : key
  * a parent, a modifier's object); the scene and its collections list every object, so they are not followed.
  */
 function reached(last, changed) {
-  const usedBy = new Map();
-  for (const references of Object.values(last.tables.references ?? {})) for (const { from, to } of references) if (from.startsWith('OB:')) (usedBy.get(to) ?? usedBy.set(to, []).get(to)).push(from);
+  const usedBy = new Map(), use = (from, to) => (usedBy.get(to) ?? usedBy.set(to, []).get(to)).push(from);
+  for (const references of Object.values(last.tables.references ?? {})) for (const { from, to } of references) if (from.startsWith('OB:')) use(from, to);
+  // An entity reading a Mesh's data (a native rig's, `{ meshData }`) is exported again with it, as its export makes that data.
+  for (const [key, entity] of Object.entries(last.tables.entities ?? {})) for (const [ref] of referencesIn(entity?.inputs)) if ('meshData' in ref) use(ownerOf('entities', key), ref.meshData);
   const seen = new Set(changed);
   for (const key of seen) for (const user of usedBy.get(key) ?? []) seen.add(user);
   return seen;

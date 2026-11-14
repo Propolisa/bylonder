@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { blendData } from '../src/python/bpy_rna.js';
+import { blendData, contextStruct } from '../src/python/bpy_rna.js';
 import { exportPackage } from '../src/io_scene_babylon/js-export.js';
 import { packageState, tablesPatch } from '../src/io_scene_babylon/scene-patch.js';
 import { exportChanged } from '../src/io_scene_babylon/scoped-export.js';
@@ -12,7 +12,7 @@ import { openExample } from './open-example.js';
 
 const changes = (patch) => Object.fromEntries(Object.entries(patch.tables).map(([table, entries]) => [table, Object.keys(entries).sort()]).sort());
 
-async function same(example, setup, edit, what) {
+async function same(example, setup, edit, what, check = null) {
   const { world, sync } = openExample(example);
   setup?.(world, sync);
   sync.view();
@@ -26,6 +26,7 @@ async function same(example, setup, edit, what) {
   const ours = tablesPatch(last, scoped), theirs = tablesPatch(last, whole);
   assert.deepEqual(changes(ours), changes(theirs), `${what}: the scoped export patches the entries a whole export patches`);
   assert.equal(scoped.version, whole.version, `${what}: and makes the same version`);
+  check?.(ours);
 }
 
 // Each case in a process of its own, as Blender's module holds one Main.
@@ -45,6 +46,28 @@ const CASES = {
     assert.equal(ours.version, whole.version, 'unmapped updates export the whole scene');
     assert.ok(Object.keys(tablesPatch(last, ours).tables).length, 'and patch what changed');
   },
+  // A mesh the native rig runtime deforms, widened: its Mesh's data is patched, the rig's entity referencing it kept.
+  native: () => same('rigged-character', (world, sync) => {
+    const data = blendData(), rig = data.objects.get('Rig'), body = data.objects.get('Body');
+    // An Action constraint, which Blender's constraint kernels do not run, puts the rig on the native runtime.
+    Object.assign(rig.pose.bones.get('chest').constraints.new('ACTION'), { use_eval_time: true, eval_time: 0.5, frame_start: 1, frame_end: 21,
+      use_bone_object_action: false }).action = rig.animation_data.action;
+    // A copy of the body with a Corrective Smooth only the runtime runs.
+    const smooth = data.objects.new('Smooth', body.data.copy());
+    contextStruct().scene.collection.objects.link(smooth);
+    Object.assign(smooth, { parent: body.parent, matrix_parent_inverse: body.matrix_parent_inverse, location: body.location, rotation_euler: body.rotation_euler, scale: body.scale });
+    smooth.modifiers.new('Armature', 'ARMATURE').object = rig;
+    Object.assign(smooth.modifiers.new('Smooth', 'CORRECTIVE_SMOOTH'), { factor: 0.8, iterations: 4, use_only_smooth: true });
+    sync.blender.tag(sync.objectOf(world.objects.find((n) => n.name === 'Rig')), 2);
+  }, () => {
+    const mesh = blendData().objects.get('Smooth').data;
+    for (const v of mesh.vertices) v.co = [v.co[0] * 1.3, v.co[1] * 1.3, v.co[2]];
+    for (const block of mesh.shape_keys?.key_blocks ?? []) for (const p of block.data) p.co = [p.co[0] * 1.3, p.co[1] * 1.3, p.co[2]];
+    mesh.update();
+  }, 'a widened mesh the native runtime deforms', (patch) => {
+    assert.deepEqual(Object.keys(patch.tables.meshes ?? {}), ['ME:Body.001'], `the Mesh's data is patched: ${JSON.stringify(changes(patch))}`);
+    assert.ok(!patch.tables.entities, `and the rig's entity, which references it, is not: ${JSON.stringify(changes(patch))}`);
+  }),
   driver: () => same('drivers-and-graph-editor', null, () => { blendData().objects.get('Flywheel').rotation_euler[1] += 0.7; }, 'a changed driver input'),
 };
 const one = process.env.SCOPED_CASE;

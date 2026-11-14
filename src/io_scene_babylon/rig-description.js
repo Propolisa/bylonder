@@ -215,6 +215,23 @@ export function rigDescription(arm, meshes, meshOf, keyed = []) {
   return { schema: 'bylonder-rig', version: 1, scene: { simplify: simplify(contextStruct().scene) }, objects: description, drivers, actions: [...actions.values()] };
 }
 
+// A packed description's meshes as datablocks of their own, as Blender's objects reference their Mesh: each MESH
+// object's data (vertices, faces, groups, shape keys) moves to `meshes[keyOf(ob)]` with the arrays it names, and the
+// object keeps `{ mesh: key }` and what is its own (the vertices it draws). Objects on one Mesh share its entry.
+export function splitMeshes(packed, arrays, keyOf) {
+  const own = [], index = new Map(), meshes = {};
+  const take = (value, list, at) => (value?.constructor === Object && 'array' in value && Object.keys(value).length === 1
+    ? { array: at.get(value.array) ?? at.set(value.array, list.push(arrays[value.array]) - 1).get(value.array) }
+    : Array.isArray(value) ? value.map((v) => take(v, list, at)) : value?.constructor === Object ? Object.fromEntries(Object.entries(value).map(([k, v]) => [k, take(v, list, at)])) : value);
+  const objects = packed.objects.map((ob) => {
+    if (ob.type !== 'MESH' || !ob.data?.faces) return take(ob, own, index);
+    const { draw_vertices, ...data } = ob.data, key = keyOf(ob.name), list = [];
+    meshes[key] ??= { description: new TextEncoder().encode(JSON.stringify(take(data, list, new Map()))), arrays: list };
+    return take({ ...ob, data: { mesh: key, ...(draw_vertices && { draw_vertices }) } }, own, index);
+  });
+  return { packed: { ...packed, objects, drivers: take(packed.drivers, own, index), actions: take(packed.actions, own, index) }, arrays: own, meshes };
+}
+
 // The description with its bulk as typed arrays: a mesh's vertices and faces, its vertex groups' weights and order, its shape
 // keys' offsets from the basis (each where non-zero), the vertices it draws, its Corrective Smooth and Surface Deform binds, and F-Curves'
 // keys, as `{ array }` indices into `arrays`, which the page reads back (runtime/native-rig.js unpackDescription).

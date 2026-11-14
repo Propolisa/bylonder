@@ -665,6 +665,52 @@
         ]
       }
     },
+    "meshes": {
+      "default": {},
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^ME:"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "description": {
+            "type": "object",
+            "properties": {
+              "buffer": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "buffer"
+            ]
+          },
+          "arrays": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "buffer": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "buffer"
+              ]
+            }
+          }
+        },
+        "required": [
+          "key",
+          "description",
+          "arrays"
+        ]
+      }
+    },
     "entities": {
       "default": {},
       "type": "object",

@@ -303,16 +303,25 @@ function evaluatedIDs(ids, graphs, entities, sync, bin) {
 // and the scheduler hands over as it is (a buffer) each time the pose runs, and its constraint types.
 const compiledRig = (rig, bin) => ({ kernels: { buffer: bin.add(new TextEncoder().encode(JSON.stringify(rig))) },
   types: [...new Set(rig.bones.flatMap((b) => b.constraints.map((c) => c.type)))] });
-// A rig the native runtime runs: its description's JSON and arrays in scene.bin (pose-export.js nativeRig).
-const nativeRig = ({ description, arrays, ...rest }, bin) => ({ native: { description: { buffer: bin.add(description) }, arrays: arrays.map((a) => ({ buffer: bin.add(a) })), ...rest } });
+// A packed description's JSON and arrays in scene.bin, and their names together as its `key`, which tells it by content.
+const packedIn = ({ description, arrays }, bin) => {
+  const named = [description, ...arrays].map((array) => bin.add(array));
+  return { key: named.join(' '), description: { buffer: named[0] }, arrays: named.slice(1).map((buffer) => ({ buffer })) };
+};
+// A rig the native runtime runs (pose-export.js nativeRig): its description in scene.bin, and its meshes' data in the
+// IR's `meshes`, which it references by key, as an object does its Mesh.
+const nativeRig = ({ description, arrays, data, ...rest }, bin, meshes) => {
+  for (const [key, mesh] of Object.entries(data)) meshes[key] ??= packedIn(mesh, bin);
+  return { native: { ...packedIn({ description, arrays }, bin), data: Object.fromEntries(Object.keys(data).map((key) => [key, { meshData: key }])), ...rest } };
+};
 
 // An object's constraints the page applies to its node each frame, after what places it (`constraints:OBJECT`), by the
 // node's id; an armature's bone constraints the page runs on its skeleton (`constraints:POSE`), by its node's.
-function constraintEntities(ids, constraints, time, bin) {
+function constraintEntities(ids, constraints, time, bin, meshes) {
   const idOf = new Map(Object.entries(ids).filter(([, id]) => id.node !== undefined).map(([k, id]) => [id.node, k]));
   const frame = time && { frame: { property: time } };
   return Object.fromEntries(constraints.flatMap((c) => {
-    if (c.pose) return idOf.has(c.armature) ? [[`${idOf.get(c.armature)}/constraints/pose`, { type: 'constraints:POSE', id: idOf.get(c.armature), inputs: { ...c.pose, ...frame, ...(c.pose.kernels && compiledRig(c.pose.kernels, bin)), ...(c.pose.native && nativeRig(c.pose.native, bin)) }, outputs: {},
+    if (c.pose) return idOf.has(c.armature) ? [[`${idOf.get(c.armature)}/constraints/pose`, { type: 'constraints:POSE', id: idOf.get(c.armature), inputs: { ...c.pose, ...frame, ...(c.pose.kernels && compiledRig(c.pose.kernels, bin)), ...(c.pose.native && nativeRig(c.pose.native, bin, meshes)) }, outputs: {},
       implementation: c.pose.kernels ? 'pose-kernels' : c.pose.native ? 'native-rig' : 'pose' }]] : [];
     return idOf.has(c.node) ? [[`${idOf.get(c.node)}/constraints/object`, { type: 'constraints:OBJECT', id: idOf.get(c.node), inputs: { ...c, ...frame }, outputs: {}, implementation: 'constraints' }]] : [];
   }));
@@ -329,7 +338,7 @@ export function exportIR(world, { controls, collections = null, live, bin, anima
   const { ids, references } = sync ? exportIDs(rootIDs(objects.map(([, pointer]) => pointer))) : { ids: {}, references: [] };
   for (const [node, pointer] of objects) if (ids[idKey(idStruct(pointer))]) ids[idKey(idStruct(pointer))].node = node.id;
   if (sync) references.push(...depsgraphReferences(ids, references, sync.blender.relations()));
-  const graphs = {};
+  const graphs = {}, meshes = {};
   const time = controls.some(({ path }) => path.endsWith('.frame_current'));
   const readsFrame = (tree) => time && treeReadsFrame(tree);
   const entities = sync ? { ...modifierEntities(world, live, controls, bin), ...geometryNodesEntities(world, controls, bin, (tree) => {
@@ -345,7 +354,7 @@ export function exportIR(world, { controls, collections = null, live, bin, anima
     for (const entity of Object.values(entities)) if (time && entity.type === 'modifier:NODES' && readsTime(graphs, entity.inputs.graph.graph)) entity.inputs.frame = { property: time };
     Object.assign(entities, driverEntities(properties, skeletons), animationEntities(ids, properties, time, animationGroups, curves, bin),
       greasePencilEntities(world, objects.map(([node]) => node), bin, time),
-      chosenState(states, 'curves') === 'OFF' ? {} : curvesEntities(world, objects.map(([node]) => node), bin), constraintEntities(ids, constraints, time, bin));
+      chosenState(states, 'curves') === 'OFF' ? {} : curvesEntities(world, objects.map(([node]) => node), bin), constraintEntities(ids, constraints, time, bin, meshes));
     Object.assign(entities, pointCloudEntities(world, objects.map(([node]) => node), bin));
   }
   // What the page computes from is offered to authors.
@@ -353,5 +362,5 @@ export function exportIR(world, { controls, collections = null, live, bin, anima
   // What a driver sets is its driver's, as in Blender: still a control, but not one to suggest.
   for (const entity of Object.values(entities)) if (entity.type.startsWith('driver:')) for (const target of Object.values(entity.outputs ?? {})) if (target && 'property' in target) delete properties[target.property]?.suggested;
   return { schema: IR_SCHEMA, version: IR_VERSION, scene: { ...(collections?.scene ?? { id: null, collection: null, view_layer: null }), time: { ...sceneTime(world.animation.time.state), sample_rates: sampleRates, clips, markers, sounds } }, ids,
-    collections: collections?.collections ?? {}, references, properties, graphs, entities, order: entityOrder(entities) };
+    collections: collections?.collections ?? {}, references, properties, graphs, meshes, entities, order: entityOrder(entities) };
 }

@@ -175,7 +175,7 @@ function hide(node, hidden) {
 
 // The tables a patch reaches: the scene's objects (scene-tables.js) and the IR's IDs, collections and properties (its
 // references are what the export follows; the page reads none).
-const IR_TABLES = new Set(['ids', 'collections', 'properties', 'graphs']);
+const IR_TABLES = new Set(['ids', 'collections', 'properties', 'graphs', 'meshes']);
 // The tables whose objects a rig's runtime holds, and the implementations that hold them.
 const REMADE = ['skeletons', 'morphTargets', 'nodes', 'geometries'], RIGS = ['pose', 'pose-kernels', 'native-rig'];
 // A buffer's key as entries name it (scene-bin.js contentKey).
@@ -595,7 +595,7 @@ export class BlendScene {
       if (patch.tables.animationGroups || patch.tables.animations) this.#clips.refresh(playing);
       // What a rig runs on holds its skeleton, meshes and morph targets: made again, it attaches to the new ones.
       const remade = REMADE.some((table) => patch.tables[table]);
-      if (entries.entities || entries.graphs || remade) this.#scheduler?.replace(entries.entities ?? {}, Object.keys(entries.graphs ?? {}), (name) => remade && RIGS.includes(name));
+      if (entries.entities || entries.graphs || entries.meshes || remade) this.#scheduler?.replace(entries.entities ?? {}, [...Object.keys(entries.graphs ?? {}), ...Object.keys(entries.meshes ?? {})], (name) => remade && RIGS.includes(name));
       this.#retime();
       // What a binding writes is the control's, on the objects the patch made too.
       for (const [path, knob] of this.#knobs) if (knob.bind) this.#write(path, /** @type {Value} */ (this.#values.get(path)));

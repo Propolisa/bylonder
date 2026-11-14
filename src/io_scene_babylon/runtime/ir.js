@@ -156,6 +156,9 @@ export const SceneSchema = z.object({
   time: fresh(TimeSchema, TIME),
 });
 
+/** A Mesh datablock's data an entity reads (a native rig's: rig-description.js splitMeshes), packed in scene.bin; `key`, its buffers' names. */
+export const MeshDataSchema = z.object({ key: z.string(), description: z.object({ buffer: z.string() }), arrays: z.array(z.object({ buffer: z.string() })) });
+
 export const IR_SCHEMA = 'bylonder-ir', IR_VERSION = 2;
 export const IRSchema = z.object({
   schema: z.literal(IR_SCHEMA),
@@ -166,6 +169,7 @@ export const IRSchema = z.object({
   references: fresh(z.array(IDReferenceSchema), () => []),
   properties: fresh(z.record(Name, PropertySchema), () => ({})),
   graphs: fresh(z.record(Name, GraphSchema), () => ({})),
+  meshes: fresh(z.record(matching(/^ME:/), MeshDataSchema), () => ({})),
   entities: fresh(z.record(matching(/^[A-Z]{2,3}:.+\/[a-z_]+\/.+$/), EntitySchema), () => ({})),
   order: fresh(z.array(Name), () => []),
 });
@@ -205,10 +209,10 @@ export const GeometrySchema = z.object({ mesh: z.optional(MeshSchema), points: z
  * @typedef {z.infer<typeof CollectionSchema>} Collection
  * @typedef {z.infer<typeof LayerCollectionSchema>} LayerCollection
  * A reference an entity's input may hold, resolved before a unit runs.
- * @typedef {{ property: string } | { entity: string, output: string } | { buffer: string } | { data: [string, string] } | { graph: string }} Reference
+ * @typedef {{ property: string } | { entity: string, output: string } | { buffer: string } | { data: [string, string] } | { graph: string } | { meshData: string }} Reference
  */
 
-const REFERENCES = ['property', 'entity', 'buffer', 'data', 'graph'];
+const REFERENCES = ['property', 'entity', 'buffer', 'data', 'graph', 'meshData'];
 /** Whether a value is a reference. @param {any} value @returns {value is Reference} */
 export const isReference = (value) => value?.constructor === Object && REFERENCES.some((kind) => kind in value)
   && Object.keys(value).every((key) => key === 'output' || REFERENCES.includes(key));
@@ -310,7 +314,7 @@ export function explain({ issues }, label = '') {
 }
 
 /** The schema of each of the IR's keyed parts, which a patch's entries take (BlendScene.patch). */
-const PARTS = { ids: IDSchema, collections: CollectionSchema, properties: PropertySchema, graphs: GraphSchema, entities: EntitySchema };
+const PARTS = { ids: IDSchema, collections: CollectionSchema, properties: PropertySchema, graphs: GraphSchema, meshes: MeshDataSchema, entities: EntitySchema };
 
 /**
  * A patch's entries of the IR's keyed parts as this runtime reads them, defaults filled (null where one is gone);
@@ -399,7 +403,7 @@ function repairCollections(ir, warn) {
 function repair(ir, warn, implementations) {
   /** @param {Reference} ref */
   const exists = (ref) => ('property' in ref ? ref.property in ir.properties : 'entity' in ref ? ref.entity in ir.entities
-    : 'graph' in ref ? ref.graph in ir.graphs : 'data' in ref ? ref.data[0] in ir.ids : true);
+    : 'graph' in ref ? ref.graph in ir.graphs : 'meshData' in ref ? ref.meshData in ir.meshes : 'data' in ref ? ref.data[0] in ir.ids : true);
   /** @param {any} value @param {string} at @returns {any} */
   const prune = (value, at) => {
     if (isReference(value)) {

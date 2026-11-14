@@ -14,9 +14,17 @@ export function nativeSolve(scene?: import("@babylonjs/core").Scene | null, cont
     detach(entry: any): void;
     deformed(native: NativePose["native"], name: string): Float64Array;
 };
+export namespace compiled {
+    let rigs: number;
+}
 export function load(page: any): {
     run: (inputs: any, context: any, entity: any) => {};
     detach: (entity: any) => void;
+};
+export type Packed = {
+    key?: string;
+    description: Uint8Array;
+    arrays: ArrayLike<number>[];
 };
 export type NativePose = {
     bones: {
@@ -28,8 +36,10 @@ export type NativePose = {
     mesh: Matrix;
     space: Matrix;
     native: {
+        key?: string;
         description: Uint8Array;
         arrays: ArrayLike<number>[];
+        data?: Record<string, Packed>;
         armature: string;
         objects?: Record<string, string>;
         meshes?: Record<string, string>;

@@ -8,7 +8,8 @@ import { blendData } from '../python/bpy_rna.js';
 import { solvePose } from './runtime/pose-constraints.js';
 import { kernelSolve } from './runtime/pose-kernels.js';
 import { nativeSolve } from './runtime/native-solve.js';
-import { packDescription, rigDescription } from './rig-description.js';
+import { packDescription, rigDescription, splitMeshes } from './rig-description.js';
+import { idKey } from './ir-export.js';
 import { compileRig } from './runtime/native/rig/program.js';
 import { compileDeform } from './runtime/native/deform/mesh.js';
 import { CpuStack } from './runtime/native/deform/cpu.js';
@@ -100,6 +101,7 @@ const drawnVertices = (mesh) => Int32Array.from([...mesh.corner_verts, ...Array.
 // An armature's description for the native runtime (rig-description.js), packed: its JSON as bytes and its arrays; the
 // page's animation poses the bones, so the armature plays no action of its own there, and the page places it and the
 // objects it draws that its constraints and modifiers read (`objects`: their nodes' ids, by name).
+// Its meshes' data are datablocks of their own (`data`, by their Mesh's IR key, rig-description.js splitMeshes).
 // `deformed`: mesh objects Babylon cannot skin for their modifier stack ({ ob, node, mesh(), evaluated() }: Main's Mesh
 // and the evaluated one the export draws; `source`: a mesh only another's Surface Deform reads, which goes in as data);
 // those whose stack the runtime runs to the evaluated mesh's vertices go in
@@ -139,8 +141,8 @@ function nativeRig(arm, nodeOf, deformed = [], armatureOnly = false) {
     meshes[d.ob.name] = d.node.id;
   }
   if (!armatureOnly) deformsOnPage(description, runs.map((d) => d.ob.name));
-  const { packed, arrays } = packDescription(description);
-  return { description: new TextEncoder().encode(JSON.stringify(packed)), arrays, armature: arm.name, objects, meshes, skipped, published: [...driven(arm, description), ...drivenKeys(keyed, description)] };
+  const whole = packDescription(description), { packed, arrays, meshes: data } = splitMeshes(whole.packed, whole.arrays, (name) => idKey(blendData().objects.get(name).data));
+  return { description: new TextEncoder().encode(JSON.stringify(packed)), arrays, data, armature: arm.name, objects, meshes, skipped, published: [...driven(arm, description), ...drivenKeys(keyed, description)] };
 }
 // Each mesh the page deforms, run once on a rig compiled from the description the page gets: one the page could not
 // deform (a Surface Deform's surface left out) fails the export rather than the page.

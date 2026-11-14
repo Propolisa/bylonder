@@ -52,7 +52,7 @@ export function createScheduler(ir, page) {
     readers.clear(); references.clear(); timed.length = 0;
     for (const [key, entity] of Object.entries(entities)) references.set(key, [...referencesIn(entity.inputs)].map(([ref]) => ref));
     for (const [key, refs] of references) for (const ref of refs) {
-      const from = 'property' in ref ? ref.property : 'entity' in ref ? ref.entity : 'graph' in ref ? ref.graph : null;
+      const from = 'property' in ref ? ref.property : 'entity' in ref ? ref.entity : 'graph' in ref ? ref.graph : 'meshData' in ref ? ref.meshData : null;
       if (from) readers.set(from, [...(readers.get(from) ?? []), key]);
       if ('property' in ref && isTime(ref.property)) timed.push(key);
     }
@@ -89,7 +89,7 @@ export function createScheduler(ir, page) {
     return name && EVALUATORS[name] ? evaluator(name) : null;
   };
 
-  // What reads no property or entity (buffers, graphs: a rig's description) resolves once, again after a patch's replace.
+  // What reads no property or entity (buffers, graphs, meshes: a rig's description) resolves once, again after a patch's replace.
   let fixed = new WeakMap(); const live = new WeakMap();
   /** @param {any} v @returns {boolean} */ const readsLive = (v) => !!v && typeof v === 'object' && !ArrayBuffer.isView(v) && holdsReference(v) && (live.get(v) ?? live.set(v, isReference(v) ? 'property' in v || 'entity' in v || ('data' in v && readsLive(dataAt(ir, v.data))) : (Array.isArray(v) ? v : Object.values(v)).some(readsLive)).get(v));
   /** An entity's inputs, read at the frame its ID shows; what holds no reference as it is. @param {any} value @param {string} id @returns {any} */
@@ -99,7 +99,7 @@ export function createScheduler(ir, page) {
     if ('property' in value) return isTime(value.property) ? controls.frame(id) : controls.get(value.property);
     if ('entity' in value) return outputs.get(value.entity)?.[value.output];
     if ('buffer' in value) return page.buffers[value.buffer];
-    return 'data' in value ? resolve(dataAt(ir, value.data), id) : ir.graphs[value.graph];
+    return 'data' in value ? resolve(dataAt(ir, value.data), id) : 'meshData' in value ? resolve(ir.meshes[value.meshData], id) : ir.graphs[value.graph];
   };
   /** What an entity gives, written to its properties and drawn; a Promise while a mesh is drawn. @param {string} key @param {Record<string, any>} result */
   const land = (key, result) => {
@@ -168,10 +168,11 @@ export function createScheduler(ir, page) {
   return {
     /** A property was set. @param {string} path */
     changed: (path) => { readers.get(path)?.forEach(mark); run(); },
-    /** A patch replaced entities (null where gone), graphs, and the objects of those whose implementation `remade` names:
-     * each is let go of (`detach`), the order made again, and they, readers of a replaced graph and their readers run.
-     * @param {Record<string, import('./ir.js').Entity | null>} replaced @param {string[]} graphs @param {(name: string) => boolean} remade */
-    replace(replaced, graphs, remade) {
+    /** A patch replaced entities (null where gone), graphs and meshes (`parts`, their keys), and the objects of those whose
+     * implementation `remade` names: each is let go of (`detach`), the order made again, and they, readers of a replaced
+     * part and their readers run.
+     * @param {Record<string, import('./ir.js').Entity | null>} replaced @param {string[]} parts @param {(name: string) => boolean} remade */
+    replace(replaced, parts, remade) {
       fixed = new WeakMap();
       const again = Object.keys(entities).filter((key) => key in replaced || remade(entities[key].implementation ?? ''));
       for (const key of again) {
@@ -182,7 +183,7 @@ export function createScheduler(ir, page) {
       for (const [key, entity] of Object.entries(replaced)) if (entity) entities[key] = entity;
       ir.order = entityOrder(entities);
       index();
-      [...again, ...Object.keys(replaced), ...graphs.flatMap((graph) => readers.get(graph) ?? [])].filter((key) => entities[key]).forEach(mark);
+      [...again, ...Object.keys(replaced), ...parts.flatMap((part) => readers.get(part) ?? [])].filter((key) => entities[key]).forEach(mark);
       run();
     },
     /** The frames IDs show changed (a time offset): what reads the frame runs again. */

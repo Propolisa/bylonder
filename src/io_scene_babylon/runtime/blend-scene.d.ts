@@ -188,6 +188,15 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
             links: [string, string, string, string][];
             interface: Record<string, any>[];
         }>;
+        meshes: Record<string, {
+            key: string;
+            description: {
+                buffer: string;
+            };
+            arrays: {
+                buffer: string;
+            }[];
+        }>;
         entities: Record<string, {
             type: string;
             id: string;

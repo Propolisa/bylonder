@@ -2,10 +2,11 @@
 export function createScheduler(ir: import("./ir.js").IR, page: Page): {
     /** A property was set. @param {string} path */
     changed: (path: string) => void;
-    /** A patch replaced entities (null where gone), graphs, and the objects of those whose implementation `remade` names:
-     * each is let go of (`detach`), the order made again, and they, readers of a replaced graph and their readers run.
-     * @param {Record<string, import('./ir.js').Entity | null>} replaced @param {string[]} graphs @param {(name: string) => boolean} remade */
-    replace(replaced: Record<string, import("./ir.js").Entity | null>, graphs: string[], remade: (name: string) => boolean): void;
+    /** A patch replaced entities (null where gone), graphs and meshes (`parts`, their keys), and the objects of those whose
+     * implementation `remade` names: each is let go of (`detach`), the order made again, and they, readers of a replaced
+     * part and their readers run.
+     * @param {Record<string, import('./ir.js').Entity | null>} replaced @param {string[]} parts @param {(name: string) => boolean} remade */
+    replace(replaced: Record<string, import("./ir.js").Entity | null>, parts: string[], remade: (name: string) => boolean): void;
     /** The frames IDs show changed (a time offset): what reads the frame runs again. */
     retimed: () => void;
     /** Resolves once every entity set going has run. */

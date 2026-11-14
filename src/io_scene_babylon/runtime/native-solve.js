@@ -7,6 +7,7 @@
 // modifier stack (the description's `meshes`) it deforms after the pose: on WebGPU in compute, else on the CPU.
 import { Matrix, Quaternion, Vector3, VertexBuffer } from '@babylonjs/core';
 import { compileRig } from './native/rig/program.js';
+import { normalize } from './native/rig/schema.js';
 import { compileDeform, deformMesh } from './native/deform/mesh.js';
 import { invertAffine, mulAffine, ROT_NAMES } from './native/rig/m4.js';
 import { eulerCompatible } from './native/euler.js';
@@ -19,24 +20,58 @@ const EULER_ORDERS = ['XYZ', 'XZY', 'YXZ', 'YZX', 'ZXY', 'ZYX'];
 
 /**
  * @typedef {{ bones: { name: string, parent: number, rest: Matrix }[], locals: Matrix[], mesh: Matrix, space: Matrix,
- *   native: { description: Uint8Array, arrays: ArrayLike<number>[], armature: string, objects?: Record<string, string>, meshes?: Record<string, string>,
+ *   native: { key?: string, description: Uint8Array, arrays: ArrayLike<number>[], data?: Record<string, Packed>, armature: string, objects?: Record<string, string>, meshes?: Record<string, string>,
  *     published?: { property: string, path?: string, bone?: string | null, name?: string, mesh?: string, key?: string, range?: [number, number] }[] }, properties?: Record<string, number>,
  *   frame?: number, nodeWorld?: (id: string) => Matrix | null }} NativePose
  */
 
+/** The rigs compiled on the page: a patch of a mesh's data puts it into its rig's program instead of compiling it again. */
+export const compiled = { rigs: 0 };
+
+/** @typedef {{ key?: string, description: Uint8Array, arrays: ArrayLike<number>[] }} Packed */
+
+/** A packed description's JSON with each `{ array }` it names in place. @param {{ description: Uint8Array, arrays: ArrayLike<number>[] }} packed */
+function unpacked({ description, arrays }) {
+  /** @type {(v: any) => any} */
+  const resolve = (v) => (v?.constructor === Object && 'array' in v ? arrays[v.array]
+    : Array.isArray(v) ? v.map(resolve) : v?.constructor === Object ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, resolve(x)])) : v);
+  return resolve(JSON.parse(new TextDecoder().decode(description)));
+}
+/** An object's data with its Mesh's (`{ mesh: key }`, the description's datablocks) in place. @param {any} data @param {NativePose['native']} native */
+const meshData = (data, native) => (data?.mesh ? { ...unpacked(/** @type {any} */ (native.data)[data.mesh]), ...data } : data);
+
 /** The runtime's rig of a description (its JSON in scene.bin, the arrays it names), compiled once. @param {NativePose['native']} native */
 function compile(native) {
-  const text = JSON.parse(new TextDecoder().decode(native.description));
-  /** @type {(v: any) => any} */
-  const resolve = (v) => (v?.constructor === Object && 'array' in v ? native.arrays[v.array]
-    : Array.isArray(v) ? v.map(resolve) : v?.constructor === Object ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, resolve(x)])) : v);
-  const program = compileRig(unpackDescription(resolve(text))), rig = program.instance();
+  const text = unpacked(native), objects = text.objects.map((/** @type {any} */ ob) => ({ ...ob, data: meshData(ob.data, native) }));
+  const program = compileRig(unpackDescription({ ...text, objects })), rig = program.instance();
   /** @type {WeakMap<object, { of: number[], unrest: Matrix[], last: Matrix[] }>} */
   const layouts = new WeakMap();
   return { program, rig, armature: program.objectIndex.get(native.armature), layouts, properties: new Map(), placed: new Map(), posed: /** @type {Float64Array | null} */ (null),
-    deforms: /** @type {Map<string, any>} Each deformed mesh's stack, by name. */ (new Map()), published: /** @type {Map<string, number>} */ (new Map()), deformers: /** @type {{ update(): void }[] | null} */ (null),
+    deforms: /** @type {Map<string, any>} Each deformed mesh's stack, by name. */ (new Map()), published: /** @type {Map<string, number>} */ (new Map()),
+    deformers: /** @type {Map<string, { update(): void }> | null} Each deformed mesh's, by name. */ (null),
     offline: /** @type {{ rig: any, unrest: Map<string, Matrix> } | null} The second instance solveAt evaluates. */ (null),
-    sharedKeys: /** @type {{ name: string, from: number, blocks: string[] }[] | null} Meshes holding another's Key (shareKeys). */ (null) };
+    sharedKeys: /** @type {{ name: string, from: number, blocks: string[] }[] | null} Meshes holding another's Key (shareKeys). */ (null),
+    /** Each object's Mesh key and the packed data its program holds, which a patch may replace. */
+    meshes: text.objects.flatMap((/** @type {any} */ ob) => (ob.data?.mesh ? [{ name: ob.name, data: ob.data, from: /** @type {any} */ (native.data)[ob.data.mesh] }] : [])) };
+}
+
+/**
+ * The meshes whose data a patch replaced (another packed datablock under their key), put into the rig's program in
+ * place: their deform stacks and deformers are made again, the rig's program and its pose kept.
+ * @param {ReturnType<typeof compile>} entry @param {NativePose['native']} native
+ */
+function remesh(entry, native) {
+  for (const mesh of entry.meshes) {
+    const now = /** @type {any} */ (native.data)?.[mesh.data.mesh];
+    if (!now || now === mesh.from) continue;
+    const same = now.key !== undefined && now.key === mesh.from.key;
+    mesh.from = now;
+    if (same) continue;
+    const data = unpackDescription({ objects: [{ type: 'MESH', data: meshData(mesh.data, native) }], drivers: [], actions: [] }).objects[0].data;
+    /** @type {any} */ (entry.program).objects[entry.program.objectIndex.get(mesh.name)].data = normalize({ objects: [{ type: 'MESH', name: mesh.name, data }] }).objects[0].data;
+    entry.deforms.delete(mesh.name);
+    entry.deformers?.delete(mesh.name);
+  }
 }
 
 /** A mesh's deform stack on an entry's rig, compiled once. @param {ReturnType<typeof compile>} entry @param {string} name */
@@ -134,11 +169,17 @@ function directState(entry, bones, shape) {
  * @returns {((pose: NativePose) => Map<number, Matrix>) & { pass(entry: any): void, detach(entry: any): void, deformed(native: NativePose['native'], name: string): Float64Array }}
  */
 export function nativeSolve(scene = null, controls = null) {
-  /** Each rig by the description it was compiled from. @type {WeakMap<Uint8Array, ReturnType<typeof compile>>} */
-  const rigs = new WeakMap();
+  /** Each rig by its description's buffers' names (a patch loads the same description anew), else by the description. */
+  const rigs = /** @type {Map<string, ReturnType<typeof compile>>} */ (new Map()), described = /** @type {WeakMap<Uint8Array, ReturnType<typeof compile>>} */ (new WeakMap());
   const scale = new Vector3(), turn = new Quaternion(), at = new Vector3(), rotation = new Matrix();
   /** The entry of a description, compiled at the first ask. @param {NativePose['native']} native */
-  const entryOf = (native) => /** @type {ReturnType<typeof compile>} */ (rigs.get(native.description) ?? rigs.set(native.description, compile(native)).get(native.description));
+  const entryOf = (native) => {
+    const key = native.key, known = key !== undefined ? rigs.get(key) : described.get(native.description);
+    const entry = known ?? compile(native);
+    if (!known) { compiled.rigs++; key !== undefined ? rigs.set(key, entry) : described.set(native.description, entry); }
+    remesh(entry, native);
+    return entry;
+  };
   /**
    * Runs the rig after its inputs: the custom properties drivers read (`["name"]` of the armature, `pose.bones["B"]["name"]`
    * of a bone) where set, the armature and the objects its constraints and modifiers read where the page places them
@@ -213,8 +254,11 @@ export function nativeSolve(scene = null, controls = null) {
   /** Deforms the rig's meshes in the scene by its pose. @param {ReturnType<typeof compile>} entry @param {NativePose['native']} native */
   const deform = (entry, native) => {
     if (!scene) return;
-    entry.deformers ??= Object.entries(native.meshes ?? {}).flatMap(([name, id]) => { const node = scene.getMeshById(id); return node ? [deformer(scene, entry, name, node)] : []; });
-    for (const d of entry.deformers) d.update();
+    const deformers = (entry.deformers ??= new Map());
+    for (const [name, id] of Object.entries(native.meshes ?? {})) {
+      if (!deformers.has(name)) { const node = scene.getMeshById(id); if (node) deformers.set(name, deformer(scene, entry, name, node)); }
+      deformers.get(name)?.update();
+    }
   };
   /** A bone's own location, rotation and scale from its Babylon local matrix (Blender's axes). @param {any} rig @param {number} b @param {Matrix} local @param {Matrix} unrest */
   const give = (rig, b, local, unrest) => {
