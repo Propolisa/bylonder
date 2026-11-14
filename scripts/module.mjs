@@ -12,7 +12,6 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { unzipSync } from 'fflate';
 import { pathToFileURL } from 'node:url';
 
 export const REPO = 'Propolisa/bylonder', DEMO_RELEASE = 'demo-packages', DEMOS = 'docs/demos';
@@ -57,7 +56,9 @@ export const demoPackages = () => (existsSync(`${DEMOS}/packages.json`) ? Object
   .map(([demo, hash]) => ({ demo, dir: `${DEMOS}/${demo}/world`, asset: `${demo}-${hash}.zip` }));
 
 /** Unzips a package archive into `dir`, replacing what was there, marked with its asset name. */
-export function installPackage(zip, dir, asset) {
+export async function installPackage(zip, dir, asset) {
+  // Loaded here, as the key is read before the dependencies are installed.
+  const { unzipSync } = await import('fflate');
   rmSync(dir, { recursive: true, force: true });
   for (const [path, bytes] of Object.entries(unzipSync(zip))) {
     if (path.endsWith('/')) continue;
@@ -73,7 +74,7 @@ async function fetchDemos() {
     const url = `https://github.com/${REPO}/releases/download/${DEMO_RELEASE}/${asset}`;
     const response = await fetchRetried(url);
     if (!response.ok) throw Error(`${url}: ${response.status}. The ${demo} demo's package is published by tools/docs/upload-demo-package.mjs ${demo}`);
-    installPackage(new Uint8Array(await response.arrayBuffer()), dir, asset);
+    await installPackage(new Uint8Array(await response.arrayBuffer()), dir, asset);
     console.log(`${dir}: ${asset}`);
   }
 }

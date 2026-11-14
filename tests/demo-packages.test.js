@@ -20,7 +20,7 @@ writeFileSync(join(from, 'bylonder', 'blend-scene.js'), new Uint8Array([1, 2, 3]
 const first = packageArchive(from), again = packageArchive(from);
 assert.equal(first.hash, again.hash, 'the same package gets the same name');
 assert.match(first.hash, /^[0-9a-f]{12}$/);
-installPackage(first.zip, to, `demo-${first.hash}.zip`);
+await installPackage(first.zip, to, `demo-${first.hash}.zip`);
 assert.equal(readFileSync(join(to, 'scene.js'), 'utf8'), 'export {};\n', 'it unzips as it was');
 assert.deepEqual([...readFileSync(join(to, 'bylonder', 'blend-scene.js'))], [1, 2, 3]);
 assert.equal(readFileSync(join(to, '.key'), 'utf8'), `demo-${first.hash}.zip`, 'marked with its asset');
