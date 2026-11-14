@@ -371,12 +371,13 @@ function selectedWorld(world, selected) {
 // whether the package is then bundled (bundle.js); `branchState` and `branches`, the states of the scene's branches
 // (export-options.js chosenState); `scope`, the whole scene or its `selected` objects (export-options.js SCOPES);
 // `clipCompression`, how clips' bone keys are compressed (export-options.js CLIP_COMPRESSION); `verified` false, a live
-// re-export's (scoped-export.js), which takes each rig's checks from the last full export instead of running them again.
+// re-export's (scoped-export.js), which takes each rig's checks from the last full export instead of running them again;
+// `changed`, a live re-export's IR keys of what the edit changed (null: everything is read again).
 
 export const exportModule = async (world, options) => (await exportPackage(world, options)).files;
 
 // The package's files, its tables by datablock and its buffers by key (scene-patch.js makes a patch of two).
-export async function exportPackage(whole, { scope = 'SCENE', selected = [], live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, animations = 'TIMELINE', clipCompression = 'STANDARD', target = 'BOTH', runtime = null, runtimes = {}, replace = [], bundle = false, controlPanel = true, devTools = 'CDN', navigation = 'FIXED', navigationModes = {}, branchState = null, branches = {}, sampleRate = {}, verified = true } = {}) {
+export async function exportPackage(whole, { scope = 'SCENE', selected = [], live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, animations = 'TIMELINE', clipCompression = 'STANDARD', target = 'BOTH', runtime = null, runtimes = {}, replace = [], bundle = false, controlPanel = true, devTools = 'CDN', navigation = 'FIXED', navigationModes = {}, branchState = null, branches = {}, sampleRate = {}, verified = true, changed = null } = {}) {
   const world = scope === 'SELECTED' ? selectedWorld(whole, selected) : whole;
   const states = { branchState, branches }, stackState = (node) => chosenState(states, 'modifiers', node.name) ?? (keepLive ? 'LIVE' : 'BAKED');
   const live = new Map(world.objects.filter((node) => stackState(node) === 'LIVE').map((node) => [node, liveStack(world, node)]).filter(([, stack]) => stack));
@@ -386,7 +387,7 @@ export async function exportPackage(whole, { scope = 'SCENE', selected = [], liv
     await prepareKernels();
     // The mapped meshes' geometry is read below: their mapping holds until the module is written.
     const sampling = exportSampling(world.animation.time.state, sampleRate);
-    const mapped = exportRuntimes(world, { bake: bakeAnimation, runtime, runtimes, sampling, verified });
+    const mapped = exportRuntimes(world, { bake: bakeAnimation, runtime, runtimes, sampling, verified, changed });
     try {
       return await moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, animations, clipCompression, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states, sampling });
     } finally {

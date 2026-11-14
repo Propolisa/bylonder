@@ -166,7 +166,7 @@ export function pathID(path) {
 }
 
 // The scene's own IDs: every scene with its collections, view layers, world and compositor, and the objects drawn.
-export const rootIDs = (objects) => [...blendData().scenes, ...objects.map(idStruct)];
+export const rootIDs = (objects, scenes = true) => [...(scenes ? blendData().scenes : []), ...objects.map(idStruct)];
 
 // An unlinked socket's value as the property that sets it, where there is one: a vector's by component. With `main`,
 // the tree the node is written from is an inlined copy of `main`: only a node of `main` itself has properties.
@@ -335,7 +335,8 @@ function constraintEntities(ids, constraints, time, bin, meshes) {
 // the states of its branches (export-options.js chosenState); `clips`, `markers` and `sounds`, the scene time's (runtime/ir.js TimeSchema).
 export function exportIR(world, { controls, collections = null, live, bin, animationGroups = [], sampleRates = {}, clips = {}, markers = [], sounds = [], curves = [], constraints = [], skeletons = {}, states = {} }) {
   const sync = world.mainSync, objects = world.objects.map((node) => [node, sync?.objectOf(node)]).filter(([, pointer]) => pointer);
-  const { ids, references } = sync ? exportIDs(rootIDs(objects.map(([, pointer]) => pointer))) : { ids: {}, references: [] };
+  // Selected Objects carry their own IDs, not the scene's (its other objects and settings).
+  const { ids, references } = sync ? exportIDs(rootIDs(objects.map(([, pointer]) => pointer), !world.only)) : { ids: {}, references: [] };
   for (const [node, pointer] of objects) if (ids[idKey(idStruct(pointer))]) ids[idKey(idStruct(pointer))].node = node.id;
   if (sync) references.push(...depsgraphReferences(ids, references, sync.blender.relations()));
   const graphs = {}, meshes = {};

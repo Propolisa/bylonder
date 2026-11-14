@@ -108,7 +108,7 @@ const drawnVertices = (mesh) => Int32Array.from([...mesh.corner_verts, ...Array.
 // with what draws each Babylon vertex (`draw_vertices`, drawnVertices), the page deforming them
 // (`meshes`: their nodes' ids, by name). A hidden mesh, which Main does not evaluate, stays out. `armatureOnly`: the
 // meshes as Babylon would skin them, their stacks cut to their Armature modifiers, each one's deform compared apart.
-function nativeRig(arm, nodeOf, deformed = [], armatureOnly = false) {
+function nativeRig(arm, nodeOf, deformed = [], armatureOnly = false, changed = null) {
   const shown = (ob) => new Set(shownStack(ob).map((m) => m.name)), keyed = deformed.filter((d) => d.keyed).map((d) => d.ob);
   const drawn = deformed.filter((d) => !d.source && !d.keyed), sources = deformed.filter((d) => d.source);
   const describe = (list) => {
@@ -269,12 +269,12 @@ const close = (a, b) => a.asArray().every((v, i) => Math.abs(v - b.asArray()[i])
 // (vertexTolerance); `off`, the deforming bones whose pose is not Main's. `verdict()` gives what the checks found;
 // given back as `verdict` (a live re-export's, of the last full export), the checks are not run again: each frame only
 // records the bones' own matrices, and what the checks found is that verdict's.
-export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, nodeWorld, deformed = [], verdict = null }) {
+export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, nodeWorld, deformed = [], verdict = null, changed = null }) {
   // The armature's own bones, without its B-Bones' segment joints after them.
   const bones = skeleton.bones.slice(0, skeleton.armatureBones);
   const targetOf = (ob, bone) => { const node = !bone && nodeOf(ob); return node ? { node: node.id } : undefined; };
   const rig = kernels && bones.length === arm.data.bones.length && rigOf(arm, [...arm.data.bones].map((b) => b.name), targetOf);
-  const native = !rig && bones.length === arm.data.bones.length ? nativeRig(arm, nodeOf, deformed) : null;
+  const native = !rig && bones.length === arm.data.bones.length ? nativeRig(arm, nodeOf, deformed, false, changed) : null;
   const deforms = Object.keys(native?.meshes ?? {}), deviation = new Map(deforms.map((name) => [name, 0])), allowed = new Map();
   // The same meshes skinned by their Armature alone, as Babylon would (`skinned`): the cheaper, where it is within the
   // allowance or closer to Main's than the runtime beyond it; a mesh Babylon can skin that the runtime does not run too.

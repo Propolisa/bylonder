@@ -47,10 +47,11 @@ function reached(last, changed) {
  * export when it reaches the scene as a whole or most of it (`share`, of the objects).
  */
 export async function exportChanged(world, last, updated, exported = {}, { share = 0.5 } = {}) {
-  // A live re-export takes each rig's last verdict instead of checking again (armature.js poseAnimations).
-  const options = { ...exported, verified: false };
-  const whole = async () => packageState(await exportPackage(world, options));
   const changed = [...updated].map(keyOfPointer).filter(Boolean);
+  // A live re-export takes each rig's last verdict instead of checking again (armature.js poseAnimations), and names what
+  // changed, so what the last export read of anything else is read again from it.
+  const options = { ...exported, verified: false, changed: new Set(changed) };
+  const whole = async () => packageState(await exportPackage(world, options));
   // A change the depsgraph did not report (of an object it does not evaluate, a hidden one), or one whose IDs have no
   // key, is found by the whole scene: never an empty patch for a change.
   if (!last || !changed.length || changed.some((key) => SCENE_WIDE.test(key))) return whole();
