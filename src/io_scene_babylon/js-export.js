@@ -516,6 +516,7 @@ import { cameraEffects, pipelineEffect, postProcessEffect } from './bylonder/cam
 import { BlendScene } from './bylonder/blend-scene.js';
 import { whenDrawable } from './bylonder/ready.js';
 import { loadTables } from './bylonder/scene-tables.js';
+import { sharedPackage } from './bylonder/shared-resources.js';
 import { mirrored } from './bylonder/skin-skeleton.js';
 import { addAsset, assetContainer, cloneAsset } from './bylonder/asset.js';${controlPanel ? `
 import { controlPanel } from './bylonder/control-panel.js';` : ''}
@@ -668,13 +669,13 @@ export async function loadAssetContainer(scene) {
 }
 
 // scene.bin's buffers and the IR, asked for by this export's version of them, so a cache never pairs them with
-// another export's scene.js.
-async function readData() {
+// another export's scene.js; read once for every run of this version on the page.
+const readData = () => sharedPackage(new URL('?v=${VERSION}', ROOT).href, async () => {
   const buffers = await readBuffers(new URL('scene.bin?v=${VERSION}', ROOT), BUFFERS, ${!hostCompression});
   // The IR as data: read as bytes, as Node's fetch reads no file: URL.
   const ir = JSON.parse(new TextDecoder().decode(await readBytes(new URL('scene.ir.json?v=${VERSION}', ROOT))));
   return { buffers, ir };
-}
+});
 
 export async function createScene(engine, canvas) {${webgpu ? `
   // On WebGPU, GLSL converted to WGSL keeps GLSL's rules, and PBR materials compile from GLSL with their shadows' depth

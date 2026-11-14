@@ -172,8 +172,8 @@ export class Layer {
 export class Character<N extends import("./names.js").ArmatureName = string> {
     /** @type {'auto' | import('./api.js').Tier} */ static quality: "auto" | import("./api.js").Tier;
     /** @type {import('./api.js').Tier} */ static tier: import("./api.js").Tier;
-    static "__#5@#pickTier": (tier: import("./api.js").Tier, ms: number) => import("./api.js").Tier;
-    static "__#5@#lastFrame": number;
+    static "__#7@#pickTier": (tier: import("./api.js").Tier, ms: number) => import("./api.js").Tier;
+    static "__#7@#lastFrame": number;
     /** Feeds the page's frame time once a frame (the first character to tick takes it). @param {number} ms @param {number} frameId */
     static frameTime(ms: number, frameId: number): void;
     /**

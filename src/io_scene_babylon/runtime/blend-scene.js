@@ -11,6 +11,7 @@ import { createPlayhead } from './playhead.js';
 import { createClips, isClip } from './clips.js';
 import { collectionKey, collectionTree, objectsIn, showing } from './collections.js';
 import { useDualQuaternionSkinning } from './dual-quaternion-skinning.js';
+import { sharedIR } from './shared-resources.js';
 
 // A 32-bit float's step at 1.
 const FLOAT_EPSILON = 1.1920928955078125e-7;
@@ -237,7 +238,7 @@ export class BlendScene {
     /** scene.bin's arrays, which the IR's `{ buffer }` inputs name. */
     this.buffers = buffers;
     /** The scene's IR, as this runtime reads it. */
-    this.ir = readIR(ir, { implementations: [...Object.keys(EVALUATORS), ...NATIVE] });
+    this.ir = sharedIR(ir, () => readIR(ir, { implementations: [...Object.keys(EVALUATORS), ...NATIVE] }));
     const knobs = Object.entries(this.ir.properties).map(([path, { id, ...property }]) => /** @type {Knob} */ ({ path, ...property }));
     this.#knobs = new Map(knobs.map((knob) => [knob.path, knob]));
     this.#values = new Map(knobs.map((knob) => [knob.path, knob.default]));
@@ -577,7 +578,8 @@ export class BlendScene {
     }
     try {
       for (const [table, part] of Object.entries(entries)) if (IR_TABLES.has(table)) {
-        const into = /** @type {Record<string, any>} */ (this.ir)[table];
+        // Its own copy of the table: the rest is shared with the package's other runs (shared-resources.js).
+        const into = (/** @type {Record<string, any>} */ (this.ir)[table] = { .../** @type {Record<string, any>} */ (this.ir)[table] });
         for (const [key, entry] of Object.entries(part)) entry === null ? delete into[key] : (into[key] = entry);
       }
       for (const [path, property] of Object.entries(entries.properties ?? {})) {

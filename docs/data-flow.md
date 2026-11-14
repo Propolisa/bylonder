@@ -3,6 +3,47 @@
 How an edit, undo or redo in the app reaches the preview and an open exported page, and how each layer learns that
 what it holds is stale. The live loop (an edit seen within a frame or two, without a reload) is built on these rules.
 
+## From .blend to the game views
+
+Five hops, each with one writer. Views into the WASM module's memory are borrowed for one call and never kept: a call
+that grows the memory detaches them (`src/bmesh/bmesh-wasm.js` `floatsView`); what is kept is copied out (`meshData`).
+
+| Hop | Copied, referenced | Owner, single writer | Stale when, detected by | Code |
+| --- | --- | --- | --- | --- |
+| 1. .blend file into Main | The file's bytes are copied into the module and read into Main; nothing refers back to the file | Blender's file reader, once | The file changes on disk: not watched, opened again | `main-sync.js` `readBlend`, `bmesh-wasm.js` `readBlend`, `sdk.js` `openBlend` |
+| 2. Main, then the depsgraph's evaluated copies | Evaluated copies are Blender's own copies of Main's IDs | Blender's code (operators, RNA setters, undo steps); the depsgraph for evaluated data | An RNA update, undo or frame change tags IDs (`ID_RECALC_*`) | Blender's code in the module |
+| 3. The editor's Babylon scene (3D View) | Values and evaluated geometry copied out of the module into Babylon objects, linked by `bylonder_id` | `main-view.js` after Blender's code ran; the exception is `main-sync.js` `flush`, which writes Babylon-side edits back into Main before Blender's code runs (undo steps, commits, saves) | Update tags after `run()`, `view()` or `undoLoad`; hooks on Babylon's setters mark what `flush` writes | `main-view.js` `createMainView`, `main-sync.js` `flush` |
+| 4. IR and package | Copied into JSON (`scene.ir.json`, scene.js tables) and `scene.bin` arrays named by their content; a scoped export copies the selected objects only | The exporter | A tagged ID marks its entries; an entry whose hash is unchanged is not sent; the package's version is the hash of its tables | `ir-export.js` `exportIR`, `js-export.js` `exportPackage`, `scene-patch.js` `tablesPatch` |
+| 5. The game views' scenes (runs) | Package data read once per version and referenced by every run (`sharedPackage`, `sharedIR`); static vertex streams uploaded once per engine (`sharedGeometry`); each run copies into its own Babylon objects and live buffers | Each run's table loader and controls; the cache for shared data, which no run writes | A patch names its base version: a mismatch or a failure loads the run again (Reset does the same); an edit brings arrays of new names, never a write into shared ones | `runtime/shared-resources.js`, `runtime/scene-tables.js` `sceneTables`, `runtime/blend-scene.js` `patch` |
+
+What flows, from Snow's package (Character Controller demo; scene.bin 9.5 MB gzipped, scene.ir.json 11.6 MB), with
+the Bar Scene and the Noodle Shop street for scale. Static: authored, unchanged while a run plays. Baked: computed at
+export from evaluated data. Live: changes per frame or per run.
+
+| Kind | Snow (others) | Class | Package as | Across runs |
+| --- | --- | --- | --- | --- |
+| Vertex streams | 71 meshes; position, normal, UV, colors, tangents 6.5 MB (Bar 177, street 146 meshes) | Static, or baked with modifiers applied | `GEOMETRIES`, scene.bin | Shared on the GPU and the CPU |
+| Index buffers | 0.5 MB | Static | scene.bin | CPU arrays shared, GPU buffer per run |
+| Skin weights | 0.75 MB | Static | scene.bin | Shared |
+| CPU-deformed positions and normals | 36 streams per run (body, head, eyes, clothes) | Live | Made at run time from rest data | Per run, updated in place |
+| Shape keys | 6 targets, 1.9 MB (Bar 50 keys, 18.5 MB) | Static targets, live weights | `MORPH_TARGETS`, scene.bin | Arrays shared; Babylon's morph texture per run |
+| Skeletons and bones | 2 skeletons, 2799 and 91 bones; table 2 MB | Static rest, live pose | `SKELETONS` | Table shared (module); bone matrices per run |
+| Rig solve data | 1 `constraints` entity, 4825 arrays, 34 MB | Baked | IR entity, scene.bin | Arrays shared; the rig's state per run |
+| Actions and clips | 51 actions, 24 groups, 0.3 MB tracks plus 3.2 MB in the IR (Bar 22.6 MB, street 9.5 MB of tracks) | Static or baked; play state live | `ANIMATION_GROUPS`, `ANIMATIONS`, scene.bin | Arrays shared; animation groups per run |
+| Materials and node trees | 26 materials, table 0.8 MB (street 130, 2 MB) | Static; control values live | `MATERIALS`, IR graphs | Effects shared by the engine; materials per run |
+| Images | 42 files, 12.9 MB | Static | `images/` | Shared by URL in the engine's texture cache |
+| Drivers and constraints | 366 drivers, 1 rig solve (Bar 45 drivers, 12 modifiers) | Static definitions, live outputs | IR entities | Definitions shared; outputs per run |
+| Custom properties and controls | 7826 properties, 2 MB | Static defaults, live values | IR properties | Defaults shared; values per run |
+| Lights | 4 lights, 3 shadow generators (street 16) | Static | `LIGHTS`, `SHADOW_GENERATORS` | Per run, shadow maps too |
+| World and probes | 1 world, no probes | Static | IR, `SCENE` | Per run |
+| Sounds | 1 file, 0.2 MB | Static | `sounds/` | Fetched by URL, decoded per run |
+| Particles, instances | 6 thin-instance sets (street 5 particle settings) | Static matrices; particles live | scene.bin, `PARTICLE_SYSTEMS` | Matrices per run (Babylon owns them) |
+| The IR itself | 11.6 MB JSON: IDs 6.8 MB, properties 2 MB, entities 1.6 MB | Static | `scene.ir.json` | Read, validated and frozen once per version |
+
+Large and per run today: Babylon's morph target textures (18.5 MB of targets in the Bar Scene), animation groups
+built from the shared tracks, and the rig's state built from its 34 MB of arrays. Every kind fits the three classes;
+shape keys and skeletons hold static data and live weights or poses side by side.
+
 ## Layers
 
 | Layer | Holds, keyed by | Sole writer | Derived from | Learns it is stale |

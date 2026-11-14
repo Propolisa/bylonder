@@ -6,8 +6,9 @@
 // using them and nodes before what hangs from them; the package's `parsers` make what Babylon's own Parse functions read
 // (each imported by scene.js only where its scene uses it), and nodes are made here. A patch is all or nothing: its
 // objects are made before any is swapped in, and one that fails leaves the scene as it was.
-import { Color3, Geometry, Matrix, Mesh, Quaternion, SubMesh, TransformNode, Animation } from '@babylonjs/core';
+import { Color3, Matrix, Mesh, Quaternion, SubMesh, TransformNode, Animation } from '@babylonjs/core';
 import { hangFromBone } from './skin-skeleton.js';
+import { sharedGeometry } from './shared-resources.js';
 
 /**
  * @typedef {Record<string, Record<string, any>>} Tables a table's entries by key, each table by name
@@ -29,17 +30,6 @@ const PROPERTIES = { isVisible: ['isVisible', true], visibility: ['visibility', 
 // What a node is made with, which a patch changes only by making it again; the rest it sets on the node it has.
 const MADE_WITH = ['type', 'geometry', 'subMeshes', 'skeleton', 'morphTargets', 'thinInstances', 'instances', 'animations', 'metadata', 'parentBone', 'poseMatrix', 'color', 'alpha', 'unIndexed'];
 const same = (/** @type {any} */ a, /** @type {any} */ b) => JSON.stringify(a) === JSON.stringify(b);
-
-/**
- * A geometry from its vertex buffers by kind (`[size, buffer]`) and its indices, buffers of scene.bin.
- * @param {import('@babylonjs/core').Scene} scene @param {{ vertices: Record<string, [number, string]>, indices?: string }} entry @param {string} key @param {import('./buffers.js').Buffers} buffers
- */
-function geometry(scene, { vertices, indices }, key, buffers) {
-  const made = new Geometry(key, scene);
-  for (const [kind, [size, buffer]] of Object.entries(vertices)) made.setVerticesData(kind, /** @type {any} */ (buffers[buffer]), false, size);
-  if (indices !== undefined) made.setIndices(/** @type {any} */ (buffers[indices]));
-  return made;
-}
 
 /**
  * What a patch may change on a node it keeps: its transform, flags and material.
@@ -181,7 +171,7 @@ export function sceneTables(loading) {
   /** @param {string} table @param {string} key @param {any} entry @param {Tables} next */
   const make = (table, key, entry, next) => {
     if (table === 'nodes') return node(loading, entry, made);
-    if (table === 'geometries') return geometry(scene, entry, key, buffers);
+    if (table === 'geometries') return sharedGeometry(scene, entry, key, buffers);
     return parsers[table](table === 'animationGroups' ? groupEntry(key, entry, next.animations) : entry, key, made);
   };
   /** Each object's own entry in `made`. @param {string} table @param {string} key @param {any} object @param {any} entry */
@@ -258,8 +248,9 @@ export function sceneTables(loading) {
         for (const object of fresh) object.dispose?.();
         for (const [table, key, object, entry] of replaced.reverse()) { unindex(table, key, null); if (object) index(table, key, object, entry); }
         for (const key of added) delete buffers[key];
-        // A group reset to make its new one has let go of its targets: the scene is no longer as it was.
-        throw Object.assign(/** @type {Error} */ (error), { reload: reset });
+        // A group reset to make its new one has let go of its targets: the scene is no longer as it was. A geometry that
+        // failed to share asks for the run to be loaded again too (shared-resources.js).
+        throw Object.assign(/** @type {Error} */ (error), { reload: reset || /** @type {any} */ (error).reload === true });
       }
       try {
         for (const key of changed.get('nodes') ?? []) if (keeps(next, 'nodes', key)) place(made.nodes[key], next.nodes[key], made);
