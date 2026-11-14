@@ -77,7 +77,6 @@ limits:
   - Layers, sources and effects are written in code (or a JSON preset); Bylonder has no editor for them
   - Saving the .blend does not yet reload its actions in a running page
   - The Character Controller example's retargeted Sprint plants its left ball 0.8 cm off where the source mannequin's lands (the cause is not yet found; the leg's solve is the first suspect)
-  - In the Character Controller example's retarget check, the first frame of Walk's and Jog's loops differs from Blender's (a longer stride, straight knees); the cause, the feet effect or the check's capture, is not yet confirmed
   - Without L and R markers, foot contacts are found where a foot is low and still, which noisy motion capture can misplace
   - On a rig whose constraints move its feet after the pose (Snow's CloudRig legs), a planted foot holds within about 3 cm on most contacts through curves and pivots; a few contacts at a pivot's first step or a sharp jogging turn slide 6 to 9 cm
 ---
