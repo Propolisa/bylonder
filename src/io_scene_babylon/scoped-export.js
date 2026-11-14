@@ -5,11 +5,22 @@
 import { exportPackage } from './js-export.js';
 import { packageState } from './scene-patch.js';
 import { idKey } from './ir-export.js';
-import { idStruct } from '../python/bpy_rna.js';
+import { blendData, idStruct } from '../python/bpy_rna.js';
 import { referencesIn } from './runtime/ir.js';
 
-// An updated ID's IR key, or null where it has none.
-const keyOfPointer = (pointer) => { try { return idKey(idStruct(pointer)) ?? null; } catch { return null; } };
+// The datablocks that own a node tree of their own (embedded data, not a node group).
+const TREE_OWNERS = ['materials', 'worlds', 'lights', 'textures', 'linestyles', 'scenes'];
+// An updated ID's IR key, or null where it has none: a node tree embedded in a material (or a world, a light...) is
+// that datablock's change, which reaches what uses it, not the scene as a node group's does.
+export const keyOfPointer = (pointer) => {
+  try {
+    const id = idStruct(pointer);
+    if (!id.is_embedded_data) return idKey(id) ?? null;
+    const data = blendData();
+    const owner = TREE_OWNERS.flatMap((kind) => [...(data[kind] ?? [])]).find((owner) => owner.node_tree?.as_pointer() === pointer);
+    return owner ? idKey(owner) : null;
+  } catch { return null; }
+};
 // Datablocks whose change reaches the whole scene: the scene, its world, node groups and collections.
 const SCENE_WIDE = /^(SC|WO|NT|GR):/;
 // The datablock a table entry is made from: its key's first part, or a property's ID.

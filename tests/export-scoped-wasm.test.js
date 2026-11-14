@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { blendData, contextStruct } from '../src/python/bpy_rna.js';
 import { exportPackage } from '../src/io_scene_babylon/js-export.js';
 import { packageState, tablesPatch } from '../src/io_scene_babylon/scene-patch.js';
-import { exportChanged } from '../src/io_scene_babylon/scoped-export.js';
+import { exportChanged, keyOfPointer } from '../src/io_scene_babylon/scoped-export.js';
 import { openExample } from './open-example.js';
 
 const changes = (patch) => Object.fromEntries(Object.entries(patch.tables).map(([table, entries]) => [table, Object.keys(entries).sort()]).sort());
@@ -69,6 +69,12 @@ const CASES = {
     assert.ok(!patch.tables.entities, `and the rig's entity, which references it, is not: ${JSON.stringify(changes(patch))}`);
   }),
   driver: () => same('drivers-and-graph-editor', null, () => { blendData().objects.get('Flywheel').rotation_euler[1] += 0.7; }, 'a changed driver input'),
+  // A material's own node tree is the material's change, which reaches the objects using it, not the scene as a whole.
+  material: () => same('rigged-character', null, () => {
+    const material = [...blendData().materials].find((m) => m.node_tree?.nodes.get('Principled BSDF'));
+    assert.equal(keyOfPointer(material.node_tree.as_pointer()), `MA:${material.name}`, "an embedded node tree is its material's");
+    material.node_tree.nodes.get('Principled BSDF').inputs.get('Roughness').default_value = 0.123;
+  }, "a material's node value"),
 };
 const one = process.env.SCOPED_CASE;
 if (one) await CASES[one]();
