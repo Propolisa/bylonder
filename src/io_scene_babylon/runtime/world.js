@@ -4,8 +4,9 @@
 // color lights through a cube of that color with its spherical harmonics; a world of nodes is its material drawn on a
 // box around the eye, baked once into a reflection probe, filtered with Babylon's HDRFiltering, which then lights the
 // scene.
-import { BaseTexture, Color4, Constants, CreateBox, CubeMapToSphericalPolynomialTools, HDRFiltering, ReflectionProbe, RenderTargetTexture, Texture } from '@babylonjs/core';
+import { BaseTexture, Color4, Constants, CreateBox, CubeMapToSphericalPolynomialTools, HDRFiltering, RenderTargetTexture, Texture } from '@babylonjs/core';
 import { cubeHarmonics } from '../../overrides/babylon/cube-harmonics.js';
+import { uprightProbe } from '../../overrides/babylon/world-probe.js';
 import { WORLD_CUBE_TYPE } from '../../overrides/webgpu/float-world-cube.js';
 
 /** @typedef {import('@babylonjs/core').Scene} Scene */
@@ -52,8 +53,7 @@ export function worldNodes(scene, material) {
   const bake = async () => {
     // Not ready: tried again after a while (an observer added while the observable notifies would run at once).
     if (!box.subMeshes.every((subMesh) => material.isReadyForSubMesh(box, subMesh))) return void setTimeout(bake, 16);
-    const probe = new ReflectionProbe('world', 256, scene, true, true, true), drawn = probe.cubeTexture;
-    Object.assign(drawn, { gammaSpace: false, refreshRate: RenderTargetTexture.REFRESHRATE_RENDER_ONCE });
+    const probe = uprightProbe('world', 256, scene), drawn = probe.cubeTexture;
     probe.renderList?.push(box);
     if (scene.activeCamera) probe.position.copyFrom(scene.activeCamera.globalPosition);
     // The probe takes the world clamped (its Sun Threshold), as the export's `world:probe` input says.

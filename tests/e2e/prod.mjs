@@ -7,9 +7,11 @@
 // deploying, since some failures only happen in the production build.
 // usage: npm run build && npm run test:prod   (E2E_URL checks a running server instead)
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { BOOT, chromium, openApp, runtimeCoverage, startServer } from "./app.mjs";
 
 // A page of an exported package: its tenth frame read back, how much of it is lit.
@@ -23,6 +25,22 @@ blend.scene.onAfterRenderObservable.add(async () => {
   let lit = 0;
   for (let i = 0; i < pixels.length; i += 4) if (pixels[i] + pixels[i + 1] + pixels[i + 2] > 30) lit++;
   window.drawn = { webgpu: !!engine.isWebGPU, lit: lit / (pixels.length / 4) };
+});
+engine.runRenderLoop(() => blend.scene.render());
+</script>`;
+// A page of the world-up fixture: once its world has baked, the colour near its sphere's top and bottom (the camera is
+// level with the sphere, 6 m away, with a vertical field of 0.8 rad).
+const WORLD_UP_PAGE = `<!doctype html><canvas id="c" width="320" height="200" style="display:block"></canvas><script type="module">
+import { createEngine, load } from './scene.js';
+const engine = await createEngine(document.getElementById('c')), blend = await load(engine);
+let frames = 0;
+blend.scene.onAfterRenderObservable.add(async () => {
+  if (++frames !== 90) return;
+  const w = 320, h = 200, r = (1 / 6) / Math.tan(0.4) * (h / 2), pixels = await engine.readPixels(0, 0, w, h);
+  // WebGPU reads the canvas in its own format, blue first where that is bgra8unorm.
+  const bgra = engine.isWebGPU && navigator.gpu.getPreferredCanvasFormat() === 'bgra8unorm';
+  const at = (dy) => { const i = (Math.round(h / 2 + dy * r) * w + w / 2) * 4, rgb = Array.from(pixels.slice(i, i + 3)); return bgra ? rgb.reverse() : rgb; };
+  window.sphere = { webgpu: !!engine.isWebGPU, top: at(0.75), bottom: at(-0.75) };
 });
 engine.runRenderLoop(() => blend.scene.render());
 </script>`;
@@ -250,6 +268,33 @@ try {
       assert.ok(drawn.lit > 0.5, `its frame shows the scene (${(drawn.lit * 100).toFixed(0)}% of pixels lit)`);
     } finally {
       // A wedged GPU process can keep the browser from closing.
+      await Promise.race([gpu.close(), new Promise((resolve) => setTimeout(resolve, 10000))]);
+      served.close();
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  // A world lights an exported page's surfaces the right way up, on WebGL 2 and on WebGPU: a white sphere under a world
+  // blue above the horizon and grey below takes the blue on its top and the grey on its bottom, as Blender lights it
+  // (tests/fixtures/world-up.blend); the probe the world is baked into once swapped them.
+  await step("a world lights an exported page the right way up", async () => {
+    const { servePackages } = await import("../export-parity/look.mjs");
+    const dir = mkdtempSync(join(tmpdir(), "bylonder-world-up-"));
+    execFileSync(process.execPath, [fileURLToPath(new URL("./world-up-export.mjs", import.meta.url)), dir], { stdio: "inherit" });
+    for (const target of ["WEBGL2", "WEBGPU"]) writeFileSync(join(dir, target, "index.html"), WORLD_UP_PAGE);
+    const served = servePackages(dir), gpu = await chromium.launch();
+    try {
+      for (const target of ["WEBGL2", "WEBGPU"]) {
+        const page = await gpu.newPage({ viewport: { width: 320, height: 200 } });
+        await page.goto(served.url(`${target}/index.html`));
+        const { webgpu, top, bottom } = await (await page.waitForFunction(() => window.sphere, null, { timeout: 180000 })).jsonValue();
+        await page.close();
+        if (target === "WEBGPU" && !webgpu) { console.log("      WebGPU skipped: the browser draws with WebGL"); continue; }
+        // Blue's lead over red: the sky's colour on top, the ground's grey below.
+        const blueness = ([r, , b]) => b - r;
+        assert.ok(blueness(top) > blueness(bottom) + 20, `${target}: the sphere's top takes the sky (top ${top}, bottom ${bottom})`);
+      }
+    } finally {
       await Promise.race([gpu.close(), new Promise((resolve) => setTimeout(resolve, 10000))]);
       served.close();
       rmSync(dir, { recursive: true, force: true });

@@ -9,7 +9,7 @@ import { Constants, CubeMapToSphericalPolynomialTools } from '@babylonjs/core';
 /** @typedef {import('@babylonjs/core').SphericalPolynomial} SphericalPolynomial */
 
 /**
- * @param {BaseTexture} texture a cube drawn by a render target (its +Y face is face 3)
+ * @param {BaseTexture} texture a cube in the usual face order (+X, -X, +Y, -Y, +Z, -Z), as an upright probe draws it
  * @returns {Promise<SphericalPolynomial | null>}
  */
 export function cubeHarmonics(texture) {
@@ -37,12 +37,12 @@ export function cubeHarmonics(texture) {
     const read = () => {
       if (gl.clientWaitSync(sync, 0, 0) === gl.TIMEOUT_EXPIRED) return void setTimeout(read, 4);
       gl.deleteSync(sync);
-      const [right, left, down, up, front, back] = buffers.map((buffer) => {
+      const [right, left, up, down, front, back] = buffers.map((buffer) => {
         const pixels = new Float32Array(bytes / 4);
         gl.bindBuffer(gl.PIXEL_PACK_BUFFER, buffer);
         gl.getBufferSubData(gl.PIXEL_PACK_BUFFER, 0, pixels);
         gl.deleteBuffer(buffer);
-        return pixels;
+        return flipRows(pixels, size);
       });
       gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);
       resolve(CubeMapToSphericalPolynomialTools.ConvertCubeMapToSphericalPolynomial({
@@ -50,4 +50,12 @@ export function cubeHarmonics(texture) {
     };
     read();
   });
+}
+
+// WebGL reads a face's rows bottom first.
+/** @param {Float32Array} pixels @param {number} size */
+function flipRows(pixels, size) {
+  const flipped = new Float32Array(pixels.length), row = size * 4;
+  for (let y = 0; y < size; y++) flipped.set(pixels.subarray(y * row, (y + 1) * row), (size - 1 - y) * row);
+  return flipped;
 }

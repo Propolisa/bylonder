@@ -1,7 +1,8 @@
-import { Color3, Color4, Constants, Vector3, CubeMapToSphericalPolynomialTools, CubeTexture, HDRCubeTexture, HDRFiltering, Matrix, MeshBuilder, BaseTexture, Texture, ReflectionProbe, RenderTargetTexture, Scene } from '@babylonjs/core';
+import { Color3, Color4, Constants, Vector3, CubeMapToSphericalPolynomialTools, CubeTexture, HDRCubeTexture, HDRFiltering, Matrix, MeshBuilder, BaseTexture, Texture, RenderTargetTexture, Scene } from '@babylonjs/core';
 import { RAY_TYPE, setRayType } from '../../nodes/blender/shader-nodes.js';
 import { createLight, deriveBabylonLight, lightRecord } from '../light/light-home.js';
 import { StudioLightTexture, firstBand } from './world-sun.js';
+import { uprightProbe } from '../../overrides/babylon/world-probe.js';
 import { cubeHarmonics } from '../../overrides/babylon/cube-harmonics.js';
 import { PrefilteredEXRCubeTexture } from '../../overrides/webgpu/prefiltered-ready.js';
 import { WORLD_CUBE_TYPE } from '../../overrides/webgpu/float-world-cube.js';
@@ -286,8 +287,4 @@ export function readyInPasses(target, mesh) {
     });
   } finally { engine.currentRenderPassId = current; }
 }
-const newProbe = (scene) => {
-  const probe = new ReflectionProbe('__worldNodesProbe', 256, scene, true, true, true);
-  Object.assign(probe.cubeTexture, { gammaSpace: false, refreshRate: RenderTargetTexture.REFRESHRATE_RENDER_ONCE });
-  return probe;
-};
+const newProbe = (scene) => uprightProbe('__worldNodesProbe', 256, scene);
