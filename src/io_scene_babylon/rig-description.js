@@ -4,7 +4,7 @@
 // vertex groups, shape keys and modifiers), every object those name (targets, lattices, parents), their drivers and the
 // actions they play.
 import { blockData, positions } from '../runtimes/key-blocks.js';
-import { actionFCurves } from './ir-export.js';
+import { actionFCurves, idKey } from './ir-export.js';
 import { contextStruct, pointerOf } from '../python/bpy_rna.js';
 import { blenderModule } from '../bmesh/bmesh-wasm.js';
 import dna from '../makesrna/dna-modifiers.json' with { type: 'json' };
@@ -75,27 +75,31 @@ const bone = (b) => ({ name: b.name, parent: b.parent?.name ?? null, matrix_loca
   tail_local: [...b.tail_local], ...pick(b, BONE), bbone_custom_handle_start: b.bbone_custom_handle_start?.name ?? null, bbone_custom_handle_end: b.bbone_custom_handle_end?.name ?? null });
 const poseBone = (pb) => ({ name: pb.name, ...transform(pb), ...pick(pb, POSE), constraints: [...pb.constraints].map(constraint), properties: numbers(pb), ...withLimits(pb) });
 
+// Flat xyz as a list of [x, y, z].
+const triples = (flat) => Array.from({ length: flat.length / 3 }, (_, i) => [flat[i * 3], flat[i * 3 + 1], flat[i * 3 + 2]]);
+
 // A mesh's geometry (its edges in Blender's order, which subdivision follows), vertex groups and shape keys, named as
 // their Key, which drivers of its blocks name (`mesh`: the Mesh Main holds, as main-sync gives it).
-function meshData(ob, mesh) {
+export function meshData(ob, mesh) {
   const count = mesh.verts_num, offsets = mesh.face_offsets, corners = mesh.corner_verts, co = positions(ob.data);
-  const vertices = Array.from({ length: count }, (_, i) => [co[i * 3], co[i * 3 + 1], co[i * 3 + 2]]);
+  const vertices = triples(co);
   const faces = Array.from({ length: mesh.faces_num }, (_, f) => Array.from(corners.subarray(offsets[f], offsets[f + 1])));
   const groups = [...ob.vertex_groups].map((g) => ({ name: g.name, weights: new Array(count).fill(0) }));
-  [...ob.data.vertices].forEach((v, i) => { for (const { group, weight } of v.groups) if (groups[group]) groups[group].weights[i] = weight; });
+  // Each vertex's groups in its weight list's order, read from RNA once.
+  const lists = [...ob.data.vertices].map((v) => [...v.groups].map(({ group, weight }) => [group, weight]));
+  lists.forEach((list, i) => { for (const [group, weight] of list) if (groups[group]) groups[group].weights[i] = weight; });
   const preservesVolume = [...ob.modifiers].some((m) => m.type === 'ARMATURE' && m.use_deform_preserve_volume), key = ob.data.shape_keys;
   const edges = Array.from({ length: mesh.edges_num }, (_, e) => [mesh.edges[e * 2], mesh.edges[e * 2 + 1]]);
-  return { vertices, edges, faces, vertex_groups: groups, ...(preservesVolume && { vertex_group_order: groupOrder(ob.data) }), ...(key && { shape_keys: { name: key.name, use_relative: key.use_relative, eval_time: key.eval_time,
-    key_blocks: [...key.key_blocks].map((kb) => ({ name: kb.name, co: Array.from({ length: count }, (_, i) => Array.from(blockData(kb, count).subarray(i * 3, i * 3 + 3))),
+  return { vertices, edges, faces, vertex_groups: groups, ...(preservesVolume && { vertex_group_order: groupOrder(lists) }), ...(key && { shape_keys: { name: key.name, use_relative: key.use_relative, eval_time: key.eval_time,
+    key_blocks: [...key.key_blocks].map((kb) => ({ name: kb.name, co: triples(blockData(kb, count)),
       value: kb.value, slider_min: kb.slider_min, slider_max: kb.slider_max, mute: kb.mute, relative_key: kb.relative_key.name, vertex_group: kb.vertex_group,
       interpolation: kb.interpolation })) } }) };
 }
 
 // Each vertex's group indices in its weight list's order, which Preserve Volume's blend follows: `indices` from
 // `offsets[v]` to `offsets[v + 1]`.
-function groupOrder(mesh) {
-  const lists = [...mesh.vertices].map((v) => [...v.groups].map((g) => g.group));
-  return { offsets: Int32Array.from([0, ...lists.map(((n) => (list) => (n += list.length))(0))]), indices: Int32Array.from(lists.flat()) };
+function groupOrder(lists) {
+  return { offsets: Int32Array.from([0, ...lists.map(((n) => (list) => (n += list.length))(0))]), indices: Int32Array.from(lists.flatMap((list) => list.map(([group]) => group))) };
 }
 
 // CorrectiveSmoothModifierData's bind_coords, their sharing info and bind_coords_num, before lambda (RNA's factor).
@@ -185,32 +189,60 @@ function named(arm, meshes) {
 // Scene > Simplify's viewport Max Subdivision, which caps Subdivision and Multires levels; null with Simplify off.
 const simplify = ({ render }) => (render.use_simplify ? { enabled: true, subdivision: render.simplify_subdivision } : null);
 
+// What each rig's descriptions read (rigDescription's memo), by armature name, kept from export to export: a full
+// export (`changed` null) reads everything again, a live one (scoped-export.js, the IR keys it changed) keeps what
+// none of those IDs was read from.
+const memos = new Map();
+export function rigMemo(arm, changed) {
+  const memo = (changed && memos.get(arm.name)) || new Map();
+  if (changed) for (const [key, part] of memo) if (part.ids.some((id) => changed.has(id))) memo.delete(key);
+  memos.set(arm.name, memo);
+  return memo;
+}
+
+// An object's description apart from its mesh data and modifiers, with the drivers and actions it names; read once
+// for every description `memo` (a Map) is given to.
+function objectPart(ob, memo) {
+  const known = memo.get(ob.name);
+  if (known) return known;
+  const ad = ob.animation_data, actions = new Set(), drivers = [];
+  const use = (act) => act && actions.add(act);
+  use(ad?.action);
+  [...(ad?.nla_tracks ?? [])].forEach((t) => [...t.strips].forEach((s) => use(s.action)));
+  drivers.push(...[...(ad?.drivers ?? [])].map(driver(ob, 'OBJECT')));
+  const key = ob.type === 'MESH' ? ob.data.shape_keys : null;
+  if (key?.animation_data) drivers.push(...[...key.animation_data.drivers].map(driver(key, 'KEY')));
+  let entry = { name: ob.name, type: ob.type, parent: ob.parent?.name ?? null, parent_type: ob.parent_type, parent_bone: ob.parent_bone || null,
+    matrix_parent_inverse: rows(ob.matrix_parent_inverse), ...transform(ob), constraints: [...ob.constraints].map(constraint), properties: numbers(ob), ...withLimits(ob),
+    animation_data: animationData(ad) };
+  if (ob.type === 'ARMATURE') {
+    for (const pb of ob.pose.bones) for (const c of pb.constraints) if (c.type === 'ACTION') use(c.action);
+    entry = { ...entry, data: { name: ob.data.name, bones: [...ob.data.bones].map(bone) }, pose: { ik_solver: ob.pose.ik_solver, bones: [...ob.pose.bones].map(poseBone) } };
+  } else if (ob.type === 'LATTICE') entry = { ...entry, data: latticeData(ob) };
+  else if (key) entry = { ...entry, keys: { name: key.name, key_blocks: [...key.key_blocks].map((kb) => ({ name: kb.name, value: kb.value, slider_min: kb.slider_min,
+    slider_max: kb.slider_max, mute: kb.mute })) } };
+  // The IDs it was read from, by IR key: a change of one makes it stale (rigMemo).
+  const ids = [ob, ob.data, key, ...actions].filter(Boolean).map(idKey);
+  const part = { ids, entry, drivers, actions: [...actions].map((act) => memo.get(`AC:${act.name}`) ?? memo.set(`AC:${act.name}`, { ids: [idKey(act)], ...action(act) }).get(`AC:${act.name}`)) };
+  memo.set(ob.name, part);
+  return part;
+}
+
 // The description of an armature (RNA's Object) and the mesh objects it deforms; `meshOf(ob)` gives a mesh object's
 // Mesh as main-sync reads it; `keyed`, mesh objects whose shape keys' drivers the runtime runs (their keys' values
-// published to the page), described by their keys' names alone.
-export function rigDescription(arm, meshes, meshOf, keyed = []) {
+// published to the page), described by their keys' names alone; `dataOf(ob)`, a mesh object's data (meshData), and
+// `memo`, what the objects' descriptions read, which a caller describing the rig again keeps and gives again.
+export function rigDescription(arm, meshes, meshOf, keyed = [], dataOf = (ob) => meshData(ob, meshOf(ob)), memo = new Map()) {
   const objects = named(arm, [...meshes, ...keyed]), deformed = new Set(meshes.map((ob) => ob.name)), actions = new Map(), drivers = [];
-  const use = (act) => act && !actions.has(act.name) && actions.set(act.name, action(act));
   const description = objects.map((ob) => {
-    const ad = ob.animation_data;
-    use(ad?.action);
-    [...(ad?.nla_tracks ?? [])].forEach((t) => [...t.strips].forEach((s) => use(s.action)));
-    drivers.push(...[...(ad?.drivers ?? [])].map(driver(ob, 'OBJECT')));
-    const key = ob.type === 'MESH' ? ob.data.shape_keys : null;
-    if (key?.animation_data) drivers.push(...[...key.animation_data.drivers].map(driver(key, 'KEY')));
-    const out = { name: ob.name, type: ob.type, parent: ob.parent?.name ?? null, parent_type: ob.parent_type, parent_bone: ob.parent_bone || null,
-      matrix_parent_inverse: rows(ob.matrix_parent_inverse), ...transform(ob), constraints: [...ob.constraints].map(constraint), properties: numbers(ob), ...withLimits(ob),
-      animation_data: animationData(ad) };
-    if (ob.type === 'ARMATURE') {
-      for (const pb of ob.pose.bones) for (const c of pb.constraints) if (c.type === 'ACTION') use(c.action);
-      return { ...out, data: { name: ob.data.name, bones: [...ob.data.bones].map(bone) }, pose: { ik_solver: ob.pose.ik_solver, bones: [...ob.pose.bones].map(poseBone) } };
-    }
-    if (ob.type === 'LATTICE') return { ...out, data: latticeData(ob), modifiers: [...ob.modifiers].map(modifier) };
-    if (ob.type === 'MESH' && deformed.has(ob.name)) return { ...out, data: meshData(ob, meshOf(ob)), modifiers: [...ob.modifiers].map(modifier) };
+    const { entry: { keys, ...entry }, drivers: own, actions: used } = objectPart(ob, memo);
+    drivers.push(...own);
+    for (const { ids, ...act } of used) if (!actions.has(act.name)) actions.set(act.name, act);
+    if (ob.type === 'LATTICE') return { ...entry, modifiers: [...ob.modifiers].map(modifier) };
+    if (ob.type === 'MESH' && deformed.has(ob.name)) return { ...entry, data: { ...dataOf(ob) }, modifiers: [...ob.modifiers].map(modifier) };
     // A mesh only its shape keys' drivers run for: the Key's and its blocks' names and values, no geometry.
-    if (ob.type === 'MESH' && key) return { ...out, data: { shape_keys: { name: key.name, key_blocks: [...key.key_blocks].map((kb) => ({ name: kb.name, value: kb.value, slider_min: kb.slider_min,
-      slider_max: kb.slider_max, mute: kb.mute })) } } };
-    return out;
+    if (keys) return { ...entry, data: { shape_keys: keys } };
+    return { ...entry };
   });
   return { schema: 'bylonder-rig', version: 1, scene: { simplify: simplify(contextStruct().scene) }, objects: description, drivers, actions: [...actions.values()] };
 }

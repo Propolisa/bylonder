@@ -8,7 +8,7 @@ import { blendData } from '../python/bpy_rna.js';
 import { solvePose } from './runtime/pose-constraints.js';
 import { kernelSolve } from './runtime/pose-kernels.js';
 import { nativeSolve } from './runtime/native-solve.js';
-import { packDescription, rigDescription, splitMeshes } from './rig-description.js';
+import { meshData, packDescription, rigDescription, rigMemo, splitMeshes } from './rig-description.js';
 import { idKey } from './ir-export.js';
 import { compileRig } from './runtime/native/rig/program.js';
 import { compileDeform } from './runtime/native/deform/mesh.js';
@@ -108,11 +108,19 @@ const drawnVertices = (mesh) => Int32Array.from([...mesh.corner_verts, ...Array.
 // with what draws each Babylon vertex (`draw_vertices`, drawnVertices), the page deforming them
 // (`meshes`: their nodes' ids, by name). A hidden mesh, which Main does not evaluate, stays out. `armatureOnly`: the
 // meshes as Babylon would skin them, their stacks cut to their Armature modifiers, each one's deform compared apart.
-function nativeRig(arm, nodeOf, deformed = [], armatureOnly = false, changed = null) {
+// A mesh object's data (meshData) as `memo` keeps it, by the IDs it is read from (rigMemo).
+const meshDataOf = (ob, deformed, memo) => {
+  const key = `data:${ob.name}`;
+  return (memo.get(key) ?? memo.set(key, { ids: [ob, ob.data, ob.data.shape_keys].filter(Boolean).map(idKey), data: meshData(ob, deformed.mesh()) }).get(key)).data;
+};
+function nativeRig(arm, nodeOf, deformed = [], armatureOnly = false, memo = new Map()) {
   const shown = (ob) => new Set(shownStack(ob).map((m) => m.name)), keyed = deformed.filter((d) => d.keyed).map((d) => d.ob);
   const drawn = deformed.filter((d) => !d.source && !d.keyed), sources = deformed.filter((d) => d.source);
   const describe = (list) => {
-    const all = [...list, ...sources.filter((s) => !list.includes(s))], description = rigDescription(arm, all.map((d) => d.ob), (ob) => all.find((d) => d.ob === ob).mesh(), keyed);
+    const all = [...list, ...sources.filter((s) => !list.includes(s))], entry = (ob) => all.find((d) => d.ob === ob);
+    // Each mesh's data and each object's description, read once for the export's descriptions of the rig (the checked,
+    // the drawn, its Armature alone: `memo`).
+    const description = rigDescription(arm, all.map((d) => d.ob), (ob) => entry(ob).mesh(), keyed, (ob) => meshDataOf(ob, entry(ob), memo), memo);
     for (const d of all) for (const m of description.objects.find((o) => o.name === d.ob.name).modifiers) m.show_viewport &&= armatureOnly ? m.type === 'ARMATURE' : shown(d.ob).has(m.name);
     return description;
   };
@@ -274,11 +282,13 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
   const bones = skeleton.bones.slice(0, skeleton.armatureBones);
   const targetOf = (ob, bone) => { const node = !bone && nodeOf(ob); return node ? { node: node.id } : undefined; };
   const rig = kernels && bones.length === arm.data.bones.length && rigOf(arm, [...arm.data.bones].map((b) => b.name), targetOf);
-  const native = !rig && bones.length === arm.data.bones.length ? nativeRig(arm, nodeOf, deformed, false, changed) : null;
+  // What the rig's descriptions read, once for all of them (nativeRig).
+  const memo = rigMemo(arm, changed);
+  const native = !rig && bones.length === arm.data.bones.length ? nativeRig(arm, nodeOf, deformed, false, memo) : null;
   const deforms = Object.keys(native?.meshes ?? {}), deviation = new Map(deforms.map((name) => [name, 0])), allowed = new Map();
   // The same meshes skinned by their Armature alone, as Babylon would (`skinned`): the cheaper, where it is within the
   // allowance or closer to Main's than the runtime beyond it; a mesh Babylon can skin that the runtime does not run too.
-  const alone = !verdict && deforms.length && nativeRig(arm, nodeOf, deformed, true), skinSolver = alone && nativeSolve(), skinDeviation = new Map(deforms.map((name) => [name, 0]));
+  const alone = !verdict && deforms.length && nativeRig(arm, nodeOf, deformed, true, memo), skinSolver = alone && nativeSolve(), skinDeviation = new Map(deforms.map((name) => [name, 0]));
   const skinnable = deformed.filter((d) => d.skinnable).map((d) => d.ob.name), babylonDeviation = new Map();
   // Only a mesh with an Armature of this rig can be skinned: one deformed otherwise (a Surface Deform alone, as Snow's lower
   // teeth) would stand still, however close its rest looks at the frames checked.
@@ -289,7 +299,7 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
   const runtimeMeshes = () => {
     const skins = skinned(), signature = JSON.stringify([...skins].sort());
     if (described?.signature !== signature) described = { signature, native: skins.size ? nativeRig(arm, nodeOf, [...deformed.filter((d) => d.source || !skins.has(d.ob.name)),
-      ...deformed.filter((d) => !d.source && skins.has(d.ob.name) && d.ob.data.shape_keys?.animation_data?.drivers.length).map((d) => ({ ob: d.ob, keyed: true }))]) : native };
+      ...deformed.filter((d) => !d.source && skins.has(d.ob.name) && d.ob.data.shape_keys?.animation_data?.drivers.length).map((d) => ({ ob: d.ob, keyed: true }))], false, memo) : native };
     return described.native;
   };
   const skinned = () => new Set([...deforms.filter((name) => skins.has(name) && (skinDeviation.get(name) <= allowed.get(name) || (deviation.get(name) > allowed.get(name) && skinDeviation.get(name) <= deviation.get(name)))),

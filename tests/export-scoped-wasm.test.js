@@ -8,11 +8,15 @@ import { blendData, contextStruct } from '../src/python/bpy_rna.js';
 import { exportPackage } from '../src/io_scene_babylon/js-export.js';
 import { packageState, tablesPatch } from '../src/io_scene_babylon/scene-patch.js';
 import { exportChanged, keyOfPointer } from '../src/io_scene_babylon/scoped-export.js';
+import { rigMemo } from '../src/io_scene_babylon/rig-description.js';
 import { openExample } from './open-example.js';
+
+// What the full export kept of the rig's descriptions (rig-description.js rigMemo), before a live edit.
+let kept = null;
 
 const changes = (patch) => Object.fromEntries(Object.entries(patch.tables).map(([table, entries]) => [table, Object.keys(entries).sort()]).sort());
 
-async function same(example, setup, edit, what, check = null) {
+async function same(example, setup, edit, what, check = null, scopedCheck = null) {
   const { world, sync } = openExample(example);
   setup?.(world, sync);
   sync.view();
@@ -22,7 +26,9 @@ async function same(example, setup, edit, what, check = null) {
   updated.clear();
   edit(world, sync);
   sync.view();
-  const ids = new Set(updated), scoped = await exportChanged(world, last, ids), whole = packageState(await exportPackage(world));
+  const ids = new Set(updated), scoped = await exportChanged(world, last, ids);
+  scopedCheck?.();
+  const whole = packageState(await exportPackage(world));
   const ours = tablesPatch(last, scoped), theirs = tablesPatch(last, whole);
   assert.deepEqual(changes(ours), changes(theirs), `${what}: the scoped export patches the entries a whole export patches`);
   assert.equal(scoped.version, whole.version, `${what}: and makes the same version`);
@@ -60,6 +66,7 @@ const CASES = {
     Object.assign(smooth.modifiers.new('Smooth', 'CORRECTIVE_SMOOTH'), { factor: 0.8, iterations: 4, use_only_smooth: true });
     sync.blender.tag(sync.objectOf(world.objects.find((n) => n.name === 'Rig')), 2);
   }, () => {
+    kept = new Map(rigMemo(blendData().objects.get('Rig'), new Set()));
     const mesh = blendData().objects.get('Smooth').data;
     for (const v of mesh.vertices) v.co = [v.co[0] * 1.3, v.co[1] * 1.3, v.co[2]];
     for (const block of mesh.shape_keys?.key_blocks ?? []) for (const p of block.data) p.co = [p.co[0] * 1.3, p.co[1] * 1.3, p.co[2]];
@@ -67,6 +74,12 @@ const CASES = {
   }, 'a widened mesh the native runtime deforms', (patch) => {
     assert.deepEqual(Object.keys(patch.tables.meshes ?? {}), ['ME:Body.001'], `the Mesh's data is patched: ${JSON.stringify(changes(patch))}`);
     assert.ok(!patch.tables.entities, `and the rig's entity, which references it, is not: ${JSON.stringify(changes(patch))}`);
+  }, () => {
+    // The live export reads again only what the edit changed: the widened mesh's data, not the rig's or the body's.
+    const now = rigMemo(blendData().objects.get('Rig'), new Set());
+    assert.equal(now.get('Rig'), kept.get('Rig'), "the rig's description is kept");
+    assert.equal(now.get('data:Body'), kept.get('data:Body'), "the body's data is kept");
+    assert.ok(kept.get('data:Smooth') && now.get('data:Smooth') !== kept.get('data:Smooth'), "the widened mesh's is read again");
   }),
   driver: () => same('drivers-and-graph-editor', null, () => { blendData().objects.get('Flywheel').rotation_euler[1] += 0.7; }, 'a changed driver input'),
   // A moved rig: the live re-export takes the rig's verdict from the full export before it (no checks again) and still
