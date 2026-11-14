@@ -5,6 +5,12 @@ propose entries; they do not add, edit, reorder or remove them on their own.
 
 ## Later
 
+### Modifier units with complete interfaces
+
+Every modifier's unit takes all its inputs through the IR (other objects, its own matrix, layers by name, bind data),
+gives exact outputs, and can be replaced by a unit with the same interface. Not needed yet. Details:
+[roadmap/modifier-units.md](roadmap/modifier-units.md).
+
 ### Load rarely used subsystems on demand
 
 Split Blender's module by subsystem (for example OpenVDB, Bullet, the image libraries, the compositor, the sequencer,
