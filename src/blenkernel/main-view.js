@@ -556,7 +556,7 @@ export function createMainView(state) {
       world.renderSettings?.resetFilms?.();
       world.shadows?.changed();
       if (redrawProbesDrawnOnce(world.scene)) world.views?.wake();
-      state.evaluated();
+      state.evaluated(updates);
     }
   }
   // The light probes EEVEE lights with (draw/light-probes.js): each Light Probe object's matrix and settings.

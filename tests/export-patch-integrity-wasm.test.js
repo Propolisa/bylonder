@@ -41,7 +41,7 @@ assert.match(warnings.pop() ?? '', /not applied.*ir\.entities\["OB:Key\/driver\/
 assert.equal(await blend.patch(moved), blend, 'the same patch whole applies');
 
 // A failure once objects are swapped in (a node hung from a bone of no skeleton): the package loads again.
-const hung = { ...Object.values(moved.tables.nodes)[0], uniqueId: 999999, id: 'Hung', name: 'Hung', parentId: undefined, parentBone: { skeletonId: 'None', index: 0, meshId: 999999 } };
+const hung = { ...Object.values(moved.tables.nodes)[0], id: 'Hung', name: 'Hung', parent: undefined, parentBone: { skeletonId: 'None', index: 0, mesh: 'OB:Body' } };
 const failing = { base: moved.version, version: 'u8.failing', tables: { nodes: { 'OB:Hung': hung } }, buffers: {} };
 const again = await blend.patch(failing);
 assert.notEqual(again, blend, 'a patch failing once applied loads the package again');

@@ -46,13 +46,6 @@ export function loadTables(loading: Loading, tables: Tables, version?: string | 
         apply(patch: Patch): Map<string, Set<string>>;
     };
 };
-/**
- * @typedef {Record<string, Record<string, any>>} Tables a table's entries by key, each table by name
- * @typedef {Record<string, (entry: any, key: string, made: Record<string, any>) => any>} Parsers what makes a table's entry, by table
- *   name, given what is made so far
- * @typedef {{ scene: import('@babylonjs/core').Scene, lookup: import('@babylonjs/core').Scene, buffers: import('./buffers.js').Buffers, parsers: Parsers }} Loading
- * @typedef {{ base?: string | null, version?: string | null, tables: Tables, buffers?: import('./buffers.js').Buffers }} Patch
- */
 /** The tables in the order their entries are made. */
 export const TABLES: string[];
 /**

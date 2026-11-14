@@ -25,7 +25,7 @@ const before = sync.undoPush('Before');
 blendData().objects.get('Key').location[0] += 0.5;
 sync.undoPush('Move');
 const moved = await exported(), patch = tablesPatch(first, moved);
-assert.deepEqual(changed(patch), ['ids OB:Key', 'nodes node:Key rig', 'properties objects["Key"].location[0]'], 'only the moved light');
+assert.deepEqual(changed(patch), ['ids OB:Key', 'nodes OB:Key/rig', 'properties objects["Key"].location[0]'], 'only the moved light and its rig');
 assert.equal(patch.base, first.version);
 assert.deepEqual(Object.keys(patch.buffers), [], 'no new buffers for a moved object');
 

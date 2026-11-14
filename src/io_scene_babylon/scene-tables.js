@@ -21,10 +21,11 @@ export function keyed(entries, keyOf) {
  * The key of each table's entries, by table: an object's node, light and camera by its object's key in the IR; a
  * material by its Material's (or World's) key; what belongs to an object (its geometry, by the id of the node first
  * using it, shape keys, shadows, an armature's skeleton) by the object's key and what it is; an action's clip by the
- * action's key. `meshes`: the serialized meshes, which name their materials and morph target managers; `worldMaterial`, the
+ * action's key; the node placing a light or camera (its rig) by the object's key and `rig`. `meshes`, `lights`,
+ * `cameras`: the serialized scene's, which name their materials, morph target managers and parents; `worldMaterial`, the
  * unique id of the world's material, keyed by the World.
  */
-export function tableKeys(world, ir, meshes, worldMaterial = null) {
+export function tableKeys(world, ir, { meshes, lights = [], cameras = [] }, worldMaterial = null) {
   const sync = world.mainSync, { scene } = world, mainWorld = sync && idStruct(sync.blender.scene)?.world;
   const objectKeys = new Map(Object.entries(ir.ids).filter(([, id]) => id.node !== undefined).map(([key, id]) => [id.node, key]));
   const objectKey = (id, fallback) => objectKeys.get(id) ?? fallback;
@@ -34,13 +35,14 @@ export function tableKeys(world, ir, meshes, worldMaterial = null) {
     return ma ? idKey(idStruct(ma)) : `material:${entry.name}`;
   };
   const meshOf = (field, id) => meshes.find((mesh) => mesh[field] === id);
+  const rigOf = (node) => { const placed = [...lights, ...cameras].find((child) => child.parentId === node.uniqueId); return placed && objectKey(placed.id) && `${objectKey(placed.id)}/rig`; };
   return {
     materials: materialKey,
     multiMaterials: (entry) => `${objectKey(meshOf('materialUniqueId', entry.uniqueId)?.id, `multimaterial:${entry.name}`)}/slots`,
     skeletons: (entry) => (ir.ids[`OB:${entry.name}`] ? `OB:${entry.name}` : `skeleton:${entry.name}`),
     morphTargets: (entry) => `${objectKey(meshOf('morphTargetManagerId', entry.id)?.id, `morph:${entry.id}`)}/shape_keys`,
     geometries: (user) => `${objectKey(user, `geometry:${user}`)}/mesh`,
-    nodes: (entry) => objectKey(entry.id, `node:${entry.id}`),
+    nodes: (entry) => objectKey(entry.id, rigOf(entry) ?? `node:${entry.id}`),
     lights: (entry) => objectKey(entry.id, `light:${entry.id}`),
     cameras: (entry) => objectKey(entry.id, `camera:${entry.id}`),
     reflectionProbes: (entry) => `probe:${entry.name}`,

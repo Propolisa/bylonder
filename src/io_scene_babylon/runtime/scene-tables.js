@@ -16,6 +16,8 @@ import { Color3, Geometry, Matrix, Mesh, Quaternion, SubMesh, TransformNode, Ani
  * @typedef {{ base?: string | null, version?: string | null, tables: Tables, buffers?: import('./buffers.js').Buffers }} Patch
  */
 
+// The tables of what has a place in the scene, which a node's parent names by key.
+const PLACED = ['nodes', 'lights', 'cameras'];
 /** The tables in the order their entries are made. */
 export const TABLES = ['materials', 'multiMaterials', 'skeletons', 'morphTargets', 'geometries', 'nodes', 'lights', 'cameras', 'reflectionProbes', 'shadowGenerators', 'particleSystems', 'animationGroups'];
 // The node properties a node's entry sets, with Babylon's name and default for each.
@@ -119,7 +121,7 @@ const merged = (tables, patch) => Object.fromEntries([...new Set([...Object.keys
  */
 function missing(tables, buffers, patch) {
   const has = (/** @type {string} */ table, /** @type {any} */ key) => key === undefined || key === null || key in (tables[table] ?? {});
-  const uniqueIds = new Set(['nodes', 'lights', 'cameras'].flatMap((table) => Object.values(tables[table] ?? {}).map((entry) => entry.uniqueId)));
+  const placed = (/** @type {any} */ key) => key === undefined || key === null || PLACED.some((table) => key in (tables[table] ?? {}));
   const problems = [];
   for (const [key, entry] of Object.entries(tables.nodes ?? {})) {
     if (!has('materials', entry.material) && !has('multiMaterials', entry.material)) problems.push(`nodes ${key}: material ${entry.material}`);
@@ -127,7 +129,8 @@ function missing(tables, buffers, patch) {
     if (!has('morphTargets', entry.morphTargets)) problems.push(`nodes ${key}: morph targets ${entry.morphTargets}`);
   }
   for (const table of ['nodes', 'lights', 'cameras']) for (const [key, entry] of Object.entries(tables[table] ?? {})) {
-    if (entry.parentId !== undefined && !uniqueIds.has(entry.parentId)) problems.push(`${table} ${key}: parent ${entry.parentId}`);
+    if (!placed(entry.parent)) problems.push(`${table} ${key}: parent ${entry.parent}`);
+    if (!placed(entry.parentBone?.mesh)) problems.push(`${table} ${key}: bone's mesh ${entry.parentBone.mesh}`);
   }
   for (const [key, multi] of Object.entries(tables.multiMaterials ?? {})) for (const slot of multi.materialsUniqueIds ?? []) if (!has('materials', slot)) problems.push(`multiMaterials ${key}: material ${slot}`);
   const text = JSON.stringify(patch);
@@ -150,7 +153,9 @@ export function sceneTables(loading) {
   /** @type {string | null} */
   let version = null;
   /** @type {Record<string, any>} */
-  const made = { ...Object.fromEntries(TABLES.map((table) => [table, {}])), materialsByKey: {}, nodesById: {} };
+  const made = { ...Object.fromEntries(TABLES.map((table) => [table, {}])), materialsByKey: {} };
+  /** A node, light or camera by its key. @param {string} key */
+  const placedAt = (key) => made.nodes[key] ?? made.lights[key] ?? made.cameras[key] ?? null;
 
   /** What a changed entry brings with it: what is made from the objects it replaces. @param {Tables} next @param {Map<string, Set<string>>} changed */
   const dependents = (next, changed) => {
@@ -179,28 +184,27 @@ export function sceneTables(loading) {
   const index = (table, key, object, entry) => {
     made[table][key] = object;
     if (table === 'materials' || table === 'multiMaterials') made.materialsByKey[key] = object;
-    else if (entry?.uniqueId !== undefined) made.nodesById[entry.uniqueId] = object;
+
   };
   const unindex = (/** @type {string} */ table, /** @type {string} */ key, /** @type {any} */ entry) => {
     delete made[table][key];
     if (table === 'materials' || table === 'multiMaterials') delete made.materialsByKey[key];
-    else if (entry?.uniqueId !== undefined) delete made.nodesById[entry.uniqueId];
+
   };
 
   /** Parents, bones, pose matrices, materials, and the meshes lights leave out or light alone, for what `fresh` holds. @param {Tables} next @param {Set<any>} fresh */
   const link = (next, fresh) => {
-    const byUniqueId = made.nodesById;
-    for (const table of ['nodes', 'lights', 'cameras']) for (const entry of Object.values(next[table] ?? {})) {
-      const object = byUniqueId[entry.uniqueId];
-      if (entry.parentId !== undefined) object.parent = byUniqueId[entry.parentId] ?? null;
+    for (const table of PLACED) for (const [key, entry] of Object.entries(next[table] ?? {})) {
+      const object = placedAt(key);
+      if (entry.parent !== undefined) object.parent = placedAt(entry.parent);
       if (table === 'nodes' && entry.material !== undefined) object.material = made.materialsByKey[entry.material] ?? null;
       if (!fresh.has(object)) continue;
-      if (entry.parentBone) object.attachToBone(lookup.getSkeletonById(entry.parentBone.skeletonId)?.bones[entry.parentBone.index], byUniqueId[entry.parentBone.meshId]);
+      if (entry.parentBone) object.attachToBone(lookup.getSkeletonById(entry.parentBone.skeletonId)?.bones[entry.parentBone.index], placedAt(entry.parentBone.mesh));
       if (entry.poseMatrix) object.updatePoseMatrix(Matrix.FromArray(entry.poseMatrix));
     }
     const meshes = (/** @type {string[]} */ ids) => ids.map((id) => lookup.getMeshById(id)).filter(Boolean);
-    for (const entry of Object.values(next.lights ?? {})) {
-      const light = byUniqueId[entry.uniqueId];
+    for (const [key, entry] of Object.entries(next.lights ?? {})) {
+      const light = placedAt(key);
       if (!fresh.has(light)) continue;
       if (entry.excludedMeshesIds?.length) light.excludedMeshes = meshes(entry.excludedMeshesIds);
       if (entry.includedOnlyMeshesIds?.length) light.includedOnlyMeshes = meshes(entry.includedOnlyMeshesIds);

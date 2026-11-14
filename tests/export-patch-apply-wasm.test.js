@@ -1,4 +1,4 @@
-// An open page takes a patch (runtime/scene-tables.js, BlendScene.patch, docs/data-flow.md): after a light is moved
+﻿// An open page takes a patch (runtime/scene-tables.js, BlendScene.patch, docs/data-flow.md): after a light is moved
 // and the skin's color changed in the app, then a key of an action moved, the patch between the two exports turns the loaded page into the scene
 // the new export loads, keeping the objects it does not change and a control the page set. A patch naming what the
 // scene would not hold is not applied, reported, and the scene stays as it was; one from another version than the page
@@ -39,7 +39,7 @@ assert.ok(patch.tables.nodes && patch.tables.materials?.['MA:Skin'], 'the patch 
 const warnings = [], warn = console.warn;
 console.warn = (message) => warnings.push(String(message));
 const before = shown(page.blend);
-const ghost = { ...patch, tables: { ...patch.tables, nodes: { ...patch.tables.nodes, 'OB:Ghost': { ...Object.values(patch.tables.nodes)[0], uniqueId: -1, material: 'MA:Ghost' } } } };
+const ghost = { ...patch, tables: { ...patch.tables, nodes: { ...patch.tables.nodes, 'OB:Ghost': { ...Object.values(patch.tables.nodes)[0], material: 'MA:Ghost' } } } };
 assert.equal(await page.blend.patch(ghost), page.blend, 'a patch naming a material the scene would not hold leaves the same scene');
 assert.equal(shown(page.blend), before, 'as it was, with none of the patch applied');
 assert.match(warnings.pop() ?? '', /not applied, the scene stays as it was: .*nodes OB:Ghost: material MA:Ghost/, 'and says why');

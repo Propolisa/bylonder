@@ -961,8 +961,8 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     debug: false,
     // Values written into Main so far, to tell that writing back does not echo.
     writes: 0,
-    // fn() after each evaluation that updated IDs, once they are drawn (editors showing evaluated data: the
-    // Spreadsheet); returns the unsubscriber.
+    // fn(updates) after each evaluation that updated IDs, once they are drawn (editors showing evaluated data: the
+    // Spreadsheet), `updates` the recalc flags by ID; returns the unsubscriber.
     onEvaluated(fn) {
       evaluatedListeners.add(fn);
       return () => evaluatedListeners.delete(fn);
@@ -973,7 +973,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   const evaluatedListeners = new Set();
   const state = {
     rna, world, selection, blender, ids, objects, materials, worlds, animationData, applying: false,
-    sceneRecords, readCollections, relations, nodeOf, forget, evaluate, evaluated: () => evaluatedListeners.forEach((fn) => fn()),
+    sceneRecords, readCollections, relations, nodeOf, forget, evaluate, evaluated: (updates) => evaluatedListeners.forEach((fn) => fn(updates)),
   };
   const mainView = createMainView(state);
   api.modifiers = createMainModifiers(api);

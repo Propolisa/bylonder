@@ -245,9 +245,18 @@ function blocksByPlace(graph) {
   for (const location of graph.editorData?.locations ?? []) location.blockId = place(location.blockId);
 }
 
-// Entries name materials by key, as their unique ids are new at each export: nodes, multi-materials, the scene's
-// default and world materials and the volumes' domains.
-function stableMaterialReferences(tables, settings, volumes) {
+// Entries name materials and what has a place in the scene by key, as unique ids are new at each export and differ
+// between a whole export and one of selected objects: nodes' materials and parents, multi-materials, the scene's default
+// and world materials, the volumes' domains and the lights clustered.
+function stableReferences(tables, settings, volumes, clustered) {
+  const placed = new Map(['nodes', 'lights', 'cameras'].flatMap((table) => Object.entries(tables[table]).map(([key, entry]) => [entry.uniqueId, key])));
+  for (const table of ['nodes', 'lights', 'cameras']) for (const entry of Object.values(tables[table])) {
+    if (entry.parentId !== undefined) entry.parent = placed.get(entry.parentId) ?? null;
+    if (entry.parentBone) { const { meshId, ...bone } = entry.parentBone; entry.parentBone = { ...bone, mesh: placed.get(meshId) ?? null }; }
+    delete entry.parentId;
+    delete entry.uniqueId;
+  }
+  if (clustered) clustered.splice(0, clustered.length, ...clustered.map((id) => placed.get(id)));
   const keys = new Map(Object.entries({ ...tables.materials, ...tables.multiMaterials }).map(([key, entry]) => [entry.uniqueId, key]));
   const key = (id) => keys.get(id) ?? null;
   for (const node of Object.values(tables.nodes)) if (node.material !== undefined) node.material = key(node.material);
@@ -345,7 +354,9 @@ function greasePencilClock(world, ir, groups, timeline) {
 // place them (an armature its meshes hang from) as its objects; `only` the set the export keeps.
 function selectedWorld(world, selected) {
   const objects = new Set(world.objects), only = new Set();
-  const keep = (node) => { if (!node || only.has(node) || !objects.has(node)) return; only.add(node); keep(node.parent); };
+  // A node placing an object that is no object itself (a light's or camera's rig) is kept with it; a bone is not a node.
+  const placing = (node) => objects.has(node) || node.getClassName?.() === 'TransformNode';
+  const keep = (node) => { if (!node || only.has(node) || !placing(node)) return; only.add(node); keep(node.parent); };
   selected.forEach(keep);
   return Object.create(world, { objects: { value: Object.assign(world.objects.filter((n) => only.has(n)), { scene: world.objects.scene }) },
     only: { value: Object.assign(only, { objects }) } });
@@ -470,7 +481,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
     defaultMaterial: data.defaultMaterialId ?? null, environmentProbe: data.environmentProbe ?? null, environmentIntensity: data.environmentIntensity, iblIntensity: data.iblIntensity, useRightHandedSystem: data.useRightHandedSystem,
   };
   // The scene's tables by datablock (scene-tables.js); nodes first, as they add thin instance buffers to scene.bin.
-  const keys = tableKeys(world, ir, data.meshes, worldEntry?.uniqueId ?? null), table = (name, list) => keyed(list ?? [], keys[name]);
+  const keys = tableKeys(world, ir, data, worldEntry?.uniqueId ?? null), table = (name, list) => keyed(list ?? [], keys[name]);
   const nodes = keyed(objects.map(({ entry, mesh }) => nodeEntry(entry, mesh, mesh?.geometry && keys.geometries(geometries.get(mesh.geometry)), live.get(mesh), bin)), keys.nodes);
   const tables = { materials: table('materials', data.materials), multiMaterials: table('multiMaterials', data.multiMaterials), skeletons: table('skeletons', data.skeletons),
     morphTargets: table('morphTargets', binaryMorphTargets(data.morphTargetManagers ?? [], world.scene.meshes, bin)),
@@ -481,7 +492,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   const morphKeys = new Map(Object.entries(tables.morphTargets).map(([key, { id }]) => [id, key]));
   for (const node of Object.values(nodes)) if (node.morphTargets !== undefined) node.morphTargets = morphKeys.get(node.morphTargets);
   for (const entry of Object.values(tables.morphTargets)) delete entry.id;
-  stableMaterialReferences(tables, settings, volumes?.config);
+  stableReferences(tables, settings, volumes?.config, clustered || null);
   for (const graph of [...Object.values(tables.materials), composited?.compositor.graph]) blocksByPlace(graph);
   const name = world.sceneSettings.state.name || 'Scene', webgpu = target !== 'WEBGL2';
   const source = `// ${name}, exported from Bylonder: load(engine) gives it with its controls, createScene(engine, canvas) builds it
@@ -761,7 +772,7 @@ ${kernels ? `  // Blender's nodes of each material and world, made from the IR's
     lightsMade: (lights, key, made) => {${clustered ? `
       // Its point and spot lights in clusters where it has more lights than a material takes, as EEVEE has no cap; a light
       // with a Custom Distance out of them while there is room, as a cluster cuts it only per screen tile.
-      const exact = new Set(${json(clustered)}.map((id) => made.nodesById[id])), cut = clusterLights(scene, lights, lightBudget(scene.getEngine()), (light) => exact.has(light))?.cutPerTile;
+      const exact = new Set(${json(clustered)}.map((key) => made.lights[key])), cut = clusterLights(scene, lights, lightBudget(scene.getEngine()), (light) => exact.has(light))?.cutPerTile;
       if (cut?.length) console.warn(\`Clustered with their Custom Distance cut per screen tile: \${cut.map((light) => light.name).join(', ')}\`);` : ''}
       reachLights(scene, lights);
     },${parser(data.particleSystems, 'particleSystems', '(entry) => ParticleSystem.Parse(entry, scene, ROOT)')}${parser(data.animationGroups, 'animationGroups', `(entry) => {${data.animationGroups.some((g) => g.targetedAnimations.some((t) => t.animation.property === CLOCK)) ? `
