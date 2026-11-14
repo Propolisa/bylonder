@@ -58,8 +58,9 @@ function reportIssues(title, issues) {
 // makes (a skeleton's bones). Without `bake`, F-Curves a package's page runs instead (live-curves.js) go in `curves`,
 // and what is still sampled in `gaps`; `sampling`, the frames it samples at (io_scene_babylon/sampling.js). `choice`: File > Export's runtime options (export-options.js), each instance on its
 // own runtime where they choose none. Returns { animations: [{ animation, target }], curves, gaps, constraints (an armature's bone constraints the page runs), clip(sampling, owns), restore() }.
-export function exportRuntimes(world, { bake = true, sampling = world.animation && exportSampling(world.animation.time.state), ...choice } = {}) {
-  const rests = appliedRests(), results = features.map((feature) => feature.export(world, { bake, sampling, rests, runtime: exportedRuntime(feature, choice) }));
+// `verified` false: a live re-export's, which takes the last full export's verdicts instead of checking again.
+export function exportRuntimes(world, { bake = true, sampling = world.animation && exportSampling(world.animation.time.state), verified = true, ...choice } = {}) {
+  const rests = appliedRests(), results = features.map((feature) => feature.export(world, { bake, sampling, rests, verified, runtime: exportedRuntime(feature, choice) }));
   for (const { title, issues } of results.flatMap((r) => r.reports)) reportIssues(title, issues);
   const all = (key) => results.flatMap((r) => r[key] ?? []);
   return { get animations() { return all('animations'); }, get curves() { return all('curves'); }, get gaps() { return all('gaps'); }, get constraints() { return all('constraints'); },

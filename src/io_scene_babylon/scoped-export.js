@@ -46,7 +46,9 @@ function reached(last, changed) {
  * packageState's state, made by a Selected Objects export of what the change reaches merged into `last`, or by a whole
  * export when it reaches the scene as a whole or most of it (`share`, of the objects).
  */
-export async function exportChanged(world, last, updated, options = {}, { share = 0.5 } = {}) {
+export async function exportChanged(world, last, updated, exported = {}, { share = 0.5 } = {}) {
+  // A live re-export takes each rig's last verdict instead of checking again (armature.js poseAnimations).
+  const options = { ...exported, verified: false };
   const whole = async () => packageState(await exportPackage(world, options));
   const changed = [...updated].map(keyOfPointer).filter(Boolean);
   // A change the depsgraph did not report (of an object it does not evaluate, a hidden one), or one whose IDs have no

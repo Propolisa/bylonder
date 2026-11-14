@@ -19,7 +19,7 @@ await record("game", { example: "rigged-character", node: "Body" }, async (r) =>
     await r.outliner("Key");
     await app.hover(0.5, 0.4);
     await r.keys("G X 1", "g", "x", "1", "Enter");
-    await app.locator(`${AREA} >> text=/^Patched/`).waitFor({ timeout: 180000 });
+    await app.locator(`${AREA} >> text=/^Edited live/`).waitFor({ timeout: 180000 });
     await r.pause(2500);
   });
   await r.shot("thumbnail");

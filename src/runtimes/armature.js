@@ -448,21 +448,24 @@ function issues(arm) {
 // `poses` are the bones' matrices as Blender evaluates them (what bounds read), where they are keyed by their own.
 // Names for a report: the first eight, and how many more.
 const named = (names) => { const list = [...names]; return `${list.slice(0, 8).join(', ')}${list.length > 8 ? ` and ${list.length - 8} more` : ''}`; };
-function poseAnimations(world, mappings, bake, sampling, scene, bases = new Set()) {
+// `live`: a live re-export's (scoped-export.js), which takes each rig's verdict from the last full export (`world.rigVerdicts`,
+// by armature name) instead of checking again; a full export checks and keeps its verdicts there.
+function poseAnimations(world, mappings, bake, sampling, scene, bases = new Set(), live = false) {
   const sync = world.mainSync, { fps, frameStart, frameEnd } = sampling.range, current = world.animation.time.frame;
   const animated = (arm) => !!arm.animation_data || [...arm.pose.bones].some((bone) => bone.constraints.length);
   // The evaluated pose of the bones keyed by their own (`bases`), which bounds read.
   const keys = new Map(), owners = new Map(), stacks = new Map(), evaluated = new Map();
   if (!bake && scene) for (const mapping of mappings) {
     const mesh = mapping.skeletons.size === 1 && scene.meshOf(mapping), [skeleton] = mapping.skeletons.values();
+    const verdict = live ? world.rigVerdicts?.get(mapping.arm.name) ?? null : null;
     const stack = mesh && livePoseConstraints(mapping.arm, skeleton, mesh, { nodeOf: scene.nodeOf, deformed: scene.deformed(mapping),
-      meshWorld: () => sync.worldMatrix(mesh), nodeWorld: (id) => sync.worldMatrix(world.scene.getNodeById(id)) });
+      meshWorld: () => sync.worldMatrix(mesh), nodeWorld: (id) => sync.worldMatrix(world.scene.getNodeById(id)), verdict });
     // A skeleton the page poses is exported, whether or not a mesh skins to it.
     if (stack) { stacks.set(mapping, stack); skeleton.posedByPage = true; }
   }
   // What the page plays judges the route too: each action the export ships as a clip, every CLIP_JUDGE_STEP-th frame,
   // checked as the timeline's are (the rig's pose and its meshes' deform), before anything is decided from the checks.
-  for (const [mapping, stack] of stacks) for (const clip of actionClips([mapping.arm])) {
+  for (const [mapping, stack] of stacks) for (const clip of live && world.rigVerdicts?.has(mapping.arm.name) ? [] : actionClips([mapping.arm])) {
     withAction(clip.ids, clip.action, () => {
       for (let frame = Math.ceil(clip.frame_start); frame <= clip.frame_end; frame += CLIP_JUDGE_STEP) {
         sync.frameChanged(frame);
@@ -496,6 +499,8 @@ function poseAnimations(world, mappings, bake, sampling, scene, bases = new Set(
     native: (mapping) => { const stack = stacks.get(mapping), skinned = stack?.skinned(); return new Set(stack?.deforms.filter((name) => !skinned.has(name)) ?? []); },
     live: new Set(stacks.keys()) });
   function finish() {
+    // A full export's verdicts, which live re-exports take until the next.
+    if (!live) for (const [mapping, stack] of stacks) (world.rigVerdicts ??= new Map()).set(mapping.arm.name, stack.verdict());
     // A stack the page runs where every bone it moves is posed by its own F-Curves, or not animated.
     const curves = [], gaps = [], constraints = [], posed = new Set();
     for (const [mapping, stack] of stacks) {
@@ -560,7 +565,7 @@ function boneParent(mappings, ob, byOb) {
 // Export: every armature mapped that skins a mesh the export writes (all of the scene's, or of its selected objects:
 // `world.only`), those on Blender for the export's duration (their meshes skinned, then drawn as Blender evaluated them
 // again), with their issues and their pose's animation.
-function exportArmatures(world, { bake, sampling, rests = appliedRests() }) {
+function exportArmatures(world, { bake, sampling, rests = appliedRests(), verified = true }) {
   const view = lastView;
   if (!view || !world.mainSync) return { reports: [], animations: [], restore() {} };
   const entries = [...view.entries()], meshes = entries.filter((e) => e.type === 'MESH').map((e) => idStruct(e.ob)), byOb = new Map(entries.map((e) => [e.ob, e]));
@@ -590,7 +595,7 @@ function exportArmatures(world, { bake, sampling, rests = appliedRests() }) {
     const skinnable = [...m.skins.keys()].flatMap((key) => entryOf(idStruct(byOb.get(key).ob)).map((entry) => ({ ...entry, skinnable: true, skin: () => m.skins.get(key), rest: () => meshOf(key) })));
     return [...[...m.apart.values(), ...surface].flatMap((ob) => entryOf(ob)), ...skinnable, ...read.flatMap((ob) => entryOf(ob, true))];
   };
-  const posed = poseAnimations(world, mappings, bake, sampling, { nodeOf, deformed, meshOf: (m) => byOb.get(m.skins.keys().next().value)?.node });
+  const posed = poseAnimations(world, mappings, bake, sampling, { nodeOf, deformed, meshOf: (m) => byOb.get(m.skins.keys().next().value)?.node }, new Set(), !verified);
   // The meshes of an export's mapping Babylon cannot skin for their stack that the native runtime does not deform
   // either: skinned by their Armature with their other modifiers applied to their rest (settle), so none stands still.
   const unmoved = (m) => (temporary.some((state) => state.mapping === m) ? [...m.apart.values()].filter((ob) => !posed.deforms.has(ob.name)).map((ob) => ob.name) : []);

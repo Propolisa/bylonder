@@ -19,7 +19,7 @@ await record("package-view", { example: "rigged-character", node: "Body" }, asyn
     await r.outliner("Key");
     await app.hover(0.5, 0.4);
     await r.keys("G X 1", "g", "x", "1", "Enter");
-    await app.locator("text=/^Patched/").waitFor({ timeout: 180000 });
+    await app.locator("text=/^Edited live/").waitFor({ timeout: 180000 });
     await r.pause(2500);
   });
   await r.shot("thumbnail");

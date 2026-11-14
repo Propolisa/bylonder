@@ -31,7 +31,7 @@ preview.changed();
 await preview.settled();
 assert.equal(await page, blend, 'the change reaches the page as a patch, not a reload');
 assert.equal(key(), +(at + 0.5).toFixed(5), 'the page shows the light moved');
-assert.match(statuses.at(-1), /^Patched: .*nodes/, 'and says what the patch changed');
+assert.match(statuses.at(-1), /^Edited live, not re-verified: .*nodes/, 'and says what the patch changed, and that it is not verified again');
 
 sync.undoLoad(before);
 preview.changed();

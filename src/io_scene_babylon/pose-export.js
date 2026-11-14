@@ -266,8 +266,10 @@ const close = (a, b) => a.asArray().every((v, i) => Math.abs(v - b.asArray()[i])
 // world matrix and `nodeWorld(id)` a node's, at the frame Main is on. On the native runtime, the `deformed` meshes it
 // runs (nativeRig) are `deforms`, their names, and each check compares some frames' deform with Main's evaluated mesh:
 // `deviation`, the largest distance of a vertex from Main's by mesh name, which holds where within `allowed`
-// (vertexTolerance); `off`, the deforming bones whose pose is not Main's.
-export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, nodeWorld, deformed = [] }) {
+// (vertexTolerance); `off`, the deforming bones whose pose is not Main's. `verdict()` gives what the checks found;
+// given back as `verdict` (a live re-export's, of the last full export), the checks are not run again: each frame only
+// records the bones' own matrices, and what the checks found is that verdict's.
+export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, nodeWorld, deformed = [], verdict = null }) {
   // The armature's own bones, without its B-Bones' segment joints after them.
   const bones = skeleton.bones.slice(0, skeleton.armatureBones);
   const targetOf = (ob, bone) => { const node = !bone && nodeOf(ob); return node ? { node: node.id } : undefined; };
@@ -276,7 +278,7 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
   const deforms = Object.keys(native?.meshes ?? {}), deviation = new Map(deforms.map((name) => [name, 0])), allowed = new Map();
   // The same meshes skinned by their Armature alone, as Babylon would (`skinned`): the cheaper, where it is within the
   // allowance or closer to Main's than the runtime beyond it; a mesh Babylon can skin that the runtime does not run too.
-  const alone = deforms.length && nativeRig(arm, nodeOf, deformed, true), skinSolver = alone && nativeSolve(), skinDeviation = new Map(deforms.map((name) => [name, 0]));
+  const alone = !verdict && deforms.length && nativeRig(arm, nodeOf, deformed, true), skinSolver = alone && nativeSolve(), skinDeviation = new Map(deforms.map((name) => [name, 0]));
   const skinnable = deformed.filter((d) => d.skinnable).map((d) => d.ob.name), babylonDeviation = new Map();
   // Only a mesh with an Armature of this rig can be skinned: one deformed otherwise (a Surface Deform alone, as Snow's lower
   // teeth) would stand still, however close its rest looks at the frames checked.
@@ -308,7 +310,13 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
   const deforming = (i) => arm.data.bones.get(bones[i].name).use_deform, off = new Set();
   // The B-Bones whose segments the kernels shape as Main does at every frame checked.
   const shaped = new Set(rig ? [...arm.data.bones].filter((b) => b.bbone_segments > 1).map((b) => b.name) : []);
-  let checked = 0, held = true;
+  let checked = 0, held = verdict?.held ?? true;
+  if (verdict) {
+    for (const [map, entries] of [[deviation, verdict.deviation], [skinDeviation, verdict.skinDeviation], [babylonDeviation, verdict.babylonDeviation], [allowed, verdict.allowed]]) for (const [name, value] of entries) map.set(name, value);
+    verdict.off.forEach((name) => off.add(name));
+    for (const name of [...shaped]) if (!verdict.shaped.includes(name)) shaped.delete(name);
+    bones.forEach((bone) => { if (verdict.moved.includes(bone.name)) moved.add(bone); });
+  }
   const solved = new Map();
   // The pose the page draws, by the runtime's pass over the skeleton's bones as the page holds them, each given its own
   // pose each frame as the page's animation gives it.
@@ -339,6 +347,7 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
     check(evaluated, frame, clip = false) {
       const locals = bones.map((bone, i) => ownMatrix(poses[i], bone));
       if (!clip) bones.forEach((bone, i) => owns.get(bone).push(locals[i]));
+      if (verdict) { checked++; return; }
       // Which frames compare the meshes' deform: every DEFORM_CHECKS-th of the timeline's, every one of the clips' the
       // caller judges (armature.js, already spaced).
       const deformsChecked = clip || checked % DEFORM_CHECKS === 0;
@@ -381,6 +390,8 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
       }
       checked++;
     },
+    verdict: () => ({ held, moved: [...moved].map((bone) => bone.name), off: [...off], shaped: [...shaped], deviation: [...deviation], skinDeviation: [...skinDeviation],
+      babylonDeviation: [...babylonDeviation], allowed: [...allowed] }),
     entity: () => {
       if (!checked || !held) return null;
       const out = {

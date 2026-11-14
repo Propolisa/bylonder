@@ -27,7 +27,7 @@ export function createPackagePreview({ world, options = {}, publish, post, idle 
     const state = await whileExporting(() => exportChanged(world, last, ids, options)), patch = tablesPatch(last, state), changed = Object.keys(patch.tables).length;
     last = state;
     if (changed) post(patch);
-    report(changed ? `Patched: ${Object.keys(patch.tables).join(', ')}` : 'Up to date');
+    report(changed ? `Edited live, not re-verified: ${Object.keys(patch.tables).join(', ')}` : 'Up to date');
   };
   return {
     /** Writes the package again and gives where its page is. */
