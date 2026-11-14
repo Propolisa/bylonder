@@ -38,3 +38,25 @@ export function mirrored(skin, rig, lookup) {
   });
   return skin;
 }
+
+/**
+ * Hangs `node` from a bone (an object parented to a bone), which follows the rig skeleton's bone, the one clips, the
+ * character and the solve write. A rig skeleton skins no mesh (its skin does), so Babylon's prepare leaves its bones'
+ * final matrices alone: they are computed here from `referal`'s pose matrix, the mesh the node is placed relative to.
+ * @param {import('@babylonjs/core').TransformNode} node @param {import('@babylonjs/core').Bone} bone @param {import('@babylonjs/core').AbstractMesh} referal
+ */
+export function hangFromBone(node, bone, referal) {
+  const skeleton = /** @type {any} */ (bone.getSkeleton());
+  if (skeleton.needInitialSkinMatrix && !skeleton.getPoseMatrix() && !skeleton.posedBy) {
+    let at = -1;
+    skeleton.posedBy = referal;
+    skeleton.prepare = (/** @type {boolean} */ dontCheckFrameId = false) => {
+      const id = skeleton.getScene().getRenderId();
+      if (!dontCheckFrameId && id === at) return;
+      at = id;
+      const pose = skeleton.posedBy.getPoseMatrix();
+      for (const b of skeleton.bones) b.getLocalMatrix().multiplyToRef(b.getParent()?.getFinalMatrix() ?? pose, b.getFinalMatrix());
+    };
+  }
+  return node.attachToBone(bone, referal);
+}

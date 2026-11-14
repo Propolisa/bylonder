@@ -25,18 +25,22 @@ try {
   assert.equal(names[0], '__root__');
   assert.deepEqual(names.filter((n) => !n.startsWith('__')).sort(), ['Tea Break', 'Tea Break Rig', 'Tea Cup'], 'the selection and the rig it hangs from');
   assert.equal(girl.entries.root.rotationQuaternion.y, 1, "glTF's half turn into a left-handed scene");
-  assert.equal(girl.entries.skeletons.length, 1, 'her rig skins her');
+  // Her rig's skeleton, which clips and the page pose, and the skin of the bones she weights, which follows it.
+  const rigOf = (blend) => blend.entries.skeletons.find((k) => !k.rigId), skinOf = (blend) => blend.entries.skeletons.find((k) => k.rigId);
+  assert.ok(rigOf(girl) && skinOf(girl)?.rigId === rigOf(girl).id, `a rig skeleton and its skin: ${girl.entries.skeletons.map((k) => k.name)}`);
+  assert.equal(girl.entries.meshes.find((m) => m.name === 'Tea Break').skeleton, skinOf(girl), 'the skin skins her');
   assert.equal(scene.lights.length, 0, "none of the scene's lights");
   assert.equal(scene.environmentTexture, null, "none of the scene's settings");
 
   // Her cup, parented to her hand's bone, hangs from the bone: where Blender places it as she sips, under a moved root too.
   const cup = (blend) => blend.entries.meshes.find((m) => m.name === 'Tea Cup');
   assert.equal(cup(girl).parent.name, 'LeftHand', 'the cup hangs from her hand');
+  assert.equal(cup(girl).parent.getSkeleton(), rigOf(girl), "a bone of her rig's skeleton, which the page poses");
   girl.entries.root.position.set(3, 0, -2);
   for (const frame of [150, 180]) {
     sync.frameChanged(frame);
     girl.playhead.seek(frame);
-    girl.entries.skeletons[0].prepare(true);
+    rigOf(girl).prepare(true);
     for (const mesh of girl.entries.meshes) mesh.computeWorldMatrix(true);
     const placed = cup(girl).getWorldMatrix().multiply(girl.entries.root.getWorldMatrix().clone().invert());
     assert.ok(placed.getTranslation().subtract(sync.worldMatrix(node('Tea Cup')).getTranslation()).length() < 1e-3, `the cup in her hand at frame ${frame}`);
@@ -62,7 +66,8 @@ try {
   assert.notEqual(body(twin).skeleton, body(container.blend).skeleton, 'a skeleton of its own');
   assert.equal(twin.scene.getMeshById('Tea Break'), body(twin));
   assert.equal(twin.entries.animationGroups.length, 1);
-  assert.equal(cup(twin).parent, body(twin).skeleton.bones[cup(container.blend).parent.getIndex()], "a copy's cup hangs from its own hand");
+  assert.equal(cup(twin).parent, rigOf(twin).bones[cup(container.blend).parent.getIndex()], "a copy's cup hangs from its own hand");
+  assert.equal(skinOf(twin).rigId, rigOf(twin).id, "and its skin follows its own rig");
 
   // Her cup alone: it hangs from her rig's hand, but nothing selected is skinned by the rig, so the page has no skeleton
   // to hang it from and plays where Blender places it instead.

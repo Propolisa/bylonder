@@ -5,6 +5,7 @@
 // with no scene-wide settings (world, camera effects, compositor). Each copy has its own controller.
 import { AssetContainer, Mesh, Quaternion } from '@babylonjs/core';
 import { isClip } from './clips.js';
+import { hangFromBone, mirrored } from './skin-skeleton.js';
 import { sceneLights } from '../../overrides/babylon/clustered-lights.js';
 
 /** @typedef {import('@babylonjs/core').Scene} Scene */
@@ -146,11 +147,14 @@ export function cloneAsset(entries, { root = null, controller }) {
   const made = source.instantiateModelsToScene((name) => name, false, { doNotInstantiate: true });
   const top = /** @type {any} */ (made.rootNodes[0]), ids = new Map(entries.meshes.concat(entries.transformNodes).map((n) => [n.name, n.id]));
   const nodes = [top, ...top.getDescendants(false)], /** @type {Node[]} */ onBones = [];
+  // A copy's skins follow the copy's rig skeletons.
+  const copyOf = (/** @type {string} */ id) => made.skeletons[entries.skeletons.findIndex((k) => k.id === id)] ?? null;
+  entries.skeletons.forEach((skin, i) => { if (/** @type {any} */ (skin).rigId) mirrored(made.skeletons[i], /** @type {any} */ (skin).rigId, { getSkeletonById: copyOf }); });
   // Nodes on bones, with what hangs from them, hung from the copy's bones.
   for (const node of [...entries.meshes, ...entries.transformNodes].filter(onBone)) {
     const bone = node.parent, skeleton = made.skeletons[entries.skeletons.indexOf(bone.getSkeleton())];
     const copy = node.clone(node.name, null), skinned = nodes.find((n) => n.name === node._transformToBoneReferal?.name);
-    onBones.push(copy.attachToBone(skeleton.bones[bone.getIndex()], skinned));
+    onBones.push(hangFromBone(copy, skeleton.bones[bone.getIndex()], skinned));
     nodes.push(copy, ...copy.getDescendants(false));
   }
   for (const node of nodes) node.id = ids.get(node.name) ?? node.id;

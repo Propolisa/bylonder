@@ -7,6 +7,7 @@
 // (each imported by scene.js only where its scene uses it), and nodes are made here. A patch is all or nothing: its
 // objects are made before any is swapped in, and one that fails leaves the scene as it was.
 import { Color3, Geometry, Matrix, Mesh, Quaternion, SubMesh, TransformNode, Animation } from '@babylonjs/core';
+import { hangFromBone } from './skin-skeleton.js';
 
 /**
  * @typedef {Record<string, Record<string, any>>} Tables a table's entries by key, each table by name
@@ -202,7 +203,7 @@ export function sceneTables(loading) {
       if (entry.parent !== undefined) object.parent = placedAt(entry.parent);
       if (table === 'nodes' && entry.material !== undefined) object.material = made.materialsByKey[entry.material] ?? null;
       if (!fresh.has(object)) continue;
-      if (entry.parentBone) object.attachToBone(lookup.getSkeletonById(entry.parentBone.skeletonId)?.bones[entry.parentBone.index], placedAt(entry.parentBone.mesh));
+      if (entry.parentBone) hangFromBone(object, /** @type {any} */ (lookup.getSkeletonById(entry.parentBone.skeletonId)?.bones[entry.parentBone.index]), placedAt(entry.parentBone.mesh));
       if (entry.poseMatrix) object.updatePoseMatrix(Matrix.FromArray(entry.poseMatrix));
     }
     const meshes = (/** @type {string[]} */ ids) => ids.map((id) => lookup.getMeshById(id)).filter(Boolean);
