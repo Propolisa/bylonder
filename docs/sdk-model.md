@@ -1,7 +1,8 @@
 # SDK model
 
 How a project's own code shapes a scene and makes it behave, so that what it does in the app also happens in an
-exported page and in Node. Approved by the owner on 2026-11-11; nothing here is implemented yet.
+exported page and in Node. Approved by the owner on 2026-11-11. Built so far: the Package View's core (Previews,
+below): it loads the package in a frame and takes each change as a patch (docs/data-flow.md); runtime scripts are not.
 
 ## The problem
 

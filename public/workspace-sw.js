@@ -58,7 +58,8 @@ self.addEventListener("fetch", (event) => {
           headers: { "Content-Type": "text/javascript" },
         });
       }
-      return response;
+      // A page of a run (the Package View's) is framed by the isolated app, so it is isolated too, or the frame stays blank.
+      return ISOLATED.has(event.request.destination) ? isolated(response) : response;
     })(),
   );
 });

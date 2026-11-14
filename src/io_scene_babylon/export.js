@@ -46,9 +46,9 @@ async function bundled(files, minify) {
   return bundlePackage(files, { minify, esbuild: await esbuildService(), babylon: await babylonSources(AbstractEngine.Version) });
 }
 
-// The package's files as the zip holds them.
-async function scenePackage(world, options) {
-  const files = await exportModule(world, options);
+// An export's files (js-export.js exportPackage's) as the package holds them: with the runtime, Blender's code it loads
+// and the app's files, bundled unless `bundle` is off.
+export async function packagedFiles(files, options) {
   for (const [path, name] of packageRuntime(files)) files[path] = packagedRuntime(runtime['./runtime/' + name]);
   for (const [path, from] of packageOverrides(files)) files[path] = overrides['../' + from];
   for (const [path, from] of gplFiles(files)) files[path] = await SOURCES[from]();
@@ -56,6 +56,8 @@ async function scenePackage(world, options) {
   for (const [path, from] of appFiles(files)) shipped[path] = await appFile(from);
   return Object.fromEntries(Object.entries(shipped).map(([path, data]) => [path, typeof data === 'string' ? strToU8(data) : data]));
 }
+
+const scenePackage = async (world, options) => packagedFiles(await exportModule(world, options), options);
 
 const FORMATS = {
   babylon: { extension: 'babylon', type: 'application/json', build: async (world, name, { parity, runtime, runtimes, sampleRate, animations }) => JSON.stringify(await serializeScene(world, { parity, runtime, runtimes, animations, sampling: exportSampling(world.animation.time.state, sampleRate) })) },

@@ -102,6 +102,14 @@ export async function publishRun(project) {
     texts: Object.fromEntries(Object.entries(project.files).filter(([, file]) => file.kind === "text").map(([path, file]) => [path, file.content])),
   };
 }
+// Files (bytes by path) served under a run of their own, as a project's are; gives the run's URL base.
+export async function publishFiles(files) {
+  await ensureModuleHost();
+  const base = APP_BASE + "__workspace_run/" + crypto.randomUUID() + "/", cache = await caches.open(RUN_CACHE);
+  for (const [path, body] of Object.entries(files))
+    await cache.put(new URL(base + path, location.origin), new Response(body, { headers: { "Content-Type": mime(path), "Cache-Control": "no-store" } }));
+  return base;
+}
 export async function removeRun(base) {
   const cache = await caches.open(RUN_CACHE);
   for (const request of await cache.keys())

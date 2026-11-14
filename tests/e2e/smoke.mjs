@@ -22,6 +22,26 @@ let app;
 // The shadow floor tiles vary from run to run by a unit or two.
 const SHADER_GALLERY_LIMITS = [12, 12, 10, 30, 12, 10, 12, 8, 8, 12, 8, 10, 8, 8, 12, 15, 14, 10, 8, 10, 15, 15, 15, 18];
 
+// An area of Bylonder's own editors whose page shows the exported scene: shown, started, and drawing it (not blank).
+async function previewDraws(area, start, status, title) {
+  await app.bylonder((b, id) => b.dock.show(id), area);
+  await start();
+  await app.frame().locator(`#${area}-section`).getByText(status).waitFor({ timeout: 120000 });
+  const frame = app.frame().locator(`#${area}-section iframe[title="${title}"]`), size = await frame.boundingBox();
+  assert.ok(size.width > 100 && size.height > 50, `the page has a size: ${JSON.stringify(size)}`);
+  await frame.contentFrame().locator("canvas").waitFor({ timeout: 60000 });
+  await app.page.waitForTimeout(3000);
+  const shot = await app.page.screenshot({ clip: size });
+  const spread = await app.page.evaluate(async (png) => {
+    const image = await createImageBitmap(await (await fetch(`data:image/png;base64,${png}`)).blob());
+    const ctx = new OffscreenCanvas(image.width, image.height).getContext("2d");
+    ctx.drawImage(image, 0, 0);
+    const red = [...ctx.getImageData(0, 0, image.width, image.height).data].filter((_, i) => i % 4 === 0);
+    return Math.max(...red) - Math.min(...red);
+  }, shot.toString("base64"));
+  assert.ok(spread > 40, `the page draws the scene, not a blank frame (red spread ${spread})`);
+}
+
 const checks = {
   // The new project's scene (sphere and ground), as a first visit shows it.
   "app boots": { open: { example: null, node: "sphere" }, async run() {} },
@@ -166,6 +186,15 @@ const checks = {
     assert.match(module, /\.modifiers\[\\"[^\\]+\\"\]\.levels/, "the Subdivision's levels as a control by its Blender path");
     assert.ok(zip["bylonder-modifiers/modifiers-worker.js"].length > 0 && zip["bylonder-modifiers/COPYING"]);
     assert.deepEqual(Array.from(zip["bylonder-modifiers/modifiers.wasm"].subarray(0, 4)), [0, 0x61, 0x73, 0x6d], "a WebAssembly module");
+  },
+
+  // The page runs in a frame of the isolated app, served by the service worker, so it must be isolated too or it stays blank.
+  async "the Package View draws the exported scene in its area"() {
+    await previewDraws("package", () => app.frame().getByRole("button", { name: "Reload" }).click(), "Loaded", "Package View");
+  },
+
+  async "the Game area plays the exported scene in its area"() {
+    await previewDraws("game", () => app.bylonder((b) => b.runOperator("bylonder.game_play")), "Playing", "Game");
   },
 
   // A failed export says why in its dialog, which stays open to try again, and in Info; it never just downloads nothing.

@@ -283,6 +283,16 @@ export async function recorder(feature, { example, node, size = SIZE, scale = 1,
       return file;
     },
     // A GIF of `region` while `steps()` runs, then `hold` ms of the result.
+    // Shows one of the dock's areas (an editor type's id) at `share` of the window's height under the 3D View, dragging
+    // the edge between them.
+    async area(id, share = 0.48) {
+      await app.bylonder((b, id) => b.dock.show(id), id);
+      await app.settled();
+      const shown = await app.locator(`#${id}-section`).boundingBox();
+      const x = shown.x + shown.width / 2, to = size.height * (1 - share);
+      await this.drag([x, shown.y - 3], [x, to]);
+      await app.settled();
+    },
     async gif(name, region, steps, { part, hold = 1200 } = {}) {
       const crop = await box(region, part);
       keyAt = [crop.x + crop.width / 2, crop.y + crop.height - 24];

@@ -37,6 +37,7 @@ import "@babylonjs/core/Debug/debugLayer";
 
 import { createEditor } from "./editors/object/editor";
 import { createHistory, restoreChannels } from "./editors/undo/storage";
+import { mountPackageView } from "./editors/space_package/package-view.js";
 import { projectState, projectStateInWorker } from "./runtime/project-state.js";
 import { createWorld } from "./runtime/world.js";
 import { createRenderHost } from "./editors/render/host.js";
@@ -198,7 +199,7 @@ const engine = await createEngine(workCanvas, { stencil: true });
 applyRenderSettings(engine);
 sizeToCanvas(engine, canvas);
 let saveOverrides = () => {};
-let history;
+let history, packageView;
 const commit = () => history?.commit();
 let views;
 // The 3D Viewports among the engine views (the compositor backdrop is the other kind).
@@ -438,6 +439,7 @@ window.addEventListener("message", (e) => {
 let ui;
 let sceneChanged = () => {};
 history = createHistory(world.objects, () => {
+  packageView?.changed();
   saveOverrides();
   world.particles.refresh();
   registerObjects(animation, objects);
@@ -669,6 +671,7 @@ const editObject = () => {
   const edit = ob && world.mainSync.blender.editMesh(ob);
   return edit ? { ob, mesh: edit.mesh } : null;
 };
+packageView = mountPackageView(document.querySelector("#package-section"), { world });
 const imageEditor = mountImageEditor(document.querySelector("#image-section"), { header: viewportDock.header("image"), engine, views, sync: world.mainSync, editObject });
 let inspectorBusy = false;
 async function inspector() {
@@ -677,7 +680,7 @@ async function inspector() {
   try {
     if (world.scene.debugLayer.isVisible()) world.scene.debugLayer.hide();
     else {
-      notify("Loading Babylon Inspectorâ€¦");
+      notify("Loading Babylon Inspector…");
       await import("@babylonjs/inspector");
       await world.scene.debugLayer.show({ embedMode: true });
     }
