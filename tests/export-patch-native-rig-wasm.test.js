@@ -79,6 +79,9 @@ tag();
 const third = await exported(), reshaped = tablesPatch(second.state, third.state);
 assert.ok(reshaped.tables.skeletons, `the patch makes the skeleton again: ${Object.keys(reshaped.tables)}`);
 assert.equal(await page.blend.patch({ ...reshaped, buffers: third.made.buffers }), page.blend, 'and applies to the open page');
+// The meshes the patch keeps skin with the skeleton made again, not the one it replaced.
+const skinned = page.blend.scene.meshes.filter((mesh) => mesh.skeleton);
+assert.ok(skinned.length && skinned.every((mesh) => page.blend.scene.skeletons.includes(mesh.skeleton)), `the kept meshes take the new skeleton: ${skinned.map((m) => m.name)}`);
 const refreshed = await loaded(third);
 await same(page.blend, refreshed.blend, 'a skeleton made again');
 refreshed.blend.dispose();

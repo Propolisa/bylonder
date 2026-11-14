@@ -57,6 +57,9 @@ function place(node, entry, made) {
   if (entry.material !== undefined) node.material = made.materialsByKey[entry.material] ?? null;
 }
 
+/** The skeleton of id `id` these tables made (a patch makes one again under the same id), else the scene's. @param {Record<string, any>} made @param {any} lookup @param {string} id */
+const skeletonOf = (made, lookup, id) => Object.values(made.skeletons ?? {}).find((s) => s.id === id) ?? lookup.getSkeletonById(id);
+
 /**
  * A mesh or transform node from its entry (js-export.js nodeEntry).
  * @param {Loading} loading @param {Record<string, any>} entry @param {Record<string, any>} made what the tables made, by table and key
@@ -77,7 +80,7 @@ function node({ scene, lookup, buffers, parsers }, entry, made) {
     node.subMeshes = [];
     for (const [material, verticesStart, verticesCount, indexStart, indexCount] of entry.subMeshes) new SubMesh(material, verticesStart, verticesCount, indexStart, indexCount, node);
   }
-  if (entry.skeleton !== undefined) Object.assign(node, { skeleton: lookup.getSkeletonById(entry.skeleton), numBoneInfluencers: entry.numBoneInfluencers });
+  if (entry.skeleton !== undefined) Object.assign(node, { skeleton: skeletonOf(made, lookup, entry.skeleton), numBoneInfluencers: entry.numBoneInfluencers });
   if (entry.morphTargets !== undefined) node.morphTargetManager = made.morphTargets[entry.morphTargets];
   if (entry.thinInstances !== undefined) node.thinInstanceSetBuffer('matrix', buffers[entry.thinInstances], 16, true);
   for (const instance of entry.instances ?? []) {
@@ -263,6 +266,8 @@ export function sceneTables(loading) {
           const object = made.nodes[key];
           if (changed.get('geometries')?.has(entry.geometry)) made.geometries[entry.geometry].applyToMesh(object);
           if (entry.morphTargets !== undefined) object.morphTargetManager = made.morphTargets[entry.morphTargets];
+          // A skeleton made again skins the meshes kept: they take the new one.
+          if (entry.skeleton !== undefined && changed.get('skeletons')?.size) object.skeleton = skeletonOf(made, loading.lookup, entry.skeleton);
         }
         link(next, fresh);
         if (changed.get('lights')?.size || changed.get('nodes')?.size || version === null) parsers.lightsMade?.(Object.values(made.lights), '', made);
