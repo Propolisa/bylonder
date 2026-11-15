@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# CPython for wasm32-wasi, with CPython's own WASI support (Tools/wasm/config.site-wasm32-wasi) on the module's
-# toolchain (clang 18, the system wasi-libc), the host's python3.13 as the build Python. zlib (zipimport, zipfile) and
+# CPython for wasm32-wasi-threads, with CPython's own WASI support (Tools/wasm/config.site-wasm32-wasi, its WASI
+# threads) on the module's toolchain (clang 18, wasi-sdk's sysroot), the host's python3.13 as the build Python. zlib (zipimport, zipfile) and
 # expat (pyexpat) are the module's own (manifest zlib and expat), which the module links once; CPython's own links
 # here (configure's checks, the interpreter make links) use them built here.
 # Usage: deps/cpython.sh PYTHON_SOURCE ZLIB_SOURCE EXPAT_SOURCE BUILD   (BUILD gets libpython3.13.a and pyconfig.h)
@@ -26,10 +26,13 @@ export PKG_CONFIG_PATH= PKG_CONFIG_LIBDIR=/nonexistent
 export CONFIG_SITE="$SRC/Tools/wasm/config.site-wasm32-wasi $TOOLS/config.site-cpython"
 export CFLAGS="-O2 -D_WASI_EMULATED_PROCESS_CLOCKS -D_WASI_EMULATED_SIGNAL -D_WASI_EMULATED_GETPID"
 export OPT="-DNDEBUG"
+# CPython's WASI threads link gives its own interpreter a 10 MiB maximum memory, below its 20 MiB initial one: the
+# module's maximum instead (the interpreter is only linked, make libainstall builds it).
+export LDFLAGS_NODIST="-Wl,--max-memory=4294967296"
 export LDFLAGS="-lwasi-emulated-process-clocks -lwasi-emulated-signal -lwasi-emulated-getpid"
 export ZLIB_CFLAGS="-I$ZLIB" ZLIB_LIBS="$BUILD/libz.a" LIBEXPAT_CFLAGS="-I$EXPAT -DXML_STATIC" LIBEXPAT_LDFLAGS="$BUILD/libexpat.a"
 if [ ! -f Makefile ]; then
-  "$SRC/configure" --host=wasm32-unknown-wasi --build=x86_64-pc-linux-gnu --with-build-python=python3.13 \
+  "$SRC/configure" --host=wasm32-unknown-wasi --build=x86_64-pc-linux-gnu --with-build-python=python3.13 --enable-wasm-pthreads \
     --prefix="$BUILD/prefix" --disable-test-modules --without-ensurepip --with-system-expat >configure.log
 fi
 make -j"${JOBS:-4}" libpython3.13.a pybuilddir.txt >make.log 2>&1

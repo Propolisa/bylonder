@@ -384,12 +384,20 @@ class RecordShader : public Shader {
   void warm_cache(int /*limit*/) override {}
   void bind(const shader::SpecializationConstants * /*constants_state*/) override {}
   void unbind() override {}
+  /* A name the shader does not declare (location -1) sets nothing, as in GL: Sun Beams sets jitter_factor on both of
+   * its shaders. */
   void uniform_float(int location, int comp_len, int array_size, const float *data) override
   {
+    if (location == -1) {
+      return;
+    }
     push_constants_.add_overwrite(location, json_list(Span<float>(data, comp_len * array_size)));
   }
   void uniform_int(int location, int comp_len, int array_size, const int *data) override
   {
+    if (location == -1) {
+      return;
+    }
     push_constants_.add_overwrite(location, json_list(Span<int>(data, comp_len * array_size)));
   }
   std::string resources_declare(const ShaderCreateInfo & /*info*/) const override { return {}; }

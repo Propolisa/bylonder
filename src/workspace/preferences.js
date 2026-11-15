@@ -29,6 +29,8 @@ export function registerBylonderPreferences(icon) {
       ...Object.fromEntries(SETTINGS.map(([name, label, description, value]) => [name, props().BoolProperty(kw({ name: label, description, default: value }))])),
       gpu_backend: props().EnumProperty(kw({ name: 'GPU Backend', description: 'The graphics API the views draw with, used from the next start',
         items: [['WEBGL2', 'WebGL 2', "Babylon's WebGL 2 engine"], ['WEBGPU', 'WebGPU', "Babylon's WebGPU engine, where the browser has it; WebGL 2 otherwise"]], default: 'WEBGL2' })),
+      threads: props().EnumProperty(kw({ name: 'Threads', description: "The threads Blender's code runs on, used from the next start",
+        items: [['AUTO', 'Auto', "The page's processors, where the page is cross-origin isolated; one thread otherwise"], ['OFF', 'Off', 'One thread']], default: 'AUTO' })),
     },
     draw(context) { drawSettings(this.layout, this); },
   }));
@@ -44,6 +46,7 @@ function drawSettings(layout, settings) {
   layout.use_property_split = true;
   layout.use_property_decorate = false;
   layout.prop(settings, 'gpu_backend');
+  layout.prop(settings, 'threads');
   layout.prop(settings, 'prepare_shaders');
   layout.prop(settings, 'keep_scenes_loaded');
   layout.prop(settings, 'ask_sequencer_setup');
