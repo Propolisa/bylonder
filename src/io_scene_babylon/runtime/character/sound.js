@@ -10,7 +10,7 @@ const decoded = new Map();
 /** The page's audio context, made once and resumed at the first gesture. @type {AudioContext | null} */
 let shared = null;
 /** @returns {AudioContext | null} */
-function audioContext() {
+export function audioContext() {
   const Context = /** @type {typeof AudioContext | undefined} */ (globalThis.AudioContext);
   if (!Context) return null;
   if (!shared) {

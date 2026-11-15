@@ -36,6 +36,7 @@ export function runGame(blend: any, code: {
             listeners: Set<() => void>;
             disposed: boolean;
             label: string;
+            output?: GainNode;
         }) => import("./world.js").Time;
         entityOf: (object: import("./world.js").HostObject) => import("./world.js").Entity;
         readonly ended: any;
@@ -52,6 +53,7 @@ export function runGame(blend: any, code: {
                 listeners: Set<() => void>;
                 disposed: boolean;
                 label: string;
+                output?: GainNode;
             };
             handlers: any;
         }>;

@@ -1,3 +1,5 @@
+/** @returns {AudioContext | null} */
+export function audioContext(): AudioContext | null;
 /**
  * The voice of an action with a sound: `time()` is the action's time by the sound (null until it plays), and
  * `play(at)`, `pause()` follow the action. A strip that fails to load warns and leaves the action on the page's clock.

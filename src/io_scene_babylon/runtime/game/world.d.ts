@@ -21,6 +21,7 @@ export function onGround(camera: import("@babylonjs/core").Camera | null | undef
  *   play(sound: string, options?: { at?: Entity, rate?: number, volume?: number }): void, end(result?: any): void,
  *   spawn(collection: string, options?: { at?: Entity, attachTo?: any, jitter?: number }): Entity | null,
  *   camera: { follow(entity: Entity, options?: { pitch?: number, distance?: number, height?: number }): void, controls: boolean, onGround(stick: { x: number, y: number }): Vector3 },
+ *   readonly audio: { context: AudioContext, destination: AudioNode } | null,
  * }} Game
  */
 /**
@@ -53,6 +54,7 @@ export function createWorld({ host, behaviors, game: composition, seed, engine, 
         listeners: Set<() => void>;
         disposed: boolean;
         label: string;
+        output?: GainNode;
     }) => Time;
     entityOf: (object: HostObject) => Entity;
     /** The run's result once a system ended it, else undefined. */
@@ -71,6 +73,7 @@ export function createWorld({ host, behaviors, game: composition, seed, engine, 
             listeners: Set<() => void>;
             disposed: boolean;
             label: string;
+            output?: GainNode;
         };
         handlers: any;
     }>;
@@ -173,6 +176,10 @@ export type Game = {
             y: number;
         }): Vector3;
     };
+    readonly audio: {
+        context: AudioContext;
+        destination: AudioNode;
+    } | null;
 };
 /**
  * The scene a run plays, as game/blend-host.js gives it from a package's controller.
@@ -189,6 +196,7 @@ export type Host = {
     }) => void;
     played?: string[];
     spawn?: (collection: string) => HostObject[];
+    audio?: () => AudioContext | null;
     blend?: any;
 };
 /**

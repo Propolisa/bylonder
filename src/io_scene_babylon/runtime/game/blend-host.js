@@ -4,7 +4,7 @@
 // IR's `["behaviors"]` custom property group of each), their props live from the controls (an edit in Blender reaches
 // them at once), ID pointers by their IDs' names, Blender's own transforms for `entity.authored`, and the .blend's sounds,
 // played as the page plays an action's sound (character/sound.js).
-import { createVoice } from '../character/sound.js';
+import { audioContext, createVoice } from '../character/sound.js';
 
 const key = (/** @type {string} */ name) => `["${name.replace(/["\\]/g, (c) => '\\' + c)}"]`;
 const GROUP = key('behaviors');
@@ -45,6 +45,8 @@ export function blendHost(blend) {
       createVoice({ ...sound, start: 0, volume, rate }, { spatial: false }).play(0);
     },
     blend,
+    /** The page's audio context, which its sounds play on (null where there is none, Node). */
+    audio: audioContext,
     // The scene's objects with behaviours, those of prefab collections (excluded or hidden) left for spawn().
     objects: () => {
       const shown = shownObjects();

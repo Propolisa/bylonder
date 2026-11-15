@@ -195,7 +195,8 @@ same way. Built: `io_scene_babylon/game-export.js`.
   Animated, mass, shape, friction, bounciness) becomes a Havok body, a spawned copy's too; for such a game the export
   bakes no rigid body's motion (Blender's simulation), which the game simulates instead. While a game plays, the scene
   camera's own mouse controls are off (`game.camera.controls = true` turns them on), and a Character's stick moves it
-  as the camera shows it.
+  as the camera shows it. `game.audio` gives game code the page's audio context and a destination of its own, disconnected
+  when its code goes (Reset, hot swap), for sounds it makes itself.
 - `game.js` starts with the project's licence from `package.json` `license`. Without one the export fails and says
   so; it is never merged with Blender's code or the runtime. With Bundle on, `game.js` is an entry of its own that
   shares Babylon's chunks with `scene.js`.

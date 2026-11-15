@@ -3,7 +3,7 @@
 // A run of a game (docs/notes/game-code.md): the behaviours added to the scene's objects and the game's systems,
 // created over the run's Babylon scene, stepped by the run's clock. Everything a behaviour makes while its code runs is
 // disposed with it, its waits never resume once it is gone, and its `state` is handed to the next run of a hot swap.
-import { Vector3 } from '@babylonjs/core';
+import { Matrix, Quaternion, Vector3 } from '@babylonjs/core';
 import { propValue } from './define.js';
 import { enablePhysics, rigidBody } from './physics.js';
 
@@ -17,6 +17,7 @@ import { enablePhysics, rigidBody } from './physics.js';
  *   play?: (action: string, object: string) => void,
  *   playSound?: (sound: string, at?: Entity, options?: { rate?: number, volume?: number }) => void, played?: string[],
  *   spawn?: (collection: string) => HostObject[],
+ *   audio?: () => AudioContext | null,
  *   blend?: any,
  * }} Host
  * @typedef {{ key: string, name: string, node: import('@babylonjs/core').TransformNode | null, behaviors: string[], rigid?: Record<string, any> | null }} HostObject
@@ -59,6 +60,15 @@ export function onGround(camera, x, y) {
   return right.scale(x).addInPlace(up.scale(y));
 }
 
+/** Puts `node` where an entity is and turns it as the entity is turned (its node's), else just at its place. @param {any} node @param {any} at */
+function placeLike(node, at) {
+  node.setAbsolutePosition(placeOf(at));
+  if (!at.node) return;
+  // world = local * parent's world, so local = world * the parent's inverse.
+  const local = at.node.computeWorldMatrix(true).multiply(Matrix.Invert(node.parent?.computeWorldMatrix(true) ?? Matrix.Identity()));
+  local.decompose(undefined, (node.rotationQuaternion ??= new Quaternion()));
+}
+
 /** A seeded random in [0, 1) (mulberry32), so a run with the same seed picks the same. @param {number} seed */
 function random(seed) {
   let a = seed >>> 0;
@@ -87,6 +97,7 @@ function random(seed) {
  *   play(sound: string, options?: { at?: Entity, rate?: number, volume?: number }): void, end(result?: any): void,
  *   spawn(collection: string, options?: { at?: Entity, attachTo?: any, jitter?: number }): Entity | null,
  *   camera: { follow(entity: Entity, options?: { pitch?: number, distance?: number, height?: number }): void, controls: boolean, onGround(stick: { x: number, y: number }): Vector3 },
+ *   readonly audio: { context: AudioContext, destination: AudioNode } | null,
  * }} Game
  */
 
@@ -110,7 +121,7 @@ export function createWorld({ host, behaviors, game: composition = {}, seed = 1,
   let now = 0, ended = /** @type {any} */ (undefined), definitions = new Map(behaviors.map((b) => [b.name, b]));
   /** Whose code runs now: what Babylon makes meanwhile is theirs. @type {Owner | null} */
   let owner = null;
-  /** @typedef {{ made: Set<{ dispose(): void }>, listeners: Set<() => void>, disposed: boolean, label: string }} Owner */
+  /** @typedef {{ made: Set<{ dispose(): void }>, listeners: Set<() => void>, disposed: boolean, label: string, output?: GainNode }} Owner */
   /** @type {{ at: number, owner: Owner, resume: () => void }[]} */
   let waits = [];
   /** What the `create`s run since the last start threw. @type {unknown[]} */
@@ -156,6 +167,7 @@ export function createWorld({ host, behaviors, game: composition = {}, seed = 1,
   function release(who) {
     who.disposed = true;
     for (const off of who.listeners) off();
+    who.output?.disconnect();
     for (const made of [...who.made].reverse()) { try { made.dispose(); } catch {} }
     who.made.clear();
   }
@@ -290,6 +302,16 @@ export function createWorld({ host, behaviors, game: composition = {}, seed = 1,
     },
     /** Plays a sound, at an entity's place where given, at a rate (1 as recorded, 2 an octave up) and a volume. @param {string} sound @param {{ at?: Entity, rate?: number, volume?: number }} [options] */
     play: (sound, options) => host.playSound?.(sound, options?.at, options),
+    /**
+     * Web Audio for sounds made in code: the page's context and a destination of this code's own, disconnected when
+     * it goes (Reset, hot swap), so what plays into it stops; null where there is no audio (Node).
+     */
+    get audio() {
+      const context = host.audio?.();
+      if (!context) return null;
+      if (!who.output) { who.output = context.createGain(); who.output.connect(context.destination); }
+      return { context, destination: who.output };
+    },
     /** The game's camera: `follow(entity, { pitch, distance, height })` follows a Character from above and behind. */
     camera: {
       follow: (entity, options) => /** @type {any} */ (entity).character?.follow?.(options),
@@ -315,7 +337,7 @@ export function createWorld({ host, behaviors, game: composition = {}, seed = 1,
         const root = made.find((o) => !made.some((p) => p.node === o.node?.parent))?.node;
         if (!root) return null;
         if (attachTo) root.parent = attachTo.node ?? attachTo;
-        else if (at) root.setAbsolutePosition(placeOf(at));
+        else if (at) placeLike(root, at);
         if (jitter) root.position.addInPlaceFromFloats((rng() - 0.5) * 2 * jitter, 0, (rng() - 0.5) * 2 * jitter);
         bodiesOf(made);
         for (const object of made) for (const name of object.behaviors) { const d = definitions.get(name); if (d && !instances.has(`${object.key}/${name}`)) createInstance(object, d); }
