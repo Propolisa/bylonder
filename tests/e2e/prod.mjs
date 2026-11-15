@@ -109,6 +109,15 @@ async function pageBrowser(dir) {
     },
   };
 }
+// Whether the machine has a hardware GPU (pageBrowser's check), for steps that only a GPU runs in time.
+async function hardwareGPU() {
+  const pages = await pageBrowser(mkdtempSync(join(tmpdir(), "bylonder-gpu-")));
+  try {
+    return await pages.hardwareWebGPU();
+  } finally {
+    await pages.close();
+  }
+}
 const step = async (name, fn) => {
   const at = Date.now();
   await within(STEP_LIMIT, `step "${name}"`, fn());
@@ -383,68 +392,85 @@ try {
       }
     });
   }
+  // The café played on the exported page in the Package View, as the step below says.
+  async function playCafe(opened) {
+    await opened.bylonder((b) => b.dock.show("package"));
+    // The Package View alone, as large as the café's camera frames it.
+    await opened.bylonder((b) => b.dock.maximize("package"));
+    await opened.frame().getByRole("button", { name: "Reload" }).click();
+    await opened.frame().locator('[data-section="package"]').getByText("Loaded").waitFor({ timeout: 300000 });
+    const view = opened.frame().locator('#package-section iframe[title="Package View"]'), page = view.contentFrame();
+    await page.locator("canvas").waitFor();
+    await page.locator("canvas").evaluate((canvas) => new Promise((resolve) => { const wait = () => (window.blend?.game ? resolve() : setTimeout(wait, 100)); wait(); }));
+    const box = await view.boundingBox();
+    await opened.page.mouse.click(box.x + box.width / 2, box.y + box.height - 10);
+    // The café as the page plays it, read from its game: where a place over the counter (at the hand's height) is on
+    // the page, by the page's own camera (the cup, or the near side of the waiting rock's top), whether the hand is over
+    // the cup (outlined) or holds it, and the rocks served. Each input waits for the game to reach the state it needs,
+    // never for a time, so a slow page plays the same; a rock that leaves meanwhile is followed
+    // by the next.
+    const cafe = () => page.locator("canvas").evaluate((canvas) => {
+      const scene = window.blend.scene, game = window.blend.game.world, instances = [...game.instances.values()];
+      const cup = instances.find((i) => i.definition.name === "Cup"), rock = instances.find((i) => i.definition.name === "Rock" && i.state.mood === "waiting");
+      const barista = instances.find((i) => i.definition.name === "Barista")?.handlers;
+      const engine = scene.getEngine(), w = engine.getRenderWidth(), h = engine.getRenderHeight(), r = canvas.getBoundingClientRect();
+      const project = (at) => {
+        const p = at.constructor.Project(at, scene.getTransformMatrix().constructor.Identity(), scene.getTransformMatrix(), scene.activeCamera.viewport.toGlobal(w, h));
+        return [r.left + (p.x * r.width) / w, r.top + (p.y * r.height) / h];
+      };
+      const onPage = (instance, nearSide) => {
+        if (!instance) return null;
+        const { min, max } = instance.entity.node.getHierarchyBoundingVectors(true), V = min.constructor;
+        const at = new V((min.x + max.x) / 2, 1.12, (min.z + max.z) / 2);
+        if (nearSide) {
+          const toward = scene.getTransformNodeByName("Barista DEF-upper_arm.R").getAbsolutePosition().subtract(at);
+          toward.y = 0;
+          at.addInPlace(toward.normalize().scale(0.2));
+        }
+        return project(at);
+      };
+      // The machine's button, from its side and through it: a slap.
+      const button = scene.getNodeByName("Machine Button").getAbsolutePosition(), at = (dx) => project(button.add(new button.constructor(dx, 0.02, 0)));
+      const doing = instances.find((i) => i.definition.name === "Machine")?.handlers.doing;
+      return { cup: onPage(cup), rock: onPage(rock, true), over: !!cup?.entity.node.renderOutline, holding: !!barista?.holding,
+        slap: [at(0.25), at(-0.05)], brewing: doing !== "idle" && doing !== "blocked", served: game.game.get({ name: "Shift" })?.save().served ?? 0 };
+    });
+    const until = async (what, done, act, seconds = 240) => {
+      const end = Date.now() + seconds * 1000;
+      for (let state = await cafe(); !done(state); state = await cafe()) {
+        if (Date.now() > end) throw new Error(`The café's ${what}, not within ${seconds} s: ${JSON.stringify(state)}`);
+        await act?.(state);
+        await opened.page.waitForTimeout(250);
+      }
+    };
+    const move = async (at) => at && opened.page.mouse.move(box.x + at[0], box.y + at[1], { steps: 5 });
+    let swing = 0;
+    await until("brew, started by a slap on its button", (s) => s.brewing, async (s) => { await move(s.slap[swing++ % 2]); await opened.page.waitForTimeout(500); });
+    await until("cup on the tray, under the hand", (s) => s.over, (s) => move(s.cup));
+    await opened.page.mouse.down();
+    await until("cup in the hand", (s) => s.holding);
+    // The rock admires, spills and leaves, which the shift counts.
+    await until("cup set down on a waiting rock", (s) => s.served > 0, async (s) => {
+      await move(s.rock);
+      // Over the rock, let go; a cup that landed short (a rock gone meanwhile) is taken again.
+      if (s.holding && s.rock) { await opened.page.waitForTimeout(1500); await opened.page.mouse.up(); }
+      else if (!s.holding && s.over) await opened.page.mouse.down();
+      else if (!s.holding) await move(s.cup);
+    });
+    await opened.page.mouse.up();
+  }
   // An exported page plays the project's game as the Game area does (docs/sdk-model.md, Game code): the Package View's
   // page, written by the app's own export with game.js built in the browser, takes the café's mouse; the barista's hand
-  // takes the cup the machine brews onto its tray and sets it down on the waiting rock, which the shift counts.
+  // slaps the machine's button, takes the mug it brews onto its tray and sets it down on the waiting rock, which the
+  // shift counts.
   await step("an exported page plays the project's game", async () => {
+    // Playing it takes a hardware GPU: in software (CI) the page draws too slowly to play within the step's limit, and the
+    // headless café test (npm test) plays the game's logic there; the export is checked either way.
+    const gpu = await hardwareGPU();
     const opened = await openApp(browser, server.url, { link: "rock-hard-cafe", node: "Rock" });
     try {
-      await opened.bylonder((b) => b.dock.show("package"));
-      // The Package View alone, as large as the café's camera frames it.
-      await opened.bylonder((b) => b.dock.maximize("package"));
-      await opened.frame().getByRole("button", { name: "Reload" }).click();
-      await opened.frame().locator('[data-section="package"]').getByText("Loaded").waitFor({ timeout: 300000 });
-      const view = opened.frame().locator('#package-section iframe[title="Package View"]'), page = view.contentFrame();
-      await page.locator("canvas").waitFor();
-      await page.locator("canvas").evaluate((canvas) => new Promise((resolve) => { const wait = () => (window.blend?.game ? resolve() : setTimeout(wait, 100)); wait(); }));
-      const box = await view.boundingBox();
-      await opened.page.mouse.click(box.x + box.width / 2, box.y + box.height - 10);
-      // The café as the page plays it, read from its game: where a place over the counter (at the hand's height) is on
-      // the page, by the page's own camera (the cup, or the near side of the waiting rock's top), whether the hand is over
-      // the cup (outlined) or holds it, and the rocks served. Each input waits for the game to reach the state it needs,
-      // never for a time, so a slow page (CI draws in software) plays the same; a rock that leaves meanwhile is followed
-      // by the next.
-      const cafe = () => page.locator("canvas").evaluate((canvas) => {
-        const scene = window.blend.scene, game = window.blend.game.world, instances = [...game.instances.values()];
-        const cup = instances.find((i) => i.definition.name === "Cup"), rock = instances.find((i) => i.definition.name === "Rock" && i.state.mood === "waiting");
-        const barista = instances.find((i) => i.definition.name === "Barista")?.handlers;
-        const engine = scene.getEngine(), w = engine.getRenderWidth(), h = engine.getRenderHeight(), r = canvas.getBoundingClientRect();
-        const onPage = (instance, nearSide) => {
-          if (!instance) return null;
-          const { min, max } = instance.entity.node.getHierarchyBoundingVectors(true), V = min.constructor;
-          const at = new V((min.x + max.x) / 2, 1.08, (min.z + max.z) / 2);
-          if (nearSide) {
-            const toward = scene.getTransformNodeByName("Barista DEF-upper_arm.R").getAbsolutePosition().subtract(at);
-            toward.y = 0;
-            at.addInPlace(toward.normalize().scale(0.2));
-          }
-          const p = V.Project(at, scene.getTransformMatrix().constructor.Identity(), scene.getTransformMatrix(), scene.activeCamera.viewport.toGlobal(w, h));
-          return [r.left + (p.x * r.width) / w, r.top + (p.y * r.height) / h];
-        };
-        return { cup: onPage(cup), rock: onPage(rock, true), over: !!cup?.entity.node.renderOutline, holding: !!barista?.holding,
-          served: game.game.get({ name: "Shift" })?.save().served ?? 0 };
-      });
-      const until = async (what, done, act, seconds = 240) => {
-        const end = Date.now() + seconds * 1000;
-        for (let state = await cafe(); !done(state); state = await cafe()) {
-          if (Date.now() > end) throw new Error(`The café's ${what}, not within ${seconds} s: ${JSON.stringify(state)}`);
-          await act?.(state);
-          await opened.page.waitForTimeout(250);
-        }
-      };
-      const move = async (at) => at && opened.page.mouse.move(box.x + at[0], box.y + at[1], { steps: 5 });
-      await until("cup on the tray, under the hand", (s) => s.over, (s) => move(s.cup));
-      await opened.page.mouse.down();
-      await until("cup in the hand", (s) => s.holding);
-      // The rock admires, spills and leaves, which the shift counts.
-      await until("cup set down on a waiting rock", (s) => s.served > 0, async (s) => {
-        await move(s.rock);
-        // Over the rock, let go; a cup that landed short (a rock gone meanwhile) is taken again.
-        if (s.holding && s.rock) { await opened.page.waitForTimeout(1500); await opened.page.mouse.up(); }
-        else if (!s.holding && s.over) await opened.page.mouse.down();
-        else if (!s.holding) await move(s.cup);
-      });
-      await opened.page.mouse.up();
+      if (!gpu) console.log(`      play skipped: ${NO_WEBGPU}`);
+      else await playCafe(opened);
       // A project whose package.json states no licence: File > Export asks for one, writes it there and ships game.js
       // under it.
       await opened.bylonder((b) => { const { files } = b.world.project; files.splice(files.indexOf("package.json"), 1); });

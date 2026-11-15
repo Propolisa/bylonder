@@ -472,6 +472,7 @@
    "tests/game-export.test.js",
    "tests/game-physics.test.js",
    "tests/game-camera-controls.test.js",
+   "tests/cafe-sounds.test.js",
    "tests/cafe-reach-ik-wasm.test.js",
    "tests/export-rigid-bodies-wasm.test.js"
   ],

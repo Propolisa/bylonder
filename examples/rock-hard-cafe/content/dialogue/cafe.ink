@@ -1,8 +1,8 @@
 VAR served = 0
 VAR walkouts = 0
 
-=== rock_noise ===
-{~Wood Clack|Plank Clack|Clack}
+=== rock_angry ===
+{~*grinds its teeth, which it does not have*|*a low, offended rumble*|*rattles, furious*|*glares, geologically*}
 -> END
 
 === rock_reaction ===

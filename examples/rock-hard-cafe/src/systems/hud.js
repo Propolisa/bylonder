@@ -15,15 +15,15 @@ export default defineSystem({
       horizontalAlignment: Control.HORIZONTAL_ALIGNMENT_LEFT, verticalAlignment: Control.VERTICAL_ALIGNMENT_TOP, left: '16px', top: '16px' });
     const lines = Object.assign(new StackPanel(), { isVertical: true, paddingLeft: '12px', paddingRight: '12px', paddingTop: '8px', paddingBottom: '8px' });
     const served = text(''), music = text('', { fontSize: 18, color: '#ddd' });
-    const help = ['Mouse: reach over the counter', 'Hold Space or the left button: grab a cup', 'Set it down on the rock; WASD: walk']
+    const help = ['Slap the orange button for a coffee', 'Mouse: reach; hold Space or the left button: grab', 'Set the mug down on the rock; WASD: walk']
       .map((line) => text(line, { fontSize: 18, color: '#ddd' }));
     for (const line of [served, ...help, music]) { line.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT; lines.addControl(line); }
     board.addControl(lines);
     screen.addControl(board);
     return {
       update() {
-        const { served: count = 0, walkouts = 0 } = game.get(Shift)?.save() ?? {};
-        served.text = `Rocks served: ${count}${walkouts ? `, left thirsty: ${walkouts}` : ''}`;
+        const { served: count = 0, walkouts = 0, angry = 0 } = game.get(Shift)?.save() ?? {};
+        served.text = `Rocks served: ${count}${walkouts ? `, left thirsty: ${walkouts}` : ''}${angry ? ` (${angry} angry)` : ''}`;
         const playing = game.get(Music);
         music.text = playing?.track ? `M: music ${playing.muted ? 'off' : 'on'}` : '';
         music.isVisible = !!music.text;

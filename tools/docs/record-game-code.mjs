@@ -41,10 +41,11 @@ await record("game-code", { example: "rock-hard-cafe", node: "Rock", size: { wid
       for (let tries = 0; tries < 100; tries++) {
         const at = await app.bylonder((b, what) => {
           const world = b.game.world, scene = b.game.blend?.scene;
-          const found = world && [...world.instances.values()].find((i) => (what === "cup" ? i.definition.name === "Cup" : i.definition.name === "Rock" && i.state.mood === "waiting"));
+          const found = world && [...world.instances.values()].find((i) => (what === "cup" ? i.definition.name === "Cup" : what === "button" ? i.entity.name === "Machine Button"
+            : i.definition.name === "Rock" && i.state.mood === "waiting"));
           if (!found) return null;
           const { min, max } = found.entity.node.getHierarchyBoundingVectors(true), V = min.constructor;
-          const point = new V((min.x + max.x) / 2, 1.08, (min.z + max.z) / 2);
+          const point = new V((min.x + max.x) / 2, 1.12, (min.z + max.z) / 2);
           if (what === "rock") {
             const toward = scene.getTransformNodeByName("Barista DEF-upper_arm.R").getAbsolutePosition().subtract(point);
             toward.y = 0;
@@ -60,6 +61,12 @@ await record("game-code", { example: "rock-hard-cafe", node: "Rock", size: { wid
       throw new Error(`No ${what} in the café`);
     };
     await page.mouse.click(canvas.x + canvas.width / 2, canvas.y + canvas.height - 10);
+    // A slap on the machine's button, the hand swung in from its side; the mug comes as the brew pours.
+    const button = await where("button");
+    await page.mouse.move(button[0] + canvas.width * 0.12, button[1], { steps: 20 });
+    await r.pause(2500);
+    await page.mouse.move(button[0] - canvas.width * 0.03, button[1], { steps: 6 });
+    await r.pause(4000);
     await page.mouse.move(...(await where("cup")), { steps: 20 });
     await r.pause(2000);
     await page.mouse.down();

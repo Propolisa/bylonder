@@ -40,6 +40,7 @@ tests:
   - tests/game-export.test.js
   - tests/game-physics.test.js
   - tests/game-camera-controls.test.js
+  - tests/cafe-sounds.test.js
   - tests/cafe-reach-ik-wasm.test.js
   - tests/export-rigid-bodies-wasm.test.js
 limits:
@@ -62,10 +63,11 @@ it all; saving a file swaps its code into the running game, keeping each behavio
 
 [Open in Bylonder](https://propolisa.github.io/bylonder/#example=rock-hard-cafe)
 
-The demo, Rock Hard Café, is a one-minute shift at an open-air coffee stand in a forest by a brook, whose only
-customers are rocks: one at a time a rock rolls up from the trailhead and waits across the counter. You reach across
-with the barista's right hand, take the cup the machine brewed onto its tray, steer it round the jars and set it down
-on the rock, which shivers with delight, makes a rock noise, spills it off and rolls back down, stained. The hand is
+The demo, Rock Hard Café, is an endless day at an open-air coffee stand in a forest by a brook, whose only
+customers are rocks: one at a time a rock rolls up from the trailhead and waits across the counter. You slap the coffee
+machine's orange button with the barista's right hand, take the mug it brews onto its tray, steer it round the jars and
+set it down on the rock, which shivers with delight, says so, spills it off (the mug breaks into pieces made in Blender)
+and rolls back down, stained. A jar or a mug knocked off the counter angers the waiting rock. The hand is
 Blender's IK on the barista's rig (an arm and a spine constraint, set in `cafe.py`), solved live in the page; the cups
 and jars are Blender rigid bodies that the game runs on Havok. Each rock's path, shiver, spill and noise come from the
 run's seeded random and the physics, so every serve plays out differently and a replay plays the same. The example
@@ -86,8 +88,9 @@ opens on the Game workspace, the 3D View beside the Game area.
    ![Edit Source opens rock.js at defineBehavior](../media/features/game-code/edit-source.png)
 
 3. **Play.** The Game area's Play runs the scene with its game code and gives it the keys (a click on the game takes
-   them back after you work elsewhere): the mouse moves the hand over the counter, holding Space or the left button
-   closes it on a cup under the palm and letting go sets the cup down; WASD walks the barista. Drag Patience while it plays and the waiting rocks change at once; save `rock.js` and its code is
+   them back after you work elsewhere): the mouse moves the hand over the counter, a slap on the orange button brews a
+   mug, holding Space or the left button closes the hand on a mug under the palm and letting go sets it down; WASD walks
+   the barista, M mutes the music. Drag Patience while it plays and the waiting rocks change at once; save `rock.js` and its code is
    swapped in without restarting.
 
    ![The café playing in the Game area](../media/features/game-code/play.gif)
@@ -102,5 +105,5 @@ opens on the Game workspace, the 3D View beside the Game area.
 - [content/dialogue/cafe.ink](../../examples/rock-hard-cafe/content/dialogue/cafe.ink): the rocks' lines, an Ink story.
 - Recorded by [record-game-code.mjs](../../tools/docs/record-game-code.mjs).
 - Credits: the barista and the forest are Quaternius' Universal Animation Library and Stylized Nature MegaKit (CC0),
-  the sounds Kenney's Impact Sounds and Interface Sounds (CC0), the music "Bubble Gum Groovin'" by Eric Matyas,
-  www.soundimage.org (CC BY 3.0), [CREDITS.md](../../examples/rock-hard-cafe/CREDITS.md).
+  the voices and spills rubberduck's (CC0), the jingles Kenney's Interface Sounds (CC0), the music "Bubble Gum
+  Groovin'" by Eric Matyas, www.soundimage.org (CC BY 3.0), [CREDITS.md](../../examples/rock-hard-cafe/CREDITS.md).

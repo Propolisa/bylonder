@@ -1,10 +1,15 @@
 // A customer: rolls up from the trailhead to the stand along a path of its own, waits, shivers with delight at the
-// coffee set down on it, spills it (a shrug of its own that tips the cup off, under Havok), takes the stain and rolls
-// back down, out of sight. Each rock's path and shiver come from the
-// run's seeded random, so every serve plays out differently and a run with the same seed plays out the same.
+// coffee set down on it, says so in a voice of its own (at half pitch: these are rocks), spills it (a shrug of its own
+// that tips the mug off, under Havok, with a splash), takes the stain and rolls back down, out of sight. Knocking a mug
+// or a jar off the counter, or breaking one, angers the waiting rock: an angry wobble, a red tint, an angry line, and
+// its patience cut by 40%; it waits for a retry, or leaves angry. Each rock's path, voice, shiver and spill come from
+// the run's seeded random, so every serve plays out differently and a run with the same seed plays out the same.
 import { Quaternion, Vector3 } from '@babylonjs/core';
 import { defineBehavior, float, sound, color, knot, object } from 'bylonder';
 import Subtitles from '../systems/subtitles.js';
+import Impact from './impact.js';
+import Cup from './cup.js';
+import { createSounds } from '../sounds.js';
 
 /** Moves `entity` toward `to` (a point) on the ground by up to `step` metres; gives whether it got there. */
 function rollToward(entity, to, step) {
@@ -17,11 +22,15 @@ function rollToward(entity, to, step) {
 export default defineBehavior({
   name: 'Rock',
   props: {
-    patience: float(20, { min: 1, unit: 's' }),
-    noises: sound(['Wood Clack', 'Plank Clack', 'Clack']),
+    patience: float(35, { min: 1, unit: 's' }),
+    voices: sound(['Voice Cute 01']),
+    spills: sound(['Spill Splash 01']),
     delight: sound('Served'),
+    anger: sound('Angry'),
     reaction: knot('rock_reaction'),
+    angry: knot('rock_angry'),
     stain: color([0.24, 0.14, 0.07]),
+    rage: color([0.7, 0.12, 0.08]),
     spot: object('Stand Spot'),
     trailhead: object('Trailhead'),
     speed: float(1.2, { min: 0.1, unit: 'm/s' }),
@@ -38,23 +47,39 @@ export default defineBehavior({
     state.waited ??= 0;
     state.leg ??= 0;
     const rest = entity.node.rotationQuaternion?.clone() ?? Quaternion.FromEulerVector(entity.node.rotation);
+    // Its voice, one of the voices; and an angry wobble of its own, faster than its delight.
+    const voice = time.pick(props.voices), audio = game.audio, sounds = audio && createSounds(audio, time.random());
+    const fury = { amplitude: 0.05 + time.random() * 0.05, rate: 18 + time.random() * 10 };
     let shiver = null;
-    // Its voice: each rock clacks at a pitch of its own.
-    const voice = 0.75 + time.random() * 0.6;
-    const leave = (served) => { state.mood = 'leaving'; state.leg = 0; this.emit('left', { served }); };
+    const leave = (served) => { state.mood = 'leaving'; state.leg = 0; this.emit('left', { served, angry: !!state.angry }); };
+    const subtitles = () => game.get(Subtitles);
+
+    // A mug or a jar lost while it waits: knocked off or broken, but not the mug it was served.
+    const upset = ({ entity: lost }) => {
+      if (state.mood !== 'waiting' || state.angry || game.all(Cup).some((cup) => cup.entity === lost && cup.served)) return;
+      state.angry = true;
+      state.waited = Math.max(state.waited, props.patience * 0.4);
+      entity.material().set('baseColor', props.rage); // the run's copy
+      game.play(props.anger, { at: entity, volume: 0.6 });
+      game.play(voice, { at: entity, rate: 0.5 });
+      subtitles()?.say(props.angry, { speaker: entity });
+    };
+    game.on(Impact, 'knocked', upset);
+    game.on(Impact, 'broke', upset);
     return {
       async served({ cup }) {
         state.mood = 'admiring';
         // Its delight: a shiver of its own amplitude, pace and length.
         shiver = { amplitude: 0.06 + time.random() * 0.14, rate: 8 + time.random() * 10, length: 1.2 + time.random(), t: 0 };
-        const subtitles = game.get(Subtitles);
         game.play(props.delight, { at: entity, volume: 0.6 });
-        game.play(subtitles?.tell('rock_noise') ?? time.pick(props.noises), { at: entity, rate: voice });
-        subtitles?.say(props.reaction, { speaker: entity });
+        game.play(voice, { at: entity, rate: 0.5 });
+        subtitles()?.say(props.reaction, { speaker: entity });
         await time.wait(shiver.length);
-        // The spill: a shrug to a side of its own tips the cup off its top.
+        // The spill: a shrug to a side of its own tips the mug off its top, with a splash (a recorded one, or one made).
         const side = time.random() * Math.PI * 2, top = cup?.node.getAbsolutePosition().add(new Vector3(0, 0.08, 0));
-        if (top) cup.node.physicsBody?.applyImpulse(new Vector3(Math.cos(side), 0.4, Math.sin(side)).scale(0.25), top);
+        if (top) cup.node.physicsBody?.applyImpulse(new Vector3(Math.cos(side), 0.4, Math.sin(side)).scale(0.3), top);
+        if (time.random() < 0.5 && sounds) sounds.splash(audio.context.currentTime + 0.01);
+        else game.play(time.pick(props.spills), { at: entity, volume: 0.7 });
         entity.material().set('baseColor', props.stain); // the run's copy: the .blend keeps a clean rock
         await time.wait(0.5);
         leave(true);
@@ -77,6 +102,9 @@ export default defineBehavior({
         } else if (shiver) {
           entity.node.rotationQuaternion = rest.clone();
           shiver = null;
+        } else if (state.angry && state.mood === 'waiting') {
+          const t = state.waited, a = fury.amplitude;
+          entity.node.rotationQuaternion = rest.multiply(Quaternion.RotationYawPitchRoll(a * Math.sin(t * fury.rate), 0, a * Math.cos(t * fury.rate * 1.3)));
         }
       },
     };

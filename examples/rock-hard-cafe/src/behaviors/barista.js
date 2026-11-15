@@ -2,7 +2,7 @@
 // (or the right stick) moves the hand in a plane over the counter, as far as the arm and a lean reach; Blender's IK on
 // the rig bends the arm and the spine to it. The palm is a Havok body that pushes what it meets, and holding Grab closes
 // the hand on a cup under the palm, which goes where the hand goes until Grab is let go.
-import { Matrix, MeshBuilder, PhysicsAggregate, PhysicsMotionType, PhysicsShapeType, Vector3 } from '@babylonjs/core';
+import { Matrix, MeshBuilder, PhysicsAggregate, PhysicsShapeType, Vector3 } from '@babylonjs/core';
 import { defineBehavior, float, reach } from 'bylonder';
 import Cup from './cup.js';
 
@@ -18,9 +18,10 @@ export default defineBehavior({
   name: 'Barista',
   requires: ['Character'],
   props: {
-    height: float(1.08, { unit: 'm', description: 'The height the hand moves at, over the counter' }),
+    height: float(1.12, { unit: 'm', description: 'The height the hand moves at, over the counter and the mugs' }),
     reach: float(0.9, { min: 0.2, unit: 'm', description: 'How far the hand goes from the shoulder, leaning' }),
     speed: float(1.2, { min: 0.1, unit: 'm/s', description: 'How fast the right stick moves the hand' }),
+    slap: float(5, { min: 0.5, unit: 'm/s', description: 'The fastest the palm hits what it meets' }),
   },
   create({ entity, input, game, props, babylon }) {
     const scene = babylon.scene, character = entity.character;
@@ -47,14 +48,16 @@ export default defineBehavior({
     const hand = MeshBuilder.CreateSphere('Palm', { diameter: 0.08 }, scene);
     hand.isVisible = false;
     hand.position.copyFrom(palm.getAbsolutePosition());
-    const touch = new PhysicsAggregate(hand, PhysicsShapeType.SPHERE, { mass: 0 }, scene).body;
-    touch.setMotionType(PhysicsMotionType.ANIMATED);
-    touch.disablePreStep = false;
+    // A body of its own, without gravity, driven toward the hand by its velocity: it pushes what it meets, stops at
+    // what does not move (a button it slaps, the counter), and Havok knows how hard it hits.
+    const touch = new PhysicsAggregate(hand, PhysicsShapeType.SPHERE, { mass: 2, friction: 0.2 }, scene).body;
+    touch.setGravityFactor(0);
+    touch.setAngularDamping(10);
 
     /** The cup nearest under the palm, over it or at its rim, if any. */
     const cupUnder = (at) => {
       let best = null, nearest = Infinity;
-      for (const cup of game.all(Cup)) {
+      for (const cup of game.all(Cup).filter((c) => c.entity.visible)) {
         const top = cup.top(), d = Math.hypot(top.x - at.x, top.z - at.z), above = at.y - top.y;
         if (d < cup.radius + 0.06 && above > -0.05 && above < 0.2 && d < nearest) [best, nearest] = [cup, d];
       }
@@ -82,8 +85,17 @@ export default defineBehavior({
         const arm = (Vector3.Distance(s, e) + Vector3.Distance(e, w)) * 0.98, toAim = aim.subtract(s);
         // Short of the goal by more than a few centimetres, the barista steps after it (input, below).
         short = toAim.length() - arm;
-        if (short > 0) aim.copyFrom(s.add(toAim.normalize().scale(arm)));
-        hand.position.copyFrom(at);
+        // Short: the aim drawn in toward the shoulder at its own height, so the hand stays over the counter.
+        if (short > 0) {
+          const across = Math.sqrt(Math.max(0, arm * arm - toAim.y * toAim.y)), flat = new Vector3(toAim.x, 0, toAim.z);
+          aim.copyFrom(s.add(flat.normalize().scale(Math.min(across, flat.length())))).y = s.y + toAim.y;
+        }
+        // A jump (the first frame, a step's catch-up) is placed, not swept, so it hits nothing at a made-up speed.
+        const jump = Vector3.Distance(at, hand.position) > 0.3;
+        touch.disablePreStep = !jump;
+        if (jump) hand.position.copyFrom(at);
+        const toward = at.subtract(hand.position).scale(1 / Math.max(dt, 1 / 120));
+        touch.setLinearVelocity(jump ? Vector3.Zero() : toward.scale(Math.min(1, props.slap / Math.max(toward.length(), 1e-6))));
         // The cup the hand would take shows its outline.
         const under = holding ?? cupUnder(at);
         if (under !== hovered) { hovered?.hover(false); under?.hover(true); hovered = under; }

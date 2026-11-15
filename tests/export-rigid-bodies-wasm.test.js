@@ -23,8 +23,8 @@ const moving = async (options) => {
   return { ir: JSON.parse(files['scene.ir.json']), baked: (name) => targets.has(name) };
 };
 const plain = await moving({});
-assert.deepEqual(Object.fromEntries(['type', 'collision_shape', 'mass'].map((k) => [k, plain.ir.ids['OB:Cup'].data.rigid_body[k]])), { type: undefined, collision_shape: 'CYLINDER', mass: 0.25 },
-  "the cup's rigid body: Active (Blender's default, left out), a cylinder of 0.25 kg");
+assert.deepEqual(Object.fromEntries(['type', 'collision_shape', 'mass'].map((k) => [k, plain.ir.ids['OB:Cup'].data.rigid_body[k]])), { type: undefined, collision_shape: 'CYLINDER', mass: 0.3 },
+  "the cup's rigid body: Active (Blender's default, left out), a cylinder of 0.3 kg");
 assert.equal(plain.ir.ids['OB:Rock'].data.rigid_body.kinematic, true, 'the rock is Animated: its code moves it');
 assert.ok(plain.baked('Cup'), "without game physics, Blender's simulation of the cup is baked");
 const simulated = await moving({ project });

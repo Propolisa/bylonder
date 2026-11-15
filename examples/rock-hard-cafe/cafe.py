@@ -2,19 +2,17 @@
 game in src/.
 
 A wooden counter with a coffee machine and a parasol beside it, the barista behind the counter, one rock waiting at the stand and
-the trailhead the next rocks roll up from. The Rock and Cup collections are prefabs the game spawns copies of (excluded
-from the view layer); each object's behaviours are its `behaviors` custom property group, as Object properties >
-Behaviors adds them. The sounds are Kenney's (CC0: Impact Sounds and Interface Sounds, in sounds/ at a quiet level) and
-one clack this script writes there, all packed. The forest is Quaternius' Stylized Nature MegaKit (CC0), as the character examples use it
-(../character-controller/environment.py, which downloads it).
+the trailhead the next rocks roll up from. The Rock, Cup and Mug Broken collections are prefabs the game spawns copies
+of (excluded from the view layer); each object's behaviours are its `behaviors` custom property group, as Object
+properties > Behaviors adds them, and what Havok moves its rigid body. The sounds in sounds/ (the rocks' voices and the
+spills, rubberduck's CC0 packs; the jingles, Kenney's CC0) are packed. The forest is Quaternius' Stylized Nature
+MegaKit (CC0), as the character examples use it (../character-controller/environment.py, which downloads it).
 
-blender -b --factory-startup -P cafe.py   (writes rock-hard-cafe.blend and sounds/ beside this file)
+blender -b --factory-startup -P cafe.py   (writes rock-hard-cafe.blend beside this file)
 """
 import math
 import os
 import random
-import struct
-import wave
 
 import sys
 
@@ -86,34 +84,20 @@ def cylinder(name, radius, depth, location, mat, collection=None, segments=24):
     return link(ob, collection)
 
 
-def tone(name, freqs, seconds, noise=0.0):
-    """A short, quiet sound written to sounds/<name>.wav: a sum of decaying tones and some noise, 22 kHz mono."""
-    os.makedirs(os.path.join(HERE, "sounds"), exist_ok=True)
-    path = os.path.join(HERE, "sounds", f"{name}.wav")
-    rate, frames = 22050, int(22050 * seconds)
-    with wave.open(path, "wb") as out:
-        out.setnchannels(1)
-        out.setsampwidth(2)
-        out.setframerate(rate)
-        data = bytearray()
-        for i in range(frames):
-            t, envelope = i / rate, math.exp(-4 * i / frames)
-            s = sum(math.sin(2 * math.pi * f * t) for f in freqs) / len(freqs) * (1 - noise) + random.uniform(-1, 1) * noise
-            data += struct.pack("<h", int(max(-1, min(1, s * envelope)) * 6500))
-        out.writeframes(bytes(data))
-    return packed(name, path)
-
-
-def packed(name, path=None):
-    """A sound of sounds/ (<name>.ogg unless `path` says), packed into the .blend, which the app and an export read it from."""
-    sound = bpy.data.sounds.load(path or os.path.join(HERE, "sounds", f"{name}.ogg"))
+def packed(name):
+    """A sound of sounds/<name>.ogg, packed into the .blend, which the app and an export read it from."""
+    sound = bpy.data.sounds.load(os.path.join(HERE, "sounds", f"{name}.ogg"))
     sound.name = name
     sound.use_fake_user = True
     sound.pack()
     return sound
 
 
-SOUNDS = {"Clack": tone("Clack", [900, 1400], 0.15, 0.4), **{name: packed(name) for name in ("Wood Clack", "Plank Clack", "Glass Clink", "Plate Clink", "Served", "Angry")}}
+# The rocks' voices, the spills and the served and angry jingles; the machine and the impacts are made in code
+# (src/sounds.js).
+SOUNDS = {os.path.splitext(f)[0]: packed(os.path.splitext(f)[0]) for f in sorted(os.listdir(os.path.join(HERE, "sounds"))) if f.endswith(".ogg")}
+VOICES = {str(i): SOUNDS[n] for i, n in enumerate(n for n in SOUNDS if n.startswith("Voice "))}
+SPILLS = {str(i): SOUNDS[n] for i, n in enumerate(n for n in SOUNDS if n.startswith("Spill "))}
 
 # The forest: the character examples' ground, grass, rocks, bushes and pines, sky and sun (environment.py), then a brook
 # across a corner of the clearing, and pines and bushes around it, where the camera above the counter sees them.
@@ -157,11 +141,13 @@ machine = parts("Machine", [("box", (0.34, 0.18, 0.4), (0, 0, 0.2), 0), ("box", 
                             ("box", (0.24, 0.15, 0.02), (0, 0.2, 0.01), 1)], (-0.55, 0.5, COUNTER_TOP))
 machine.data.materials.append(CHROME)
 machine.data.materials.append(material("Machine Black", (0.02, 0.02, 0.02, 1), 0.4))
+button = cylinder("Machine Button", 0.05, 0.03, (-0.745, 0.5, COUNTER_TOP + 0.2), material("Button Orange", (0.95, 0.35, 0.05, 1), 0.4))
+button.rotation_euler.y = math.radians(90)
 tray = link(bpy.data.objects.new("Tray Spot", None))
 tray.empty_display_type, tray.empty_display_size, tray.location = "CIRCLE", 0.06, (-0.55, 0.7, COUNTER_TOP + 0.02)
 GLASS = material("Jar Glass", (0.75, 0.85, 0.82, 1), 0.1)
 SUGAR = material("Sugar", (0.95, 0.93, 0.88, 1), 0.9)
-things = [cylinder("Sugar Jar", 0.06, 0.16, (-0.27, 0.55, COUNTER_TOP + 0.08), GLASS), cylinder("Biscotti Jar", 0.075, 0.2, (0.0, 0.66, COUNTER_TOP + 0.1), GLASS),
+things = [cylinder("Sugar Jar", 0.06, 0.2, (-0.27, 0.55, COUNTER_TOP + 0.1), GLASS), cylinder("Biscotti Jar", 0.075, 0.28, (0.0, 0.66, COUNTER_TOP + 0.14), GLASS),
           cylinder("Milk Jug", 0.05, 0.13, (0.55, 0.55, COUNTER_TOP + 0.065), CHINA)]
 things[0].data.materials.append(SUGAR)
 box("Parasol Pole", (0.04, 0.04, 2.1), (-2.0, 1.9, 1.05), WOOD)
@@ -312,13 +298,31 @@ for kind, model, size, tone, height in (("Rock A", "Rock_Medium_1", 0.75, 0.42, 
     link(megakit_rock(f"{kind} Prefab", model, size, tone, height), rock_kinds[kind])
 cup_prefabs = bpy.data.collections.new("Cup")
 prefabs.children.link(cup_prefabs)
-# The cup, its origin at its base, the coffee in it showing from above.
-cup = parts("Cup", [("cylinder", (0.055, 0, 0.1), (0, 0, 0.05), 0), ("cylinder", (0.047, 0, 0.002), (0, 0, 0.1), 1)], (0, 0, 0))
-cup.data.materials.append(CHINA)
-cup.data.materials.append(material("Coffee", (0.12, 0.06, 0.03, 1), 0.15))
+# The cup, a terracotta mug its origin at its base, the dark coffee in it showing from above.
+MUG, COFFEE = material("Terracotta", (0.72, 0.3, 0.16, 1), 0.45), material("Coffee", (0.08, 0.04, 0.02, 1), 0.15)
+cup = parts("Cup", [("cylinder", (0.075, 0, 0.12), (0, 0, 0.06), 0), ("cylinder", (0.065, 0, 0.002), (0, 0, 0.12), 1)], (0, 0, 0))
+cup.data.materials.append(MUG)
+cup.data.materials.append(COFFEE)
 for c in list(cup.users_collection):
     c.objects.unlink(cup)
 cup_prefabs.objects.link(cup)
+# The mug broken: wedges of it, a lower and an upper ring, that fit together as the mug, under one empty at its base,
+# which the game swaps the mug for when it breaks (src/behaviors/impact.js).
+broken = bpy.data.collections.new("Mug Broken")
+prefabs.children.link(broken)
+pieces = link(bpy.data.objects.new("Mug Pieces", None), broken)
+shards = []
+for k in range(6):
+    for level in range(2):
+        a0, a1, z0, z1 = k * math.tau / 6, (k + 1) * math.tau / 6, level * 0.06, (level + 1) * 0.06
+        mesh = bpy.data.meshes.new(f"Mug Shard {2 * k + level + 1}")
+        ring = [(0, 0), (0.075 * math.cos(a0), 0.075 * math.sin(a0)), (0.075 * math.cos((a0 + a1) / 2), 0.075 * math.sin((a0 + a1) / 2)), (0.075 * math.cos(a1), 0.075 * math.sin(a1))]
+        mesh.from_pydata([(x, y, z0) for x, y in ring] + [(x, y, z1) for x, y in ring], [],
+                         [(3, 2, 1, 0), (4, 5, 6, 7), (0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)])
+        mesh.materials.append(MUG)
+        shard = link(bpy.data.objects.new(mesh.name, mesh), broken)
+        shard.parent = pieces
+        shards.append(shard)
 
 
 def rigid(ob, kind, shape, mass=1.0, animated=False):
@@ -331,7 +335,9 @@ def rigid(ob, kind, shape, mass=1.0, animated=False):
 
 for ob in (c.objects[0] for c in rock_kinds.values()):
     rigid(ob, "PASSIVE", "CONVEX_HULL", animated=True)
-rigid(cup, "ACTIVE", "CYLINDER", 0.25)
+rigid(cup, "ACTIVE", "CYLINDER", 0.3)
+for shard in shards:
+    rigid(shard, "ACTIVE", "CONVEX_HULL", 0.025)
 bpy.context.view_layer.layer_collection.children["Prefabs"].exclude = True
 
 # The rock waiting at the stand.
@@ -340,8 +346,9 @@ rock.location = spot.location
 rigid(rock, "PASSIVE", "CONVEX_HULL", animated=True)
 # The stand on Havok: the ground, the counter and the machine (its own shape: the cup stands under its spout) stay; the
 # jars, the jug and the cups fall and slide.
-for ob in (bpy.data.objects["Ground"], counter, machine):
-    rigid(ob, "PASSIVE", "BOX" if ob == counter else "MESH")
+pole = bpy.data.objects["Parasol Pole"]
+for ob in (bpy.data.objects["Ground"], counter, machine, button, pole):
+    rigid(ob, "PASSIVE", "BOX" if ob in (counter, pole) else "MESH")
 for ob, mass in zip(things, (0.5, 0.6, 0.4)):
     rigid(ob, "ACTIVE", "CYLINDER", mass)
 
@@ -357,14 +364,18 @@ def behaviors(ob, **groups):
     return ob
 
 
-ROCK = {"patience": 20.0, "noises": {"0": SOUNDS["Wood Clack"], "1": SOUNDS["Plank Clack"], "2": SOUNDS["Clack"]}, "delight": SOUNDS["Served"],
+ROCK = {"patience": 35.0, "voices": VOICES, "spills": SPILLS, "delight": SOUNDS["Served"], "anger": SOUNDS["Angry"],
         "reaction": "rock_reaction", "stain": [0.24, 0.14, 0.07], "spot": spot, "trailhead": trailhead, "speed": 1.2}
 for ob in (rock, *(c.objects[0] for c in rock_kinds.values())):
-    behaviors(ob, Rock=ROCK)
-behaviors(machine, Machine={"cup": cup_prefabs, "tray": tray, "brew": 0.6})
+    behaviors(ob, Rock=ROCK, Impact={"material": "ground"})
+behaviors(machine, Machine={"cup": cup_prefabs, "tray": tray, "button": button}, Impact={"material": "button"})
+# Everything the hand can hit sounds as it is hit (src/behaviors/impact.js): its material, and what it breaks into.
+behaviors(button, Impact={"material": "button"})
+for ob, kind in ((counter, "wood"), (pole, "wood"), (bpy.data.objects["Ground"], "ground"), (things[0], "glass"), (things[1], "glass"), (things[2], "ceramic"), *((s, "ceramic") for s in shards)):
+    behaviors(ob, Impact={"material": kind})
 behaviors(trailhead, Spawner={"prefabs": {str(i): c for i, c in enumerate(rock_kinds.values())}, "every": 3.0})
 behaviors(barista, Character={"speed": 1.5, "radius": 0.16, "feet": True, "gaze": True, "lean": True}, Barista={})
-behaviors(cup, Cup={"clinks": {"0": SOUNDS["Glass Clink"], "1": SOUNDS["Plate Clink"]}})
+behaviors(cup, Cup={}, Impact={"material": "ceramic", "breaks": broken})
 # The camera, high over the counter, just behind the barista's head, looking almost straight down: the whole counter top in view,
 # the barista's head and shoulders at the frame's bottom edge, the waiting rock across the counter, the brook in a corner.
 # The Play Area: the counter, the barista's reach and the rock's spot, which the game's camera keeps in view whatever the
