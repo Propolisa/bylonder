@@ -432,9 +432,6 @@ try {
           await opened.page.waitForTimeout(250);
         }
       };
-      // The game's state is what this step checks, not its pixels: drawn at a quarter of the resolution, so a software
-      // renderer (CI) draws its frames many times faster. Layout and input are unchanged.
-      await page.locator("canvas").evaluate(() => window.blend.scene.getEngine().setHardwareScalingLevel(4));
       const move = async (at) => at && opened.page.mouse.move(box.x + at[0], box.y + at[1], { steps: 5 });
       await until("cup on the tray, under the hand", (s) => s.over, (s) => move(s.cup));
       await opened.page.mouse.down();

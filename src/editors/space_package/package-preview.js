@@ -132,6 +132,8 @@ export const previewPage = (channel) => `<!doctype html>
 <script type="module">
 import { createEngine, load, readPatch } from './scene.js';
 const canvas = document.getElementById('view'), engine = await createEngine(canvas);
+// At the resolution the app's 3D View is set to (Viewport resolution), when one is set.
+try { const { mode, ratio } = JSON.parse(localStorage.getItem('workbench:render-resolution:v1')) ?? {}; if (mode === 'custom') engine.setHardwareScalingLevel(ratio); } catch {}
 let blend = await load(engine);
 engine.runRenderLoop(() => blend.scene.render());
 addEventListener('resize', () => engine.resize());

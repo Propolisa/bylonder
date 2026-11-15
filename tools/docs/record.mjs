@@ -133,7 +133,7 @@ export async function recorder(feature, { example, node, size = SIZE, scale = 1,
   const media = `${root}docs/media/${folder}/`, out = mkdtempSync(`${tmpdir()}/bylonder-${feature}-`) + "/";
   const stopServer = await devServer();
   const browser = await chromium.launch();
-  const app = await openApp(browser, URL_, { ...(example ? { link: example } : {}), node, size, scale, touch });
+  const app = await openApp(browser, URL_, { ...(example ? { link: example } : {}), node, size, scale, touch, fullResolution: true });
   await app.context.addInitScript(overlay);
   for (const frame of app.page.frames()) await frame.evaluate(overlay).catch(() => {});
   await app.settled();

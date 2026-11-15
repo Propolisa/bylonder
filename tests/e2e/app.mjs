@@ -56,10 +56,13 @@ export async function startServer({ build = true } = {}) {
 // `link`: an example's id, opened by its #example= link instead of the splash. `video`: a directory to record the
 // session to. `persistent`: a browser profile of its own instead of an incognito context. `touch`: a touch device
 // (touch events, a coarse pointer, no hover). `init`: scripts (Playwright addInitScript arguments) every document of the
-// context runs before its own.
-export async function openApp(browser, url, { example = "Default Cube", node = "Cube", link, size = { width: 1600, height: 950 }, scale = 1, video, persistent, touch, init = [] } = {}) {
+// context runs before its own. `fullResolution`: the 3D Views, the Game area and the Package View draw at full
+// resolution, for checks of pixels and recordings; else at a quarter of it (the app's Viewport resolution setting), so a
+// software renderer (CI) draws them many times faster, the UI around them unchanged.
+export async function openApp(browser, url, { example = "Default Cube", node = "Cube", link, size = { width: 1600, height: 950 }, scale = 1, video, persistent, touch, init = [], fullResolution = false } = {}) {
   const options = { viewport: size, deviceScaleFactor: scale, acceptDownloads: true, ...(touch && { hasTouch: true, isMobile: true }), ...(video && { recordVideo: { dir: video, size } }) };
   const context = await (persistent ? persistentContext(options) : browser.newContext(options));
+  if (!fullResolution) await context.addInitScript(() => { try { localStorage.getItem("workbench:render-resolution:v1") ?? localStorage.setItem("workbench:render-resolution:v1", JSON.stringify({ mode: "custom", ratio: 4 })); } catch {} });
   for (const script of init) await context.addInitScript(script);
   const page = await context.newPage();
   const errors = [];

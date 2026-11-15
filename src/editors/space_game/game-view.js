@@ -16,6 +16,10 @@ import { publishFiles, removeRun, RUN_CACHE } from '../../workspace/module-host.
 import { registerOperator } from '../../windowmanager/wm-operators.js';
 import { runGame } from '../../io_scene_babylon/runtime/game/run.js';
 import { createGameCode, errorAt } from './game-code.js';
+import { renderSettings } from '../../workspace/render-settings.js';
+
+/** The engine at the Viewport resolution set in the app, if any (renderSettings), else as made. */
+const scaled = (engine) => { const { mode, ratio } = renderSettings(); if (mode === 'custom') engine.setHardwareScalingLevel(ratio); return engine; };
 
 // The app's modules a package's scene.js imports (runtime-files.js appSource), by src/ path.
 const sources = import.meta.glob(['../../io_scene_babylon/runtime/**/*.js', '../../overrides/**/*.js', '../../blenkernel/light/area-specular.js', '../../compositor/fog-glow.js',
@@ -36,7 +40,8 @@ export function mountGameView(section, { world, header, run: files, codeError })
   const canvas = Object.assign(document.createElement('canvas'), { className: 'block h-full w-full outline-none', tabIndex: 0 });
   // Keys typed into the playing game are the game's, not Blender's shortcuts.
   canvas.dataset.gameInput = '';
-  const game = createGameRun({ appModule, exportAgain: () => preview.reload(), engine: (createEngine) => createEngine(canvas) });
+  // At the resolution the 3D View is set to (Viewport resolution), when one is set.
+  const game = createGameRun({ appModule, exportAgain: () => preview.reload(), engine: async (createEngine) => scaled(await createEngine(canvas)) });
   // The area's size is the game's, as a page's canvas is its engine's.
   // The new size is taken at the start of the next frame, never between a frame's encoding and its submit, where a
   // WebGPU canvas texture the resize replaced would be submitted.
