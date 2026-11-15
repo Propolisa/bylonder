@@ -4,13 +4,14 @@
 import { createApp, h, reactive } from 'vue';
 import PackageView from './PackageView.vue';
 import { createPackagePreview, previewPage } from './package-preview.js';
-import { packagedFiles } from '../../io_scene_babylon/export.js';
+import { packagedFiles, withProject } from '../../io_scene_babylon/export.js';
 import { exportOptions } from '../../io_scene_babylon/export-options.js';
 import { publishFiles, removeRun } from '../../workspace/module-host.js';
 import { registerOperator } from '../../windowmanager/wm-operators.js';
 
 export function mountPackageView(section, { world }) {
-  const state = reactive({ url: '', status: '', busy: false }), options = exportOptions({ controlPanel: false, target: 'WEBGL2' });
+  // The page plays the project's game, as an exported page does.
+  const state = reactive({ url: '', status: '', busy: false }), options = withProject(world, exportOptions({ controlPanel: false, target: 'WEBGL2' }));
   const channel = `bylonder-package-view:${crypto.randomUUID()}`, patches = new BroadcastChannel(channel);
   const preview = createPackagePreview({
     world, options, report: (status) => { state.status = status; },

@@ -8,6 +8,8 @@ import { execFileSync } from "node:child_process";
 import { createReadStream, readdirSync, readFileSync, statSync } from "node:fs";
 import { zipSync } from "fflate";
 import { babylonArchive } from "./src/io_scene_babylon/babylon-sources.js";
+import { GAME_LIBRARIES } from "./src/io_scene_babylon/game-export.js";
+import { GAME_LIBRARIES_ARCHIVE } from "./src/io_scene_babylon/game-libraries.js";
 import { demoFile } from "./scripts/demo-files.mjs";
 import { bundleDemo, demoGames } from "./tools/docs/demo-bundle.mjs";
 import { staleModule } from "./scripts/module.mjs";
@@ -94,6 +96,30 @@ const babylonSources = () => {
   };
 };
 
+// The sources of the libraries game code may import (game-libraries.js), for an export to inline into game.js: each
+// package's manifest, licence and modules (not its source maps nor CommonJS builds).
+const gameLibraries = () => {
+  let archive;
+  const bytes = () => (archive ??= zipSync(Object.fromEntries(Object.keys(GAME_LIBRARIES).flatMap((name) => {
+    const dir = fileURLToPath(new URL(`./node_modules/${name}/`, import.meta.url));
+    return readdirSync(dir, { recursive: true }).map((path) => path.replaceAll("\\", "/"))
+      .filter((path) => /^(package\.json|license(\.md)?)$/i.test(path) || (/\.m?js$/.test(path) && !path.startsWith("node_modules/") && (name !== "inkjs" || path.endsWith(".mjs"))))
+      .map((path) => [`${name}/${path}`, readFileSync(dir + path)]);
+  }))));
+  return {
+    name: "game-libraries",
+    configureServer(server) {
+      server.middlewares.use(`${server.config.base}${GAME_LIBRARIES_ARCHIVE}`, (req, res) => {
+        res.setHeader("Content-Type", "application/zip");
+        res.end(bytes());
+      });
+    },
+    generateBundle() {
+      this.emitFile({ type: "asset", fileName: GAME_LIBRARIES_ARCHIVE, source: bytes() });
+    },
+  };
+};
+
 // The live demos of exported pages (tools/docs/export-demo.mjs), published as they are, games bundled with Babylon
 // (demo-bundle.mjs) so they load as a few files.
 const demos = () => ({
@@ -142,7 +168,7 @@ const isolation = () => ({
 
 export default defineConfig({
   base: process.env.BASE_PATH || "/",
-  plugins: [vue(), tailwindcss(), blenderCoverage(), blenderIconSet(), changelog(), demoFiles(), babylonSources(), demos(), isolation(), moduleCheck()],
+  plugins: [vue(), tailwindcss(), blenderCoverage(), blenderIconSet(), changelog(), demoFiles(), babylonSources(), gameLibraries(), demos(), isolation(), moduleCheck()],
   define: { __BYLONDER_VERSION__: JSON.stringify(pkg.version), __BYLONDER_CHANGE__: JSON.stringify(commits()[0] ?? null) },
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
   // Agents' worktrees live under .claude/: their edits must not reload this checkout's pages (a worktree's own server

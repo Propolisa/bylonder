@@ -7,7 +7,7 @@ const declared = (...names) => names.flatMap((name) => [`${name}.js`, `${name}.d
 // The character animation system (runtime/character/), for a scene.js that exports it (a scene with an armature).
 export const CHARACTER_FILES = declared(...['api', 'names', 'core', 'pose-api', 'roles', 'movement', 'collision', 'input', 'contacts', 'locomotion', 'camera', 'sound', 'rootmotion', 'clip', 'pose', 'rig', 'procedural', 'mirror', 'quality', 'collections', ...['index', 'aim', 'feet', 'gaze', 'impact', 'lean', 'limbs', 'reach', 'space', 'springs', 'breathe', 'eyes'].map((n) => `effects/${n}`)].map((n) => `character/${n}`));
 // The game framework (runtime/game/), which a package carries when its scene.js runs game code.
-export const GAME_FILES = [...declared(...['define', 'world', 'blend-host', 'input', 'character'].map((n) => `game/${n}`)), 'game/names.d.ts'];
+export const GAME_FILES = [...declared(...['define', 'world', 'blend-host', 'input', 'character', 'run'].map((n) => `game/${n}`)), 'game/names.d.ts'];
 export const RUNTIME_FILES = [...declared('blend-scene', 'collections', 'playhead', 'clips', 'buffers', 'world', 'scheduler', 'ready', 'skin-skeleton', 'ir', 'units', 'mesh', 'ortho-scale', 'zod', 'asset', 'scene-loader', 'dual-quaternion-skinning', 'tiled-images', 'scene-tables', 'shared-resources', 'package-modules', 'camera-effects'), 'ir.schema.json', 'implementations.json', 'LICENSE.md'];
 // GPL's notice and text, beside Blender's code in a package (src/ paths).
 const NOTICE = { 'LICENSE.md': 'io_scene_babylon/blender-code.LICENSE.md', COPYING: '../LICENSES/GPL-3.0-or-later.txt' };
@@ -113,9 +113,11 @@ export const BLOCK_FILES = { 'bylonder-blocks.js': 'blocks.js', 'bylonder-view-t
 export const MATERIAL_FILES = declared('materials');
 // The control panel (runtime/control-panel.js) and what it loads on first open, for a scene.js that imports it.
 export const PANEL_FILES = declared('control-panel', 'control-panel-ui', 'control-panel-model', 'control-panel-camera', 'control-panel-coverage', 'dev-tools');
+// A scene.js that runs the project's game (game.js) ships the game runtime, and the character runtime its Character uses.
+const hasGameRun = (files) => text(files).includes("import('./bylonder/game/run.js')");
 // The runtime/ files a package with these files ships: [package path, runtime/ file name].
 export const packageRuntime = (files) => [...RUNTIME_FILES, ...evaluatorsOf(files).flatMap((e) => e.runtime),
-  ...(text(files).includes("from './bylonder/materials.js'") ? MATERIAL_FILES : []), ...(text(files).includes("from './bylonder/character/api.js'") ? CHARACTER_FILES : []), ...(text(files).includes("from './bylonder/game/world.js'") ? GAME_FILES : []), ...(text(files).includes("from './bylonder/control-panel.js'") ? PANEL_FILES : [])].map((name) => [`bylonder/${name}`, name])
+  ...(text(files).includes("from './bylonder/materials.js'") ? MATERIAL_FILES : []), ...(text(files).includes("from './bylonder/character/api.js'") || hasGameRun(files) ? CHARACTER_FILES : []), ...(text(files).includes("from './bylonder/game/world.js'") || hasGameRun(files) ? GAME_FILES : []), ...(text(files).includes("from './bylonder/control-panel.js'") ? PANEL_FILES : [])].map((name) => [`bylonder/${name}`, name])
   .concat(Object.entries(BLOCK_FILES).filter(([path]) => text(files).includes(`from './${path}'`)));
 // The app's own module (its src/ path) each Bylonder module a package ships is a copy of, for a package run in the
 // app's module graph (space_game/package-link.js); undefined for what the export writes.

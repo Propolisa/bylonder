@@ -48,7 +48,7 @@ export const bundlePackage = (files, options) => bundlePage({ '': files }, optio
  * `page.entry`, bundled together: one Babylon for them all, each package's Blender code kept in its own files.
  */
 export async function bundlePage(packages, { minify = true, babylon, esbuild, page }) {
-  const all = { ...page?.files }, gpl = new Set(), scenes = new Set();
+  const all = { ...page?.files }, gpl = new Set(), scenes = new Set(), games = new Set();
   for (const [at, files] of Object.entries(packages)) {
     // Blender's code: every module in a folder of it, those made at export (the curves' GLSL, the nodes' kernels) too.
     const folders = new Set(gplFiles(files).map(([path]) => path.split('/')[0]));
@@ -57,6 +57,8 @@ export async function bundlePage(packages, { minify = true, babylon, esbuild, pa
       if (isModule(path) && folders.has(path.split('/')[0])) gpl.add(at + path);
     }
     scenes.add(`${at}scene.js`);
+    // The project's game code, a file of its own under the project's licence that scene.js loads.
+    if (`game.js` in files) games.add(`${at}game.js`);
   }
   const plugin = { name: 'package', setup(build) {
     build.onResolve({ filter: /.*/ }, ({ path, importer, namespace, kind }) => {
@@ -82,7 +84,7 @@ export async function bundlePage(packages, { minify = true, babylon, esbuild, pa
   // The chunks go beside the page's entry, or in the package's folder.
   const chunks = page ? CHUNKS : `${Object.keys(packages)[0]}${CHUNKS}`;
   const { outputFiles } = await esbuild.build({
-    entryPoints: [...page ? [page.entry] : [], ...scenes, ...gpl], bundle: true, splitting: true, format: 'esm', minify, write: false,
+    entryPoints: [...page ? [page.entry] : [], ...scenes, ...games, ...gpl], bundle: true, splitting: true, format: 'esm', minify, write: false,
     outdir: 'bylonder-bundle-out', entryNames: '[dir]/[name]', chunkNames: `${chunks}/[name]-[hash]`, plugins: [plugin], logLevel: 'silent',
   });
   const bundled = Object.fromEntries(outputFiles.map(({ path, text }) => {

@@ -695,6 +695,8 @@ const editObject = () => {
   const edit = ob && world.mainSync.blender.editMesh(ob);
   return edit ? { ob, mesh: edit.mesh } : null;
 };
+// The project's files, served with the run, which an export ships what it needs of (its game: io_scene_babylon/game-export.js).
+world.project = { files: input.files ?? [], read: async (path) => new Uint8Array(await (await fetch(location.origin + input.base + path)).arrayBuffer()) };
 packageView = mountPackageView(document.querySelector("#package-section"), { world });
 gameView = mountGameView(document.querySelector("#game-section"), { world, header: viewportDock.header("game"), run: { root: location.origin + input.base, files: input.files ?? [] }, codeError: (error) => send("code-error", error) });
 // The .blend's behaviours follow their code as the project opens (a prop added in code, a script's kinds).

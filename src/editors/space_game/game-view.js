@@ -14,10 +14,8 @@ import { EVALUATIONS, exportEvaluation, setExportEvaluation } from '../../io_sce
 import { sharedStatus } from '../../io_scene_babylon/runtime/shared-resources.js';
 import { publishFiles, removeRun, RUN_CACHE } from '../../workspace/module-host.js';
 import { registerOperator } from '../../windowmanager/wm-operators.js';
-import { createWorld } from '../../io_scene_babylon/runtime/game/world.js';
-import { blendHost } from '../../io_scene_babylon/runtime/game/blend-host.js';
+import { runGame } from '../../io_scene_babylon/runtime/game/run.js';
 import { createGameCode, errorAt } from './game-code.js';
-import { createInput } from '../../io_scene_babylon/runtime/game/input.js';
 
 // The app's modules a package's scene.js imports (runtime-files.js appSource), by src/ path.
 const sources = import.meta.glob(['../../io_scene_babylon/runtime/**/*.js', '../../overrides/**/*.js', '../../blenkernel/light/area-specular.js', '../../compositor/fog-glow.js',
@@ -50,11 +48,10 @@ export function mountGameView(section, { world, header, run: files, codeError })
   const loadingCode = code?.load().catch((error) => report(`Game code: ${error.message}`));
   const swapTimers = new Map();
   const stopGame = () => {
-    played?.blend.scene.onBeforeRenderObservable.remove(played.observer);
-    played?.world.dispose();
-    played?.input.dispose();
+    played?.dispose();
     played = null;
   };
+  // The page's own run (runtime/game/run.js) over the loaded scene, on the area's canvas.
   const startGame = async () => {
     const blend = game.blend;
     if (played?.blend === blend) return played.world.sync();
@@ -62,19 +59,7 @@ export function mountGameView(section, { world, header, run: files, codeError })
     stopGame();
     await loadingCode;
     if (game.blend !== blend) return;
-    const input = createInput(code.game.input ?? {}, canvas);
-    const run = createWorld({ host: blendHost(blend), behaviors: code.behaviors, game: code.game, engine: game.engine, assets, input, report: (error, where) => report(`${where}: ${error?.message ?? error}`) });
-    run.start();
-    let stepping = null, owed = 0;
-    const observer = blend.scene.onBeforeRenderObservable.add(() => {
-      if (state.paused) return;
-      owed += blend.scene.getEngine().getDeltaTime() / 1000;
-      if (stepping) return;
-      const dt = owed;
-      owed = 0;
-      stepping = run.step(dt).finally(() => { stepping = null; });
-    });
-    played = { blend, world: run, observer, input };
+    played = runGame(blend, code, { canvas, assets, engine: game.engine, paused: () => state.paused, report: (error, where) => report(`${where}: ${error?.message ?? error}`) });
   };
   const shown = () => {
     state.shared = game.blend ? sharedStatus(game.blend.scene) : '';

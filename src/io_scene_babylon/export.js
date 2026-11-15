@@ -13,6 +13,7 @@ import { exportModule } from './js-export.js';
 import { appFiles, gplFiles, packagedModules, packagedRuntime, packageOverrides, packageRuntime } from './runtime-files.js';
 import { MODULES } from './module-files.js';
 import { exportOptions } from './export-options.js';
+import { gameFiles, hasGame } from './game-export.js';
 
 const runtime = import.meta.glob('./runtime/**/*', { query: '?raw', import: 'default', eager: true });
 const overrides = import.meta.glob('../overrides/**/*', { query: '?raw', import: 'default', eager: true });
@@ -49,6 +50,7 @@ async function bundled(files, minify) {
 // An export's files (js-export.js exportPackage's) as the package holds them: with the runtime, Blender's code it loads
 // and the app's files, bundled unless `bundle` is off.
 export async function packagedFiles(files, options) {
+  if (options.game && options.project) Object.assign(files, await projectGame(options.project));
   for (const [path, name] of packageRuntime(files)) files[path] = packagedRuntime(runtime['./runtime/' + name]);
   for (const [path, from] of packageOverrides(files)) files[path] = overrides['../' + from];
   for (const [path, from] of gplFiles(files)) files[path] = await SOURCES[from]();
@@ -57,7 +59,18 @@ export async function packagedFiles(files, options) {
   return Object.fromEntries(Object.entries(shipped).map(([path, data]) => [path, typeof data === 'string' ? strToU8(data) : data]));
 }
 
-const scenePackage = async (world, options) => packagedFiles(await exportModule(world, options), options);
+// The project's game (game-export.js): game.js, made with the app's esbuild and its archive of the libraries game code imports.
+async function projectGame(project) {
+  const [{ esbuildService }, { archivedLibrary }] = await Promise.all([import('../workspace/esbuild.js'), import('./game-libraries.js')]);
+  return gameFiles(project, { esbuild: await esbuildService(), library: archivedLibrary });
+}
+/**
+ * Export options for `world`'s project: with its game (game.js) when it has one, which the page's load() plays, and the
+ * .blend's actions as clips too, which behaviours play (entity.play), as the Game area exports them.
+ */
+export const withProject = (world, options) => (hasGame(world.project) ? { ...options, game: true, project: world.project, animations: 'BOTH' } : options);
+
+const scenePackage = async (world, options) => packagedFiles(await exportModule(world, withProject(world, options)), withProject(world, options));
 
 const FORMATS = {
   babylon: { extension: 'babylon', type: 'application/json', build: async (world, name, { parity, runtime, runtimes, sampleRate, animations }) => JSON.stringify(await serializeScene(world, { parity, runtime, runtimes, animations, sampling: exportSampling(world.animation.time.state, sampleRate) })) },

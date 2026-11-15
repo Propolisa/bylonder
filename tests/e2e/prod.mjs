@@ -382,6 +382,39 @@ try {
       }
     });
   }
+  // An exported page plays the project's game as the Game area does (docs/sdk-model.md, Game code): the Package View's
+  // page, written by the app's own export with game.js built in the browser, takes the café's keys; the barista pours
+  // at the machine and serves the waiting rock, which the shift counts.
+  await step("an exported page plays the project's game", async () => {
+    const opened = await openApp(browser, server.url, { link: "rock-hard-cafe", node: "Rock" });
+    try {
+      await opened.bylonder((b) => b.dock.show("package"));
+      await opened.frame().getByRole("button", { name: "Reload" }).click();
+      await opened.frame().locator('[data-section="package"]').getByText("Loaded").waitFor({ timeout: 300000 });
+      const view = opened.frame().locator('#package-section iframe[title="Package View"]'), page = view.contentFrame();
+      await page.locator("canvas").waitFor();
+      await page.locator("canvas").evaluate((canvas) => new Promise((resolve) => { const wait = () => (window.blend?.game ? resolve() : setTimeout(wait, 100)); wait(); }));
+      const box = await view.boundingBox();
+      await opened.page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+      const hold = async (key, ms) => { await opened.page.keyboard.down(key); await opened.page.waitForTimeout(ms); await opened.page.keyboard.up(key); };
+      await hold("KeyA", 1000);
+      await hold("KeyE", 150);
+      await opened.page.waitForTimeout(1500);
+      await hold("KeyD", 1300);
+      await hold("KeyE", 150);
+      // The rock admires, spills and leaves, which the shift counts.
+      const served = await page.locator("canvas").evaluate(() => new Promise((resolve) => {
+        const shift = () => window.blend.game.world.game.get({ name: "Shift" })?.save(), until = performance.now() + 30000;
+        const check = () => (shift()?.served === 1 || performance.now() > until ? resolve(shift()) : setTimeout(check, 100));
+        check();
+      }));
+      assert.equal(served?.served, 1, `the page's game served the rock within 30 s: ${JSON.stringify(served)}`);
+      assert.deepEqual(opened.errors, [], "page errors");
+    } finally {
+      await opened.close();
+    }
+  });
+
   // The docs' Open in Bylonder link (index.html#example=<id>) opens its example without the splash.
   await step("example link #example=lava", async () => {
     const opened = await openApp(browser, server.url, { link: "lava", node: "Sphere" });

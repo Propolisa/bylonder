@@ -2,7 +2,7 @@
 
 How a project's own code shapes a scene and makes it behave, so that what it does in the app also happens in an
 exported page and in Node. Approved by the owner on 2026-11-11. Built so far: the Package View's core (Previews,
-below): it loads the package in a frame and takes each change as a patch (docs/data-flow.md); runtime scripts are not.
+below): it loads the package in a frame and takes each change as a patch (docs/data-flow.md); and game code (Packaging, Game code). Runtime scripts are not.
 
 ## The problem
 
@@ -175,6 +175,29 @@ The scripts keep the user's licence: `scripts.js` is a file of its own with the 
 into the GPL units or the SDK's MIT OR Apache-2.0 files, as the licence table in `docs/controllable-exports.md` already
 says for project SDK code. The notice comes from the project's `package.json` `license`, and the export dialog asks
 for one when it is missing, so a package never ships scripts without a stated licence.
+
+### Game code
+
+A project with `src/game.js` (game code: behaviours, systems and a game, `docs/features/game-code.md`) ships it the
+same way. Built: `io_scene_babylon/game-export.js`.
+
+- `game.js` beside `scene.js`: the project's `src/` bundled with esbuild from an entry that imports `src/game.js` and
+  every module whose default export is a behaviour (behaviours attach to objects by name, from `ob["behaviors"]` in the
+  IR). `bylonder` resolves to the package's own `bylonder/game/define.js`; `@babylonjs/core` stays the page's.
+- The libraries game code may import (`inkjs`, `@babylonjs/gui`) are inlined into `game.js`, so a page needs no import
+  map beyond Babylon's. Their notices ship in `THIRD-PARTY.md` beside it, one section per bundled package with its
+  version, licence and licence text. Any other import fails the export, naming the module and the import.
+- `game.js` starts with the project's licence from `package.json` `license`. Without one the export fails and says
+  so; it is never merged with Blender's code or the runtime. With Bundle on, `game.js` is an entry of its own that
+  shares Babylon's chunks with `scene.js`.
+- The project's `content/` (an Ink story) ships under the same paths; `assets.url` and `assets.text` resolve against
+  `scene.js`'s URL.
+- `load(engine)` plays the game as the Game area does, through one module, `bylonder/game/run.js`: input from the
+  canvas's keys (load gives the canvas a tab index, so a click focuses it), a step before each frame, gone with
+  `blend.dispose()`. `load(engine, { game: false })` loads the scene alone and `{ seed }` seeds the game's random. The
+  Package View plays it too; the Game area runs the project's code itself, for its hot swap.
+- Tests run what ships: `tests/game-test.js` exports the example, builds its `game.js` and runs it through the
+  package's `run.js` on a NullEngine.
 
 In Node, runtime scripts that read pointer or keyboard input get none from a device. The SDK offers recorded input
 instead (`load(engine, { input: recording })`, a list of timed events by frame), so tests can replay a session and

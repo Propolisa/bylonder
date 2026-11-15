@@ -3,11 +3,11 @@
 // the game's composition (src/game.js). A file edited while playing is published again and imported anew as a
 // candidate; the definitions change only once the run took it (accept), so a version that does not parse or whose
 // create throws never replaces the last good one.
-import Character from '../../io_scene_babylon/runtime/game/character.js';
+import { BUILTINS } from '../../io_scene_babylon/runtime/game/run.js';
 
 const CODE = /^src\/.+\.m?js$/;
 /** Behaviours every project has. */
-export const BUILTINS = [Character];
+export { BUILTINS };
 
 /**
  * @param {{ root: string, files: string[], publish: (path: string, content: string) => Promise<void> }} run the run's files (their

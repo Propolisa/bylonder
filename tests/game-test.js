@@ -1,15 +1,14 @@
-// `bylonder/test`, a game run headless for a test (tests/fixtures/example-loader.mjs maps it): an example's .blend
-// exported and loaded as its page loads it, on a NullEngine, its game code from src/ run by the framework with a seed,
-// input driven by action, and the clock stepped by the test. One example per process (open-example.js).
+// `bylonder/test`, a game run headless for a test (tests/fixtures/example-loader.mjs maps it): an example exported as
+// File > Export > JavaScript ships it, its game code as the package's game.js, and run as its page runs it
+// (bylonder/game/run.js) on a NullEngine with a seed, input driven by action and the clock stepped by the test. What
+// the test plays is what ships. One example per process (open-example.js).
 import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as core from '@babylonjs/core';
 import { exportPackage } from '../src/io_scene_babylon/js-export.js';
-import { blendHost } from '../src/io_scene_babylon/runtime/game/blend-host.js';
-import { createWorld } from '../src/io_scene_babylon/runtime/game/world.js';
-import { createInput } from '../src/io_scene_babylon/runtime/game/input.js';
-import { BUILTINS } from '../src/editors/space_game/game-code.js';
+import { folderLibrary, gameFiles } from '../src/io_scene_babylon/game-export.js';
 import '../src/draw/draw-view.js';
 import { writePackage } from './export-package.js';
 import { openExample } from './open-example.js';
@@ -29,21 +28,17 @@ export async function run(example, { seed = 1 } = {}) {
   const root = new URL(`../${example}/`, import.meta.url), id = example.split('/').pop();
   const { world, sync } = openExample(id);
   world.mainSync = sync;
-  const written = writePackage((await exportPackage(world, { animations: 'BOTH' })).files);
+  const exported = (await exportPackage(world, { animations: 'BOTH', game: true })).files;
+  const project = { files: files(fileURLToPath(root)), read: (path) => readFile(new URL(path, root)) };
+  const library = folderLibrary((path) => readFile(new URL(`../node_modules/${path}`, import.meta.url), 'utf8'));
+  const written = writePackage({ ...exported, ...(await gameFiles(project, { esbuild: await import('esbuild-wasm'), library })) });
+  const at = (path) => new URL(path, written.url).href;
   const engine = Object.assign(new core.NullEngine(), { getFontOffset: () => ({ ascent: 0, height: 0, descent: 0 }) });
   const blend = await (await import(written.url)).load({ scene: new core.Scene(engine) });
-  const behaviors = [...BUILTINS], code = files(fileURLToPath(new URL('src/', root))).filter((path) => /\.m?js$/.test(path));
-  let game = {};
-  for (const path of code) {
-    const made = (await import(new URL(`src/${path}`, root).href)).default;
-    if (made?.kind === 'behavior') behaviors.push(made);
-    if (made?.kind === 'game') game = made;
-  }
-  const input = createInput(game.input ?? {});
-  const assets = { url: (path) => new URL(path, root).href, text: async (path) => readFileSync(new URL(path, root), 'utf8') };
+  const [{ runGame, BUILTINS }, { default: code }] = await Promise.all([import(at('bylonder/game/run.js')), import(at('game.js'))]);
+  const assets = { url: at, text: async (path) => readFileSync(new URL(path, written.url), 'utf8') };
   const errors = [];
-  const run = createWorld({ host: blendHost(blend), behaviors, game, seed, input, assets, report: (error, where) => errors.push(`${where}: ${error?.stack ?? error}`) });
-  run.start();
+  const { world: run, input } = runGame(blend, code, { seed, assets, step: false, report: (error, where) => errors.push(`${where}: ${error?.stack ?? error}`) });
   const step = async (seconds = STEP) => { for (let t = 0; t < seconds - 1e-9; t += STEP) { await run.step(STEP); blend.scene.render?.(); } };
   // An object as a test drives it: its entity, its behaviours' handles, and actions that take the run's time.
   const find = (name) => {

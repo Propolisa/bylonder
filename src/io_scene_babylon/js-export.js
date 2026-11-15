@@ -380,7 +380,7 @@ function selectedWorld(world, selected) {
 export const exportModule = async (world, options) => (await exportPackage(world, options)).files;
 
 // The package's files, its tables by datablock and its buffers by key (scene-patch.js makes a patch of two).
-export async function exportPackage(whole, { scope = 'SCENE', selected = [], live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, animations = 'TIMELINE', clipCompression = 'STANDARD', target = 'BOTH', runtime = null, runtimes = {}, replace = [], bundle = false, controlPanel = true, devTools = 'CDN', navigation = 'FIXED', navigationModes = {}, branchState = null, branches = {}, sampleRate = {}, verified = true, changed = null, progress = null } = {}) {
+export async function exportPackage(whole, { scope = 'SCENE', selected = [], live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, animations = 'TIMELINE', clipCompression = 'STANDARD', target = 'BOTH', runtime = null, runtimes = {}, replace = [], bundle = false, game = false, controlPanel = true, devTools = 'CDN', navigation = 'FIXED', navigationModes = {}, branchState = null, branches = {}, sampleRate = {}, verified = true, changed = null, progress = null } = {}) {
   const step = async (status) => { if (progress) { progress(status); await new Promise((resume) => setTimeout(resume)); } };
   const world = scope === 'SELECTED' ? selectedWorld(whole, selected) : whole;
   const states = { branchState, branches }, stackState = (node) => chosenState(states, 'modifiers', node.name) ?? (keepLive ? 'LIVE' : 'BAKED');
@@ -397,7 +397,7 @@ export async function exportPackage(whole, { scope = 'SCENE', selected = [], liv
     try {
       await mapped.judge(step);
       await step(`Sampling ${sampling.frames.length} frames`);
-      return await moduleSource(world, live, mapped, { step, parity, hostCompression, bakeAnimation, animations, clipCompression, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states, sampling });
+      return await moduleSource(world, live, mapped, { step, parity, hostCompression, bakeAnimation, animations, clipCompression, target, replace, bundle, game, controlPanel, devTools, navigation, navigationModes, states, sampling });
     } finally {
       mapped.restore();
       saveVerdicts();
@@ -407,7 +407,7 @@ export async function exportPackage(whole, { scope = 'SCENE', selected = [], liv
   }
 }
 
-async function moduleSource(world, live, mapped, { step, parity, hostCompression, bakeAnimation, animations, clipCompression, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states, sampling }) {
+async function moduleSource(world, live, mapped, { step, parity, hostCompression, bakeAnimation, animations, clipCompression, target, replace, bundle, game, controlPanel, devTools, navigation, navigationModes, states, sampling }) {
   const graphs = [], graphOf = materialGraphs(world, graphs), asset = !!world.only;
   const data = await serializeScene(world, { geometry: false, live, mapped, parity, graphOf, bake: bakeAnimation, sampling, only: world.only, animations, onBones: true });
   if (chosenState(states, 'postProcessing') === 'OFF') Object.assign(data, { renderingPipelines: [], postProcesses: [] });
@@ -630,8 +630,9 @@ export * from './bylonder/character/effects/index.js';
 // settings${controlPanel ? ' and the control panel' : ''}; load({ scene, root }) adds its objects to a scene of yours, as a .glb's are, under
 // a root of their own, "__root__" (bylonder/asset.js), itself under \`root\` (a node of yours) if given, with none of the
 // scene's settings; load({ instance, root }) copies what a load added, sharing its geometry, materials and textures. A
-// load resolves once the scene's shaders are compiled.
-export async function load(target) {
+// load resolves once the scene's shaders are compiled.${game ? ` load(engine) also plays the project's game (game.js), as the
+// Game area plays it; load(engine, { game: false }) loads the scene alone, { seed } seeds the game's random.` : ''}
+export async function load(target${game ? ', { game = true, seed } = {}' : ''}) {
   if (target.scene || target.instance) {
     const { ir, buffers } = target.instance ?? await readData(), options = { root: target.root,
       controller: (view, entries, dispose) => new BlendScene(view, ir, { root: ROOT, buffers, entries, dispose, source: target.instance, reload: (old) => { old.dispose(); return load(target); } }) };
@@ -647,14 +648,28 @@ export async function load(target) {
   const blend = new BlendScene(scene, IRS.get(scene), { root: ROOT, world: WORLDS.get(scene), compositor: COMPOSITORS.get(scene), display: DISPLAYS.get(scene), buffers: SCENE_BUFFERS.get(scene), tables: TABLES.get(scene),
     reload: (old) => { old.dispose(); return load(engine); } });
   await entitiesRun(scene, blend);
-  await shadersCompiled(scene);${controlPanel ? `
+  await shadersCompiled(scene);${game ? `
+  if (game) await playGame(blend, seed);` : ''}${controlPanel ? `
   // The page's control panel, at the canvas's top right corner (none in Node).
   controlPanel(blend, ${json({ tools: devTools, navigation, offer: NAVIGATION.map(([id]) => id).filter((id) => navigationModes[id] !== false) }).replace('}', `, root: ROOT${panelIcons ? `, icons: () => Promise.resolve(unitFor('${PANEL_ICONS_UNIT}')?.icons${blenderIcons ? ` ?? import('./${PANEL_ICONS}').then((m) => m.default)` : ''})` : ''} }`)});
 ` : ''}
   return blend;
 }
 
-// A frame's entities run once and settled, so what they make (a rig the page's native runtime solves, its solver attached)
+${game ? `// The project's game (game.js: its own code, under its own licence), run as the Game area runs it, gone with the scene.
+async function playGame(blend, seed) {
+  const [{ runGame }, { default: code }] = await Promise.all([import('./bylonder/game/run.js'), import('./game.js')]);
+  const assets = { url: (path) => new URL(path, ROOT).href, text: async (path) => (await fetch(new URL(path, ROOT))).text() };
+  // The game's keys reach it on its canvas, which a click focuses.
+  const canvas = blend.scene.getEngine().getRenderingCanvas();
+  if (canvas && canvas.tabIndex < 0) canvas.tabIndex = 0;
+  const run = runGame(blend, code, { canvas: canvas ?? undefined, assets, seed });
+  const dispose = blend.dispose.bind(blend);
+  blend.dispose = () => { run.dispose(); dispose(); };
+  blend.game = run;
+}
+
+` : ''}// A frame's entities run once and settled, so what they make (a rig the page's native runtime solves, its solver attached)
 // is in place before the load resolves: the scheduler runs them after a frame's animations.
 async function entitiesRun(scene, blend) {
   scene.animate();
