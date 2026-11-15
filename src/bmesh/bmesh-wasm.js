@@ -7,7 +7,7 @@ import { createMesh } from '../blenkernel/mesh/mesh.js';
 import { BMESH_WASM } from './bmesh-module.js';
 import { ATTRIBUTE_TYPES, DOMAINS, MAIN_NAMES, moduleMesh } from './module-mesh.js';
 
-const { exports: x } = await instantiate(BMESH_WASM);
+const { exports: x, threads } = await instantiate(BMESH_WASM);
 // Blender's datafiles (its Essentials asset libraries) at its system directory (ghost-paths.cc), read in once the module
 // starts; what reads assets (the asset menus, object.modifier_add_node_group) waits for them.
 export const datafiles = Promise.all(DATAFILES.map(async ([name, url]) => files.set(`/blender/datafiles/${name}`, new Uint8Array(await read(url)))));
@@ -27,7 +27,7 @@ export const hasOperator = (idname) => operatorTypes.has(idname);
 export const execOperators = () => [...operatorTypes].filter(([, i]) => x.operator_has_exec(i)).map(([idname]) => idname);
 
 // The module's exports and memory helpers, for subsystems with API files of their own (anim-api.cc).
-export const blenderModule = { exports: x, withArrays, withString, cString };
+export const blenderModule = { exports: x, threads, withArrays, withString, cString };
 // The project's .blend in the module's file system: the file Main is read from and written to, its libraries beside it.
 export const PROJECT_BLEND = '/project.blend';
 
