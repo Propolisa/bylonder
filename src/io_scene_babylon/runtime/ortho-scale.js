@@ -35,9 +35,35 @@ export function fitsOrthoScale(camera) {
 }
 
 /**
- * A parsed camera, its bounds from its Orthographic Scale when it is orthographic.
+ * A perspective camera exported with its render's frame (`metadata.frameAspect`, its field of view along the side its
+ * sensor fits) shows that frame whole in any view, as Blender's camera view does: along the frame's width where the view
+ * is narrower than the frame, along its height where it is wider. The field of view it is set to stays along the side
+ * it was exported for (a lens control's writes).
  * @template {BabylonCamera} C
  * @param {C} camera
  * @returns {C}
  */
-export const orthoScaled = (camera) => (camera.mode === Camera.ORTHOGRAPHIC_CAMERA ? fitsOrthoScale(camera) : camera);
+export function fitsFrame(camera) {
+  const frameAspect = camera.metadata?.frameAspect;
+  if (!frameAspect || fitted.has(camera)) return camera;
+  fitted.add(camera);
+  const exportedVertical = camera.fovMode === Camera.FOVMODE_VERTICAL_FIXED;
+  let fov = camera.fov;
+  const vertical = () => camera.getEngine().getAspectRatio(camera) > frameAspect;
+  const along = (/** @type {boolean} */ alongHeight) => {
+    if (alongHeight === exportedVertical) return fov;
+    const half = Math.tan(fov / 2);
+    return 2 * Math.atan(alongHeight ? half / frameAspect : half * frameAspect);
+  };
+  Object.defineProperty(camera, 'fovMode', { configurable: true, get: () => (vertical() ? Camera.FOVMODE_VERTICAL_FIXED : Camera.FOVMODE_HORIZONTAL_FIXED), set() {} });
+  Object.defineProperty(camera, 'fov', { configurable: true, get: () => along(vertical()), set: (/** @type {number} */ value) => { fov = value; } });
+  return camera;
+}
+
+/**
+ * A parsed camera, its bounds from its Orthographic Scale when it is orthographic, else its render's frame whole.
+ * @template {BabylonCamera} C
+ * @param {C} camera
+ * @returns {C}
+ */
+export const orthoScaled = (camera) => (camera.mode === Camera.ORTHOGRAPHIC_CAMERA ? fitsOrthoScale(camera) : fitsFrame(camera));

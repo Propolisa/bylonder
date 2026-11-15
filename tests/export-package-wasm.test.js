@@ -200,7 +200,13 @@ for (const name of ['Key Light', 'Rim Light']) {
 setData('Camera', 'cameras', 'lens', undefined, 85);
 setData('Camera', 'cameras', 'clip_end', undefined, 250);
 const appCamera = scene.cameras.find((c) => c.name === 'Camera'), pageCamera = page.getCameraById('Camera');
-assert.ok(Math.abs(pageCamera.fov - appCamera.fov) < 1e-5, `lens: fov ${pageCamera.fov}, app ${appCamera.fov}`);
+// The page fits the render's frame whole in its view (ortho-scale.js fitsFrame): its field of view along the app's side.
+const along = (camera, vertical) => {
+  const half = Math.tan(camera.fov / 2), aspect = camera.metadata.frameAspect;
+  return (camera.fovMode === 0) === vertical ? camera.fov : 2 * Math.atan(vertical ? half / aspect : half * aspect);
+};
+const pageFov = along(pageCamera, appCamera.fovMode === 0);
+assert.ok(Math.abs(pageFov - appCamera.fov) < 1e-5, `lens: fov ${pageFov}, app ${appCamera.fov}`);
 assert.equal(pageCamera.maxZ, appCamera.maxZ, 'clip_end');
 
 // Visibility: hidden in renders or the viewport, a mesh is not drawn.

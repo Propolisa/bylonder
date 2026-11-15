@@ -87,11 +87,13 @@ export function shaderTree(tree) {
   return { nodes, links };
 }
 
-// A camera's Shift moves its view plane off center: clip x and y less the plane's center times w.
+// A camera's Shift moves its view plane off center: clip x and y less the plane's center times w. It shifts the matrix
+// Babylon has just computed, the one its projection observer is told of, never asking for it again from there.
 const shifted = new WeakSet();
 function shiftLens(camera) {
-  const [x, y] = camera.metadata?.wbLensShift ?? [0, 0], projection = camera.getProjectionMatrix(), m = projection.m;
+  const [x, y] = camera.metadata?.wbLensShift ?? [0, 0];
   if (!x && !y) return;
+  const projection = camera._projectionMatrix, m = projection.m;
   for (let row = 0; row < 4; row++) {
     m[row * 4] -= x * m[row * 4 + 3];
     m[row * 4 + 1] -= y * m[row * 4 + 3];
@@ -931,10 +933,14 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     // Main); a Babylon camera's is its own.
     // A Blender camera's depth of field (bmesh-wasm.js cameraDof), or null.
     cameraDof: (camera) => { const ob = blenderCameraOf(camera); return ob ? blender.cameraDof(ob) : null; },
-    fitCamera(camera, { width, height }) {
+    // A Blender camera's frame of an image of that size (its field of view along the side it fits, and its Shift), or null.
+    cameraFrame(camera, { width, height }) {
       const ob = blenderCameraOf(camera);
-      if (!ob) return;
-      const frame = blender.cameraViewFov(ob, width, height);
+      return ob ? blender.cameraViewFov(ob, width, height) : null;
+    },
+    fitCamera(camera, size) {
+      const frame = api.cameraFrame(camera, size);
+      if (!frame) return;
       setOutputFrame(camera, frame);
       setLens(camera, frame, frame.shift);
       setOrthoView(camera, null);

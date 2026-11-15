@@ -20,6 +20,7 @@ import { channelKey } from './modifiers-export.js';
 import { AREA_LIGHT, rigAreaLights, rigId, rigTransform } from './area-lights.js';
 import { eulerCameras, turnedCameras } from '../overrides/babylon/camera-quaternion.js';
 import { writePostProcesses } from '../overrides/babylon/camera-post-processes.js';
+import { outputSize } from '../blenkernel/scene/render.js';
 import '../overrides/babylon/material-unique-id.js';
 import { serializePipeline } from '../overrides/babylon/pipeline-effects.js';
 
@@ -100,6 +101,19 @@ export function cameraEffects(world, scene, camera) {
     };
   } finally {
     world.renderSettings.setRenderedCameras(rendered);
+  }
+}
+
+// Each Blender camera framing the render as Blender's camera view does, at the render's size: its field of view along
+// the side its sensor fits, and the render's aspect, by which a page fits that frame whole in its canvas
+// (runtime/ortho-scale.js), whatever a view of the app last set on the camera.
+function framedCameras(cameras, scene, world) {
+  const size = outputSize(world.renderSettings.state.render);
+  for (const entry of cameras) {
+    const camera = scene.getCameraByUniqueId(entry.uniqueId), frame = camera && world.mainSync?.cameraFrame(camera, size);
+    if (!frame) continue;
+    Object.assign(entry, { fov: frame.fov, fovMode: frame.vertical ? Camera.FOVMODE_VERTICAL_FIXED : Camera.FOVMODE_HORIZONTAL_FIXED });
+    entry.metadata = { ...entry.metadata, frameAspect: size.width / size.height };
   }
 }
 
@@ -548,6 +562,7 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
     if (transform.rotationQuaternion) entry.rotation = [0, 0, 0];
   }
   eulerCameras(json.cameras);
+  framedCameras(json.cameras, scene, world);
   json.materials = await Promise.all(json.materials.map(async (entry) => {
     const material = scene.materials.find((m) => m.uniqueId === entry.uniqueId);
     return (material && await exportNodeMaterial(material, { parity, graph: graphOf(material) })) ?? withoutOwnPlugins(entry, scene);
