@@ -35,5 +35,5 @@ export function dropTarget(from, onto, ontoIsFolder) {
 
 // A file's icon, from Blender's file browser icons.
 const ICONS = [[/\.blend$/i, "file_blend"], [/\.(png|jpe?g|webp|gif|hdr|exr|svg)$/i, "file_image"], [/\.(wav|mp3|ogg|flac)$/i, "file_sound"],
-  [/\.(mp4|webm|mov)$/i, "file_movie"], [/\.(glb|gltf|obj|fbx|babylon|stl)$/i, "file_3d"], [/\.py$/i, "file_script"], [/\.(m?[jt]sx?|glsl|wgsl)$/i, "script"], [/\.(ttf|otf|woff2?)$/i, "file_font"]];
+  [/\.(mp4|webm|mov)$/i, "file_movie"], [/\.(glb|gltf|obj|fbx|babylon|stl)$/i, "file_3d"], [/\.py$/i, "file_script"], [/\.(m?[jt]sx?|glsl|wgsl)$/i, "text"], [/\.(ttf|otf|woff2?)$/i, "file_font"]];
 export const fileIcon = (name) => ICONS.find(([test]) => test.test(name))?.[1] ?? "file_text";

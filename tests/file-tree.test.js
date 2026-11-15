@@ -24,7 +24,7 @@ assert.equal(dropTarget("src/behaviors/rock.js", "", true), "rock.js", "dropped 
 assert.equal(dropTarget("src/behaviors/rock.js", "src/behaviors", true), null, "already there");
 assert.equal(dropTarget("src", "src/behaviors", true), null, "not into itself");
 
-assert.equal(fileIcon("rock.js"), "script", "a script, not Python's icon");
+assert.equal(fileIcon("rock.js"), "text", "a text, as Blender's Text Editor shows code that is not Python");
 assert.equal(fileIcon("tool.py"), "file_script");
 assert.equal(fileIcon("cafe.blend"), "file_blend");
 assert.equal(fileIcon("cafe.ink"), "file_text");
