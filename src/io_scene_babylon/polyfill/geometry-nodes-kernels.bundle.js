@@ -521,7 +521,7 @@ async function instantiate(url, threads = hardwareThreads()) {
   const imports = { wasi_snapshot_preview1: wasiFor(() => memory), env: env(memory, threads), wasi: { "thread-spawn": (arg) => spawn(arg) } };
   const instance = await WebAssembly.instantiate(module, imports);
   memory = instance.exports.memory;
-  if (threads > 1) spawn = await startThreads(module, memory, threads);
+  if (threads > 1) spawn = await startThreads(module, memory, threads + 4);
   instance.exports._initialize?.();
   instance.exports.blender_init?.();
   return new Heap(instance.exports, threads);

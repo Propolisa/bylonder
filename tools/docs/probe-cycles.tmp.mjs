@@ -10,11 +10,22 @@ try {
   const app = await openApp(browser, url, { example: "Window Light", node: "Carafe" });
   app.page.on("console", (m) => console.log("console:", m.text().slice(0, 300)));
   console.log("isolated:", await app.frame().evaluate(() => crossOriginIsolated), "threads:", await app.frame().evaluate(() => navigator.hardwareConcurrency));
-  await app.bylonder((b) => { b.world.renderSettings.set("render.resolutionPercentage", 25); b.world.renderSettings.set("render.blenderEngine", "CYCLES"); });
+  await app.bylonder((b) => { b.world.renderSettings.set("render.resolutionPercentage", 50); b.world.renderSettings.set("render.blenderEngine", "CYCLES"); });
   await new Promise((r) => setTimeout(r, 20000));
   await app.page.click('[data-blender="TOPBAR_MT_render"]');
   await app.page.getByRole("menuitem", { name: "Render Image" }).click({ noWaitAfter: true });
   const t = Date.now();
+  // The page answers while Cycles renders: the longest an evaluation waits.
+  let longest = 0, done = false;
+  const statusText = () => app.page.evaluate(() => [...document.querySelectorAll("iframe")].map((f) => f.contentDocument?.querySelector(".render-result [data-status]")?.textContent).find(Boolean) ?? "");
+  while (!done && Date.now() - t < 600000) {
+    const at = Date.now();
+    const text = await statusText();
+    longest = Math.max(longest, Date.now() - at);
+    done = /^(Finished|Render failed|Render cancelled)/.test(text);
+    if (!done) await new Promise((r) => setTimeout(r, 1000));
+  }
+  console.log("longest page answer during the render:", longest, "ms");
   await app.page.waitForFunction(() => /^(Finished|Render failed)/.test([...document.querySelectorAll("iframe")].map((f) => f.contentDocument?.querySelector(".render-result [data-status]")?.textContent).find(Boolean) ?? document.querySelector(".render-result [data-status]")?.textContent ?? ""), null, { timeout: 300000 });
   const status = await app.page.evaluate(() => [...document.querySelectorAll("iframe")].map((f) => f.contentDocument?.querySelector(".render-result [data-status]")?.textContent).find(Boolean) ?? document.querySelector(".render-result [data-status]")?.textContent);
   console.log("status:", status, `${(Date.now() - t) / 1000} s`);

@@ -23,6 +23,14 @@ extern "C" ScrArea *WRAP(__wrap_, RENDER_VIEW_OPEN)(bContext * /*C*/, int /*mx*/
   return nullptr;
 }
 
+extern bool platform_threaded_jobs;
+/* F12's render job (render.render's invoke, which the page runs between these) on a thread of its own: platform.cc
+ * runs other window-manager jobs on the page's thread. */
+EXPORT(render_job_start) void render_job_start(bool starting)
+{
+  platform_threaded_jobs = starting;
+}
+
 /* Whether the scene's render job runs (render.render's invoke started it), and how far it is (0 to 1). */
 EXPORT(render_job_running) bool render_job_running(const bContext *C, const Scene *scene)
 {
