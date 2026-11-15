@@ -198,7 +198,7 @@ Outliner and Properties column. On a tablet nothing folds at Resolution Scale 1.
 ### Back
 
 The phone's Back button never closes the app. It closes the topmost open thing: a menu, popover or popup, a dialog,
-a folded area's drawer, then a maximized area (as Back to Previous). With nothing open it stays in the app, or, with
+a folded area's drawer, then a maximized area or one in Focus Mode (as Back to Previous). With nothing open it stays in the app, or, with
 unsaved changes, asks before leaving (`src/windowmanager/wm-back.js`, one history entry kept above the page).
 
 ### Area management
@@ -207,6 +207,13 @@ All of it is Blender's:
 
 - **Maximize and toggle.** `screen.screen_full_area` (Ctrl Space, View > Area > Toggle Maximize Area, Focus Mode),
   from the header's context menu (long press on the header) or the quick keys pie.
+- **Focus Mode.** `screen.screen_full_area` with `use_hide_panels` (Ctrl Alt Space, the header's context menu): the
+  area alone without its header, and the page fullscreen through the browser's Fullscreen API. Esc, the system's Back
+  and the area's corner button (Blender's fullscreen action zone, always shown since a finger has no hover) give the
+  layout back. Where the browser has no fullscreen for a page (an iPhone), Focus Mode still fills the page.
+- **Hidden areas draw nothing.** An area folded into a closed drawer, or hidden by a maximized area or one in Focus
+  Mode, stops drawing: its 3D Viewports leave the frame, and the Game area and the Package View stop their render loops
+  until it shows again (`src/editors/screen/area-shown.js`).
 - **Switching an area's editor** is the header's editor type menu.
 - **Switching workspaces** is the topbar's workspace tabs. The topbar scrolls sideways when the tabs do not fit; it is
   never hidden.

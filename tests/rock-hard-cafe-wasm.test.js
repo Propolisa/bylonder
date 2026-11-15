@@ -102,6 +102,8 @@ const sounding = new Set([...game.world.instances.values()].filter((i) => i.defi
 const silent = scene.getPhysicsEngine().getBodies().map((b) => b.transformNode).filter((n) => n.name !== 'Palm' && !sounding.has(n)).map((n) => n.name);
 assert.deepEqual(silent, [], 'no hittable body without a sound');
 assert.deepEqual(game.errors, []);
+// Stop: the run goes, then its scene, Havok asked nothing after it is gone.
 game.dispose();
+scene.dispose();
 console.log('Rock Hard Café: a slap brews a mug, the hand routes it round a jar onto the rock, which spills it (it breaks) and leaves stained; a knocked-off jar angers the next; the .blend stays clean');
 process.exit(0);

@@ -18,6 +18,7 @@ export function enablePhysics(scene: import("@babylonjs/core").Scene, havok: any
 }) => void): {
     /** Advances by `dt` seconds of the run's clock, in whole fixed steps. @param {number} dt */
     step(dt: number): void;
+    /** Havok gone with every body on it, so a node disposed after it (the scene's own) asks nothing of it. */
     dispose(): void;
 };
 /** The fixed step, in seconds. */

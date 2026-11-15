@@ -1,6 +1,7 @@
 // Records docs/features/mobile.md's media under touch emulation: the Layout workspace on a large phone, a folded area's
 // drawer, navigation by gestures, on the Robot Arm in Pose Mode, the header scrolled to Rendered shading, press and hold, a value dragged with its
-// readout and soft Shift, the area edge menu, an area carried by its header, and the touch bar's pie and bubbles.
+// readout and soft Shift, the area edge menu, an area carried by its header, the touch bar's pie and bubbles, and Focus
+// Mode left by Back.
 // usage: node tools/docs/record-mobile.mjs
 import { record } from "./record.mjs";
 
@@ -127,4 +128,20 @@ await record("mobile", { example: "robot-arm", node: null, size: PHONE, touch: t
     await r.pause(1000);
   });
   await app.bylonder((b) => b.dock.reset());
+  await r.pause(1000);
+  await focusMode(r);
 });
+
+// Focus Mode from the 3D Viewport header's long press: the area alone, its corner button faint at the top right; then
+// the phone's Back gives the layout back.
+async function focusMode(r) {
+  const { app, fingers } = r;
+  await fingers.hold(await center(app.locator('.dock-leaf[data-section="viewport"] > .dock-heading')), 1000);
+  await r.pause(900);
+  await fingers.tap(await center(app.locator(".bl-menu-item").filter({ hasText: "Focus Mode" })));
+  await app.until((b) => b.dock.focusMode);
+  await r.pause(1500);
+  await r.shot("focus");
+  await r.page.evaluate(() => history.back());
+  await app.until((b) => !b.dock.focused);
+}

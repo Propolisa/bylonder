@@ -63,9 +63,11 @@ export function createGameRun({ appModule, exportAgain, engine: makeEngine }) {
         return false;
       }
     },
+    /** The run and its engine gone: the next play makes a new engine. */
     dispose() {
       drop();
       engine?.dispose();
+      engine = source = null;
     },
   };
 }

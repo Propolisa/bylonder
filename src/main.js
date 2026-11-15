@@ -716,8 +716,14 @@ world.project = (() => {
     },
   };
 })();
+// Play takes the Game area into Focus Mode, as a game takes the screen (Preferences > System > Bylonder).
+const playFullscreen = () => {
+  if (bylonderPreferences()?.play_fullscreen === false || viewportDock.focusMode) return;
+  if (viewportDock.focused) viewportDock.maximize(viewportDock.focused);
+  viewportDock.maximize("game", { hidePanels: true });
+};
 packageView = mountPackageView(document.querySelector("#package-section"), { world });
-gameView = mountGameView(document.querySelector("#game-section"), { world, header: viewportDock.header("game"), run: { root: location.origin + input.base, files: input.files ?? [] }, codeError: (error) => send("code-error", error) });
+gameView = mountGameView(document.querySelector("#game-section"), { world, header: viewportDock.header("game"), run: { root: location.origin + input.base, files: input.files ?? [] }, codeError: (error) => send("code-error", error), fullscreen: playFullscreen });
 // The .blend's behaviours follow their code as the project opens (a prop added in code, a script's kinds).
 gameView.codeReady?.then(() => { if (gameView.code && repairBehaviors(new Map(gameView.code.behaviors.map((b) => [b.name, b])))) world.mainSync.view(); refreshUI(); });
 const imageEditor = mountImageEditor(document.querySelector("#image-section"), { header: viewportDock.header("image"), engine, views, sync: world.mainSync, editObject });
@@ -890,7 +896,7 @@ registerOperators({
   "render.view_show": { run: () => renderHost.viewRender() },
   "view3d.view_camera": { run: () => activeView()?.toggleCameraView() },
   "view3d.toggle_xray": { poll: () => !!activeView(), run: () => { const view = activeView(); view.state.xray = !view.state.xray; view.sync(); } },
-  "screen.screen_full_area": { supports: ({ use_hide_panels }) => !use_hide_panels, run: () => viewportDock.maximize(screenArea()) },
+  "screen.screen_full_area": { run: ({ use_hide_panels }) => viewportDock.maximize(screenArea(), { hidePanels: !!use_hide_panels }) },
   "screen.area_split": { run: ({ direction }) => viewportDock.split(screenArea(), direction === "HORIZONTAL") },
   "screen.area_close": { run: () => viewportDock.close(screenArea()) },
   "screen.area_options": { poll: () => !!areaEdge, run: (props, event) => openEdgeMenu(areaEdge, event) },

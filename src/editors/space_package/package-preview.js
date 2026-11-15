@@ -135,7 +135,11 @@ const canvas = document.getElementById('view'), engine = await createEngine(canv
 // At the resolution the app's 3D View is set to (Viewport resolution), when one is set.
 try { const { mode, ratio } = JSON.parse(localStorage.getItem('workbench:render-resolution:v1')) ?? {}; if (mode === 'custom') engine.setHardwareScalingLevel(ratio); } catch {}
 let blend = await load(engine);
-engine.runRenderLoop(() => blend.scene.render());
+// Drawn while the app shows the Package View's area (\`shown\` messages).
+const draw = () => blend.scene.render();
+let shown = true;
+engine.runRenderLoop(draw);
+const show = (on) => { if (on === shown) return; shown = on; if (on) engine.runRenderLoop(draw); else engine.stopRenderLoop(draw); };
 addEventListener('resize', () => engine.resize());
 // A patch applied, read as it comes in; one it cannot read leaves the scene as it was.
 let patching = Promise.resolve();
@@ -145,7 +149,9 @@ const take = async ({ patch }) => {
 // Values set where they differ, the scene's own controls only.
 const has = (path) => { try { blend.get(path); return true; } catch { return false; } };
 const set = (changes) => { for (const [path, value] of changes) if (has(path) && blend.get(path) !== value) blend.set(path, value); };
-new BroadcastChannel(${JSON.stringify(channel)}).onmessage = ({ data }) => { patching = patching.then(() => (data.set ? set(data.set) : take(data))); };
+const app = new BroadcastChannel(${JSON.stringify(channel)});
+app.onmessage = ({ data }) => { if ('shown' in data) return show(data.shown); patching = patching.then(() => (data.set ? set(data.set) : take(data))); };
+app.postMessage({ ready: true });
 // The scene the page shows, for tests.
 Object.defineProperty(window, 'blend', { get: () => blend });
 </script></body></html>

@@ -8,6 +8,7 @@ import { packagedFiles, withProject } from '../../io_scene_babylon/export.js';
 import { exportOptions } from '../../io_scene_babylon/export-options.js';
 import { publishFiles, removeRun } from '../../workspace/module-host.js';
 import { registerOperator } from '../../windowmanager/wm-operators.js';
+import { watchShown } from '../screen/area-shown.js';
 
 export function mountPackageView(section, { world }) {
   // The page plays the project's game, as an exported page does.
@@ -29,6 +30,11 @@ export function mountPackageView(section, { world }) {
     try { state.url = await preview.reload(); } catch (error) { state.status = `Not exported: ${error.message}`; } finally { state.busy = false; }
   };
   registerOperator('bylonder.package_view_reload', { poll: () => !state.busy, run: reload });
+  // The page draws only while the area is shown: told on each change, and when a page is ready.
+  let shown = true;
+  const tell = () => patches.postMessage({ shown });
+  watchShown(section, (now) => { shown = now; tell(); });
+  patches.onmessage = ({ data }) => { if (data.ready) tell(); };
   createApp({ render: () => h(PackageView, { ...state, onReload: reload }) }).mount(section);
   return { changed: () => preview.changed() };
 }

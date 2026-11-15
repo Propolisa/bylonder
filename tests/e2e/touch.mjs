@@ -188,6 +188,28 @@ const checks = {
     assert.ok(await app.bylonder((b) => !!b.editor), "which keeps running");
   },
 
+  // A long press on an area's header opens its context menu, whose Focus Mode takes the area fullscreen; Back gives
+  // the layout back and stays in the app, and so does the area's corner button.
+  async "Focus Mode from a header's long press, left by Back and by its corner button"() {
+    const back = async () => { await app.page.evaluate(() => history.back()); await app.page.waitForTimeout(300); };
+    const focusMode = async () => {
+      await touch.hold(await center(app.locator('.dock-leaf[data-section="viewport"] > .dock-heading')), 1000);
+      await touch.tap(await center(app.locator(".bl-menu-item").filter({ hasText: "Focus Mode" })));
+      await app.until((b) => b.dock.focusMode && b.dock.focused === "viewport");
+    };
+    await focusMode();
+    assert.equal(await app.locator('.dock-leaf[data-section="viewport"] > .dock-heading').isVisible(), false, "no header");
+    const url = app.page.url();
+    await back();
+    await app.until((b) => !b.dock.focused);
+    assert.equal(app.page.url(), url, "Back stays in the app");
+    assert.equal(await app.frame().evaluate(() => !!document.fullscreenElement), false, "and leaves fullscreen");
+    await focusMode();
+    await touch.tap(await center(app.locator('button[aria-label="Back to Previous"]')));
+    await app.until((b) => !b.dock.focused);
+    await pause();
+  },
+
   async "a tap selects, a tap on nothing deselects"() {
     await touch.tap(await app.point(0.5, 0.92));
     await app.until((b) => b.editor.selection.size === 0);

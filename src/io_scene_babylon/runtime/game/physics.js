@@ -62,6 +62,10 @@ export function enablePhysics(scene, havok, onBody) {
         scene.onAfterPhysicsObservable.notifyObservers(scene);
       }
     },
-    dispose() { scene.disablePhysicsEngine(); },
+    /** Havok gone with every body on it, so a node disposed after it (the scene's own) asks nothing of it. */
+    dispose() {
+      for (const body of [...engine.getBodies()]) body.dispose();
+      scene.disablePhysicsEngine();
+    },
   };
 }

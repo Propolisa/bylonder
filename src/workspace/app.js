@@ -992,10 +992,11 @@ const openExample = action(async (example) => {
   await save();
   await load((await createExample(example)).id);
 });
-// A link to index.html#example=<id> (the docs' Open in Bylonder) opens that example as a new project.
+// A link to index.html#example=<id> (the docs' Open in Bylonder) opens that example as a new project. The hash leaves
+// the address at once, keeping the entry's state, so Back never comes to it and opens the example again.
 const linkedExample = () => {
   const example = examples.find(({ id }) => location.hash === `#example=${id}`);
-  if (example) history.replaceState(null, "", location.pathname + location.search);
+  if (example) history.replaceState(history.state, "", location.pathname + location.search);
   return example;
 };
 window.addEventListener("hashchange", () => {
@@ -1126,6 +1127,7 @@ window.addEventListener("keydown", (e) => {
     (!folder ? save() : editor?.hasTextFocus() ? saveActiveFile() : save("Save")).catch(failure);
   }
 });
+const startExample = linkedExample();
 installBack(window, { unsaved: () => dirty });
 window.addEventListener("beforeunload", (e) => {
   if (dirty) {
@@ -1143,7 +1145,7 @@ document.addEventListener("visibilitychange", () => {
     const last = localStorage.getItem("babylon-active-project");
     let id = last;
     if (!projects.some((p) => p.id === id)) id = projects[0]?.id;
-    const example = linkedExample();
+    const example = startExample;
     if (example) id = (await createExample(example)).id;
     else if (!id) id = (await repo.create("Untitled", defaultFiles())).id;
     const shared = location.hash.startsWith("#project=");

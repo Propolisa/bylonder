@@ -7,6 +7,7 @@ import 'splitpanes/dist/splitpanes.css';
 import './dock.css';
 import { validateLayout, swapSections, focusedSection } from './model.js';
 import { onBack } from '../../windowmanager/wm-back.js';
+import { FullscreenExit } from '../interface/components/ui/fullscreen-exit';
 
 // Pane sizes (percent of the panes, and pixels) of a split `size` px long whose first pane takes `share` of it, as
 // Blender places areas: the edge between them is a screen vertex at that share of the vertex range, rounded from the
@@ -35,7 +36,7 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
   // (screen.area_options, onEdgeMenu); an area dropped on another by its header (screen.area_swap, onSwap).
   let headerMenu=()=>{},edgeMenu=()=>{},swapAreas=(a,b)=>swap(a,b);
   try{const value=JSON.parse(localStorage.getItem(storageKey)||'{}');if(value&&typeof value==='object'&&!Array.isArray(value))saved=value;}catch{}
-  const state=reactive({drop:null,drawer:null,drawers:{},screen:null,layout:null,remember:saved.remember!==false,focus:null,tree:structuredClone(firstTree),factoryCount:0,width:0,height:0,content:null});
+  const state=reactive({focusMode:false,drop:null,drawer:null,drawers:{},screen:null,layout:null,remember:saved.remember!==false,focus:null,tree:structuredClone(firstTree),factoryCount:0,width:0,height:0,content:null});
   const screenOf=()=>screens[state.screen]??{tree:firstTree,defaults:firstDefaults};
   const tree=()=>screenOf().tree,defaults=()=>screenOf().defaults();
   // Each screen keeps its own layout; the first screen's under 'main'.
@@ -92,7 +93,7 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
   // Blender keeps each area at least one header high (screen_geom_vertices_scale).
   const minSize=horizontal=>{const header=parseFloat(getComputedStyle(host).getPropertyValue('--bl-header-h'))||26,length=horizontal?state.height:state.width;return length?Math.min(50,100*header/length):8;};
   const persist=()=>{
-    saved[key()]={...JSON.parse(JSON.stringify(state.layout)),focus:state.focus,tree:JSON.parse(JSON.stringify(state.tree)),drawers:{...state.drawers}};saved.remember=state.remember;saved.extras=items.slice(baseCount).map(({id,type})=>({id,type}));
+    saved[key()]={...JSON.parse(JSON.stringify(state.layout)),focus:state.focusMode?null:state.focus,tree:JSON.parse(JSON.stringify(state.tree)),drawers:{...state.drawers}};saved.remember=state.remember;saved.extras=items.slice(baseCount).map(({id,type})=>({id,type}));
     try{localStorage.setItem(storageKey,JSON.stringify(state.remember?saved:{remember:false}));}catch{}
     position();nextTick(()=>{position();schedule();});
   };
@@ -120,7 +121,7 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
   function renderNode(node,extent=state.content){
     if(typeof node==='number'){
       const id=state.layout.order[node];
-      return h('div',{'data-section':id,class:['dock-leaf',{bare:items.find(item=>item.id===id)?.bare,overlap:items.find(item=>item.id===id)?.overlap,'no-header':screenOf().headerless?.includes(id)}],onPointerenter:()=>hovered=node,onEditorType:e=>editorType(e.detail,node)},[
+      return h('div',{'data-section':id,class:['dock-leaf',{bare:items.find(item=>item.id===id)?.bare,overlap:items.find(item=>item.id===id)?.overlap,'no-header':screenOf().headerless?.includes(id)||(state.focusMode&&focus()===id)}],onPointerenter:()=>hovered=node,onEditorType:e=>editorType(e.detail,node)},[
         h('div',{class:'dock-heading','data-touch-hold-drag':'',onContextmenu:e=>{e.preventDefault();e.stopPropagation();headerMenu(id,e);},
           'onBl-hold-drag':e=>carry(id,e.detail),onTouchmove:e=>{if(carried)e.preventDefault();}},[
           // An editor whose header is not Blender's yet has the screen's editor type button in place of Blender's.
@@ -250,7 +251,8 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
   const labels={animation:'Timeline split',root:'Main split',main:'Output split',editors:'Editor split',inspector:'Inspector split'};
   const app=createApp({setup(){
     watch(()=>JSON.stringify([state.layout,state.focus]),()=>nextTick(position),{flush:'post'});
-    return ()=>h('div',{class:'dock-shell'},[
+    return ()=>h('div',{class:['dock-shell',{'focus-mode':state.focusMode}]},[
+      state.focusMode&&h(FullscreenExit,{onExit:()=>maximize(state.focus)}),
       state.drop&&h('div',{class:'dock-drop',style:state.drop},icon('area_swap')),
       h('div',{class:'dock-splits'},focus()?h('div',{class:'dock-focus-space'},bareFocus?[]:[renderNode(state.layout.order.indexOf(focus()))]):h('div',{key:JSON.stringify([state.layout.hidden,state.layout.order]),class:'dock-split-tree',ref:el=>el&&observer.observe(el)},[renderNode(state.tree)])),
       h(Teleport,{to:document.body},[h('dialog',{class:'dock-dialog',ref:el=>menuElement=el,onClick:e=>{if(e.target===menuElement)closeMenu();}},[
@@ -267,7 +269,19 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
     ]);
   }});
   app.mount(root);nextTick(position);
-  const keyboard=event=>{if((event.ctrlKey||event.metaKey)&&event.code==='Space'&&hovered!==null){event.preventDefault();event.stopPropagation();const id=state.layout.order[hovered];state.focus=state.focus===id?null:id;persist();}};
+  // Blender's screen.screen_full_area: an area maximized, or with use_hide_panels in Focus Mode, which hides its header
+  // and takes the page's fullscreen (the Fullscreen API) too; leaving fullscreen (Esc, the system's Back) leaves it.
+  // Either way, running it again goes back to the layout.
+  const doc=host.ownerDocument;
+  const pageFullscreen=on=>{if(on!==!!doc.fullscreenElement)(on?doc.documentElement.requestFullscreen?.():doc.exitFullscreen?.())?.catch(()=>{});};
+  function maximize(id,{hidePanels=false}={}){
+    const back=state.focus===id;
+    state.focus=back?null:id;state.focusMode=!back&&hidePanels;
+    pageFullscreen(state.focusMode);doc.documentElement.classList.toggle('bl-focus-mode',state.focusMode);persist();
+  }
+  const leftFullscreen=()=>{if(!doc.fullscreenElement&&state.focusMode)maximize(state.focus);};
+  doc.addEventListener('fullscreenchange',leftFullscreen);
+  const keyboard=event=>{if((event.ctrlKey||event.metaKey)&&event.code==='Space'&&hovered!==null){event.preventDefault();event.stopPropagation();maximize(state.layout.order[hovered],{hidePanels:event.altKey});}};
   host.addEventListener('keydown',keyboard,true);
   host.addEventListener('pointerover',event=>{const panel=event.target.closest('.dock-content');if(panel)hovered=state.layout.order.indexOf(panel.dataset.section);});
   const unlock=()=>host.classList.remove('dock-resizing');
@@ -275,5 +289,5 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
   window.addEventListener('pointerup',unlock);window.addEventListener('pointercancel',unlock);window.addEventListener('blur',unlock);
   // Blender's workspace switch: another screen over the same areas.
   const setScreen=name=>{const next=name in screens?name:null;if(next===state.screen)return;persist();state.screen=next;load();persist();};
-  return {show,toggle,reset,openMenu,setFactory,header,setScreen,onHeaderMenu(fn){headerMenu=fn;},onEdgeMenu(fn){edgeMenu=fn;},onSwap(fn){swapAreas=fn;},swap,join(keep,remove){if(siblings(keep,remove))closeArea(state.layout.order.indexOf(remove));},get hovered(){return hovered===null?null:state.layout.order[hovered];},get screen(){return state.screen;},get areas(){return leaves(state.tree).map(slot=>state.layout.order[slot]);},get maximized(){return focus();},get focused(){return state.focus;},maximize(id){state.focus=state.focus===id?null:id;persist();},split(id,horizontal){if(state.factoryCount)split(state.layout.order.indexOf(id),horizontal);},close(id){if(typeof state.tree!=='number')closeArea(state.layout.order.indexOf(id));},dispose(){disposed=true;releaseBack();cancelAnimationFrame(frameId);observer.disconnect();instances.forEach(instance=>instance?.dispose?.());host.removeEventListener('keydown',keyboard,true);app.unmount();window.removeEventListener('pointerup',unlock);window.removeEventListener('pointercancel',unlock);window.removeEventListener('blur',unlock);}};
+  return {show,toggle,reset,openMenu,setFactory,header,setScreen,onHeaderMenu(fn){headerMenu=fn;},onEdgeMenu(fn){edgeMenu=fn;},onSwap(fn){swapAreas=fn;},swap,join(keep,remove){if(siblings(keep,remove))closeArea(state.layout.order.indexOf(remove));},get hovered(){return hovered===null?null:state.layout.order[hovered];},get screen(){return state.screen;},get areas(){return leaves(state.tree).map(slot=>state.layout.order[slot]);},get maximized(){return focus();},get focused(){return state.focus;},get focusMode(){return state.focusMode;},maximize,split(id,horizontal){if(state.factoryCount)split(state.layout.order.indexOf(id),horizontal);},close(id){if(typeof state.tree!=='number')closeArea(state.layout.order.indexOf(id));},dispose(){disposed=true;releaseBack();doc.removeEventListener('fullscreenchange',leftFullscreen);cancelAnimationFrame(frameId);observer.disconnect();instances.forEach(instance=>instance?.dispose?.());host.removeEventListener('keydown',keyboard,true);app.unmount();window.removeEventListener('pointerup',unlock);window.removeEventListener('pointercancel',unlock);window.removeEventListener('blur',unlock);}};
 }

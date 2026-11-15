@@ -2,7 +2,8 @@
 // JavaScript ships it, run by the exported page's own runtime (load, BlendScene) in the app's module graph
 // (game-run.js), on an engine of its own on the area's canvas, made as the page makes it (scene.js createEngine). Its tables are the live package's (package-preview.js): each edit, undo or redo reaches
 // the game as a patch, one way, from Main; nothing the game runs writes into Main or the live package, which it holds
-// frozen. Pause holds the game's frame; Reset drops the run and loads the live version again.
+// frozen. Pause holds the game's frame; Reset drops the run and loads the live version again; Stop ends it and frees
+// its engine. Play takes the area into Focus Mode (`fullscreen`), and the game draws only while its area is shown.
 import * as core from '@babylonjs/core';
 import { createApp, h, reactive } from 'vue';
 import GameView from './GameView.vue';
@@ -17,6 +18,8 @@ import { registerOperator } from '../../windowmanager/wm-operators.js';
 import { runGame } from '../../io_scene_babylon/runtime/game/run.js';
 import { createGameCode, errorAt } from './game-code.js';
 import { renderSettings } from '../../workspace/render-settings.js';
+import { areaRenderLoop, watchShown } from '../screen/area-shown.js';
+import { audioContext } from '../../io_scene_babylon/runtime/character/sound.js';
 
 /** The engine at the Viewport resolution set in the app, if any (renderSettings), else as made. */
 const scaled = (engine) => { const { mode, ratio } = renderSettings(); if (mode === 'custom') engine.setHardwareScalingLevel(ratio); return engine; };
@@ -28,7 +31,7 @@ const sources = import.meta.glob(['../../io_scene_babylon/runtime/**/*.js', '../
 const havok = () => import('@babylonjs/havok').then((m) => m.default());
 const appModule = (source) => (source === '@babylonjs/core' ? core : sources[`../../${source}`]());
 
-export function mountGameView(section, { world, header, run: files, codeError }) {
+export function mountGameView(section, { world, header, run: files, codeError, fullscreen }) {
   const state = reactive({ status: '', shared: '', busy: false, running: false, paused: false, evaluation: exportEvaluation(world) });
   // On the app's own engine kind, WebGPU or WebGL 2, so a rig the native runtime deforms computes where the app does.
   // A project with game code gets its actions as clips too, which behaviours play (entity.play). Never bundled: the run
@@ -37,18 +40,33 @@ export function mountGameView(section, { world, header, run: files, codeError })
   // Its project too, whose game may run physics: then the rigid bodies are the game's to simulate, not baked.
   const project = hasGameCode && { files: files.files, read: async (path) => new Uint8Array(await (await fetch(files.root + path)).arrayBuffer()) };
   const options = { ...exportOptions({ controlPanel: false, target: world.scene.getEngine().isWebGPU ? 'WEBGPU' : 'WEBGL2', bundle: false, ...(hasGameCode && { animations: 'BOTH' }) }), ...(project && { project }) };
-  const canvas = Object.assign(document.createElement('canvas'), { className: 'block h-full w-full outline-none', tabIndex: 0 });
-  // Keys typed into the playing game are the game's, not Blender's shortcuts.
-  canvas.dataset.gameInput = '';
+  // Each run draws on a canvas of its own, so a stopped run's drawing context goes with it.
+  const newCanvas = () => {
+    const made = Object.assign(document.createElement('canvas'), { className: 'block h-full w-full outline-none', tabIndex: 0 });
+    // Keys typed into the playing game are the game's, not Blender's shortcuts.
+    made.dataset.gameInput = '';
+    return made;
+  };
+  let canvas = newCanvas();
   // At the resolution the 3D View is set to (Viewport resolution), when one is set.
   const game = createGameRun({ appModule, exportAgain: () => preview.reload(), engine: async (createEngine) => scaled(await createEngine(canvas)) });
   // The area's size is the game's, as a page's canvas is its engine's.
   // The new size is taken at the start of the next frame, never between a frame's encoding and its submit, where a
   // WebGPU canvas texture the resize replaced would be submitted.
-  let resize = false;
-  const resized = new ResizeObserver(() => { resize = true; });
-  resized.observe(canvas);
-  let base = null, patching = Promise.resolve(), looping = null;
+  let resize = false, unwatch = () => {};
+  const render = () => {
+    if (resize) { resize = false; game.engine.resize(); }
+    if (!state.paused) game.blend?.scene.render();
+  };
+  const loop = areaRenderLoop(render, { engine: () => game.engine, wanted: () => state.running });
+  const watch = () => {
+    unwatch();
+    const resized = new ResizeObserver(() => { resize = true; }), hidden = watchShown(canvas, loop.shown);
+    resized.observe(canvas);
+    unwatch = () => { resized.disconnect(); hidden(); };
+  };
+  watch();
+  let base = null, patching = Promise.resolve();
   const report = (status) => { state.status = status; };
   // The project's game code (game-code.js) over the run: one world per loaded run, so Reset and a fresh load start it
   // fresh, while a patch keeps it; a saved file swaps its definitions in, keeping each behaviour's state.
@@ -79,12 +97,7 @@ export function mountGameView(section, { world, header, run: files, codeError })
   const shown = () => {
     state.shared = game.blend ? sharedStatus(game.blend.scene) : '';
     startGame().catch((error) => report(`Game code: ${error.message}`));
-    if (looping === game.engine) return;
-    looping = game.engine;
-    looping.runRenderLoop(() => {
-      if (resize) { resize = false; game.engine.resize(); }
-      if (!state.paused) game.blend?.scene.render();
-    });
+    loop.update();
   };
   const preview = createPackagePreview({
     world, options, report,
@@ -116,8 +129,12 @@ export function mountGameView(section, { world, header, run: files, codeError })
   };
   const play = run('Play', async () => {
     if (state.running) { pause(); return; }
+    // At the press, while the browser still takes it as the user's: fullscreen and sound need one.
+    fullscreen?.();
+    audioContext()?.resume();
     await preview.reload();
     Object.assign(state, { running: true, paused: false });
+    loop.update();
     report('Playing');
     // Play is the intent to play: the game takes the keys at once.
     canvas.focus();
@@ -129,6 +146,21 @@ export function mountGameView(section, { world, header, run: files, codeError })
     shown();
     state.paused = false;
     report('Reset');
+  });
+  // The run, its engine (scene, physics, game code) and its files gone; the game's sound held until the next Play.
+  const stop = run('Stop', async () => {
+    Object.assign(state, { running: false, paused: false, shared: '' });
+    await preview.settled();
+    await patching;
+    loop.update();
+    stopGame();
+    game.dispose();
+    if (base) await removeRun(base);
+    base = null;
+    canvas = newCanvas();
+    watch();
+    audioContext()?.suspend();
+    report('Stopped');
   });
   // The scene's modifier stack for packages: a structural change, which exports again and loads the game fresh.
   const evaluate = run('Modifier Stack', async (value) => {
@@ -145,8 +177,9 @@ export function mountGameView(section, { world, header, run: files, codeError })
   });
   registerOperator('bylonder.game_play', { poll: () => !state.busy, run: play });
   registerOperator('bylonder.game_pause', { poll: () => state.running, run: pause });
+  registerOperator('bylonder.game_stop', { poll: () => state.running && !state.busy, run: stop });
   registerOperator('bylonder.game_reset', { poll: () => state.running && !state.busy, run: reset });
-  createApp({ render: () => h(GameView, { ...state, evaluations: EVALUATIONS, header, canvas, onPlay: play, onPause: pause, onReset: reset, onEvaluation: evaluate }) }).mount(section);
+  createApp({ render: () => h(GameView, { ...state, evaluations: EVALUATIONS, header, canvas, onPlay: play, onPause: pause, onStop: stop, onReset: reset, onEvaluation: evaluate }) }).mount(section);
   return {
     changed: () => {
       state.evaluation = exportEvaluation(world);
@@ -154,6 +187,9 @@ export function mountGameView(section, { world, header, run: files, codeError })
     },
     settled: async () => { await preview.settled(); await patching; },
     get blend() { return game.blend; },
+    /** The game's engine while it plays, and whether it draws (its area shown). */
+    get engine() { return game.engine; },
+    get drawing() { return loop.running; },
     /** The game's world while it plays (game/world.js). */
     get world() { return played?.world ?? null; },
     /** The project's game code (game-code.js), and when it is first loaded. */
@@ -185,7 +221,8 @@ export function mountGameView(section, { world, header, run: files, codeError })
     },
     dispose() {
       stopGame();
-      resized.disconnect();
+      unwatch();
+      loop.update();
       game.dispose();
       if (base) removeRun(base);
     },

@@ -107,6 +107,7 @@
   "bylonder.game_pause",
   "bylonder.game_play",
   "bylonder.game_reset",
+  "bylonder.game_stop",
   "bylonder.group",
   "bylonder.inspector",
   "bylonder.knot_add",

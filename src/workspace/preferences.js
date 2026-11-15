@@ -13,6 +13,7 @@ const props = () => globalThis.__py_modules['_bpy.props'];
 // Each setting: [name, label, description, default], booleans.
 const SETTINGS = [
   ['prepare_shaders', 'Prepare Shaders Ahead', 'On WebGPU, once the views settle after shaders change, every object draws once so it shows without a stall when it comes into view', true],
+  ['play_fullscreen', 'Play in Focus Mode', "The Game area's Play takes the area into Focus Mode, fullscreen in the browser; Esc, Back or its corner button go back", true],
   ['keep_scenes_loaded', 'Keep Scenes Loaded', 'Scenes stay loaded after switching away, so switching back is instant. Uses more memory and graphics contexts', true],
   ['ask_sequencer_setup', 'Ask to Set Up for Video Editing', 'When the Video Sequencer opens on an empty edit, offer to render video and add the scene; off uses the remembered choice', true],
   ['sequencer_setup_video', 'Video Output', 'Remembered choice: render the edit as MPEG-4 video', true],
@@ -49,6 +50,7 @@ function drawSettings(layout, settings) {
   layout.prop(settings, 'threads');
   layout.prop(settings, 'prepare_shaders');
   layout.prop(settings, 'keep_scenes_loaded');
+  layout.prop(settings, 'play_fullscreen');
   layout.prop(settings, 'ask_sequencer_setup');
   const remembered = layout.column(kw({ heading: 'Video Editing Setup', align: true }));
   remembered.active = !settings.ask_sequencer_setup;

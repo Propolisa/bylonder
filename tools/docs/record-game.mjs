@@ -1,5 +1,6 @@
-// Records docs/features/game.md's media: the Game area played beside the 3D View, the running game following an edit
-// made in the app, and its modifier stack switched from Render to Viewport in its header.
+// Records docs/features/game.md's media: Play taking the Game area into Focus Mode, Back giving the layout back, the
+// running game following an edit made in the app, its modifier stack switched from Render to Viewport in its header,
+// and Stop.
 // usage: node tools/docs/record-game.mjs
 import { record } from "./record.mjs";
 
@@ -15,8 +16,14 @@ await record("game", { example: "rigged-character", node: "Body" }, async (r) =>
   };
   await r.gif("play", undefined, async () => {
     await play.click();
-    await header.locator("text=Playing").waitFor({ timeout: 180000 });
+    await app.until((b) => b.dock.focusMode && b.game.drawing, null, 180000);
     await r.pause(4000);
+  });
+  // The phone's or the browser's Back: the area back in the layout, the game still playing.
+  await r.gif("back", undefined, async () => {
+    await r.page.evaluate(() => history.back());
+    await app.until((b) => !b.dock.focused);
+    await r.pause(2500);
   });
   await r.gif("edit", undefined, async () => {
     await r.outliner("Key");
@@ -34,4 +41,9 @@ await record("game", { example: "rigged-character", node: "Body" }, async (r) =>
   await header.locator("text=/Loaded fresh with the Viewport stack/").waitFor({ timeout: 180000 });
   await r.pause(2000);
   await r.shot("stack-viewport", await game());
+  await r.gif("stop", await game(), async () => {
+    await header.getByRole("button", { name: "Stop" }).click();
+    await app.until((b) => !b.game.engine);
+    await r.pause(1500);
+  });
 });

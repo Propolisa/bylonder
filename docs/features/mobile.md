@@ -21,6 +21,7 @@ media:
   - mobile/edge.gif
   - mobile/carry.gif
   - mobile/bubbles.gif
+  - mobile/focus.png
 ui:
   - VIEW_3D
   - PROPERTIES
@@ -42,6 +43,7 @@ operators:
   - screen.area_split
   - screen.area_join
   - screen.area_swap
+  - screen.screen_full_area
   - transform.translate
   - transform.rotate
   - transform.resize
@@ -57,10 +59,14 @@ code:
   - src/editors/interface/components/ui/number-field/NumberField.vue
   - src/editors/interface/touch-keys.js
   - src/editors/screen/dock.js
+  - src/editors/screen/area-shown.js
+  - src/editors/interface/components/ui/fullscreen-exit/FullscreenExit.vue
   - src/theme.css
 tests:
   - tests/touch.test.js
   - tests/touch-keys.test.js
+  - tests/area-shown.test.js
+  - tests/wm-back.test.js
   - tests/e2e/touch.mjs
 limits:
   - Shortcut bubbles show for the 3D Viewport's modal operators (transforms, Extrude); the 2D editors' (Graph Editor, Dope Sheet, Outliner) do not show them yet.
@@ -132,6 +138,12 @@ active, so it can be posed by touch; its work light follows the Head bone.
    upper arm turns 20 degrees about X and the light on the bench moves with it.
 
    ![Rotate by the keys pie, then X, 20 and Confirm by bubbles](../media/features/mobile/bubbles.gif)
+
+10. **Focus on one area.** Hold the 3D Viewport's header and tap Focus Mode: the area fills the screen without its
+    header, and the browser goes fullscreen. Back, Esc or the faint button in its top right corner put it back in the
+    layout. Areas hidden meanwhile draw nothing.
+
+    ![The 3D Viewport in Focus Mode, its corner button at the top right](../media/features/mobile/focus.png)
 
 ## Project files
 

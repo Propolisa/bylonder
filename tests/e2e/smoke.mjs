@@ -205,6 +205,8 @@ const checks = {
   // The Game plays on an engine of its own, of the app's one Babylon; input over the 3D View never reaches the game, over
   // the Game it does; Reset after Reset leaves the 3D View drawing.
   async "the Game area plays the exported scene in its area, apart from the app's views"() {
+    // Beside the 3D View, not in Focus Mode.
+    await app.bylonder((b) => { b.bylonderPreferences().play_fullscreen = false; });
     const game = await previewDraws("game", () => app.bylonder((b) => b.runOperator("bylonder.game_play")), "Playing");
     assert.ok(await app.bylonder((b) => { const game = b.game.blend.scene, app = b.world.scene; return game instanceof app.constructor && game.getEngine() !== app.getEngine(); }),
       "the game runs on its own engine, of the app's one Babylon");
@@ -238,6 +240,29 @@ const checks = {
       await app.bylonder(async (b) => { b.world.views.wake(); await new Promise((resolve) => setTimeout(resolve, 300)); });
       assert.ok(await redSpread(area) > 40, `the 3D View draws after Reset ${i + 1}`);
     }
+  },
+
+  // Play takes the Game area into Focus Mode, in the browser's fullscreen; Esc gives the layout back; the game draws only
+  // while its area shows; Stop ends it, its engine disposed.
+  async "Play goes fullscreen in Focus Mode, Esc returns the area, Stop frees the game"() {
+    const fullscreen = () => app.frame().evaluate(() => !!document.fullscreenElement);
+    await app.bylonder(async (b) => { b.bylonderPreferences().play_fullscreen = true; if (b.game.engine) await b.runOperator("bylonder.game_stop"); b.dock.show("game"); });
+    await app.until((b) => !b.game.engine);
+    await app.frame().locator('button[title^="Play the scene"]').click();
+    await app.until((b) => b.dock.focusMode && b.dock.focused === "game" && b.game.drawing, null, 120000);
+    assert.ok(await fullscreen(), "the page is fullscreen");
+    assert.equal(await app.frame().locator('[data-section="game"] .dock-heading').isVisible(), false, "Focus Mode hides the header");
+    await app.page.keyboard.press("Escape");
+    await app.until((b) => !b.dock.focused);
+    assert.equal(await fullscreen(), false);
+    assert.ok(await app.frame().locator('[data-section="game"] .dock-heading').isVisible(), "the area is back in the layout");
+    await app.bylonder((b) => b.dock.maximize("viewport"));
+    await app.until((b) => !b.game.drawing);
+    await app.bylonder((b) => b.dock.maximize("viewport"));
+    await app.until((b) => b.game.drawing);
+    await app.bylonder((b) => b.runOperator("bylonder.game_stop"));
+    await app.until((b) => !b.game.engine && !b.game.drawing && !b.game.blend);
+    assert.equal(await app.frame().locator("#game-section canvas").count(), 1, "one canvas, the next run's");
   },
 
   // A failed export says why in its dialog, which stays open to try again, and in Info; it never just downloads nothing.

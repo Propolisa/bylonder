@@ -2,7 +2,7 @@
 id: game
 title: Game
 summary: Bylonder's own editor that plays the scene as File > Export > JavaScript ships it, run by the exported page's runtime, while edits, undo and redo made in the app reach the running game.
-expect: Play exports the scene in memory and runs it in the area on an engine of its own, as its page does; a value edit (a move, a material colour, backface culling or alpha cutoff, a light's power, exposure, colour or spot cone, a camera's lens, sensor or orthographic scale, the view's exposure or gamma, visibility, a shape key, a custom property) shows in the game on the next frame, and the scoped export behind it checks it once the app is idle, loading the game fresh if they disagree; other edits reach it as a patch after that export (about a second on Rigged Character); the game's own state never writes back to the scene; Reset starts the game again from the scene as it is now; Play takes as long as an export.
+expect: Play exports the scene in memory and runs it in the area on an engine of its own, as its page does; a value edit (a move, a material colour, backface culling or alpha cutoff, a light's power, exposure, colour or spot cone, a camera's lens, sensor or orthographic scale, the view's exposure or gamma, visibility, a shape key, a custom property) shows in the game on the next frame, and the scoped export behind it checks it once the app is idle, loading the game fresh if they disagree; other edits reach it as a patch after that export (about a second on Rigged Character); the game's own state never writes back to the scene; Reset starts the game again from the scene as it is now; Play takes as long as an export, and takes the area into Focus Mode with the page fullscreen, which Esc, Back or the corner button leave; Stop ends the game and frees its engine, scene, physics and sound; a Game area hidden by the layout draws nothing.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/files/import_export.html
@@ -10,12 +10,15 @@ example: rigged-character
 thumbnail: game/thumbnail.png
 media:
   - game/play.gif
+  - game/back.gif
   - game/edit.gif
   - game/stack-render.png
   - game/stack-viewport.png
+  - game/stop.gif
 ui:
   - TOPBAR_MT_file_export
 operators:
+  - screen.screen_full_area
   - ed.undo
   - ed.redo
 code:
@@ -23,12 +26,14 @@ code:
   - src/editors/space_game/GameView.vue
   - src/editors/space_game/game-run.js
   - src/editors/space_game/package-link.js
+  - src/editors/screen/area-shown.js
   - src/editors/space_package/package-preview.js
   - src/io_scene_babylon/controls-export.js
   - src/io_scene_babylon/export-settings.js
   - src/io_scene_babylon/scoped-export.js
   - src/io_scene_babylon/scene-patch.js
 tests:
+  - tests/area-shown.test.js
   - tests/game-run-wasm.test.js
   - tests/game-instant-edits-wasm.test.js
   - tests/controls-coverage-wasm.test.js
@@ -58,18 +63,26 @@ own editor, chosen from an area's editor type menu.
 ## Steps
 
 1. Open an area's editor type menu and choose Game, then press Play. The scene is exported and its page plays in the
-   area. Pause holds the game; Reset starts it again from the scene as it is now.
+   area, in Focus Mode: the area alone, without its header, and the page fullscreen. Preferences > System > Bylonder >
+   Play in Focus Mode turns that off.
 
-   ![Game chosen and played](../media/features/game/play.gif)
+   ![Game chosen and played in Focus Mode](../media/features/game/play.gif)
 
-2. Edit the scene while it plays: move an object, change a material's colour or a light's power. The game shows the
+2. Press Esc, the phone's Back, or the faint button in the top right corner: the area goes back to its place in the
+   layout and the game keeps playing. In its header, Pause holds the game and Reset starts it again from the scene as
+   it is now. While the layout hides the area (another area maximized, or a folded drawer closed), the game draws
+   nothing.
+
+   ![Back to the layout](../media/features/game/back.gif)
+
+3. Edit the scene while it plays: move an object, change a material's colour or a light's power. The game shows the
    value on its next frame. Behind it the change is exported and checked; the header shows the export and says when
    the game was loaded fresh. Undo and redo of a value reach it the same way. Structural edits (a mesh, node links, a
    new modifier or object) reach the game once that export is done.
 
    ![The game following an edit](../media/features/game/edit.gif)
 
-3. Choose the modifier stack the game evaluates in its header, Viewport or Render. It is the scene's export setting
+4. Choose the modifier stack the game evaluates in its header, Viewport or Render. It is the scene's export setting
    (File > Export > JavaScript's Modifier Stack, saved in the .blend), Render by default. Choosing one exports the scene
    again and loads the game fresh; the header says so. Here the body's Armature modifier is off in viewports and on in
    renders: Render poses the body by its rig, Viewport leaves it at rest.
@@ -77,6 +90,11 @@ own editor, chosen from an area's editor type menu.
    ![Render chosen](../media/features/game/stack-render.png)
 
    ![Viewport chosen, the game loaded fresh](../media/features/game/stack-viewport.png)
+
+5. Press Stop. The game ends: its engine, scene, physics, game code and sound are disposed and its render loop stops,
+   so the app runs as fast as before Play. Play starts it again from the scene.
+
+   ![Stop](../media/features/game/stop.gif)
 
 ## Project files
 

@@ -73,3 +73,6 @@
 .dock-drawer-edge.bottom::after{bottom:0}.dock-drawer-edge.top::after{top:0}
 .dock-content.dock-in-drawer{z-index:9}
 .dock-leaf.no-header>.dock-heading{display:none}
+.dock-shell.focus-mode>.dock-splits{padding:0}
+/* Focus Mode shows the area alone, without the window's touch bar, as Blender's hides its status bar. */
+:root.bl-focus-mode .bl-touch-bar{display:none}
