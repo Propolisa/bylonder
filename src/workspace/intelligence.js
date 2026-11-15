@@ -97,8 +97,6 @@ export async function setupIntelligence(onStatus) {
   extra(sdk, "file:///node_modules/@workbench/sdk/index.d.ts");
   for (const [path, source] of Object.entries(gameTypes)) extra(source, "file:///node_modules/bylonder/" + path.split("/").pop());
   extra(globals, "file:///workspace/__globals.d.ts");
-  // inkjs, which the Game area provides to a project with Ink stories (src/runtime/world.js), loosely typed.
-  extra("export const Story: any, Compiler: any, InkList: any;", "file:///node_modules/inkjs/index.d.ts");
   extra(
     'declare module "*?raw" { const source:string;export default source } declare module "*.css?module" {const style:HTMLStyleElement;export default style}',
     "file:///workspace/__assets.d.ts",
@@ -111,8 +109,8 @@ export async function setupIntelligence(onStatus) {
     babylonjs: ["../node_modules/@babylonjs/core/index.d.ts"],
     "@workbench/sdk": ["../node_modules/@workbench/sdk/index.d.ts"],
     bylonder: ["../node_modules/bylonder/define.d.ts"],
-    inkjs: ["../node_modules/inkjs/index.d.ts"],
-    "inkjs/full": ["../node_modules/inkjs/index.d.ts"],
+    inkjs: ["../node_modules/inkjs/ink.d.mts"],
+    "inkjs/full": ["../node_modules/inkjs/ink.d.mts"],
   };
   let generation = 0,
     remoteDisposers = [],
