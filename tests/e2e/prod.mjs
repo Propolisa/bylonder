@@ -515,6 +515,26 @@ try {
     }
   });
 
+  // Picking Cycles after a render (whose memory the page then reuses) loads it on every thread (port/side-modules.js),
+  // and Properties shows its panels without further input.
+  await step("Cycles loads after a render and shows its panels", async () => {
+    const opened = await openApp(browser, server.url, BOOT);
+    try {
+      const result = opened.frame().locator(".render-result");
+      await opened.page.click('[data-blender="TOPBAR_MT_render"]');
+      await opened.page.getByRole("menuitem", { name: "Render Image" }).click();
+      await result.locator("[data-status]").filter({ hasText: /^(Finished|Render failed)/ }).waitFor({ timeout: 120000 });
+      await result.locator("[data-close]").click();
+      await opened.locator('[role="tab"][aria-label="Render"]').click();
+      await opened.locator('[data-blender="RENDER_PT_context"]').getByText("EEVEE", { exact: true }).first().click();
+      await opened.frame().getByText("Cycles", { exact: true }).last().click();
+      await opened.locator('[data-blender="CYCLES_RENDER_PT_sampling"]').first().waitFor({ state: "attached", timeout: 120000 });
+      assert.deepEqual(opened.errors, [], "page errors");
+    } finally {
+      await opened.close();
+    }
+  });
+
   // File > Open Folder (folder-repository.js), on a folder in OPFS standing in for one on disk: an empty folder takes the
   // project's files and, once the scene runs, its .blend; edits made in the folder outside the app are taken when the
   // page regains focus; a reload reopens the folder.

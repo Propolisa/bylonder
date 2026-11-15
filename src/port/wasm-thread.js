@@ -22,6 +22,7 @@ async function thread({ module, memory, control, count, slot }, post) {
       Atomics.wait(slots, slot, state, 200);
       sync();
     }
+    sync();
     try {
       instance.exports.wasi_thread_start(slots[slot + 1], slots[slot + 2]);
     } catch (error) {
