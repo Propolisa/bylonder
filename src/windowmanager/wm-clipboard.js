@@ -20,7 +20,7 @@ const refresh = async (event) => {
 provided.clipboard_text_length = () => bytes.length;
 provided.clipboard_text_read = (pointer) => new Uint8Array(x.memory.buffer, pointer >>> 0, bytes.length).set(bytes);
 provided.clipboard_text_write = (pointer, length) => {
-  setClipboardText(decoder.decode(new Uint8Array(x.memory.buffer, pointer >>> 0, length)));
+  setClipboardText(decoder.decode(new Uint8Array(x.memory.buffer, pointer >>> 0, length).slice()));
   globalThis.navigator?.clipboard?.writeText?.(clipboardText()).catch(() => {});
 };
 globalThis.addEventListener?.('focus', refresh);

@@ -2,6 +2,8 @@
 // with C-layout typed arrays. Each unit call copies its arguments into one grow-only scratch block of the module's
 // memory and its outputs back out.
 
+import { hardwareThreads, startThreads, threadsAvailable } from './wasm-threads.js';
+
 // Files Blender's code writes and reads (a .blend Blender's writer saves), by absolute path: the module's file system,
 // in memory. JS puts files in and takes them out.
 export const files = new Map();
@@ -21,7 +23,7 @@ function wasiFor(memory) {
   const decoder = new TextDecoder(), encoder = new TextEncoder();
   const write = (text) => (globalThis.process?.stderr ? process.stderr.write(text) : console.warn(text));
   const view = () => new DataView(memory().buffer);
-  const string = (pointer, length) => decoder.decode(new Uint8Array(memory().buffer, pointer, length));
+  const string = (pointer, length) => decoder.decode(new Uint8Array(memory().buffer, pointer, length).slice());
   // A path as WASI gives one, relative to a directory fd (the root's, or one opened), as the file system's absolute path.
   const path = (pointer, length, dir = ROOT) => {
     const name = string(pointer, length);
@@ -132,7 +134,7 @@ function wasiFor(memory) {
     fd_write(fd, iovs, count, nwritten) {
       if (fd === 1 || fd === 2) {
         const chunks = iovecs(iovs, count).map(([pointer, length]) => new Uint8Array(memory().buffer, pointer, length));
-        chunks.forEach((c) => write(decoder.decode(c)));
+        chunks.forEach((c) => write(decoder.decode(c.slice())));
         view().setUint32(nwritten, chunks.reduce((n, c) => n + c.length, 0), true);
         return ESUCCESS;
       }
@@ -230,8 +232,10 @@ function wasiFor(memory) {
     environ_sizes_get(count, size) { view().setUint32(count, 0, true); view().setUint32(size, 0, true); return ESUCCESS; },
     environ_get: () => ESUCCESS,
     fd_fdstat_set_flags: (fd) => (open.has(fd) || fd < ROOT ? ESUCCESS : EBADF),
+    sched_yield: () => ESUCCESS,
     random_get(at, length) {
-      for (let i = 0; i < length; i += 65536) crypto.getRandomValues(new Uint8Array(memory().buffer, at + i, Math.min(65536, length - i)));
+      // Through a copy: a shared memory's views are not filled.
+      for (let i = 0; i < length; i += 65536) new Uint8Array(memory().buffer, at + i).set(crypto.getRandomValues(new Uint8Array(Math.min(65536, length - i))));
       return ESUCCESS;
     },
     // One thread cannot wait for another: each subscription (a sleep's clock) is answered at once, as elapsed.
@@ -262,10 +266,40 @@ const gap = (name) => {
   logged.add(name);
   return 0;
 };
-const missing = new Proxy({}, { get: (_, name) => (...args) => (provided[name] ? provided[name](...args) : gap(name)) });
+export const missing = new Proxy({}, { get: (_, name) => (...args) => (provided[name] ? provided[name](...args) : gap(name)) });
 
-// Compiled modules by URL, compiled once per realm; a worker is given its creator's (provideModule) instead of
-// compiling the bytes again.
+// A module's imported memory (a wasm32-wasi-threads build's, shared): { initial, maximum, shared } from its import
+// section, and where it is shared but threads are not available, the bytes made to import it unshared (the module then
+// runs on one thread: its atomics work on unshared memory, and the page's thread never waits, wasm/threads.cc).
+function importedMemory(bytes) {
+  const data = ArrayBuffer.isView(bytes) ? bytes : new Uint8Array(bytes);
+  let at = 8;
+  const uleb = () => { let value = 0, shift = 0, byte; do { byte = data[at++]; value += (byte & 0x7f) * 2 ** shift; shift += 7; } while (byte & 0x80); return value; };
+  const skipName = () => { const length = uleb(); at += length; };
+  while (at < data.length) {
+    const id = data[at++], size = uleb(), end = at + size;
+    if (id !== 2) { at = end; continue; }
+    for (let count = uleb(); count--;) {
+      skipName(); skipName();
+      const kind = data[at++];
+      if (kind === 2) {
+        const flagsAt = at++, flags = data[flagsAt];
+        const limits = { initial: uleb(), maximum: flags & 1 ? uleb() : undefined, shared: !!(flags & 2) && threadsAvailable() };
+        data[flagsAt] = limits.shared ? flags : flags & ~2;
+        return limits;
+      }
+      if (kind === 0) uleb();
+      else if (kind === 1) { at++; if (data[at++] & 1) uleb(); uleb(); }
+      else if (kind === 3) at += 2;
+      else { at++; uleb(); }
+    }
+    return null;
+  }
+  return null;
+}
+
+// Compiled modules by URL with their imported memory (importedMemory), compiled once per realm; a worker is given its
+// creator's (provideModule) instead of compiling the bytes again.
 const compiled = new Map();
 export async function read(url) {
   if (url.protocol === 'file:') return process.getBuiltinModule('fs/promises').readFile(url);
@@ -273,24 +307,41 @@ export async function read(url) {
   if (!response.ok) throw Error(`${url}: ${response.status} ${response.statusText}`);
   return response.arrayBuffer();
 }
-export const compile = (url) => compiled.get(url.href) ?? compiled.set(url.href, read(url).then((bytes) => WebAssembly.compile(bytes))).get(url.href);
+const compileBytes = async (bytes) => { const memory = importedMemory(bytes); return { module: await WebAssembly.compile(bytes), memory }; };
+export const compile = (url) => compiled.get(url.href) ?? compiled.set(url.href, read(url).then(compileBytes)).get(url.href);
 export const provideModule = (url, module) => compiled.set(url.href, Promise.resolve(module));
 
-export async function instantiate(url) {
-  let memory;
-  const instance = await WebAssembly.instantiate(await compile(url), { wasi_snapshot_preview1: wasiFor(() => memory), env: missing });
+// The imports from JS other than WASI's (env), with what a threaded module imports: its memory and the number of
+// threads it runs on (wasm/threads.cc's processor count).
+const env = (memory, threads, own = {}) => (memory ? new Proxy({}, { get: (_, name) => ({ memory, hardware_threads: () => threads, ...own })[name] ?? missing[name] }) : missing);
+// A thread's imports (wasm-threads.js): WASI's calls on its own file system (threads read no files), thread-spawn, and
+// the thread's own (`own`: loading side modules).
+export const threadImports = (memory, threads, spawn, own) => ({ wasi_snapshot_preview1: wasiFor(() => memory), env: env(memory, threads, own), wasi: { 'thread-spawn': spawn } });
+
+// The module's first thread is the page's: its instance is made first, as the first to instantiate a shared memory's
+// module copies its data in and takes the first thread's thread-locals; the other threads' instances follow.
+export async function instantiate(url, threads = hardwareThreads()) {
+  const { module, memory: limits } = await compile(url);
+  let memory = limits && new WebAssembly.Memory(limits), spawn = () => -6;
+  if (!limits?.shared) threads = 1;
+  const imports = { wasi_snapshot_preview1: wasiFor(() => memory), env: env(memory, threads), wasi: { 'thread-spawn': (arg) => spawn(arg) } };
+  const instance = await WebAssembly.instantiate(module, imports);
   memory = instance.exports.memory;
+  // A worker per processor for oneTBB, and spares for threads of Blender's own (window-manager jobs, Cycles' session).
+  if (threads > 1) spawn = await startThreads(module, memory, threads + 4);
   instance.exports._initialize?.();
   instance.exports.blender_init?.();
-  return new Heap(instance.exports);
+  return new Heap(instance.exports, threads);
 }
 
 // Bytes an argument takes in scratch, 8-aligned so every typed array view lines up.
 export const size = (array) => (array.byteLength + 7) & ~7;
 
 class Heap {
-  constructor(exports) {
+  constructor(exports, threads = 1) {
     this.exports = exports;
+    // The threads the module runs on: the page's and its pool's (wasm-threads.js).
+    this.threads = threads;
     this.scratch = 0;
     this.capacity = 0;
     this.top = 0;

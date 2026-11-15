@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # FFTW 3 in single precision (libfftw3f, as Blender's builds use it: the compositor's Fog Glow and Convolve) for
-# wasm32-wasi, as released, by FFTW's own configure on the module's toolchain, without its threads library (the module
-# runs on one thread: wasm/fftw-threads.cc).
+# wasm32-wasi-threads, as released, by FFTW's own configure on the module's toolchain, without its threads library (its
+# plans run on the calling thread: wasm/fftw-threads.cc).
 # Usage: deps/fftw.sh FFTW_SOURCE BUILD   (BUILD gets libfftw3f.a and include/fftw3.h)
 set -euo pipefail
 SRC=$(realpath "$1")

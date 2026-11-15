@@ -11,6 +11,7 @@ import { mountAnimEditor, registerAnimOperators } from './editors/animation/anim
 import { mountRuntimeLayout, IMAGE_MODES } from "./editors/screen/runtime.js";
 import { applyRenderSettings, sizeToCanvas } from "./workspace/render-settings.js";
 import { createEngine, rememberBackend } from "./render/gpu-engine.js";
+import { rememberThreads } from "./port/wasm-threads.js";
 import { createPipelineWarmup } from "./draw/pipeline-warmup.js";
 import { createObjectActions } from "./editors/object/object-actions";
 import { createObjectCommands } from "./editors/object/commands";
@@ -608,7 +609,7 @@ const themed = () => {
 themed();
 followPixelRatio(window, [document, parent.document]);
 const setUiScale = (value) => { preferences().view.ui_scale = value; preferencesChanged(); };
-onPreferencesChanged(() => { themed(); rememberBackend(bylonderPreferences().gpu_backend); send("preferences", { keep_scenes_loaded: bylonderPreferences().keep_scenes_loaded }); });
+onPreferencesChanged(() => { themed(); rememberBackend(bylonderPreferences().gpu_backend); rememberThreads(bylonderPreferences().threads); send("preferences", { keep_scenes_loaded: bylonderPreferences().keep_scenes_loaded }); });
 // The Preferences editor: an area's editor (Editor Type), mounted once it is first shown, and Edit > Preferences.
 const mountWhenShown = (host, mount) => {
   const observer = new ResizeObserver(() => { if (host.clientWidth) { observer.disconnect(); mount(); } });

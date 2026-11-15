@@ -50,6 +50,8 @@ src/bmesh/bmesh.wasm.key
 src/bmesh/python313.zip
 src/bmesh/scripts.zip
 src/bmesh/addons.zip
+src/bmesh/cycles.wasm
+src/bmesh/cycles.zip
 
 # Demo packages, fetched by scripts/module.mjs from the release demo-packages (docs/demos/packages.json)
 docs/demos/*/world/
