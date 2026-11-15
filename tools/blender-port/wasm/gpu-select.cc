@@ -72,6 +72,12 @@ using namespace blender;
 
 /* port-override: the GPU module is past the seam; selection projects by the view's own matrices. */
 void blender::DRW_gpu_context_enable() {}
+/* port-override: no draw GPU context to hand over (OpenSubdiv's GPU evaluator asks around its evaluation). */
+bool blender::DRW_gpu_context_release()
+{
+  return false;
+}
+void blender::DRW_gpu_context_activate(bool /*drw_state*/) {}
 void blender::DRW_gpu_context_disable()
 {
   if (selecting_view) {
