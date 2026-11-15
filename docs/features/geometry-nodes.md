@@ -50,6 +50,7 @@ tests:
   - tests/instances-wasm.test.js
 limits:
   - Volumes are evaluated but not drawn; curves draw as the hair curves do.
+  - Evaluation runs on all cores where the page is cross-origin isolated; in Safari, and in a page that embeds the app without isolation, it runs on one thread.
   - Instances draw where their geometry is a mesh, an object or a point cloud; instanced curves and volumes do not.
   - Instance attributes (a color per instance) do not reach the material yet: an instance draws in its mesh's first material.
   - Points are spheres in their material in every shading mode; Solid does not give them Workbench's studio light yet.

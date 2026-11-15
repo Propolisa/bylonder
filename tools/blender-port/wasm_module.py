@@ -1,4 +1,4 @@
-"""WebAssembly modules: whole Blender libraries built with Clang's wasm32-wasi target, for state that lives in the
+"""WebAssembly modules: whole Blender libraries built with Clang's wasm32-wasi-threads target, for state that lives in the
 module (the edit-mode BMesh), where per-function units (wasm.py) would copy it at every call.
 
 A module (manifest `modules`: output path under src/, its API files in wasm/, the library directories it draws on,
@@ -32,6 +32,13 @@ import convert
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 WASM = os.path.join(HERE, 'wasm')
+# WASI with threads (wasi-threads), on wasi-sdk's sysroot, whose libc and libc++ have them (scripts/setup-build-host.sh).
+SYSROOT = os.environ.get('WASI_SYSROOT', '/opt/wasi-sysroot')
+TARGET = ['--target=wasm32-wasi-threads', '-pthread', f'--sysroot={SYSROOT}']
+# A module's memory is the threads' shared memory: imported (each thread's instance is given it) and up to 4 GiB, as
+# shared memory declares its maximum. Its threads start at wasi_thread_start (src/port/wasm-threads.js).
+SHARED_MEMORY = ['-Wl,--import-memory', '-Wl,--export-memory', '-Wl,--shared-memory', '-Wl,--max-memory=4294967296',
+                 '-Wl,--export=wasi_thread_start']
 # Header directories the editors' and RNA's sources include beyond those the converter parses with.
 EDITOR_INCLUDES = ('blenloader', 'modifiers', 'modifiers/intern', 'modifiers/intern/lineart', 'sequencer', 'editors/include', 'editors/mesh', 'windowmanager', 'gpu', 'imbuf', 'blenfont', 'render', 'animrig', 'nodes',
                    'asset_system', 'draw', 'makesdna/intern', 'makesrna/intern', 'imbuf/movie', 'editors/transform', 'python')
@@ -155,6 +162,8 @@ def dependencies(build, deps, build_all=True):
         stamp = os.path.join(out, '.built')
         if not (os.path.exists(stamp) and open(stamp).read() == digest):
             print(f'{name}: building with {dep["build"]["script"]}', file=sys.stderr, flush=True)
+            # From a clean directory: a build system an earlier script configured keeps that script's toolchain.
+            shutil.rmtree(out, ignore_errors=True)
             subprocess.run([script, source, *uses, out], check=True)
             open(stamp, 'w').write(digest)
         return out
@@ -217,12 +226,12 @@ def library_flags(entry, tree, deps, spec):
     entry = entry if isinstance(entry, dict) else {}
     specs = spec.get('dependencies', {})
     used = [n for n in [entry.get('dependency'), *entry.get('uses', [])] if n and specs[n].get('private')]
-    # An include under wasm/ is the module's own (wasm/fstream), the rest are Blender's.
+    # An include under wasm/ is the module's own (wasm/process), the rest are Blender's.
     flags = ([f for n in used for f in include_flags(deps[n], specs[n])]
              + [f'-I{os.path.join(HERE if d.startswith("wasm/") else tree, d)}' for d in entry.get('includes', [])]
              + [f'-D{d}' for d in entry.get('defines', [])] + entry.get('flags', []))
     key = ''.join(f'{n}@{specs[n]["tag"]}' for n in used)
-    # The module's own include directories' headers (wasm/fstream), so a change to one builds its users again.
+    # The module's own include directories' headers (wasm/process), so a change to one builds its users again.
     for d in entry.get('includes', []):
         if d.startswith('wasm/'):
             key += hashlib.sha1(b''.join(open(p, 'rb').read() for p in sorted(glob.glob(os.path.join(HERE, d, '**'), recursive=True))
@@ -289,7 +298,7 @@ def configure(target, variables, root):
 def flags(tree, spec):
     """Clang's arguments for the module's sources, with its Blender build options (`defines`) and the header directories
     outside source/blender it includes (`includes`)."""
-    return [*(f'-D{d}' for d in spec.get('defines', [])), *(f'-I{os.path.join(tree, d)}' for d in spec.get('includes', [])),'--target=wasm32-wasi', '-std=c++20', '-O2', '-DNDEBUG', '-DFMT_HEADER_ONLY', '-fignore-exceptions',
+    return [*(f'-D{d}' for d in spec.get('defines', [])), *(f'-I{os.path.join(tree, d)}' for d in spec.get('includes', [])), *TARGET, '-std=c++20', '-O2', '-DNDEBUG', '-DFMT_HEADER_ONLY', '-fignore-exceptions',
             '-Wno-c++11-narrowing', '-D_WASI_EMULATED_PROCESS_CLOCKS', '-isystem', os.path.join(WASM, 'include'),
             '-include', os.path.join(WASM, 'compat.h'), *convert.include_args(tree),
             *(f'-I{os.path.join(tree, "source/blender", d)}' for d in EDITOR_INCLUDES), f'-I{os.path.join(tree, "intern/guardedalloc/intern")}']
@@ -303,7 +312,7 @@ def operator_table(tree, build, args, spec):
     names = []
     for path in spec.get('operators', []):
         tu = ci.Index.create().parse(os.path.join(tree, path), args=[a for a in args if a.startswith(('-I', '-D', '-std', '-isystem'))]
-                                     + ['-x', 'c++', '--target=wasm32-wasi'], options=ci.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES)
+                                     + ['-x', 'c++', *TARGET], options=ci.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES)
         names += [c.spelling for c in tu.cursor.walk_preorder() if c.kind == ci.CursorKind.FUNCTION_DECL
                   and c.location.file and c.location.file.name.endswith(path) and '_OT_' in c.spelling
                   and [t.spelling for t in c.type.argument_types()] == ['wmOperatorType *']]
@@ -428,10 +437,9 @@ def rna_dna_fields(build):
 
 
 def own_headers():
-    """The module's own headers (wasm/*.hh, wasm/include and wasm/fstream), which its sources and some of Blender's
+    """The module's own headers (wasm/*.hh and wasm/include), which its sources and some of Blender's
     include: a change to them rebuilds them."""
-    paths = sorted(glob.glob(os.path.join(WASM, '*.h*')) + glob.glob(os.path.join(WASM, 'include', '**', '*'), recursive=True)
-                   + glob.glob(os.path.join(WASM, 'fstream', '*')))
+    paths = sorted(glob.glob(os.path.join(WASM, '*.h*')) + glob.glob(os.path.join(WASM, 'include', '**', '*'), recursive=True))
     return hashlib.sha1(b''.join(open(p, 'rb').read() for p in paths if os.path.isfile(p))).hexdigest()
 
 
@@ -519,7 +527,7 @@ def sdna(tree, build, args, archives):
     outputs = [os.path.join(out, f) for f in ('dna.cc', 'dna_type_offsets.h', 'dna_verify.cc', 'dna_struct_ids.cc', 'dna_defaults.cc')]
     stamp = os.path.join(out, '.digest')
     if not (os.path.exists(stamp) and open(stamp).read() == digest and all(map(os.path.exists, outputs))):
-        tool_args = [f'-I{os.path.join(WASM, "fstream-read")}', *args, f'-I{out}', f'-I{os.path.join(makesdna, "intern")}']
+        tool_args = [*args, f'-I{out}', f'-I{os.path.join(makesdna, "intern")}']
         # With the module's platform functions (allocation, thread-local destructors).
         objects = compile_all(build, [*sources, os.path.join(WASM, 'platform.cc')], tool_args, digest)
         if not all(objects.values()):
@@ -528,13 +536,13 @@ def sdna(tree, build, args, archives):
                                     capture_output=True, text=True)
             sys.exit(f'makesdna does not build:\n{result.stderr}')
         tool = os.path.join(out, 'makesdna.wasm')
-        link = subprocess.run(['clang++', '--target=wasm32-wasi', '-O2', *objects.values(), *archives, *archives, '-lwasi-emulated-process-clocks',
-                               '-Wl,--allow-undefined', '-o', tool], capture_output=True, text=True)
+        link = subprocess.run(['clang++', *TARGET, '-O2', *objects.values(), *archives, *archives, '-lwasi-emulated-process-clocks',
+                               '-Wl,--shared-memory', '-Wl,--max-memory=4294967296', '-Wl,--allow-undefined', '-o', tool], capture_output=True, text=True)
         if link.returncode:
             sys.exit(f'makesdna does not link:\n{link.stderr}')
         script = ("const { WASI } = require('node:wasi'); const fs = require('node:fs');"
                   "const wasi = new WASI({ version: 'preview1', args: ['makesdna', ...process.argv.slice(2)], preopens: { '/': '/' }, returnOnExit: true });"
-                  "const instance = new WebAssembly.Instance(new WebAssembly.Module(fs.readFileSync(process.argv[1])), { wasi_snapshot_preview1: wasi.wasiImport,"
+                  "const instance = new WebAssembly.Instance(new WebAssembly.Module(fs.readFileSync(process.argv[1])), { wasi_snapshot_preview1: wasi.wasiImport, wasi: { 'thread-spawn': () => -6 },"
                   " env: new Proxy({}, { get: (_, name) => () => { throw new Error(name); } }) });"
                   "process.exitCode = wasi.start(instance);")
         run = subprocess.run(['node', '-e', script, tool, *outputs, padded + '/'], capture_output=True, text=True)
@@ -548,12 +556,16 @@ def demangle(names):
     return subprocess.run(['c++filt'], input='\n'.join(names), capture_output=True, text=True).stdout.split('\n')[:len(names)]
 
 
-def live_imports(path):
-    """What the module still imports besides WASI: Blender functions nothing in it defines."""
+def imports_of(path):
+    """The names a module imports besides WASI's, as linked (mangled)."""
     script = ("const m = new WebAssembly.Module(require('fs').readFileSync(process.argv[1]));"
               "console.log(JSON.stringify(WebAssembly.Module.imports(m).filter((i) => i.module !== 'wasi_snapshot_preview1').map((i) => i.name)))")
-    names = json.loads(subprocess.run(['node', '-e', script, path], capture_output=True, text=True, check=True).stdout)
-    return sorted({d.split('(')[0] for d in demangle(names)})
+    return json.loads(subprocess.run(['node', '-e', script, path], capture_output=True, text=True, check=True).stdout)
+
+
+def live_imports(path):
+    """What the module still imports besides WASI: Blender functions nothing in it defines."""
+    return sorted({d.split('(')[0] for d in demangle(imports_of(path))})
 
 
 def data_references(objects):
@@ -617,8 +629,8 @@ def build(root, name, spec, tag):
     strip = [] if os.environ.get('WASM_NAMES') else ['-Wl,--strip-all']
     # Blender's code expects a thread's stack (wasm-ld's default is 64 KiB), placed first so that overflowing it traps
     # instead of writing over the module's data.
-    link = ['clang++', '--target=wasm32-wasi', '-O2', '-mexec-model=reactor', '-Wl,--gc-sections', *strip, '-Wl,--error-limit=0',
-            '-Wl,-z,stack-size=8388608', '-Wl,--stack-first',
+    link = ['clang++', *TARGET, '-O2', '-mexec-model=reactor', '-Wl,--gc-sections', *strip, '-Wl,--error-limit=0',
+            '-Wl,-z,stack-size=8388608', '-Wl,--stack-first', *SHARED_MEMORY,
             '-Wl,--export=malloc', '-Wl,--export=free', *(f'-Wl,--wrap={w}' for w in PLATFORM_WRAPPED), *own.values(), *archives, *archives,
             '-lwasi-emulated-process-clocks']
     # A dry link names every unresolved symbol, for the data check; the module itself imports missing functions by name.
@@ -670,7 +682,7 @@ def check_layouts(link, first, out, script, build):
         source = os.path.join(build, 'generated', f'layout_shift_{shift}.c')
         open(source, 'w').write(f'__attribute__((used)) const char layout_shift[{shift}] = {{1}};\n')
         obj, shifted = source[:-2] + '.o', f'{out}.shift{shift}.wasm'
-        subprocess.run(['clang', '--target=wasm32-wasi', '-O2', '-c', source, '-o', obj], check=True)
+        subprocess.run(['clang', *TARGET, '-O2', '-c', source, '-o', obj], check=True)
         try:
             subprocess.run([*link[:at], obj, *link[at:], '-Wl,--export=layout_shift', '-Wl,--allow-undefined', '-o', shifted], check=True,
                            capture_output=True)

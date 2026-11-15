@@ -29,7 +29,7 @@ export function moduleMesh(x, createMesh) {
   // A WebAssembly pointer is an unsigned 32-bit address; exports return it as a signed int.
   const cString = (pointer) => {
     const bytes = new Uint8Array(x.memory.buffer, pointer >>> 0);
-    return new TextDecoder().decode(bytes.subarray(0, bytes.indexOf(0)));
+    return new TextDecoder().decode(bytes.slice(0, bytes.indexOf(0)));
   };
   const withString = (text, fn) => withArrays([new TextEncoder().encode(text + '\0')], ([pointer]) => fn(pointer));
   const bytes = (data) => data && Uint8Array.from(data, Boolean);

@@ -112,6 +112,13 @@ static void keyconfig_reload_updates_set()
   }
 }
 
+/* port-override: the module has no GPU context to make (Babylon owns the page's), so an engine Blender renders in the
+ * module (Cycles) goes on without one, as where a platform cannot make one (RE_engine_gpu_context_create). */
+GHOST_IContext *WM_system_gpu_context_create()
+{
+  return nullptr;
+}
+
 /* port-override: the page draws the window, so it is never made drawable again, which is where Blender sets the
  * window's resolution from the Preferences (WM_window_dpi_set_userdef); reading the Preferences clears the drawable to
  * ask for that, so it is set here. */

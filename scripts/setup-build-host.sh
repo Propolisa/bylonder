@@ -11,6 +11,8 @@ if ! node --version 2>/dev/null | grep -q '^v22'; then
   curl -fsSL https://nodejs.org/dist/v22.17.0/node-v22.17.0-linux-x64.tar.xz | tar -xJ -C /opt
   ln -sf /opt/node-v22.17.0-linux-x64/bin/node /usr/local/bin/node
 fi
+# The module's libc and libc++, with threads (wasi-sdk's sysroot); Ubuntu's wasi-libc builds the per-function units.
+bash "$(dirname "$0")/../tools/blender-port/wasi-sysroot.sh"
 for tool in clang clang++ wasm-ld llvm-ar llvm-nm; do
   [ -e /usr/bin/$tool ] || ln -s /usr/bin/$tool-18 /usr/bin/$tool
 done

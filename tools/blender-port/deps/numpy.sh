@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# numpy for wasm32-wasi, by numpy's own meson build (its vendored meson) as a cross build against deps/cpython.sh's
+# numpy for wasm32-wasi-threads, by numpy's own meson build (its vendored meson) as a cross build against deps/cpython.sh's
 # Python. wasm32-wasi has no shared libraries: each extension module is linked as its shared library would be, into one
 # object whose definitions are its own but its PyInit function, and numpy_inittab lists them by package name for
 # PyImport_ExtendInittab (CPython's BuiltinImporter finds dotted names). The build Python is the host's python3.13 seeing
@@ -19,14 +19,14 @@ if [ ! -x venv/bin/cython ]; then
 fi
 cat >python <<EOF
 #!/bin/sh
-_PYTHON_HOST_PLATFORM=wasi-wasm32 _PYTHON_SYSCONFIGDATA_NAME=_sysconfigdata__wasi_wasm32-wasi \
+_PYTHON_HOST_PLATFORM=wasi-wasm32 _PYTHON_SYSCONFIGDATA_NAME=_sysconfigdata__wasi_wasm32-wasi-threads \
 PYTHONPATH=$PY/$(cat "$PY/pybuilddir.txt") exec python3.13 "\$@"
 EOF
 chmod +x python
 cat >cross.ini <<EOF
 [binaries]
-c = ['$TOOLS/clang-wasi']
-cpp = ['$TOOLS/clang-wasi', '-fignore-exceptions', '-isystem', '$TOOLS/../wasm/include']
+c = ['$TOOLS/clang-wasi', '-include', '$TOOLS/errno-location.h']
+cpp = ['$TOOLS/clang-wasi', '-fignore-exceptions', '-isystem', '$TOOLS/../wasm/include', '-include', '$TOOLS/errno-location.h']
 ar = 'llvm-ar-18'
 python = '$BUILD/python'
 cython = '$BUILD/venv/bin/cython'
