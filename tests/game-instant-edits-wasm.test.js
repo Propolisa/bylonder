@@ -24,10 +24,12 @@ sync.view();
 const game = createGameRun({ appModule, exportAgain: () => preview.reload(), engine: () => new core.NullEngine() });
 let written, asset, copy, exports = 0, posted = Promise.resolve();
 // Once the patches asked for are sent and applied.
-const settled = async () => { await preview.settled(); await posted; };
+// The app's idle wait, run when the test settles: what is exported before it is exported at once.
+const idles = [];
+const settled = async () => { while (idles.length) idles.shift()(); await preview.settled(); await posted; };
 const statuses = [], fresh = [];
 // The runs: the Game area's, and the scene added to a scene of a page's own with a copy made of it.
-const preview = createPackagePreview({ world, idle: (run) => run(), report: (status) => statuses.push(status),
+const preview = createPackagePreview({ world, idle: (run) => idles.push(run), report: (status) => statuses.push(status),
   set: (changes) => { game.set(changes); setControls(asset, changes); },
   post: (patch, reload) => {
     fresh.push(reload);
@@ -94,6 +96,17 @@ for (const [kind, edit] of Object.entries(EDITS)) {
 }
 assert.notEqual(shown(game.blend).shape, undefined, 'the shape key is checked in the game');
 
+// A setting the run remakes (an area light's size) is exported at once, with no idle wait, and edits made meanwhile, as a
+// drag makes them, fold into one export after it with their latest values.
+const key = objects.get('Key').data, before = fresh.length;
+for (const step of [1.1, 1.2, 1.3]) {
+  key.size *= step;
+  sync.view();
+}
+await settled();
+assert.ok(fresh.length - before >= 1 && fresh.length - before <= 2, `three steps of a drag export at most twice (${fresh.length - before})`);
+assert.equal(+find(game.blend.scene.lights, 'Key').width.toFixed(5), +key.size.toFixed(5), 'the run shows the last size');
+
 // Reconciled: the live tables are a full export's, and the patched run shows what a fresh run of them does.
 const full = packageState(await exportPackage(world, {}));
 assert.equal(preview.state.version, full.version, 'the reconciled tables equal a full export');
@@ -110,6 +123,16 @@ await settled();
 assert.equal(fresh.at(-1), true, 'the export disagreeing with a fast set loads the run fresh');
 assert.ok(loaded.scene.isDisposed && game.blend !== loaded, 'no partial state: a fresh run');
 assert.match(statuses.at(-1), /^Loaded fresh: objects\["Key"\]\.location\[1\]/, 'and the header says so');
+
+// An edit the runs do not show (a camera's sensor fit) is exported at once, with no idle wait.
+const exportedBefore = fresh.length;
+objects.get('Camera').data.sensor_fit = 'VERTICAL';
+sync.view();
+preview.changed();
+await preview.settled();
+await posted;
+assert.equal(fresh.length, exportedBefore + 1, 'an edit the runs do not show is exported at once');
+idles.length = 0;
 
 // The game never writes into the editor's data.
 const writes = sync.writes;

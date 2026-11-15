@@ -40,7 +40,7 @@ limits:
   - A separate window is not built yet.
   - The game draws with WebGL 2, as an exported page does by default, also where the app draws with WebGPU, until exported pages draw area lights on WebGPU.
   - A change of the scene, its world, a node group or a collection exports the whole scene, so on a large scene it reaches the game after an export's time.
-  - Settings with no fast control yet (render and scene settings) reach the game after the export; a light's type, shape, area size and influence radius, and a camera's type and sensor fit, remake that object once the export is done.
+  - Settings with no fast control yet (render and scene settings) reach the game after the export; a light's type, shape, area size and influence radius, and a camera's type and sensor fit, remake that object through an export of it alone, started at once (about 0.1 s on Rigged Character, a light's type about 1 s).
   - Exported pages do not draw a light's color temperature, transmission, power normalization, soft falloff, spread, or Blender's shadow resolution, filter, jitter and cascade settings yet (their shadows have a fixed bias, map size and filter per light type), so editing those changes nothing in the game. tests/controls-coverage-wasm.test.js lists them.
   - A camera's lens shift (Shift X and Y) is not drawn by exported pages yet, so the game shows the camera unshifted.
   - A value the game animates (an F-Curve's or a driver's) is the game's: an edit of it reaches the game through the export only.

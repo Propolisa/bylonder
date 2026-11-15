@@ -7,6 +7,7 @@
 import { exportPackage } from '../../io_scene_babylon/js-export.js';
 import { packageState, tablesPatch } from '../../io_scene_babylon/scene-patch.js';
 import { exportChanged, keyOfPointer } from '../../io_scene_babylon/scoped-export.js';
+import { referencesIn } from '../../io_scene_babylon/runtime/ir.js';
 import { float32 } from '../../io_scene_babylon/ir-export.js';
 import { blendData } from '../../python/bpy_rna.js';
 
@@ -19,18 +20,24 @@ function controlValue(path) {
 }
 
 /**
- * The controls a value edit sets fast, by the IR key of their ID (as properties name it, `OB:Cube`): those that bind
- * to the scene, less what the page computes (an F-Curve's or driver's output) and the scene's frame, which is the run's.
+ * The controls an edit sets on the runs, by the IR key of their ID (as properties name it, `OB:Cube`), less what the
+ * page computes (an F-Curve's or driver's output) and the scene's frame, which is the run's; and those of them a run
+ * does not show from their value alone (bound to nothing, read by nothing, not a custom property), which the export's
+ * patch remakes.
  */
-function fastControls(state) {
-  const written = new Set(Object.values(state.tables.entities ?? {}).flatMap((entity) => Object.values(entity?.outputs ?? {}).map((output) => output?.property)));
-  const byID = new Map();
+function liveControls(state) {
+  const outputs = Object.values(state.tables.entities ?? {}).flatMap((entity) => Object.values(entity?.outputs ?? {}).map((output) => output?.property));
+  const read = new Set(Object.values(state.tables.entities ?? {}).flatMap((entity) => [...referencesIn(entity?.inputs)].map(([ref]) => ref.property)));
+  const written = new Set(outputs), byID = new Map(), remade = new Set(), values = new Map();
   for (const [path, property] of Object.entries(state.tables.properties ?? {})) {
-    if (!property?.bind || property.bind.frame || written.has(path)) continue;
+    if (!property || property.bind?.frame || written.has(path)) continue;
     (byID.get(property.id) ?? byID.set(property.id, []).get(property.id)).push(path);
+    values.set(path, property.default);
+    if (!property.bind && !read.has(path) && !CUSTOM.test(path)) remade.add(path);
   }
-  return byID;
+  return { byID, remade, values };
 }
+const CUSTOM = /\["(?:[^"\\]|\\.)*"\]$/;
 
 /**
  * `publish(made, state)` puts an export (exportPackage's, its tables `state`) where the page loads it and gives the
@@ -39,18 +46,29 @@ function fastControls(state) {
  * idle; `report(status)` tells what the view shows.
  */
 export function createPackagePreview({ world, options = {}, publish, post, set = () => {}, idle = (run) => setTimeout(run, 400), report = () => {} }) {
-  let last = null, controls = new Map(), changes = 0, exporting = false, sending = Promise.resolve();
+  let last = null, controls = liveControls({ tables: {} }), changes = 0, queued = false, shown = false, exporting = false, sending = Promise.resolve();
   // The IDs Blender's depsgraph updated since the last export; an export's own evaluation of the frames is not a change.
   const updated = new Set();
   // The values set fast since the last export, which its patch must agree with.
   const setFast = new Map();
-  const remember = (state) => { last = state; controls = fastControls(state); };
+  const remember = (state) => { last = state; controls = liveControls(state); };
+  const exportSoon = (run) => { sending = sending.then(run).catch((error) => report(`Not patched: ${error.message}`)); };
+  // At once, and once more after an export that is running: edits meanwhile fold into it with their latest values.
+  const exportNow = () => {
+    if (queued) return;
+    queued = true;
+    exportSoon(() => { queued = false; return send(); });
+  };
+  // The controls of the updated IDs whose values differ from what the runs show: set on the runs, and exported at once
+  // where one is remade, not set.
   const setChanged = (pointers) => {
-    const changes = [...pointers].flatMap((pointer) => controls.get(keyOfPointer(pointer)?.replace(/@.*$/, '')) ?? [])
-      .map((path) => [path, controlValue(path)]).filter(([, value]) => value !== undefined);
+    const changes = [...pointers].flatMap((pointer) => controls.byID.get(keyOfPointer(pointer)?.replace(/@.*$/, '')) ?? [])
+      .map((path) => [path, controlValue(path)]).filter(([path, value]) => value !== undefined && value !== controls.values.get(path));
     if (!changes.length) return;
-    for (const [path, value] of changes) setFast.set(path, value);
+    for (const [path, value] of changes) { controls.values.set(path, value); setFast.set(path, value); }
     set(changes);
+    if (changes.some(([path]) => controls.remade.has(path))) exportNow();
+    else shown = true;
   };
   world.mainSync?.onEvaluated((updates) => {
     if (exporting) return;
@@ -85,12 +103,15 @@ export function createPackagePreview({ world, options = {}, publish, post, set =
       report('Loaded');
       return url;
     },
-    /** The scene changed (an edit, undo or redo): once idle after the last change, the page gets its patch. */
+    /** The scene changed (an edit, undo or redo): the page gets its patch, at once or, for edits it shows already, once idle. */
     changed() {
       if (!last) return;
-      const asked = ++changes;
-      // The export holds the app's thread: it waits for a pause in the edits, which reach the runs meanwhile.
-      idle(() => { if (asked === changes) sending = sending.then(send).catch((error) => report(`Not patched: ${error.message}`)); });
+      const asked = ++changes, fast = shown;
+      shown = false;
+      // An edit the runs do not show yet (a light's type, a mesh, a modifier) is exported at once; one they show is
+      // checked once the edits pause, as the export holds the app's thread.
+      if (!fast) exportNow();
+      else idle(() => { if (asked === changes) exportSoon(send); });
     },
     /** Resolves once the patches asked for are sent. */
     settled: () => sending,
