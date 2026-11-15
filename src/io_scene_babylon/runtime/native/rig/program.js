@@ -687,6 +687,12 @@ export class RigInstance {
     return false;
   }
 
+  // A bone's B-Bone values written (its curve, ease, roll or scale): its shape changes with its matrix unchanged.
+  bboneValueWritten(b) {
+    this.bboneValuesVersion = (this.bboneValuesVersion ?? 0) + 1;
+    (this.bboneValuePass ??= new Int32Array(this.program.bones.length).fill(-1))[b] = this.pass ?? 0;
+  }
+
   // The current value of an animated property, and the ops to rerun when it changes.
   readWritten(w) {
     if (w.kind === 'transform') return this.transformValue(w.object, w.bone, w.prop, w.index);
@@ -734,9 +740,9 @@ export class RigInstance {
       }
       // Properties with a range store the value clamped to it (a target weight is 0..1).
       case 'armatureWeight': if (w.constraint.targetList[w.index]) w.constraint.targetList[w.index].weight = Math.min(1, Math.max(0, value)); break;
-      case 'boneData': (this.boneData ??= new Map()).set(`${w.bone}/${w.prop}`, value); this.bboneValuesVersion = (this.bboneValuesVersion ?? 0) + 1; break;
+      case 'boneData': (this.boneData ??= new Map()).set(`${w.bone}/${w.prop}`, value); this.bboneValueWritten(w.bone); break;
       case 'poseValue': {
-        this.bboneValuesVersion = (this.bboneValuesVersion ?? 0) + 1;
+        this.bboneValueWritten(w.bone);
         const cur = this.poseValues?.get(`${w.bone}/${w.prop}`) ?? this.program.bones[w.bone].pose[w.prop];
         let v = value;
         if (Array.isArray(cur)) { v = cur.slice(); v[w.index ?? 0] = value; }
