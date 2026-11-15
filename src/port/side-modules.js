@@ -76,24 +76,25 @@ function link(module, main, { memoryBase, tableBase }, first, missing, tls) {
 const list = (main) => new Int32Array(main.memory.buffer, main.side_modules_list() >>> 0, 1 + FIELDS * 8);
 
 // The side module at `bytes` loaded into the page's instance (main: its exports) and, through the module's memory, into
-// every thread's (`threads` instances besides the page's), resolved once they all have it. Its instance's exports.
-export async function loadSideModule(main, bytes, missing, threads = 1) {
+// every thread's (`workers`, the pool's instances besides the page's), resolved once they all have it: its bytes are
+// freed then. Its instance's exports.
+export async function loadSideModule(main, bytes, missing, workers = 0) {
   const module = await WebAssembly.compile(bytes);
   const info = memoryInfo(module);
   const memoryBase = zeroed(main, info.memorySize, info.memoryAlign);
   const place = { memoryBase, tableBase: main.__indirect_function_table.length };
   const instance = link(module, main, place, true, missing);
-  if (threads > 1) {
+  if (workers) {
     const copy = main.malloc(bytes.byteLength) >>> 0;
     new Uint8Array(main.memory.buffer, copy >>> 0, bytes.byteLength).set(new Uint8Array(bytes));
     const generation = new Int32Array(main.memory.buffer, main.side_modules_generation() >>> 0, 1);
     const at = 1 + FIELDS * Atomics.load(generation, 0);
     const { __tls_size: size, __tls_align: align } = instance.exports, stride = aligned(size?.value ?? 0, align?.value ?? 1);
-    const blocks = stride ? zeroed(main, stride * (threads - 1), align.value) : 0;
+    const blocks = stride ? zeroed(main, stride * workers, align.value) : 0;
     list(main).set([copy, bytes.byteLength, place.memoryBase, place.tableBase, blocks, stride, 0], at);
     const loaded = Atomics.add(generation, 0, 1) + 1;
     // Each thread loads it at its next wait or start (at most wasm/threads.cc's slice later).
-    while (Atomics.load(list(main), 0) < (threads - 1) * loaded) await new Promise((done) => setTimeout(done, 20));
+    while (Atomics.load(list(main), 0) < workers * loaded) await new Promise((done) => setTimeout(done, 20));
     main.free(copy);
   }
   return instance.exports;
