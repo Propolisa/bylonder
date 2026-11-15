@@ -25,9 +25,10 @@ const appModule = (source) => (source === '@babylonjs/core' ? core : sources[`..
 export function mountGameView(section, { world, header, run: files, codeError }) {
   const state = reactive({ status: '', shared: '', busy: false, running: false, paused: false, evaluation: exportEvaluation(world) });
   // WebGL 2, whatever the app draws with, until exported pages draw on WebGPU again (the area light fixes in progress).
-  // A project with game code gets its actions as clips too, which behaviours play (entity.play).
+  // A project with game code gets its actions as clips too, which behaviours play (entity.play). Never bundled: the run
+  // links scene.js to the app's own modules (package-link.js), so a bundle would only cost time.
   const hasGameCode = !!files?.files.some((path) => /^src\/.+\.m?js$/.test(path));
-  const options = exportOptions({ controlPanel: false, target: 'WEBGL2', ...(hasGameCode && { animations: 'BOTH' }) });
+  const options = exportOptions({ controlPanel: false, target: 'WEBGL2', bundle: false, ...(hasGameCode && { animations: 'BOTH' }) });
   const canvas = Object.assign(document.createElement('canvas'), { className: 'block h-full w-full outline-none', tabIndex: 0 });
   // Keys typed into the playing game are the game's, not Blender's shortcuts.
   canvas.dataset.gameInput = '';
