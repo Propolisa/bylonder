@@ -6,6 +6,8 @@ import { buttonMenu, buttonPress, buttonOperator, buttonSearch, buttonSearchAppl
 import { pointerStruct } from '../../python/bpy_rna.js';
 import { takeOperatorPopup, newOperator, blenderModule } from '../../bmesh/bmesh-wasm.js';
 import { runsOperator, unavailableReason } from '../../windowmanager/wm-operators.js';
+import { toolIconName } from './icon.js';
+import { BYLONDER_ICON } from '../../python/bpy_icons.js';
 
 export const press = (b, ui, value = -1) => {
   ui.inContext((C) => buttonPress(C, b, value));
@@ -72,7 +74,7 @@ export function treeMenu(tree, ui, editorTypeOwner) {
     if (node.kind !== 'button') return node.children?.forEach(visit);
     // A menu's entry shows its shortcut after UI_SEP_CHAR (ui_menu_block_set_keymaps).
     const [text, shortcut] = (node.text || node.display || '').split('|');
-    const iconName = node.icon && node.icon !== 'NONE' ? node.icon : undefined;
+    const iconName = node.icon && node.icon !== 'NONE' ? node.icon : toolIconName(node.icon_value) === BYLONDER_ICON ? 'BYLONDER' : undefined;
     switch (node.type) {
       case 'SEPR': case 'SEPR_LINE': items.push('-'); break;
       case 'SEPR_SPACER': break;

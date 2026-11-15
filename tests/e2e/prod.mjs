@@ -393,6 +393,75 @@ try {
     }
   });
 
+  // File > Open Folder (folder-repository.js), on a folder in OPFS standing in for one on disk: an empty folder takes the
+  // project's files and, once the scene runs, its .blend; edits made in the folder outside the app are taken when the
+  // page regains focus; a reload reopens the folder.
+  await step("a project opens from a folder on disk and saves to it", async () => {
+    const opened = await openApp(browser, server.url, { ...BOOT, persistent: true });
+    const { page } = opened;
+    const disk = (op, path, text) => page.evaluate(async ([op, path, text]) => {
+      const parts = path.split("/"), name = parts.pop();
+      let dir = await (await navigator.storage.getDirectory()).getDirectoryHandle("Picked", { create: true });
+      for (const part of parts) dir = await dir.getDirectoryHandle(part, { create: true });
+      if (op === "list") return [...await Array.fromAsync(dir.keys())];
+      const handle = await dir.getFileHandle(name, { create: op === "write" });
+      if (op === "read") return (await handle.getFile()).text();
+      const writer = await handle.createWritable();
+      await writer.write(text);
+      await writer.close();
+    }, [op, path, text]);
+    try {
+      await page.evaluate(() => { window.showDirectoryPicker = async () => (await navigator.storage.getDirectory()).getDirectoryHandle("Picked", { create: true }); });
+      await page.click('[data-blender="TOPBAR_MT_file"]');
+      await page.getByRole("menuitem", { name: "Open Folder..." }).click();
+      await page.locator("#storage-status", { hasText: "Folder: Picked" }).waitFor();
+      await page.waitForFunction(async () => {
+        const dir = await (await navigator.storage.getDirectory()).getDirectoryHandle("Picked");
+        return (await Array.fromAsync(dir.keys())).some((name) => name.endsWith(".blend"));
+      }, null, { timeout: 120000, polling: 500 });
+      const names = await disk("list", "x");
+      assert.ok(names.includes("index.js") && names.includes("bylonder.json"), `the folder holds the project: ${names}`);
+      await disk("write", "content/notes.txt", "written outside");
+      const edited = (await disk("read", "index.js")) + "// edited on disk\n";
+      await disk("write", "index.js", edited);
+      await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+      await page.locator("#file-tree", { hasText: "notes.txt" }).waitFor({ state: "attached" });
+      // A scene edit (the light, under the view's centre, moved up), then File > Save (wm.save_mainfile).
+      // The scene's frame, once it runs: the edit made on disk runs the project again, replacing the frame meanwhile.
+      const ready = async () => {
+        await page.locator("#run-status", { hasText: "Running" }).waitFor({ timeout: 120000 });
+        for (let tries = 1; ; tries++) {
+          try {
+            return await opened.until((b) => b?.editor && b.world.scene.getNodeByName("light"), null, 20000);
+          } catch (error) {
+            if (tries === 6) throw error;
+          }
+        }
+      };
+      const lightZ = () => opened.bylonder((b) => [...b.rna.objects()].map((ob) => b.rna.pointer("Object", ob)).find((o) => o.name === "light").location[2]);
+      await ready();
+      await opened.click();
+      for (const key of ["g", "z", "2", "Enter"]) await page.keyboard.press(key);
+      await opened.settled();
+      assert.equal(await lightZ(), 2, "the light moved");
+      const blendSaved = () => page.evaluate(async () => {
+        for await (const [name, handle] of await (await navigator.storage.getDirectory()).getDirectoryHandle("Picked")) if (name.endsWith(".blend")) return (await handle.getFile()).lastModified;
+      });
+      const before = await blendSaved();
+      await page.evaluate(() => document.getElementById("checkpoint").click());
+      await page.waitForFunction(() => document.getElementById("save-status").textContent === "Saved to folder");
+      while ((await blendSaved()) === before) await page.waitForTimeout(200);
+      assert.equal(await disk("read", "index.js"), edited, "Save keeps the edit made on disk");
+      await page.reload();
+      await page.locator("#storage-status", { hasText: "Folder: Picked" }).waitFor({ timeout: 120000 });
+      await ready();
+      assert.equal(await lightZ(), 2, "the scene reopens from the folder's .blend");
+      assert.deepEqual(opened.errors, [], "page errors");
+    } finally {
+      await opened.close();
+    }
+  });
+
   // The live demos whose packages are release assets (docs/demos/packages.json): each one's package is in the build and
   // its page loads it. A missing package fails here, naming the demo, rather than a page that loads nothing.
   await step("demo packages", async () => {

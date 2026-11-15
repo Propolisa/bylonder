@@ -9,6 +9,7 @@ import { menuTree } from '../interface/ui-tree.js';
 import { treeMenu } from '../interface/tree-menu.js';
 import { invokeOperator, registerOperator, runsOperator, appendMenu, prependMenu } from '../../windowmanager/wm-operators.js';
 import { blenderKeys } from '../../windowmanager/keyconfig.js';
+import { bylonderIcon } from '../../python/bpy_icons.js';
 
 const SPACE_TOPBAR = 21;
 // HEADERY: a header region's height in pixels at 1x scale.
@@ -40,6 +41,8 @@ export function createTopbarArea(main, sync) {
       for (const [idname, side, draw] of extensions) (side === 'prepend' ? prependMenu : appendMenu)(idname, draw);
       globalThis.__py_modules['os.path']._mount('/blender/scripts/startup/bl_app_templates_system', templates);
     },
+    // Bylonder's icon for the app page's entries (icon_value=), from this window's icons.
+    bylonderIcon,
     // The menus of the bar: { label, menu } for each.
     bar: () => buttons(menu('TOPBAR_MT_editor_menus') ?? {}).filter((b) => b.menu).map((b) => ({ label: b.text, menu: b.menu })),
     // A menu's tree (ui-tree.js), or null without the menu.

@@ -4,7 +4,7 @@ import { iconEl, iconButton } from '../editors/interface/icon.js';
 import { fullDate, timeAgo } from './relative-time.js';
 import { listedDemoFiles, openDemoFile, openFromUrl } from './demo-files.js';
 
-export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, newProject, recentProjects, openProject, openBlend, resetApp }) {
+export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, newProject, recentProjects, openProject, openBlend, openFolder, resetApp }) {
   const $ = id => document.getElementById(id);
   const click = id => () => $(id).click();
   const bar = $('appbar');
@@ -52,6 +52,8 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
     'wm.read_homefile': { keys: () => 'Ctrl N', run: ({ app_template: name = '' }) => (name ? openExample(examples.find((e) => e.title === name)) : click('new-project')()) },
     'wm.open_mainfile': { keys: () => 'Ctrl O', run: ({ filepath }) => (filepath ? openProject(filepath) : chooseBlend()) },
     'bylonder.project_open': { run: openProjects },
+    // A project folder on disk (File System Access API), where the browser has it.
+    'bylonder.folder_open': { run: () => openFolder?.() },
     'wm.save_mainfile': { keys: () => 'Ctrl S', run: click('checkpoint') },
     // A .blend file of the scene, from Blender's writer in the scene window; a copy too, as the open project stays.
     'wm.save_as_mainfile': { keys: ({ copy }) => (copy ? undefined : 'Shift Ctrl S'), run: () => send('save-blend') },
@@ -92,10 +94,10 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
   };
   registerOperators(operators);
   // Bylonder's entries in Blender's menus, as an add-on's (Menu.append); its settings as check entries.
-  const op = (layout, idname, text, icon) => layout.operator(idname, kw({ text, ...(icon && { icon }) }));
+  const op = (layout, idname, text, icon) => layout.operator(idname, kw({ text, ...(icon === 'BYLONDER' ? { icon_value: scene().bylonderIcon() } : icon && { icon }) }));
   const check = (layout, idname, text, on) => op(layout, idname, text, on ? 'CHECKBOX_HLT' : 'CHECKBOX_DEHLT');
   const extensions = [
-    ['TOPBAR_MT_file', 'append', ({ layout }) => { layout.separator(); op(layout, 'bylonder.project_open', 'Open Project...'); op(layout, 'bylonder.project_fork', 'Save Project As...'); op(layout, 'bylonder.project_rename', 'Rename Project...'); op(layout, 'bylonder.project_share', 'Share Project Link...'); op(layout, 'bylonder.app_source', 'Download App Source'); }],
+    ['TOPBAR_MT_file', 'append', ({ layout }) => { layout.separator(); op(layout, 'bylonder.project_open', 'Open Project...'); if (openFolder) op(layout, 'bylonder.folder_open', 'Open Folder...', 'BYLONDER'); op(layout, 'bylonder.project_fork', 'Save Project As...'); op(layout, 'bylonder.project_rename', 'Rename Project...'); op(layout, 'bylonder.project_share', 'Share Project Link...'); op(layout, 'bylonder.app_source', 'Download App Source'); }],
     // Open Recent lists Bylonder's recent projects.
     ['TOPBAR_MT_file_open_recent', 'append', ({ layout }) => { for (const project of recent) op(layout, 'wm.open_mainfile', project.name, 'FILE_BLEND').filepath = project.id; }],
     ['TOPBAR_MT_file_import', 'append', ({ layout }) => op(layout, 'bylonder.project_import', 'Project ZIP (.zip)')],

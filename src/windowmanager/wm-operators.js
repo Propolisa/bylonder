@@ -110,8 +110,34 @@ registerOperator('wm.call_menu', {
 // Blender's Python has loaded (extendMenus, bpy_interface.js).
 let extend = null;
 const pending = [];
-export const appendMenu = (idname, draw) => (extend ? extend(idname, 'append', draw) : pending.push([idname, 'append', draw]));
-export const prependMenu = (idname, draw) => (extend ? extend(idname, 'prepend', draw) : pending.push([idname, 'prepend', draw]));
+const add = (idname, side, draw) => {
+  const safe = (self, context) => draw(new Proxy(self, { get: (target, key) => (key === 'layout' ? iconFallback(target.layout) : target[key]) }), context);
+  return extend ? extend(idname, side, safe) : pending.push([idname, side, safe]);
+};
+export const appendMenu = (idname, draw) => add(idname, 'append', draw);
+export const prependMenu = (idname, draw) => add(idname, 'prepend', draw);
+
+// A layout whose calls with an icon Blender does not know draw without it, so one entry never hides those after it;
+// development warns once per icon.
+const warnedIcons = new Set();
+export function iconFallback(layout) {
+  return new Proxy(layout, {
+    get(target, key) {
+      const value = target[key];
+      if (typeof value !== 'function') return value;
+      return (...list) => {
+        try {
+          return value.apply(target, list);
+        } catch (error) {
+          const { icon, ...rest } = list.at(-1) ?? {};
+          if (!icon) throw error;
+          if (import.meta.env?.DEV && !warnedIcons.has(icon)) { warnedIcons.add(icon); console.warn(`Unknown icon ${icon} in a menu entry, drawn without it:`, error); }
+          return value.apply(target, [...list.slice(0, -1), rest]);
+        }
+      };
+    },
+  });
+}
 export function extendMenus(fn) {
   extend = fn;
   pending.splice(0).forEach((args) => fn(...args));

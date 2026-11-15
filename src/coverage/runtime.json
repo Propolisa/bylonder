@@ -103,6 +103,7 @@
   "bylonder.export_babylon",
   "bylonder.export_js",
   "bylonder.export_js_live",
+  "bylonder.folder_open",
   "bylonder.game_pause",
   "bylonder.game_play",
   "bylonder.game_reset",

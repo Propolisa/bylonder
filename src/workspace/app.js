@@ -9,6 +9,7 @@ import { mountTopbar } from "./topbar.js";
 import { examples } from "./examples.js";
 import { openOPFS } from "./opfs";
 import { createRepository } from "./repository";
+import { createFolderRepository, rememberFolder, rememberedFolder, folderAccess, canOpenFolders } from "./folder-repository.js";
 import { defaultFiles, blendProjectSource } from "./default-project";
 import { resetApp } from "./reset.js";
 import {
@@ -38,8 +39,10 @@ mountTouch(window, { scale: {
   preview: (value) => showScale([document, frame?.contentDocument], value),
   commit: (value) => frame?.contentWindow.postMessage({ channel, type: "ui-scale", payload: value }, location.origin),
 } });
-const topbar = mountTopbar({ dock, examples, openExample: (example) => openExample(example), newProject: () => $("new-project").click(), recentProjects: () => repo.list(), openProject: (id) => { $("project").value = id; $("project").dispatchEvent(new Event("change")); }, openBlend: (file) => openBlend(file), resetApp: () => resetApp(() => { dirty = false; clearTimeout(saveTimer); document.querySelectorAll("iframe").forEach((f) => f.remove()); }), send: (type, payload) => frame?.contentWindow.postMessage({ channel, type, payload }, location.origin), sceneTopbar: () => frame?.contentWindow?.__bylonder?.topbar });
+const topbar = mountTopbar({ dock, examples, openExample: (example) => openExample(example), newProject: () => $("new-project").click(), recentProjects: () => repo.list(), openProject: (id) => { $("project").value = id; $("project").dispatchEvent(new Event("change")); }, openBlend: (file) => openBlend(file), openFolder: canOpenFolders() && (() => chooseFolder()), resetApp: () => resetApp(() => { dirty = false; clearTimeout(saveTimer); document.querySelectorAll("iframe").forEach((f) => f.remove()); }), send: (type, payload) => frame?.contentWindow.postMessage({ channel, type, payload }, location.origin), sceneTopbar: () => frame?.contentWindow?.__bylonder?.topbar });
 let repo,
+  // The open project's folder on disk (folder-repository.js), or null for one kept in OPFS.
+  folder = null,
   project,
   active = "index.js",
   tabs = ["index.js"],
@@ -214,7 +217,8 @@ function markDirty(source = true) {
   $("save-status").classList.remove("error");
   $("save-status").textContent = "Unsaved changes";
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => save().catch(failure), 750);
+  if (folder) renderTabs();
+  else saveTimer = setTimeout(() => save().catch(failure), 750);
   if (source) scheduleTypes();
   if (source && $("auto-run").checked) {
     clearTimeout(runTimer);
@@ -288,6 +292,7 @@ function renderTabs() {
     button.className = path === active ? "active" : "";
     button.textContent = path.split("/").pop();
     button.title = path;
+    if (folder && folder.saved(path) !== project.files[path].content) button.classList.add("dirty");
     button.onclick = () => openFile(path);
     if (path !== "index.js") {
       const close = document.createElement("span");
@@ -339,7 +344,7 @@ function renderTree() {
     };
     row.append(button);
     for (const [text, title, fn] of [
-      ["✎", "Rename", () => rename(path, folder)],
+      ["✎", "Rename", () => rename(path)],
       ["×", "Delete", () => remove(path, folder)],
     ]) {
       const b = document.createElement("button");
@@ -352,11 +357,12 @@ function renderTree() {
     root.append(row);
   }
 }
-async function rename(path, folder) {
+async function rename(path) {
   const to = await askText("Rename", "Path", path);
   if (!to || to === path) return;
   normalizePath(to);
   project.files = renamePath(project.files, path, to);
+  await folder?.move(path, to, project.files);
   project.folders = (project.folders || []).map((p) =>
     p === path || p.startsWith(path + "/") ? to + p.slice(path.length) : p,
   );
@@ -370,17 +376,11 @@ async function rename(path, folder) {
   markDirty();
   log("Renamed " + path + ". Relative import statements are not rewritten.");
 }
-function remove(path, folder) {
+async function remove(path, isFolder) {
   if (path === "index.js") throw Error("index.js cannot be deleted.");
-  if (
-    !confirm(
-      "Delete " +
-        path +
-        (folder ? " and its contents" : "") +
-        "? This change remains recoverable in version history.",
-    )
-  )
+  if (!confirm(`Delete ${path}${isFolder ? " and its contents" : ""}? ${folder ? "It is deleted from the folder on disk." : "This change remains recoverable in version history."}`))
     return;
+  await folder?.remove(path);
   project.files = removePath(project.files, path);
   project.folders = project.folders.filter(
     (f) => f !== path && !f.startsWith(path + "/"),
@@ -393,6 +393,7 @@ function remove(path, folder) {
 }
 function save(label = "Autosave") {
   clearTimeout(saveTimer);
+  if (folder) return label === "Autosave" ? saveQueue : (saveQueue = saveQueue.catch(() => {}).then(saveFolder));
   const work = async () => {
     if (!project || (!dirty && label === "Autosave")) return;
     const captured = structuredClone(project),
@@ -421,8 +422,92 @@ function save(label = "Autosave") {
   saveQueue = saveQueue.catch(() => {}).then(work);
   return saveQueue;
 }
+// File > Save of a project in a folder: the scene as its .blend, and every changed file.
+async function saveFolder() {
+  if (frame && $("run-status").textContent === "Running") project.overrides = await sceneSnapshot();
+  const generation = editGeneration;
+  $("save-status").textContent = "Saving…";
+  await folder.commit(project);
+  if (generation === editGeneration) dirty = false;
+  $("save-status").textContent = dirty ? "Unsaved changes" : "Saved to folder";
+  renderTabs();
+}
+// Ctrl S in the code editor: its file only.
+async function saveActiveFile() {
+  await folder.writeFile(active, project.files[active]);
+  dirty = Object.entries(project.files).some(([path, file]) => folder.saved(path) !== file.content);
+  $("save-status").textContent = dirty ? "Unsaved changes" : "Saved to folder";
+  renderTabs();
+}
+// Edits made to the folder outside the app, when the page regains focus or the browser reports them: files without
+// unsaved edits here take the folder's, and a changed .blend reopens the project.
+async function folderChanged() {
+  if (!folder || busy) return;
+  const unsaved = new Set(Object.keys(project.files).filter((path) => folder.saved(path) !== project.files[path].content));
+  const { files, blend } = await folder.changes();
+  let changed = false;
+  for (const [path, file] of Object.entries(files)) {
+    if (unsaved.has(path)) { log(`${path} changed on disk; your unsaved edits here are kept, and Save writes them over it.`, "warn"); continue; }
+    if (file) project.files[path] = file;
+    else if (path !== "index.js") delete project.files[path];
+    changed = true;
+  }
+  if (blend && !dirty) return load(folder.id);
+  if (blend) log("The .blend changed on disk; your unsaved scene edits are kept, and Save writes them over it.", "warn");
+  if (!changed) return;
+  tabs = tabs.filter((path) => project.files[path]);
+  syncModels();
+  openFile(project.files[active] ? active : "index.js");
+  renderTree();
+  scheduleTypes();
+  if ($("auto-run").checked) run().catch(failure);
+}
+window.addEventListener("focus", () => folderChanged().catch(failure));
+let observer = null;
+function watchFolder() {
+  observer?.disconnect();
+  observer = null;
+  if (!folder || typeof FileSystemObserver !== "function") return;
+  let timer;
+  observer = new FileSystemObserver(() => { clearTimeout(timer); timer = setTimeout(() => folderChanged().catch(failure), 300); });
+  observer.observe(folder.root, { recursive: true }).catch(() => {});
+}
+// File > Open Folder: a project folder opens; an empty one gets the open project's files, and its .blend with the
+// first save once the scene runs.
+async function openFolder(handle) {
+  const opened = createFolderRepository(handle);
+  if (await opened.isEmpty()) await opened.create(project.name, project.files);
+  await rememberFolder(handle);
+  await save();
+  folder = opened;
+  await load(opened.id);
+}
+const chooseFolder = action(async () => {
+  const handle = await showDirectoryPicker({ id: "bylonder-project", mode: "readwrite" }).catch((e) => { if (e.name !== "AbortError") throw e; });
+  if (handle) await openFolder(handle);
+});
+// A folder opened on an earlier visit: the browser asks for its permission again on a click.
+async function reconnectFolder(id) {
+  const handle = await rememberedFolder(id.slice("folder:".length)).catch(() => null);
+  if (!handle) return false;
+  if ((await folderAccess(handle)) === "granted") return openFolder(handle).then(() => true);
+  const button = $("storage-status");
+  button.textContent = "Reconnect " + handle.name;
+  button.classList.add("reconnect");
+  button.onclick = action(async () => {
+    if ((await folderAccess(handle, true)) !== "granted") return;
+    button.onclick = null;
+    button.classList.remove("reconnect");
+    await openFolder(handle);
+  });
+  return false;
+}
+function showStorage() {
+  $("storage-status").textContent = folder ? "Folder: " + folder.label : "Local workspace";
+  $("storage-status").title = folder ? `The project's files are in the folder ${folder.label}; File > Save writes them` : "Projects are kept in this browser";
+}
 async function updateProjects() {
-  const projects = await repo.list();
+  const projects = [...(await repo.list()), ...(folder ? await folder.list() : [])];
   $("project").replaceChildren(
     ...projects.map((p) => {
       const option = document.createElement("option");
@@ -507,9 +592,13 @@ $("scene").ondblclick = action(async () => {
   if (name) { renameSceneTo(scene.id, name); postToScene(scene.id, "scene-name", sceneList(project).find((s) => s.id === scene.id).name); }
 });
 async function load(id, autoRun = true) {
+  if (folder && dirty && project?.id === folder.id && id !== folder.id && !confirm(`Discard the unsaved changes to ${folder.label}?`)) return;
   await save();
   stop();
-  project = await repo.load(id);
+  if (folder?.id !== id) folder = null;
+  project = await (folder ?? repo).load(id);
+  watchFolder();
+  showStorage();
   renderScenes();
   dirty = false;
   editGeneration = 0;
@@ -523,7 +612,7 @@ async function load(id, autoRun = true) {
   $("remember").checked = !!project.settings.remember;
   $("toggle-remember").textContent = "Remember scene edits: " + (project.settings.remember ? "on" : "off");
   localStorage.setItem("babylon-active-project", id);
-  $("save-status").textContent = "Saved locally";
+  $("save-status").textContent = folder ? "Saved to folder" : "Saved locally";
   await updateProjects();
   scheduleTypes();
   if (autoRun) await run();
@@ -583,6 +672,13 @@ function parkedMessage(sceneId, { type, payload }) {
   if (type === "overrides" && project.settings.remember) { setSceneData(project, sceneId, { overrides: payload }); markDirty(false); }
   if (type === "rename-scene") renameSceneTo(sceneId, payload);
 }
+// The running scene's state now: its .blend and the rest of what Remember Scene Edits keeps.
+const sceneSnapshot = () => new Promise((resolve, reject) => {
+  const requestId = crypto.randomUUID();
+  const timer = setTimeout(() => { snapshotRequests.delete(requestId); reject(Error("Scene did not respond. Finish any active operation and retry.")); }, 5000);
+  snapshotRequests.set(requestId, { resolve, reject, timer });
+  frame.contentWindow.postMessage({ channel, type: "snapshot", payload: { requestId } }, location.origin);
+});
 function snapshotResult(payload) {
   const pending = snapshotRequests.get(payload.requestId);
   if (pending) { clearTimeout(pending.timer); snapshotRequests.delete(payload.requestId); payload.error ? pending.reject(Error(payload.error)) : pending.resolve(payload.state); }
@@ -610,6 +706,8 @@ window.addEventListener("message", (e) => {
   if (type === "library") { project.files[payload.path] = binaryFile(payload.bytes); renderTree(); markDirty(false); }
   if (type === "preferences" && !payload.keep_scenes_loaded) unloadParked();
   if (type === "running" || type === "run-error") requestAnimationFrame(() => requestAnimationFrame(() => { reveal(); setTimeout(code, 0); }));
+  // A folder's project always has its .blend: one opened without it gets it once the scene runs.
+  if (type === "running" && folder && !folder.savedBlend) save("Save").catch(failure);
   if (type === "running") { topbar.connect(); $("run-status").textContent = "Running"; frame.contentWindow.postMessage({channel,type:"render-settings",payload:renderSettings()},location.origin); }
   if (type === "run-error") {
     $("run-status").textContent = "Run failed";
@@ -654,7 +752,8 @@ function setRemember(enabled, notifyFrame = true) {
 async function showHistory() {
   await save();
   $("version-list").replaceChildren();
-  for (const version of await repo.history(project.id)) {
+  if (folder) $("version-list").textContent = "Versions of a project in a folder are kept by the folder's own tools, such as git.";
+  for (const version of folder ? [] : await repo.history(project.id)) {
     const row = document.createElement("div");
     row.className = "version";
     const b = document.createElement("button");
@@ -819,12 +918,7 @@ const sharing = setupSharing({
   async capture(includeOverrides) {
     const projectId = project.id;
     let overrides = project.overrides;
-    if (includeOverrides && frame && $("run-status").textContent === "Running") overrides = await new Promise((resolve,reject) => {
-      const requestId = crypto.randomUUID();
-      const timer = setTimeout(() => { snapshotRequests.delete(requestId); reject(Error('Scene did not respond. Finish any active operation and retry.')); },5000);
-      snapshotRequests.set(requestId,{resolve,reject,timer});
-      frame.contentWindow.postMessage({channel,type:'snapshot',payload:{requestId}},location.origin);
-    });
+    if (includeOverrides && frame && $("run-status").textContent === "Running") overrides = await sceneSnapshot();
     if(project.id !== projectId) throw Error('Project changed. Reopen Share.');
     await save();
     return {project:structuredClone(project),overrides};
@@ -897,6 +991,7 @@ $("new-file").onclick = action(async () => {
   normalizePath(path);
   if (project.files[path]) throw Error("File already exists");
   project.files[path] = textFile("");
+  await folder?.writeFile(path, project.files[path]);
   syncModels();
   openFile(path);
   markDirty();
@@ -906,6 +1001,7 @@ $("new-folder").onclick = action(async () => {
   if (!path) return;
   normalizePath(path);
   if (project.files[path]) throw Error("A file exists at that path");
+  await folder?.createFolder(path);
   if (!project.folders.includes(path)) project.folders.push(path);
   renderTree();
   markDirty();
@@ -913,6 +1009,7 @@ $("new-folder").onclick = action(async () => {
 $("run").onclick = action(run);
 $("stop").onclick = stop;
 $("checkpoint").onclick = action(async () => {
+  if (folder) return save("Save");
   const label = await askText("Save Checkpoint", "Label", "Checkpoint");
   if (label) await save(label);
 });
@@ -991,7 +1088,7 @@ window.addEventListener("keydown", (e) => {
   }
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
     e.preventDefault();
-    save().catch(failure);
+    (!folder ? save() : editor?.hasTextFocus() ? saveActiveFile() : save("Save")).catch(failure);
   }
 });
 installBack(window, { unsaved: () => dirty });
@@ -1008,12 +1105,17 @@ document.addEventListener("visibilitychange", () => {
   try {
     repo = createRepository(await openOPFS());
     const projects = await repo.list();
-    let id = localStorage.getItem("babylon-active-project");
+    const last = localStorage.getItem("babylon-active-project");
+    let id = last;
     if (!projects.some((p) => p.id === id)) id = projects[0]?.id;
     const example = linkedExample();
     if (example) id = (await createExample(example)).id;
     else if (!id) id = (await repo.create("Untitled", defaultFiles())).id;
-    await load(id, !location.hash.startsWith("#project="));
+    const shared = location.hash.startsWith("#project=");
+    if (last?.startsWith("folder:") && !example && !shared) {
+      await load(id, false);
+      if (!(await reconnectFolder(last))) await run();
+    } else await load(id, !shared);
     await sharing.incoming();
     if (!projects.length && !example && !location.hash.startsWith("#project=")) topbar.splash();
   } catch (e) {
