@@ -505,7 +505,7 @@ function poseAnimations(world, mappings, bake, sampling, scene, bases = new Set(
   for (const [mapping, stack] of stacks) for (const clip of live && world.rigVerdicts?.has(mapping.arm.name) ? [] : actionClips([mapping.arm])) {
     withAction(clip.ids, clip.action, () => {
       for (let frame = Math.ceil(clip.frame_start); frame <= clip.frame_end; frame += CLIP_JUDGE_STEP) {
-        sync.frameChanged(frame);
+        sync.frameChanged(frame, { draw: false });
         const bones = bonesOf(mapping.arm, segmentsOf(mapping.arm), shapes);
         for (const skeleton of mapping.skeletons.values()) stack.check(skeleton.bones.map((bone, i) => relative(bones, i, 'pose', skeleton.space)), frame, true);
       }

@@ -8,7 +8,8 @@
 import { Matrix, Quaternion, Vector3, VertexBuffer } from '@babylonjs/core';
 import { compileRig } from './native/rig/program.js';
 import { normalize } from './native/rig/schema.js';
-import { compileDeform, deformMesh } from './native/deform/mesh.js';
+import { compileDeform } from './native/deform/mesh.js';
+import { CpuStack } from './native/deform/cpu.js';
 import { invertAffine, mulAffine, ROT_NAMES } from './native/rig/m4.js';
 import { eulerCompatible } from './native/euler.js';
 import { CpuDeformer, GpuDeformer, gpuSupported } from './native/babylon/gpu-deform.js';
@@ -172,6 +173,8 @@ export function nativeSolve(scene = null, controls = null) {
   /** Each rig by its description's buffers' names (a patch loads the same description anew), else by the description. */
   const rigs = /** @type {Map<string, ReturnType<typeof compile>>} */ (new Map()), described = /** @type {WeakMap<Uint8Array, ReturnType<typeof compile>>} */ (new WeakMap());
   const scale = new Vector3(), turn = new Quaternion(), at = new Vector3(), rotation = new Matrix();
+  /** Each deform stack's run on the CPU, as the page runs it where it does not compute (gpu-deform.js CpuDeformer). */
+  const cpuStacks = /** @type {WeakMap<object, CpuStack>} */ (new WeakMap());
   /** The entry of a description, compiled at the first ask. @param {NativePose['native']} native */
   const entryOf = (native) => {
     const key = native.key, known = key !== undefined ? rigs.get(key) : described.get(native.description);
@@ -431,7 +434,13 @@ export function nativeSolve(scene = null, controls = null) {
       targets.clear();
     },
     /** @param {NativePose['native']} native @param {string} name */
-    deformed: (native, name) => deformMesh(entryOf(native).rig, deformOf(entryOf(native), name)),
+    deformed(native, name) {
+      const entry = entryOf(native), deform = deformOf(entry, name);
+      let stack = cpuStacks.get(deform);
+      if (!stack) cpuStacks.set(deform, (stack = new CpuStack(entry.rig, deform, { normals: false })));
+      stack.run();
+      return /** @type {Float64Array} */ (stack.welded);
+    },
   });
 }
 
