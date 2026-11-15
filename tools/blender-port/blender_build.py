@@ -357,6 +357,8 @@ def main():
     archives = []
     ar = shutil.which('llvm-ar') or shutil.which('llvm-ar-18')
     cycles = [o for target, done in results.items() if CYCLES.match(target) for _, o, _ in done if o]
+    if 'bf_intern_cycles' in by_target:
+        cycles.append(cycles_api(objects, by_target['bf_intern_cycles'][0], extra + own.get('bf_intern_cycles', [])))
     for target, done in ((t, d) for t, d in results.items() if not CYCLES.match(t)):
         built = [o for _, o, _ in done if o]
         if built:
@@ -408,6 +410,18 @@ NULL_DATA = os.path.join(WASM, 'null-data.txt')
 # Libraries whose Blender definitions the API's seam implementations replace (window manager, UI layout and drawing,
 # fonts, video, Grease Pencil's offscreen rendering); everywhere else Blender's definition wins over the API's stand-in.
 SEAM_LIBRARIES = {'bf_blenfont', 'bf_editor_interface', 'bf_editor_screen', 'bf_windowmanager', 'bf_imbuf_movie', 'bf_editor_grease_pencil'}
+
+
+def cycles_api(objects, sibling, extra):
+    """wasm/cycles-api.cc, the side module's start, compiled as `sibling` (a source of Blender's Cycles library) is."""
+    source = os.path.join(WASM, 'cycles-api.cc')
+    args = shlex.split(sibling['command']) if 'command' in sibling else sibling['arguments']
+    entry = {'directory': sibling['directory'], 'file': source,
+             'arguments': [arg for arg in args if not arg.endswith(os.path.basename(sibling['file']))]}
+    built = compile_one(objects, entry, [*extra, '-fPIC'])
+    if not built[1]:
+        sys.exit(f'cycles-api.cc does not build: {first_error(built[2])}')
+    return built[1]
 
 
 def link_cycles(out, objects):

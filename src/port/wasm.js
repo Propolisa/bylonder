@@ -330,15 +330,17 @@ export async function instantiate(url, threads = hardwareThreads()) {
   if (threads > 1) spawn = await startThreads(module, memory, threads);
   instance.exports._initialize?.();
   instance.exports.blender_init?.();
-  return new Heap(instance.exports);
+  return new Heap(instance.exports, threads);
 }
 
 // Bytes an argument takes in scratch, 8-aligned so every typed array view lines up.
 export const size = (array) => (array.byteLength + 7) & ~7;
 
 class Heap {
-  constructor(exports) {
+  constructor(exports, threads = 1) {
     this.exports = exports;
+    // The threads the module runs on: the page's and its pool's (wasm-threads.js).
+    this.threads = threads;
     this.scratch = 0;
     this.capacity = 0;
     this.top = 0;
