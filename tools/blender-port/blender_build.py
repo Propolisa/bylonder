@@ -457,6 +457,24 @@ def side_exports(out, names):
     return ['-Wl,--export=__stack_pointer', '-Wl,--export-table', '-Wl,--growable-table', f'@{rsp}']
 
 
+IMPORTS = os.path.join(WASM, 'imports.txt')
+
+
+def check_imports(module):
+    """The functions the module imports (each one nothing in it defines, which throws when called) are the ones
+    wasm/imports.txt lists: a new one is a source that stopped compiling (a header the sysroot does not have) or a seam
+    gone, so the link fails and names it; one no longer imported is to be taken off the list."""
+    allowed = {line.strip() for line in open(IMPORTS) if line.strip() and not line.startswith('#')}
+    imported = set(wasm_module.imports_of(module))
+    if imported - allowed:
+        new = sorted(imported - allowed)
+        sys.exit(f'module link: {len(new)} functions newly imported (throwing when called), not in wasm/imports.txt:\n'
+                 + '\n'.join(demangle(new)))
+    if allowed - imported:
+        print(f'wasm/imports.txt lists {len(allowed - imported)} functions the module now defines: '
+              + ', '.join(demangle(sorted(allowed - imported))[:10]), file=sys.stderr)
+
+
 def link_module(host, out, entries, extra, archives, module_libraries, side_imports=()):
     """The module the app loads (src/bmesh/bmesh.wasm's exports): Bylonder's API (glue) with Blender's libraries.
     Where both define a symbol, the loser's definition is made weak (wasm_weaken.py): the module build's own libraries
@@ -527,6 +545,7 @@ def link_module(host, out, entries, extra, archives, module_libraries, side_impo
     if invalid.returncode:
         sys.exit(f'module link made an invalid module: {next(l for l in invalid.stderr.splitlines() if "Error" in l)}')
     missing = wasm_module.live_imports(module)
+    check_imports(module)
     print(f'{module}: {os.path.getsize(module)} bytes; API wins {sum(map(len, replaced["blender"].values()))} symbols, '
           f'Blender {sum(map(len, replaced["api"].values()))} (replaced.json); {len(missing)} imports, which throw when called',
           file=sys.stderr)
