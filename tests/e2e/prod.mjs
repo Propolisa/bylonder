@@ -71,6 +71,43 @@ function runNode(script, args, ms) {
     throw error;
   });
 }
+// Exported pages served from `dir`, in a browser of their own with the harness's flags that start WebGPU (this check's
+// is launched with CHROMIUM_ARGS). Each browser call has its own limit, as a wedged GPU process hangs them silently.
+const NO_WEBGPU = "the browser has no hardware WebGPU adapter";
+async function pageBrowser(dir) {
+  const { servePackages } = await import("../export-parity/look.mjs");
+  writeFileSync(join(dir, "blank.html"), "<!doctype html>");
+  const served = servePackages(dir), gpu = await within(60000, "chromium.launch", chromium.launch());
+  const open = async (path) => {
+    const page = await within(30000, "browser.newPage", gpu.newPage({ viewport: { width: 320, height: 200 } }));
+    await page.goto(served.url(path), { timeout: 60000 });
+    return page;
+  };
+  const closed = (page) => within(10000, "page.close", page.close());
+  return {
+    // A software adapter (SwiftShader) is none: CI's runners have no GPU, and pages drawing on WebGPU there hung the
+    // check; the steps measure a GPU's drawing.
+    async hardwareWebGPU() {
+      const page = await open("blank.html");
+      const hardware = (a) => !!a && !a.isFallbackAdapter && !a.info?.isFallbackAdapter && !/swiftshader/i.test(`${a.info?.vendor} ${a.info?.architecture}`);
+      const found = await within(20000, "requestAdapter", page.evaluate(`Promise.race([navigator.gpu?.requestAdapter().then(${hardware}), new Promise((resolve) => setTimeout(resolve, 15000, false))])`));
+      await closed(page);
+      return found;
+    },
+    // What the page at `path` sets on window as `name` once drawn.
+    async read(path, name) {
+      const page = await open(path);
+      const value = await (await page.waitForFunction((name) => window[name], name, { timeout: 180000 })).jsonValue();
+      await closed(page);
+      return value;
+    },
+    async close() {
+      await within(10000, "browser.close", gpu.close()).catch((error) => console.log(`      ${error.message}`));
+      served.close();
+      rmSync(dir, { recursive: true, force: true });
+    },
+  };
+}
 const step = async (name, fn) => {
   const at = Date.now();
   await within(STEP_LIMIT, `step "${name}"`, fn());
@@ -268,33 +305,24 @@ try {
   // and its frame shows the scene, as a first frame drawn outside the engine's frame once left every page black there.
   // A browser without a hardware WebGPU adapter (CI's runners have no GPU, where the check hung the deploy) skips it.
   await step("an exported page draws on WebGPU", async () => {
-    const [{ openExample }, { exportModule }, { bundledFiles }, { servePackages }] = await Promise.all([import("../open-example.js"),
-      import("../../src/io_scene_babylon/js-export.js"), import("../export-package.js"), import("../export-parity/look.mjs")]);
+    const [{ openExample }, { exportModule }, { bundledFiles }] = await Promise.all([import("../open-example.js"),
+      import("../../src/io_scene_babylon/js-export.js"), import("../export-package.js")]);
     const { world, sync } = openExample("framed-print");
     sync.view();
-    const files = { ...(await bundledFiles(await exportModule(world, { live: true, bundle: true }))), "index.html": WEBGPU_PAGE, "blank.html": "<!doctype html>" };
+    const files = { ...(await bundledFiles(await exportModule(world, { live: true, bundle: true }))), "index.html": WEBGPU_PAGE };
     const dir = mkdtempSync(join(tmpdir(), "bylonder-webgpu-"));
     for (const [path, data] of Object.entries(files)) {
       mkdirSync(dirname(join(dir, "page", path)), { recursive: true });
       writeFileSync(join(dir, "page", path), data);
     }
-    // A browser of its own, with the harness's flags that start WebGPU (this check's is launched with CHROMIUM_ARGS).
-    const served = servePackages(dir), gpu = await chromium.launch(), page = await gpu.newPage({ viewport: { width: 320, height: 200 } });
+    const pages = await pageBrowser(dir);
     try {
-      await page.goto(served.url("page/blank.html"));
-      // A software adapter (SwiftShader) is none: the step measures a GPU's drawing.
-      const hardware = (a) => !!a && !a.isFallbackAdapter && !a.info?.isFallbackAdapter && !/swiftshader/i.test(`${a.info?.vendor} ${a.info?.architecture}`);
-      const adapter = await page.evaluate(`Promise.race([navigator.gpu?.requestAdapter().then(${hardware}), new Promise((resolve) => setTimeout(resolve, 15000, false))])`);
-      if (!adapter) return console.log("      skipped: the browser has no hardware WebGPU adapter");
-      await page.goto(served.url("page/index.html"));
-      const drawn = await (await page.waitForFunction(() => window.drawn, null, { timeout: 180000 })).jsonValue();
+      if (!(await pages.hardwareWebGPU())) return console.log(`      skipped: ${NO_WEBGPU}`);
+      const drawn = await pages.read("page/index.html", "drawn");
       assert.ok(drawn.webgpu, "the page's engine is WebGPU's");
       assert.ok(drawn.lit > 0.5, `its frame shows the scene (${(drawn.lit * 100).toFixed(0)}% of pixels lit)`);
     } finally {
-      // A wedged GPU process can keep the browser from closing.
-      await Promise.race([gpu.close(), new Promise((resolve) => setTimeout(resolve, 10000))]);
-      served.close();
-      rmSync(dir, { recursive: true, force: true });
+      await pages.close();
     }
   });
 
@@ -302,26 +330,21 @@ try {
   // blue above the horizon and grey below takes the blue on its top and the grey on its bottom, as Blender lights it
   // (tests/fixtures/world-up.blend); the probe the world is baked into once swapped them.
   await step("a world lights an exported page the right way up", async () => {
-    const { servePackages } = await import("../export-parity/look.mjs");
     const dir = mkdtempSync(join(tmpdir(), "bylonder-world-up-"));
     await runNode(fileURLToPath(new URL("./world-up-export.mjs", import.meta.url)), [dir], 5 * 60 * 1000);
     for (const target of ["WEBGL2", "WEBGPU"]) writeFileSync(join(dir, target, "index.html"), WORLD_UP_PAGE);
-    const served = servePackages(dir), gpu = await chromium.launch();
+    const pages = await pageBrowser(dir);
     try {
       for (const target of ["WEBGL2", "WEBGPU"]) {
-        const page = await gpu.newPage({ viewport: { width: 320, height: 200 } });
-        await page.goto(served.url(`${target}/index.html`));
-        const { webgpu, top, bottom } = await (await page.waitForFunction(() => window.sphere, null, { timeout: 180000 })).jsonValue();
-        await page.close();
+        if (target === "WEBGPU" && !(await pages.hardwareWebGPU())) { console.log(`      WebGPU skipped: ${NO_WEBGPU}`); continue; }
+        const { webgpu, top, bottom } = await pages.read(`${target}/index.html`, "sphere");
         if (target === "WEBGPU" && !webgpu) { console.log("      WebGPU skipped: the browser draws with WebGL"); continue; }
         // Blue's lead over red: the sky's colour on top, the ground's grey below.
         const blueness = ([r, , b]) => b - r;
         assert.ok(blueness(top) > blueness(bottom) + 20, `${target}: the sphere's top takes the sky (top ${top}, bottom ${bottom})`);
       }
     } finally {
-      await Promise.race([gpu.close(), new Promise((resolve) => setTimeout(resolve, 10000))]);
-      served.close();
-      rmSync(dir, { recursive: true, force: true });
+      await pages.close();
     }
   });
 
