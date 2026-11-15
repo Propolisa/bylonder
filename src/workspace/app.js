@@ -654,6 +654,7 @@ function stop() {
   $("frame-host").textContent = "";
   $("run-status").textContent = "Stopped";
 }
+const same = (a, b) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 function parkedMessage(sceneId, { type, payload }) {
   if (type === "snapshot-result") snapshotResult(payload);
   if (type === "console") log(payload.text, payload.level);
@@ -710,8 +711,9 @@ window.addEventListener("message", (e) => {
   if (type === "names") { blendNamesNow = payload; writeGameTypes(); }
   // A project file the scene wrote (package.json's licence, chosen in File > Export).
   if (type === "project-file") { project.files[payload.path] = textFile(payload.content); syncModels(); renderTree(); markDirty(false); }
-  if (type === "animation") { project.animation = payload; markDirty(false); }
-  if (type === "overrides" && project.settings.remember) {
+  // The scene's state as it reports it: a change only where it differs (a run starting sends what it opened with).
+  if (type === "animation" && !same(project.animation, payload)) { project.animation = payload; markDirty(false); }
+  if (type === "overrides" && project.settings.remember && !same(project.overrides, payload)) {
     project.overrides = payload;
     markDirty(false);
   }

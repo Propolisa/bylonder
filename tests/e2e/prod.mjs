@@ -492,6 +492,8 @@ try {
       };
       const lightZ = () => opened.bylonder((b) => [...b.rna.objects()].map((ob) => b.rna.pointer("Object", ob)).find((o) => o.name === "light").location[2]);
       await ready();
+      // Opened and saved there, the project has nothing unsaved until an edit.
+      await page.locator("#save-status", { hasText: /^Saved to folder$/ }).waitFor({ timeout: 30000 });
       await opened.click();
       for (const key of ["g", "z", "2", "Enter"]) await page.keyboard.press(key);
       await opened.settled();
