@@ -47,6 +47,8 @@ const CUSTOM = /\["(?:[^"\\]|\\.)*"\]$/;
  */
 export function createPackagePreview({ world, options = {}, publish, post, set = () => {}, idle = (run) => setTimeout(run, 400), report = () => {} }) {
   let last = null, controls = liveControls({ tables: {} }), changes = 0, queued = false, shown = false, exporting = false, sending = Promise.resolve();
+  // An edit made while the first export ran (it yields as it goes), which that export may have read in part.
+  let editedFirst = false;
   // The IDs Blender's depsgraph updated since the last export; an export's own evaluation of the frames is not a change.
   const updated = new Set();
   // The values set fast since the last export, which its patch must agree with.
@@ -79,7 +81,7 @@ export function createPackagePreview({ world, options = {}, publish, post, set =
   const exported = () => whileExporting(async () => {
     updated.clear();
     setFast.clear();
-    const made = await exportPackage(world, options);
+    const made = await exportPackage(world, { ...options, progress: report });
     return { made, state: packageState(made) };
   });
   const send = async () => {
@@ -101,11 +103,13 @@ export function createPackagePreview({ world, options = {}, publish, post, set =
       const { made, state } = await exported(), url = await publish(made, state);
       remember(state);
       report('Loaded');
+      // Exported whole again, as what it read of the edit is not known.
+      if (editedFirst) { editedFirst = false; exportNow(); }
       return url;
     },
     /** The scene changed (an edit, undo or redo): the page gets its patch, at once or, for edits it shows already, once idle. */
     changed() {
-      if (!last) return;
+      if (!last) { editedFirst ||= exporting; return; }
       const asked = ++changes, fast = shown;
       shown = false;
       // An edit the runs do not show yet (a light's type, a mesh, a modifier) is exported at once; one they show is

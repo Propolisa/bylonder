@@ -145,7 +145,7 @@ export function mountGameView(section, { world, header, run: files, codeError })
   return {
     changed: () => {
       state.evaluation = exportEvaluation(world);
-      if (state.running) preview.changed();
+      if (state.running || state.busy) preview.changed();
     },
     settled: async () => { await preview.settled(); await patching; },
     get blend() { return game.blend; },

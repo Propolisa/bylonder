@@ -62,16 +62,20 @@ function reportIssues(title, issues) {
 // its IR keys of what the edit changed.
 export function exportRuntimes(world, { bake = true, sampling = world.animation && exportSampling(world.animation.time.state), verified = true, changed = null, ...choice } = {}) {
   const rests = appliedRests(), results = features.map((feature) => feature.export(world, { bake, sampling, rests, verified, changed, runtime: exportedRuntime(feature, choice) }));
-  for (const { title, issues } of results.flatMap((r) => r.reports)) reportIssues(title, issues);
-  const all = (key) => results.flatMap((r) => r[key] ?? []);
+  // Reported once what the features judge is known: after `judge`, or as soon as anything is read.
+  let reported = false;
+  const report = () => { if (!reported) { reported = true; for (const { title, issues } of results.flatMap((r) => r.reports)) reportIssues(title, issues); } };
+  const all = (key) => { report(); return results.flatMap((r) => r[key] ?? []); };
   return { get animations() { return all('animations'); }, get curves() { return all('curves'); }, get gaps() { return all('gaps'); }, get constraints() { return all('constraints'); },
+    /** What the features judge (an armature's clips), awaiting `step(status)` between parts. @param {(status: string) => Promise<void>} step */
+    async judge(step) { for (const r of results) await r.judge?.(step); report(); },
     clip(clipSampling, owns) {
       const clips = results.map((r) => r.clip?.(clipSampling, owns));
       return () => clips.flatMap((animations) => animations?.() ?? []);
     },
     boneParent: (ob) => results.map((r) => r.boneParent?.(ob)).find(Boolean) ?? null,
-    settle: () => results.forEach((r) => r.settle?.()),
-    restore: () => { results.forEach((r) => r.restore()); rests.dispose(); } };
+    settle: () => { report(); results.forEach((r) => r.settle?.()); },
+    restore: () => { report(); results.forEach((r) => r.restore()); rests.dispose(); } };
 }
 
 // The runtime File > Export's options (export-options.js) choose for an instance of a feature: set on the instance, else

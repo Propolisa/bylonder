@@ -374,12 +374,14 @@ function selectedWorld(world, selected) {
 // (export-options.js chosenState); `scope`, the whole scene or its `selected` objects (export-options.js SCOPES);
 // `clipCompression`, how clips' bone keys are compressed (export-options.js CLIP_COMPRESSION); `verified` false, a live
 // re-export's (scoped-export.js), which takes each rig's checks from the last full export instead of running them again;
-// `changed`, a live re-export's IR keys of what the edit changed (null: everything is read again).
+// `changed`, a live re-export's IR keys of what the edit changed (null: everything is read again); `progress(status)`, told
+// each step as it starts ("Checking RIG-Snow: frame 40 of 289"), after which the export yields so a page can draw it.
 
 export const exportModule = async (world, options) => (await exportPackage(world, options)).files;
 
 // The package's files, its tables by datablock and its buffers by key (scene-patch.js makes a patch of two).
-export async function exportPackage(whole, { scope = 'SCENE', selected = [], live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, animations = 'TIMELINE', clipCompression = 'STANDARD', target = 'BOTH', runtime = null, runtimes = {}, replace = [], bundle = false, controlPanel = true, devTools = 'CDN', navigation = 'FIXED', navigationModes = {}, branchState = null, branches = {}, sampleRate = {}, verified = true, changed = null } = {}) {
+export async function exportPackage(whole, { scope = 'SCENE', selected = [], live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, animations = 'TIMELINE', clipCompression = 'STANDARD', target = 'BOTH', runtime = null, runtimes = {}, replace = [], bundle = false, controlPanel = true, devTools = 'CDN', navigation = 'FIXED', navigationModes = {}, branchState = null, branches = {}, sampleRate = {}, verified = true, changed = null, progress = null } = {}) {
+  const step = async (status) => { if (progress) { progress(status); await new Promise((resume) => setTimeout(resume)); } };
   const world = scope === 'SELECTED' ? selectedWorld(whole, selected) : whole;
   const states = { branchState, branches }, stackState = (node) => chosenState(states, 'modifiers', node.name) ?? (keepLive ? 'LIVE' : 'BAKED');
   const live = new Map(world.objects.filter((node) => stackState(node) === 'LIVE').map((node) => [node, liveStack(world, node)]).filter(([, stack]) => stack));
@@ -390,9 +392,12 @@ export async function exportPackage(whole, { scope = 'SCENE', selected = [], liv
     await Promise.all([prepareKernels(), loadVerdicts()]);
     // The mapped meshes' geometry is read below: their mapping holds until the module is written.
     const sampling = exportSampling(world.animation.time.state, sampleRate);
+    await step('Mapping the scene');
     const mapped = exportRuntimes(world, { bake: bakeAnimation, runtime, runtimes, sampling, verified, changed });
     try {
-      return await moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, animations, clipCompression, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states, sampling });
+      await mapped.judge(step);
+      await step(`Sampling ${sampling.frames.length} frames`);
+      return await moduleSource(world, live, mapped, { step, parity, hostCompression, bakeAnimation, animations, clipCompression, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states, sampling });
     } finally {
       mapped.restore();
       saveVerdicts();
@@ -402,7 +407,7 @@ export async function exportPackage(whole, { scope = 'SCENE', selected = [], liv
   }
 }
 
-async function moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, animations, clipCompression, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states, sampling }) {
+async function moduleSource(world, live, mapped, { step, parity, hostCompression, bakeAnimation, animations, clipCompression, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states, sampling }) {
   const graphs = [], graphOf = materialGraphs(world, graphs), asset = !!world.only;
   const data = await serializeScene(world, { geometry: false, live, mapped, parity, graphOf, bake: bakeAnimation, sampling, only: world.only, animations, onBones: true });
   if (chosenState(states, 'postProcessing') === 'OFF') Object.assign(data, { renderingPipelines: [], postProcesses: [] });
@@ -443,6 +448,7 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
   const controls = withUI([...exportControls(world, data), ...(collected?.controls ?? []), ...(compositorState === 'LIVE' ? composited?.knobs ?? [] : [])]);
   const timelineGroups = data.animationGroups.filter((group) => !isClip(group)), markers = world.mainSync ? [...sceneOf(world.mainSync).timeline_markers].map(({ name, frame }) => ({ name, frame })) : [];
   const { sounds, files: soundFiles } = world.mainSync && !asset ? await exportSounds(sceneOf(world.mainSync)) : { sounds: [], files: {} };
+  await step('Writing the scene');
   const ir = exportIR(world, { controls, collections: collected, live, bin, animationGroups: timelineGroups, sampleRates: data.sampleRates, clips: irClips(data.clips), markers, sounds, curves: data.liveCurves, constraints: data.liveConstraints, skeletons: skeletonsOf(data), states });
   const computed = { ...ir, entities: structuredClone(ir.entities) };
   stripEntities(ir, replace);
@@ -810,6 +816,7 @@ ${kernels ? `  // Blender's nodes of each material and world, made from the IR's
 import { ${[...usedNames(source), ...pipelineClasses].join(', ')} } from '@babylonjs/core';`;
   // An ES module package in Node too (the headless SDK), needing only Babylon.
   const manifest = { name: name.toLowerCase().replace(/[^a-z0-9-]+/g, '-'), type: 'module', main: 'scene.js', types: 'scene.d.ts', peerDependencies: { '@babylonjs/core': AbstractEngine.Version } };
+  await step('Compressing');
   const binBytes = bin.bytes(), version = [binBytes, new TextEncoder().encode(irJson)].map((bytes) => digest(bytes).replace(':', '.')).join('-');
   // What a patch is made from (scene-patch.js): the tables, the scene's own settings and the IR's, and the buffers.
   Object.assign(tables, { scene: { [ir.scene.id ?? 'scene']: { settings, imageProcessing: data.imageProcessingConfiguration, code, effectLayers: data.effectLayers ?? [],

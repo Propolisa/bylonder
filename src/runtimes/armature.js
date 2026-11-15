@@ -503,17 +503,30 @@ function poseAnimations(world, mappings, bake, sampling, scene, bases = new Set(
   }
   // What the page plays judges the route too: each action the export ships as a clip, every CLIP_JUDGE_STEP-th frame,
   // checked as the timeline's are (the rig's pose and its meshes' deform), before anything is decided from the checks.
-  for (const [mapping, stack] of stacks) for (const clip of stack.checks ? actionClips([mapping.arm]) : []) {
-    withAction(clip.ids, clip.action, () => {
-      for (let frame = Math.ceil(clip.frame_start); frame <= clip.frame_end; frame += CLIP_JUDGE_STEP) {
-        sync.frameChanged(frame, { draw: false });
-        const bones = bonesOf(mapping.arm, segmentsOf(mapping.arm), shapes);
-        for (const skeleton of mapping.skeletons.values()) stack.check(skeleton.bones.map((bone, i) => relative(bones, i, 'pose', skeleton.space)), frame, true);
-      }
-    });
+  // Clip by clip, each step saying how far the checks are, with Main as it was between them.
+  function* clipChecks() {
+    const clips = [...stacks].flatMap(([mapping, stack]) => (stack.checks ? actionClips([mapping.arm]) : []).map((clip) => ({ mapping, stack, clip,
+      frames: Math.max(0, Math.floor((clip.frame_end - Math.ceil(clip.frame_start)) / CLIP_JUDGE_STEP) + 1) })));
+    const total = clips.reduce((sum, { frames }) => sum + frames, 0);
+    let done = 0;
+    for (const { mapping, stack, clip, frames } of clips) {
+      yield `Checking ${mapping.arm.name}: frame ${done} of ${total}`;
+      withAction(clip.ids, clip.action, () => {
+        for (let frame = Math.ceil(clip.frame_start); frame <= clip.frame_end; frame += CLIP_JUDGE_STEP) {
+          sync.frameChanged(frame, { draw: false });
+          const bones = bonesOf(mapping.arm, segmentsOf(mapping.arm), shapes);
+          for (const skeleton of mapping.skeletons.values()) stack.check(skeleton.bones.map((bone, i) => relative(bones, i, 'pose', skeleton.space)), frame, true);
+        }
+      });
+      done += frames;
+      sync.frameChanged(current, { draw: false });
+    }
   }
-  if (stacks.size) sync.frameChanged(current);
+  const checks = clipChecks();
+  // The rest of the clips' checks at once, where something reads what they found.
+  const judged = () => { for (const _ of checks); };
   const sample = (frame) => {
+    judged();
     for (const mapping of mappings) {
       const bones = bonesOf(mapping.arm, segmentsOf(mapping.arm), shapes);
       for (const skeleton of mapping.skeletons.values()) {
@@ -553,11 +566,13 @@ function poseAnimations(world, mappings, bake, sampling, scene, bases = new Set(
   if (resampled.length < mappings.length) mappings = resampled;
   if (mappings.length && mappings.some((m) => animated(m.arm)) && frameEnd >= frameStart) sampling.sample(sample);
   else if (mappings.length) sample(current);
-  return Object.assign(once(finish), { deforms: new Set([...stacks.values()].flatMap((stack) => stack.deforms)),
+  return Object.assign(once(() => { judged(); return finish(); }), { deforms: new Set([...stacks.values()].flatMap((stack) => stack.deforms)),
+    /** The clips' checks, awaiting `step(status)` between clips. @param {(status: string) => Promise<void>} step */
+    async judge(step) { for (let next = checks.next(); !next.done; next = checks.next()) await step(next.value); },
     // The meshes of each mapping skinned by their Armature alone, once its frames are checked.
-    skinned: (mapping) => stacks.get(mapping)?.skinned() ?? new Set(),
+    skinned: (mapping) => { judged(); return stacks.get(mapping)?.skinned() ?? new Set(); },
     // Those it deforms in the end, Babylon's skinning missing them.
-    native: (mapping) => { const stack = stacks.get(mapping), skinned = stack?.skinned(); return new Set(stack?.deforms.filter((name) => !skinned.has(name)) ?? []); },
+    native: (mapping) => { judged(); const stack = stacks.get(mapping), skinned = stack?.skinned(); return new Set(stack?.deforms.filter((name) => !skinned.has(name)) ?? []); },
     live: new Set(stacks.keys()) });
   function finish() {
     // A full export's verdicts and samples, which live re-exports take until the next.
@@ -678,7 +693,9 @@ function exportArmatures(world, { bake, sampling, rests = appliedRests(), verifi
     for (const key of state.applied.keys()) exporting.add(key);
   }
   return {
-    reports: mappings.map((m) => ({ title: `${m.arm.name}: exported`, issues: native(m, [...m.issues.filter((i) => !i.silent)]) })),
+    // Once the rigs are judged.
+    get reports() { return mappings.map((m) => ({ title: `${m.arm.name}: exported`, issues: native(m, [...m.issues.filter((i) => !i.silent)]) })); },
+    judge: (step) => posed.judge(step),
     get animations() { return posed().animations; },
     get curves() { return posed().curves; },
     get gaps() { return posed().gaps; },
