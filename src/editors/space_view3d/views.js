@@ -42,7 +42,7 @@ export function createViews({ engine, scene, live = () => false, settle = () => 
       const k = Math.min(1, workSize[0] / w, workSize[1] / h);
       const pw = Math.max(1, Math.floor(w * k)), ph = Math.max(1, Math.floor(h * k));
       if (view.canvas.width !== pw || view.canvas.height !== ph) { view.canvas.width = pw; view.canvas.height = ph; }
-      view.scale = k;
+      view.scale = k / scaling(); // render pixels per CSS pixel, for picks under a pointer
       view.region = view === anchor ? new Viewport(0, 0, 1, 1) : new Viewport(0, 1 - ph / workSize[1], pw / workSize[0], ph / workSize[1]);
     }
   };
