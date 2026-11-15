@@ -1,7 +1,8 @@
 // An exported page displays as the app's rendered view through its .blend's view transform (Lava's AgX, kept through
 // Node's view as a project keeps it): its materials and the world's clear color draw in scene linear and the camera's
 // last post process displays them through Blender's transform, not left linear by Bylonder's own pipeline turning the
-// scene's image processing off; a camera the page makes active takes it and the scene's other passes.
+// scene's image processing off; a camera the page makes active takes it and the scene's other passes; the scene draws
+// multisampled into the chain's first post process, so the page is antialiased as a canvas drawn to directly is.
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -28,10 +29,13 @@ const fileCamera = scene.activeCamera, display = posts.at(-1);
 const pass = cameraEffects(scene).add(postProcessEffect(new PassPostProcess('Pass', 1, null, undefined, scene.getEngine()), display)).post;
 assert.deepEqual(fileCamera._postProcesses.filter(Boolean).map((p) => p.name).slice(-2), ['Pass', 'Display Transform'], 'a pass goes before the display');
 scene.activeCamera = new FreeCamera('game', new Vector3(0, 1, -5), scene);
+// As a WebGL 2 device multisamples (Node's Null engine takes one sample).
+scene.getEngine().getCaps().maxMSAASamples = 4;
 scene.render();
 assert.deepEqual(scene.activeCamera._postProcesses.filter(Boolean), [pass, display], "a camera made active takes the scene's passes, in order");
 assert.ok(!fileCamera._postProcesses.some((p) => p === pass || p === display), "the file's camera keeps none");
+assert.equal(pass.samples, 4, 'the scene draws multisampled into the first post process: the page is antialiased');
 blend.dispose();
 written.remove();
-console.log("Export display: the .blend's view transform (AgX) displays the page in a post process, as the app does");
+console.log("Export display: the .blend's view transform (AgX) displays the page in a post process, as the app does, the scene drawn with 4x MSAA");
 process.exit(0);

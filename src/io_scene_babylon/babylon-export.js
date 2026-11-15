@@ -8,6 +8,7 @@ import { exportRuntimes } from '../runtimes/runtimes.js';
 import { skinningBones } from '../runtimes/armature.js';
 import { imageFile } from '../imbuf/image-textures.js';
 import { exportNodeMaterial } from './node-material-export.js';
+import { shadowFilter } from '../blenkernel/light/light-shadows.js';
 import { exactAnimation, fcurveKeys, stripKeys } from './exact-keys.js';
 import { actionClips, additive, clipGroup, ownedBy, withAction } from './clip-export.js';
 import { sampleContacts } from './contacts-export.js';
@@ -468,7 +469,7 @@ function shadowsOf(world, content) {
   if (!generators?.length) return null;
   const lights = new Map([...content.nodes].filter((n) => n.getClassName().endsWith('Light')).map((l) => [l.name, l]));
   // With Bylonder's shadow map shader (lit-side-normal-bias.js), which the page carries.
-  return generators.filter((g) => lights.has(g.getLight().name)).map((g) => ({ ...g.serialize(), lightId: lights.get(g.getLight().name).id, customShaderOptions: g.customShaderOptions }));
+  return generators.filter((g) => lights.has(g.getLight().name)).map((g) => ({ ...g.serialize(), ...shadowFilter(g), lightId: lights.get(g.getLight().name).id, customShaderOptions: g.customShaderOptions }));
 }
 
 async function serializeMapped(world, { geometry, live, mapped, parity, graphOf, bake, sampling, only, animations, onBones, simulated }) {

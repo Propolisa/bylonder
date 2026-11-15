@@ -54,6 +54,9 @@ void main(void) {
 }`;
 export const DISPLAY_UNIFORMS = ['exposure', 'range', 'exponent', 'latticed', 'background'];
 
+// The samples of the multisampled target the scene draws into.
+const MSAA_SAMPLES = 4;
+
 /**
  * The camera's display transform, its last post process, with the scene's materials drawing in scene linear. Its
  * exposure and exponent are read from `display` as each frame draws, so setting them there shows on the next frame.
@@ -80,11 +83,17 @@ export function viewTransform(camera, display) {
     if (texture) effect.setTexture('lattice', texture);
   };
   // Last on the active camera (camera-effects.js moves it there): a pipeline that builds its post processes again
-  // appends them after it.
+  // appends them after it. The scene draws into the chain's first post process, multisampled, as it would be drawn
+  // to an antialiased canvas without post processes.
   const last = scene.onBeforeCameraRenderObservable.add((rendering) => {
-    if (rendering !== scene.activeCamera || rendering._postProcesses.filter(Boolean).at(-1) === post) return;
-    rendering.detachPostProcess(post);
-    rendering.attachPostProcess(post);
+    if (rendering !== scene.activeCamera) return;
+    const chain = rendering._postProcesses.filter(Boolean);
+    if (chain.at(-1) !== post) {
+      rendering.detachPostProcess(post);
+      rendering.attachPostProcess(post);
+    }
+    const first = rendering._postProcesses.find(Boolean);
+    if (first && first.samples !== MSAA_SAMPLES) first.samples = MSAA_SAMPLES;
   });
   post.onDisposeObservable.add(() => { scene.onBeforeCameraRenderObservable.remove(last); texture?.dispose(); });
   return post;

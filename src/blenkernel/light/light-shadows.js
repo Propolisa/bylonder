@@ -63,6 +63,13 @@ const casts = (mesh) => shadedObject(mesh) && !(mesh instanceof LinesMesh) && me
 const fitsCasters = (light) => !!light.metadata?.shadowFitsCasters;
 const FITTED_MAP_SIZE = 4096;
 
+// Each generator's filter as its light's settings chose it, whatever the drawing engine supports (Babylon's filters fall
+// back to Poisson sampling without shadow samplers, as in Node's Null engine): what an export writes, so a package does
+// not depend on the engine that wrote it.
+const FILTERS = new WeakMap();
+export const shadowFilter = (generator) => ({ usePoissonSampling: false, usePercentageCloserFiltering: false, useContactHardeningShadow: false, ...FILTERS.get(generator),
+  filteringQuality: generator.filteringQuality });
+
 function createGenerator(light, type) {
   // A sun's map spans the view's frustum in cascades, fine near the eye, as EEVEE's clipmaps are: one map over the
   // whole scene's bounds is too coarse for what a large scene (a sky dome, a ground plane) holds.
@@ -74,6 +81,7 @@ function createGenerator(light, type) {
   // Poisson sampling.
   // A cube map's depths are compared point by point, as EEVEE's shadow maps are: Babylon samples it bilinearly, which
   // blends a hashed (Dithered) caster's depths with what lies behind and shadows as if it were nearly opaque.
+  FILTERS.set(generator, light.needCube() ? { usePoissonSampling: true } : type === 'SUN' ? { useContactHardeningShadow: true } : { usePercentageCloserFiltering: true });
   if (light.needCube()) {
     generator.usePoissonSampling = true;
     generator.getShadowMap().updateSamplingMode(Texture.NEAREST_SAMPLINGMODE);
@@ -219,7 +227,7 @@ export function createLightShadows(scene, { warn } = {}) {
       const casters = value ? scene.meshes.filter(casts) : [];
       const quality = SUN_QUALITY[Math.min(rays, SUN_QUALITY.length) - 1] ?? SUN_QUALITY[0];
       for (const [light, { generator }] of generators) {
-        if (generator.useContactHardeningShadow && generator.filteringQuality !== quality) generator.filteringQuality = quality;
+        if (FILTERS.get(generator)?.useContactHardeningShadow && generator.filteringQuality !== quality) generator.filteringQuality = quality;
         const map = generator.getShadowMap(), shows = value && lightsMeshes(light), rate = RenderTargetTexture.REFRESHRATE_RENDER_ONCE;
         const had = !!map.renderList?.length;
         if (setRenderList(map, shows ? casters : [])) map.resetRefreshCounter();
