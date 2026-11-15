@@ -11,19 +11,21 @@ const CONTEXT = '[data-blender="RENDER_PT_context"]';
 await record("cycles", { example: "rendering", node: "Carafe" }, async (r) => {
   const { app, page } = r;
   await r.tab("Render");
-  // A quarter of the output's resolution, so the recording's render takes seconds.
-  await app.bylonder((b) => b.world.renderSettings.set("render.resolutionPercentage", 25));
   await r.gif("engine-pick", CONTEXT, async () => {
     await app.locator(CONTEXT).getByText("EEVEE", { exact: true }).first().click();
     await r.pause(600);
-    await page.getByText("Cycles", { exact: true }).last().click();
+    await app.frame().getByText("Cycles", { exact: true }).last().click();
   });
   // Cycles is fetched and started (render/cycles.js).
   await r.pause(20000);
+  // A quarter of the output's resolution, so the recording's render takes seconds.
+  await app.bylonder((b) => b.world.renderSettings.set("render.resolutionPercentage", 25));
+  await app.settled();
   console.log("engine set");
   await r.shot("engine", CONTEXT);
   await page.click('[data-blender="TOPBAR_MT_render"]');
   await r.gif("render-image", undefined, async () => {
+    setTimeout(async () => console.log("status after 20 s:", await app.frame().evaluate(() => document.querySelector(".render-result [data-status]")?.textContent)), 20000);
     await page.getByRole("menuitem", { name: "Render Image" }).click();
     await app.until(() => /^(Finished|Render failed)/.test(document.querySelector(".render-result [data-status]")?.textContent ?? ""), null, 600000);
   });
