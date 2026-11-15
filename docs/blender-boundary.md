@@ -220,7 +220,8 @@ Blender's own code paths. The module's memory is shared. Each thread is a worker
 `thread-spawn` hands it one. The seams (`wasm/threads.cc`): the processor count is the page's
 (`navigator.hardwareConcurrency`), and the page's thread spins where a wait would block it, since a browser traps a
 blocking wait there; the page stalls for as long as Blender waits on its other threads (`threads_longest_wait`). Window
-manager jobs still run on the page's thread (`platform.cc`). The snapshot (`wasm_snapshot.py`) keeps wasm-ld's way of
+manager jobs run on threads of their own as in Blender (F12's render job among them), polled by the page's timers; the
+pool has a few workers beyond the processor count for them, as oneTBB takes one per processor. The snapshot (`wasm_snapshot.py`) keeps wasm-ld's way of
 starting a shared memory: the first instance copies the data in and takes the first thread's thread-locals, so the
 page's instance is made before the pool's.
 

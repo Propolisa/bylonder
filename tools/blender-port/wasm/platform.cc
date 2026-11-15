@@ -1,5 +1,5 @@
 /* What Blender's code needs from the platform in a WebAssembly build: allocation without the exception runtime, memory
- * that grows in large steps, and window manager jobs on the page's thread. */
+ * that grows in large steps, and memory-mapped files. */
 #include "BLI_mmap.h"
 #include <cerrno>
 #include <cstddef>
@@ -10,7 +10,6 @@
 #include <unistd.h>
 #include <new>
 
-#include "BLI_threads.h"
 
 void *operator new(std::size_t n)
 {
@@ -78,20 +77,6 @@ extern "C" void *sbrk(intptr_t increment)
 }
 
 namespace blender {
-/* port-override: a thread pool's work (a window manager job's: a point cache bake, a background task pool's queue)
- * reaches Blender's data the page draws from, so it runs where it is inserted, on the page's thread, to its end, which
- * frees its slot for the next; the window then ends a job (wm_jobs_handle_finished, wm-api.cc wm_window_handle). Linked
- * with --wrap (wasm_module.PLATFORM_WRAPPED). */
-struct ThreadSlot {
-  ThreadSlot *next, *prev;
-  void *(*do_thread)(void *);
-  void *callerdata;
-  pthread_t pthread;
-  int avail;
-};
-}  // namespace blender
-
-namespace blender {
 /* port-override: WASI has no memory mapping, nor the signals BLI_mmap.cc handles a mapped file's read errors with: a
  * file's mapping is its bytes read into memory, which the module's file system holds in memory already. */
 struct BLI_mmap_file {
@@ -131,26 +116,3 @@ void BLI_mmap_free(BLI_mmap_file *file)
 }
 }  // namespace blender
 
-#define QUEUE_POP _ZN7blender20BLI_thread_queue_popEPNS_11ThreadQueueE
-#define THREADPOOL_INSERT _ZN7blender21BLI_threadpool_insertEPNS_9ListBaseTINS_10ThreadSlotEEEPv
-#define WRAP_(prefix, name) prefix##name
-#define WRAP(prefix, name) WRAP_(prefix, name)
-extern "C" void WRAP(__wrap_, THREADPOOL_INSERT)(blender::ListBaseT<blender::ThreadSlot> *threadbase, void *callerdata)
-{
-  for (blender::ThreadSlot &slot : *threadbase) {
-    if (slot.avail) {
-      slot.avail = 0;
-      slot.callerdata = callerdata;
-      slot.do_thread(callerdata);
-      slot.avail = 1;
-      return;
-    }
-  }
-}
-extern "C" void *WRAP(__real_, QUEUE_POP)(blender::ThreadQueue *queue);
-/* port-override: with the pool's work run where it is inserted, nothing else adds work to a queue being waited on, so an
- * empty queue gives no work (a background task pool's worker then ends) instead of waiting forever. */
-extern "C" void *WRAP(__wrap_, QUEUE_POP)(blender::ThreadQueue *queue)
-{
-  return blender::BLI_thread_queue_is_empty(queue) ? nullptr : WRAP(__real_, QUEUE_POP)(queue);
-}

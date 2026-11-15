@@ -1,14 +1,42 @@
-/* The render result of an engine Blender renders with in the module (Cycles, src/editors/render/cycles-source.js): its
- * size and its pixels through the scene's view transform, as Blender's render window shows them. */
+/* F12 with an engine Blender renders in the module (Cycles, src/editors/render/cycles-source.js): Blender's own render
+ * job, its progress, and its result's size and pixels through the scene's view transform, as Blender's render window
+ * shows them. */
 
+#include "BKE_context.hh"
 #include "DNA_scene_types.h"
 #include "RE_pipeline.h"
+#include "WM_api.hh"
 
 #include <cstdint>
 
 using namespace blender;
 
 #define EXPORT(name) extern "C" __attribute__((export_name(#name)))
+
+#define RENDER_VIEW_OPEN _ZN7blender16render_view_openEPNS_8bContextEiiPNS_10ReportListE
+#define WRAP_(prefix, name) prefix##name
+#define WRAP(prefix, name) WRAP_(prefix, name)
+/* port-override: the page shows a render in its own Render Result window (editors/render/host.js), so F12 opens no
+ * Image Editor area or window, as with the Preferences' Render In set to Keep User Interface. */
+extern "C" ScrArea *WRAP(__wrap_, RENDER_VIEW_OPEN)(bContext * /*C*/, int /*mx*/, int /*my*/, ReportList * /*reports*/)
+{
+  return nullptr;
+}
+
+/* Whether the scene's render job runs (render.render's invoke started it), and how far it is (0 to 1). */
+EXPORT(render_job_running) bool render_job_running(const bContext *C, const Scene *scene)
+{
+  return WM_jobs_test(CTX_wm_manager(C), scene, WM_JOB_TYPE_RENDER);
+}
+EXPORT(render_job_progress) float render_job_progress(const bContext *C, const Scene *scene)
+{
+  return WM_jobs_progress(CTX_wm_manager(C), scene);
+}
+/* Stops it, as Esc does in Blender's render window. */
+EXPORT(render_job_stop) void render_job_stop(const bContext *C, const Scene *scene)
+{
+  WM_jobs_stop_type(CTX_wm_manager(C), scene, WM_JOB_TYPE_RENDER);
+}
 
 /* The width and height of the scene's last render result, in `r_size`; false when it has none. */
 EXPORT(render_result_size) bool render_result_size(const Scene *scene, int *r_size)

@@ -1,6 +1,6 @@
 // F12 with Cycles: Blender's own render operator (render.render) in the module, with Cycles loaded on first use
 // (render/cycles.js), its result read through the scene's view transform (wasm/render-api.cc) as Blender's render
-// window shows it. The render blocks the page while it runs, so the status says so first.
+// window shows it.
 import { blenderModule } from '../../bmesh/bmesh-wasm.js';
 import { loadCycles } from '../../render/cycles.js';
 import { pointerStruct, structFind } from '../../python/bpy_rna.js';
@@ -27,22 +27,33 @@ function resultImage(scene) {
   }
 }
 
-// A frame source (editors/render/host.js) for the scene in `world`, rendered by Cycles.
+const OPERATOR_RUNNING_MODAL = 1 << 0, OPERATOR_FINISHED = 1 << 2;
+
+// A frame source (editors/render/host.js) for the scene in `world`, rendered by Cycles in Blender's render job (F12's
+// invoke), on a thread of its own while the page goes on; Cancel stops the job.
 export async function cyclesSource(world) {
   await loadCycles();
-  const blender = world.mainSync.blender;
+  const blender = world.mainSync.blender, scene = () => blender.scene;
+  let job = null;
   return {
     label: 'Cycles',
     async renderFrame(frame, progress) {
-      progress?.(0, 1, 'Rendering');
-      // A frame for the status to show before the render holds the page.
-      await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve)));
-      pointerStruct(structFind('Scene'), blender.scene, blender.scene).render.engine = 'CYCLES';
-      const { status, report } = blender.run('render.render', {});
-      const OPERATOR_FINISHED = 1 << 2;
-      if (!(status & OPERATOR_FINISHED)) throw Error(report || 'Cycles did not render');
-      return resultImage(blender.scene);
+      pointerStruct(structFind('Scene'), scene(), scene()).render.engine = 'CYCLES';
+      job = blender.invoke('render.render', {}, { type: 'F12' });
+      if (!(job.status & (OPERATOR_RUNNING_MODAL | OPERATOR_FINISHED))) throw Error(job.report || 'Cycles did not render');
+      while (x.render_job_running(blender.C, scene())) {
+        progress?.(0, 1, `Rendering ${Math.round(x.render_job_progress(blender.C, scene()) * 100)}%`);
+        await new Promise((resolve) => setTimeout(resolve, 200));
+      }
+      // The job's end ends the operator (screen_render_modal).
+      if (job.op) blender.modal(job.op, { type: 'TIMER' });
+      job = null;
+      return resultImage(scene());
     },
-    dispose() {},
+    dispose() {
+      if (!job) return;
+      x.render_job_stop(blender.C, scene());
+      if (job.op) blender.modal(job.op, { type: 'TIMER' });
+    },
   };
 }
