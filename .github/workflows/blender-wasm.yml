@@ -42,6 +42,15 @@ jobs:
         with:
           path: work/blender
           key: blender-source-${{ hashFiles('tools/blender-port/manifest.json', 'tools/blender-port/wasm/patches/*.patch') }}
+      # Blender's LFS datafiles by its tag (configure_host.sh keeps them in work/blender-lfs): fetched from Blender's LFS
+      # server, which fails at times, once per tag.
+      - name: Blender tag
+        id: blender
+        run: echo "tag=$(python3 -c "import json; print(json.load(open('tools/blender-port/manifest.json'))['blender'])")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        with:
+          path: work/blender-lfs
+          key: blender-lfs-${{ steps.blender.outputs.tag }}
       # A failed LFS pull leaves a clone the script would not pull again, so a retry starts from no clone.
       - name: Configure Blender
         run: for i in 1 2 3; do bash tools/blender-port/configure_host.sh work && exit 0; rm -rf work/blender; sleep 60; done; exit 1
@@ -76,6 +85,15 @@ jobs:
         with:
           path: work/wasm-build/deps
           key: blender-wasm-deps-${{ hashFiles('tools/blender-port/manifest.json', 'tools/blender-port/deps/**', 'tools/blender-port/wasm/patches/deps/*') }}
+      # Blender's LFS datafiles by its tag (configure_host.sh keeps them in work/blender-lfs): fetched from Blender's LFS
+      # server, which fails at times, once per tag.
+      - name: Blender tag
+        id: blender
+        run: echo "tag=$(python3 -c "import json; print(json.load(open('tools/blender-port/manifest.json'))['blender'])")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        with:
+          path: work/blender-lfs
+          key: blender-lfs-${{ steps.blender.outputs.tag }}
       # A failed LFS pull leaves a clone the script would not pull again, so a retry starts from no clone.
       - name: Configure Blender
         run: for i in 1 2 3; do bash tools/blender-port/configure_host.sh work && exit 0; rm -rf work/blender; sleep 60; done; exit 1

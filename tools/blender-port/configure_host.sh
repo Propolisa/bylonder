@@ -20,6 +20,8 @@ if [ ! -d "$DIR/blender/.git" ]; then
   GIT_LFS_SKIP_SMUDGE=1 git clone -q --depth 1 --branch "$TAG" https://github.com/blender/blender.git "$DIR/blender"
   git -C "$DIR/blender" config lfs.url "$LFS"
   git -C "$DIR/blender" config "lfs.$LFS.access" none
+  # LFS objects kept beside the checkout (CI caches them by tag), so they are fetched from Blender's server once.
+  git -C "$DIR/blender" config lfs.storage "$DIR/blender-lfs"
   (cd "$DIR/blender" && GIT_TERMINAL_PROMPT=0 git lfs pull --include="release/datafiles/**")
 fi
 # The reviewed patches, each applied once: one already in the tree is left as it is.
