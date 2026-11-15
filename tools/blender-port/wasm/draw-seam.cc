@@ -28,6 +28,10 @@ void DRW_engines_register()
                                                   RE_INTERNAL | RE_USE_STEREO_VIEWPORT | RE_USE_GPU_CONTEXT);
   RE_engines_register(&eevee);
   RE_engines_register(&workbench);
+  /* Cycles' place among the engines until its side module and add-on arrive (render/cycles.js, which choosing it
+   * starts): cycles-api.cc takes it out before the add-on registers Cycles' own. */
+  static RenderEngineType cycles = engine_type("CYCLES", N_("Cycles"), 0);
+  RE_engines_register(&cycles);
 }
 
 /* port-override: no batch caches to tag or free; Bylonder's mesh extraction is its own. */

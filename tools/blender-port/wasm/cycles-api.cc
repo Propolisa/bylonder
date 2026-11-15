@@ -3,6 +3,10 @@
  * module's Python, started without Cycles, gets in sys.modules (bpy_interface.cc lists it in its inittab). */
 #include <Python.h>
 
+#include "BLI_listbase.h"
+#include "BLI_string.h"
+#include "RE_engine.h"
+
 #include "blender/CCL_api.h"
 #include "blender/session.h"
 
@@ -12,6 +16,13 @@ EXPORT(cycles_start) void cycles_start()
 {
   blender::CCL_log_init();
   blender::CCL_implicit_sharing_init();
+  /* The engine draw-seam.cc held Cycles' place with makes way for the add-on's. */
+  for (blender::RenderEngineType &type : blender::R_engines) {
+    if (STREQ(type.idname, "CYCLES") && !type.rna_ext.srna) {
+      BLI_remlink(&blender::R_engines, &type);
+      break;
+    }
+  }
   const PyGILState_STATE gil = PyGILState_Ensure();
   PyObject *module = static_cast<PyObject *>(blender::CCL_python_module_init());
   PyDict_SetItemString(PyImport_GetModuleDict(), "_cycles", module);
