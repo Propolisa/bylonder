@@ -167,14 +167,15 @@ const SCREEN_SPACE_PIPELINES = {
 
 // A geometry's vertex buffers by Babylon kind, with their sizes, and its indices, as buffers of scene.bin: one entry per
 // geometry, shared by its meshes. A thin instance buffer (world0 to world3, per instance) is the mesh's thinInstances,
-// written with its node.
-function geometryEntry(mesh, bin, skins) {
+// written with its node. `uv2`: a lightmap's UV set (lightmaps.js), which the mesh does not draw with.
+function geometryEntry(mesh, bin, skins, uv2) {
   const kinds = mesh.getVerticesDataKinds().filter((kind) => !mesh.getVertexBuffer(kind).getIsInstanced());
   const map = mesh.skeleton && skins?.get(mesh.skeleton.id)?.map;
   const vertices = Object.fromEntries(kinds.map((kind) => {
     const size = mesh.getVertexBuffer(kind).getSize(), data = Float32Array.from(mesh.getVerticesData(kind, false, false));
     return [kind, [size, bin.add(map ? remappedIndices(kind, data, map, mesh.skeleton.bones.length) : data)]];
   }));
+  if (uv2) vertices.uv2 = [2, bin.add(uv2)];
   const indices = mesh.getIndices();
   const wide = mesh.getTotalVertices() > 65535;
   return { vertices, ...(indices?.length && { indices: bin.add(wide ? Uint32Array.from(indices) : Uint16Array.from(indices)) }) };
@@ -429,7 +430,7 @@ async function moduleSource(world, live, mapped, { step, parity, hostCompression
   const objects = [...data.transformNodes.map((entry) => ({ entry })), ...data.meshes.map((entry) => ({ entry, mesh: scene.getMeshByUniqueId(entry.uniqueId) }))];
   for (const { entry, mesh } of objects) if (mesh?.geometry && !geometries.has(mesh.geometry)) {
     geometries.set(mesh.geometry, entry.id);
-    geometryEntries.push([entry.id, geometryEntry(mesh, bin, skins)]);
+    geometryEntries.push([entry.id, geometryEntry(mesh, bin, skins, data.lightmaps.get(mesh)?.uv2)]);
   }
   const compositorState = chosenState(states, 'compositor') ?? 'LIVE';
   const composited = !asset && data.cameras.length && compositorState !== 'OFF' ? exportCompositor(world) : null;

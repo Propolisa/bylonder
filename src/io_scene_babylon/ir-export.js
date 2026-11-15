@@ -46,7 +46,9 @@ const UI = /^(show_expanded|.*_expanded|is_active|ui_.*|bl_.*|select_.*|use_cust
 const DERIVED = new Set(['ActionGroup.channels', 'Bone.children', 'BoneCollection.bones', 'PoseBone.matrix', 'PoseBone.matrix_channel',
   // What the editors draw a channel or a bone in: an F-Curve's and its group's colors and visibility, a bone's color.
   'FCurve.color', 'FCurve.color_mode', 'FCurve.hide', 'ActionGroup.colors', 'ActionGroup.color_set', 'ActionGroup.is_custom_color_set',
-  'Bone.color', 'PoseBone.color']);
+  'Bone.color', 'PoseBone.color',
+  // An image's pixels, which the package carries as its file.
+  'Image.pixels']);
 // A node tree's nodes, links and interface, which its graph holds.
 const GRAPHED = new Set(['nodes', 'links', 'interface']);
 // A node's place in its editor, which only the editor reads.

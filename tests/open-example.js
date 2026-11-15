@@ -27,6 +27,7 @@ import '../src/runtimes/armature.js';
 import '../src/runtimes/image.js';
 import '../src/runtimes/grease-pencil.js';
 import '../src/runtimes/shape-keys.js';
+import '../src/io_scene_babylon/lightmaps.js';
 import { bylonderIcon } from '../src/python/bpy_icons.js';
 import { hasMesh, identify } from '../src/editors/object/identity.js';
 

@@ -8,6 +8,7 @@ import { exportRuntimes } from '../runtimes/runtimes.js';
 import { skinningBones } from '../runtimes/armature.js';
 import { imageFile } from '../imbuf/image-textures.js';
 import { exportNodeMaterial } from './node-material-export.js';
+import { lightmapsOf, writeLightmaps } from './lightmaps.js';
 import { shadowFilter } from '../blenkernel/light/light-shadows.js';
 import { exactAnimation, fcurveKeys, stripKeys } from './exact-keys.js';
 import { actionClips, additive, clipGroup, ownedBy, withAction } from './clip-export.js';
@@ -484,6 +485,7 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
   world.worlds?.setViewportActive(true, !world.compositor?.drawsScene);
   const effects = camera ? cameraEffects(world, scene, camera) : { renderingPipelines: [], postProcesses: [] };
   const imageData = new Map(scene.textures.filter((t) => t instanceof Texture).map((t) => [t, imageFile(t)]).filter(([, data]) => data));
+  const lightmaps = lightmapsOf(world, content.meshes);
   // Sampled before the export's flags and metadata are set, which channels read to know they are available.
   const samples = world.animation.sample(sampling.frames), liveIds = live && new Map([...live].map(([node, stack]) => [nodeId(node), [node, stack]]));
   // Objects' evaluated transforms too, while their metadata, which evaluating a frame reads, is theirs.
@@ -573,6 +575,7 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
   const kept = (list, items, keep) => list.filter((_, i) => keep(items[i]));
   json.multiMaterials = kept(json.multiMaterials, scene.multiMaterials, (m) => content.materials.has(m) || content.meshes.some((mesh) => mesh.material === m));
   json.particleSystems = kept(json.particleSystems, scene.particleSystems, (p) => !p.emitter?.getClassName || content.nodes.has(p.emitter));
+  writeLightmaps(world, json, lightmaps);
   for (const entry of json.cameras) aimed(entry, scene.getCameraByUniqueId(entry.uniqueId));
   turnedCameras(json.cameras, animationGroups);
   extraInfluences(json, scene);
@@ -582,6 +585,6 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
   // The F-Curves the page runs (live-curves.js), for the package's IR, and what it still plays as samples (sampledGaps):
   // neither is part of the file.
   // The rate of each object whose animation is baked, for the IR's time.
-  Object.defineProperties(json, { clips: { value: clips }, liveCurves: { value: curves ?? [] }, liveConstraints: { value: constraints }, sampledAnimation: { value: gaps ?? [] }, sampleRates: { value: sampling.rates() } });
+  Object.defineProperties(json, { lightmaps: { value: lightmaps }, clips: { value: clips }, liveCurves: { value: curves ?? [] }, liveConstraints: { value: constraints }, sampledAnimation: { value: gaps ?? [] }, sampleRates: { value: sampling.rates() } });
   return json;
 }

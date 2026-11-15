@@ -86,6 +86,7 @@ import "./runtimes/armature.js";
 import "./runtimes/image.js";
 import "./runtimes/grease-pencil.js";
 import "./runtimes/shape-keys.js";
+import "./io_scene_babylon/lightmaps.js";
 import { bylonderIcon } from "./python/bpy_icons.js";
 import { keymapHandler, blenderKeys } from "./windowmanager/keyconfig.js";
 import { createToolSystem } from "./windowmanager/wm-toolsystem.js";

@@ -32,6 +32,12 @@ const features = [];
 export function registerRuntime(feature) {
   features.push(feature);
 }
+// Bylonder's own settings on a struct's `bylonder` beside its features' runtime (io_scene_babylon/lightmaps.js):
+// settings(props, types) gives bpy.props by name, panel(types, icon) its panel.
+const ownSettings = [];
+export function registerSettings(struct, { settings, panel }) {
+  ownSettings.push({ struct, settings, panel });
+}
 export const runtimeOf = (struct) => struct?.bylonder?.runtime ?? 'BLENDER';
 export const featureOf = (struct) => features.find((feature) => feature.poll(struct)) ?? null;
 
@@ -120,11 +126,13 @@ function propertyGroup(struct, list) {
     __annotations__: Object.assign({}, ...list.map((feature) => feature.settings(props(), kw))),
   });
   registerClass(Babylon);
+  const own = ownSettings.filter((s) => s.struct === struct).map((s) => s.settings(props(), types()));
   const Group = __class__(`BYLONDER_PG_${struct.toLowerCase()}`, [types().PropertyGroup], {
     __annotations__: {
       runtime: props().EnumProperty(kw({ name: 'Runtime', description: 'Which settings define this feature and which code evaluates it',
         items: offered.map((id) => [id, ...RUNTIMES[id]]), default: 'BLENDER', options: new Set() })),
       babylon: props().PointerProperty(kw({ type: Babylon, name: 'Babylon', description: "Babylon's settings of the feature" })),
+      ...Object.assign({}, ...own),
     },
     get issues() { return featureOf(this.id_data)?.issues(this.id_data) ?? []; },
   });
@@ -186,9 +194,11 @@ function scenePanel(icon) {
 // (python/bpy_interface.js); `icon` is the Bylonder icon's icon_value.
 export function registerRuntimeTypes(icon) {
   const byStruct = Map.groupBy(features, (feature) => feature.struct);
+  for (const { struct } of ownSettings) if (!byStruct.has(struct)) byStruct.set(struct, []);
   for (const [struct, list] of byStruct) propertyGroup(struct, list);
   defineAssignedProperties();
   for (const feature of features) registerClass(runtimePanel(feature, icon));
+  for (const { panel } of ownSettings) registerClass(panel(types(), icon));
   registerClass(scenePanel(icon));
 }
 

@@ -1260,6 +1260,72 @@
   }
  },
  {
+  "id": "lightmaps",
+  "title": "Lightmaps",
+  "summary": "Draw a scene's light baked in Cycles in an exported page, each object's lightmap set in Object properties > Lightmap and drawn with Babylon's own lightmapTexture.",
+  "expect": "An object's Lightmap setting names a baked image and the UV map it is laid out on, and File > Export > JavaScript draws the object with it through Babylon's lightmapTexture on a copy of its material, so the page shows Cycles' soft light, bounce and contact shadows at the cost of a texture read; the copy is Babylon's PBRMaterial made from the material's Principled BSDF values, so node setups beyond them are not carried, and the app's own views still light the object live.",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/render/cycles/baking.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/meshes/editing/uv.html",
+   "https://docs.blender.org/manual/en/5.2/editors/graph_editor/fcurves/modifiers.html"
+  ],
+  "example": "meditation",
+  "thumbnail": "lightmaps/thumbnail.png",
+  "media": [
+   "lightmaps/breathing.gif",
+   "lightmaps/room-lightmap.png",
+   "lightmaps/figure-lightmap.png"
+  ],
+  "ui": [
+   "VIEW_3D",
+   "PROPERTIES",
+   "OBJECT_PT_context_object",
+   "DATA_PT_uv_texture",
+   "CYCLES_RENDER_PT_bake*",
+   "GRAPH_PT_modifiers",
+   "TOPBAR_MT_file_export"
+  ],
+  "operators": [
+   "object.bake",
+   "uv.smart_project",
+   "uv.lightmap_pack",
+   "graph.fmodifier_add"
+  ],
+  "code": [
+   "src/io_scene_babylon/lightmaps.js",
+   "src/io_scene_babylon/babylon-export.js",
+   "src/io_scene_babylon/js-export.js",
+   "src/runtimes/runtimes.js"
+  ],
+  "tests": [
+   "tests/meditation-wasm.test.js"
+  ],
+  "limits": [
+   "Lightmaps are drawn only in exported pages; the app's 3D Viewport and Render Image light the object live, as Blender does.",
+   "The lightmapped copy of a material takes its Principled BSDF's unlinked Base Color, Roughness and Metallic (else its viewport display values); textures and other nodes of the material are not carried.",
+   "An image is a PNG or JPEG of 8 bits scaled by Intensity, so light beyond Intensity clips; HDR lightmaps (EXR, RGBD) are not read.",
+   "Bylonder does not bake yet; the example bakes with desktop Blender's Cycles in its script.",
+   "A lightmap holds diffuse light only: a lightmapped surface loses its glossy reflections in the page, so the example's surfaces are matte.",
+   "Noise F-Curve modifiers play in a page as sampled keys, not live; Cycles modifiers play live."
+  ],
+  "page": "docs/features/lightmaps.md",
+  "open": "https://propolisa.github.io/bylonder/#example=meditation",
+  "example_title": "Meditation",
+  "coverage": {
+   "operators": {
+    "supported": 4,
+    "partial": 10,
+    "total": 14
+   },
+   "ui": {
+    "supported": 2,
+    "partial": 1,
+    "total": 9
+   }
+  }
+ },
+ {
   "id": "link-append",
   "title": "Link and Append",
   "summary": "Bring collections, objects, materials and any other data-block in from another .blend with File > Link and File > Append, browsing inside the file in Blender's own File Browser, and make linked data editable with library overrides.",
