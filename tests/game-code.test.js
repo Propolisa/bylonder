@@ -3,13 +3,13 @@
 // edited file a candidate that changes nothing until accepted, one that does not parse a thrown error with its line,
 // and the line of an error thrown in a module.
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { createGameCode, definitionAt, errorAt } from '../src/editors/space_game/game-code.js';
+import { tempDir } from './temp-dir.js';
 
-const dir = mkdtempSync(join(tmpdir(), 'bylonder-game-code-'));
+const dir = tempDir('bylonder-game-code-');
 const define = new URL('../src/io_scene_babylon/runtime/game/define.js', import.meta.url).href;
 const rock = (mood) => `import { defineBehavior } from '${define}';\nexport default defineBehavior({ name: 'Rock', create() { return { mood: '${mood}' }; } });\n`;
 const write = (path, text) => { mkdirSync(join(dir, path, '..'), { recursive: true }); writeFileSync(join(dir, path), text); };

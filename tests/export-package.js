@@ -1,12 +1,12 @@
 // A JavaScript export's package written to a folder as the zip holds it, with the runtime and the folders of Blender's
 // code it loads from src, and its scene.js imported: @babylonjs/core resolves to the installed package, as an
 // import map maps it in a page.
-import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { appFiles, gplFiles, packagedModules, packagedRuntime, packageOverrides, packageRuntime } from '../src/io_scene_babylon/runtime-files.js';
 import { bundlePackage } from '../src/io_scene_babylon/bundle.js';
+import { tempDir } from './temp-dir.js';
 import { groupEntry } from '../src/io_scene_babylon/runtime/scene-tables.js';
 
 const CORE = import.meta.resolve('@babylonjs/core').replace(/index\.js$/, '');
@@ -32,13 +32,13 @@ export async function bundledFiles(files, { minify = true } = {}) {
 }
 
 // `dir`: where to write it (default a new temporary folder).
-export function writePackage(files, dir = mkdtempSync(join(tmpdir(), 'bylonder-package-'))) {
+export function writePackage(files, dir = tempDir('bylonder-package-')) {
   const all = packageFiles(files);
   for (const [path, data] of Object.entries(all)) {
     mkdirSync(dirname(join(dir, path)), { recursive: true });
     writeFileSync(join(dir, path), /\.m?js$/.test(path) ? String(data).replace(/(['"])@babylonjs\/core(?:\/([^'"]+))?\1/g, (_, quote, path) => JSON.stringify(CORE + (path ?? 'index.js'))) : data);
   }
-  return { dir, url: pathToFileURL(join(dir, 'scene.js')).href, remove: () => rmSync(dir, { recursive: true }) };
+  return { dir, url: pathToFileURL(join(dir, 'scene.js')).href, remove: () => rmSync(dir, { recursive: true, force: true }) };
 }
 
 // A table of scene.js (runtime/scene-tables.js) as a list of its entries, `name` its constant's (MATERIALS); its

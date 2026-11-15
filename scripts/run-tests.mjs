@@ -83,6 +83,9 @@ function report(result) {
 // less a reserve; one always runs.
 const jobs = Number(process.env.JOBS) || Math.max(1, availableParallelism() >> 1), budget = freemem() / 2 ** 20 - RESERVE_MB;
 const running = new Map(), queue = [...tests], begun = performance.now();
+// What the system's temp folder held before the run: a test's folders left there after it are listed at the end
+// (another program's, made meanwhile, can show too).
+const tempBefore = new Set(readdirSync(tmpdir()));
 const fits = (test) => !running.size || (running.size < jobs && [...running.keys()].reduce((mb, t) => mb + peakOf(t), peakOf(test)) <= budget);
 while (queue.length || running.size) {
   while (queue.length && fits(queue[0])) {
@@ -97,5 +100,7 @@ writeFileSync(PEAKS, JSON.stringify(peaks, null, 1));
 for (const { test, output } of failed) console.log(`\n--- ${test}\n${output}`);
 const slowest = tests.filter((t) => times[t]).toSorted((a, b) => times[b] - times[a]).slice(0, 8).map((t) => `${t.slice('tests/'.length)} ${times[t].toFixed(0)} s`);
 console.log(`slowest: ${slowest.join(', ')}`);
+const leftInTemp = readdirSync(tmpdir()).filter((name) => !tempBefore.has(name) && /^(bylonder|blend|node-|udim|solveat|demo-package|shader-gallery)/.test(name));
+if (leftInTemp.length) console.log(`left in ${tmpdir()} by the run (or another program meanwhile): ${leftInTemp.join(', ')}`);
 console.log(`${tests.length - failed.length} of ${tests.length} passed in ${((performance.now() - begun) / 60000).toFixed(1)} min, up to ${jobs} at a time within ${(budget / 1024).toFixed(1)} GB`);
 process.exit(failed.length ? 1 : 0);

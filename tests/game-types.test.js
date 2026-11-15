@@ -4,11 +4,11 @@
 // that is not one; with none written, any string is taken.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, writeFileSync, copyFileSync, mkdirSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { writeFileSync, copyFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gameTypes, inkKnots, projectKnots } from '../src/editors/space_game/game-types.js';
+import { tempDir } from './temp-dir.js';
 
 assert.deepEqual(inkKnots('=== rock_reaction ===\n{~*clack*}\n-> END\n\n=== shift_over\n{served} served.\n'), ['rock_reaction', 'shift_over']);
 assert.deepEqual(projectKnots({ 'content/cafe.ink': { content: '=== a ===\n' }, 'src/x.js': { content: '=== b ===' } }), ['a']);
@@ -18,7 +18,7 @@ assert.match(gameTypes({}), /sound: never;/);
 
 // The framework's declarations with the generated names, checked by TypeScript as the editor checks a project.
 const runtime = fileURLToPath(new URL('../src/io_scene_babylon/runtime/', import.meta.url));
-const dir = mkdtempSync(join(tmpdir(), 'bylonder-game-types-'));
+const dir = tempDir('bylonder-game-types-');
 mkdirSync(join(dir, 'game'));
 for (const name of ['define.d.ts', 'world.d.ts', 'names.d.ts', 'blend-host.d.ts']) copyFileSync(join(runtime, 'game', name), join(dir, 'game', name));
 copyFileSync(join(runtime, 'blend-scene.d.ts'), join(dir, 'blend-scene.d.ts'));

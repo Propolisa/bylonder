@@ -4,8 +4,8 @@
 // coordinator, ColorCurves' parser) throws there, as on a page. Each example exports in a process of its own (one Main);
 // the examples are checked in batches (export-side-effects-<n>-wasm.test.js), each a test of its own.
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdtempSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { tempDir } from './temp-dir.js';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -35,7 +35,7 @@ if (id) {
   written.remove();
   const exported = await exportModule(world, { bundle: true });
   exported['scene.js'] += "\nexport { NullEngine } from '@babylonjs/core/Engines/nullEngine.js';\n";
-  const dir = mkdtempSync(join(tmpdir(), 'bylonder-bundle-'));
+  const dir = tempDir('bylonder-bundle-');
   for (const [path, data] of Object.entries(await bundledFiles(exported))) { mkdirSync(dirname(join(dir, path)), { recursive: true }); writeFileSync(join(dir, path), data); }
   const bundled = verdict(run(page(pathToFileURL(join(dir, 'scene.js')).href, true)));
   rmSync(dir, { recursive: true, force: true });
