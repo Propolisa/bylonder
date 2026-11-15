@@ -120,6 +120,20 @@ const gameLibraries = () => {
   };
 };
 
+// An example's file added or removed while the dev server runs: the examples' module (its eager glob of examples/) is
+// made again, so a project opened from the example has it without a restart.
+const exampleFiles = () => ({
+  name: "example-files",
+  configureServer(server) {
+    const examples = fileURLToPath(new URL("./src/workspace/examples.js", import.meta.url)).replaceAll("\\", "/");
+    const changed = (file) => {
+      if (!file.replaceAll("\\", "/").includes("/examples/")) return;
+      for (const module of server.moduleGraph.getModulesByFile(examples) ?? []) server.moduleGraph.invalidateModule(module);
+    };
+    server.watcher.on("add", changed).on("unlink", changed);
+  },
+});
+
 // The live demos of exported pages (tools/docs/export-demo.mjs), published as they are, games bundled with Babylon
 // (demo-bundle.mjs) so they load as a few files.
 const demos = () => ({
@@ -168,7 +182,7 @@ const isolation = () => ({
 
 export default defineConfig({
   base: process.env.BASE_PATH || "/",
-  plugins: [vue(), tailwindcss(), blenderCoverage(), blenderIconSet(), changelog(), demoFiles(), babylonSources(), gameLibraries(), demos(), isolation(), moduleCheck()],
+  plugins: [vue(), tailwindcss(), blenderCoverage(), blenderIconSet(), changelog(), demoFiles(), babylonSources(), gameLibraries(), exampleFiles(), demos(), isolation(), moduleCheck()],
   define: { __BYLONDER_VERSION__: JSON.stringify(pkg.version), __BYLONDER_CHANGE__: JSON.stringify(commits()[0] ?? null) },
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
   // Agents' worktrees live under .claude/: their edits must not reload this checkout's pages (a worktree's own server
