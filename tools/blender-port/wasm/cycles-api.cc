@@ -15,7 +15,9 @@ EXPORT(cycles_start) void cycles_start()
   PyObject *module = static_cast<PyObject *>(blender::CCL_python_module_init());
   PyDict_SetItemString(PyImport_GetModuleDict(), "_cycles", module);
   Py_DECREF(module);
-  /* Its add-on, from cycles.zip, enabled as Blender enables it by default. */
-  PyRun_SimpleString("import addon_utils\naddon_utils.enable('cycles', default_set=True)\n");
+  /* Its add-on, from cycles.zip, enabled as Blender enables it by default; Python's importers list the add-ons folder
+   * again, as cycles.zip arrived after they first did. */
+  PyRun_SimpleString(
+      "import addon_utils, importlib\nimportlib.invalidate_caches()\naddon_utils.enable('cycles', default_set=True)\n");
   PyGILState_Release(gil);
 }
