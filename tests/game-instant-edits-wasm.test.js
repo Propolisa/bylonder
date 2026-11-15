@@ -60,6 +60,12 @@ const shown = (run) => {
     shape: morph?.influence,
     // The camera's field of view, as its frame fits it (rounded: Blender's and the bind's arithmetic differ in the last bits).
     lens: find(scene.cameras, 'Camera') && +find(scene.cameras, 'Camera').fov.toFixed(6),
+    // The display transform's exposure and exponent, as its post process applies them.
+    view: (() => {
+      const post = scene.activeCamera?._postProcesses?.find((p) => p?.name === 'Display Transform'), applied = {};
+      post?.onApplyObservable.notifyObservers({ setFloat: (name, value) => { applied[name] = value; }, setFloat4() {}, setTexture() {} });
+      return post && [applied.exposure, +applied.exponent.toFixed(6)];
+    })(),
     // Whether the light casts shadows at all.
     shadows: light?.shadowEnabled,
     // Whether the body casts the light's shadow (a light none casts on has no shadow map).
@@ -76,6 +82,7 @@ const EDITS = {
   shape: () => { blendData().shape_keys.get('Key').key_blocks.get('Breathe').value = 0.75; },
   shadow: () => { objects.get('Body').visible_shadow = false; },
   shadows: () => { objects.get('Key').data.use_shadow = false; },
+  view: () => { const view = blendData().scenes.get('Scene').view_settings; view.exposure = 0.5; view.gamma = 1.2; },
   lens: () => { objects.get('Camera').data.lens *= 1.5; objects.get('Camera').data.sensor_width = 30; },
 };
 for (const [kind, edit] of Object.entries(EDITS)) {
@@ -145,5 +152,5 @@ assert.notEqual(objects.get('Key').location[0], 9);
 
 game.dispose();
 written.remove();
-console.log('Instant edits: transform, material colour and culling, light, shape key, shadow casting and camera lens on the next frame in every run and copy; the export reconciles');
+console.log('Instant edits: transform, material colour and culling, light, shape key, shadow casting, camera lens and view exposure and gamma on the next frame in every run and copy; the export reconciles');
 process.exit(0);

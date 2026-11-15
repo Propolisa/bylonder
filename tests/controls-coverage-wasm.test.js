@@ -36,9 +36,12 @@ async function syncedIn(id) {
   const { exportPackage } = await import('../src/io_scene_babylon/js-export.js');
   const { packageState } = await import('../src/io_scene_babylon/scene-patch.js');
   const ROOTS = { objects: 'Object', lights: 'Light', cameras: 'Camera', materials: 'Material' }, bound = new Set();
+  const SCENE_PATHS = { view_settings: 'ColorManagedViewSettings' };
   for (const [path, property] of Object.entries(packageState(await exportPackage(world, {})).tables.properties)) {
     const [, root, name] = /^(\w+)\["(?:[^"\\]|\\.)*"\]\.(\w+)/.exec(path) ?? [];
+    const [, part, setting] = /\.(view_settings)\.(\w+)$/.exec(path) ?? [];
     if (property?.bind && ROOTS[root]) bound.add(`${ROOTS[root]}.${name}`);
+    if (property?.bind && part) bound.add(`${SCENE_PATHS[part]}.${setting}`);
   }
   return { structs: Object.fromEntries(Object.entries(found).map(([struct, names]) => [struct, [...names]])), bound: [...bound] };
 }
@@ -69,6 +72,7 @@ else {
     lines.push(`${scene}: ${covered} covered (${count.fast} fast, ${count.rebuild} rebuild, ${count.reload} reload), ${count.none} not drawn by pages, ${count.app} the editor's, ${count.pending} not in the table yet`);
   }
   assert.deepEqual(gaps, [], `synced properties with no kind in controls-export.js SYNCED: ${gaps.join(', ')}`);
+  assert.deepEqual([...pending.keys()], [], `shipped structs not in controls-export.js SYNCED: ${[...pending.keys()].join(', ')}`);
   console.log(lines.join('\n'));
   console.log(`Reload: ${[...reloads].sort().join(', ') || 'none'}`);
   console.log(`Not drawn by pages: ${[...undrawn].sort().join(', ') || 'none'}`);

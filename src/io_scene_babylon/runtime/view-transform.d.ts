@@ -1,9 +1,10 @@
 /**
- * The camera's display transform, its last post process, with the scene's materials drawing in scene linear.
+ * The camera's display transform, its last post process, with the scene's materials drawing in scene linear. Its
+ * exposure and exponent are read from `display` as each frame draws, so setting them there shows on the next frame.
  * @param {Camera} camera
  * @param {Display} display
  */
-export function viewTransform(camera: Camera, { exposure, exponent, lattice }: Display): PostProcess;
+export function viewTransform(camera: Camera, display: Display): PostProcess;
 export function displayTransformShader(size: number, stops: number): string;
 export const DISPLAY_UNIFORMS: string[];
 export type Camera = import("@babylonjs/core").Camera;

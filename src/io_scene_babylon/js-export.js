@@ -609,7 +609,7 @@ const SCREEN_SPACE = {${pipelineTypes.filter((type) => SCREEN_SPACE_PIPELINES[ty
 const PIPELINES = { ${pipelineClasses.join(', ')} };
 ` : ''}
 // Each built scene's IR, world, compositor and scene.bin buffers, which load gives its controls.
-const IRS = new WeakMap(), WORLDS = new WeakMap(), COMPOSITORS = new WeakMap(), SCENE_BUFFERS = new WeakMap(), TABLES = new WeakMap();${bundle && webgpu ? `
+const IRS = new WeakMap(), WORLDS = new WeakMap(), COMPOSITORS = new WeakMap(), DISPLAYS = new WeakMap(), SCENE_BUFFERS = new WeakMap(), TABLES = new WeakMap();${bundle && webgpu ? `
 // Babylon's GLSL to WGSL compilers, which WebGPU needs, in the package.
 const compiler = (name) => ({ jsPath: new URL(\`${COMPILER_FOLDER}/\${name}.js\`, ROOT).href, wasmPath: new URL(\`${COMPILER_FOLDER}/\${name}.wasm\`, ROOT).href });
 const COMPILERS = { glslangOptions: compiler('glslang'), twgslOptions: compiler('twgsl') };` : ''}
@@ -636,7 +636,7 @@ export async function load(target) {
   const engine = target;${webgpu ? `
   warnUnlessMaximumLimits(engine);` : ''}
   const scene = await createScene(engine, engine.getRenderingCanvas());
-  const blend = new BlendScene(scene, IRS.get(scene), { root: ROOT, world: WORLDS.get(scene), compositor: COMPOSITORS.get(scene), buffers: SCENE_BUFFERS.get(scene), tables: TABLES.get(scene),
+  const blend = new BlendScene(scene, IRS.get(scene), { root: ROOT, world: WORLDS.get(scene), compositor: COMPOSITORS.get(scene), display: DISPLAYS.get(scene), buffers: SCENE_BUFFERS.get(scene), tables: TABLES.get(scene),
     reload: (old) => { old.dispose(); return load(engine); } });
   await entitiesRun(scene, blend);
   await shadersCompiled(scene);${controlPanel ? `
@@ -731,7 +731,10 @@ ${pipelineTypes.length ? `  for (const entry of RENDERING_PIPELINES) {
   // Displayed as Blender's rendered view: scene linear, ${composited ? 'composited, ' : ''}then the view transform.
   const camera = scene.activeCamera;
   if (camera) {
-    const display = cameraEffects(scene).add(postProcessEffect(viewTransform(camera, { ...DISPLAY, lattice: DISPLAY.lattice && { ...DISPLAY.lattice, texels: buffers[DISPLAY.lattice.texels] } })), true).post;${composited ? `${fogGlow ? `
+    // Its exposure and gamma, which the scene's controls set (blend-scene.js, a \`display\` bind).
+    const settings = { ...DISPLAY, lattice: DISPLAY.lattice && { ...DISPLAY.lattice, texels: buffers[DISPLAY.lattice.texels] } };
+    DISPLAYS.set(scene, settings);
+    const display = cameraEffects(scene).add(postProcessEffect(viewTransform(camera, settings)), true).post;${composited ? `${fogGlow ? `
     // Glare's Fog Glow: its kernel a registered unit gives, else Blender's, convolved by an FFT on the GPU.
     const fogGlowKernel = unitFor('${FOG_GLOW_UNIT}')?.value${blenderFogGlow ? ' ?? fogGlowKernelValue' : ''};
     if (fogGlowKernel) ReplayTask.operations.fogGlow = (task, step, read) => fftConvolution(task, step, read, fogGlowKernel);` : ''}
@@ -808,7 +811,9 @@ import { ${[...usedNames(source), ...pipelineClasses].join(', ')} } from '@babyl
   const binBytes = bin.bytes(), version = [binBytes, new TextEncoder().encode(irJson)].map((bytes) => digest(bytes).replace(':', '.')).join('-');
   // What a patch is made from (scene-patch.js): the tables, the scene's own settings and the IR's, and the buffers.
   Object.assign(tables, { scene: { [ir.scene.id ?? 'scene']: { settings, imageProcessing: data.imageProcessingConfiguration, code, effectLayers: data.effectLayers ?? [],
-    renderingPipelines: data.renderingPipelines, postProcesses: data.postProcesses, volumes: volumes?.config ?? null, display, compositor: composited?.compositor ?? null } }, ...irTables(ir) });
+    renderingPipelines: data.renderingPipelines, postProcesses: data.postProcesses, volumes: volumes?.config ?? null,
+    // The display's exposure and gamma are the scene's controls: a patch carries them, the scene's entry does not.
+    display: display && { ...display, exposure: undefined, exponent: undefined }, compositor: composited?.compositor ?? null } }, ...irTables(ir) });
   const files = { 'scene.js': source.replace(BABYLON_IMPORTS, babylonImports).replaceAll(VERSION, version).replace(TABLES_VERSION, packageState({ tables }).version), 'scene.d.ts': controlTypes(Object.entries(ir.properties).map(([path, { type }]) => ({ path, type })), armatureNames(data, ir), !!data.skeletons?.length), 'scene.ir.json': irJson, [UNITS_FILE]: units, ...(kernels && { [NODE_KERNELS]: kernels }), ...(curves && { [CURVES_GLSL_FILE]: curvesGlslFile() }), 'scene.bin': binBytes, [ASSET_FILE]: ASSET_MANIFEST, 'package.json': `${JSON.stringify(manifest, null, 2)}\n`, ...images, ...soundFiles };
   // `ir` and `version` (scene.bin's and the IR's, which scene.js asks for its data by) for a run given them by reference.
   return { files, tables, buffers: bin.arrays(), ir, version };

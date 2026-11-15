@@ -186,6 +186,29 @@ export const SYNCED = {
     alpha_threshold: ({ base, ma, entry }) => [knob(`${base}.alpha_threshold`, ma.alpha_threshold, { type: 'FLOAT', subtype: 'FACTOR' }, { material: entry.id, property: 'alphaCutOff' })],
     surface_render_method: REBUILD,
   },
+  // The scene's settings: a page draws them from the scene's own table and clock, which a patch does not reach, so an
+  // edit loads the run fresh; the playhead and preview range are the editor's (a run plays its own clock).
+  Scene: {
+    frame_current: APP, frame_subframe: APP, use_preview_range: APP, frame_preview_start: APP, frame_preview_end: APP,
+    frame_start: RELOAD, frame_end: RELOAD, use_gravity: RELOAD, gravity: RELOAD,
+    // Frame Step: how the editor's playback steps.
+    frame_step: APP,
+  },
+  // Resolution sets each camera's frame (babylon-export.js framedCameras): the export's patch remakes the cameras.
+  RenderSettings: {
+    resolution_x: REBUILD, resolution_y: REBUILD, resolution_percentage: REBUILD,
+    fps: RELOAD, fps_base: RELOAD, use_motion_blur: RELOAD, motion_blur_shutter: RELOAD, engine: RELOAD,
+  },
+  SceneEEVEE: Object.fromEntries(['taa_samples', 'taa_render_samples', 'shadow_ray_count', 'use_raytracing', 'ray_tracing_method', 'fast_gi_method', 'fast_gi_distance']
+    .map((name) => [name, RELOAD])),
+  RaytraceEEVEE: { screen_trace_quality: RELOAD, screen_trace_thickness: RELOAD },
+  // Exposure and Gamma set the page's display transform (runtime/view-transform.js, a `display` bind).
+  ColorManagedViewSettings: {
+    exposure: ({ base, view }) => [knob(`${base}.exposure`, view.exposure, { type: 'FLOAT' }, { display: 'exposure' })],
+    gamma: ({ base, view }) => [knob(`${base}.gamma`, view.gamma, { type: 'FLOAT' }, { display: 'gamma' })],
+  },
+  // sRGB, the one display Bylonder has.
+  ColorManagedDisplaySettings: { display_device: APP },
 };
 
 // The sensor the camera's frame fits (Auto and Horizontal: its width), whose half extent over the lens is the field of
@@ -367,6 +390,7 @@ export function exportControls(world, data) {
   }
   list.push(...data.materials.flatMap(nodeMaterialControls), ...data.materials.flatMap((entry) => [...principledControls(entry, scene, sync), ...materialControls(entry, scene, sync)]));
   if (!data.materials.some((m) => m.name?.startsWith('__world '))) list.push(...worldControls(mainScene));
+  list.push(...syncedControls('ColorManagedViewSettings', world, { base: `scenes${key(mainScene.name)}.view_settings`, view: mainScene.view_settings }));
   list.push(frameControl(world, mainScene), ...customProperties(mainScene, `scenes${key(mainScene.name)}`), ...sdkControls(world, mainScene));
   return [...new Map(list.map((k) => [k.path, k])).values()];
 }

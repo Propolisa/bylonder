@@ -55,11 +55,13 @@ void main(void) {
 export const DISPLAY_UNIFORMS = ['exposure', 'range', 'exponent', 'latticed', 'background'];
 
 /**
- * The camera's display transform, its last post process, with the scene's materials drawing in scene linear.
+ * The camera's display transform, its last post process, with the scene's materials drawing in scene linear. Its
+ * exposure and exponent are read from `display` as each frame draws, so setting them there shows on the next frame.
  * @param {Camera} camera
  * @param {Display} display
  */
-export function viewTransform(camera, { exposure, exponent, lattice }) {
+export function viewTransform(camera, display) {
+  const { lattice } = display;
   const scene = camera.getScene(), name = `bylonderDisplay${lattice?.size ?? 0}_${lattice?.stops ?? 0}`;
   Effect.ShadersStore[`${name}FragmentShader`] ??= displayTransformShader(lattice?.size ?? 2, lattice?.stops ?? 1);
   // A Null engine (Node) draws nothing and makes no 3D texture: the transform there is the gamma's alone.
@@ -71,8 +73,8 @@ export function viewTransform(camera, { exposure, exponent, lattice }) {
     undefined, false, texture ? null : '#define SRGB_ONLY', Constants.TEXTURETYPE_HALF_FLOAT);
   post.onApply = (effect) => {
     effect.setFloat4('background', 0, 0, 0, 0);
-    effect.setFloat('exposure', exposure);
-    effect.setFloat('exponent', exponent);
+    effect.setFloat('exposure', display.exposure);
+    effect.setFloat('exponent', display.exponent);
     effect.setFloat('latticed', lattice ? 1 : 0);
     effect.setFloat('range', lattice?.range ?? 1);
     if (texture) effect.setTexture('lattice', texture);

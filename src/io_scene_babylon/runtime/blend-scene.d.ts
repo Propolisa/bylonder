@@ -44,13 +44,14 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
      * @param {{ root?: string, world?: { set(color: number[]): void }, compositor?: import('@babylonjs/core').NodeRenderGraph,
      *   buffers?: import('./buffers.js').Buffers, entries?: import('./asset.js').Entries, dispose?: () => void,
      *   tables?: ReturnType<typeof import('./scene-tables.js').sceneTables>, reload?: (old: BlendScene<any>) => Promise<BlendScene<any>>,
-     *   source?: BlendScene<any> }} [options]
+     *   source?: BlendScene<any>, display?: { exposure: number, exponent: number } }} [options]
      * the package's URL, which relative image URLs resolve against, the world of one color its background controls set
      * (world.js), the compositor its pass controls set (bylonder-blocks.js), scene.bin's buffers, which its entities
      * read; loaded into a scene of the page's own, what was added there and what removes it (asset.js); the scene's tables,
-     * which `patch` changes, what loads the package again in its place, and the scene this one is a copy of
+     * which `patch` changes, what loads the package again in its place, the scene this one is a copy of, and its display
+     * transform's settings
      */
-    constructor(scene: import("@babylonjs/core").Scene, ir: any, { root, world, compositor, buffers, entries, dispose, tables, reload, source }?: {
+    constructor(scene: import("@babylonjs/core").Scene, ir: any, { root, world, compositor, buffers, entries, dispose, tables, reload, source, display }?: {
         root?: string;
         world?: {
             set(color: number[]): void;
@@ -62,6 +63,10 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
         tables?: ReturnType<typeof import("./scene-tables.js").sceneTables>;
         reload?: (old: BlendScene<any>) => Promise<BlendScene<any>>;
         source?: BlendScene<any>;
+        display?: {
+            exposure: number;
+            exponent: number;
+        };
     });
     /** Told of each control's new value. @type {Observable<Change>} */
     onChanged: Observable<Change>;
@@ -462,6 +467,10 @@ export type Binding = {
         exposure: string;
         factor: number;
     } | undefined;
+    /**
+     * the display transform's exposure or gamma, as Blender's view settings give them
+     */
+    display?: "exposure" | "gamma" | undefined;
     /**
      * whether its node's meshes cast the lights' shadows (Object > Visibility > Shadow)
      */

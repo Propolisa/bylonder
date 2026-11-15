@@ -83,6 +83,7 @@ const FLOAT_EPSILON = 1.1920928955078125e-7;
  * @property {[string, number][]} [properties] the node's properties a value sets, each by its factor
  * @property {{ size: string, blend: string }} [spot] a spot light's cone: the paths of its size and blend
  * @property {{ energy: string, exposure: string, factor: number }} [power] a light's intensity: its energy times 2 to its exposure, by the factor
+ * @property {'exposure' | 'gamma'} [display] the display transform's exposure or gamma, as Blender's view settings give them
  * @property {boolean} [shadow] whether its node's meshes cast the lights' shadows (Object > Visibility > Shadow)
  */
 
@@ -217,6 +218,9 @@ export class BlendScene {
   /** @type {{ set(color: number[]): void } | undefined} */
   #world;
 
+  /** The display transform's settings (view-transform.js), which its exposure and gamma controls set. @type {{ exposure: number, exponent: number } | undefined} */
+  #display;
+
   /** @type {() => void} */
   #disposeContent;
 
@@ -232,13 +236,15 @@ export class BlendScene {
    * @param {{ root?: string, world?: { set(color: number[]): void }, compositor?: import('@babylonjs/core').NodeRenderGraph,
    *   buffers?: import('./buffers.js').Buffers, entries?: import('./asset.js').Entries, dispose?: () => void,
    *   tables?: ReturnType<typeof import('./scene-tables.js').sceneTables>, reload?: (old: BlendScene<any>) => Promise<BlendScene<any>>,
-   *   source?: BlendScene<any> }} [options]
+   *   source?: BlendScene<any>, display?: { exposure: number, exponent: number } }} [options]
    * the package's URL, which relative image URLs resolve against, the world of one color its background controls set
    * (world.js), the compositor its pass controls set (bylonder-blocks.js), scene.bin's buffers, which its entities
    * read; loaded into a scene of the page's own, what was added there and what removes it (asset.js); the scene's tables,
-   * which `patch` changes, what loads the package again in its place, and the scene this one is a copy of
+   * which `patch` changes, what loads the package again in its place, the scene this one is a copy of, and its display
+   * transform's settings
    */
-  constructor(scene, ir, { root = '', world, compositor, buffers = {}, entries, dispose = () => scene.dispose(), tables, reload, source } = {}) {
+  constructor(scene, ir, { root = '', world, compositor, buffers = {}, entries, dispose = () => scene.dispose(), tables, reload, source, display } = {}) {
+    this.#display = display;
     this.#tables = tables;
     this.#source = source;
     source?.copies.add(this);
@@ -764,6 +770,13 @@ export class BlendScene {
       const inputs = path.slice(0, path.lastIndexOf('.inputs[') + '.inputs'.length);
       const strength = /** @type {number} */ (this.#values.get(`${inputs}[1].default_value`) ?? 1);
       this.#world?.set([0, 1, 2].map((i) => /** @type {number} */ (this.#values.get(`${inputs}[0].default_value[${i}]`)) * strength));
+      return;
+    }
+    if (bind.display) {
+      // Blender's Exposure is in stops, its Gamma the exponent of its inverse (at most 100).
+      const display = this.#display, v = /** @type {number} */ (value);
+      if (display && bind.display === 'exposure') display.exposure = 2 ** v;
+      else if (display) display.exponent = Math.min(1 / Math.max(Number.EPSILON, v), 100);
       return;
     }
     if (bind.offset) {
