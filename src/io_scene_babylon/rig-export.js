@@ -13,7 +13,7 @@ const view = () => new DataView(blenderModule.exports.memory.buffer);
 const decoder = new TextDecoder();
 const text = (address, length) => {
   const bytes = new Uint8Array(blenderModule.exports.memory.buffer, address >>> 0, length);
-  return decoder.decode(bytes.subarray(0, Math.max(0, bytes.indexOf(0))));
+  return decoder.decode(bytes.slice(0, Math.max(0, bytes.indexOf(0))));
 };
 
 /** A struct's settings in Main's memory by RNA name, an array's as an array. @param {number} address @param {Record<string, any>} layouts */
