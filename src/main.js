@@ -696,7 +696,22 @@ const editObject = () => {
   return edit ? { ob, mesh: edit.mesh } : null;
 };
 // The project's files, served with the run, which an export ships what it needs of (its game: io_scene_babylon/game-export.js).
-world.project = { files: input.files ?? [], read: async (path) => new Uint8Array(await (await fetch(location.origin + input.base + path)).arrayBuffer()) };
+// Its licence, package.json's `license`, is set from File > Export: written here at once, and in the project by the app.
+world.project = (() => {
+  const files = [...(input.files ?? [])];
+  let manifest = null;
+  const read = async (path) => (path === "package.json" && manifest ? new TextEncoder().encode(manifest) : new Uint8Array(await (await fetch(location.origin + input.base + path)).arrayBuffer()));
+  const parsed = async () => (files.includes("package.json") ? JSON.parse(new TextDecoder().decode(await read("package.json"))) : {});
+  return {
+    files, read,
+    license: async () => (await parsed()).license ?? null,
+    async setLicense(license) {
+      manifest = `${JSON.stringify({ ...(await parsed()), license }, null, 2)}\n`;
+      if (!files.includes("package.json")) files.push("package.json");
+      send("project-file", { path: "package.json", content: manifest });
+    },
+  };
+})();
 packageView = mountPackageView(document.querySelector("#package-section"), { world });
 gameView = mountGameView(document.querySelector("#game-section"), { world, header: viewportDock.header("game"), run: { root: location.origin + input.base, files: input.files ?? [] }, codeError: (error) => send("code-error", error) });
 // The .blend's behaviours follow their code as the project opens (a prop added in code, a script's kinds).

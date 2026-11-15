@@ -6,6 +6,7 @@ import { RUNTIMES, exportChoices, exportIssue } from '../runtimes/runtimes.js';
 import { contextStruct, idStruct } from '../python/bpy_rna.js';
 import { sceneUnits } from './unit-manifest.js';
 import { EVALUATIONS, exportEvaluation, setExportEvaluation } from './export-settings.js';
+import { hasGame } from './game-export.js';
 
 const PARITY_NOTE = "Lights materials as Blender's EEVEE does (view vector, second reflection as clearcoat). Off: Babylon's own lighting; Blender's texture nodes still export as one custom block.";
 const BAKE_NOTE = "Samples every animated value the page cannot play as its F-Curve at each frame, as Babylon keys. Off: F-Curves Babylon plays exactly stay its keys and the others run as F-Curves in the page; what the page cannot run yet is still sampled, each named in the Info editor.";
@@ -149,9 +150,20 @@ const panelTree = (values) => setting(values, 'controlPanel', { label: 'Control 
   children: [setting(values, 'devTools', { label: 'Editors', icon: 'BYLONDER', items: DEV_TOOLS, inherited: DEFAULT('CDN'),
     issue: (value) => (value === 'PACKAGE' && values.controlPanel === false ? 'Only the control panel links to the editors' : null) }), navigationTree(values)] });
 
+// The licences offered for a project's game code (SPDX identifiers, as package.json's `license` holds them).
+const LICENSE_ITEMS = [['MIT', 'MIT', 'Anyone may use, change and share the game code, keeping its notice'],
+  ['Apache-2.0', 'Apache 2.0', 'As MIT, with a patent grant and a notice of changes'],
+  ['CC0-1.0', 'CC0 (Public Domain)', 'No rights reserved: anyone may use it for anything'],
+  ['UNLICENSED', 'All Rights Reserved', 'Shipped, but no one else may use, change or share it']];
+// A project with game code ships it as game.js under the project's licence (game-export.js), which the dialog sets in
+// its package.json: unset, the one stated there; none stated, the export needs one.
+const licenseTree = (values, stated) => setting(values, 'license', { label: 'Game Code Licence', icon: 'BYLONDER', items: LICENSE_ITEMS,
+  inherited: () => (stated ? { value: stated, label: LICENSE_ITEMS.find(([id]) => id === stated)?.[1] ?? stated, source: "The project's package.json" }
+    : { label: 'Not Stated', source: "The project's package.json states none", issue: 'The game code ships under its licence: choose one' }) });
+
 // The settings tree: a JavaScript package's scope, GPU engine, bundle, control panel and branches, the animations, the sample rate, the runtimes,
 // then its units.
-function settingsTree(values, js, branches, world) {
+function settingsTree(values, js, branches, world, license) {
   const scope = setting(values, 'scope', { label: 'Scope', icon: 'BYLONDER', items: SCOPES, inherited: DEFAULT('SCENE') });
   const target = setting(values, 'target', { label: 'GPU Engine', icon: 'BYLONDER', items: TARGETS, inherited: DEFAULT('BOTH') });
   const animations = setting(values, 'animations', { label: 'Animations', icon: 'BYLONDER', items: ANIMATIONS, inherited: DEFAULT('TIMELINE'),
@@ -159,11 +171,11 @@ function settingsTree(values, js, branches, world) {
       issue: (value) => (value !== 'OFF' && values.animations === 'TIMELINE' ? 'Only clips are compressed' : null) })] });
   // The scene's own setting (export-settings.js), which the Game area's header shows too.
   const evaluation = setting(values, 'evaluation', { label: 'Modifier Stack', icon: 'BYLONDER', items: EVALUATIONS, inherited: DEFAULT('RENDER') });
-  return [...(js ? [scope, target, evaluation, bundleTree(values), panelTree(values), branchesTree(values, branches)] : []), animations, sampleRateTree(values, world), runtimesTree(values), ...(js ? [unitsTree(values)] : [])].filter(Boolean);
+  return [...(license ? [license] : []), ...(js ? [scope, target, evaluation, bundleTree(values), panelTree(values), branchesTree(values, branches)] : []), animations, sampleRateTree(values, world), runtimesTree(values), ...(js ? [unitsTree(values)] : [])].filter(Boolean);
 }
 
 // The dialog's values as export options: unset settings left out, the Units tree as the type keys replaced.
-const options = ({ units, unitState, evaluation, ...values }) => ({ ...JSON.parse(JSON.stringify(values, (key, value) => (value === null ? undefined : value))),
+const options = ({ units, unitState, evaluation, license, ...values }) => ({ ...JSON.parse(JSON.stringify(values, (key, value) => (value === null ? undefined : value))),
   ...(units && { replace: [...new Set(Object.values(units).flatMap((category) => Object.keys(category.units).filter((key) => unitStateOf(unitState, category, key) === 'REPLACED')))] }) });
 
 // Asks for a format's export options (export-options.js ExportOptionsSchema) and exports with them by `run(options)`;
@@ -179,7 +191,9 @@ export async function exportDialog(world, format, title, run) {
   const fields = [{ name: 'eeveeParity', label: 'EEVEE Parity', note: PARITY_NOTE },
     ...(js ? [{ name: 'hostCompression', label: 'Host Compresses Geometry', note: HOST_NOTE }, { name: 'bakeAnimation', label: 'Bake Animation', note: BAKE_NOTE }] : [])];
   const branches = js ? sceneBranches(world, { live: format === 'js-live' }) : {};
-  const tree = settingsTree(values, js, branches, world);
+  const game = js && hasGame(world.project), stated = game ? await world.project.license() : null;
+  values.license = null;
+  const tree = settingsTree(values, js, branches, world, game && licenseTree(values, stated));
   const note = branches.geometryNodes ? await geometryNodesNote() : undefined;
   const host = document.body.appendChild(document.createElement('div'));
   const status = reactive({ busy: false, error: '' });
@@ -191,6 +205,7 @@ export async function exportDialog(world, format, title, run) {
       Object.assign(status, { busy: true, error: '' });
       try {
         if (js) setExportEvaluation(world, values.evaluation ?? 'RENDER');
+        if (game && values.license && values.license !== stated) await world.project.setLicense(values.license);
         await run(options(values));
         close(true);
       } catch (error) {

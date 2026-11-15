@@ -708,6 +708,8 @@ window.addEventListener("message", (e) => {
   if (type === "code-error") gameCodeError(payload);
   if (type === "edit-source") editSource(payload).catch(failure);
   if (type === "names") { blendNamesNow = payload; writeGameTypes(); }
+  // A project file the scene wrote (package.json's licence, chosen in File > Export).
+  if (type === "project-file") { project.files[payload.path] = textFile(payload.content); syncModels(); renderTree(); markDirty(false); }
   if (type === "animation") { project.animation = payload; markDirty(false); }
   if (type === "overrides" && project.settings.remember) {
     project.overrides = payload;

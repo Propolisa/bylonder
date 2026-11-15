@@ -14,6 +14,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { POSIX, stop } from "../../scripts/process-group.mjs";
 import { BOOT, chromium, openApp, runtimeCoverage, startServer } from "./app.mjs";
+import { strFromU8, unzipSync } from "fflate";
 
 // A page of an exported package: its tenth frame read back, how much of it is lit.
 const WEBGPU_PAGE = `<!doctype html><canvas id="c" width="320" height="200" style="display:block"></canvas><script type="module">
@@ -409,6 +410,23 @@ try {
         check();
       }));
       assert.equal(served?.served, 1, `the page's game served the rock within 30 s: ${JSON.stringify(served)}`);
+      // A project whose package.json states no licence: File > Export asks for one, writes it there and ships game.js
+      // under it.
+      await opened.bylonder((b) => { const { files } = b.world.project; files.splice(files.indexOf("package.json"), 1); });
+      await opened.page.click('[data-blender="TOPBAR_MT_file"]');
+      await opened.page.getByRole("menuitem", { name: /^Export/ }).first().hover();
+      await opened.page.getByRole("menuitem", { name: "JavaScript (.zip)" }).click();
+      const dialog = opened.frame().locator('[role="dialog"][aria-label^="Export"]');
+      await dialog.getByRole("button", { name: "Game Code Licence: Not Stated, inherited" }).click();
+      await opened.frame().getByRole("menuitem", { name: "Apache 2.0" }).click();
+      const download = opened.page.waitForEvent("download", { timeout: 300000 });
+      await dialog.getByRole("button", { name: "Export" }).click();
+      const chunks = [];
+      for await (const chunk of await (await download).createReadStream()) chunks.push(chunk);
+      const zip = unzipSync(Buffer.concat(chunks));
+      assert.match(strFromU8(zip["game.js"]).split("\n")[0], /licensed Apache-2\.0/, "game.js ships under the chosen licence");
+      assert.match(strFromU8(zip["THIRD-PARTY.md"]), /## inkjs/);
+      assert.equal(await opened.bylonder((b) => b.world.project.license()), "Apache-2.0", "the licence is written to package.json");
       assert.deepEqual(opened.errors, [], "page errors");
     } finally {
       await opened.close();
