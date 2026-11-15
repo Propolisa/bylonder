@@ -11,6 +11,8 @@ thumbnail: game/thumbnail.png
 media:
   - game/play.gif
   - game/edit.gif
+  - game/stack-render.png
+  - game/stack-viewport.png
 ui:
   - TOPBAR_MT_file_export
 operators:
@@ -69,7 +71,12 @@ own editor, chosen from an area's editor type menu.
 
 3. Choose the modifier stack the game evaluates in its header, Viewport or Render. It is the scene's export setting
    (File > Export > JavaScript's Modifier Stack, saved in the .blend), Render by default. Choosing one exports the scene
-   again and loads the game fresh; the header says so.
+   again and loads the game fresh; the header says so. Here the body's Armature modifier is off in viewports and on in
+   renders: Render poses the body by its rig, Viewport leaves it at rest.
+
+   ![Render chosen](../media/features/game/stack-render.png)
+
+   ![Viewport chosen, the game loaded fresh](../media/features/game/stack-viewport.png)
 
 ## Project files
 

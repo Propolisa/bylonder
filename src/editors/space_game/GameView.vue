@@ -11,7 +11,7 @@ onMounted(() => host.value.append(props.canvas));
 
 <template>
   <Teleport :to="header">
-    <div class="bl-ui flex min-w-0 flex-1 items-center gap-2 text-sm text-foreground">
+    <div class="bl-ui flex min-w-0 flex-1 items-center gap-2 text-sm text-foreground select-none">
       <span>Game</span>
       <Button size="sm" variant="secondary" :disabled="busy || (running && !paused)" title="Play the scene as an exported page runs it" @click="$emit(running ? 'pause' : 'play')">
         <BlIcon name="PLAY" />

@@ -369,7 +369,9 @@
   "thumbnail": "game/thumbnail.png",
   "media": [
    "game/play.gif",
-   "game/edit.gif"
+   "game/edit.gif",
+   "game/stack-render.png",
+   "game/stack-viewport.png"
   ],
   "ui": [
    "TOPBAR_MT_file_export"
