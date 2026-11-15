@@ -3,7 +3,7 @@
 // the same operators (keyframing.cc's ANIM_OT_keyframe_insert_button and the rest). A button is Blender's (a layout
 // tree's, block-view.js), whose operators run in the module on it, or a Babylon-only panel's property (primitives.js),
 // keyed through its animation channels. Either is { run(idname, props): whether it ran, menu(event) }.
-import { registerOperators } from '../../windowmanager/wm-operators.js';
+import { editSource, registerOperators } from '../../windowmanager/wm-operators.js';
 import { keymapHandler, blenderKeys } from '../../windowmanager/keyconfig.js';
 import { keyType } from '../../windowmanager/input/keymap.js';
 import { blenderModule, newOperator } from '../../bmesh/bmesh-wasm.js';
@@ -41,6 +41,7 @@ globalThis.addEventListener?.('keydown', (e) => {
 export function blenderButton(area, regionType, b, done) {
   const activate = (id) => area.inContext(regionType, (C) => x.ui_button_active_set(C, id));
   const run = (idname, props = {}) => {
+    if (idname === 'ui.editsource') return editSource(b);
     let op;
     try { op = newOperator(idname, props); } catch { return false; }
     activate(b.id);

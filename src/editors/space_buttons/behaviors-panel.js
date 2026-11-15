@@ -3,14 +3,20 @@
 // objects that carry it, as a datablock's) and its props drawn as Blender properties of its custom property group; Add
 // Behavior lists the project's behaviours with their user counts. Its operators are Bylonder's (`bylonder.behavior_*`).
 import { __class__, __kwargtrans__, set } from '../../bl_py/org.transcrypt.__runtime__.js';
-import { registerClass, blendData } from '../../python/bpy_rna.js';
-import { registerOperatorTip } from '../../windowmanager/wm-operators.js';
+import { registerClass, blendData, idStruct, pointerOf } from '../../python/bpy_rna.js';
+import { registerEditSource, registerOperatorTip } from '../../windowmanager/wm-operators.js';
 import { addBehavior, behaviorNames, removeBehavior, label as propLabel, BEHAVIORS } from '../../blenkernel/behaviors.js';
 
 const kw = (keywords) => __kwargtrans__(keywords);
 const types = () => globalThis.__py_modules['_bpy.types'];
 const props = () => globalThis.__py_modules['_bpy.props'];
 const FINISHED = () => set(['FINISHED']), CANCELLED = () => set(['CANCELLED']);
+
+/** The behaviour whose props group a button's RNA pointer is (`[type, id, data]`), on its object. */
+const behaviorOfGroup = ([, id, data]) => {
+  const ob = id && idStruct(id);
+  return ob?.bl_rna?.identifier === 'Object' ? behaviorNames(ob).find((name) => pointerOf(ob.get(BEHAVIORS).get(name))?.[2] === data) : undefined;
+};
 
 /** The objects carrying a behaviour, as a datablock's users: by name. */
 export const behaviorUsers = (name) => [...blendData().objects].filter((ob) => behaviorNames(ob).includes(name));
@@ -93,5 +99,12 @@ export function registerBehaviorTypes({ icon, code, editSource, select, changed 
     }),
   ];
   for (const cls of classes) registerClass(cls);
+  // Edit Source on a behaviour's name or on one of its props opens its code at its defineBehavior.
+  registerEditSource((b) => {
+    const name = b.operator === 'bylonder.behavior_edit_source' ? b.properties?.name : b.rna && behaviorOfGroup(b.rna.pointer);
+    const path = name && code()?.sourceOf(name);
+    if (path) editSource(path, name);
+    return !!path;
+  });
   registerOperatorTip('bylonder.behavior_users', ({ name }) => `Used by ${users(name).join(', ') || 'no object'}. Click to select one`);
 }

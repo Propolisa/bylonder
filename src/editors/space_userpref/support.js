@@ -19,7 +19,7 @@ export const UNSUPPORTED = {
     language: 'Bylonder has no translations', use_translate_tooltips: 'Bylonder has no translations', use_translate_interface: 'Bylonder has no translations',
     use_translate_reports: 'Bylonder has no translations', use_translate_new_dataname: 'Bylonder has no translations',
     show_statusbar_vram: GPU, show_statusbar_memory: BROWSER, show_splash: 'The splash screen opens with a new session',
-    render_display_type: NOT_YET, filebrowser_display_type: NOT_YET, show_developer_ui: NOT_YET, show_tooltips_python: NOT_YET,
+    render_display_type: NOT_YET, filebrowser_display_type: NOT_YET, show_tooltips_python: NOT_YET,
     use_mouse_over_open: NOT_YET, open_toplevel_delay: NOT_YET, open_sublevel_delay: NOT_YET, color_picker_type: NOT_YET,
     pie_initial_timeout: NOT_YET, pie_tap_timeout: NOT_YET, pie_animation_timeout: NOT_YET, pie_menu_radius: NOT_YET,
     pie_menu_threshold: NOT_YET, pie_menu_confirm: NOT_YET, show_playback_fps: NOT_YET, playback_fps_samples: NOT_YET,

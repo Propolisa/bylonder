@@ -149,6 +149,13 @@ const tips = new Map();
 export const registerOperatorTip = (idname, tip) => tips.set(idname, tip);
 export const operatorTip = (idname, properties = {}) => tips.get(idname)?.(properties);
 
+// Edit Source (ui.editsource, in a button's context menu with Preferences > Interface > Developer Extras): Blender opens
+// the C or Python source that drew the button; Bylonder opens what it has a source for (game code), by its handlers,
+// each `(button) => opened` for a layout tree's button.
+const sources = [];
+export const registerEditSource = (handler) => sources.push(handler);
+export const editSource = (button) => sources.some((handler) => handler(button));
+
 // Python keyword arguments for a layout call from JS, as Transcrypt passes them.
 export const kw = (keywords) => ({ ...keywords, __kwargtrans__: null });
 

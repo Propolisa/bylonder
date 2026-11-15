@@ -4,12 +4,12 @@
 // the panel draws each behaviour's name (Edit Source), its user count with its users as the tooltip, and its props as
 // Blender properties, an enum Blender's dropdown with stable item values; an enum value set, a user selected, a behaviour removed; Shift D copies them.
 import assert from 'node:assert/strict';
-import { BlenderMain } from '../src/bmesh/bmesh-wasm.js';
+import { BlenderMain, blenderModule } from '../src/bmesh/bmesh-wasm.js';
 import '../src/python/bpy_interface.js';
-import { blendData, setContextPointer } from '../src/python/bpy_rna.js';
+import { blendData, contextStruct, setContextPointer } from '../src/python/bpy_rna.js';
 import { AnimArea, RGN_TYPE_WINDOW, OPERATOR_FINISHED } from '../src/editors/animation/anim-area.js';
 import { regionPanels, menuTree } from '../src/editors/interface/ui-tree.js';
-import { operatorTip } from '../src/windowmanager/wm-operators.js';
+import { editSource, operatorTip } from '../src/windowmanager/wm-operators.js';
 import { registerBehaviorTypes } from '../src/editors/space_buttons/behaviors-panel.js';
 import { behaviorNames } from '../src/blenkernel/behaviors.js';
 import { defineBehavior, float, color, enumOf, enumValue, propValue } from '../src/io_scene_babylon/runtime/game/define.js';
@@ -57,6 +57,17 @@ assert.equal(panelButtons().find((b) => b.rna?.prop === 'mood').text, 'Content')
 assert.equal(propValue(enumOf(['content', 'grumpy']), group.get('mood')), 'content');
 blender.run('bylonder.behavior_edit_source', { name: 'Rock' });
 assert.deepEqual(edits, [['src/behaviors/rock.js', 'Rock']]);
+// Blender's Edit Source (ui.editsource) in a button's context menu, with Developer Extras: on a prop of the behaviour,
+// its code; on a button Bylonder has no source for, nothing.
+const contextMenu = (b) => area.inContext(RGN_TYPE_WINDOW, (C) => blenderModule.exports.ui_button_context_menu(C, b.id)
+  && buttons(JSON.parse(blenderModule.cString(blenderModule.exports.operator_popup_text()))).map((item) => item.operator));
+const moodButton = () => panelButtons().find((b) => b.rna?.prop === 'mood');
+assert.ok(!contextMenu(moodButton()).includes('ui.editsource'), 'no Edit Source without Developer Extras');
+contextStruct(blender.C).preferences.view.show_developer_ui = true;
+assert.ok(contextMenu(moodButton()).includes('ui.editsource'), 'Edit Source with Developer Extras');
+assert.ok(editSource(moodButton()), 'Edit Source on a prop opens its behaviour');
+assert.deepEqual(edits.at(-1), ['src/behaviors/rock.js', 'Rock']);
+assert.ok(!editSource(panelButtons().find((b) => b.operator === 'bylonder.behavior_users')), 'none for a button without a source');
 blender.run('bylonder.behavior_select_user', { name: 'Rock' });
 assert.deepEqual(selected, ['Rock']);
 
