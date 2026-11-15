@@ -159,12 +159,6 @@ SPDX-FileCopyrightText = ["Blender Authors", "Contributors to the OpenImageIO pr
 SPDX-License-Identifier = "Apache-2.0"
 
 [[annotations]]
-path = "tools/blender-port/wasm/patches/deps/cpython-pthread-stubs-cxx.patch"
-precedence = "override"
-SPDX-FileCopyrightText = ["Python Software Foundation", "2026 Chris Stanley"]
-SPDX-License-Identifier = "Python-2.0"
-
-[[annotations]]
 path = "tools/blender-port/wasm/patches/deps/numpy-wasm.patch"
 precedence = "override"
 SPDX-FileCopyrightText = ["NumPy Developers", "2026 Chris Stanley"]

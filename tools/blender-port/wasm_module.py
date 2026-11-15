@@ -226,12 +226,12 @@ def library_flags(entry, tree, deps, spec):
     entry = entry if isinstance(entry, dict) else {}
     specs = spec.get('dependencies', {})
     used = [n for n in [entry.get('dependency'), *entry.get('uses', [])] if n and specs[n].get('private')]
-    # An include under wasm/ is the module's own (wasm/fstream), the rest are Blender's.
+    # An include under wasm/ is the module's own (wasm/process), the rest are Blender's.
     flags = ([f for n in used for f in include_flags(deps[n], specs[n])]
              + [f'-I{os.path.join(HERE if d.startswith("wasm/") else tree, d)}' for d in entry.get('includes', [])]
              + [f'-D{d}' for d in entry.get('defines', [])] + entry.get('flags', []))
     key = ''.join(f'{n}@{specs[n]["tag"]}' for n in used)
-    # The module's own include directories' headers (wasm/fstream), so a change to one builds its users again.
+    # The module's own include directories' headers (wasm/process), so a change to one builds its users again.
     for d in entry.get('includes', []):
         if d.startswith('wasm/'):
             key += hashlib.sha1(b''.join(open(p, 'rb').read() for p in sorted(glob.glob(os.path.join(HERE, d, '**'), recursive=True))
@@ -437,10 +437,9 @@ def rna_dna_fields(build):
 
 
 def own_headers():
-    """The module's own headers (wasm/*.hh, wasm/include and wasm/fstream), which its sources and some of Blender's
+    """The module's own headers (wasm/*.hh and wasm/include), which its sources and some of Blender's
     include: a change to them rebuilds them."""
-    paths = sorted(glob.glob(os.path.join(WASM, '*.h*')) + glob.glob(os.path.join(WASM, 'include', '**', '*'), recursive=True)
-                   + glob.glob(os.path.join(WASM, 'fstream', '*')))
+    paths = sorted(glob.glob(os.path.join(WASM, '*.h*')) + glob.glob(os.path.join(WASM, 'include', '**', '*'), recursive=True))
     return hashlib.sha1(b''.join(open(p, 'rb').read() for p in paths if os.path.isfile(p))).hexdigest()
 
 
@@ -528,7 +527,7 @@ def sdna(tree, build, args, archives):
     outputs = [os.path.join(out, f) for f in ('dna.cc', 'dna_type_offsets.h', 'dna_verify.cc', 'dna_struct_ids.cc', 'dna_defaults.cc')]
     stamp = os.path.join(out, '.digest')
     if not (os.path.exists(stamp) and open(stamp).read() == digest and all(map(os.path.exists, outputs))):
-        tool_args = [f'-I{os.path.join(WASM, "fstream-read")}', *args, f'-I{out}', f'-I{os.path.join(makesdna, "intern")}']
+        tool_args = [*args, f'-I{out}', f'-I{os.path.join(makesdna, "intern")}']
         # With the module's platform functions (allocation, thread-local destructors).
         objects = compile_all(build, [*sources, os.path.join(WASM, 'platform.cc')], tool_args, digest)
         if not all(objects.values()):

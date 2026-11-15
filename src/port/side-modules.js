@@ -78,7 +78,7 @@ export async function loadSideModule(main, bytes, missing, threads = 1) {
   const instance = link(module, main, place, true, missing);
   if (threads > 1) {
     const copy = main.malloc(bytes.byteLength) >>> 0;
-    new Uint8Array(main.memory.buffer, copy, bytes.byteLength).set(new Uint8Array(bytes));
+    new Uint8Array(main.memory.buffer, copy >>> 0, bytes.byteLength).set(new Uint8Array(bytes));
     const generation = new Int32Array(main.memory.buffer, main.side_modules_generation() >>> 0, 1);
     const at = 1 + FIELDS * Atomics.load(generation, 0);
     const { __tls_size: size, __tls_align: align } = instance.exports, stride = aligned(size?.value ?? 0, align?.value ?? 1);

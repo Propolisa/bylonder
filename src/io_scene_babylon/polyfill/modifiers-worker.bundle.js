@@ -9,6 +9,117 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
+// src/port/side-modules.js
+var side_modules_exports = {};
+__export(side_modules_exports, {
+  loadSideModule: () => loadSideModule,
+  syncSideModules: () => syncSideModules
+});
+function memoryInfo(module) {
+  const [section] = WebAssembly.Module.customSections(module, "dylink.0");
+  if (!section) throw Error("not a side module: no dylink.0 section");
+  const bytes = new Uint8Array(section);
+  let at = 0;
+  const uleb = () => {
+    let value = 0, shift = 0, byte;
+    do {
+      byte = bytes[at++];
+      value += (byte & 127) * 2 ** shift;
+      shift += 7;
+    } while (byte & 128);
+    return value;
+  };
+  while (at < bytes.length) {
+    const type = bytes[at++], end = uleb() + at;
+    if (type === 1) return { memorySize: uleb(), memoryAlign: 2 ** uleb(), tableSize: uleb() };
+    at = end;
+  }
+  throw Error("side module without its memory info");
+}
+function link(module, main, { memoryBase, tableBase }, first, missing2, tls) {
+  const info = memoryInfo(module), table = main.__indirect_function_table;
+  const imports = WebAssembly.Module.imports(module);
+  const gotFunctions = imports.filter((i) => i.module === "GOT.func").map((i) => i.name);
+  const end = tableBase + info.tableSize + gotFunctions.length;
+  if (table.length < end) table.grow(end - table.length);
+  const got = { mem: {}, func: {} };
+  const entry = (kind, name) => got[kind][name] ??= new WebAssembly.Global({ value: "i32", mutable: true }, 0);
+  const slot = (name) => tableBase + info.tableSize + gotFunctions.indexOf(name);
+  const resolve = (exports, base) => {
+    for (const [name, global] of Object.entries(got.mem)) if (!global.value && exports[name] instanceof WebAssembly.Global) global.value = exports[name].value + base;
+    for (const [name, global] of Object.entries(got.func)) {
+      if (global.value || typeof exports[name] !== "function") continue;
+      table.set(slot(name), exports[name]);
+      global.value = slot(name);
+    }
+  };
+  const fixed = {
+    memory: main.memory,
+    __indirect_function_table: table,
+    __stack_pointer: main.__stack_pointer,
+    __memory_base: new WebAssembly.Global({ value: "i32" }, memoryBase),
+    __table_base: new WebAssembly.Global({ value: "i32" }, tableBase)
+  };
+  const instance = new WebAssembly.Instance(module, {
+    env: new Proxy({}, { get: (_, name) => fixed[name] ?? (typeof main[name] === "function" ? main[name] : missing2[name]) }),
+    "GOT.mem": new Proxy({}, { get: (_, name) => entry("mem", name) }),
+    "GOT.func": new Proxy({}, { get: (_, name) => entry("func", name) })
+  });
+  resolve(main, 0);
+  resolve(instance.exports, memoryBase);
+  const unresolved = Object.keys(got.mem).filter((name) => !got.mem[name].value);
+  if (unresolved.length) throw Error(`side module: no address for ${unresolved.slice(0, 5).join(", ")}`);
+  if (first) {
+    instance.exports.__wasm_apply_data_relocs?.();
+    instance.exports.__wasm_call_ctors?.();
+  } else if (instance.exports.__tls_size?.value) {
+    instance.exports.__wasm_init_tls(tls);
+  }
+  return instance;
+}
+async function loadSideModule(main, bytes, missing2, threads = 1) {
+  const module = await WebAssembly.compile(bytes);
+  const info = memoryInfo(module);
+  const memoryBase = aligned(main.malloc(info.memorySize + info.memoryAlign) >>> 0, info.memoryAlign);
+  const place = { memoryBase, tableBase: main.__indirect_function_table.length };
+  const instance = link(module, main, place, true, missing2);
+  if (threads > 1) {
+    const copy = main.malloc(bytes.byteLength) >>> 0;
+    new Uint8Array(main.memory.buffer, copy >>> 0, bytes.byteLength).set(new Uint8Array(bytes));
+    const generation = new Int32Array(main.memory.buffer, main.side_modules_generation() >>> 0, 1);
+    const at = 1 + FIELDS * Atomics.load(generation, 0);
+    const { __tls_size: size2, __tls_align: align } = instance.exports, stride = aligned(size2?.value ?? 0, align?.value ?? 1);
+    const blocks = stride ? aligned(main.malloc(stride * (threads - 1) + align.value) >>> 0, align.value) : 0;
+    list(main).set([copy, bytes.byteLength, place.memoryBase, place.tableBase, blocks, stride, 0], at);
+    const loaded = Atomics.add(generation, 0, 1) + 1;
+    while (Atomics.load(list(main), 0) < (threads - 1) * loaded) await new Promise((done) => setTimeout(done, 20));
+    main.free(copy);
+  }
+  return instance.exports;
+}
+function syncSideModules(main, missing2) {
+  if (!main.side_modules_generation) return;
+  const generation = Atomics.load(new Int32Array(main.memory.buffer, main.side_modules_generation() >>> 0, 1), 0);
+  for (let index = loadedBy.get(main) ?? 0; index < generation; index++) {
+    const at = 1 + FIELDS * index;
+    const [bytes, size2, memoryBase, tableBase, blocks, stride] = list(main).slice(at, at + FIELDS);
+    const tls = (blocks >>> 0) + stride * Atomics.add(list(main), at + 6, 1);
+    const module = new WebAssembly.Module(new Uint8Array(main.memory.buffer, bytes >>> 0, size2).slice());
+    link(module, main, { memoryBase: memoryBase >>> 0, tableBase }, false, missing2, tls);
+    loadedBy.set(main, index + 1);
+    Atomics.add(list(main), 0, 1);
+  }
+}
+var FIELDS, aligned, list, loadedBy;
+var init_side_modules = __esm({
+  "src/port/side-modules.js"() {
+    FIELDS = 7;
+    aligned = (pointer, alignment) => pointer + alignment - 1 & -alignment;
+    list = (main) => new Int32Array(main.memory.buffer, main.side_modules_list() >>> 0, 1 + FIELDS * 8);
+    loadedBy = /* @__PURE__ */ new WeakMap();
+  }
+});
+
 // src/port/wasm-threads.js
 async function startThreads(module, memory, count) {
   const control = new SharedArrayBuffer(4 * (1 + SLOT * count));
@@ -23,17 +134,21 @@ async function startThreads(module, memory, count) {
   return threadSpawn(control);
 }
 async function thread({ module, memory, control, count, slot }, post) {
-  const { threadImports: threadImports2 } = await Promise.resolve().then(() => (init_wasm(), wasm_exports));
+  const [{ threadImports: threadImports2, missing: missing2 }, { syncSideModules: syncSideModules2 }] = await Promise.all([Promise.resolve().then(() => (init_wasm(), wasm_exports)), Promise.resolve().then(() => (init_side_modules(), side_modules_exports))]);
   const slots = new Int32Array(control);
   let instance;
+  const sync = () => syncSideModules2(instance.exports, missing2);
   try {
-    instance = await WebAssembly.instantiate(module, threadImports2(memory, count, threadSpawn(control)));
+    instance = await WebAssembly.instantiate(module, threadImports2(memory, count, threadSpawn(control), { side_modules_sync: sync }));
   } catch (error) {
     return post({ starting: true, error: error.message });
   }
   post({});
   for (; ; ) {
-    for (let state; (state = Atomics.load(slots, slot)) !== STARTED; ) Atomics.wait(slots, slot, state);
+    for (let state; (state = Atomics.load(slots, slot)) !== STARTED; ) {
+      Atomics.wait(slots, slot, state, 200);
+      sync();
+    }
     try {
       instance.exports.wasi_thread_start(slots[slot + 1], slots[slot + 2]);
     } catch (error) {
@@ -42,7 +157,7 @@ async function thread({ module, memory, control, count, slot }, post) {
     Atomics.store(slots, slot, IDLE);
   }
 }
-var IDLE, CLAIMED, STARTED, SLOT, isNode, threadsAvailable, hardwareThreads, threadSpawn;
+var IDLE, CLAIMED, STARTED, SLOT, isNode, threadsAvailable, THREADS_KEY, threadsPreference, hardwareThreads, threadSpawn;
 var init_wasm_threads = __esm({
   "src/port/wasm-threads.js"() {
     IDLE = 0;
@@ -51,7 +166,15 @@ var init_wasm_threads = __esm({
     SLOT = 3;
     isNode = !!globalThis.process?.versions?.node;
     threadsAvailable = () => isNode || !!globalThis.crossOriginIsolated;
-    hardwareThreads = () => (isNode ? Number(process.env.BYLONDER_THREADS ?? 1) : navigator.hardwareConcurrency) || 1;
+    THREADS_KEY = "bylonder-threads";
+    threadsPreference = () => {
+      try {
+        return localStorage.getItem(THREADS_KEY) ?? "AUTO";
+      } catch {
+        return "AUTO";
+      }
+    };
+    hardwareThreads = () => (isNode ? Number(process.env.BYLONDER_THREADS ?? 1) : threadsPreference() === "OFF" ? 1 : navigator.hardwareConcurrency) || 1;
     threadSpawn = (control) => {
       const slots = new Int32Array(control);
       return (arg) => {
@@ -81,6 +204,7 @@ __export(wasm_exports, {
   compile: () => compile,
   files: () => files,
   instantiate: () => instantiate,
+  missing: () => missing,
   provideModule: () => provideModule,
   provided: () => provided,
   read: () => read,
@@ -400,7 +524,7 @@ async function instantiate(url, threads = hardwareThreads()) {
   if (threads > 1) spawn = await startThreads(module, memory, threads);
   instance.exports._initialize?.();
   instance.exports.blender_init?.();
-  return new Heap(instance.exports);
+  return new Heap(instance.exports, threads);
 }
 var files, directories, ESUCCESS, EBADF, EEXIST, EINVAL, ENOENT, ENOSYS, ENOTDIR, ENOTEMPTY, FILETYPE_DIRECTORY, FILETYPE_REGULAR, O_CREAT, O_DIRECTORY, O_EXCL, O_TRUNC, ROOT, unsigned, provided, logMissing, logged, gap, missing, compiled, compileBytes, compile, provideModule, env, threadImports, size, Heap;
 var init_wasm = __esm({
@@ -442,12 +566,13 @@ var init_wasm = __esm({
     };
     compile = (url) => compiled.get(url.href) ?? compiled.set(url.href, read(url).then(compileBytes)).get(url.href);
     provideModule = (url, module) => compiled.set(url.href, Promise.resolve(module));
-    env = (memory, threads) => memory ? new Proxy({}, { get: (_, name) => ({ memory, hardware_threads: () => threads })[name] ?? missing[name] }) : missing;
-    threadImports = (memory, threads, spawn) => ({ wasi_snapshot_preview1: wasiFor(() => memory), env: env(memory, threads), wasi: { "thread-spawn": spawn } });
+    env = (memory, threads, own = {}) => memory ? new Proxy({}, { get: (_, name) => ({ memory, hardware_threads: () => threads, ...own })[name] ?? missing[name] }) : missing;
+    threadImports = (memory, threads, spawn, own) => ({ wasi_snapshot_preview1: wasiFor(() => memory), env: env(memory, threads, own), wasi: { "thread-spawn": spawn } });
     size = (array) => array.byteLength + 7 & ~7;
     Heap = class {
-      constructor(exports) {
+      constructor(exports, threads = 1) {
         this.exports = exports;
+        this.threads = threads;
         this.scratch = 0;
         this.capacity = 0;
         this.top = 0;

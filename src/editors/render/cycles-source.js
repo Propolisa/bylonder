@@ -12,11 +12,11 @@ function resultImage(scene) {
   const size = x.malloc(8) >>> 0;
   try {
     if (!x.render_result_size(scene, size)) throw Error('Cycles made no render result');
-    const [width, height] = new Int32Array(x.memory.buffer, size, 2);
+    const [width, height] = new Int32Array(x.memory.buffer, size >>> 0, 2);
     const pixels = x.malloc(width * height * 4) >>> 0;
     try {
       x.render_result_pixels(scene, pixels);
-      const rows = new Uint8ClampedArray(x.memory.buffer, pixels, width * height * 4), flipped = new Uint8ClampedArray(rows.length);
+      const rows = new Uint8ClampedArray(x.memory.buffer, pixels >>> 0, width * height * 4), flipped = new Uint8ClampedArray(rows.length);
       for (let y = 0; y < height; y++) flipped.set(rows.subarray((height - 1 - y) * width * 4, (height - y) * width * 4), y * width * 4);
       return createImageBitmap(new ImageData(flipped, width, height));
     } finally {

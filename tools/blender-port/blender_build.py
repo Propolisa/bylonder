@@ -40,7 +40,7 @@ DROP = re.compile(r'^(-DFMT_SHARED|-DWITH_CYCLES$|-DEIGEN_HAS_TBB|-DWITH_OPENVDB
 # the API records (its icons are registered only then, icons_init).
 HEADED = re.compile(r'source/blender/editors/interface/')
 FLAGS = [*TARGET, '-O2', '-DNDEBUG', '-DFMT_HEADER_ONLY', '-fignore-exceptions', '-D_WASI_EMULATED_PROCESS_CLOCKS',
-         '-Wno-everything', '-isystem', os.path.join(WASM, 'include'), '-I' + os.path.join(WASM, 'fstream'), '-I' + os.path.join(WASM, 'storage'),
+         '-Wno-everything', '-isystem', os.path.join(WASM, 'include'), '-I' + os.path.join(WASM, 'storage'),
          '-I' + os.path.join(WASM, 'process'), '-include', os.path.join(WASM, 'compat.h'),
          # Before any source includes it inside a namespace (makesrna.cc), where WASI's unistd.h declarations then clash.
          '-include', 'sys/stat.h']
@@ -124,29 +124,6 @@ WORK = {}
 # by main.
 HOST_INCLUDES = {}
 SHIMS = wasm_module.own_headers()[:8]
-FSTREAM = [os.path.join(WASM, name, 'fstream') for name in ('fstream', 'fstream-read')]
-
-
-@functools.cache
-def fstream_users(tree):
-    """What brings the module's <fstream> (wasm/fstream) into a source: <fstream> itself and Blender's headers that
-    include it, by the name a source includes them by."""
-    names = {'<fstream>'}
-    for root, _, files in os.walk(os.path.join(tree, 'source')):
-        for name in files:
-            if name.endswith(('.h', '.hh')) and '#include <fstream>' in open(os.path.join(root, name), errors='ignore').read():
-                names.add(name)
-    return frozenset(names)
-
-
-def shim_key(source):
-    """The module's <fstream> (with the reading half it includes), for a source that includes it, directly or through one of Blender's headers: a change
-    to it builds that source again."""
-    text = open(source, errors='ignore').read()
-    users = fstream_users(BLENDER_TREE)
-    if not any(f'include {name}' in text or f'/{name}"' in text or f'"{name}"' in text for name in users):
-        return ''
-    return hashlib.sha1(b''.join(open(path, 'rb').read() for path in FSTREAM)).hexdigest()[:8]
 
 
 def compile_one(objects, entry, extra):
@@ -160,7 +137,7 @@ def compile_one(objects, entry, extra):
     for work, token in WORK.items():
         stable = stable.replace(work, token)
     stable = stable.replace(REPO, '$REPO')
-    digest = hashlib.sha1((stable + open(source, 'rb').read().hex() + shim_key(source)).encode()).hexdigest()[:16]
+    digest = hashlib.sha1((stable + open(source, 'rb').read().hex()).encode()).hexdigest()[:16]
     obj = os.path.join(objects, f'{os.path.basename(source)}.{digest}.o')
     if os.path.exists(obj):
         return source, obj, None
@@ -187,8 +164,6 @@ def wasm_tool(host, out, name, libraries, by_any, extra, link=True):
     for the module's platform: its own target's objects and the libraries it links. Without `link`, the archive of them
     (for wasm_module.sdna's makesdna)."""
     objects = os.path.join(out, 'objects')
-    # Tools read Blender's sources: their <fstream> reads files through WASI's stdio.
-    extra = ['-I' + os.path.join(WASM, 'fstream-read'), *extra]
     with concurrent.futures.ThreadPoolExecutor(int(os.environ.get('JOBS', os.cpu_count()))) as pool:
         done = list(pool.map(lambda e: compile_one(objects, e, extra), [e for t in [name, *libraries] for e in by_any.get(t, [])]))
     built = [o for _, o, _ in done if o]
