@@ -78,6 +78,7 @@ const FLOAT_EPSILON = 1.1920928955078125e-7;
  * @property {string} [channel] the key in its node's `metadata.bylonderChannels` the scene's animation sets it through
  * @property {string} [collection] a collection's visibility flag or time offset: the key of the collection it sets
  * @property {boolean} [offset] a collection's time offset (Bylonder's own): frames its objects' animation plays later
+ * @property {boolean} [shadow] whether its node's meshes cast the lights' shadows (Object > Visibility > Shadow)
  */
 
 /**
@@ -697,6 +698,27 @@ export class BlendScene {
 
   /** The paths of a vector's components (`…location[0]`), made once: a bone is placed every frame. @type {Map<string, string[]>} */
   #vectors = new Map();
+
+  /** The shadow maps each node's meshes were taken out of, which casting again puts them back into. @type {Map<any, any[][]>} */
+  #uncast = new Map();
+  /**
+   * A node's meshes taken out of the lights' shadow maps, or put back where they were: a node that cast none when
+   * exported casts once a patch says so.
+   * @param {any} node
+   * @param {boolean} cast
+   */
+  #castShadows(node, cast) {
+    const meshes = [node, ...(node.getChildMeshes?.(false) ?? []).filter((/** @type {any} */ m) => m.id.startsWith(`${node.id}/`))];
+    if (cast) {
+      for (const list of this.#uncast.get(node) ?? []) for (const mesh of meshes) if (!list.includes(mesh)) list.push(mesh);
+      this.#uncast.delete(node);
+      return;
+    }
+    const lists = /** @type {any[][]} */ (this.scene.lights.map((light) => light.getShadowGenerator()?.getShadowMap()?.renderList)
+      .filter((list) => list && meshes.some((mesh) => list.includes(mesh))));
+    for (const list of lists) for (const mesh of meshes) if (list.includes(mesh)) list.splice(list.indexOf(mesh), 1);
+    if (lists.length) this.#uncast.set(node, [...(this.#uncast.get(node) ?? []), ...lists]);
+  }
   /** @param {string} base @param {string} name @param {number} count */
   #paths(base, name, count) {
     const key = `${base}.${name}`;
@@ -782,6 +804,8 @@ export class BlendScene {
       const object = Object.keys(this.ir.ids).find((k) => this.ir.ids[k].node === bind.node);
       if (object) this.#showObjects([object]);
       else hide(node, this.#hidden(path.slice(0, path.lastIndexOf('.'))));
+    } else if (bind.shadow) {
+      this.#castShadows(node, /** @type {boolean} */ (value));
     } else if (bind.morph !== undefined) {
       const target = node.morphTargetManager?.getTargetByName(bind.morph);
       if (target) target.influence = value;

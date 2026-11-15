@@ -435,6 +435,10 @@ export type Binding = {
      * a collection's time offset (Bylonder's own): frames its objects' animation plays later
      */
     offset?: boolean | undefined;
+    /**
+     * whether its node's meshes cast the lights' shadows (Object > Visibility > Shadow)
+     */
+    shadow?: boolean | undefined;
 };
 /**
  * A collection of the scene (docs/ir.md, Collections): its key and Blender data, its place in the tree, and whether it

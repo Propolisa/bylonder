@@ -12,6 +12,7 @@ import { babylonMatrix } from '../blenkernel/main-view.js';
 import { AREA_OFFSET, rigId } from './area-lights.js';
 import { actionFCurves } from './ir-export.js';
 import { limits } from './rig-description.js';
+import { syncNames } from '../makesrna/rna-bylonder.js';
 
 // Blender's own (Bylonder's ID properties, add-ons' groups) stay out of an ID's custom properties.
 const OWN = /^(bylonder|_RNA_UI$|cycles)/;
@@ -59,22 +60,54 @@ export function transformBinding(node, ob, rotation, parentInverse) {
   return { node: node.id, transform: { mode, ...parent, ...(offset && { offset }) } };
 }
 
+// Each transform property's RNA type, and the rotation property of each rotation mode.
+const TRANSFORM_META = { location: { type: 'FLOAT', subtype: 'TRANSLATION', unit: 'LENGTH' }, rotation_euler: { type: 'FLOAT', subtype: 'EULER', unit: 'ROTATION' },
+  rotation_quaternion: { type: 'FLOAT', subtype: 'QUATERNION' }, rotation_axis_angle: { type: 'FLOAT', subtype: 'AXISANGLE' }, scale: { type: 'FLOAT', subtype: 'XYZ' } };
+const rotationOf = (owner) => ({ QUATERNION: 'rotation_quaternion', AXIS_ANGLE: 'rotation_axis_angle' }[owner.rotation_mode] ?? 'rotation_euler');
+// One transform property of an object or a pose bone at `base`, each component bound by `bind`.
+const vectorKnobs = (base, owner, name, bind) => [...owner[name]].map((v, i) => knob(`${base}.${name}[${i}]`, v, TRANSFORM_META[name], bind));
 // The location, rotation and scale of an object or a pose bone at `base`, each bound by `bind`.
-function transformControls(base, owner, bind) {
-  const [property, meta] = { QUATERNION: ['rotation_quaternion', { type: 'FLOAT', subtype: 'QUATERNION' }], AXIS_ANGLE: ['rotation_axis_angle', { type: 'FLOAT', subtype: 'AXISANGLE' }] }[owner.rotation_mode]
-    ?? ['rotation_euler', { type: 'FLOAT', subtype: 'EULER', unit: 'ROTATION' }];
-  return [...[...owner.location].map((v, i) => knob(`${base}.location[${i}]`, v, { type: 'FLOAT', subtype: 'TRANSLATION', unit: 'LENGTH' }, bind)),
-    ...[...owner[property]].map((v, i) => knob(`${base}.${property}[${i}]`, v, meta, bind)),
-    ...[...owner.scale].map((v, i) => knob(`${base}.scale[${i}]`, v, { type: 'FLOAT', subtype: 'XYZ' }, bind))];
+const transformControls = (base, owner, bind) => ['location', rotationOf(owner), 'scale'].flatMap((name) => vectorKnobs(base, owner, name, bind));
+
+// What a run does with each property of a struct that Bylonder keeps equal in Main (rna-bylonder.js syncNames): the one
+// list of what becomes a control. A function gives its controls, each bound to the exported object or by a named kind
+// the runtime applies; KEPT: the run shows it as it is, with nothing to set; REBUILD: the export's patch remakes the
+// object; RELOAD: the run loads fresh; APP: the editor's own, which a run does not show.
+export const KEPT = 'kept', REBUILD = 'rebuild', RELOAD = 'reload', APP = 'app';
+const rotation = ({ base, ob, transform }) => vectorKnobs(base, ob, rotationOf(ob), transform());
+// A driven Disable in Viewports switches a viewport's proxies (driver-export.js leaves it out): the page shows renders.
+const drivenHide = (ob) => [...(ob.animation_data?.drivers ?? [])].some((fc) => fc.data_path === 'hide_viewport');
+export const SYNCED = {
+  Object: {
+    location: ({ base, ob, transform }) => vectorKnobs(base, ob, 'location', transform()),
+    // The object's rotation in its own mode, whichever of the two Babylon keeps.
+    rotation_euler: rotation,
+    rotation_quaternion: rotation,
+    scale: ({ base, ob, transform }) => vectorKnobs(base, ob, 'scale', transform()),
+    hide_viewport: ({ base, ob, node }) => [knob(`${base}.hide_viewport`, !drivenHide(ob) && !!ob.hide_viewport, {}, { node: node.id, hide: 'viewport' })],
+    hide_render: ({ base, ob, node }) => [knob(`${base}.hide_render`, !!ob.hide_render, {}, { node: node.id, hide: 'render' })],
+    // Object > Visibility > Shadow: whether its meshes cast shadows (blend-scene.js, a `shadow` bind).
+    visible_shadow: ({ base, ob, node }) => [knob(`${base}.visible_shadow`, !!ob.visible_shadow, {}, { node: node.id, shadow: true })],
+    // Blender converts the rotation to the new mode, so the pose stays; the export brings the new mode's controls.
+    rotation_mode: KEPT,
+    // Disable Selection: the editor's.
+    hide_select: APP,
+  },
+};
+
+// The controls of a struct's synced properties over `owner` (rna-bylonder.js syncNames), in the table's order, each
+// kind once; `context` is what the kinds read.
+function syncedControls(struct, owner, context) {
+  const names = new Set(syncNames(struct, owner)), done = new Set();
+  return Object.entries(SYNCED[struct]).filter(([name, kind]) => names.has(name) && typeof kind === 'function' && !done.has(kind) && done.add(kind))
+    .flatMap(([, kind]) => kind(context));
 }
 
 function objectControls(node, ob, parentInverse) {
-  const base = `objects${key(ob.name)}`, property = { QUATERNION: 'rotation_quaternion', AXIS_ANGLE: 'rotation_axis_angle' }[ob.rotation_mode] ?? 'rotation_euler';
-  const list = transformControls(base, ob, transformBinding(node, ob, [...ob[property]], parentInverse));
-  // A driven Disable in Viewports switches a viewport's proxies (driver-export.js leaves it out): the page shows renders.
-  const driven = (hide) => hide === 'viewport' && [...(ob.animation_data?.drivers ?? [])].some((fc) => fc.data_path === 'hide_viewport');
-  for (const hide of ['viewport', 'render']) list.push(knob(`${base}.hide_${hide}`, !driven(hide) && !!ob[`hide_${hide}`], {}, { node: node.id, hide }));
-  return [...list, ...customProperties(ob, base)];
+  const base = `objects${key(ob.name)}`;
+  let bound;
+  const transform = () => (bound ??= transformBinding(node, ob, [...ob[rotationOf(ob)]], parentInverse));
+  return [...syncedControls('Object', node, { base, ob, node, transform }), ...customProperties(ob, base)];
 }
 
 function lightControls(node, light) {

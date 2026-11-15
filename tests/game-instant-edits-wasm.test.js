@@ -3,7 +3,7 @@
 // depsgraph updates give their controls' values, which every run and every copy of it sets through the binds the
 // package carries, with no export in between. The scoped export behind them reconciles: its patch leaves the run as a
 // fresh load of a full export shows it, and one that disagrees with a value set fast loads the run fresh.
-// Law, on Rigged Character: a transform, a material colour, a light and a shape key.
+// Law, on Rigged Character: a transform, a material colour, a light, a shape key and whether an object casts shadows.
 import assert from 'node:assert/strict';
 import * as core from '@babylonjs/core';
 import { blendData } from '../src/python/bpy_rna.js';
@@ -55,6 +55,8 @@ const shown = (run) => {
     color: find(scene.materials, 'Skin')?.albedoColor.asArray(),
     light: light && [light.intensity, ...light.diffuse.asArray()],
     shape: morph?.influence,
+    // Whether the body casts the light's shadow (a light none casts on has no shadow map).
+    shadow: light && !!light.getShadowGenerator()?.getShadowMap().renderList.some((mesh) => mesh.name === 'Body'),
   };
 };
 const runs = () => [game.blend, asset, copy];
@@ -64,6 +66,7 @@ const EDITS = {
   color: () => { skin.default_value[0] = 0.9; },
   light: () => { objects.get('Key').data.energy *= 2; objects.get('Key').data.color[1] = 0.5; },
   shape: () => { blendData().shape_keys.get('Key').key_blocks.get('Breathe').value = 0.75; },
+  shadow: () => { objects.get('Body').visible_shadow = false; },
 };
 for (const [kind, edit] of Object.entries(EDITS)) {
   const before = runs().map((run) => shown(run)[kind]), exported = exports, patched = fresh.length;
@@ -109,5 +112,5 @@ assert.notEqual(objects.get('Key').location[0], 9);
 
 game.dispose();
 written.remove();
-console.log('Instant edits: transform, material colour, light and shape key on the next frame in every run and copy; the export reconciles');
+console.log('Instant edits: transform, material colour, light, shape key and shadow casting on the next frame in every run and copy; the export reconciles');
 process.exit(0);

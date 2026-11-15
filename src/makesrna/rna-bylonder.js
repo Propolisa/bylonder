@@ -791,12 +791,14 @@ function bindingsOf(struct, owner) {
   return Object.fromEntries(Object.entries(table).map(([name, binding]) => [name, typeof binding === 'function' ? { get: binding } : binding]));
 }
 
+const syncedOf = (struct, owner) => Object.entries(bindingsOf(struct, owner)).filter(([, { sync }]) => (typeof sync === 'function' ? sync(owner) : sync));
 // The properties of a struct over an owner that are kept equal in Blender's Main (main-sync.js): [name, { get(), set(value) }]
 // pairs, set undefined for a read-only one. Their writes do not notify; the caller does once.
 export function syncBindings(r, struct, owner) {
-  return Object.entries(bindingsOf(struct, owner)).filter(([, { sync }]) => (typeof sync === 'function' ? sync(owner) : sync))
-    .map(([name, { get, set }]) => [name, { get: () => get(owner, r), set: set && ((value) => set(owner, value, r)) }]);
+  return syncedOf(struct, owner).map(([name, { get, set }]) => [name, { get: () => get(owner, r), set: set && ((value) => set(owner, value, r)) }]);
 }
+// Their names: what an export makes controls of (controls-export.js).
+export const syncNames = (struct, owner) => syncedOf(struct, owner).map(([name]) => name);
 
 // The RNA of one host's data: pointer(struct, owner) is the struct over a Bylonder owner (None for none), one per owner
 // so scripts see the same struct each time; `key` is the owner's identity when the owner is made per call.

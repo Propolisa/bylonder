@@ -36,6 +36,9 @@ function reached(last, changed) {
   for (const references of Object.values(last.tables.references ?? {})) for (const { from, to } of references) if (from.startsWith('OB:')) use(from, to);
   // An entity reading a Mesh's data (a native rig's, `{ meshData }`) is exported again with it, as its export makes that data.
   for (const [key, entity] of Object.entries(last.tables.entities ?? {})) for (const [ref] of referencesIn(entity?.inputs)) if ('meshData' in ref) use(ownerOf('entities', key), ref.meshData);
+  // A light's shadows list the objects that cast them (Object > Visibility > Shadow): any object's change may change them.
+  const objects = Object.keys(last.tables.ids ?? {}).filter((key) => key.startsWith('OB:'));
+  for (const key of Object.keys(last.tables.shadowGenerators ?? {})) for (const object of objects) use(ownerOf('shadowGenerators', key), object);
   const seen = new Set(changed);
   for (const key of seen) for (const user of usedBy.get(key) ?? []) seen.add(user);
   return seen;
