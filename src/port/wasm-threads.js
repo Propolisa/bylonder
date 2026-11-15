@@ -12,10 +12,11 @@ export const threadsAvailable = () => isNode || !!globalThis.crossOriginIsolated
 const THREADS_KEY = 'bylonder-threads';
 const threadsPreference = () => { try { return localStorage.getItem(THREADS_KEY) ?? 'AUTO'; } catch { return 'AUTO'; } };
 export const rememberThreads = (value) => { try { localStorage.setItem(THREADS_KEY, value); } catch {} };
-// The threads a module runs on: the page's processors unless the preference is OFF; in Node, BYLONDER_THREADS (one when
-// unset, so tests and build tools start no workers).
+// The threads a module runs on: the page's processors but one, which the page keeps for itself, unless the preference
+// is OFF; in Node, BYLONDER_THREADS (one when unset, so tests and build tools start no workers).
+const browserThreads = () => { const cores = navigator.hardwareConcurrency || 1; return cores > 2 ? cores - 1 : cores; };
 export const hardwareThreads = () => (isNode ? Number(process.env.BYLONDER_THREADS ?? 1)
-  : threadsPreference() === 'OFF' ? 1 : navigator.hardwareConcurrency) || 1;
+  : threadsPreference() === 'OFF' ? 1 : browserThreads()) || 1;
 
 // wasi's thread-spawn over a pool's slots: an idle slot takes the thread; a negative errno (EAGAIN) when none is idle.
 export const threadSpawn = (control) => {
