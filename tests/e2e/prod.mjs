@@ -7,11 +7,12 @@
 // deploying, since some failures only happen in the production build.
 // usage: npm run build && npm run test:prod   (E2E_URL checks a running server instead)
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
+import { spawn } from "node:child_process";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { POSIX, stop } from "../../scripts/process-group.mjs";
 import { BOOT, chromium, openApp, runtimeCoverage, startServer } from "./app.mjs";
 
 // A page of an exported package: its tenth frame read back, how much of it is lit.
@@ -47,9 +48,32 @@ engine.runRenderLoop(() => blend.scene.render());
 const TOPBAR = ["TOPBAR_MT_file", "TOPBAR_MT_edit", "TOPBAR_MT_render", "TOPBAR_MT_window", "TOPBAR_MT_help"];
 const started = Date.now();
 const steps = [];
+// A step that hangs fails by its name, as CI would otherwise stop the whole check at its own limit, saying nothing.
+const STEP_LIMIT = 10 * 60 * 1000;
+const within = (ms, what, work) => {
+  let timer;
+  const late = new Promise((_, reject) => { timer = setTimeout(() => reject(new Error(`${what} took longer than ${ms / 1000} s`)), ms); });
+  return Promise.race([work, late]).finally(() => clearTimeout(timer));
+};
+// A node script in a process of its own, stopped with the processes it started once it runs longer than `ms`; on POSIX
+// it first prints node's diagnostic report (its JavaScript stack and open handles), which says where it hung.
+const REPORT = ["--report-on-signal", "--report-signal=SIGUSR2", "--report-filename=stdout", "--report-compact"];
+function runNode(script, args, ms) {
+  const child = spawn(process.execPath, [...(POSIX ? REPORT : []), script, ...args], { stdio: "inherit", detached: POSIX });
+  const exited = new Promise((resolve, reject) => {
+    child.on("error", reject);
+    child.on("exit", (code, signal) => (code === 0 ? resolve() : reject(new Error(`${script} exited with ${code ?? signal}`))));
+  });
+  return within(ms, script, exited).catch(async (error) => {
+    if (child.exitCode !== null) throw error;
+    if (POSIX) await new Promise((resolve) => { child.kill("SIGUSR2"); setTimeout(resolve, 3000); });
+    stop(child);
+    throw error;
+  });
+}
 const step = async (name, fn) => {
   const at = Date.now();
-  await fn();
+  await within(STEP_LIMIT, `step "${name}"`, fn());
   steps.push(name);
   console.log(`ok    ${name} (${Date.now() - at} ms)`);
 };
@@ -280,7 +304,7 @@ try {
   await step("a world lights an exported page the right way up", async () => {
     const { servePackages } = await import("../export-parity/look.mjs");
     const dir = mkdtempSync(join(tmpdir(), "bylonder-world-up-"));
-    execFileSync(process.execPath, [fileURLToPath(new URL("./world-up-export.mjs", import.meta.url)), dir], { stdio: "inherit" });
+    await runNode(fileURLToPath(new URL("./world-up-export.mjs", import.meta.url)), [dir], 5 * 60 * 1000);
     for (const target of ["WEBGL2", "WEBGPU"]) writeFileSync(join(dir, target, "index.html"), WORLD_UP_PAGE);
     const served = servePackages(dir), gpu = await chromium.launch();
     try {
@@ -392,7 +416,11 @@ try {
   console.log(`FAIL  ${error.stack}\nPage errors: ${JSON.stringify(app?.errors ?? [], null, 2)}\nScreenshot: ${shot}`);
   process.exitCode = 1;
 } finally {
-  await app?.close();
-  await browser.close();
-  await server.close();
+  // A stopped step can leave its work running, or a browser that does not close: the check ends regardless.
+  await within(60000, "closing the check", (async () => {
+    await app?.close();
+    await browser.close();
+    await server.close();
+  })()).catch((error) => console.log(error.message));
+  process.exit();
 }

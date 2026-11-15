@@ -10,6 +10,7 @@ import { dirname, join } from 'node:path';
 import { availableParallelism, freemem, tmpdir } from 'node:os';
 import { pathToFileURL } from 'node:url';
 import { portUsage, reachable } from './import-graph.mjs';
+import { POSIX, stop } from './process-group.mjs';
 
 const TIMES = 'node_modules/.cache/test-times.json', PEAKS = 'node_modules/.cache/test-peaks.json';
 const read = (path) => { try { return JSON.parse(readFileSync(path, 'utf8')); } catch { return {}; } };
@@ -45,8 +46,6 @@ function readPeak(file) {
 // fresh checkout, CI) gets fifteen minutes, as nothing says how slow it is there.
 const declaredLimit = (test) => Number(/^\/\/ Time limit: (\d+) s/.exec(readFileSync(test, 'utf8'))?.[1] ?? 0);
 const limitOf = (test) => (times[test] ? Math.max(300, declaredLimit(test), 2 * times[test]) : Math.max(900, declaredLimit(test))) * 1000;
-const POSIX = process.platform !== 'win32';
-const stop = (child) => (POSIX ? process.kill(-child.pid, 'SIGKILL') : spawn('taskkill', ['/pid', String(child.pid), '/t', '/f']));
 
 let started = 0;
 const run = (test) => new Promise((resolve) => {
