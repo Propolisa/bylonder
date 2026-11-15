@@ -15,6 +15,7 @@ const files = async (id) => ({
 
 export const examples = [
   // Newest first, as the splash lists them.
+  { id: "project-files", title: "Project Files" },
   { id: "character-controller", title: "Snow at the Bar" },
   { id: "compositor", title: "Akari Noodle House" },
   { id: "volumes", title: "Temple Light" },

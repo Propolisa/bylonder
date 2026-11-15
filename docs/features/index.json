@@ -1681,6 +1681,66 @@
   }
  },
  {
+  "id": "project-files",
+  "title": "Project Files",
+  "summary": "A project's files in the code editor's Explorer, kept in the browser or in a folder on disk opened with File > Open Folder, where the .blend, the code and the content are plain files other tools can edit.",
+  "expect": "The Explorer works as VS Code's (new, rename, delete, drag, a right-click menu, keys, dots on unsaved files); a folder on disk holds the project as plain files and its scene as a .blend, File > Save writes them, and edits made there show when the page has the focus again. Open Folder needs Chromium's File System Access API.",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/files/blend/save_load.html"
+  ],
+  "example": "project-files",
+  "thumbnail": "project-files/thumbnail.png",
+  "media": [
+   "project-files/explorer.gif",
+   "project-files/open-folder.png",
+   "project-files/outside-edit.gif"
+  ],
+  "ui": [
+   "TOPBAR_MT_file"
+  ],
+  "operators": [
+   "wm.save_mainfile"
+  ],
+  "code": [
+   "src/workspace/folder-repository.js",
+   "src/workspace/repository.js",
+   "src/workspace/explorer/FileTree.vue",
+   "src/workspace/explorer/file-tree.js",
+   "src/workspace/app.js"
+  ],
+  "tests": [
+   "tests/folder-repository.test.js",
+   "tests/file-tree.test.js",
+   "tests/repository.test.js",
+   "tests/menu-icon-fallback.test.js",
+   "tests/e2e/prod.mjs"
+  ],
+  "limits": [
+   "Open Folder needs the File System Access API, which Chromium browsers have; elsewhere projects stay in the browser.",
+   "A folder keeps no versions of its own; History lists none, and git or another tool keeps them.",
+   "The browser asks again for a folder's permission after a reload, with Reconnect in the status bar.",
+   "Edits made outside the app show when the page regains focus; Chromium's FileSystemObserver reports them sooner where it has it.",
+   "A folder holds the active scene as its .blend; the project's other scenes are kept in .bylonder/state.json.",
+   "Renames do not rewrite import statements."
+  ],
+  "page": "docs/features/project-files.md",
+  "open": "https://propolisa.github.io/bylonder/#example=project-files",
+  "example_title": "Project Files",
+  "coverage": {
+   "operators": {
+    "supported": 17,
+    "partial": 22,
+    "total": 49
+   },
+   "ui": {
+    "supported": 8,
+    "partial": 2,
+    "total": 10
+   }
+  }
+ },
+ {
   "id": "python",
   "title": "Python Scripts, Console and Add-ons",
   "summary": "Run Python scripts, type in the Python Console and install add-ons, with Blender's own bpy and numpy in CPython 3.13.",
