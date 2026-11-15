@@ -54,9 +54,10 @@ export function defineBehavior<P extends PropSchema = {}, E extends string = nev
  */
 export function defineSystem<D extends SystemDefinition>(definition: D): D & System;
 /**
- * @typedef {{ start?: string, systems?: System[], ui?: any[], input?: Record<string, string[]> }} GameDefinition
- * The game's composition: the scene it starts in, its systems, its UI and its input map. Behaviours are found by being
- * added to objects in the .blend, not listed here.
+ * @typedef {{ start?: string, systems?: System[], ui?: any[], input?: Record<string, string[]>, physics?: 'havok' }} GameDefinition
+ * The game's composition: the scene it starts in, its systems, its UI, its input map and its physics (`'havok'`:
+ * Babylon's Havok on `babylon.scene`, stepped in fixed steps by the run's clock). Behaviours are found by being added
+ * to objects in the .blend, not listed here.
  * @param {GameDefinition} definition
  * @returns {GameDefinition & { kind: 'game' }}
  */
@@ -192,14 +193,16 @@ export type System = SystemDefinition & {
     with(values: Record<string, any>): System;
 };
 /**
- * The game's composition: the scene it starts in, its systems, its UI and its input map. Behaviours are found by being
- * added to objects in the .blend, not listed here.
+ * The game's composition: the scene it starts in, its systems, its UI, its input map and its physics (`'havok'`:
+ * Babylon's Havok on `babylon.scene`, stepped in fixed steps by the run's clock). Behaviours are found by being added
+ * to objects in the .blend, not listed here.
  */
 export type GameDefinition = {
     start?: string;
     systems?: System[];
     ui?: any[];
     input?: Record<string, string[]>;
+    physics?: "havok";
 };
 export type PropType = "float" | "int" | "bool" | "enum" | "color" | "object" | "action" | "sound" | "knot" | "collection";
 export type PropOptions = {

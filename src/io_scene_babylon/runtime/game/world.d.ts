@@ -19,10 +19,11 @@
  */
 /**
  * A run of `behaviors` (by name) and the game's systems over `host`.
+ * `havok`: Havok's wasm instance, for a game with `physics: 'havok'` (game/physics.js).
  * @param {{ host: Host, behaviors: Behavior[], game?: import('./define.js').GameDefinition, seed?: number, engine?: import('@babylonjs/core').AbstractEngine,
- *   kept?: { states?: Map<string, any>, saved?: Map<string, any> }, input?: Input, assets?: Assets, dev?: boolean, report?: (error: unknown, where: string) => void }} options
+ *   kept?: { states?: Map<string, any>, saved?: Map<string, any> }, input?: Input, assets?: Assets, havok?: any, dev?: boolean, report?: (error: unknown, where: string) => void }} options
  */
-export function createWorld({ host, behaviors, game: composition, seed, engine, kept, input, assets, dev, report }: {
+export function createWorld({ host, behaviors, game: composition, seed, engine, kept, input, assets, havok, dev, report }: {
     host: Host;
     behaviors: Behavior[];
     game?: import("./define.js").GameDefinition;
@@ -34,6 +35,7 @@ export function createWorld({ host, behaviors, game: composition, seed, engine, 
     };
     input?: Input;
     assets?: Assets;
+    havok?: any;
     dev?: boolean;
     report?: (error: unknown, where: string) => void;
 }): {
@@ -67,7 +69,7 @@ export function createWorld({ host, behaviors, game: composition, seed, engine, 
         handlers: any;
     }>;
     start: () => void;
-    /** Advances the run by `dt` seconds: waits due resume, then each behaviour's and system's `update`. @param {number} dt */
+    /** Advances the run by `dt` seconds: waits due resume, physics steps, then each behaviour's and system's `update`. @param {number} dt */
     step(dt: number): Promise<void>;
     /** What a hot swap carries to the next run: each instance's state and each system's save(). */
     keep: () => {

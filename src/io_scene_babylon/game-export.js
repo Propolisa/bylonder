@@ -7,7 +7,12 @@
 export const GAME_LIBRARIES = {
   inkjs: { '': 'dist/ink.mjs', full: 'dist/ink-full.mjs' },
   '@babylonjs/gui': { '': 'index.js' },
+  '@babylonjs/havok': { '': 'lib/esm/HavokPhysics_es.js' },
 };
+// Havok's wasm, beside game.js for a game with `physics: 'havok'`, fetched only when it plays.
+const HAVOK_WASM = 'lib/esm/HavokPhysics.wasm';
+/** Whether a game's composition (src/game.js) asks for Havok. */
+const usesHavok = (game) => /physics\s*:\s*(['"])havok\1/.test(game);
 const CORE = '@babylonjs/core';
 
 /** Whether a project (`{ files, read }`, its file paths and a reader) has a game: src/game.js. */
@@ -75,7 +80,7 @@ const text = (data) => (typeof data === 'string' ? data : new TextDecoder().deco
 
 /**
  * The package's game files, by path. `esbuild`: esbuild's API; `library(name)`: a library's `{ version, license, notice,
- * read(path) }` (its package.json's licence, its licence file's text, its files' text); `babylon(path)`: the text of
+ * read(path), bytes(path) }` (its package.json's licence, its licence file's text, its files' text and bytes); `babylon(path)`: the text of
  * @babylonjs/core's file at `path`, where Babylon's imports by name are found. Throws when the project states
  * no licence (package.json `license`), so a package never ships code without one.
  */
@@ -84,9 +89,10 @@ export async function gameFiles(project, { esbuild, library, babylon }) {
   const manifest = project.files.includes('package.json') ? JSON.parse(await read('package.json')) : {};
   if (!manifest.license) throw Error('The project\'s game code ships under its own licence: add "license" to its package.json (for example "MIT")');
   const modules = project.files.filter((path) => /^src\/.+\.m?js$/.test(path) && path !== 'src/game.js');
+  const havok = usesHavok(await read('src/game.js'));
   // Every module of src/ whose default export is a behaviour: behaviours are found by their names on objects.
   const entry = `import game from './src/game.js';\n${modules.map((path, i) => `import * as m${i} from './${path}';`).join('\n')}
-export default { game, behaviors: [${modules.map((_, i) => `m${i}.default`).join(', ')}].filter((d) => d?.kind === 'behavior') };\n`;
+export default { game, behaviors: [${modules.map((_, i) => `m${i}.default`).join(', ')}].filter((d) => d?.kind === 'behavior')${havok ? ", havok: (options) => import('@babylonjs/havok').then((m) => m.default(options))" : ''} };\n`;
   const used = new Map();
   const plugin = { name: 'game', setup(build) {
     build.onResolve({ filter: /.*/ }, async ({ path, importer, namespace, kind }) => {
@@ -110,13 +116,14 @@ export default { game, behaviors: [${modules.map((_, i) => `m${i}.default`).join
     banner: { js: `// ${manifest.name ?? 'The project'}'s game code, licensed ${manifest.license}. The libraries inlined in it, and their licences: THIRD-PARTY.md.` } });
   const files = { 'game.js': built.outputFiles[0].text };
   files['THIRD-PARTY.md'] = `# Third-party code in game.js\n\n${[...used].map(([name, { version, license, notice }]) => `## ${name} ${version} (${license})\n\n\`\`\`text\n${notice.trim()}\n\`\`\`\n`).join('\n') || 'None.\n'}`;
+  if (havok) files['HavokPhysics.wasm'] = await used.get('@babylonjs/havok').bytes(HAVOK_WASM);
   for (const path of project.files.filter((p) => p.startsWith('content/'))) files[path] = await project.read(path);
   return files;
 }
 
-/** A library's sources from a folder of packages (node_modules) by `readFile(path)`. */
+/** A library's sources from a folder of packages (node_modules) by `readFile(path)`, which gives a file's bytes. */
 export const folderLibrary = (readFile) => async (name) => {
-  const at = (path) => `${name}/${path}`, manifest = JSON.parse(await readFile(at('package.json')));
-  const notice = await readFile(at('LICENSE.md')).catch(() => readFile(at('license.md'))).catch(() => readFile(at('LICENSE')));
-  return { version: manifest.version, license: manifest.license, notice, read: (path) => readFile(at(path)) };
+  const at = (path) => `${name}/${path}`, read = async (path) => text(await readFile(at(path))), manifest = JSON.parse(await read('package.json'));
+  const notice = await read('LICENSE.md').catch(() => read('license.md')).catch(() => read('LICENSE'));
+  return { version: manifest.version, license: manifest.license, notice, read, bytes: (path) => readFile(at(path)) };
 };

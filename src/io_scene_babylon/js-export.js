@@ -665,7 +665,7 @@ async function playGame(blend, seed) {
   // The game's keys reach it on its canvas, which a click focuses.
   const canvas = blend.scene.getEngine().getRenderingCanvas();
   if (canvas && canvas.tabIndex < 0) canvas.tabIndex = 0;
-  const run = runGame(blend, code, { canvas: canvas ?? undefined, assets, seed });
+  const run = await runGame(blend, code, { canvas: canvas ?? undefined, assets, seed });
   const dispose = blend.dispose.bind(blend);
   blend.dispose = () => { run.dispose(); dispose(); };
   blend.game = run;

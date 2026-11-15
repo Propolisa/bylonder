@@ -187,6 +187,11 @@ same way. Built: `io_scene_babylon/game-export.js`.
 - The libraries game code may import (`inkjs`, `@babylonjs/gui`) are inlined into `game.js`, so a page needs no import
   map beyond Babylon's. Their notices ship in `THIRD-PARTY.md` beside it, one section per bundled package with its
   version, licence and licence text. Any other import fails the export, naming the module and the import.
+- A game whose `src/game.js` says `physics: 'havok'` gets Babylon's Havok (`@babylonjs/havok`, MIT): its loader is
+  inlined into `game.js` and listed in `THIRD-PARTY.md`, and `HavokPhysics.wasm` (about 2 MB) ships beside it, fetched
+  only when the game plays. The run steps Havok in fixed steps of 1/60 s from its own clock, before the behaviours'
+  `update`, so a seed reproduces a run at any frame rate; the bodies game code makes go with its behaviour, and Havok
+  with the run (`runtime/game/physics.js`).
 - `game.js` starts with the project's licence from `package.json` `license`. Without one the export fails and says
   so; it is never merged with Blender's code or the runtime. With Bundle on, `game.js` is an entry of its own that
   shares Babylon's chunks with `scene.js`.

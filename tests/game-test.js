@@ -30,7 +30,7 @@ export async function run(example, { seed = 1 } = {}) {
   world.mainSync = sync;
   const exported = (await exportPackage(world, { animations: 'BOTH', game: true })).files;
   const project = { files: files(fileURLToPath(root)), read: (path) => readFile(new URL(path, root)) };
-  const library = folderLibrary((path) => readFile(new URL(`../node_modules/${path}`, import.meta.url), 'utf8'));
+  const library = folderLibrary((path) => readFile(new URL(`../node_modules/${path}`, import.meta.url)));
   const written = writePackage({ ...exported, ...(await gameFiles(project, { esbuild: await import('esbuild-wasm'), library, babylon: (path) => readFile(new URL(`../node_modules/@babylonjs/core/${path}`, import.meta.url), 'utf8') })) });
   const at = (path) => new URL(path, written.url).href;
   const engine = Object.assign(new core.NullEngine(), { getFontOffset: () => ({ ascent: 0, height: 0, descent: 0 }) });
@@ -38,7 +38,9 @@ export async function run(example, { seed = 1 } = {}) {
   const [{ runGame, BUILTINS }, { default: code }] = await Promise.all([import(at('bylonder/game/run.js')), import(at('game.js'))]);
   const assets = { url: at, text: async (path) => readFileSync(new URL(path, written.url), 'utf8') };
   const errors = [];
-  const { world: run, input, host } = runGame(blend, code, { seed, assets, step: false, report: (error, where) => errors.push(`${where}: ${error?.stack ?? error}`) });
+  // Havok's wasm read from the package, as Node fetches no file URL.
+  const havok = code.havok && (() => code.havok({ wasmBinary: readFileSync(new URL('HavokPhysics.wasm', written.url)) }));
+  const { world: run, input, host } = await runGame(blend, code, { seed, assets, havok, step: false, report: (error, where) => errors.push(`${where}: ${error?.stack ?? error}`) });
   const step = async (seconds = STEP) => { for (let t = 0; t < seconds - 1e-9; t += STEP) { await run.step(STEP); blend.scene.render?.(); } };
   // An object as a test drives it: its entity, its behaviours' handles, and actions that take the run's time.
   const find = (name) => {

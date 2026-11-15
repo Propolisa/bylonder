@@ -23,6 +23,7 @@ code:
   - src/io_scene_babylon/runtime/game/blend-host.js
   - src/io_scene_babylon/runtime/game/input.js
   - src/io_scene_babylon/runtime/game/character.js
+  - src/io_scene_babylon/runtime/game/physics.js
   - src/io_scene_babylon/runtime/game/run.js
   - src/io_scene_babylon/game-export.js
   - src/editors/space_game/game-code.js
@@ -37,6 +38,7 @@ tests:
   - tests/behaviors-panel-wasm.test.js
   - tests/rock-hard-cafe-wasm.test.js
   - tests/game-export.test.js
+  - tests/game-physics.test.js
 limits:
   - A mesh's visibility (mesh.visibility below 1) does not fade the exported scene's materials yet: game code can hide a mesh, not fade it.
   - Game sounds (game.play) play at full volume from no place: not yet positioned at the entity they are played at.

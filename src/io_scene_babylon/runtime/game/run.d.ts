@@ -1,15 +1,19 @@
 /**
  * Runs `code` (its behaviours and its game) on `blend`. `canvas` gives the keys; `step: false` leaves stepping to the
- * caller (a test's clock), else the run steps before each frame while `paused()` is false.
+ * caller (a test's clock), else the run steps before each frame while `paused()` is false. A game with `physics:
+ * 'havok'` loads Havok first: `havok(options)` (HavokPhysics) makes its wasm instance, else game.js's own (`code.havok`)
+ * with its wasm beside the project's files.
  * @param {any} blend the loaded scene (BlendScene)
- * @param {{ behaviors: import('./define.js').Behavior[], game?: import('./define.js').GameDefinition }} code
+ * @param {{ behaviors: import('./define.js').Behavior[], game?: import('./define.js').GameDefinition, havok?: (options?: any) => Promise<any> }} code
  * @param {{ canvas?: EventTarget, assets?: import('./world.js').Assets, seed?: number, engine?: import('@babylonjs/core').AbstractEngine,
- *   kept?: { states?: Map<string, any>, saved?: Map<string, any> }, step?: boolean, paused?: () => boolean, report?: (error: unknown, where: string) => void }} [options]
+ *   kept?: { states?: Map<string, any>, saved?: Map<string, any> }, step?: boolean, paused?: () => boolean, report?: (error: unknown, where: string) => void,
+ *   havok?: (options?: any) => Promise<any> }} [options]
  */
 export function runGame(blend: any, code: {
     behaviors: import("./define.js").Behavior[];
     game?: import("./define.js").GameDefinition;
-}, { canvas, assets, seed, engine, kept, step, paused, report }?: {
+    havok?: (options?: any) => Promise<any>;
+}, { canvas, assets, seed, engine, kept, step, paused, report, havok }?: {
     canvas?: EventTarget;
     assets?: import("./world.js").Assets;
     seed?: number;
@@ -21,7 +25,8 @@ export function runGame(blend: any, code: {
     step?: boolean;
     paused?: () => boolean;
     report?: (error: unknown, where: string) => void;
-}): {
+    havok?: (options?: any) => Promise<any>;
+}): Promise<{
     world: {
         game: import("./world.js").Game;
         timeFor: (who: {
@@ -77,6 +82,6 @@ export function runGame(blend: any, code: {
     blend: any;
     host: import("./world.js").Host;
     dispose(): void;
-};
+}>;
 /** The behaviours the runtime brings, which a project adds to objects without writing them. */
 export const BUILTINS: import("./define.js").Behavior[];

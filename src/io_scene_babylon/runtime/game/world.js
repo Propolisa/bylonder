@@ -5,6 +5,7 @@
 // disposed with it, its waits never resume once it is gone, and its `state` is handed to the next run of a hot swap.
 import { Vector3 } from '@babylonjs/core';
 import { propValue } from './define.js';
+import { enablePhysics } from './physics.js';
 
 /**
  * The scene a run plays, as game/blend-host.js gives it from a package's controller.
@@ -77,10 +78,11 @@ function random(seed) {
 
 /**
  * A run of `behaviors` (by name) and the game's systems over `host`.
+ * `havok`: Havok's wasm instance, for a game with `physics: 'havok'` (game/physics.js).
  * @param {{ host: Host, behaviors: Behavior[], game?: import('./define.js').GameDefinition, seed?: number, engine?: import('@babylonjs/core').AbstractEngine,
- *   kept?: { states?: Map<string, any>, saved?: Map<string, any> }, input?: Input, assets?: Assets, dev?: boolean, report?: (error: unknown, where: string) => void }} options
+ *   kept?: { states?: Map<string, any>, saved?: Map<string, any> }, input?: Input, assets?: Assets, havok?: any, dev?: boolean, report?: (error: unknown, where: string) => void }} options
  */
-export function createWorld({ host, behaviors, game: composition = {}, seed = 1, engine, kept = {}, input = idleInput(), assets = noAssets, dev = true, report = (error, where) => console.error(`${where}:`, error) }) {
+export function createWorld({ host, behaviors, game: composition = {}, seed = 1, engine, kept = {}, input = idleInput(), assets = noAssets, havok, dev = true, report = (error, where) => console.error(`${where}:`, error) }) {
   const scene = host.scene, rng = random(seed), babylon = { scene, engine: engine ?? scene.getEngine() };
   let now = 0, ended = /** @type {any} */ (undefined), definitions = new Map(behaviors.map((b) => [b.name, b]));
   /** Whose code runs now: what Babylon makes meanwhile is theirs. @type {Owner | null} */
@@ -102,6 +104,8 @@ export function createWorld({ host, behaviors, game: composition = {}, seed = 1,
   const listeners = new Map();
   /** @typedef {{ key: string, definition: Behavior, entity: any, state: any, owner: Owner, handlers: any }} Instance */
 
+  // A physics body made by game code goes with its owner, as what Babylon makes does.
+  const physics = havok ? enablePhysics(scene, havok, (body) => { if (owner && !owner.disposed) owner.made.add(body); }) : null;
   const tracking = ADDED.map((name) => /** @type {any} */ (scene)[name]?.add((/** @type {any} */ made) => { if (owner && !owner.disposed) owner.made.add(made); })).filter(Boolean);
   /** @param {string} label @returns {Owner} */
   const newOwner = (label) => ({ made: new Set(), listeners: new Set(), disposed: false, label });
@@ -352,12 +356,13 @@ export function createWorld({ host, behaviors, game: composition = {}, seed = 1,
     /** The behaviours' instances, by `objectKey/Behavior`. */
     instances,
     start,
-    /** Advances the run by `dt` seconds: waits due resume, then each behaviour's and system's `update`. @param {number} dt */
+    /** Advances the run by `dt` seconds: waits due resume, physics steps, then each behaviour's and system's `update`. @param {number} dt */
     async step(dt) {
       if (ended !== undefined) return;
       now += dt;
       input.step?.();
       await resumeWaits();
+      physics?.step(dt);
       for (const i of ordered()) if (instances.has(i.key) && typeof i.handlers.update === 'function') run(i.owner, 'update', () => i.handlers.update(dt));
       for (const s of systems.values()) if (typeof s.handlers.update === 'function') run(s.owner, 'update', () => s.handlers.update(dt));
     },
@@ -405,6 +410,7 @@ export function createWorld({ host, behaviors, game: composition = {}, seed = 1,
       systems.clear();
       waits = [];
       tracking.forEach((observer, i) => /** @type {any} */ (scene)[ADDED.filter((n) => /** @type {any} */ (scene)[n])[i]]?.remove(observer));
+      physics?.dispose();
     },
   };
 }

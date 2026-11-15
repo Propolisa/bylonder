@@ -20,6 +20,8 @@ import { createGameCode, errorAt } from './game-code.js';
 // The app's modules a package's scene.js imports (runtime-files.js appSource), by src/ path.
 const sources = import.meta.glob(['../../io_scene_babylon/runtime/**/*.js', '../../overrides/**/*.js', '../../blenkernel/light/area-specular.js', '../../compositor/fog-glow.js',
   '../../io_scene_babylon/panel-icons.js', '../../io_scene_babylon/polyfill/volumes.js', '../../draw/curves-blocks.js', '../../draw/pointcloud.js']);
+// Havok (@babylonjs/havok, MIT) for a game with physics: the app's own copy, its wasm fetched on the first such run.
+const havok = () => import('@babylonjs/havok').then((m) => m.default());
 const appModule = (source) => (source === '@babylonjs/core' ? core : sources[`../../${source}`]());
 
 export function mountGameView(section, { world, header, run: files, codeError }) {
@@ -60,7 +62,9 @@ export function mountGameView(section, { world, header, run: files, codeError })
     stopGame();
     await loadingCode;
     if (game.blend !== blend) return;
-    played = runGame(blend, code, { canvas, assets, engine: game.engine, paused: () => state.paused, report: (error, where) => report(`${where}: ${error?.message ?? error}`) });
+    const started = await runGame(blend, code, { canvas, assets, engine: game.engine, havok, paused: () => state.paused, report: (error, where) => report(`${where}: ${error?.message ?? error}`) });
+    if (game.blend !== blend || played) started.dispose();
+    else played = started;
   };
   const shown = () => {
     state.shared = game.blend ? sharedStatus(game.blend.scene) : '';

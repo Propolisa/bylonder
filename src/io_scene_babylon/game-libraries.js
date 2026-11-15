@@ -17,8 +17,10 @@ export async function archivedLibrary(name) {
   const all = await files, file = (path) => all[`${name}/${path}`];
   const manifest = JSON.parse(strFromU8(file('package.json')));
   const notice = ['LICENSE.md', 'license.md', 'LICENSE'].map(file).find(Boolean);
+  const bytes = async (path) => { const data = file(path); if (!data) throw Error(`${name}/${path} is not in ${GAME_LIBRARIES_ARCHIVE}`); return data; };
   return {
     version: manifest.version, license: manifest.license, notice: notice ? strFromU8(notice) : manifest.license,
-    read: async (path) => { const data = file(path); if (!data) throw Error(`${name}/${path} is not in ${GAME_LIBRARIES_ARCHIVE}`); return strFromU8(data); },
+    read: async (path) => strFromU8(await bytes(path)),
+    bytes,
   };
 }

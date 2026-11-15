@@ -103,7 +103,7 @@ const gameLibraries = () => {
   const bytes = () => (archive ??= zipSync(Object.fromEntries(Object.keys(GAME_LIBRARIES).flatMap((name) => {
     const dir = fileURLToPath(new URL(`./node_modules/${name}/`, import.meta.url));
     return readdirSync(dir, { recursive: true }).map((path) => path.replaceAll("\\", "/"))
-      .filter((path) => /^(package\.json|license(\.md)?)$/i.test(path) || (/\.m?js$/.test(path) && !path.startsWith("node_modules/") && (name !== "inkjs" || path.endsWith(".mjs"))))
+      .filter((path) => /^(package\.json|license(\.md)?)$/i.test(path) || (/\.(m?js|wasm)$/.test(path) && !/^(node_modules|lib\/umd)\//.test(path) && (name !== "inkjs" || path.endsWith(".mjs"))))
       .map((path) => [`${name}/${path}`, readFileSync(dir + path)]);
   }))));
   return {
@@ -203,6 +203,6 @@ export default defineConfig({
     chunkSizeWarningLimit: 7000,
   },
   worker: { format: "es" },
-  // The KubeezCut embed is prebuilt and loads its workers and chunks relative to its own files.
-  optimizeDeps: { exclude: ["kubeezcut-embed"] },
+  // The KubeezCut embed is prebuilt and loads its workers and chunks relative to its own files; Havok finds its wasm beside its module.
+  optimizeDeps: { exclude: ["kubeezcut-embed", "@babylonjs/havok"] },
 });

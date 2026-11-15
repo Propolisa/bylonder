@@ -7,7 +7,7 @@ const declared = (...names) => names.flatMap((name) => [`${name}.js`, `${name}.d
 // The character animation system (runtime/character/), for a scene.js that exports it (a scene with an armature).
 export const CHARACTER_FILES = declared(...['api', 'names', 'core', 'pose-api', 'roles', 'movement', 'collision', 'input', 'contacts', 'locomotion', 'camera', 'sound', 'rootmotion', 'clip', 'pose', 'rig', 'procedural', 'mirror', 'quality', 'collections', ...['index', 'aim', 'feet', 'gaze', 'impact', 'lean', 'limbs', 'reach', 'space', 'springs', 'breathe', 'eyes'].map((n) => `effects/${n}`)].map((n) => `character/${n}`));
 // The game framework (runtime/game/), which a package carries when its scene.js runs game code.
-export const GAME_FILES = [...declared(...['define', 'world', 'blend-host', 'input', 'character', 'run'].map((n) => `game/${n}`)), 'game/names.d.ts'];
+export const GAME_FILES = [...declared(...['define', 'world', 'blend-host', 'input', 'character', 'physics', 'run'].map((n) => `game/${n}`)), 'game/names.d.ts'];
 export const RUNTIME_FILES = [...declared('blend-scene', 'collections', 'playhead', 'clips', 'buffers', 'world', 'scheduler', 'ready', 'skin-skeleton', 'ir', 'units', 'mesh', 'ortho-scale', 'zod', 'asset', 'scene-loader', 'dual-quaternion-skinning', 'tiled-images', 'scene-tables', 'shared-resources', 'package-modules', 'camera-effects'), 'ir.schema.json', 'implementations.json', 'LICENSE.md'];
 // GPL's notice and text, beside Blender's code in a package (src/ paths).
 const NOTICE = { 'LICENSE.md': 'io_scene_babylon/blender-code.LICENSE.md', COPYING: '../LICENSES/GPL-3.0-or-later.txt' };
