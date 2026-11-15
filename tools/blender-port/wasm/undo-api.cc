@@ -10,6 +10,7 @@
 #include "BLO_undofile.hh"
 #include "DNA_windowmanager_types.h"
 #include "ED_undo.hh"
+#include "WM_api.hh"
 
 using namespace blender;
 
@@ -79,6 +80,8 @@ EXPORT(undo_load) bool undo_load(bContext *C, UndoStep *step)
     if (ustack->step_active == ustack->steps.last && ustack->step_active->type == BKE_UNDOSYS_TYPE_MEMFILE) {
       undo_push(C, "Edit");
     }
+    /* As ed_undo_step_pre: jobs reading the data an undo frees (an asset list's of Main) end first. */
+    WM_jobs_kill_all(CTX_wm_manager(C));
     BKE_undosys_step_load_data(ustack, C, step);
   }
   return true;

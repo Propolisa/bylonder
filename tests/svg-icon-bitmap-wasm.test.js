@@ -32,7 +32,15 @@ const space = pointerStruct(structFind('Area'), 0, area.pointer).spaces.active;
 space.params.directory = '/thumbs/';
 space.params.display_type = 'THUMBNAIL';
 area.layout({ x: 0, y: 0, width: 800, height: 600 }, { [RGN_TYPE_WINDOW]: { x: 0, y: 0, width: 800, height: 600 } });
-for (let i = 0; i < 3; i++) { area.draw(RGN_TYPE_WINDOW); tick(); }
+// The listing is a window-manager job that reads the folder on a thread of its own: the window handled until it ends.
+area.draw(RGN_TYPE_WINDOW);
+for (const start = performance.now(); x.wm_jobs_running(main.C) || x.wm_pending(main.C);) {
+  assert.ok(performance.now() - start < 30000, 'the File Browser lists the folder');
+  tick();
+  await new Promise((resolve) => setTimeout(resolve, 5));
+}
+area.draw(RGN_TYPE_WINDOW);
+tick();
 const drawn = area.draw(RGN_TYPE_WINDOW).draw;
 assert.ok(drawn.some((op) => op.op === 'text' && op.text === 'Folder'), 'the File Browser lists the folder');
 assert.ok(['FILE_FOLDER_LARGE', 'FILE_LARGE'].every((icon) => asked.includes(icon)), `the folder and file icons are rasterized from their SVG (${asked})`);

@@ -71,6 +71,16 @@ function doubleClick(area, name) {
   tick();
 }
 
+// The File Browser's listing, a window-manager job that reads the library on a thread of its own: the window handled
+// until no job runs.
+async function listed() {
+  for (const start = performance.now(); x.wm_jobs_running(main.C) || x.wm_pending(main.C);) {
+    assert.ok(performance.now() - start < 30000, 'the File Browser lists the library');
+    tick();
+    await new Promise((resolve) => setTimeout(resolve, 5));
+  }
+}
+
 // Blender's File Browser for the operator, browsed as a user does: into the ID type, then the data-block.
 const browser = (folder, name) => async (op) => {
   const area = window.area(SPACE_FILE);
@@ -79,11 +89,14 @@ const browser = (folder, name) => async (op) => {
   layout();
   area.draw(RGN_TYPE_WINDOW);
   tick();
+  await listed();
   const space = pointerStruct(structFind('Area'), 0, area.pointer).spaces.active;
   assert.equal(space.params.directory, '/libraries/library.blend/', 'the File Browser opens inside the library');
   for (const type of ['Collection', 'Material', 'Mesh', 'Object']) entryAt(area, type);
   doubleClick(area, folder);
   assert.equal(space.params.directory, `/libraries/library.blend/${folder}/`);
+  area.draw(RGN_TYPE_WINDOW);
+  await listed();
   doubleClick(area, name);
   assert.ok(!x.fileselect_held(main.C, op), 'a double click on the data-block runs the operator');
   area.free();

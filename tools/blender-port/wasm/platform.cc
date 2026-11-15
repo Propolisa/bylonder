@@ -1,5 +1,5 @@
 /* What Blender's code needs from the platform in a WebAssembly build: allocation without the exception runtime, memory
- * that grows in large steps, and window manager jobs on the page's thread but those that run on threads of their own. */
+ * that grows in large steps, and window manager jobs on threads of their own. */
 #include "BLI_mmap.h"
 #include <cerrno>
 #include <cstddef>
@@ -78,10 +78,7 @@ extern "C" void *sbrk(intptr_t increment)
 }
 
 namespace blender {
-/* port-override: a thread pool's work (a window manager job's: a point cache bake, a background task pool's queue)
- * reaches Blender's data the page draws from, so it runs where it is inserted, on the page's thread, to its end, which
- * frees its slot for the next; the window then ends a job (wm_jobs_handle_finished, wm-api.cc wm_window_handle). Linked
- * with --wrap (wasm_module.PLATFORM_WRAPPED). */
+/* As threads.cc defines it, for the pool's insert (THREADPOOL_INSERT below). */
 struct ThreadSlot {
   ThreadSlot *next, *prev;
   void *(*do_thread)(void *);
@@ -135,20 +132,23 @@ void BLI_mmap_free(BLI_mmap_file *file)
 #define THREADPOOL_INSERT _ZN7blender21BLI_threadpool_insertEPNS_9ListBaseTINS_10ThreadSlotEEEPv
 #define WRAP_(prefix, name) prefix##name
 #define WRAP(prefix, name) WRAP_(prefix, name)
-/* Whether a pool's work is a window-manager job that runs on a thread of its own (render-api.cc); absent from the
- * build's tools, which run no jobs. */
-extern "C" bool job_on_own_thread(const void *callerdata) __attribute__((weak));
-extern "C" void WRAP(__real_, THREADPOOL_INSERT)(blender::ListBaseT<blender::ThreadSlot> *threadbase, void *callerdata);
+/* Whether a pool's work is a window-manager job (wm-api.cc); absent from the build's tools, which run no jobs. */
+extern "C" bool is_wm_job(const void *callerdata) __attribute__((weak));
+/* port-override: a window-manager job runs on a thread of its own, as in Blender, while the page goes on and polls it
+ * (wm_jobs_timer, wm_jobs_handle_finished); where no thread can be had (the page is not cross-origin isolated, Node on
+ * one thread) it runs here to its end instead, as the pool's other work (a background task pool's queue) always does,
+ * which frees its slot for the next. Linked with --wrap (wasm_module.PLATFORM_WRAPPED). */
 extern "C" void WRAP(__wrap_, THREADPOOL_INSERT)(blender::ListBaseT<blender::ThreadSlot> *threadbase, void *callerdata)
 {
-  if (job_on_own_thread && job_on_own_thread(callerdata)) {
-    WRAP(__real_, THREADPOOL_INSERT)(threadbase, callerdata);
-    return;
-  }
   for (blender::ThreadSlot &slot : *threadbase) {
     if (slot.avail) {
       slot.avail = 0;
       slot.callerdata = callerdata;
+      if (is_wm_job && is_wm_job(callerdata) &&
+          pthread_create(&slot.pthread, nullptr, slot.do_thread, callerdata) == 0)
+      {
+        return;
+      }
       slot.do_thread(callerdata);
       slot.avail = 1;
       return;

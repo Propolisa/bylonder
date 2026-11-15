@@ -19,17 +19,18 @@ setContextPointer(blender.C);
 const python = (fn) => inPythonContext(blender.C, fn);
 
 // Each operator is picked from a menu, as the Add Modifier menu's asset catalogs show them: drawing it loads the asset
-// list (again after Main changes), which the window's ticks finish.
-const openMenu = () => {
+// list (again after Main changes) in a window-manager job, which the window, handled until no job runs, ends.
+const openMenu = async () => {
   assert(blender.menu('OBJECT_MT_modifier_add_root_catalogs'));
-  for (let ticks = 0; x.wm_pending(blender.C); ticks++) {
-    assert(ticks < 100, 'the asset list loads');
+  for (const start = performance.now(); x.wm_jobs_running(blender.C) || x.wm_pending(blender.C);) {
+    assert(performance.now() - start < 30000, 'the asset list loads');
     x.wm_tick(blender.C);
+    await new Promise((resolve) => setTimeout(resolve, 5));
   }
 };
 
 for (const [idname, props] of CASE.operators) {
-  openMenu();
+  await openMenu();
   const { status, report } = blender.run(idname, props);
   assert.equal(status, 4, `${idname}: ${report}`);
 }

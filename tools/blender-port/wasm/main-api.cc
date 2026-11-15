@@ -1729,7 +1729,9 @@ EXPORT(main_open) const char *main_open(BlenderMain *ctx, const char *filepath)
     BlendFileReadParams params = {};
     params.skip_flags = BLO_READ_SKIP_USERDEF;
     G.fileflags |= G_FILE_NO_UI;
-    /* The Main the file replaces, which setting it up frees, keeping its window manager (wm_file_read_setup_wm_init). */
+    /* The Main the file replaces, which setting it up frees, keeping its window manager (wm_file_read_setup_wm_init),
+     * whose jobs reading it (an asset list's) end first. */
+    WM_jobs_kill_all(ctx->wm);
     G_MAIN = ctx->bmain;
     BlendFileReadWMSetupData wm_setup_data = {ctx->wm};
     BKE_blendfile_read_setup_readfile(ctx->C, bfd, &params, &wm_setup_data, &read_report, false, nullptr);
