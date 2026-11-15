@@ -494,10 +494,16 @@ def link_module(host, out, entries, extra, archives, module_libraries, side_impo
                 # as null, unless null-data.txt names it.
                 '-Wl,--import-undefined', '-Wl,--unresolved-symbols=report-all', f'-Wl,--allow-undefined-file={NULL_DATA}', '-o', module]
         result = subprocess.run(link, capture_output=True, text=True)
-        # Data cycles.wasm names that nothing in the module defines: dropped, so the side module reports them as it loads.
+        # What cycles.wasm names that nothing in the module defines is dropped (it stays the side module's import, which
+        # throws when called): data fails the link, and a function would become the module's import where a weak
+        # reference expects null (oneTBB's dlopen).
         undefined = {line.split('undefined symbol: ')[-1].strip() for line in result.stderr.splitlines() if 'undefined symbol: ' in line}
-        if side_imports and undefined & set(side_imports):
-            side_imports = [name for name in side_imports if name not in undefined]
+        if not result.returncode:
+            undefined |= set(wasm_module.imports_of(module))
+        demangled = dict(zip(demangle(side_imports), side_imports)) if side_imports else {}
+        unmet = {demangled.get(name, name) for name in undefined} & set(side_imports)
+        if unmet:
+            side_imports = [name for name in side_imports if name not in unmet]
             shared = side_exports(out, side_imports)
             continue
         losers = duplicate_losers(result.stderr, {os.path.basename(a) for a in module_libraries})

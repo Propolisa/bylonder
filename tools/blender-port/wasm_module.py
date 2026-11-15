@@ -557,12 +557,16 @@ def demangle(names):
     return subprocess.run(['c++filt'], input='\n'.join(names), capture_output=True, text=True).stdout.split('\n')[:len(names)]
 
 
-def live_imports(path):
-    """What the module still imports besides WASI: Blender functions nothing in it defines."""
+def imports_of(path):
+    """The names a module imports besides WASI's, as linked (mangled)."""
     script = ("const m = new WebAssembly.Module(require('fs').readFileSync(process.argv[1]));"
               "console.log(JSON.stringify(WebAssembly.Module.imports(m).filter((i) => i.module !== 'wasi_snapshot_preview1').map((i) => i.name)))")
-    names = json.loads(subprocess.run(['node', '-e', script, path], capture_output=True, text=True, check=True).stdout)
-    return sorted({d.split('(')[0] for d in demangle(names)})
+    return json.loads(subprocess.run(['node', '-e', script, path], capture_output=True, text=True, check=True).stdout)
+
+
+def live_imports(path):
+    """What the module still imports besides WASI: Blender functions nothing in it defines."""
+    return sorted({d.split('(')[0] for d in demangle(imports_of(path))})
 
 
 def data_references(objects):
