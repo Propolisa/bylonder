@@ -98,7 +98,8 @@ jobs:
           cp work/wasm-build/bylonder.wasm bmesh.wasm
           cp work/wasm-build/bylonder-names.wasm bmesh-names.wasm
           cp work/wasm-build/python/python313.zip work/wasm-build/python/scripts.zip work/wasm-build/python/addons.zip .
-          gh release view "$key" >/dev/null 2>&1 || gh release create "$key" bmesh.wasm bmesh-names.wasm python313.zip scripts.zip addons.zip --latest=false \
+          cp work/wasm-build/cycles.wasm work/wasm-build/python/cycles.zip . 2>/dev/null || true
+          gh release view "$key" >/dev/null 2>&1 || gh release create "$key" bmesh.wasm bmesh-names.wasm python313.zip scripts.zip addons.zip $(ls cycles.wasm cycles.zip 2>/dev/null) --latest=false \
             --title "$key" --notes "Blender's module built from tools/blender-port at ${{ github.sha }}." --target "${{ github.sha }}"
       - uses: actions/upload-artifact@v4
         if: always()

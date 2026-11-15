@@ -27,11 +27,14 @@ import wasm_weaken
 from wasm_module import SHARED_MEMORY, TARGET, WASM, demangle
 
 # CMake targets on the far side of the seams, and Blender's generators and tests, matched against target names.
-SEAMS = re.compile(r'^(bf_intern_ghost|bf_gpu|bf_draw|bf_python_gpu|bf_intern_cycles|cycles_|bf_intern_audaspace|audaspace'
+SEAMS = re.compile(r'^(bf_intern_ghost|bf_gpu|bf_draw|bf_python_gpu|bf_intern_audaspace|audaspace'
                    r'|bf_intern_libmv|extern_glog|extern_ceres|bf_intern_mantaflow|bf_blendthumb|blender$|makesdna|makesrna|datatoc'
                    r'|msgfmt|.*_test|.*_tests|gtest|bf_intern_wayland|bf_intern_sky_gpu|.*_cpp_shaders_.*|shader_tool)')
-# Host flags that have no meaning for wasm32 or name host paths.
-DROP = re.compile(r'^(-DFMT_SHARED|-DEIGEN_HAS_TBB|-DWITH_OPENVDB_BLOSC|-DHAVE_EXECINFO_H|-DHAVE_MALLOC_STATS_H|-I/usr/|-isystem/usr/|-march=|-mtune=|-msse|-mavx|-mfpmath|-m64|-fPIC|-fopenmp|-O\d|-g\d?$|-W|-pedantic|-fno-strict-overflow'
+# Cycles' libraries, built into their own side module (cycles.wasm, link_cycles) that the app loads when Cycles renders.
+CYCLES = re.compile(r'^(bf_intern_cycles|cycles_)')
+# Host flags that have no meaning for wasm32 or name host paths; and WITH_CYCLES, as Blender's own sources build as they
+# do without Cycles, which comes as a side module.
+DROP = re.compile(r'^(-DFMT_SHARED|-DWITH_CYCLES$|-DEIGEN_HAS_TBB|-DWITH_OPENVDB_BLOSC|-DHAVE_EXECINFO_H|-DHAVE_MALLOC_STATS_H|-I/usr/|-isystem/usr/|-march=|-mtune=|-msse|-mavx|-mfpmath|-m64|-fPIC|-fopenmp|-O\d|-g\d?$|-W|-pedantic|-fno-strict-overflow'
                   r'|-fmacro-prefix-map|-ffile-prefix-map|-fdiagnostics|-fcolor-diagnostics|-ffp-contract|-fno-trapping-math)')
 # Sources built as a Blender with a window draws them, though the configure is headless: the interface, whose drawing
 # the API records (its icons are registered only then, icons_init).
@@ -344,7 +347,8 @@ def main():
     results = {}
     with concurrent.futures.ThreadPoolExecutor(int(os.environ.get("JOBS", os.cpu_count()))) as pool:
         for target, group in sorted(by_target.items()):
-            done = list(pool.map(lambda e: compile_one(objects, e, extra + own.get(target, [])), group))
+            pic = ['-fPIC'] if CYCLES.match(target) else []
+            done = list(pool.map(lambda e: compile_one(objects, e, extra + own.get(target, []) + pic), group))
             results[target] = done
             failed = [s for s, o, _ in done if not o]
             print(f'{target}: {len(done) - len(failed)} of {len(done)} compile', file=sys.stderr, flush=True)
@@ -352,7 +356,8 @@ def main():
         return
     archives = []
     ar = shutil.which('llvm-ar') or shutil.which('llvm-ar-18')
-    for target, done in results.items():
+    cycles = [o for target, done in results.items() if CYCLES.match(target) for _, o, _ in done if o]
+    for target, done in ((t, d) for t, d in results.items() if not CYCLES.match(t)):
         built = [o for _, o, _ in done if o]
         if built:
             archive = os.path.join(out, 'archives', target + '.a')
@@ -388,7 +393,7 @@ def main():
     total = sum(len(d) for d in results.values())
     compiled = sum(1 for d in results.values() for _, o, _ in d if o)
     print(f'{compiled} of {total} sources compile; link exit {result.returncode}; {len(names)} unresolved symbols; report {report}', file=sys.stderr)
-    link_module(host, out, entries, extra, archives, module_libraries)
+    link_module(host, out, entries, extra, archives, module_libraries, link_cycles(out, cycles))
 
 
 def wrapped(objects):
@@ -405,7 +410,40 @@ NULL_DATA = os.path.join(WASM, 'null-data.txt')
 SEAM_LIBRARIES = {'bf_blenfont', 'bf_editor_interface', 'bf_editor_screen', 'bf_windowmanager', 'bf_imbuf_movie', 'bf_editor_grease_pencil'}
 
 
-def link_module(host, out, entries, extra, archives, module_libraries):
+def link_cycles(out, objects):
+    """Cycles as a side module (cycles.wasm: WebAssembly dynamic linking, dylink.0) that src/port/side-modules.js loads
+    into the module's memory, table and threads when Cycles first renders. It imports what it does not define (libc,
+    libc++, Blender, OpenImageIO, OpenColorIO, oneTBB, OpenVDB, Python) from the module, which exports those names
+    (returned, for link_module). A Cycles that does not link leaves the module as it is."""
+    side = os.path.join(out, 'cycles.wasm')
+    with open(os.path.join(out, 'cycles-objects.rsp'), 'w') as rsp:
+        rsp.write('\n'.join(objects))
+    result = subprocess.run(['clang++', *TARGET, '-O2', '-fPIC', '-shared', '-nostdlib', '-Wl,--experimental-pic', '-Wl,--shared-memory',
+                             '-Wl,--no-entry', '-Wl,--gc-sections', '-Wl,--strip-all', '-Wl,--error-limit=0',
+                             *(f'-Wl,--export={name}' for name in ('__wasm_call_ctors', '__wasm_init_tls', '__tls_size', '__tls_align')),
+                             f'@{rsp.name}', '-o', side], capture_output=True, text=True)
+    if result.returncode or not objects:
+        print(f'cycles.wasm does not link:\n{result.stderr[-3000:]}', file=sys.stderr)
+        return []
+    imports = subprocess.run(['node', '-e', 'const m = new WebAssembly.Module(require("fs").readFileSync(process.argv[1]));'
+                              'for (const i of WebAssembly.Module.imports(m)) if (i.module.startsWith("GOT.") || i.module === "env" && i.kind === "function") console.log(i.name)',
+                              side], capture_output=True, text=True, check=True).stdout.split()
+    print(f'{side}: {os.path.getsize(side)} bytes, {len(objects)} objects, {len(set(imports))} names from the module', file=sys.stderr)
+    return sorted(set(imports))
+
+
+def side_exports(out, names):
+    """The module's link arguments that give a side module (link_cycles) what it imports: each name kept and exported,
+    in a response file, with the stack pointer and a growable function table."""
+    if not names:
+        return []
+    rsp = os.path.join(out, 'side-exports.rsp')
+    with open(rsp, 'w') as file:
+        file.write('\n'.join(f'-Wl,-u,{name}\n-Wl,--export-if-defined={name}' for name in names))
+    return ['-Wl,--export=__stack_pointer', '-Wl,--export-table', '-Wl,--growable-table', f'@{rsp}']
+
+
+def link_module(host, out, entries, extra, archives, module_libraries, side_imports=()):
     """The module the app loads (src/bmesh/bmesh.wasm's exports): Bylonder's API (glue) with Blender's libraries.
     Where both define a symbol, the loser's definition is made weak (wasm_weaken.py): the module build's own libraries
     (module_archives) win, the API wins in SEAM_LIBRARIES, Blender everywhere else. Each one is listed (wasm-build/replaced.json), so the API's stand-ins can go one by one."""
@@ -430,8 +468,11 @@ def link_module(host, out, entries, extra, archives, module_libraries):
     # symbol something already defines.
     renamed = [c for c in copies if os.path.basename(c).startswith('renamed_')]
     replaced = {'blender': {}, 'api': {}}
+    # What cycles.wasm imports, kept and exported by name (each pulled in from the archives, -u), with what a side module
+    # shares with the module's instances: its stack pointer and its function table, which grows to hold the side's.
+    shared = side_exports(out, side_imports)
     while True:
-        link = ['clang++', *TARGET, '-O2', '-mexec-model=reactor', '-Wl,--gc-sections', '-Wl,--error-limit=0',
+        link = ['clang++', *TARGET, '-O2', '-mexec-model=reactor', '-Wl,--gc-sections', '-Wl,--error-limit=0', *shared,
                 '-Wl,-z,stack-size=8388608', '-Wl,--stack-first', *SHARED_MEMORY, '-Wl,--export=malloc', '-Wl,--export=free',
                 *(f'-Wl,--wrap={w}' for w in wrapped(api)), *api, '-Wl,--whole-archive', *renamed, '-Wl,--no-whole-archive', *copies, *copies, *dependencies, '-lwasi-emulated-process-clocks', '-lwasi-emulated-mman',
                 '-lwasi-emulated-signal', '-lwasi-emulated-getpid', *dependency_flags,
@@ -439,6 +480,12 @@ def link_module(host, out, entries, extra, archives, module_libraries):
                 # as null, unless null-data.txt names it.
                 '-Wl,--import-undefined', '-Wl,--unresolved-symbols=report-all', f'-Wl,--allow-undefined-file={NULL_DATA}', '-o', module]
         result = subprocess.run(link, capture_output=True, text=True)
+        # Data cycles.wasm names that nothing in the module defines: dropped, so the side module reports them as it loads.
+        undefined = {line.split('undefined symbol: ')[-1].strip() for line in result.stderr.splitlines() if 'undefined symbol: ' in line}
+        if side_imports and undefined & set(side_imports):
+            side_imports = [name for name in side_imports if name not in undefined]
+            shared = side_exports(out, side_imports)
+            continue
         losers = duplicate_losers(result.stderr, {os.path.basename(a) for a in module_libraries})
         if not losers:
             break
@@ -465,7 +512,8 @@ def link_module(host, out, entries, extra, archives, module_libraries):
           file=sys.stderr)
     # The module the app loads starts initialized (wasm_snapshot.py): Blender's RNA and node types are in its data.
     wasm_snapshot.snapshot(module, os.path.join(out, 'bylonder.wasm'), named=os.path.join(out, 'bylonder-names.wasm'))
-    install(os.path.join(out, 'bylonder.wasm'), python_files(out, tree, deps))
+    cycles = [os.path.join(out, 'cycles.wasm'), cycles_addon(out, tree)] if side_imports else []
+    install(os.path.join(out, 'bylonder.wasm'), [*python_files(out, tree, deps), *cycles])
 
 
 # What Python's library ships without: tests, and the GUI toolkits and tools a browser has no use for.
@@ -508,6 +556,19 @@ def python_files(out, tree, deps):
                             path = os.path.join(directory, name)
                             archive.write(path, os.path.join(target, os.path.relpath(path, folder)))
     return [os.path.join(python, name) for name in ('python313.zip', *SCRIPT_ZIPS)]
+
+
+def cycles_addon(out, tree):
+    """cycles.zip: Cycles' add-on (intern/cycles/blender/addon), unpacked where Blender installs it (addons_core/cycles)
+    when Cycles first renders."""
+    source = os.path.join(tree, 'intern', 'cycles', 'blender', 'addon')
+    path = os.path.join(out, 'python', 'cycles.zip')
+    with zipfile.ZipFile(path, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
+        for directory, _, names in os.walk(source):
+            for name in sorted(names):
+                if '__pycache__' not in directory:
+                    archive.write(os.path.join(directory, name), os.path.join('addons_core', 'cycles', os.path.relpath(os.path.join(directory, name), source)))
+    return path
 
 
 def install(module, files):

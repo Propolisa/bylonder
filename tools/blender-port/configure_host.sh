@@ -28,15 +28,18 @@ for p in "$(dirname "$0")"/wasm/patches/*.patch; do
   git -C "$DIR/blender" apply --reverse --check "$p" 2>/dev/null || git -C "$DIR/blender" apply "$p"
 done
 
-OFF="PYTHON_INSTALL FREESTYLE CYCLES OPENGL_BACKEND VULKAN_BACKEND METAL_BACKEND GHOST_X11 GHOST_WAYLAND GHOST_SDL AUDASPACE CODEC_FFMPEG CODEC_SNDFILE
+OFF="PYTHON_INSTALL FREESTYLE OPENGL_BACKEND VULKAN_BACKEND METAL_BACKEND GHOST_X11 GHOST_WAYLAND GHOST_SDL AUDASPACE CODEC_FFMPEG CODEC_SNDFILE
 OPENAL JACK PULSEAUDIO SDL OPENIMAGEIO OPENCOLORIO OPENEXR IMAGE_OPENJPEG IMAGE_WEBP MOD_FLUID MOD_OCEANSIM
 FFTW3 ALEMBIC USD HYDRA MATERIALX OPENIMAGEDENOISE GMP MANIFOLD QUADRIFLOW POTRACE HARU LIBMV XR_OPENXR INPUT_NDOF INTERNATIONAL
 HARFBUZZ FRIBIDI DRACO MESHOPTIMIZER TESTS GTESTS NANOVDB CPU_CHECK MEM_JEMALLOC BLENDER_THUMBNAILER LIBS_PRECOMPILED STRICT_BUILD_OPTIONS"
+# Cycles is configured for its compile commands (blender_build.py builds it as the side module cycles.wasm), with its CPU
+# device only and without its optional libraries.
+OFF="$OFF CYCLES_EMBREE CYCLES_OSL CYCLES_PATH_GUIDING CYCLES_DEVICE_CUDA CYCLES_DEVICE_OPTIX CYCLES_DEVICE_HIP CYCLES_DEVICE_HIPRT
+CYCLES_DEVICE_METAL CYCLES_DEVICE_ONEAPI CYCLES_CUDA_BINARIES CYCLES_HIP_BINARIES CYCLES_ONEAPI_BINARIES CYCLES_HYDRA_RENDER_DELEGATE"
 args=()
-# What the shipped module builds with (manifest defines); TBB only so that CMake keeps OpenVDB, as blender_build.py drops
-# WITH_TBB and the module's serial tbb headers stand in. Python is found at the host's python3.13, whose headers
-# blender_build.py replaces with the module's CPython's (manifest cpython).
-ON="PYTHON BULLET OPENSUBDIV OPENVDB TBB MOD_REMESH"
+# What the shipped module builds with (manifest defines); TBB is the manifest's oneTBB. Python is found at the host's
+# python3.13, whose headers blender_build.py replaces with the module's CPython's (manifest cpython).
+ON="PYTHON BULLET OPENSUBDIV OPENVDB TBB MOD_REMESH CYCLES"
 for o in $OFF; do args+=("-DWITH_$o=OFF"); done
 for o in $ON; do args+=("-DWITH_$o=ON"); done
 args+=("-DPYTHON_ROOT_DIR=$(python3.13 -c 'import sys; print(sys.base_prefix)')")
