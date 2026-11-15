@@ -5,6 +5,7 @@ import { BRANCH_ROWS, sceneBranches } from './branches.js';
 import { RUNTIMES, exportChoices, exportIssue } from '../runtimes/runtimes.js';
 import { contextStruct, idStruct } from '../python/bpy_rna.js';
 import { sceneUnits } from './unit-manifest.js';
+import { EVALUATIONS, exportEvaluation, setExportEvaluation } from './export-settings.js';
 
 const PARITY_NOTE = "Lights materials as Blender's EEVEE does (view vector, second reflection as clearcoat). Off: Babylon's own lighting; Blender's texture nodes still export as one custom block.";
 const BAKE_NOTE = "Samples every animated value the page cannot play as its F-Curve at each frame, as Babylon keys. Off: F-Curves Babylon plays exactly stay its keys and the others run as F-Curves in the page; what the page cannot run yet is still sampled, each named in the Info editor.";
@@ -156,11 +157,13 @@ function settingsTree(values, js, branches, world) {
   const animations = setting(values, 'animations', { label: 'Animations', icon: 'BYLONDER', items: ANIMATIONS, inherited: DEFAULT('TIMELINE'),
     children: [setting(values, 'clipCompression', { label: 'Clip Compression', icon: 'BYLONDER', items: CLIP_COMPRESSION.map(([id, label, note]) => [id, label, note]), inherited: DEFAULT('STANDARD'),
       issue: (value) => (value !== 'OFF' && values.animations === 'TIMELINE' ? 'Only clips are compressed' : null) })] });
-  return [...(js ? [scope, target, bundleTree(values), panelTree(values), branchesTree(values, branches)] : []), animations, sampleRateTree(values, world), runtimesTree(values), ...(js ? [unitsTree(values)] : [])].filter(Boolean);
+  // The scene's own setting (export-settings.js), which the Game area's header shows too.
+  const evaluation = setting(values, 'evaluation', { label: 'Modifier Stack', icon: 'BYLONDER', items: EVALUATIONS, inherited: DEFAULT('RENDER') });
+  return [...(js ? [scope, target, evaluation, bundleTree(values), panelTree(values), branchesTree(values, branches)] : []), animations, sampleRateTree(values, world), runtimesTree(values), ...(js ? [unitsTree(values)] : [])].filter(Boolean);
 }
 
 // The dialog's values as export options: unset settings left out, the Units tree as the type keys replaced.
-const options = ({ units, unitState, ...values }) => ({ ...JSON.parse(JSON.stringify(values, (key, value) => (value === null ? undefined : value))),
+const options = ({ units, unitState, evaluation, ...values }) => ({ ...JSON.parse(JSON.stringify(values, (key, value) => (value === null ? undefined : value))),
   ...(units && { replace: [...new Set(Object.values(units).flatMap((category) => Object.keys(category.units).filter((key) => unitStateOf(unitState, category, key) === 'REPLACED')))] }) });
 
 // Asks for a format's export options (export-options.js ExportOptionsSchema) and exports with them by `run(options)`;
@@ -172,7 +175,7 @@ export async function exportDialog(world, format, title, run) {
     import('../editors/interface/components/tailwind.css'),
   ]);
   const js = format !== 'babylon';
-  const values = reactive({ eeveeParity: false, hostCompression: false, bakeAnimation: false, scope: null, target: null, animations: null, clipCompression: null, bundle: null, minify: null, controlPanel: null, devTools: null, navigation: null });
+  const values = reactive({ eeveeParity: false, hostCompression: false, bakeAnimation: false, evaluation: exportEvaluation(world), scope: null, target: null, animations: null, clipCompression: null, bundle: null, minify: null, controlPanel: null, devTools: null, navigation: null });
   const fields = [{ name: 'eeveeParity', label: 'EEVEE Parity', note: PARITY_NOTE },
     ...(js ? [{ name: 'hostCompression', label: 'Host Compresses Geometry', note: HOST_NOTE }, { name: 'bakeAnimation', label: 'Bake Animation', note: BAKE_NOTE }] : [])];
   const branches = js ? sceneBranches(world, { live: format === 'js-live' }) : {};
@@ -187,6 +190,7 @@ export async function exportDialog(world, format, title, run) {
       if (!ok) return close(false);
       Object.assign(status, { busy: true, error: '' });
       try {
+        if (js) setExportEvaluation(world, values.evaluation ?? 'RENDER');
         await run(options(values));
         close(true);
       } catch (error) {

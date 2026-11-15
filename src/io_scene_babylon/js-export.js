@@ -17,6 +17,7 @@ import { prepareKernels } from './pose-export.js';
 import { chosenState, CLIP_COMPRESSION, NAVIGATION, TARGETS } from './export-options.js';
 import { exportControls, controlTypes, sceneOf, withUI } from './controls-export.js';
 import { evaluateForRender } from './render-evaluation.js';
+import { exportEvaluation } from './export-settings.js';
 import { exportCollections } from './collections-export.js';
 import { exportNodeMaterial, kernelsFile, materialKernels } from './node-material-export.js';
 import { fillMaterials, MESH_VALUE } from './runtime/materials.js';
@@ -381,7 +382,8 @@ export async function exportPackage(whole, { scope = 'SCENE', selected = [], liv
   const world = scope === 'SELECTED' ? selectedWorld(whole, selected) : whole;
   const states = { branchState, branches }, stackState = (node) => chosenState(states, 'modifiers', node.name) ?? (keepLive ? 'LIVE' : 'BAKED');
   const live = new Map(world.objects.filter((node) => stackState(node) === 'LIVE').map((node) => [node, liveStack(world, node)]).filter(([, stack]) => stack));
-  const disable = evaluateForRender(whole);
+  // The scene's modifier stack (export-settings.js): Render shows what Disable in Viewports leaves off while it is read.
+  const disable = exportEvaluation(whole) === 'RENDER' ? evaluateForRender(whole) : () => {};
   try {
     await world.modifiers.settled();
     await prepareKernels();

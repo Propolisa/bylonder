@@ -22,11 +22,15 @@ code:
   - src/editors/space_game/game-run.js
   - src/editors/space_game/package-link.js
   - src/editors/space_package/package-preview.js
+  - src/io_scene_babylon/controls-export.js
+  - src/io_scene_babylon/export-settings.js
   - src/io_scene_babylon/scoped-export.js
   - src/io_scene_babylon/scene-patch.js
 tests:
   - tests/game-run-wasm.test.js
   - tests/game-instant-edits-wasm.test.js
+  - tests/controls-coverage-wasm.test.js
+  - tests/export-evaluation-wasm.test.js
   - tests/live-package-wasm.test.js
   - tests/package-preview-wasm.test.js
   - tests/export-scoped-wasm.test.js
@@ -62,6 +66,10 @@ own editor, chosen from an area's editor type menu.
    new modifier or object) reach the game once that export is done.
 
    ![The game following an edit](../media/features/game/edit.gif)
+
+3. Choose the modifier stack the game evaluates in its header, Viewport or Render. It is the scene's export setting
+   (File > Export > JavaScript's Modifier Stack, saved in the .blend), Render by default. Choosing one exports the scene
+   again and loads the game fresh; the header says so.
 
 ## Project files
 

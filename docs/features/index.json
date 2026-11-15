@@ -384,12 +384,16 @@
    "src/editors/space_game/game-run.js",
    "src/editors/space_game/package-link.js",
    "src/editors/space_package/package-preview.js",
+   "src/io_scene_babylon/controls-export.js",
+   "src/io_scene_babylon/export-settings.js",
    "src/io_scene_babylon/scoped-export.js",
    "src/io_scene_babylon/scene-patch.js"
   ],
   "tests": [
    "tests/game-run-wasm.test.js",
    "tests/game-instant-edits-wasm.test.js",
+   "tests/controls-coverage-wasm.test.js",
+   "tests/export-evaluation-wasm.test.js",
    "tests/live-package-wasm.test.js",
    "tests/package-preview-wasm.test.js",
    "tests/export-scoped-wasm.test.js"

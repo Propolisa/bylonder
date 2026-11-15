@@ -3,8 +3,8 @@ import { onMounted, ref } from "vue";
 import BlIcon from "../interface/components/BlIcon.vue";
 import { Button } from "../interface/components/ui/button";
 
-const props = defineProps({ header: Object, canvas: Object, status: String, shared: String, busy: Boolean, running: Boolean, paused: Boolean });
-defineEmits(["play", "pause", "reset"]);
+const props = defineProps({ header: Object, canvas: Object, status: String, shared: String, busy: Boolean, running: Boolean, paused: Boolean, evaluation: String, evaluations: Array });
+defineEmits(["play", "pause", "reset", "evaluation"]);
 const host = ref(null);
 onMounted(() => host.value.append(props.canvas));
 </script>
@@ -23,6 +23,11 @@ onMounted(() => host.value.append(props.canvas));
         <BlIcon name="BYLONDER" />
         <span>Reset</span>
       </Button>
+      <span class="flex items-center gap-0.5" title="Which modifier stack the game's package evaluates (the scene's export setting)">
+        <BlIcon name="BYLONDER" />
+        <Button v-for="[id, label, description] in evaluations" :key="id" size="sm" :variant="evaluation === id ? 'default' : 'secondary'" :disabled="busy" :title="description"
+          @click="evaluation !== id && $emit('evaluation', id)">{{ label }}</Button>
+      </span>
       <span class="truncate text-muted-foreground">{{ status }}</span>
       <span v-if="shared" class="ml-auto truncate text-muted-foreground">{{ shared }}</span>
     </div>

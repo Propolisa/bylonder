@@ -10,6 +10,7 @@ import { createGameRun } from './game-run.js';
 import { createPackagePreview } from '../space_package/package-preview.js';
 import { packagedFiles } from '../../io_scene_babylon/export.js';
 import { exportOptions } from '../../io_scene_babylon/export-options.js';
+import { EVALUATIONS, exportEvaluation, setExportEvaluation } from '../../io_scene_babylon/export-settings.js';
 import { sharedStatus } from '../../io_scene_babylon/runtime/shared-resources.js';
 import { publishFiles, removeRun } from '../../workspace/module-host.js';
 import { registerOperator } from '../../windowmanager/wm-operators.js';
@@ -20,7 +21,7 @@ const sources = import.meta.glob(['../../io_scene_babylon/runtime/**/*.js', '../
 const appModule = (source) => (source === '@babylonjs/core' ? core : sources[`../../${source}`]());
 
 export function mountGameView(section, { world, header }) {
-  const state = reactive({ status: '', shared: '', busy: false, running: false, paused: false });
+  const state = reactive({ status: '', shared: '', busy: false, running: false, paused: false, evaluation: exportEvaluation(world) });
   // WebGL 2, whatever the app draws with, until exported pages draw on WebGPU again (the area light fixes in progress).
   const options = exportOptions({ controlPanel: false, target: 'WEBGL2' });
   const canvas = Object.assign(document.createElement('canvas'), { className: 'block h-full w-full outline-none', tabIndex: 0 });
@@ -56,9 +57,9 @@ export function mountGameView(section, { world, header }) {
       }).catch((error) => report(`Not loaded: ${error.message}`));
     },
   });
-  const run = (label, fn) => async () => {
+  const run = (label, fn) => async (...args) => {
     state.busy = true;
-    try { await fn(); } catch (error) { report(`${label} failed: ${error.message}`); } finally { state.busy = false; }
+    try { await fn(...args); } catch (error) { report(`${label} failed: ${error.message}`); } finally { state.busy = false; }
   };
   const pause = () => {
     state.paused = !state.paused;
@@ -78,12 +79,28 @@ export function mountGameView(section, { world, header }) {
     state.paused = false;
     report('Reset');
   });
+  // The scene's modifier stack for packages: a structural change, which exports again and loads the game fresh.
+  const evaluate = run('Modifier Stack', async (value) => {
+    setExportEvaluation(world, value);
+    state.evaluation = value;
+    if (!state.running) return;
+    const label = EVALUATIONS.find(([id]) => id === value)[1];
+    report(`Exporting with the ${label} stack`);
+    await preview.settled();
+    await patching;
+    await preview.reload();
+    state.paused = false;
+    report(`Loaded fresh with the ${label} stack`);
+  });
   registerOperator('bylonder.game_play', { poll: () => !state.busy, run: play });
   registerOperator('bylonder.game_pause', { poll: () => state.running, run: pause });
   registerOperator('bylonder.game_reset', { poll: () => state.running && !state.busy, run: reset });
-  createApp({ render: () => h(GameView, { ...state, header, canvas, onPlay: play, onPause: pause, onReset: reset }) }).mount(section);
+  createApp({ render: () => h(GameView, { ...state, evaluations: EVALUATIONS, header, canvas, onPlay: play, onPause: pause, onReset: reset, onEvaluation: evaluate }) }).mount(section);
   return {
-    changed: () => state.running && preview.changed(),
+    changed: () => {
+      state.evaluation = exportEvaluation(world);
+      if (state.running) preview.changed();
+    },
     settled: async () => { await preview.settled(); await patching; },
     get blend() { return game.blend; },
     dispose() {

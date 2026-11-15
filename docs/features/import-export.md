@@ -220,7 +220,9 @@ control panel, on WebGL 2, loading Babylon.js from its CDN. [Open the demo](http
    ![The STL exporter's options](../media/features/import-export/export-options.png)
 
 6. **Export for Babylon.** File > Export > JavaScript (.zip) writes a package that loads in plain Babylon.js. Below its
-   checkboxes, its settings are a tree: GPU Engine; Bundle, on by default, which writes one minified bundle with the
+   checkboxes, its settings are a tree: GPU Engine; Modifier Stack, the scene's own setting saved in the .blend
+   (Render, the default, evaluates what Disable in Viewports leaves off, as Blender renders; Viewport leaves it off),
+   which the Game area's header shows and sets too; Bundle, on by default, which writes one minified bundle with the
    Babylon.js modules the scene uses, so the page needs no CDN, import map or bundler (Off: ES modules importing
    Babylon module by module), and under it Minify; Control Panel; Branches, which step 9 shows; then Runtime with each
    feature that has a runtime choice and, under
