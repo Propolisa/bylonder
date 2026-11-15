@@ -92,11 +92,18 @@ function deformer(scene, entry, name, mesh) {
   // targets (pulling toward their rest shapes) and a skeleton would apply again on the GPU.
   Object.assign(mesh, { morphTargetManager: null, skeleton: null });
   if (engine.isWebGPU && gpuSupported(deform).supported) {
-    const gpu = new GpuDeformer(engine, entry.rig, deform, mesh, { axis: AXIS });
-    let ready = false;
-    gpu.whenReady().then(() => { ready = true; });
-    mesh.alwaysSelectAsActiveMesh = true;
-    return { update: () => ready && gpu.update() };
+    // One mesh the GPU cannot deform falls back to the CPU, named, and the rest of the scene plays.
+    const rest = [VertexBuffer.PositionKind, VertexBuffer.NormalKind].map((kind) => [kind, mesh.getVerticesData(kind)]);
+    try {
+      const gpu = new GpuDeformer(engine, entry.rig, deform, mesh, { axis: AXIS });
+      let ready = false;
+      gpu.whenReady().then(() => { ready = true; });
+      mesh.alwaysSelectAsActiveMesh = true;
+      return { update: () => ready && gpu.update() };
+    } catch (error) {
+      console.warn(`${name}: the native rig runtime cannot deform it on the GPU (${/** @type {Error} */ (error).message}), so it deforms on the CPU`);
+      for (const [kind, data] of rest) if (data) mesh.setVerticesData(kind, data, true);
+    }
   }
   mesh.makeGeometryUnique();
   for (const kind of [VertexBuffer.PositionKind, VertexBuffer.NormalKind]) { const data = mesh.getVerticesData(kind); if (data) mesh.setVerticesData(kind, Float32Array.from(data), true); }

@@ -10,6 +10,7 @@ import { ComputeShader } from '@babylonjs/core/Compute/computeShader.js';
 import '@babylonjs/core/Engines/WebGPU/Extensions/engine.computeShader.js';
 import { StorageBuffer } from '@babylonjs/core/Buffers/storageBuffer.js';
 import { VertexBuffer } from '@babylonjs/core/Buffers/buffer.js';
+import { BoundingInfo } from '@babylonjs/core/Culling/boundingInfo.js';
 import { Constants } from '@babylonjs/core/Engines/constants.js';
 import { buildBinding, jointMatrices, dualQuatData, MAX_INFLUENCES } from '../deform/binding.js';
 import { latticeFrame } from '../deform/lattice.js';
@@ -336,8 +337,10 @@ export class GpuDeformer {
     }
     this.output = cur;
     this.count = count;
-    mesh.setVerticesBuffer(new VertexBuffer(engine, cur.getBuffer(), VertexBuffer.PositionKind, false, false, 4, false, 0, 3));
-    if (this.normals) mesh.setVerticesBuffer(new VertexBuffer(engine, this.normals.getBuffer(), VertexBuffer.NormalKind, false, false, 4, false, 0, 3));
+    keepingBounds(mesh, () => {
+      mesh.setVerticesBuffer(new VertexBuffer(engine, cur.getBuffer(), VertexBuffer.PositionKind, false, false, 4, false, 0, 3));
+      if (this.normals) mesh.setVerticesBuffer(new VertexBuffer(engine, this.normals.getBuffer(), VertexBuffer.NormalKind, false, false, 4, false, 0, 3));
+    });
   }
 
   // Face normals, then per welded vertex the angle-weighted sum over its corners, then gathered per drawn vertex.
@@ -565,6 +568,19 @@ function cornerFrame(P, v, prev, next) {
   const d = x[0] * z[0] + x[1] * z[1] + x[2] * z[2];
   x = norm(x.map((c, i) => c - d * z[i]));
   return [x, cross(z, x), z];
+}
+
+// `swap`, which gives a mesh a vertex buffer that lives on the GPU alone, with the mesh and each of its submeshes keeping
+// the bounds they had: Babylon reads no positions from such a buffer, so it would bound the mesh as infinite and leave
+// a submesh of several without bounds, which sorting it among transparent ones reads.
+export function keepingBounds(mesh, swap) {
+  const bounds = mesh.getBoundingInfo(), parts = new Map((mesh.subMeshes ?? []).map((sub) => [sub.materialIndex, sub.getBoundingInfo()]));
+  swap();
+  mesh.setBoundingInfo(new BoundingInfo(bounds.minimum, bounds.maximum, mesh.getWorldMatrix()));
+  for (const sub of mesh.subMeshes ?? []) if (!sub.IsGlobal) {
+    const own = parts.get(sub.materialIndex) ?? bounds;
+    sub.setBoundingInfo(new BoundingInfo(own.minimum, own.maximum, mesh.getWorldMatrix()));
+  }
 }
 
 // The CPU path with the same interface: the stack on the CPU, written into the mesh's positions each frame.
