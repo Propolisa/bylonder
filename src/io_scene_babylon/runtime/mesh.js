@@ -145,7 +145,10 @@ export async function drawGeometry(scene, node, value, { meshBuffers = triangula
   else if (points) {
     const cloud = part(target, 'points'), p = points.positions;
     cloud.setVerticesData('position', Float32Array.from(p, (_, i) => p[i - (i % 3) + [0, 2, 1][i % 3]]), false);
-    if (cloud.material) cloud.material = Object.assign(cloud.material.clone(`${cloud.id}/material`) ?? cloud.material, { pointsCloud: true });
+    // A copy of the mesh's material, which its controls set too (blend-scene.js materialsOf).
+    const copy = cloud.material?.clone(`${cloud.id}/material`);
+    if (copy) copy.metadata = { ...copy.metadata, bylonderCopyOf: cloud.material?.id };
+    if (cloud.material) cloud.material = Object.assign(copy ?? cloud.material, { pointsCloud: true });
   }
   for (const [r, reference] of (instances?.references ?? []).entries()) {
     const source = 'id' in reference ? /** @type {Mesh | null} */ (scene.getMeshById(nodeOf(reference.id) ?? '')) : null;

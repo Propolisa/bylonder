@@ -16,6 +16,11 @@ that grows the memory detaches them (`src/bmesh/bmesh-wasm.js` `floatsView`); wh
 | 4. IR and package | Copied into JSON (`scene.ir.json`, scene.js tables) and `scene.bin` arrays named by their content; a scoped export copies the selected objects only | The exporter | A tagged ID marks its entries; an entry whose hash is unchanged is not sent; the package's version is the hash of its tables | `ir-export.js` `exportIR`, `js-export.js` `exportPackage`, `scene-patch.js` `tablesPatch` |
 | 5. The game views' scenes (runs) | Package data read once per version and referenced by every run (`sharedPackage`, `sharedIR`); in the app, the export's own IR and arrays, frozen; static vertex streams uploaded once per engine (`sharedGeometry`); each run copies into its own Babylon objects and live buffers | Each run's table loader and controls; the cache for shared data, which no run writes | A patch names its base version: a mismatch or a failure loads the run again (Reset does the same); an edit brings arrays of new names, never a write into shared ones | `runtime/shared-resources.js`, `runtime/scene-tables.js` `sceneTables`, `runtime/blend-scene.js` `patch` |
 
+A value edit goes from hop 2 to hop 5 without hop 4 (`package-preview.js`): each ID the depsgraph updates gives the
+values of its controls, read by their RNA paths, and every run and copy sets those that differ through the binds its
+package carries. Hop 4 still runs behind, once the edits pause; a patch that disagrees with a value set this way loads
+the runs fresh.
+
 What flows, from Snow's package (Character Controller demo; scene.bin 9.5 MB gzipped, scene.ir.json 11.6 MB), with
 the Bar Scene and the Noodle Shop street for scale. Static: authored, unchanged while a run plays. Baked: computed at
 export from evaluated data. Live: changes per frame or per run.

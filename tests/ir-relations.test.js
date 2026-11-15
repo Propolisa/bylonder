@@ -66,7 +66,9 @@ async function gapsOf(id) {
   const relations = sync.blender.relations();
   if (!relations) return { gaps: [...gaps].sort(), open: null };
   const references = [...carried.references, ...depsgraphReferences(carried.ids, carried.references, relations)];
-  const held = ({ from, to }) => !(from === 'time' || carried.ids[from]) || !carried.ids[to] || references.some((r) => r.from === to && r.to === from || r.from === from && r.to === to);
+  // An embedded node tree is named by its name alone, which another's shares: its relations are its owner's.
+  const own = (key) => carried.ids[key] && !carried.ids[key].data?.is_embedded_data;
+  const held = ({ from, to }) => !(from === 'time' || own(from)) || !own(to) || references.some((r) => r.from === to && r.to === from || r.from === from && r.to === to);
   const closed = relations.every(held);
   return { gaps: [...gaps].sort(), open: [...gaps].filter((kind) => !closed || !BETWEEN_IDS.includes(kind)).sort() };
 }

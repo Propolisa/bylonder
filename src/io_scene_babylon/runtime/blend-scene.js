@@ -214,20 +214,28 @@ export class BlendScene {
   /** @type {() => void} */
   #disposeContent;
 
+  /** What this scene is a copy of (load({ instance })), else undefined. @type {BlendScene<any> | undefined} */
+  #source;
+
+  /** The copies made of what this scene loaded (load({ instance })), each with a controller of its own. @type {Set<BlendScene<any>>} */
+  copies = new Set();
 
   /**
    * @param {import('@babylonjs/core').Scene} scene
    * @param {any} ir the scene's IR: a file's read with readSceneIR, or the exporter's own
    * @param {{ root?: string, world?: { set(color: number[]): void }, compositor?: import('@babylonjs/core').NodeRenderGraph,
    *   buffers?: import('./buffers.js').Buffers, entries?: import('./asset.js').Entries, dispose?: () => void,
-   *   tables?: ReturnType<typeof import('./scene-tables.js').sceneTables>, reload?: (old: BlendScene<any>) => Promise<BlendScene<any>> }} [options]
+   *   tables?: ReturnType<typeof import('./scene-tables.js').sceneTables>, reload?: (old: BlendScene<any>) => Promise<BlendScene<any>>,
+   *   source?: BlendScene<any> }} [options]
    * the package's URL, which relative image URLs resolve against, the world of one color its background controls set
    * (world.js), the compositor its pass controls set (bylonder-blocks.js), scene.bin's buffers, which its entities
    * read; loaded into a scene of the page's own, what was added there and what removes it (asset.js); the scene's tables,
-   * which `patch` changes, and what loads the package again in its place
+   * which `patch` changes, what loads the package again in its place, and the scene this one is a copy of
    */
-  constructor(scene, ir, { root = '', world, compositor, buffers = {}, entries, dispose = () => scene.dispose(), tables, reload } = {}) {
+  constructor(scene, ir, { root = '', world, compositor, buffers = {}, entries, dispose = () => scene.dispose(), tables, reload, source } = {}) {
     this.#tables = tables;
+    this.#source = source;
+    source?.copies.add(this);
     this.#reload = reload ?? (() => Promise.reject(new Error('This scene cannot load its package again')));
     /** Babylon's scene: loaded into a scene of the page's own, a view of it that holds what was loaded alone. */
     this.scene = scene;
@@ -667,6 +675,7 @@ export class BlendScene {
 
   /** Disposes of the scene. */
   dispose() {
+    this.#source?.copies.delete(this);
     this.#scheduler?.dispose();
     this.#clips.dispose();
     this.playhead.dispose();
@@ -752,15 +761,16 @@ export class BlendScene {
       return;
     }
     if (bind.material !== undefined && bind.property) {
-      const material = this.scene.getMaterialById(bind.material);
-      if (material) assign(material, bind.property, /** @type {number} */ (value) * (bind.factor ?? 1));
+      for (const material of materialsOf(this.scene, bind.material)) assign(material, bind.property, /** @type {number} */ (value) * (bind.factor ?? 1));
       return;
     }
     if (bind.material !== undefined) {
-      const material = /** @type {any} */ (this.scene.getMaterialById(bind.material)), block = material?.getBlockByName(bind.block);
-      if (block && bind.image) block.texture = this.#image(block.texture, /** @type {string} */ (value));
-      else if (block && bind.component === undefined) block.value = value;
-      else if (block) block.value['xyzw'[bind.component ?? 0]] = value;
+      for (const material of materialsOf(this.scene, bind.material)) {
+        const block = material.getBlockByName(bind.block);
+        if (block && bind.image) block.texture = this.#image(block.texture, /** @type {string} */ (value));
+        else if (block && bind.component === undefined) block.value = value;
+        else if (block) block.value['xyzw'[bind.component ?? 0]] = value;
+      }
       return;
     }
     const node = /** @type {any} */ (bind.node === undefined ? this.scene : nodeById(this.scene, bind.node));
@@ -782,6 +792,14 @@ export class BlendScene {
     }
   }
 }
+
+/**
+ * The material of an id and the copies made of it (`metadata.bylonderCopyOf`, a point cloud's), which its controls set too.
+ * @param {import('@babylonjs/core').Scene} scene
+ * @param {string} id
+ * @returns {any[]}
+ */
+const materialsOf = (scene, id) => scene.materials.filter((m) => m.id === id || m.metadata?.bylonderCopyOf === id);
 
 /**
  * A scene exported from Bylonder, loaded: `url` is its scene.js.

@@ -13,7 +13,10 @@ export function mountPackageView(section, { world }) {
   const state = reactive({ url: '', status: '', busy: false }), options = exportOptions({ controlPanel: false, target: 'WEBGL2' });
   const channel = `bylonder-package-view:${crypto.randomUUID()}`, patches = new BroadcastChannel(channel);
   const preview = createPackagePreview({
-    world, options, post: (patch) => patches.postMessage({ patch }), report: (status) => { state.status = status; },
+    world, options, report: (status) => { state.status = status; },
+    set: (changes) => patches.postMessage({ set: changes }),
+    // A patch in doubt: the page is exported again and loaded fresh.
+    post: (patch, fresh) => (fresh ? reload() : patches.postMessage({ patch })),
     publish: async ({ files }) => {
       const page = { ...(await packagedFiles(files, options)), 'index.html': new TextEncoder().encode(previewPage(channel)) };
       if (state.url) await removeRun(state.url.slice(0, state.url.lastIndexOf('/') + 1));

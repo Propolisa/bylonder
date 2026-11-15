@@ -47,6 +47,10 @@ export function createGameRun({ appModule, exportAgain, engine: makeEngine }) {
       }
       return blend;
     },
+    /** A value edit's controls (`[path, value]` pairs) set where they differ, on the run and every copy made of it. */
+    set(changes) {
+      if (blend) setControls(blend, changes);
+    },
     /** An edit's patch to the live tables `state`, its entries by reference: true once applied, false once loaded fresh. */
     async patch(patch, state) {
       const run = blend;
@@ -64,6 +68,15 @@ export function createGameRun({ appModule, exportAgain, engine: makeEngine }) {
       engine?.dispose();
     },
   };
+}
+
+/** The copies made of a run (load({ instance })), and theirs. @returns {any[]} */
+const copiesOf = (blend) => [...blend.copies].flatMap((copy) => [copy, ...copiesOf(copy)]);
+
+const has = (run, path) => { try { run.get(path); return true; } catch { return false; } };
+/** Controls (`[path, value]` pairs) set where they differ, on a run and every copy made of it. */
+export function setControls(blend, changes) {
+  for (const run of [blend, ...copiesOf(blend)]) for (const [path, value] of changes) if (has(run, path) && run.get(path) !== value) run.set(path, value);
 }
 
 /** What `make` gives, Babylon's last created engine and scene left as they were. @template T @param {() => Promise<T>} make */

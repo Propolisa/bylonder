@@ -45,10 +45,13 @@ export function mountGameView(section, { world, header }) {
       shown();
       return base;
     },
-    post: (patch) => {
+    // A value edit is set on the run at once, ahead of the patches still on their way, which carry the same values.
+    set: (changes) => { if (state.running) game.set(changes); },
+    post: (patch, fresh) => {
       patching = patching.then(async () => {
         if (!state.running) return;
-        if (!(await game.patch(patch, preview.state))) report('Loaded again: a patch did not apply');
+        if (fresh) await game.reset(preview.state);
+        else if (!(await game.patch(patch, preview.state))) report('Loaded again: a patch did not apply');
         shown();
       }).catch((error) => report(`Not loaded: ${error.message}`));
     },

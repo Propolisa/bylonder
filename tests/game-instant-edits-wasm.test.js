@@ -1,0 +1,113 @@
+// tags: live
+// Value edits reach the Game area on the next frame (src/editors/space_package/package-preview.js): the IDs Blender's
+// depsgraph updates give their controls' values, which every run and every copy of it sets through the binds the
+// package carries, with no export in between. The scoped export behind them reconciles: its patch leaves the run as a
+// fresh load of a full export shows it, and one that disagrees with a value set fast loads the run fresh.
+// Law, on Rigged Character: a transform, a material colour, a light and a shape key.
+import assert from 'node:assert/strict';
+import * as core from '@babylonjs/core';
+import { blendData } from '../src/python/bpy_rna.js';
+import { createPackagePreview } from '../src/editors/space_package/package-preview.js';
+import { createGameRun, setControls } from '../src/editors/space_game/game-run.js';
+import { exportPackage } from '../src/io_scene_babylon/js-export.js';
+import { packageState } from '../src/io_scene_babylon/scene-patch.js';
+import '../src/draw/draw-view.js';
+import { writePackage } from './export-package.js';
+import { openExample } from './open-example.js';
+
+const appModule = async (source) => (source === '@babylonjs/core' ? core : import(new URL(`../src/${source}`, import.meta.url).href));
+const { world, sync } = openExample('rigged-character');
+world.mainSync = sync;
+// Breathe's value is its driver's in the example: muted, an edit holds, as in Blender.
+[...blendData().shape_keys.get('Key').animation_data.drivers].find((fc) => fc.data_path === 'key_blocks["Breathe"].value').mute = true;
+sync.view();
+const game = createGameRun({ appModule, exportAgain: () => preview.reload(), engine: () => new core.NullEngine() });
+let written, asset, copy, exports = 0, posted = Promise.resolve();
+// Once the patches asked for are sent and applied.
+const settled = async () => { await preview.settled(); await posted; };
+const statuses = [], fresh = [];
+// The runs: the Game area's, and the scene added to a scene of a page's own with a copy made of it.
+const preview = createPackagePreview({ world, idle: (run) => run(), report: (status) => statuses.push(status),
+  set: (changes) => { game.set(changes); setControls(asset, changes); },
+  post: (patch, reload) => {
+    fresh.push(reload);
+    posted = reload ? game.reset(preview.state) : game.patch(patch, preview.state).then((applied) => assert.equal(applied, true, 'the run takes the patch'));
+  },
+  publish: async (made, tables) => {
+    exports++;
+    written = writePackage(made.files);
+    await game.play(made, tables, new URL('./', written.url).href);
+    return written.url;
+  } });
+await preview.reload();
+const module = await import(written.url);
+asset = await module.load({ scene: new core.Scene(new core.NullEngine()) });
+copy = await module.load({ instance: asset });
+assert.ok(asset.copies.has(copy), 'a copy is linked to what it copies');
+
+// What a frame draws of each edited item, by run.
+const find = (list, name) => list.find((item) => item.name === name);
+const shown = (run) => {
+  // A copy holds no lights of its own: its scene's are the run's.
+  const { scene } = run, morph = find(scene.meshes, 'Body')?.morphTargetManager?.getTargetByName('Breathe'), light = find(scene.lights, 'Key');
+  return {
+    transform: find(scene.transformNodes, 'Key rig')?.position.asArray(),
+    color: find(scene.materials, 'Skin')?.albedoColor.asArray(),
+    light: light && [light.intensity, ...light.diffuse.asArray()],
+    shape: morph?.influence,
+  };
+};
+const runs = () => [game.blend, asset, copy];
+const objects = blendData().objects, skin = blendData().materials.get('Skin').node_tree.nodes.get('Principled BSDF').inputs[0];
+const EDITS = {
+  transform: () => { objects.get('Key').location[0] += 0.5; },
+  color: () => { skin.default_value[0] = 0.9; },
+  light: () => { objects.get('Key').data.energy *= 2; objects.get('Key').data.color[1] = 0.5; },
+  shape: () => { blendData().shape_keys.get('Key').key_blocks.get('Breathe').value = 0.75; },
+};
+for (const [kind, edit] of Object.entries(EDITS)) {
+  const before = runs().map((run) => shown(run)[kind]), exported = exports, patched = fresh.length;
+  const start = performance.now();
+  edit();
+  sync.view();
+  const ms = performance.now() - start;
+  runs().forEach((run, i) => {
+    if (before[i] === undefined) return;
+    assert.notDeepEqual(shown(run)[kind], before[i], `the ${kind} edit shows on the next frame of run ${i}`);
+  });
+  assert.ok(exports === exported && fresh.length === patched, `the ${kind} edit needs no export`);
+  console.log(`${kind}: edit to frame ${ms.toFixed(1)} ms`);
+  preview.changed();
+  await settled();
+  assert.deepEqual(fresh.slice(patched), [false], `the export behind the ${kind} edit agrees: patched, not loaded fresh`);
+}
+assert.notEqual(shown(game.blend).shape, undefined, 'the shape key is checked in the game');
+
+// Reconciled: the live tables are a full export's, and the patched run shows what a fresh run of them does.
+const full = packageState(await exportPackage(world, {}));
+assert.equal(preview.state.version, full.version, 'the reconciled tables equal a full export');
+const patchedRun = shown(game.blend), freshRun = shown(await game.reset(preview.state));
+assert.deepEqual(patchedRun, freshRun, 'the patched run shows what a fresh run does');
+
+// A value set fast that the export behind it does not give (Main changed with no evaluation between): loaded fresh.
+objects.get('Key').location[1] += 0.25;
+sync.view();
+objects.get('Key').location[1] += 0.25;
+const loaded = game.blend;
+preview.changed();
+await settled();
+assert.equal(fresh.at(-1), true, 'the export disagreeing with a fast set loads the run fresh');
+assert.ok(loaded.scene.isDisposed && game.blend !== loaded, 'no partial state: a fresh run');
+assert.match(statuses.at(-1), /^Loaded fresh: objects\["Key"\]\.location\[1\]/, 'and the header says so');
+
+// The game never writes into the editor's data.
+const writes = sync.writes;
+game.blend.set('objects["Key"].location[0]', 9);
+sync.view();
+assert.equal(sync.writes, writes, 'a set in the game leaves Main alone');
+assert.notEqual(objects.get('Key').location[0], 9);
+
+game.dispose();
+written.remove();
+console.log('Instant edits: transform, material colour, light and shape key on the next frame in every run and copy; the export reconciles');
+process.exit(0);

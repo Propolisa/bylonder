@@ -43,13 +43,14 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
      * @param {any} ir the scene's IR: a file's read with readSceneIR, or the exporter's own
      * @param {{ root?: string, world?: { set(color: number[]): void }, compositor?: import('@babylonjs/core').NodeRenderGraph,
      *   buffers?: import('./buffers.js').Buffers, entries?: import('./asset.js').Entries, dispose?: () => void,
-     *   tables?: ReturnType<typeof import('./scene-tables.js').sceneTables>, reload?: (old: BlendScene<any>) => Promise<BlendScene<any>> }} [options]
+     *   tables?: ReturnType<typeof import('./scene-tables.js').sceneTables>, reload?: (old: BlendScene<any>) => Promise<BlendScene<any>>,
+     *   source?: BlendScene<any> }} [options]
      * the package's URL, which relative image URLs resolve against, the world of one color its background controls set
      * (world.js), the compositor its pass controls set (bylonder-blocks.js), scene.bin's buffers, which its entities
      * read; loaded into a scene of the page's own, what was added there and what removes it (asset.js); the scene's tables,
-     * which `patch` changes, and what loads the package again in its place
+     * which `patch` changes, what loads the package again in its place, and the scene this one is a copy of
      */
-    constructor(scene: import("@babylonjs/core").Scene, ir: any, { root, world, compositor, buffers, entries, dispose, tables, reload }?: {
+    constructor(scene: import("@babylonjs/core").Scene, ir: any, { root, world, compositor, buffers, entries, dispose, tables, reload, source }?: {
         root?: string;
         world?: {
             set(color: number[]): void;
@@ -60,9 +61,12 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
         dispose?: () => void;
         tables?: ReturnType<typeof import("./scene-tables.js").sceneTables>;
         reload?: (old: BlendScene<any>) => Promise<BlendScene<any>>;
+        source?: BlendScene<any>;
     });
     /** Told of each control's new value. @type {Observable<Change>} */
     onChanged: Observable<Change>;
+    /** The copies made of what this scene loaded (load({ instance })), each with a controller of its own. @type {Set<BlendScene<any>>} */
+    copies: Set<BlendScene<any>>;
     /** Babylon's scene: loaded into a scene of the page's own, a view of it that holds what was loaded alone. */
     scene: import("@babylonjs/core").Scene;
     /** Loaded into a scene of the page's own: what was added there, as ImportMeshAsync gives a .glb's (meshes[0] the root). */

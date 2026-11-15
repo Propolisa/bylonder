@@ -624,7 +624,7 @@ export * from './bylonder/character/effects/index.js';
 export async function load(target) {
   if (target.scene || target.instance) {
     const { ir, buffers } = target.instance ?? await readData(), options = { root: target.root,
-      controller: (view, entries, dispose) => new BlendScene(view, ir, { root: ROOT, buffers, entries, dispose, reload: (old) => { old.dispose(); return load(target); } }) };
+      controller: (view, entries, dispose) => new BlendScene(view, ir, { root: ROOT, buffers, entries, dispose, source: target.instance, reload: (old) => { old.dispose(); return load(target); } }) };
     if (target.instance) return cloneAsset(target.instance.entries, options);
     const added = addAsset(target.scene, (into, lookup) => addObjects(into, { ir, buffers }, lookup), options);
     await entitiesRun(target.scene, added);

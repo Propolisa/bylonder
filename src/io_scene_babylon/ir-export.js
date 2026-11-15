@@ -264,7 +264,9 @@ function readsTime(graphs, graphKey, seen = new Set()) {
 // Object or Collection Info given its ID by a link, the view layer's flags.
 export function depsgraphReferences(ids, references, relations) {
   const seen = new Set(references.flatMap(({ from, to }) => [`${from}\0${to}`, `${to}\0${from}`]));
-  return (relations ?? []).filter(({ from, to }) => (from === 'time' || ids[from]) && ids[to] && !seen.has(`${to}\0${from}`) && seen.add(`${to}\0${from}`).add(`${from}\0${to}`))
+  // An embedded node tree is its owner's (the pointer walk names it there); its name alone would name another's too.
+  const own = (key) => ids[key] && !ids[key].data?.is_embedded_data;
+  return (relations ?? []).filter(({ from, to }) => (from === 'time' || own(from)) && own(to) && !seen.has(`${to}\0${from}`) && seen.add(`${to}\0${from}`).add(`${from}\0${to}`))
     .map(({ from, to, name }) => ({ from: to, to: from, relation: name }));
 }
 
