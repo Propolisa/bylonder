@@ -425,7 +425,8 @@ try {
       const edited = (await disk("read", "index.js")) + "// edited on disk\n";
       await disk("write", "index.js", edited);
       await page.evaluate(() => window.dispatchEvent(new Event("focus")));
-      await page.locator("#file-tree", { hasText: "notes.txt" }).waitFor({ state: "attached" });
+      // The new folder shows in the Explorer (its file inside, once the folder is opened).
+      await page.locator("#file-tree [role=treeitem]", { hasText: /^content$/ }).waitFor({ state: "attached" });
       // A scene edit (the light, under the view's centre, moved up), then File > Save (wm.save_mainfile).
       // The scene's frame, once it runs: the edit made on disk runs the project again, replacing the frame meanwhile.
       const ready = async () => {

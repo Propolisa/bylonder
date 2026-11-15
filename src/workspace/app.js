@@ -27,6 +27,9 @@ import { iconButton } from "../editors/interface/icon.js";
 import { mountTouch, showScale } from "../editors/interface/touch.js";
 import { installBack } from "../windowmanager/wm-back.js";
 import { zipSync, unzipSync, strToU8, strFromU8 } from "fflate";
+import { createApp, h, reactive, ref } from "vue";
+import FileTree from "./explorer/FileTree.vue";
+import "@/editors/interface/components/tailwind.css";
 performance.mark("bl:workspace-imported");
 await preloadIcons();
 // The window shows once the scene's interface has drawn, or failed to (and in any case after a while: index.html).
@@ -217,8 +220,8 @@ function markDirty(source = true) {
   $("save-status").classList.remove("error");
   $("save-status").textContent = "Unsaved changes";
   clearTimeout(saveTimer);
-  if (folder) renderTabs();
-  else saveTimer = setTimeout(() => save().catch(failure), 750);
+  showUnsaved();
+  if (!folder) saveTimer = setTimeout(() => save().catch(failure), 750);
   if (source) scheduleTypes();
   if (source && $("auto-run").checked) {
     clearTimeout(runTimer);
@@ -292,7 +295,7 @@ function renderTabs() {
     button.className = path === active ? "active" : "";
     button.textContent = path.split("/").pop();
     button.title = path;
-    if (folder && folder.saved(path) !== project.files[path].content) button.classList.add("dirty");
+    if ((folder ? folder.saved(path) : savedText.get(path)) !== project.files[path].content) button.classList.add("dirty");
     button.onclick = () => openFile(path);
     if (path !== "index.js") {
       const close = document.createElement("span");
@@ -309,60 +312,36 @@ function renderTabs() {
     $("tabs").append(button);
   }
 }
+// The Explorer (explorer/FileTree.vue), drawn from the project's files.
+const explorer = reactive({ title: "", paths: [], folders: [], active: "", dirty: [] });
+let explorerTree;
 function renderTree() {
-  const root = $("file-tree");
-  root.replaceChildren();
-  const all = new Set([
-    ...Object.keys(project.files),
-    ...(project.folders || []).map((f) => f + "/"),
-  ]);
-  const folders = new Set(project.folders || []);
-  for (const path of all) {
-    const parts = path.split("/");
-    parts.pop();
-    for (let i = 1; i <= parts.length; i++)
-      folders.add(parts.slice(0, i).join("/"));
-  }
-  const nodes = [...folders]
-    .map((path) => ({ path, folder: true }))
-    .concat(Object.keys(project.files).map((path) => ({ path, folder: false })))
-    .sort((a, b) => a.path.localeCompare(b.path));
-  for (const { path, folder } of nodes) {
-    const row = document.createElement("div");
-    row.className =
-      "file-row" +
-      (path === active ? " active" : "") +
-      (path === "index.js" ? " locked" : "");
-    row.style.paddingLeft = 4 + (path.split("/").length - 1) * 10 + "px";
-    const button = document.createElement("button");
-    button.textContent =
-      (folder ? "▾ " : path === "index.js" ? "◆ " : "") + path.split("/").pop();
-    button.title =
-      path + (path === "index.js" ? " (required entry point)" : "");
-    button.onclick = () => {
-      if (!folder) { openFile(path); dock.show("code"); }
-    };
-    row.append(button);
-    for (const [text, title, fn] of [
-      ["✎", "Rename", () => rename(path)],
-      ["×", "Delete", () => remove(path, folder)],
-    ]) {
-      const b = document.createElement("button");
-      b.textContent = text;
-      b.title = title;
-      b.className = "file-action";
-      b.onclick = action(fn);
-      row.append(b);
-    }
-    root.append(row);
-  }
+  Object.assign(explorer, { title: project.name, paths: Object.keys(project.files), folders: project.folders || [], active, dirty: unsavedPaths() });
+  if (explorerTree) return;
+  const view = ref();
+  createApp({
+    render: () => h(FileTree, {
+      ref: view, ...explorer,
+      onOpen: (path) => { openFile(path); dock.show("code"); },
+      onCreate: action((path, isFolder) => (isFolder ? createFolder(path) : createFile(path))),
+      onRename: action(moveTo),
+      onMove: action(moveTo),
+      onRemove: action(remove),
+    }),
+  }).mount($("file-tree"));
+  explorerTree = view;
 }
-async function rename(path) {
-  const to = await askText("Rename", "Path", path);
-  if (!to || to === path) return;
+// The files whose text differs from what was last saved: to OPFS, or to the project's folder.
+let savedText = new Map();
+const unsavedPaths = () => Object.keys(project.files).filter((path) => project.files[path].kind === "text" && (folder ? folder.saved(path) : savedText.get(path)) !== project.files[path].content);
+const rememberSaved = (files) => (savedText = new Map(Object.entries(files).map(([path, file]) => [path, file.content])));
+// A rename or a move of a file or folder.
+async function moveTo(path, to) {
   normalizePath(to);
+  if (project.files[to] || project.folders.includes(to)) throw Error(to + " already exists.");
   project.files = renamePath(project.files, path, to);
   await folder?.move(path, to, project.files);
+  if (folder && !Object.keys(project.files).some((p) => p.startsWith(to + "/"))) await folder.createFolder(to);
   project.folders = (project.folders || []).map((p) =>
     p === path || p.startsWith(path + "/") ? to + p.slice(path.length) : p,
   );
@@ -374,7 +353,8 @@ async function rename(path) {
   syncModels();
   openFile(project.files[active] ? active : "index.js");
   markDirty();
-  log("Renamed " + path + ". Relative import statements are not rewritten.");
+  renderTree();
+  log("Moved " + path + " to " + to + ". Relative import statements are not rewritten.");
 }
 async function remove(path, isFolder) {
   if (path === "index.js") throw Error("index.js cannot be deleted.");
@@ -403,6 +383,8 @@ function save(label = "Autosave") {
     try {
       const head = await repo.commit(captured, project.head, label);
       project.head = head;
+      rememberSaved(captured.files);
+      showUnsaved();
       if (generation === editGeneration) dirty = false;
       $("save-status").classList.remove("error");
       $("save-status").textContent = dirty
@@ -430,14 +412,18 @@ async function saveFolder() {
   await folder.commit(project);
   if (generation === editGeneration) dirty = false;
   $("save-status").textContent = dirty ? "Unsaved changes" : "Saved to folder";
-  renderTabs();
+  showUnsaved();
 }
 // Ctrl S in the code editor: its file only.
 async function saveActiveFile() {
   await folder.writeFile(active, project.files[active]);
-  dirty = Object.entries(project.files).some(([path, file]) => folder.saved(path) !== file.content);
+  dirty = unsavedPaths().length > 0;
   $("save-status").textContent = dirty ? "Unsaved changes" : "Saved to folder";
+  showUnsaved();
+}
+function showUnsaved() {
   renderTabs();
+  explorer.dirty = unsavedPaths();
 }
 // Edits made to the folder outside the app, when the page regains focus or the browser reports them: files without
 // unsaved edits here take the folder's, and a changed .blend reopens the project.
@@ -597,6 +583,7 @@ async function load(id, autoRun = true) {
   stop();
   if (folder?.id !== id) folder = null;
   project = await (folder ?? repo).load(id);
+  rememberSaved(project.files);
   watchFolder();
   showStorage();
   renderScenes();
@@ -985,27 +972,24 @@ $("rename-project").onclick = action(async () => {
   await save("Rename project");
   await updateProjects();
 });
-$("new-file").onclick = action(async () => {
-  const path = await askText("New File", "Path", "modules/");
-  if (!path) return;
+async function createFile(path) {
   normalizePath(path);
-  if (project.files[path]) throw Error("File already exists");
+  if (project.files[path]) throw Error(path + " already exists.");
   project.files[path] = textFile("");
   await folder?.writeFile(path, project.files[path]);
   syncModels();
   openFile(path);
+  dock.show("code");
   markDirty();
-});
-$("new-folder").onclick = action(async () => {
-  const path = await askText("New Folder", "Path", "");
-  if (!path) return;
+}
+async function createFolder(path) {
   normalizePath(path);
-  if (project.files[path]) throw Error("A file exists at that path");
+  if (project.files[path]) throw Error("A file exists at " + path);
   await folder?.createFolder(path);
   if (!project.folders.includes(path)) project.folders.push(path);
   renderTree();
   markDirty();
-});
+}
 $("run").onclick = action(run);
 $("stop").onclick = stop;
 $("checkpoint").onclick = action(async () => {
