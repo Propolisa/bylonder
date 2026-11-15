@@ -39,12 +39,7 @@ export async function cyclesSource(world) {
     label: 'Cycles',
     async renderFrame(frame, progress) {
       pointerStruct(structFind('Scene'), scene(), scene()).render.engine = 'CYCLES';
-      x.render_job_start(true);
-      try {
-        job = blender.invoke('render.render', {}, { type: 'F12' });
-      } finally {
-        x.render_job_start(false);
-      }
+      job = blender.invoke('render.render', {}, { type: 'F12' });
       if (!(job.status & (OPERATOR_RUNNING_MODAL | OPERATOR_FINISHED))) throw Error(job.report || 'Cycles did not render');
       while (x.render_job_running(blender.C, scene())) {
         progress?.(0, 1, `Rendering ${Math.round(x.render_job_progress(blender.C, scene()) * 100)}%`);

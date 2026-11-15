@@ -7,7 +7,9 @@
 #include "RE_pipeline.h"
 #include "WM_api.hh"
 
+#include <algorithm>
 #include <cstdint>
+#include <unordered_set>
 
 using namespace blender;
 
@@ -23,12 +25,29 @@ extern "C" ScrArea *WRAP(__wrap_, RENDER_VIEW_OPEN)(bContext * /*C*/, int /*mx*/
   return nullptr;
 }
 
-extern bool platform_threaded_jobs;
-/* F12's render job (render.render's invoke, which the page runs between these) on a thread of its own: platform.cc
- * runs other window-manager jobs on the page's thread. */
-EXPORT(render_job_start) void render_job_start(bool starting)
+#define JOBS_GET _ZN7blender11WM_jobs_getEPNS_15wmWindowManagerEPNS_8wmWindowEPKvPKcNS_11eWM_JobFlagENS_11eWM_JobTypeE
+/* port-override: window-manager jobs of these types run on threads of their own as in Blender, so the page goes on
+ * while they work (platform.cc); the others run on the page's thread, where their subsystems wait for them (asset
+ * lists, the File Browser). WM_jobs_get, linked with --wrap, notes which jobs they are. */
+static constexpr eWM_JobType OWN_THREAD_JOBS[] = {WM_JOB_TYPE_RENDER, WM_JOB_TYPE_RENDER_PREVIEW};
+static std::unordered_set<const void *> own_thread_jobs;
+extern "C" wmJob *WRAP(__real_, JOBS_GET)(wmWindowManager *wm, wmWindow *win, const void *owner, const char *name,
+                                          eWM_JobFlag flag, eWM_JobType job_type);
+extern "C" wmJob *WRAP(__wrap_, JOBS_GET)(wmWindowManager *wm, wmWindow *win, const void *owner, const char *name,
+                                          eWM_JobFlag flag, eWM_JobType job_type)
 {
-  platform_threaded_jobs = starting;
+  wmJob *job = WRAP(__real_, JOBS_GET)(wm, win, owner, name, flag, job_type);
+  if (std::find(std::begin(OWN_THREAD_JOBS), std::end(OWN_THREAD_JOBS), job_type) != std::end(OWN_THREAD_JOBS)) {
+    own_thread_jobs.insert(job);
+  }
+  else {
+    own_thread_jobs.erase(job);
+  }
+  return job;
+}
+extern "C" bool job_on_own_thread(const void *callerdata)
+{
+  return own_thread_jobs.contains(callerdata);
 }
 
 /* Whether the scene's render job runs (render.render's invoke started it), and how far it is (0 to 1). */

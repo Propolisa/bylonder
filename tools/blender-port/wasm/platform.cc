@@ -1,5 +1,5 @@
 /* What Blender's code needs from the platform in a WebAssembly build: allocation without the exception runtime, memory
- * that grows in large steps, and window manager jobs on the page's thread (but a render job). */
+ * that grows in large steps, and window manager jobs on the page's thread but those that run on threads of their own. */
 #include "BLI_mmap.h"
 #include <cerrno>
 #include <cstddef>
@@ -135,13 +135,13 @@ void BLI_mmap_free(BLI_mmap_file *file)
 #define THREADPOOL_INSERT _ZN7blender21BLI_threadpool_insertEPNS_9ListBaseTINS_10ThreadSlotEEEPv
 #define WRAP_(prefix, name) prefix##name
 #define WRAP(prefix, name) WRAP_(prefix, name)
-/* A render job (F12 with an engine that renders in the module, render-api.cc render_job_start) runs on a thread of its
- * own, as in Blender, so the page goes on while it renders. */
-bool platform_threaded_jobs = false;
+/* Whether a pool's work is a window-manager job that runs on a thread of its own (render-api.cc); absent from the
+ * build's tools, which run no jobs. */
+extern "C" bool job_on_own_thread(const void *callerdata) __attribute__((weak));
 extern "C" void WRAP(__real_, THREADPOOL_INSERT)(blender::ListBaseT<blender::ThreadSlot> *threadbase, void *callerdata);
 extern "C" void WRAP(__wrap_, THREADPOOL_INSERT)(blender::ListBaseT<blender::ThreadSlot> *threadbase, void *callerdata)
 {
-  if (platform_threaded_jobs) {
+  if (job_on_own_thread && job_on_own_thread(callerdata)) {
     WRAP(__real_, THREADPOOL_INSERT)(threadbase, callerdata);
     return;
   }

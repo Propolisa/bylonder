@@ -220,9 +220,10 @@ Blender's own code paths. The module's memory is shared. Each thread is a worker
 `thread-spawn` hands it one. The seams (`wasm/threads.cc`): the processor count is the page's
 (`navigator.hardwareConcurrency`), and the page's thread spins where a wait would block it, since a browser traps a
 blocking wait there; the page stalls for as long as Blender waits on its other threads (`threads_longest_wait`). Window
-manager jobs run on the page's thread (`platform.cc`), but F12's render job, which runs on a thread of its own as in
-Blender while the page polls it; the pool has a few workers beyond the processor count for such threads, as oneTBB
-takes one per processor. The snapshot (`wasm_snapshot.py`) keeps wasm-ld's way of
+manager jobs of the types `render-api.cc` lists (render and render preview, bakes next) run on threads of their own as
+in Blender while the page polls them; the others still run on the page's thread (`platform.cc`), since their
+subsystems (asset lists, the File Browser, the pose library shelf, edit mode) wait for them; moving those is a step of
+its own. The pool has a few workers beyond the processor count for such threads, as oneTBB takes one per processor. The snapshot (`wasm_snapshot.py`) keeps wasm-ld's way of
 starting a shared memory: the first instance copies the data in and takes the first thread's thread-locals, so the
 page's instance is made before the pool's.
 
