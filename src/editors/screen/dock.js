@@ -215,6 +215,8 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
   const editorChoices=slot=>items.slice(0,baseCount).flatMap(item=>item.variants?item.variants.map(v=>({label:v.label,icon:v.icon,run:()=>{chooseEditor(slot,item.id);v.run();}})):[{label:item.title,icon:item.icon,run:()=>chooseEditor(slot,item.id)}]);
   // Blender's editor type menu in an area's header (tree-menu.js), by the editors' labels.
   const editorType=(detail,slot)=>{
+    // Bylonder's own editors, which carry its icon, as Blender's menu has none of them.
+    if(detail.own){detail.own.push(...editorChoices(slot).filter(c=>c.icon==='BYLONDER').map(c=>c.label));return;}
     const choice=editorChoices(slot).find(c=>c.label===detail.label);
     detail.available=!!choice;
     if(choice&&detail.choose)choice.run();

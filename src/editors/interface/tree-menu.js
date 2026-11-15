@@ -56,6 +56,13 @@ function editorType(owner, label, choose) {
   return detail.available;
 }
 
+// The page's own editors Blender has none of (the Package View, the Game), by label, which the screen adds to the menu.
+function ownEditors(owner) {
+  const detail = { own: [] };
+  owner.dispatchEvent(new CustomEvent('editor-type', { bubbles: true, detail }));
+  return detail.own;
+}
+
 // A menu tree's items as menu.js entries: operators, toggles and enum items, labels as headings, separators and
 // sub-menus, opened when shown. `editorTypeOwner`: the editor type button that opened it.
 export function treeMenu(tree, ui, editorTypeOwner) {
@@ -89,6 +96,7 @@ export function treeMenu(tree, ui, editorTypeOwner) {
     }
   };
   visit(tree);
+  if (editorTypeOwner) items.push('-', { heading: 'Bylonder' }, ...ownEditors(editorTypeOwner).map((label) => ({ label, icon: 'BYLONDER', run: () => editorType(editorTypeOwner, label, true) })));
   return items.filter((item, i, all) => item !== '-' || (i > 0 && all[i - 1] !== '-' && i < all.length - 1));
 }
 
