@@ -220,10 +220,13 @@ Blender's own code paths. The module's memory is shared. Each thread is a worker
 `thread-spawn` hands it one. The seams (`wasm/threads.cc`): the processor count is the page's
 (`navigator.hardwareConcurrency`), and the page's thread spins where a wait would block it, since a browser traps a
 blocking wait there; the page stalls for as long as Blender waits on its other threads (`threads_longest_wait`). Window
-manager jobs of the types `render-api.cc` lists (render and render preview, bakes next) run on threads of their own as
-in Blender while the page polls them; the others still run on the page's thread (`platform.cc`), since their
-subsystems (asset lists, the File Browser, the pose library shelf, edit mode) wait for them; moving those is a step of
-its own. The pool has a few workers beyond the processor count for such threads, as oneTBB takes one per processor. The snapshot (`wasm_snapshot.py`) keeps wasm-ld's way of
+manager jobs (renders, previews, asset lists, the File Browser's listing, bakes) run on threads of their own as in
+Blender (`platform.cc`): the page handles its window each animation frame while a job runs (`wm_pending`), which
+polls the job (`wm_jobs_timer`), ends it when it is done (`wm_jobs_handle_finished`) and redraws what its notifiers
+tag. Where the page or a test needs a job's result, it handles the window until no job runs (`wm_jobs_running`), as
+Blender's code tests `WM_jobs_test`. Where no thread can be had (one thread, below) a job runs on the page's thread to
+its end when it starts. The pool has a few workers beyond the processor count for such threads, as oneTBB takes one
+per processor. The snapshot (`wasm_snapshot.py`) keeps wasm-ld's way of
 starting a shared memory: the first instance copies the data in and takes the first thread's thread-locals, so the
 page's instance is made before the pool's.
 
@@ -251,8 +254,11 @@ Cycles is Blender's own, built from `intern/cycles` at the tracked tag as the si
 downloaded until something renders with Cycles (`src/render/cycles.js`). Its required libraries (OpenImageIO,
 OpenColorIO, OpenEXR, oneTBB, OpenVDB, OpenSubdiv, Python) are the module's own, which it imports; Blender's sources
 build without `WITH_CYCLES`. The configure gives Cycles its CPU device only, without Embree, OpenImageDenoise, OSL,
-NanoVDB or path guiding. On wasm32 Cycles' headers define none of its x86 or Arm SIMD paths, so the CPU kernel is its
-plain (scalar) one. `wasm/cycles-api.cc` starts it as Blender's `main()` does and puts its Python module `_cycles` in
+NanoVDB or path guiding. Its CPU kernel is the SSE4.2 one x86-64 builds, run on WebAssembly SIMD128 as Blender's Arm
+build runs it on Neon (sse2neon): Cycles' sources compile with `-msimd128` and `wasm/include/cycles_simd.h`, which sets
+the kernel flags Cycles' `util/optimization.h` leaves unset for wasm32 and gives the SSE intrinsics through SIMDe
+(manifest dependency `simde`). Cycles' AVX2 kernel is left out, as WebAssembly's vectors are 128 bits. Every browser
+that can run Cycles (it needs threads) has SIMD128, so there is no scalar build. `wasm/cycles-api.cc` starts it as Blender's `main()` does and puts its Python module `_cycles` in
 `sys.modules` before enabling its add-on.
 
 ### Adding a subsystem
@@ -410,8 +416,9 @@ Decided 2026-10-29 (docs/model.md, principle 5). Blender's window manager runs t
 - **3D View navigation** is Blender's navigation operators on the area's RegionView3D: the page sets the view from its
   camera before an event (`wm_view3d_set`) and the camera follows what the operators leave (`wm_view3d_get`); the
   navigation gizmo invokes them as a gizmo does (`wm_area_operator_invoke`).
-- **Threads.** WASI has none: a thread pool's work runs where it is inserted, to its end, and frees its slot; popping an
-  empty queue gives no work instead of waiting for a thread that cannot come (`platform.cc`).
+- **Threads.** A window-manager job runs on a thread of its own (Threads, above); a thread pool's other work (a
+  background task pool's) runs where it is inserted, to its end, and frees its slot; popping an empty queue gives no
+  work instead of waiting for a thread that cannot come (`platform.cc`).
 - **Checked.** `tests/wm-wasm.test.js`: G, mouse moves and a click move an object through Blender's transform modal
   handler, Escape cancels, an operator the page runs passes its event on, and Blender makes the click.
 

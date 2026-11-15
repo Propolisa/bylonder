@@ -1,6 +1,7 @@
 // Cycles as the side module cycles.wasm (src/render/cycles.js, src/port/side-modules.js): loaded into Blender's module
 // on first use, its add-on enabled, and Blender's render operator rendering Window Light (examples/rendering) with it at
-// a few samples into a Render Result read through the view transform (wasm/render-api.cc).
+// a few samples into a Render Result read through the view transform (wasm/render-api.cc), as desktop Blender 5.2's
+// Cycles renders it on the CPU (tools/blender-reference/cycles-window-light.py) with its kernel on WebAssembly SIMD.
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
@@ -21,7 +22,7 @@ const scene = pointerStruct(structFind('Scene'), main.scene, main.scene);
 scene.render.engine = 'CYCLES';
 assert.equal(scene.render.engine, 'CYCLES', "Cycles' add-on registered its render engine");
 Object.assign(scene.render, { resolution_x: 64, resolution_y: 48, resolution_percentage: 100 });
-scene.cycles.samples = 4;
+Object.assign(scene.cycles, { samples: 4, use_denoising: false });
 const { status, report } = main.run('render.render', {});
 assert.ok(status & OPERATOR_FINISHED, `render.render finished: status ${status}, ${report}`);
 
@@ -37,7 +38,11 @@ const brightness = Array.from({ length: width * height }, (_, i) => rgba[i * 4] 
 const mean = brightness.reduce((a, b) => a + b) / brightness.length;
 const spread = Math.sqrt(brightness.reduce((a, b) => a + (b - mean) ** 2, 0) / brightness.length);
 assert.ok(mean > 30 && spread > 20, `a lit, shaded image: mean ${mean.toFixed(0)}, spread ${spread.toFixed(0)}`);
+// Desktop Blender's pixels for the same samples and seed: each channel's mean difference within a few levels.
+const blender = await readFile(new URL('./fixtures/cycles/window-light-64x48.rgba', import.meta.url));
+const differences = [0, 1, 2].map((c) => rgba.reduce((sum, v, i) => (i % 4 === c ? sum + Math.abs(v - blender[i]) : sum), 0) / (width * height));
+assert.ok(differences.every((d) => d < 2), `the render matches desktop Blender's: mean differences ${differences.map((d) => d.toFixed(2)).join(', ')} of 255`);
 x.free(pixels);
 x.free(size);
-console.log('cycles ok');
+console.log(`Cycles renders Window Light as desktop Blender does: mean differences ${differences.map((d) => d.toFixed(2)).join(', ')} of 255 per channel`);
 process.exit(0);

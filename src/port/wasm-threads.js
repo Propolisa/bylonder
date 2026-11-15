@@ -37,7 +37,8 @@ export const threadSpawn = (control) => {
 
 // A pool of `count` threads for a compiled module on its shared memory, once every worker has instantiated it; rejected,
 // its workers stopped, when one fails to load or start or is not ready within `wait` ms. `worker`: Node's worker file.
-export async function startThreads(module, memory, count, { wait = 30000, worker: file = new URL('./wasm-thread.js', import.meta.url) } = {}) {
+// `files`: the threads' file calls (thread-files.js), which `serve` makes when a worker says one waits.
+export async function startThreads(module, memory, count, { wait = 30000, worker: file = new URL('./wasm-thread.js', import.meta.url), files, serve } = {}) {
   const control = new SharedArrayBuffer(4 * (1 + SLOT * count));
   const workers = [];
   const started = Promise.all(Array.from({ length: count }, (_, i) => new Promise((resolve, reject) => {
@@ -47,9 +48,9 @@ export async function startThreads(module, memory, count, { wait = 30000, worker
     const listen = (type, handler) => (isNode ? worker.on(type, handler) : worker.addEventListener(type, (event) => handler(type === 'message' ? event.data : event)));
     // A Node process ends without waiting for its threads.
     const ready = () => (isNode && worker.unref(), resolve());
-    listen('message', (data) => (!data.error ? ready() : data.starting ? reject(Error(`thread ${i}: ${data.error}`)) : console.error(`thread ${i}: ${data.error}`)));
+    listen('message', (data) => (data.files ? serve() : !data.error ? ready() : data.starting ? reject(Error(`thread ${i}: ${data.error}`)) : console.error(`thread ${i}: ${data.error}`)));
     listen('error', (error) => reject(Error(`thread ${i}: ${error.message || 'its worker did not load'}`)));
-    worker.postMessage({ module, memory, control, count, slot: 1 + i * SLOT });
+    worker.postMessage({ module, memory, control, count, slot: 1 + i * SLOT, files, index: i });
   })));
   let timer;
   const late = new Promise((_, reject) => { timer = setTimeout(() => reject(Error(`threads not ready within ${wait / 1000} s`)), wait); });

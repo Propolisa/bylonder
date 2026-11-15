@@ -97,13 +97,17 @@ static void side_modules_check()
   }
 }
 
+/* The file calls the module's threads wait on, made by the page's thread (src/port/thread-files.js). */
+extern "C" __attribute__((import_module("env"), import_name("serve_files"))) void serve_files();
+
 /* The longest a spawned thread sleeps before it looks for side modules. */
 constexpr int64_t SIDE_MODULES_SLICE_NS = 200000000;
 
 extern "C" int __real___wasilibc_futex_wait(volatile void *addr, int op, int val, int64_t max_wait_ns);
 /* port-override: a browser's page thread cannot block (memory.atomic.wait traps there), so it spins until the futex
- * word changes or the wait times out; threads the module spawned wait as wasi-libc does, in slices between which they
- * load the side modules the page loaded (a futex wait may return early: its callers check their condition again). */
+ * word changes or the wait times out, making meanwhile the file calls of the threads it may wait for; threads the
+ * module spawned wait as wasi-libc does, in slices between which they load the side modules the page loaded (a futex
+ * wait may return early: its callers check their condition again). */
 extern "C" int __wrap___wasilibc_futex_wait(volatile void *addr, int op, int val, int64_t max_wait_ns)
 {
   if (spawned) {
@@ -116,7 +120,11 @@ extern "C" int __wrap___wasilibc_futex_wait(volatile void *addr, int op, int val
   const int64_t start = now();
   int result = 0;
   for (unsigned i = 1; __atomic_load_n(static_cast<volatile int *>(addr), __ATOMIC_SEQ_CST) == val; i++) {
-    if (max_wait_ns >= 0 && !(i & 1023) && now() - start >= max_wait_ns) {
+    if (i & 1023) {
+      continue;
+    }
+    serve_files();
+    if (max_wait_ns >= 0 && now() - start >= max_wait_ns) {
       result = -ETIMEDOUT;
       break;
     }

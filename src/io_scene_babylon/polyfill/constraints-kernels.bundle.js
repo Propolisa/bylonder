@@ -33,7 +33,7 @@ var threadSpawn = (control) => {
     return -6;
   };
 };
-async function startThreads(module, memory, count, { wait = 3e4, worker: file = new URL("./wasm-thread.js", import.meta.url) } = {}) {
+async function startThreads(module, memory, count, { wait = 3e4, worker: file = new URL("./wasm-thread.js", import.meta.url), files: files2, serve } = {}) {
   const control = new SharedArrayBuffer(4 * (1 + SLOT * count));
   const workers = [];
   const started = Promise.all(Array.from({ length: count }, (_, i) => new Promise((resolve, reject) => {
@@ -41,9 +41,9 @@ async function startThreads(module, memory, count, { wait = 3e4, worker: file = 
     workers.push(worker);
     const listen = (type, handler) => isNode ? worker.on(type, handler) : worker.addEventListener(type, (event) => handler(type === "message" ? event.data : event));
     const ready = () => (isNode && worker.unref(), resolve());
-    listen("message", (data) => !data.error ? ready() : data.starting ? reject(Error(`thread ${i}: ${data.error}`)) : console.error(`thread ${i}: ${data.error}`));
+    listen("message", (data) => data.files ? serve() : !data.error ? ready() : data.starting ? reject(Error(`thread ${i}: ${data.error}`)) : console.error(`thread ${i}: ${data.error}`));
     listen("error", (error) => reject(Error(`thread ${i}: ${error.message || "its worker did not load"}`)));
-    worker.postMessage({ module, memory, control, count, slot: 1 + i * SLOT });
+    worker.postMessage({ module, memory, control, count, slot: 1 + i * SLOT, files: files2, index: i });
   })));
   let timer;
   const late = new Promise((_, reject) => {
@@ -58,6 +58,50 @@ async function startThreads(module, memory, count, { wait = 3e4, worker: file = 
     clearTimeout(timer);
   }
   return threadSpawn(control);
+}
+
+// src/port/thread-files.js
+var FILE_CALLS = [
+  "path_open",
+  "fd_close",
+  "fd_readdir",
+  "fd_write",
+  "fd_pwrite",
+  "fd_read",
+  "fd_pread",
+  "fd_seek",
+  "fd_tell",
+  "fd_fdstat_get",
+  "fd_fdstat_set_flags",
+  "fd_filestat_get",
+  "fd_filestat_set_size",
+  "fd_prestat_get",
+  "fd_prestat_dir_name",
+  "path_filestat_get",
+  "path_rename",
+  "path_unlink_file",
+  "path_create_directory",
+  "path_remove_directory",
+  "path_readlink"
+];
+var CALLED = 1;
+var ANSWERED = 2;
+var HEADER = 5;
+var ARGS = 10;
+var SLOT2 = HEADER + 2 * ARGS + 1;
+var filesBuffer = (threads) => new SharedArrayBuffer(4 * (1 + SLOT2 * threads));
+function serveFiles(buffer, wasi) {
+  const state = new Int32Array(buffer);
+  if (!Atomics.load(state, 0)) return;
+  for (let base = 1; base < state.length; base += SLOT2) {
+    if (Atomics.load(state, base) !== CALLED) continue;
+    const args = new BigInt64Array(buffer, 4 * (base + HEADER), ARGS), mask = state[base + 4];
+    const values = Array.from({ length: state[base + 3] }, (_, i) => mask & 1 << i ? args[i] : Number(args[i]));
+    state[base + 2] = wasi[FILE_CALLS[state[base + 1]]](...values);
+    Atomics.sub(state, 0, 1);
+    Atomics.store(state, base, ANSWERED);
+    Atomics.notify(state, base);
+  }
 }
 
 // src/port/wasm.js
@@ -404,12 +448,14 @@ async function instantiate(url, threads = hardwareThreads(), options) {
   const { module, memory: limits } = await compile(url);
   let memory = limits && new WebAssembly.Memory(limits), spawn = () => -6, threadsError;
   if (!limits?.shared) threads = 1;
-  const imports = { wasi_snapshot_preview1: wasiFor(() => memory), env: env(memory, () => threads), wasi: { "thread-spawn": (arg) => spawn(arg) } };
+  const workers = threads + 4, files2 = threads > 1 && filesBuffer(workers), wasi = wasiFor(() => memory);
+  const serve = () => files2 && serveFiles(files2, wasi);
+  const imports = { wasi_snapshot_preview1: wasi, env: env(memory, () => threads, { serve_files: serve }), wasi: { "thread-spawn": (arg) => spawn(arg) } };
   const instance = await WebAssembly.instantiate(module, imports);
   memory = instance.exports.memory;
   if (threads > 1) {
     try {
-      spawn = await startThreads(module, memory, threads + 4, options);
+      spawn = await startThreads(module, memory, workers, { ...options, files: files2, serve });
     } catch (error) {
       threadsError = `Blender runs on one thread: ${error.message}`;
       console.warn(threadsError);

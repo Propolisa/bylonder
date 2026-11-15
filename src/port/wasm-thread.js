@@ -6,12 +6,13 @@ import { STARTED, IDLE, threadSpawn } from './wasm-threads.js';
 
 const isNode = !!globalThis.process?.versions?.node;
 
-async function thread({ module, memory, control, count, slot }, post) {
+async function thread({ module, memory, control, count, slot, files, index }, post) {
   const slots = new Int32Array(control);
   let instance;
   const sync = () => syncSideModules(instance.exports, missing);
   try {
-    instance = await WebAssembly.instantiate(module, threadImports(memory, count, threadSpawn(control), { side_modules_sync: sync }));
+    const own = { side_modules_sync: sync }, filesSlot = { buffer: files, slot: index, notify: () => post({ files: true }) };
+    instance = await WebAssembly.instantiate(module, threadImports(memory, count, threadSpawn(control), own, filesSlot));
   } catch (error) {
     return post({ starting: true, error: error.message });
   }
