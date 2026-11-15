@@ -24,6 +24,12 @@ export function sharedGeometry(scene: import("@babylonjs/core").Scene, { vertice
     indices?: string;
 }, key: string, buffers: import("./buffers.js").Buffers): SharedGeometry;
 /**
+ * An object and all it holds made read-only, so that no run writes into what runs and their host share; typed arrays
+ * cannot be, and are read-only by contract.
+ * @template T @param {T} value @returns {T}
+ */
+export function frozen<T>(value: T): T;
+/**
  * A package version's data, read once for every run of it on the page: `read` reads it when no run holds it. The IR
  * is frozen; each run gets its own table of the shared arrays, which its patches change.
  * @param {string} version the package's URL with its version @param {() => Promise<PackageData>} read
@@ -31,11 +37,11 @@ export function sharedGeometry(scene: import("@babylonjs/core").Scene, { vertice
  */
 export function sharedPackage(version: string, read: () => Promise<PackageData>): Promise<PackageData>;
 /**
- * A run's IR: what `read` (readIR) makes of a package's IR, once for every run of it and frozen, in a view of the run's
- * own: its clock (`scene.time`), entities and their order, which its playhead and scheduler change, and the tables a
- * patch replaces whole.
+ * A run's IR: the package's, frozen and shared by every run of it, in a view of the run's own: its clock
+ * (`scene.time`), entities and their order, which its playhead and scheduler change, and the tables a patch replaces
+ * whole.
  * @template {{ scene: { time: object }, entities: object, order: string[] }} IR
- * @param {object} raw the IR as read @param {() => IR} read
+ * @param {IR} ir
  * @returns {IR}
  */
 export function sharedIR<IR extends {
@@ -44,7 +50,7 @@ export function sharedIR<IR extends {
     };
     entities: object;
     order: string[];
-}>(raw: object, read: () => IR): IR;
+}>(ir: IR): IR;
 /** How many bytes of streams no geometry uses an engine keeps, for a run loaded again or a patch undone. */
 export const IDLE_BYTES: number;
 export type PackageData = {

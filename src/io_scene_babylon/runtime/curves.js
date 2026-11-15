@@ -5,6 +5,7 @@
 // (Blender's curve shape functions, GPL) draws in the curves' material, as the app's view does.
 
 import { fillWhatItReads } from '../../overrides/webgpu/missing-attributes.js';
+import { packageModule } from './package-modules.js';
 
 /**
  * Main's curves draw: each evaluated point's position and radius, the drawn segments' indirection, each point's time
@@ -22,7 +23,7 @@ export const run = (inputs) => ({ geometry: { curves: inputs } });
  * @param {import('./scheduler.js').Page} page
  */
 export async function load({ root, scene }) {
-  const { curvesData, curvesMesh } = await import(new URL('bylonder-curves/curves.js', root).href);
+  const { curvesData, curvesMesh } = await packageModule('bylonder-curves/curves.js', root);
   return {
     run,
     /** @param {string} node @param {Curves} curves */

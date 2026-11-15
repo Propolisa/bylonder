@@ -1,15 +1,17 @@
 <script setup>
+import { onMounted, ref } from "vue";
 import BlIcon from "../interface/components/BlIcon.vue";
 import { Button } from "../interface/components/ui/button";
 
-defineProps({ url: String, status: String, busy: Boolean, running: Boolean, paused: Boolean });
+const props = defineProps({ header: Object, canvas: Object, status: String, shared: String, busy: Boolean, running: Boolean, paused: Boolean });
 defineEmits(["play", "pause", "reset"]);
+const host = ref(null);
+onMounted(() => host.value.append(props.canvas));
 </script>
 
 <template>
-  <div class="bl-ui flex h-full flex-col bg-background text-foreground">
-    <div class="flex items-center gap-2 border-b border-border bg-header px-2 py-1 text-sm">
-      <BlIcon name="BYLONDER" />
+  <Teleport :to="header">
+    <div class="bl-ui flex min-w-0 flex-1 items-center gap-2 text-sm text-foreground">
       <span>Game</span>
       <Button size="sm" variant="secondary" :disabled="busy || (running && !paused)" title="Play the scene as an exported page runs it" @click="$emit(running ? 'pause' : 'play')">
         <BlIcon name="PLAY" />
@@ -21,9 +23,11 @@ defineEmits(["play", "pause", "reset"]);
         <BlIcon name="BYLONDER" />
         <span>Reset</span>
       </Button>
-      <span class="text-muted-foreground">{{ status }}</span>
+      <span class="truncate text-muted-foreground">{{ status }}</span>
+      <span v-if="shared" class="ml-auto truncate text-muted-foreground">{{ shared }}</span>
     </div>
-    <iframe v-if="url" :src="url" title="Game" class="min-h-0 flex-1 border-0" />
-    <p v-else class="p-4 text-muted-foreground">Play runs the scene as File > Export > JavaScript ships it; edits reach it as you make them.</p>
+  </Teleport>
+  <div ref="host" class="bl-ui relative h-full bg-background text-foreground">
+    <p v-if="!running" class="absolute inset-0 p-4 text-muted-foreground">Play runs the scene as File > Export > JavaScript ships it; edits reach it as you make them.</p>
   </div>
 </template>

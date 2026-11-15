@@ -14,7 +14,7 @@ let page = null, written = null;
 const statuses = [];
 const preview = createPackagePreview({
   world, idle: (run) => run(), report: (status) => statuses.push(status),
-  publish: async (files) => { written = writePackage(files); return written.url; },
+  publish: async ({ files }) => { written = writePackage(files); return written.url; },
   post: (patch) => { page = page.then((blend) => blend.patch(patch)); },
 });
 const url = await preview.reload();

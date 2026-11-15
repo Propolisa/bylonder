@@ -332,6 +332,12 @@ export function readEntries(tables) {
 }
 
 /**
+ * A patch that comes from outside (a message, a file) as BlendScene.patch takes it: its IR entries read (readEntries).
+ * @template {{ tables: Record<string, Record<string, any>> }} Patch @param {Patch} patch @returns {Patch}
+ */
+export const readPatch = (patch) => ({ ...patch, tables: { ...patch.tables, ...readEntries(patch.tables) } });
+
+/**
  * An IR file's data as this runtime reads it: an older version migrated, omitted fields given their defaults, and what
  * can be solved repaired with a warning (a property's type from its default, a reference to what the IR lacks dropped,
  * an implementation this runtime does not ship left baked, `order` made whole). Throws on what cannot be read, naming

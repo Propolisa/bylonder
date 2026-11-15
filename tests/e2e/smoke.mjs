@@ -22,17 +22,10 @@ let app;
 // The shadow floor tiles vary from run to run by a unit or two.
 const SHADER_GALLERY_LIMITS = [12, 12, 10, 30, 12, 10, 12, 8, 8, 12, 8, 10, 8, 8, 12, 15, 14, 10, 8, 10, 15, 15, 15, 18];
 
-// An area of Bylonder's own editors whose page shows the exported scene: shown, started, and drawing it (not blank).
-async function previewDraws(area, start, status, title) {
-  await app.bylonder((b, id) => b.dock.show(id), area);
-  await start();
-  await app.frame().locator(`#${area}-section`).getByText(status).waitFor({ timeout: 120000 });
-  const frame = app.frame().locator(`#${area}-section iframe[title="${title}"]`), size = await frame.boundingBox();
-  assert.ok(size.width > 100 && size.height > 50, `the page has a size: ${JSON.stringify(size)}`);
-  await frame.contentFrame().locator("canvas").waitFor({ timeout: 60000 });
-  await app.page.waitForTimeout(3000);
+// The red channel's spread over a part of the page: a drawn scene, not a blank frame, has some.
+async function redSpread(size) {
   const shot = await app.page.screenshot({ clip: size });
-  const spread = await app.page.evaluate(async (png) => {
+  return app.page.evaluate(async (png) => {
     const image = await createImageBitmap(await (await fetch(`data:image/png;base64,${png}`)).blob());
     const ctx = new OffscreenCanvas(image.width, image.height).getContext("2d");
     ctx.drawImage(image, 0, 0);
@@ -41,7 +34,21 @@ async function previewDraws(area, start, status, title) {
     for (let i = 0; i < data.length; i += 4) { low = Math.min(low, data[i]); high = Math.max(high, data[i]); }
     return high - low;
   }, shot.toString("base64"));
+}
+
+// An area of Bylonder's own editors that shows the exported scene, in its page's frame (`title`) or on a canvas of its
+// own: shown, started, and drawing it (not blank).
+async function previewDraws(area, start, status, title) {
+  await app.bylonder((b, id) => b.dock.show(id), area);
+  await start();
+  await app.frame().locator(`[data-section="${area}"]`).getByText(status).waitFor({ timeout: 120000 });
+  const view = app.frame().locator(`#${area}-section ${title ? `iframe[title="${title}"]` : "canvas"}`), size = await view.boundingBox();
+  assert.ok(size.width > 100 && size.height > 50, `the page has a size: ${JSON.stringify(size)}`);
+  if (title) await view.contentFrame().locator("canvas").waitFor({ timeout: 60000 });
+  await app.page.waitForTimeout(3000);
+  const spread = await redSpread(size);
   assert.ok(spread > 40, `the page draws the scene, not a blank frame (red spread ${spread})`);
+  return view;
 }
 
 const checks = {
@@ -195,8 +202,30 @@ const checks = {
     await previewDraws("package", () => app.frame().getByRole("button", { name: "Reload" }).click(), "Loaded", "Package View");
   },
 
-  async "the Game area plays the exported scene in its area"() {
-    await previewDraws("game", () => app.bylonder((b) => b.runOperator("bylonder.game_play")), "Playing", "Game");
+  // The Game plays on an engine of its own, of the app's one Babylon; input over the 3D View never reaches the game, over
+  // the Game it does; Reset after Reset leaves the 3D View drawing.
+  async "the Game area plays the exported scene in its area, apart from the app's views"() {
+    const game = await previewDraws("game", () => app.bylonder((b) => b.runOperator("bylonder.game_play")), "Playing");
+    assert.ok(await app.bylonder((b) => { const game = b.game.blend.scene, app = b.world.scene; return game instanceof app.constructor && game.getEngine() !== app.getEngine(); }),
+      "the game runs on its own engine, of the app's one Babylon");
+    const area = await app.frame().locator("#viewport-section canvas").first().boundingBox();
+    await app.bylonder((b) => { window.gameInput = 0; b.game.blend.scene.onPointerObservable.add(() => window.gameInput++); b.game.blend.scene.onKeyboardObservable.add(() => window.gameInput++); });
+    await app.page.mouse.move(area.x + area.width / 2, area.y + area.height / 2);
+    await app.page.mouse.down();
+    await app.page.mouse.move(area.x + area.width / 2 + 40, area.y + area.height / 2 + 20, { steps: 5 });
+    await app.page.mouse.up();
+    await app.page.keyboard.press("w");
+    assert.equal(await app.frame().evaluate(() => window.gameInput), 0, "input over the 3D View does not reach the game");
+    const box = await game.boundingBox();
+    await app.page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+    await app.page.keyboard.press("w");
+    assert.ok(await app.frame().evaluate(() => window.gameInput) > 0, "input over the Game does");
+    for (let i = 0; i < 10; i++) {
+      await app.bylonder(async (b) => { await b.runOperator("bylonder.game_reset"); });
+      await app.until((b) => !!b.game.blend, null, 120000);
+      await app.bylonder(async (b) => { b.world.views.wake(); await new Promise((resolve) => setTimeout(resolve, 300)); });
+      assert.ok(await redSpread(area) > 40, `the 3D View draws after Reset ${i + 1}`);
+    }
   },
 
   // A failed export says why in its dialog, which stays open to try again, and in Info; it never just downloads nothing.

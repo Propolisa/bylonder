@@ -513,10 +513,12 @@ async function moduleSource(world, live, mapped, { parity, hostCompression, bake
 import { readBuffers, readBytes } from './bylonder/buffers.js';
 import { worldColor, worldNodes } from './bylonder/world.js';
 import { cameraEffects, pipelineEffect, postProcessEffect } from './bylonder/camera-effects.js';
-import { BlendScene } from './bylonder/blend-scene.js';
+import { BlendScene, readSceneIR } from './bylonder/blend-scene.js';
 import { whenDrawable } from './bylonder/ready.js';
 import { loadTables } from './bylonder/scene-tables.js';
 import { sharedPackage } from './bylonder/shared-resources.js';
+// A patch that comes from outside the page (a message), read as BlendScene.patch takes it.
+export { readPatch } from './bylonder/ir.js';
 import { mirrored } from './bylonder/skin-skeleton.js';
 import { addAsset, assetContainer, cloneAsset } from './bylonder/asset.js';${controlPanel ? `
 import { controlPanel } from './bylonder/control-panel.js';` : ''}
@@ -669,11 +671,11 @@ export async function loadAssetContainer(scene) {
 }
 
 // scene.bin's buffers and the IR, asked for by this export's version of them, so a cache never pairs them with
-// another export's scene.js; read once for every run of this version on the page.
+// another export's scene.js; read once for every run of this version on the page, the IR's schema run as it is read.
 const readData = () => sharedPackage(new URL('?v=${VERSION}', ROOT).href, async () => {
   const buffers = await readBuffers(new URL('scene.bin?v=${VERSION}', ROOT), BUFFERS, ${!hostCompression});
   // The IR as data: read as bytes, as Node's fetch reads no file: URL.
-  const ir = JSON.parse(new TextDecoder().decode(await readBytes(new URL('scene.ir.json?v=${VERSION}', ROOT))));
+  const ir = readSceneIR(JSON.parse(new TextDecoder().decode(await readBytes(new URL('scene.ir.json?v=${VERSION}', ROOT)))));
   return { buffers, ir };
 });
 
@@ -803,5 +805,6 @@ import { ${[...usedNames(source), ...pipelineClasses].join(', ')} } from '@babyl
   Object.assign(tables, { scene: { [ir.scene.id ?? 'scene']: { settings, imageProcessing: data.imageProcessingConfiguration, code, effectLayers: data.effectLayers ?? [],
     renderingPipelines: data.renderingPipelines, postProcesses: data.postProcesses, volumes: volumes?.config ?? null, display, compositor: composited?.compositor ?? null } }, ...irTables(ir) });
   const files = { 'scene.js': source.replace(BABYLON_IMPORTS, babylonImports).replaceAll(VERSION, version).replace(TABLES_VERSION, packageState({ tables }).version), 'scene.d.ts': controlTypes(Object.entries(ir.properties).map(([path, { type }]) => ({ path, type })), armatureNames(data, ir), !!data.skeletons?.length), 'scene.ir.json': irJson, [UNITS_FILE]: units, ...(kernels && { [NODE_KERNELS]: kernels }), ...(curves && { [CURVES_GLSL_FILE]: curvesGlslFile() }), 'scene.bin': binBytes, [ASSET_FILE]: ASSET_MANIFEST, 'package.json': `${JSON.stringify(manifest, null, 2)}\n`, ...images, ...soundFiles };
-  return { files, tables, buffers: bin.arrays() };
+  // `ir` and `version` (scene.bin's and the IR's, which scene.js asks for its data by) for a run given them by reference.
+  return { files, tables, buffers: bin.arrays(), ir, version };
 }

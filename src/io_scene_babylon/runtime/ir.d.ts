@@ -833,6 +833,9 @@ export const GeometrySchema: import("zod/mini").ZodMiniObject<{
 export function isReference(value: any): value is Reference;
 /** Steps from each older version to the next: `MIGRATIONS[n]` takes an IR of version n to n + 1. @type {Record<number, (ir: any) => any>} */
 export const MIGRATIONS: Record<number, (ir: any) => any>;
+export function readPatch<Patch extends {
+    tables: Record<string, Record<string, any>>;
+}>(patch: Patch): Patch;
 export type IR = z.infer<typeof IRSchema>;
 export type ID = z.infer<typeof IDSchema>;
 export type IDReference = z.infer<typeof IDReferenceSchema>;

@@ -5,6 +5,7 @@
 // bylonder-pointclouds/ (Blender's point cloud drawing, GPL) draws as spheres in the point cloud's material, as the
 // app's view does.
 import { Matrix, Quaternion } from '@babylonjs/core';
+import { packageModule } from './package-modules.js';
 
 /**
  * A point cloud: 4 floats per point (its position in Blender's axes and its radius), its matrix in its object's space
@@ -20,7 +21,7 @@ export const run = (inputs) => ({ geometry: { pointcloud: inputs } });
  * @param {import('./scheduler.js').Page} page
  */
 export async function load({ root, scene }) {
-  const { drawPointClouds } = await import(new URL('bylonder-pointclouds/pointcloud.js', root).href);
+  const { drawPointClouds } = await packageModule('bylonder-pointclouds/pointcloud.js', root);
   return {
     run,
     /** @param {string} node @param {PointCloud} cloud */

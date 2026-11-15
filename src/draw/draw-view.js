@@ -5,6 +5,7 @@
 import { Camera, MaterialPluginBase, PBRBaseMaterial, RegisterMaterialPlugin, ShaderStore, Vector3, Vector4 } from '@babylonjs/core';
 import '@babylonjs/core/Shaders/ShadersInclude/reflectionFunction.js';
 import { eeveeParity } from './eevee-parity.js';
+import { isAppScene } from '../runtime/app-scene.js';
 
 const view = { right: [0, 0, 0], up: [0, 0, 0], forward: [0, 0, 0], position: [0, 0, 0], persp: true, pixelFac: 1, size: [1, 1], winmat: [1, 1], camera: null, renderId: -1 };
 
@@ -70,4 +71,4 @@ class BlenderViewPlugin extends MaterialPluginBase {
   // GLSL: Bylonder's PBR materials compile from it on WebGPU too (overrides/webgpu/pbr-from-glsl.js).
   getCustomCode(shaderType, shaderLanguage = 0) { return shaderType === 'fragment' && shaderLanguage === 0 ? VIEW_CODE : null; }
 }
-RegisterMaterialPlugin('BlenderView', (material) => (material instanceof PBRBaseMaterial ? new BlenderViewPlugin(material) : null));
+RegisterMaterialPlugin('BlenderView', (material) => (material instanceof PBRBaseMaterial && isAppScene(material.getScene()) ? new BlenderViewPlugin(material) : null));

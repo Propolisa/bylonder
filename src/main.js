@@ -676,7 +676,7 @@ const editObject = () => {
   return edit ? { ob, mesh: edit.mesh } : null;
 };
 packageView = mountPackageView(document.querySelector("#package-section"), { world });
-gameView = mountGameView(document.querySelector("#game-section"), { world });
+gameView = mountGameView(document.querySelector("#game-section"), { world, header: viewportDock.header("game") });
 const imageEditor = mountImageEditor(document.querySelector("#image-section"), { header: viewportDock.header("image"), engine, views, sync: world.mainSync, editObject });
 let inspectorBusy = false;
 async function inspector() {

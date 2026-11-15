@@ -6,7 +6,7 @@ import { AbstractMesh, BoundingInfo, Matrix, Observable, Quaternion, Texture, Ve
 import { createScheduler, EVALUATORS, NATIVE } from './scheduler.js';
 import { TABLES } from './scene-tables.js';
 import { nodeById } from '../../overrides/babylon/clustered-lights.js';
-import { readEntries, readIR, referencesIn } from './ir.js';
+import { readIR, referencesIn } from './ir.js';
 import { createPlayhead } from './playhead.js';
 import { createClips, isClip } from './clips.js';
 import { collectionKey, collectionTree, objectsIn, showing } from './collections.js';
@@ -186,6 +186,9 @@ const PATCHED = new Set([...TABLES, 'animations', 'references', 'entities', 'irS
 // its own): the rest (its range, rate and loop, which the playhead runs on) loads the package again.
 const RETIMED = ['clips', 'markers'], CLOCK = ['frame_start', 'frame_end', 'fps', 'fps_base', 'loop'];
 
+/** An IR file's data as BlendScene takes it (ir.js readIR), with the implementations this runtime ships. @param {any} raw @returns {import('./ir.js').IR} */
+export const readSceneIR = (raw) => readIR(raw, { implementations: [...Object.keys(EVALUATORS), ...NATIVE] });
+
 /**
  * The exported scene and its controls.
  * @template {Record<string, Value>} [Controls=Record<string, Value>]
@@ -214,7 +217,7 @@ export class BlendScene {
 
   /**
    * @param {import('@babylonjs/core').Scene} scene
-   * @param {any} ir the scene's IR (scene.ir.json), read with readIR
+   * @param {any} ir the scene's IR: a file's read with readSceneIR, or the exporter's own
    * @param {{ root?: string, world?: { set(color: number[]): void }, compositor?: import('@babylonjs/core').NodeRenderGraph,
    *   buffers?: import('./buffers.js').Buffers, entries?: import('./asset.js').Entries, dispose?: () => void,
    *   tables?: ReturnType<typeof import('./scene-tables.js').sceneTables>, reload?: (old: BlendScene<any>) => Promise<BlendScene<any>> }} [options]
@@ -238,7 +241,7 @@ export class BlendScene {
     /** scene.bin's arrays, which the IR's `{ buffer }` inputs name. */
     this.buffers = buffers;
     /** The scene's IR, as this runtime reads it. */
-    this.ir = sharedIR(ir, () => readIR(ir, { implementations: [...Object.keys(EVALUATORS), ...NATIVE] }));
+    this.ir = sharedIR(/** @type {import('./ir.js').IR} */ (ir));
     const knobs = Object.entries(this.ir.properties).map(([path, { id, ...property }]) => /** @type {Knob} */ ({ path, ...property }));
     this.#knobs = new Map(knobs.map((knob) => [knob.path, knob]));
     this.#values = new Map(knobs.map((knob) => [knob.path, knob.default]));
@@ -540,7 +543,8 @@ export class BlendScene {
    * those it has not set taking the patch's defaults. A patch from another version than the one shown, or of what a patch
    * does not reach yet (computed entities, graphs, the scene's settings), loads the package again, reported. One that
    * names what the scene would not hold is not applied, reported, and the scene stays as it was. Gives the scene that
-   * shows the result: this one, or the one loaded again.
+   * shows the result: this one, or the one loaded again. A patch's IR entries are taken as they are: one that comes from
+   * a file or a message is read first (ir.js readPatch).
    * @param {import('./scene-tables.js').Patch} patch
    * @returns {Promise<BlendScene<Controls>>}
    */
@@ -563,13 +567,7 @@ export class BlendScene {
       return this.#reload(this);
     };
     /** @type {Record<string, Record<string, any>>} */
-    let entries;
-    try {
-      entries = readEntries(patch.tables);
-    } catch (error) {
-      return notApplied(error);
-    }
-    const playing = this.#clips.playing(), tables = this.#tables.tables, ir = /** @type {Record<string, any>} */ (this.ir);
+    const entries = patch.tables, playing = this.#clips.playing(), tables = this.#tables.tables, ir = /** @type {Record<string, any>} */ (this.ir);
     const replaced = JSON.stringify(Object.entries(patch.tables).map(([table, part]) => Object.keys(part).map((key) => (tables[table] ?? ir[table])?.[key])));
     try {
       this.#tables.apply(patch);
@@ -634,6 +632,11 @@ export class BlendScene {
     if (!candidates.size) return;
     for (const key of keys(JSON.stringify(this.#tables?.tables) + JSON.stringify(this.ir))) candidates.delete(key);
     for (const key of candidates) delete this.buffers[key];
+  }
+
+  /** The version of the package's tables the scene shows (scene-patch.js), which a patch names as its base. */
+  get version() {
+    return this.#tables?.version ?? null;
   }
 
   /** Resolves once what the last changes set going has run (an evaluator's first load). */

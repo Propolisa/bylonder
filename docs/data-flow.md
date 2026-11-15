@@ -14,7 +14,7 @@ that grows the memory detaches them (`src/bmesh/bmesh-wasm.js` `floatsView`); wh
 | 2. Main, then the depsgraph's evaluated copies | Evaluated copies are Blender's own copies of Main's IDs | Blender's code (operators, RNA setters, undo steps); the depsgraph for evaluated data | An RNA update, undo or frame change tags IDs (`ID_RECALC_*`) | Blender's code in the module |
 | 3. The editor's Babylon scene (3D View) | Values and evaluated geometry copied out of the module into Babylon objects, linked by `bylonder_id` | `main-view.js` after Blender's code ran; the exception is `main-sync.js` `flush`, which writes Babylon-side edits back into Main before Blender's code runs (undo steps, commits, saves) | Update tags after `run()`, `view()` or `undoLoad`; hooks on Babylon's setters mark what `flush` writes | `main-view.js` `createMainView`, `main-sync.js` `flush` |
 | 4. IR and package | Copied into JSON (`scene.ir.json`, scene.js tables) and `scene.bin` arrays named by their content; a scoped export copies the selected objects only | The exporter | A tagged ID marks its entries; an entry whose hash is unchanged is not sent; the package's version is the hash of its tables | `ir-export.js` `exportIR`, `js-export.js` `exportPackage`, `scene-patch.js` `tablesPatch` |
-| 5. The game views' scenes (runs) | Package data read once per version and referenced by every run (`sharedPackage`, `sharedIR`); static vertex streams uploaded once per engine (`sharedGeometry`); each run copies into its own Babylon objects and live buffers | Each run's table loader and controls; the cache for shared data, which no run writes | A patch names its base version: a mismatch or a failure loads the run again (Reset does the same); an edit brings arrays of new names, never a write into shared ones | `runtime/shared-resources.js`, `runtime/scene-tables.js` `sceneTables`, `runtime/blend-scene.js` `patch` |
+| 5. The game views' scenes (runs) | Package data read once per version and referenced by every run (`sharedPackage`, `sharedIR`); in the app, the export's own IR and arrays, frozen; static vertex streams uploaded once per engine (`sharedGeometry`); each run copies into its own Babylon objects and live buffers | Each run's table loader and controls; the cache for shared data, which no run writes | A patch names its base version: a mismatch or a failure loads the run again (Reset does the same); an edit brings arrays of new names, never a write into shared ones | `runtime/shared-resources.js`, `runtime/scene-tables.js` `sceneTables`, `runtime/blend-scene.js` `patch` |
 
 What flows, from Snow's package (Character Controller demo; scene.bin 9.5 MB gzipped, scene.ir.json 11.6 MB), with
 the Bar Scene and the Noodle Shop street for scale. Static: authored, unchanged while a run plays. Baked: computed at
@@ -38,7 +38,19 @@ export from evaluated data. Live: changes per frame or per run.
 | World and probes | 1 world, no probes | Static | IR, `SCENE` | Per run |
 | Sounds | 1 file, 0.2 MB | Static | `sounds/` | Fetched by URL, decoded per run |
 | Particles, instances | 6 thin-instance sets (street 5 particle settings) | Static matrices; particles live | scene.bin, `PARTICLE_SYSTEMS` | Matrices per run (Babylon owns them) |
-| The IR itself | 11.6 MB JSON: IDs 6.8 MB, properties 2 MB, entities 1.6 MB | Static | `scene.ir.json` | Read, validated and frozen once per version |
+| The IR itself | 11.6 MB JSON: IDs 6.8 MB, properties 2 MB, entities 1.6 MB | Static | `scene.ir.json` | Read, validated and frozen once per version; in the app, the export's object, frozen, never read again |
+
+In the app, the Game area runs the package in-process (`space_game/game-run.js`), on an engine of its own made by
+scene.js's createEngine, so Babylon's per-engine state (effects, input, size) stays the app's or the game's; the app's
+Babylon-wide extensions (material plugins, prototype overrides) skip a game's scenes (`runtime/app-scene.js`
+`isAppScene`). A full export's scene.js is linked to
+the app's own modules (`space_game/package-link.js`, by `runtime-files.js` `appSource`, the table packaging copies from),
+so Babylon and the page runtime are the app's, one of each by construction, and an import it cannot map throws. The
+run is given the export's IR and arrays by reference, frozen (`sharedPackage`), with no JSON, parse or schema; an edit's
+patch reaches it as the new version's entries. The schema (`readSceneIR`, `readPatch`) runs only where data comes from
+outside: a package's files and the Package View's messages. A patch the run does not take, or one that asks to load the
+package again, drops the run and loads it fresh at the live version; the header says so. Next step: scene.js becomes
+imports plus data, its template body a runtime module, and the linker goes away.
 
 Large and per run today: Babylon's morph target textures (18.5 MB of targets in the Bar Scene), animation groups
 built from the shared tracks, and the rig's state built from its 34 MB of arrays. Every kind fits the three classes;

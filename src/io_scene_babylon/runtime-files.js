@@ -6,7 +6,7 @@ import native from './runtime/native/files.json' with { type: 'json' };
 const declared = (...names) => names.flatMap((name) => [`${name}.js`, `${name}.d.ts`]);
 // The character animation system (runtime/character/), for a scene.js that exports it (a scene with an armature).
 export const CHARACTER_FILES = declared(...['api', 'names', 'core', 'pose-api', 'roles', 'movement', 'collision', 'input', 'contacts', 'locomotion', 'camera', 'sound', 'rootmotion', 'clip', 'pose', 'rig', 'procedural', 'mirror', 'quality', 'collections', ...['index', 'aim', 'feet', 'gaze', 'impact', 'lean', 'limbs', 'reach', 'space', 'springs', 'breathe', 'eyes'].map((n) => `effects/${n}`)].map((n) => `character/${n}`));
-export const RUNTIME_FILES = [...declared('blend-scene', 'collections', 'playhead', 'clips', 'buffers', 'world', 'scheduler', 'ready', 'skin-skeleton', 'ir', 'units', 'mesh', 'ortho-scale', 'zod', 'asset', 'scene-loader', 'dual-quaternion-skinning', 'tiled-images', 'scene-tables', 'shared-resources', 'camera-effects'), 'ir.schema.json', 'implementations.json', 'LICENSE.md'];
+export const RUNTIME_FILES = [...declared('blend-scene', 'collections', 'playhead', 'clips', 'buffers', 'world', 'scheduler', 'ready', 'skin-skeleton', 'ir', 'units', 'mesh', 'ortho-scale', 'zod', 'asset', 'scene-loader', 'dual-quaternion-skinning', 'tiled-images', 'scene-tables', 'shared-resources', 'package-modules', 'camera-effects'), 'ir.schema.json', 'implementations.json', 'LICENSE.md'];
 // GPL's notice and text, beside Blender's code in a package (src/ paths).
 const NOTICE = { 'LICENSE.md': 'io_scene_babylon/blender-code.LICENSE.md', COPYING: '../LICENSES/GPL-3.0-or-later.txt' };
 // Stopgap: the scene module stands in as a package's Geometry Nodes kernels (its gn_* entry points, one node a call)
@@ -68,9 +68,7 @@ export const gplFolders = (files) => {
 export const gplFiles = (files) => {
   const ships = shipping(files);
   const own = withFolders(files).filter((e) => e.folder).flatMap(folderPaths)
-    .concat(text(files).includes(AREA_SPECULAR) ? [[AREA_SPECULAR, 'blenkernel/light/area-specular.js']] : [])
-    .concat(text(files).includes(FOG_GLOW) ? [[FOG_GLOW, 'compositor/fog-glow.js']] : [])
-    .concat(text(files).includes(PANEL_ICONS) ? [[PANEL_ICONS, 'io_scene_babylon/panel-icons.js']] : []).filter(([path]) => ships(path));
+    .concat([AREA_SPECULAR, FOG_GLOW, PANEL_ICONS].filter((path) => text(files).includes(path)).map((path) => [path, SOURCES[path]])).filter(([path]) => ships(path));
   const kernels = text(files).includes(NODE_KERNELS) && ships(NODE_KERNELS) ? [NODE_KERNELS] : [];
   return [...own, ...[...new Set([...own.map(([path]) => path), ...kernels].map((path) => path.split('/')[0]))].flatMap(noticeFiles)];
 };
@@ -117,3 +115,13 @@ export const PANEL_FILES = declared('control-panel', 'control-panel-ui', 'contro
 export const packageRuntime = (files) => [...RUNTIME_FILES, ...evaluatorsOf(files).flatMap((e) => e.runtime),
   ...(text(files).includes("from './bylonder/materials.js'") ? MATERIAL_FILES : []), ...(text(files).includes("from './bylonder/character/api.js'") ? CHARACTER_FILES : []), ...(text(files).includes("from './bylonder/control-panel.js'") ? PANEL_FILES : [])].map((name) => [`bylonder/${name}`, name])
   .concat(Object.entries(BLOCK_FILES).filter(([path]) => text(files).includes(`from './${path}'`)));
+// The app's own module (its src/ path) each Bylonder module a package ships is a copy of, for a package run in the
+// app's module graph (space_game/package-link.js); undefined for what the export writes.
+// The volume passes are their bundle's source, which the app imports itself.
+const SOURCES = { [AREA_SPECULAR]: 'blenkernel/light/area-specular.js', [FOG_GLOW]: 'compositor/fog-glow.js', [PANEL_ICONS]: 'io_scene_babylon/panel-icons.js',
+  [`${VOLUMES.folder}/volumes.js`]: 'io_scene_babylon/polyfill/volumes.js', ...Object.fromEntries(folderPaths(EVALUATOR_FILES.curves)), ...Object.fromEntries(folderPaths(EVALUATOR_FILES.pointcloud)) };
+export const appSource = (path) => {
+  const [folder, ...rest] = path.split('/'), name = rest.join('/');
+  if (folder === 'bylonder') return name.startsWith('overrides/') ? name : `io_scene_babylon/runtime/${name}`;
+  return path in BLOCK_FILES ? `io_scene_babylon/runtime/${BLOCK_FILES[path]}` : SOURCES[path];
+};

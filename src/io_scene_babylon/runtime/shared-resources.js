@@ -160,10 +160,14 @@ const packages = new Map();
 /** A package's arrays by its IR. @type {WeakMap<any, import('./buffers.js').Buffers>} */
 const arraysOf = new WeakMap();
 
-/** An object and all it holds made read-only; typed arrays cannot be, and are read-only by contract. @param {any} value */
-function freeze(value) {
+/**
+ * An object and all it holds made read-only, so that no run writes into what runs and their host share; typed arrays
+ * cannot be, and are read-only by contract.
+ * @template T @param {T} value @returns {T}
+ */
+export function frozen(value) {
   if (value === null || typeof value !== 'object' || Object.isFrozen(value) || ArrayBuffer.isView(value)) return value;
-  for (const item of Object.values(value)) freeze(item);
+  for (const item of Object.values(/** @type {any} */ (value))) frozen(item);
   return Object.freeze(value);
 }
 
@@ -177,7 +181,7 @@ export async function sharedPackage(version, read) {
   const held = packages.get(version);
   let ir = held instanceof WeakRef ? held.deref() : (await held)?.ir;
   if (!ir) {
-    const reading = read().then((data) => { arraysOf.set(freeze(data.ir), data.buffers); return data; });
+    const reading = read().then((data) => { arraysOf.set(frozen(data.ir), data.buffers); return data; });
     packages.set(version, reading);
     try { ir = (await reading).ir; } catch (error) { packages.delete(version); throw error; }
     packages.set(version, new WeakRef(ir));
@@ -185,20 +189,15 @@ export async function sharedPackage(version, read) {
   return { ir, buffers: { .../** @type {import('./buffers.js').Buffers} */ (arraysOf.get(ir)) } };
 }
 
-/** Each package's IR as readIR makes it, by the IR as read. @type {WeakMap<object, any>} */
-const validated = new WeakMap();
-
 /**
- * A run's IR: what `read` (readIR) makes of a package's IR, once for every run of it and frozen, in a view of the run's
- * own: its clock (`scene.time`), entities and their order, which its playhead and scheduler change, and the tables a
- * patch replaces whole.
+ * A run's IR: the package's, frozen and shared by every run of it, in a view of the run's own: its clock
+ * (`scene.time`), entities and their order, which its playhead and scheduler change, and the tables a patch replaces
+ * whole.
  * @template {{ scene: { time: object }, entities: object, order: string[] }} IR
- * @param {object} raw the IR as read @param {() => IR} read
+ * @param {IR} ir
  * @returns {IR}
  */
-export function sharedIR(raw, read) {
-  if (!validated.has(raw)) validated.set(raw, freeze(read()));
-  /** @type {IR} */
-  const ir = validated.get(raw);
+export function sharedIR(ir) {
+  frozen(ir);
   return { ...ir, scene: { ...ir.scene, time: structuredClone(ir.scene.time) }, entities: { ...ir.entities }, order: [...ir.order] };
 }

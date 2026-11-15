@@ -32,6 +32,7 @@ export function posedBone(transform: Transform, vector: (name: string, count: nu
  * @returns {Promise<BlendScene>}
  */
 export function loadBlendScene(engine: import("@babylonjs/core").AbstractEngine, url: string | URL): Promise<BlendScene>;
+export function readSceneIR(raw: any): import("./ir.js").IR;
 /**
  * The exported scene and its controls.
  * @template {Record<string, Value>} [Controls=Record<string, Value>]
@@ -39,7 +40,7 @@ export function loadBlendScene(engine: import("@babylonjs/core").AbstractEngine,
 export class BlendScene<Controls extends Record<string, Value> = Record<string, Value>> {
     /**
      * @param {import('@babylonjs/core').Scene} scene
-     * @param {any} ir the scene's IR (scene.ir.json), read with readIR
+     * @param {any} ir the scene's IR: a file's read with readSceneIR, or the exporter's own
      * @param {{ root?: string, world?: { set(color: number[]): void }, compositor?: import('@babylonjs/core').NodeRenderGraph,
      *   buffers?: import('./buffers.js').Buffers, entries?: import('./asset.js').Entries, dispose?: () => void,
      *   tables?: ReturnType<typeof import('./scene-tables.js').sceneTables>, reload?: (old: BlendScene<any>) => Promise<BlendScene<any>> }} [options]
@@ -317,11 +318,14 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
      * those it has not set taking the patch's defaults. A patch from another version than the one shown, or of what a patch
      * does not reach yet (computed entities, graphs, the scene's settings), loads the package again, reported. One that
      * names what the scene would not hold is not applied, reported, and the scene stays as it was. Gives the scene that
-     * shows the result: this one, or the one loaded again.
+     * shows the result: this one, or the one loaded again. A patch's IR entries are taken as they are: one that comes from
+     * a file or a message is read first (ir.js readPatch).
      * @param {import('./scene-tables.js').Patch} patch
      * @returns {Promise<BlendScene<Controls>>}
      */
     patch(patch: import("./scene-tables.js").Patch): Promise<BlendScene<Controls>>;
+    /** The version of the package's tables the scene shows (scene-patch.js), which a patch names as its base. */
+    get version(): string | null;
     /** Resolves once what the last changes set going has run (an evaluator's first load). */
     settled(): Promise<void>;
     /** The controls, as Blender's RNA describes them. @returns {Control[]} */

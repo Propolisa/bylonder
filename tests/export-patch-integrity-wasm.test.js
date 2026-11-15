@@ -1,5 +1,5 @@
 // What a patch keeps whole on an open page (docs/data-flow.md, BlendScene.patch): a patch that fails once its objects are
-// swapped in loads the package again, never a mixed scene; an entry the IR's schema cannot read is not applied; a
+// swapped in loads the package again, never a mixed scene; an entry the IR's schema cannot read is refused (readPatch); a
 // collection a patch adds, with a mesh in it, is a control that hides what it holds; a collection's Time Offset reaches what a patch made
 // again; and the buffers a patch replaced are let go of.
 import assert from 'node:assert/strict';
@@ -7,6 +7,7 @@ import { NullEngine } from '@babylonjs/core';
 import { blendData, contextStruct } from '../src/python/bpy_rna.js';
 import { exportPackage } from '../src/io_scene_babylon/js-export.js';
 import { packageState, tablesPatch } from '../src/io_scene_babylon/scene-patch.js';
+import { readPatch } from '../src/io_scene_babylon/runtime/ir.js';
 import { writePackage } from './export-package.js';
 import { openExample } from './open-example.js';
 
@@ -31,14 +32,12 @@ const page = await loaded(last);
 let blend = page.blend;
 const next = async () => { const made = await exported(), patch = { ...tablesPatch(last.state, made.state), buffers: made.made.buffers }; last = made; return patch; };
 
-// An entity the schema cannot read: nothing applied.
+// An entity the schema cannot read: refused where the patch comes in, naming it.
 blendData().objects.get('Key').location[0] += 0.5;
 sync.view();
-const moved = await next(), before = blend.scene.getTransformNodeByName('Key rig').position.x;
-assert.equal(await blend.patch({ ...moved, tables: { ...moved.tables, entities: { 'OB:Key/driver/x': { id: 'OB:Key' } } } }), blend, 'an unreadable entity leaves the same scene');
-assert.equal(blend.scene.getTransformNodeByName('Key rig').position.x, before, 'with none of the patch applied');
-assert.match(warnings.pop() ?? '', /not applied.*ir\.entities\["OB:Key\/driver\/x"\]\.type/, 'naming what it could not read');
-assert.equal(await blend.patch(moved), blend, 'the same patch whole applies');
+const moved = await next();
+assert.throws(() => readPatch({ ...moved, tables: { ...moved.tables, entities: { 'OB:Key/driver/x': { id: 'OB:Key' } } } }), /ir\.entities\["OB:Key\/driver\/x"\]\.type/);
+assert.equal(await blend.patch(readPatch(moved)), blend, 'the patch read applies whole');
 
 // A failure once objects are swapped in (a node hung from a bone of no skeleton): the package loads again.
 const hung = { ...Object.values(moved.tables.nodes)[0], id: 'Hung', name: 'Hung', parent: undefined, parentBone: { skeletonId: 'None', index: 0, mesh: 'OB:Body' } };

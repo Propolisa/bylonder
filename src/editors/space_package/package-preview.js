@@ -7,7 +7,8 @@ import { packageState, tablesPatch } from '../../io_scene_babylon/scene-patch.js
 import { exportChanged } from '../../io_scene_babylon/scoped-export.js';
 
 /**
- * `publish(files)` puts an export's files where the page loads them and gives the page's URL; `post(patch)` sends a
+ * `publish(made, state)` puts an export (exportPackage's, its tables `state`) where the page loads it and gives the
+ * page's URL; `post(patch)` sends a
  * patch to the page; `idle(run)` runs once the app is idle; `report(status)` tells what the view shows.
  */
 export function createPackagePreview({ world, options = {}, publish, post, idle = (run) => setTimeout(run, 400), report = () => {} }) {
@@ -33,7 +34,7 @@ export function createPackagePreview({ world, options = {}, publish, post, idle 
     /** Writes the package again and gives where its page is. */
     async reload() {
       report('Exporting');
-      const { made, state } = await exported(), url = await publish(made.files);
+      const { made, state } = await exported(), url = await publish(made, state);
       last = state;
       report('Loaded');
       return url;
@@ -60,17 +61,15 @@ export const previewPage = (channel) => `<!doctype html>
 <style>html, body, canvas { margin: 0; width: 100%; height: 100%; display: block; overflow: hidden; background: #000; }</style></head>
 <body><canvas id="view"></canvas>
 <script type="module">
-import { createEngine, load } from './scene.js';
+import { createEngine, load, readPatch } from './scene.js';
 const canvas = document.getElementById('view'), engine = await createEngine(canvas);
-let blend = await load(engine), paused = false;
-engine.runRenderLoop(() => { if (!paused) blend.scene.render(); });
+let blend = await load(engine);
+engine.runRenderLoop(() => blend.scene.render());
 addEventListener('resize', () => engine.resize());
-// A patch applied; paused, the game's frame held; reset, the package loaded again and patched to the app's tables.
+// A patch applied, read as it comes in; one it cannot read leaves the scene as it was.
 let patching = Promise.resolve();
-const take = async ({ patch, paused: hold, reset }) => {
-  if (hold !== undefined) paused = hold;
-  if (reset) { blend.dispose(); blend = await (await load(engine)).patch(reset); paused = false; }
-  if (patch) blend = await blend.patch(patch);
+const take = async ({ patch }) => {
+  try { blend = await blend.patch(readPatch(patch)); } catch (error) { console.warn(\`Bylonder: a patch is not applied, the scene stays as it was: \${error.message}\`); }
 };
 new BroadcastChannel(${JSON.stringify(channel)}).onmessage = ({ data }) => { patching = patching.then(() => take(data)); };
 // The scene the page shows, for tests.
