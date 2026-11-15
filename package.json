@@ -11,8 +11,8 @@
     "test:prod": "node tests/e2e/prod.mjs",
     "test:touch": "node tests/e2e/touch.mjs",
     "test:workflows": "node tests/e2e/workflows.mjs",
-    "test": "node scripts/run-tests.mjs",
-    "test:fast": "node scripts/run-tests.mjs --fast",
+    "test": "node scripts/babylon-assets.mjs && node scripts/run-tests.mjs",
+    "test:fast": "node scripts/babylon-assets.mjs && node scripts/run-tests.mjs --fast",
     "module": "node scripts/module.mjs",
     "tools": "node scripts/dev-tools.mjs",
     "gates": "node scripts/gates.mjs"
