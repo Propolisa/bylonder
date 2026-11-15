@@ -94,7 +94,17 @@ CYCLES_SIMD(xor_si128)
 #  undef CYCLES_SIMD
 #  define _mm_set1_ps _mm_set_ps1
 
-#  define _mm_dp_ps(...) simde_mm_dp_ps(__VA_ARGS__)
+/* SIMDe's dot product on wasm is a scalar loop; Cycles' dot() and len() take it, so here it is on wasm's vectors, summed
+ * in dpps's order: (x + y) + (z + w). */
+template<int imm8> SIMDE_FUNCTION_ATTRIBUTES __m128 cycles_dp_ps(const __m128 a, const __m128 b)
+{
+  const v128_t lanes = wasm_i32x4_make(-(imm8 >> 4 & 1), -(imm8 >> 5 & 1), -(imm8 >> 6 & 1), -(imm8 >> 7 & 1));
+  v128_t sum = wasm_v128_and(wasm_f32x4_mul(v128_t(a), v128_t(b)), lanes);
+  sum = wasm_f32x4_add(sum, wasm_i32x4_shuffle(sum, sum, 1, 0, 3, 2));
+  sum = wasm_f32x4_add(sum, wasm_i32x4_shuffle(sum, sum, 2, 3, 0, 1));
+  return __m128(wasm_v128_and(sum, wasm_i32x4_make(-(imm8 & 1), -(imm8 >> 1 & 1), -(imm8 >> 2 & 1), -(imm8 >> 3 & 1))));
+}
+#  define _mm_dp_ps(a, b, imm8) cycles_dp_ps<(imm8)>((a), (b))
 #  define _mm_extract_epi16(...) simde_mm_extract_epi16(__VA_ARGS__)
 #  define _mm_round_ps(...) simde_mm_round_ps(__VA_ARGS__)
 #  define _mm_round_ss(...) simde_mm_round_ss(__VA_ARGS__)

@@ -450,7 +450,11 @@ async function instantiate(url, threads = hardwareThreads(), options) {
   if (!limits?.shared) threads = 1;
   const pool = threads + 4, files2 = threads > 1 && filesBuffer(pool), wasi = wasiFor(() => memory);
   const serve = () => files2 && serveFiles(files2, wasi);
-  const imports = { wasi_snapshot_preview1: wasi, env: env(memory, () => threads, { serve_files: serve }), wasi: { "thread-spawn": (arg) => spawn(arg) } };
+  const died = (at) => {
+    const bytes = new Uint8Array(memory.buffer, at >>> 0, 1020).slice();
+    throw Error(`A thread of Blender's stopped: ${new TextDecoder().decode(bytes.subarray(0, bytes.indexOf(0)))}`);
+  };
+  const imports = { wasi_snapshot_preview1: wasi, env: env(memory, () => threads, { serve_files: serve, threads_died: died }), wasi: { "thread-spawn": (arg) => spawn(arg) } };
   const instance = await WebAssembly.instantiate(module, imports);
   memory = instance.exports.memory;
   if (threads > 1) {

@@ -32,6 +32,7 @@ for (let run = 0; run < runs; run++) {
   const { status, report } = main.run('render.render', {});
   if (!(status & 4)) throw Error(`render.render: ${report}`);
   times.push(performance.now() - start);
+  console.error(`run ${run + 1}: ${(times.at(-1) / 1000).toFixed(2)} s`);
 }
 const size = x.malloc(8) >>> 0;
 x.render_result_size(main.scene, size);

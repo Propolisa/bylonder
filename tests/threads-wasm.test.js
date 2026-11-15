@@ -18,5 +18,8 @@ for (const [what, file] of [['fails to load', worker('throw Error("no module")')
   assert.match(fallback.threadsError ?? '', /^Blender runs on one thread: /, `a worker that ${what}: the reason`);
   assert.equal(fallback.exports.threads_parallel_for(64), 1, `a worker that ${what}: parallel_for runs on the one thread`);
 }
-console.log('threads ok; a failing thread worker leaves Blender on one thread');
+// A thread that stops on a trap while the page waits for it: the page's call throws what stopped it instead of waiting
+// forever.
+assert.throws(() => threaded.exports.threads_trap(), /^Error: A thread of Blender's stopped: RuntimeError: unreachable/, 'a trapped thread is reported');
+console.log('threads ok; a failing thread worker leaves Blender on one thread; a thread that traps is reported, not waited on');
 process.exit(0);

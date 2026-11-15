@@ -226,7 +226,12 @@ polls the job (`wm_jobs_timer`), ends it when it is done (`wm_jobs_handle_finish
 tag. Where the page or a test needs a job's result, it handles the window until no job runs (`wm_jobs_running`), as
 Blender's code tests `WM_jobs_test`. Where no thread can be had (one thread, below) a job runs on the page's thread to
 its end when it starts. The pool has a few workers beyond the processor count for such threads, as oneTBB takes one
-per processor. The snapshot (`wasm_snapshot.py`) keeps wasm-ld's way of
+per processor. A thread's WASI calls on files are made by the page's thread on the same memory (`src/port/thread-files.js`),
+as a process's threads share its files: a worker's own instance has no file system. wasi-libc takes a new thread's
+stack, thread-locals and thread-specific values from malloc where musl maps zeroed pages, so `threads.cc` clears them
+(`__copy_tls`): a thread started on freed memory (a second render's session thread) would read another's oneTBB data.
+A thread that stops on a trap marks a word in the module's memory that the page's waits look at, so the page's call
+throws what stopped it instead of waiting for it forever. The snapshot (`wasm_snapshot.py`) keeps wasm-ld's way of
 starting a shared memory: the first instance copies the data in and takes the first thread's thread-locals, so the
 page's instance is made before the pool's.
 
