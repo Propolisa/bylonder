@@ -64,13 +64,46 @@ static int64_t now()
   return time.tv_sec * 1000000000ll + time.tv_nsec;
 }
 
+/* Side modules (src/port/side-modules.js) the page loaded: each thread's instance loads them too before it next waits
+ * or starts, as a thread that sleeps inside the module receives no messages. */
+static std::atomic<int> side_generation;
+/* The loaded side modules for the threads (side-modules.js writes them): how many instances loaded one, then per
+ * module its bytes, their size, and its memory and table bases. */
+static int side_modules[1 + 4 * 16];
+EXPORT(side_modules_generation) int *side_modules_generation()
+{
+  return reinterpret_cast<int *>(&side_generation);
+}
+EXPORT(side_modules_list) int *side_modules_list()
+{
+  return side_modules;
+}
+static thread_local int side_seen;
+extern "C" __attribute__((import_module("env"), import_name("side_modules_sync"))) void side_modules_sync(int generation);
+static void side_modules_check()
+{
+  const int generation = side_generation.load();
+  if (generation != side_seen) {
+    side_seen = generation;
+    side_modules_sync(generation);
+  }
+}
+
+/* The longest a spawned thread sleeps before it looks for side modules. */
+constexpr int64_t SIDE_MODULES_SLICE_NS = 200000000;
+
 extern "C" int __real___wasilibc_futex_wait(volatile void *addr, int op, int val, int64_t max_wait_ns);
 /* port-override: a browser's page thread cannot block (memory.atomic.wait traps there), so it spins until the futex
- * word changes or the wait times out; threads the module spawned wait as wasi-libc does. */
+ * word changes or the wait times out; threads the module spawned wait as wasi-libc does, in slices between which they
+ * load the side modules the page loaded (a futex wait may return early: its callers check their condition again). */
 extern "C" int __wrap___wasilibc_futex_wait(volatile void *addr, int op, int val, int64_t max_wait_ns)
 {
   if (spawned) {
-    return __real___wasilibc_futex_wait(addr, op, val, max_wait_ns);
+    side_modules_check();
+    const bool sliced = max_wait_ns < 0 || max_wait_ns > SIDE_MODULES_SLICE_NS;
+    const int result = __real___wasilibc_futex_wait(addr, op, val, sliced ? SIDE_MODULES_SLICE_NS : max_wait_ns);
+    side_modules_check();
+    return sliced && result == -ETIMEDOUT ? 0 : result;
   }
   const int64_t start = now();
   int result = 0;

@@ -50,17 +50,22 @@ export async function startThreads(module, memory, count) {
 
 // A worker of the pool: instantiates the module, then runs each thread its slot is given.
 async function thread({ module, memory, control, count, slot }, post) {
-  const { threadImports } = await import('./wasm.js');
+  const [{ threadImports, missing }, { syncSideModules }] = await Promise.all([import('./wasm.js'), import('./side-modules.js')]);
   const slots = new Int32Array(control);
   let instance;
+  const sync = () => syncSideModules(instance.exports, missing);
   try {
-    instance = await WebAssembly.instantiate(module, threadImports(memory, count, threadSpawn(control)));
+    instance = await WebAssembly.instantiate(module, threadImports(memory, count, threadSpawn(control), { side_modules_sync: sync }));
   } catch (error) {
     return post({ starting: true, error: error.message });
   }
   post({});
   for (;;) {
-    for (let state; (state = Atomics.load(slots, slot)) !== STARTED;) Atomics.wait(slots, slot, state);
+    // Waking now and then to load the side modules the page loaded (side-modules.js), as wasm/threads.cc's waits do.
+    for (let state; (state = Atomics.load(slots, slot)) !== STARTED;) {
+      Atomics.wait(slots, slot, state, 200);
+      sync();
+    }
     try {
       instance.exports.wasi_thread_start(slots[slot + 1], slots[slot + 2]);
     } catch (error) {

@@ -266,7 +266,7 @@ const gap = (name) => {
   logged.add(name);
   return 0;
 };
-const missing = new Proxy({}, { get: (_, name) => (...args) => (provided[name] ? provided[name](...args) : gap(name)) });
+export const missing = new Proxy({}, { get: (_, name) => (...args) => (provided[name] ? provided[name](...args) : gap(name)) });
 
 // A module's imported memory (a wasm32-wasi-threads build's, shared): { initial, maximum, shared } from its import
 // section, and where it is shared but threads are not available, the bytes made to import it unshared (the module then
@@ -313,9 +313,10 @@ export const provideModule = (url, module) => compiled.set(url.href, Promise.res
 
 // The imports from JS other than WASI's (env), with what a threaded module imports: its memory and the number of
 // threads it runs on (wasm/threads.cc's processor count).
-const env = (memory, threads) => (memory ? new Proxy({}, { get: (_, name) => ({ memory, hardware_threads: () => threads })[name] ?? missing[name] }) : missing);
-// A thread's imports (wasm-threads.js): WASI's calls on its own file system (threads read no files), and thread-spawn.
-export const threadImports = (memory, threads, spawn) => ({ wasi_snapshot_preview1: wasiFor(() => memory), env: env(memory, threads), wasi: { 'thread-spawn': spawn } });
+const env = (memory, threads, own = {}) => (memory ? new Proxy({}, { get: (_, name) => ({ memory, hardware_threads: () => threads, ...own })[name] ?? missing[name] }) : missing);
+// A thread's imports (wasm-threads.js): WASI's calls on its own file system (threads read no files), thread-spawn, and
+// the thread's own (`own`: loading side modules).
+export const threadImports = (memory, threads, spawn, own) => ({ wasi_snapshot_preview1: wasiFor(() => memory), env: env(memory, threads, own), wasi: { 'thread-spawn': spawn } });
 
 // The module's first thread is the page's: its instance is made first, as the first to instantiate a shared memory's
 // module copies its data in and takes the first thread's thread-locals; the other threads' instances follow.
