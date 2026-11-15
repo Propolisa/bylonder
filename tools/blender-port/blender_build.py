@@ -256,6 +256,21 @@ def stand_ins(tree, out, source):
     return ['-ivfsoverlay', overlay]
 
 
+def header_options(entries):
+    """The build options (WITH_TBB, ...) Blender's own libraries (bf_) compile with that its headers test, which
+    Bylonder's API compiles with too: those headers lay out their types by them (BLI_mutex.hh's Mutex is TBB's or the
+    standard one), so the API sees the types the libraries have."""
+    defined = {a for e in entries if (target_of(e.get('output') or e['command']) or '').startswith('bf_')
+               for a in wasm_command(e, [])[1:] if a.startswith('-DWITH_')}
+    tested = set()
+    for root, _, names in os.walk(os.path.join(BLENDER_TREE, 'source', 'blender')):
+        for name in (n for n in names if n.endswith(('.h', '.hh'))):
+            for line in re.findall(r'^\s*#\s*(?:if|ifdef|ifndef|elif).*$', open(os.path.join(root, name), errors='ignore').read(), re.M):
+                tested.update(re.findall(r'WITH_\w+', line))
+    # Not WITH_HEADLESS: the API draws the interface, built as a Blender with a window builds it (HEADED).
+    return sorted(d for d in defined if d.split('=')[0][2:] in tested and d != '-DWITH_HEADLESS')
+
+
 def glue(host, out, entries, extra):
     """Bylonder's API over Blender (the module build's `api` sources, without its stand-ins), compiled against Blender's
     own headers as this build has them: every include directory Blender's sources use, the generated operator table
@@ -263,7 +278,7 @@ def glue(host, out, entries, extra):
     tree, spec, includes = module_inputs(host, out)
     directories = list(dict.fromkeys(a for e in entries for a in wasm_command(e, [])[1:] if a.startswith('-I')))
     generated = os.path.join(out, 'generated')
-    args = [*extra, '-std=c++20', f'-I{generated}', f'-I{WASM}', *directories,
+    args = [*extra, '-std=c++20', *header_options(entries), f'-I{generated}', f'-I{WASM}', *directories,
             *(f'-I{os.path.join(tree, "source/blender", d)}' for d in wasm_module.EDITOR_INCLUDES), *(f'-I{os.path.join(tree, os.path.dirname(p))}' for p in spec.get('operators', []))]
     wasm_module.operator_table(tree, out, args + FLAGS, spec)
     sources = [os.path.join(WASM, f) for f in [*spec['api'], 'rna-runtime.cc', 'platform.cc', 'ghost-paths.cc', 'draw-seam.cc'] if f not in STAND_INS]
