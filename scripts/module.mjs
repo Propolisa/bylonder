@@ -1,4 +1,4 @@
-// Blender's module (src/bmesh/bmesh.wasm) and the files its CPython reads (python313.zip, scripts.zip, addons.zip) are built from
+// Blender's module (src/bmesh/bmesh.wasm), the files its CPython reads (python313.zip, scripts.zip, addons.zip) and Cycles (cycles.wasm, cycles.zip) are built from
 // tools/blender-port and published by CI as release assets named by that tree's git hash
 // (.github/workflows/blender-wasm.yml), not kept in git.
 //   node scripts/module.mjs        fetches them for the checked-out tree unless a local build is in place
@@ -15,7 +15,7 @@ import { dirname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 export const REPO = 'Propolisa/bylonder', DEMO_RELEASE = 'demo-packages', DEMOS = 'docs/demos';
-const DIR = 'src/bmesh', FILES = ['bmesh.wasm', 'python313.zip', 'scripts.zip', 'addons.zip'];
+const DIR = 'src/bmesh', FILES = ['bmesh.wasm', 'python313.zip', 'scripts.zip', 'addons.zip', 'cycles.wasm', 'cycles.zip'];
 const MODULE = `${DIR}/bmesh.wasm`, MARK = `${MODULE}.key`;
 const key = () => `module-${execFileSync('git', ['rev-parse', 'HEAD:tools/blender-port'], { encoding: 'utf8' }).trim()}`;
 

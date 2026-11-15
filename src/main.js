@@ -3,6 +3,7 @@ import { preloadIcons } from "./editors/interface/icon.js";
 import { mountNodeEditor } from './editors/space_node/node-editor.js';
 import { crossingLosses } from "./blenkernel/light/light-home.js";
 import { report } from "./windowmanager/wm-reports.js";
+import { loadCycles, sceneEngine } from "./render/cycles.js";
 import { syncLightDirections } from "./runtime/object-transform.js";
 import { createCompositorBackdrop } from './editors/space_node/compositor-backdrop.js';
 import { createNodeContexts } from './editors/space_node/contexts.js';
@@ -831,6 +832,13 @@ const sequencerAdapter = createSequencerAdapter({
   notify,
 });
 world.renderSettings.subscribe(() => sequencerAdapter.setFormat(sequencerFormat()));
+// Cycles is fetched and started when the scene's render engine becomes Cycles (render/cycles.js), not before.
+let renderEngine = null;
+blenderAreas.watchRedraws(() => {
+  const engine = sceneEngine(world);
+  if (engine === "CYCLES" && renderEngine !== engine) loadCycles().catch((error) => report("ERROR", error.message));
+  renderEngine = engine;
+});
 animation.time.subscribe((kind) => { if (kind === "settings" || kind === "load") sequencerAdapter.setFormat(sequencerFormat()); });
 // Opening the Video Sequencer on an empty edit offers to set it up for video editing of this scene.
 const addSceneStrip = async (menu, scene) => (await sequencerAdapter.menus()).Add.find((entry) => entry.label === menu).items()[hostScenes().findIndex((s) => s.id === scene.id)].run();

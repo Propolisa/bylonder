@@ -281,6 +281,67 @@
   }
  },
  {
+  "id": "cycles",
+  "title": "Cycles",
+  "summary": "Render Image with Blender's own Cycles path tracer, run in the page on all its processors and fetched the first time the render engine becomes Cycles.",
+  "expect": "A still renders as Blender's Cycles renders it on the CPU (the same image for the same samples and seed), several times slower than desktop Blender, without denoising; the page stays usable while it renders.",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/render/cycles/index.html",
+   "https://docs.blender.org/manual/en/5.2/render/cycles/render_settings/sampling.html",
+   "https://docs.blender.org/manual/en/5.2/render/output/render_output.html"
+  ],
+  "example": "rendering",
+  "thumbnail": "cycles/thumbnail.png",
+  "media": [
+   "cycles/engine-pick.gif",
+   "cycles/engine.png",
+   "cycles/render-image.gif",
+   "cycles/render-result.png"
+  ],
+  "ui": [
+   "PROPERTIES",
+   "RENDER_PT_context",
+   "TOPBAR_MT_render"
+  ],
+  "operators": [
+   "render.render"
+  ],
+  "code": [
+   "src/render/cycles.js",
+   "src/editors/render/cycles-source.js",
+   "src/port/side-modules.js",
+   "tools/blender-port/wasm/cycles-api.cc",
+   "tools/blender-port/wasm/render-api.cc"
+  ],
+  "tests": [
+   "tests/cycles-wasm.test.js",
+   "tests/threads-wasm.test.js"
+  ],
+  "limits": [
+   "Cycles needs threads, so a cross-origin isolated page and Preferences > System > Bylonder > Threads on Auto; Safari, which cannot isolate a page this way, has no Cycles.",
+   "The CPU device only, on Cycles' plain kernel (WebAssembly has no SSE or AVX), several times slower than desktop Blender's CPU render; no GPU devices.",
+   "No denoising (OpenImageDenoise), no Open Shading Language, no Embree, no path guiding and no NanoVDB volumes yet.",
+   "Render Image of a still only; Render Animation, the 3D Viewport's Rendered shading and baking with Cycles are not done yet.",
+   "Cycles' panels in Properties > Render come with its add-on once it is fetched; Bylonder's own render panels for Babylon show beside them."
+  ],
+  "page": "docs/features/cycles.md",
+  "open": "https://propolisa.github.io/bylonder/#example=rendering",
+  "example_title": "Window Light",
+  "coverage": {
+   "operators": {
+    "supported": 3,
+    "partial": 0,
+    "total": 4
+   },
+   "ui": {
+    "supported": 2,
+    "partial": 0,
+    "total": 2
+   }
+  }
+ },
+ {
   "id": "drivers-and-graph-editor",
   "title": "Drivers and the Graph Editor",
   "summary": "Shape animation as F-curves in the Graph Editor, repeat or shake them with F-curve modifiers, and drive one property from others with drivers, here a steam engine whose flywheel moves everything else.",
@@ -632,6 +693,7 @@
   ],
   "limits": [
    "Volumes are evaluated but not drawn; curves draw as the hair curves do.",
+   "Evaluation runs on all cores where the page is cross-origin isolated; in Safari, and in a page that embeds the app without isolation, it runs on one thread.",
    "Instances draw where their geometry is a mesh, an object or a point cloud; instanced curves and volumes do not.",
    "Instance attributes (a color per instance) do not reach the material yet: an instance draws in its mesh's first material.",
    "Points are spheres in their material in every shading mode; Solid does not give them Workbench's studio light yet.",
@@ -1515,7 +1577,8 @@
    "tests/modifiers-wasm.test.js"
   ],
   "limits": [
-   "Modifier panels lay out Blender's properties in a narrow column, so long labels are cut short."
+   "Modifier panels lay out Blender's properties in a narrow column, so long labels are cut short.",
+   "Evaluation runs on all cores where the page is cross-origin isolated; in Safari, and in a page that embeds the app without isolation, it runs on one thread."
   ],
   "page": "docs/features/modifiers.md",
   "open": "https://propolisa.github.io/bylonder/#example=arrays",

@@ -22,6 +22,13 @@ function memoryInfo(module) {
 
 const aligned = (pointer, alignment) => (pointer + alignment - 1) & -alignment;
 
+// Memory for a side module's data or thread-locals, zeroed as a module's own starts: its .bss is not in its segments.
+function zeroed(main, size, alignment) {
+  const pointer = aligned(main.malloc(size + alignment) >>> 0, alignment) >>> 0;
+  new Uint8Array(main.memory.buffer, pointer >>> 0, size).fill(0);
+  return pointer;
+}
+
 // Instantiates a side module in one instance of the Blender module (`main`, its exports), with `missing` for the
 // functions nothing defines (they throw when called). The first instance (the page's) applies its data relocations and
 // runs its constructors; each other one gives it thread-locals of its own (`tls`, from the page: a thread may look for
@@ -73,7 +80,7 @@ const list = (main) => new Int32Array(main.memory.buffer, main.side_modules_list
 export async function loadSideModule(main, bytes, missing, threads = 1) {
   const module = await WebAssembly.compile(bytes);
   const info = memoryInfo(module);
-  const memoryBase = aligned(main.malloc(info.memorySize + info.memoryAlign) >>> 0, info.memoryAlign);
+  const memoryBase = zeroed(main, info.memorySize, info.memoryAlign);
   const place = { memoryBase, tableBase: main.__indirect_function_table.length };
   const instance = link(module, main, place, true, missing);
   if (threads > 1) {
@@ -82,7 +89,7 @@ export async function loadSideModule(main, bytes, missing, threads = 1) {
     const generation = new Int32Array(main.memory.buffer, main.side_modules_generation() >>> 0, 1);
     const at = 1 + FIELDS * Atomics.load(generation, 0);
     const { __tls_size: size, __tls_align: align } = instance.exports, stride = aligned(size?.value ?? 0, align?.value ?? 1);
-    const blocks = stride ? aligned(main.malloc(stride * (threads - 1) + align.value) >>> 0, align.value) : 0;
+    const blocks = stride ? zeroed(main, stride * (threads - 1), align.value) : 0;
     list(main).set([copy, bytes.byteLength, place.memoryBase, place.tableBase, blocks, stride, 0], at);
     const loaded = Atomics.add(generation, 0, 1) + 1;
     // Each thread loads it at its next wait or start (at most wasm/threads.cc's slice later).
