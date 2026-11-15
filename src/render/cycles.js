@@ -20,7 +20,7 @@ export function loadCycles() {
     report('INFO', 'Cycles is loading');
     const [bytes, addon] = await Promise.all([read(MODULE), read(ADDON), startPython()]);
     for (const [name, data] of await unzip(addon)) files.set(`/blender/scripts/${name}`, data);
-    const cycles = await loadSideModule(blenderModule.exports, bytes, missing, blenderModule.threads);
+    const cycles = await loadSideModule(blenderModule.exports, bytes, missing, blenderModule.workers);
     cycles.cycles_start();
     report('INFO', 'Cycles loaded');
   })());

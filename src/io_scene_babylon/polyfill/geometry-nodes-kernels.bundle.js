@@ -402,23 +402,25 @@ var compile = (url) => compiled.get(url.href) ?? compiled.set(url.href, read(url
 var env = (memory, threads, own = {}) => memory ? new Proxy({}, { get: (_, name) => ({ memory, hardware_threads: () => threads(), ...own })[name] ?? missing[name] }) : missing;
 async function instantiate(url, threads = hardwareThreads(), options) {
   const { module, memory: limits } = await compile(url);
-  let memory = limits && new WebAssembly.Memory(limits), spawn = () => -6, threadsError;
+  let memory = limits && new WebAssembly.Memory(limits), spawn = () => -6, threadsError, workers = 0;
   if (!limits?.shared) threads = 1;
   const imports = { wasi_snapshot_preview1: wasiFor(() => memory), env: env(memory, () => threads), wasi: { "thread-spawn": (arg) => spawn(arg) } };
   const instance = await WebAssembly.instantiate(module, imports);
   memory = instance.exports.memory;
   if (threads > 1) {
     try {
-      spawn = await startThreads(module, memory, threads + 4, options);
+      workers = threads + 4;
+      spawn = await startThreads(module, memory, workers, options);
     } catch (error) {
       threadsError = `Blender runs on one thread: ${error.message}`;
       console.warn(threadsError);
       threads = 1;
+      workers = 0;
     }
   }
   instance.exports._initialize?.();
   instance.exports.blender_init?.();
-  return Object.assign(new Heap(instance.exports, threads), { threadsError });
+  return Object.assign(new Heap(instance.exports, threads), { threadsError, workers });
 }
 var size = (array) => array.byteLength + 7 & ~7;
 var Heap = class {

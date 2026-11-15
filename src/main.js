@@ -836,7 +836,8 @@ world.renderSettings.subscribe(() => sequencerAdapter.setFormat(sequencerFormat(
 let renderEngine = null;
 blenderAreas.watchRedraws(() => {
   const engine = sceneEngine(world);
-  if (engine === "CYCLES" && renderEngine !== engine) loadCycles().catch((error) => report("ERROR", error.message));
+  // Its add-on's panels show once it is loaded.
+  if (engine === "CYCLES" && renderEngine !== engine) loadCycles().then(refreshUI, (error) => report("ERROR", error.message));
   renderEngine = engine;
 });
 animation.time.subscribe((kind) => { if (kind === "settings" || kind === "load") sequencerAdapter.setFormat(sequencerFormat()); });
