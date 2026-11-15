@@ -8,7 +8,7 @@
 // usage: npm run build && npm run test:prod   (E2E_URL checks a running server instead)
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -584,9 +584,13 @@ try {
       assert.ok(response.ok, `the ${demo} demo's package (${asset}) is not in the build: run npm run module before npm run build`);
       const page = await browser.newPage(), errors = [];
       page.on("pageerror", (error) => errors.push(error.message));
-      // The page fetches Babylon's modules from the CDN, which on a CI runner can take longer than goto's limit to
-      // finish loading; the wait for window.demo below is the real readiness check.
-      await page.goto(new URL(`docs/demos/${demo}/index.html?step`, server.url).href, { waitUntil: "domcontentloaded" });
+      // The page imports Babylon from the CDN, hundreds of modules that can take minutes on a CI runner; the check
+      // serves the same version from node_modules, so it tests the page, not the network.
+      await page.route(/cdn\.jsdelivr\.net\/npm\/@babylonjs\/core@[^/]+\//, (route) => {
+        const file = new URL(`../../node_modules/@babylonjs/core/${route.request().url().replace(/^.*@babylonjs\/core@[^/]+\//, "")}`, import.meta.url);
+        return existsSync(file) ? route.fulfill({ path: fileURLToPath(file), contentType: "text/javascript" }) : route.continue();
+      });
+      await page.goto(new URL(`docs/demos/${demo}/index.html?step`, server.url).href, { waitUntil: "commit" });
       await page.waitForFunction(() => window.demo, null, { timeout: 5 * 60 * 1000 });
       assert.deepEqual(errors, [], `the ${demo} demo's page errors`);
       await page.close();
