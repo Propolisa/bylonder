@@ -326,26 +326,29 @@ export const threadImports = (memory, threads, spawn, own, { buffer, slot, notif
 // why. `options`: startThreads'.
 export async function instantiate(url, threads = hardwareThreads(), options) {
   const { module, memory: limits } = await compile(url);
-  let memory = limits && new WebAssembly.Memory(limits), spawn = () => -6, threadsError;
+  let memory = limits && new WebAssembly.Memory(limits), spawn = () => -6, threadsError, workers = 0;
   if (!limits?.shared) threads = 1;
   // A worker per processor for oneTBB, and spares for threads of Blender's own (window-manager jobs, Cycles' session).
-  const workers = threads + 4, files = threads > 1 && filesBuffer(workers), wasi = wasiFor(() => memory);
+  const pool = threads + 4, files = threads > 1 && filesBuffer(pool), wasi = wasiFor(() => memory);
   const serve = () => files && serveFiles(files, wasi);
   const imports = { wasi_snapshot_preview1: wasi, env: env(memory, () => threads, { serve_files: serve }), wasi: { 'thread-spawn': (arg) => spawn(arg) } };
   const instance = await WebAssembly.instantiate(module, imports);
   memory = instance.exports.memory;
   if (threads > 1) {
     try {
+      workers = pool;
       spawn = await startThreads(module, memory, workers, { ...options, files, serve });
     } catch (error) {
       threadsError = `Blender runs on one thread: ${error.message}`;
       console.warn(threadsError);
       threads = 1;
+      workers = 0;
     }
   }
   instance.exports._initialize?.();
   instance.exports.blender_init?.();
-  return Object.assign(new Heap(instance.exports, threads), { threadsError });
+  // `workers`: the pool's instances of the module, each of which loads a side module too (side-modules.js).
+  return Object.assign(new Heap(instance.exports, threads), { threadsError, workers });
 }
 
 // Bytes an argument takes in scratch, 8-aligned so every typed array view lines up.

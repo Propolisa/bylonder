@@ -18,6 +18,10 @@ const main = blenderMain();
 setContextPointer(main.C);
 main.readBlend(await readFile(new URL('../examples/rendering/rendering.blend', import.meta.url)));
 await loadCycles();
+// Every worker of the thread pool, spares too, loaded Cycles before the bytes it loads them from were freed (a page that
+// rendered before reuses that memory at once).
+const loads = new Int32Array(x.memory.buffer, x.side_modules_list() >>> 0, 1)[0];
+assert.equal(loads, blenderModule.workers, `each of the pool's ${blenderModule.workers} workers loaded Cycles, not ${loads}`);
 const scene = pointerStruct(structFind('Scene'), main.scene, main.scene);
 scene.render.engine = 'CYCLES';
 assert.equal(scene.render.engine, 'CYCLES', "Cycles' add-on registered its render engine");
