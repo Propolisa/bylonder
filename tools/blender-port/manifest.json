@@ -139,6 +139,9 @@
       "targets": {
         "bf_imbuf": {"uses": ["libjpeg-turbo", "openimageio", "opencolorio", "imath"], "defines": ["OIIO_STATIC_DEFINE", "OpenColorIO_SKIP_IMPORTS"]},
         "bf_imbuf_openexr": {"uses": ["openexr", "imath"]},
+        "bf_blenkernel": {"uses": ["zstd"]},
+        "bf_blenloader": {"uses": ["zstd"]},
+        "bf_editor_sculpt_paint": {"uses": ["zstd"]},
         "bf_imbuf_openimageio": {"uses": ["openimageio", "imath"], "defines": ["OIIO_STATIC_DEFINE"]},
         "bf_intern_cycles": {"uses": ["openimageio", "opencolorio", "imath"], "defines": ["OIIO_STATIC_DEFINE", "OpenColorIO_SKIP_IMPORTS"]},
         "cycles_bvh": {"uses": ["openimageio", "opencolorio", "imath"], "defines": ["OIIO_STATIC_DEFINE", "OpenColorIO_SKIP_IMPORTS"]},
@@ -154,7 +157,7 @@
         "bf_imbuf_opencolorio": {"uses": ["opencolorio", "imath"], "defines": ["OpenColorIO_SKIP_IMPORTS"]},
         "bf_compositor": {"uses": ["opencolorio", "imath", "fftw3"], "defines": ["OpenColorIO_SKIP_IMPORTS", "WITH_FFTW3"]},
         "bf_nodes_composite": {"uses": ["fftw3"], "defines": ["WITH_FFTW3"]},
-        "bf_blenlib": {"uses": ["fftw3"], "defines": ["WITH_FFTW3"]}
+        "bf_blenlib": {"uses": ["fftw3", "zlib", "zstd"], "defines": ["WITH_FFTW3"]}
       },
       "libraries": [
         {"dependency": "tbb", "path": "src/tbb", "defines": ["__TBB_BUILD", "__unix__", "__TBB_DYNAMIC_LOAD_ENABLED=0", "__TBB_RESUMABLE_TASKS_USE_THREADS=1"]},
