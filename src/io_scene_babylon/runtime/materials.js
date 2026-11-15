@@ -194,13 +194,14 @@ function unregistered(node, kernels) {
 const warned = new Set();
 
 // Blender's matrices of the drawn object and view from Babylon's: Blender's axes swap y and z (S), its view looks down
-// -z (F).
+// -z (F). S and F are their own inverses, so an inverse inverts Babylon's matrix alone: the GLSL to WGSL conversion
+// writes an inverse out with its argument repeated in every term, which DXC (WebGPU on D3D12) took up to 140 s to compile.
 const S = 'mat4(1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0)';
 const F = 'mat4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0)';
 /** @type {Record<string, (m: (name: string) => string) => string>} */
 const MATRICES = {
-  $model: (m) => `${S} * ${m('world')} * ${S}`, $model_inverse: (m) => `inverse(${S} * ${m('world')} * ${S})`,
-  $viewmat: (m) => `${F} * ${m('view')} * ${S}`, $viewinv: (m) => `inverse(${F} * ${m('view')} * ${S})`, $winmat: (m) => `${m('projection')} * ${F}`,
+  $model: (m) => `${S} * ${m('world')} * ${S}`, $model_inverse: (m) => `${S} * inverse(${m('world')}) * ${S}`,
+  $viewmat: (m) => `${F} * ${m('view')} * ${S}`, $viewinv: (m) => `${S} * inverse(${m('view')}) * ${F}`, $winmat: (m) => `${m('projection')} * ${F}`,
 };
 
 /**

@@ -1,3 +1,4 @@
+// tags: materials, webgpu
 // Materials on the IR (runtime/materials.js): a material's nodes, made into per-node kernels at export, are fused again
 // from the IR graph alone: into an exported material's node block, or into a NodeMaterial of Babylon's own blocks. The
 // result builds, compiles to WGSL as Babylon's WebGPU engine does, and draws each graph of one structure with one body;
@@ -21,6 +22,9 @@ const TREES = {
     ['ShaderNodeBsdfGlossy', 'Glossy'], ['ShaderNodeMixShader', 'Mix']],
   [['Coordinates', 'Object', 'Noise', 'Vector'], ['Noise', 'Color', 'Diffuse', 'Color'], ['Noise', 'Fac', 'Math', 'Value'], ['Math', 'Value', 'Mix', 'Fac'],
     ['Diffuse', 'BSDF', 'Mix', 'Shader'], ['Glossy', 'BSDF', 'Mix', 'Shader_001'], ['Mix', 'Shader', 'Material Output', 'Surface']]],
+  // A tangent space normal map, whose tangent reads the object's inverse matrix.
+  Bumpy: [[['ShaderNodeTexNoise', 'Noise'], ['ShaderNodeNormalMap', 'Normal Map'], ['ShaderNodeBsdfPrincipled', 'Principled']],
+    [['Noise', 'Color', 'Normal Map', 'Color'], ['Normal Map', 'Normal', 'Principled', 'Normal'], ['Principled', 'BSDF', 'Material Output', 'Surface']]],
   // A value linked into a shader input: an Emission of it, as Blender casts it.
   Glow: [[['ShaderNodeTexNoise', 'Noise']], [['Noise', 'Color', 'Material Output', 'Surface']]],
 };
@@ -63,6 +67,13 @@ assert.deepEqual(pieces('Lava 2'), pieces('Lava'), 'materials of one structure s
 const body = (name) => fuse(ir, key(name), { kernels, sources: (source) => source }).code([]).join('\n');
 assert.equal(body('Lava 2'), body('Lava'), 'and their body');
 
+// No inverse() of a product in a material's shader: the GLSL to WGSL conversion repeats its argument in every term of
+// the inverse, which DXC (WebGPU on D3D12) took up to 140 s to compile (runtime/materials.js MATRICES).
+const INVERTED_PRODUCT = /\binverse\((?:[^()]|\([^()]*\))*?\*/;
+const invertsNoProduct = (code, name) => assert.doesNotMatch(code, INVERTED_PRODUCT, `${name}: inverts no product of matrices`);
+assert.match(body('Bumpy'), /\binverse\(/, "Bumpy's body inverts the object's matrix (Normal Map's tangent)");
+for (const name of Object.keys(TREES)) invertsNoProduct(body(name), name);
+
 const ready = async (material) => {
   for (let i = 0; i < 100 && !material._buildWasSuccessful; i++) await new Promise((resolve) => setTimeout(resolve, 20));
   return material._buildWasSuccessful;
@@ -75,6 +86,7 @@ for (const [material] of materials) {
   assert.deepEqual(nodes.options.code, [], `${material.name}: the export ships no code for its nodes`);
   fillMaterials([entry], ir, kernels);
   assert.match(nodes.options.code.join('\n'), /void bl_nodes\(/, `${material.name}: the page makes it from the IR`);
+  invertsNoProduct(nodes.options.code.join('\n'), material.name);
   const parsed = NodeMaterial.Parse(entry, new Scene(engine));
   assert.ok(await ready(parsed), `${material.name}: the filled material builds`);
 }
@@ -95,6 +107,7 @@ const compiled = async (material) => {
   // A material of the same shader as one before reuses its effect.
   assert.ok(drawn, `${material.name}: compiled`);
   for (const { errors } of gpu.results.slice(from)) assert.deepEqual(errors, [], material.name);
+  invertsNoProduct(material._fragmentCompilationState._builtCompilationString, material.name);
 };
 for (const [material] of materials) await compiled(buildNodeMaterial(ir, key(material.name), view, { kernels, name: `${material.name} (IR)` }));
 

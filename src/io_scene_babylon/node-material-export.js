@@ -52,14 +52,15 @@ const PBR_SETTINGS = ['lightFalloff', 'useAlphaTest', 'alphaTestCutoff', 'useAlp
 const MATERIAL_SETTINGS = ['alphaMode', 'backFaceCulling', 'separateCullingPass', 'transparencyMode', 'needDepthPrePass', 'forceDepthWrite', 'alpha'];
 
 // Blender's matrices of the drawn object and view from Babylon's (shader-nodes.js MESH_VALUES): Blender's axes swap y
-// and z (S), and its view looks down -z (F).
+// and z (S), and its view looks down -z (F). Both are their own inverses, so an inverse inverts Babylon's matrix alone
+// (runtime/materials.js says why).
 const S = 'mat4(1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0)';
 const F = 'mat4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0)';
 // Per-mesh values the page gives each mesh it draws (runtime/materials.js), as InputBlocks of this name prefix.
 const PAGE_MESH_VALUES = ['$texspace_location', '$texspace_size'];
 const MATRICES = {
-  $model: `${S} * bl_world * ${S}`, $model_inverse: `inverse(${S} * bl_world * ${S})`, $viewmat: `${F} * bl_view * ${S}`,
-  $viewinv: `inverse(${F} * bl_view * ${S})`, $winmat: `bl_projection * ${F}`,
+  $model: `${S} * bl_world * ${S}`, $model_inverse: `${S} * inverse(bl_world) * ${S}`, $viewmat: `${F} * bl_view * ${S}`,
+  $viewinv: `${S} * inverse(bl_view) * ${F}`, $winmat: `bl_projection * ${F}`,
 };
 
 // A node's unlinked input as the export's tunable value: a Babylon InputBlock named by the input's RNA path from its

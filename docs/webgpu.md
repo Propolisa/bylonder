@@ -51,6 +51,10 @@ Bylonder's shaders are GLSL only, on both backends; Babylon converts them on Web
   both backends; on WebGPU the engine sends Babylon's compile failure through the effect's error path. A pipeline the
   GPU rejects (FXC, a shader compiler Dawn uses on D3D12, fails some WGSL) fails its effect the same way, so the
   objects using it are skipped and reported once instead of invalidating the frame, which would draw nothing.
+- A node material inverts Babylon's world and view matrices alone, never a product of them (Blender's axes are a swap
+  of Babylon's, its own inverse): Tint writes `inverse()` out with its argument repeated in every term, and DXC took
+  up to 140 s to compile such a shader (Snow's materials with a normal map), with no frame drawn meanwhile.
+  `tests/ir-materials.test.js` fails on an inverse of a product in a node material's shader.
 - WebGPU passes at most 28 values between a shader's stages and, unlike WebGL 2, packs no floats together. Babylon
   passes each shadow's depth metric beside its light-space position (one value per shadow, four per sun with cascades);
   on WebGPU the engine derives it in the fragment stage from that position instead
