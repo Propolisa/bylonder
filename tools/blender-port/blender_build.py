@@ -583,6 +583,7 @@ def cycles_addon(out, tree):
     when Cycles first renders."""
     source = os.path.join(tree, 'intern', 'cycles', 'blender', 'addon')
     path = os.path.join(out, 'python', 'cycles.zip')
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     with zipfile.ZipFile(path, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
         for directory, _, names in os.walk(source):
             for name in sorted(names):

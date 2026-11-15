@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 const repo = fileURLToPath(new URL('..', import.meta.url));
 const DISTRO = 'bylonder-build';
 const ROOTFS = 'https://cloud-images.ubuntu.com/wsl/releases/24.04/current/ubuntu-noble-wsl-amd64-wsl.rootfs.tar.gz';
-const OUTPUTS = ['bmesh.wasm', 'python313.zip', 'scripts.zip', 'addons.zip'];
+const OUTPUTS = ['bmesh.wasm', 'python313.zip', 'scripts.zip', 'addons.zip', 'cycles.wasm', 'cycles.zip'];
 const BUILD = (dir) => `set -euo pipefail; bash tools/blender-port/configure_host.sh ${dir}; JOBS=\${JOBS:-$(nproc)} python3.13 tools/blender-port/blender_build.py ${dir}/build-host`;
 
 const run = (command, args, options = {}) => execFileSync(command, args, { stdio: 'inherit', ...options });
