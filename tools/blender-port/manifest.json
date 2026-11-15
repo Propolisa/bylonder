@@ -150,7 +150,7 @@
         "cycles_scene": {"uses": ["openimageio", "opencolorio", "imath"], "defines": ["OIIO_STATIC_DEFINE", "OpenColorIO_SKIP_IMPORTS"]},
         "cycles_session": {"uses": ["openimageio", "opencolorio", "imath"], "defines": ["OIIO_STATIC_DEFINE", "OpenColorIO_SKIP_IMPORTS"]},
         "cycles_subd": {"uses": ["openimageio", "opencolorio", "imath"], "defines": ["OIIO_STATIC_DEFINE", "OpenColorIO_SKIP_IMPORTS"]},
-        "cycles_util": {"uses": ["openimageio", "opencolorio", "imath"], "defines": ["OIIO_STATIC_DEFINE", "OpenColorIO_SKIP_IMPORTS"]},
+        "cycles_util": {"uses": ["openimageio", "opencolorio", "imath", "zstd"], "defines": ["OIIO_STATIC_DEFINE", "OpenColorIO_SKIP_IMPORTS"]},
         "bf_imbuf_opencolorio": {"uses": ["opencolorio", "imath"], "defines": ["OpenColorIO_SKIP_IMPORTS"]},
         "bf_compositor": {"uses": ["opencolorio", "imath", "fftw3"], "defines": ["OpenColorIO_SKIP_IMPORTS", "WITH_FFTW3"]},
         "bf_nodes_composite": {"uses": ["fftw3"], "defines": ["WITH_FFTW3"]},
