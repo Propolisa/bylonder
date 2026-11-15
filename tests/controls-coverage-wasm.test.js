@@ -31,35 +31,47 @@ async function syncedIn(id) {
   }
   for (const material of world.scene.materials) add('Material', material);
   for (const struct of SCENE_STRUCTS) add(struct, world);
-  return Object.fromEntries(Object.entries(found).map(([struct, names]) => [struct, [...names]]));
+  // The properties a full export binds to the scene, by struct and name: a measured kind that binds none here is set by
+  // the export's patch.
+  const { exportPackage } = await import('../src/io_scene_babylon/js-export.js');
+  const { packageState } = await import('../src/io_scene_babylon/scene-patch.js');
+  const ROOTS = { objects: 'Object', lights: 'Light', cameras: 'Camera' }, bound = new Set();
+  for (const [path, property] of Object.entries(packageState(await exportPackage(world, {})).tables.properties)) {
+    const [, root, name] = /^(\w+)\["(?:[^"\\]|\\.)*"\]\.(\w+)/.exec(path) ?? [];
+    if (property?.bind && ROOTS[root]) bound.add(`${ROOTS[root]}.${name}`);
+  }
+  return { structs: Object.fromEntries(Object.entries(found).map(([struct, names]) => [struct, [...names]])), bound: [...bound] };
 }
 
 const id = process.argv[2];
 if (id) console.log(JSON.stringify(await syncedIn(id)));
 else {
-  const { SYNCED, KEPT, REBUILD, RELOAD, APP } = await import('../src/io_scene_babylon/controls-export.js');
+  const { SYNCED, KEPT, REBUILD, RELOAD, NONE, APP } = await import('../src/io_scene_babylon/controls-export.js');
   const run = promisify(execFile), self = fileURLToPath(import.meta.url);
   const scenes = await Promise.all(SCENES.map(async (scene) => [scene, JSON.parse((await run(process.execPath, [self, scene], { encoding: 'utf8', maxBuffer: 1 << 26 })).stdout.trim().split('\n').at(-1))]));
   // A light of any type binds as Light (rna-bylonder.js LIGHT_STRUCTS).
   const tableOf = (struct) => SYNCED[struct] ?? (/Light$/.test(struct) ? SYNCED.Light : undefined);
-  const lines = [], gaps = [], reloads = new Set(), pending = new Map();
-  for (const [scene, structs] of scenes) {
-    const count = { fast: 0, rebuild: 0, reload: 0, app: 0, pending: 0 };
+  const lines = [], gaps = [], reloads = new Set(), undrawn = new Set(), pending = new Map();
+  for (const [scene, { structs, bound }] of scenes) {
+    const count = { fast: 0, rebuild: 0, reload: 0, none: 0, app: 0, pending: 0 };
     for (const [struct, names] of Object.entries(structs)) for (const name of names) {
       const table = tableOf(struct), kind = table?.[name];
       if (!table) { count.pending++; pending.set(struct, new Set([...(pending.get(struct) ?? []), name])); }
       else if (kind === undefined) gaps.push(`${scene}: ${struct}.${name}`);
-      else if (typeof kind === 'function' || kind === KEPT) count.fast++;
+      else if (typeof kind === 'function') count[bound.includes(`${/Light$/.test(struct) ? 'Light' : struct}.${name}`) ? 'fast' : 'rebuild']++;
+      else if (kind === KEPT) count.fast++;
       else if (kind === REBUILD) count.rebuild++;
       else if (kind === RELOAD) { count.reload++; reloads.add(`${struct}.${name}`); }
+      else if (kind === NONE) { count.none++; undrawn.add(`${/Light$/.test(struct) ? 'Light' : struct}.${name}`); }
       else if (kind === APP) count.app++;
     }
     const covered = count.fast + count.rebuild + count.reload;
-    lines.push(`${scene}: ${covered} covered (${count.fast} fast, ${count.rebuild} rebuild, ${count.reload} reload), ${count.app} the editor's, ${count.pending} not in the table yet`);
+    lines.push(`${scene}: ${covered} covered (${count.fast} fast, ${count.rebuild} rebuild, ${count.reload} reload), ${count.none} not drawn by pages, ${count.app} the editor's, ${count.pending} not in the table yet`);
   }
   assert.deepEqual(gaps, [], `synced properties with no kind in controls-export.js SYNCED: ${gaps.join(', ')}`);
   console.log(lines.join('\n'));
   console.log(`Reload: ${[...reloads].sort().join(', ') || 'none'}`);
+  console.log(`Not drawn by pages: ${[...undrawn].sort().join(', ') || 'none'}`);
   console.log(`Not in the table yet: ${[...pending].map(([struct, names]) => `${struct} (${names.size})`).join(', ') || 'none'}`);
   console.log('Controls coverage: every synced property of a struct in the table has a kind');
 }

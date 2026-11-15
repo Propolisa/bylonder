@@ -57,6 +57,8 @@ const shown = (run) => {
     shape: morph?.influence,
     // The camera's field of view, as its frame fits it (rounded: Blender's and the bind's arithmetic differ in the last bits).
     lens: find(scene.cameras, 'Camera') && +find(scene.cameras, 'Camera').fov.toFixed(6),
+    // Whether the light casts shadows at all.
+    shadows: light?.shadowEnabled,
     // Whether the body casts the light's shadow (a light none casts on has no shadow map).
     shadow: light && !!light.getShadowGenerator()?.getShadowMap().renderList.some((mesh) => mesh.name === 'Body'),
   };
@@ -66,9 +68,10 @@ const objects = blendData().objects, skin = blendData().materials.get('Skin').no
 const EDITS = {
   transform: () => { objects.get('Key').location[0] += 0.5; },
   color: () => { skin.default_value[0] = 0.9; },
-  light: () => { objects.get('Key').data.energy *= 2; objects.get('Key').data.color[1] = 0.5; },
+  light: () => { objects.get('Key').data.energy *= 2; objects.get('Key').data.color[1] = 0.5; objects.get('Key').data.exposure = 0.5; },
   shape: () => { blendData().shape_keys.get('Key').key_blocks.get('Breathe').value = 0.75; },
   shadow: () => { objects.get('Body').visible_shadow = false; },
+  shadows: () => { objects.get('Key').data.use_shadow = false; },
   lens: () => { objects.get('Camera').data.lens *= 1.5; objects.get('Camera').data.sensor_width = 30; },
 };
 for (const [kind, edit] of Object.entries(EDITS)) {

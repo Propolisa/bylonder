@@ -80,6 +80,9 @@ const FLOAT_EPSILON = 1.1920928955078125e-7;
  * @property {string} [channel] the key in its node's `metadata.bylonderChannels` the scene's animation sets it through
  * @property {string} [collection] a collection's visibility flag or time offset: the key of the collection it sets
  * @property {boolean} [offset] a collection's time offset (Bylonder's own): frames its objects' animation plays later
+ * @property {[string, number][]} [properties] the node's properties a value sets, each by its factor
+ * @property {{ size: string, blend: string }} [spot] a spot light's cone: the paths of its size and blend
+ * @property {{ energy: string, exposure: string, factor: number }} [power] a light's intensity: its energy times 2 to its exposure, by the factor
  * @property {boolean} [shadow] whether its node's meshes cast the lights' shadows (Object > Visibility > Shadow)
  */
 
@@ -806,6 +809,16 @@ export class BlendScene {
       const object = Object.keys(this.ir.ids).find((k) => this.ir.ids[k].node === bind.node);
       if (object) this.#showObjects([object]);
       else hide(node, this.#hidden(path.slice(0, path.lastIndexOf('.'))));
+    } else if (bind.properties) {
+      for (const [property, factor] of bind.properties) assign(node, property, /** @type {number} */ (value) * factor);
+    } else if (bind.power) {
+      const { energy, exposure, factor } = bind.power;
+      node.intensity = /** @type {number} */ (this.#values.get(energy)) * 2 ** /** @type {number} */ (this.#values.get(exposure) ?? 0) * factor;
+    } else if (bind.spot) {
+      // Blender's spot blend is the share of the cone's cosine range, from its edge inward, over which it fades in;
+      // Babylon's spot fades between the cosines of its angle and its inner angle.
+      const size = /** @type {number} */ (this.#values.get(bind.spot.size)), blend = /** @type {number} */ (this.#values.get(bind.spot.blend) ?? 0), edge = Math.cos(size / 2);
+      Object.assign(node, { angle: size, innerAngle: 2 * Math.acos(Math.min(1, edge + blend * (1 - edge))) });
     } else if (bind.shadow) {
       this.#castShadows(node, /** @type {boolean} */ (value));
     } else if (bind.morph !== undefined) {

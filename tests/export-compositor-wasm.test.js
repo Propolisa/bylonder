@@ -86,9 +86,10 @@ console.log(JSON.stringify(graph.attachedBlocks.map((b) => [b.name, b.getClassNa
   const container = clustered.scene.lights.find((l) => l instanceof ClusteredLightContainer);
   const own = clustered.scene.lights.filter((l) => l !== container), shadowless = (l) => !l.getShadowGenerator();
   assert.ok(container?.lights.length && !own.some((l) => l.getClassName() === 'PointLight' && shadowless(l)), `every point light without a shadow is clustered (${container?.lights.length}), ${own.length} lights besides`);
-  const lamp = container.lights[0], [power, { bind }] = Object.entries(JSON.parse(files['scene.ir.json']).properties).find(([, p]) => p.bind?.node === lamp.name && p.bind.property === 'intensity');
+  const properties = JSON.parse(files['scene.ir.json']).properties, lamp = container.lights[0];
+  const [power, { bind }] = Object.entries(properties).find(([path, p]) => p.bind?.node === lamp.name && p.bind.power && path.endsWith('.energy'));
   clustered.set(power, 200);
-  assert.equal(lamp.intensity, 200 * bind.factor, `${power} sets the clustered ${lamp.name}`);
+  assert.equal(lamp.intensity, 200 * 2 ** (properties[bind.power.exposure]?.default ?? 0) * bind.power.factor, `${power} sets the clustered ${lamp.name}`);
   assert.equal(clustered.nodeOf(`OB:${lamp.name}`), lamp, 'nodeOf finds a clustered light');
   // A joined object's material slots: its multi-material holds each slot's material, not Babylon's default.
   const slots = blend.scene.getMeshByName('Shop Front').material;

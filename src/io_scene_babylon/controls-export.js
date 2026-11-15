@@ -4,7 +4,7 @@
 // Bylonder draws a Blender value through a factor (a light's power as Babylon's intensity, a lens as a field of view,
 // a camera turned to look along Babylon's +Z), the factor is measured here on the exported objects, so the page
 // needs none of Bylonder's mapping code.
-import { Matrix, Quaternion } from '@babylonjs/core';
+import { Color3, Matrix, Quaternion } from '@babylonjs/core';
 import { blendData, customPropertyType, idStruct, pointerStruct, structFind } from '../python/bpy_rna.js';
 import { declaration } from '../nodes/blender/declarations.js';
 import { babylonRotation } from './runtime/blend-scene.js';
@@ -13,6 +13,8 @@ import { AREA_OFFSET, rigId } from './area-lights.js';
 import { actionFCurves } from './ir-export.js';
 import { limits } from './rig-description.js';
 import { syncNames } from '../makesrna/rna-bylonder.js';
+import { LIGHT_STRUCTS, lightFields } from '../blenkernel/light/light-fields.js';
+import { deriveBabylonLight, isBlenderLight, lightRecord } from '../blenkernel/light/light-home.js';
 
 // Blender's own (Bylonder's ID properties, add-ons' groups) stay out of an ID's custom properties.
 const OWN = /^(bylonder|_RNA_UI$|cycles)/;
@@ -69,11 +71,50 @@ const vectorKnobs = (base, owner, name, bind) => [...owner[name]].map((v, i) => 
 // The location, rotation and scale of an object or a pose bone at `base`, each bound by `bind`.
 const transformControls = (base, owner, bind) => ['location', rotationOf(owner), 'scale'].flatMap((name) => vectorKnobs(base, owner, name, bind));
 
+// What Bylonder draws of a Blender light's settings (light-home.js deriveBabylonLight), as Babylon's properties of a
+// light made from them; a Babylon light (none) is read from the light itself.
+const DRAWN = ['intensity', 'diffuse.r', 'diffuse.g', 'diffuse.b', 'specular.r', 'specular.g', 'specular.b', 'radius', 'range', 'width', 'height'];
+const valueAt = (owner, path) => path.split('.').reduce((o, k) => o?.[k], owner);
+function drawnOf(node, record) {
+  const light = { diffuse: new Color3(), specular: new Color3(), getScene: () => node.getScene(), metadata: { wbLight: record } };
+  deriveBabylonLight(light);
+  return Object.fromEntries(DRAWN.map((path) => [path, valueAt(light, path)]));
+}
+// The Babylon properties a light's setting (a number, or one component of a color) sets in proportion, each with its
+// factor, measured by drawing the light's settings with that value changed; null where it sets none so, or moves
+// another otherwise. Its influence radius (Babylon's range, which a color or power moves) follows with the export's patch.
+function measured(node, name, index) {
+  const record = isBlenderLight(node) && lightRecord(node);
+  if (!record) return null;
+  const at = (value) => drawnOf(node, { ...record, [name]: index === undefined ? value : Object.assign([...record[name]], { [index]: value }) });
+  const value = index === undefined ? record[name] : record[name][index], other = value * 1.5 + 0.25, before = at(value), after = at(other);
+  const moved = DRAWN.filter((path) => Math.abs(after[path] - before[path]) > 1e-9);
+  const linear = moved.filter((path) => Math.abs(before[path] - (after[path] / other) * value) <= 1e-6 * Math.max(1, Math.abs(before[path])));
+  return linear.length && moved.every((path) => linear.includes(path) || path === 'range') ? linear.map((path) => [path, after[path] / other]) : null;
+}
+// A light's setting bound to what it draws in proportion (measured), else to nothing: the export's patch remakes it.
+const drawnSetting = (name, meta) => ({ base, light, node }) => (typeof light[name] === 'number' ? [[`${base}.${name}`, light[name], undefined]]
+  : [...light[name]].map((v, i) => [`${base}.${name}[${i}]`, v, i])).map(([path, value, index]) => {
+  const properties = measured(node, name, index);
+  return knob(path, value, meta, properties && { node: node.id, properties });
+});
+// A light's power, its energy times 2 to its exposure as Blender's: Babylon's intensity by the factor measured between
+// them (a `power` bind).
+const powerSetting = (name, meta) => ({ base, light, node }) => {
+  const watts = light.energy * 2 ** (light.exposure ?? 0);
+  return [knob(`${base}.${name}`, light[name], meta, watts ? { node: node.id, power: { energy: `${base}.energy`, exposure: `${base}.exposure`, factor: node.intensity / watts } } : undefined)];
+};
+// A spot's cone: its size and blend set Babylon's angle and inner angle together (a `spot` bind).
+const spotSetting = (name) => ({ base, light, node }) => [knob(`${base}.${name}`, light[name], { type: 'FLOAT', subtype: name === 'spot_size' ? 'ANGLE' : 'FACTOR' },
+  { node: node.id, spot: { size: `${base}.spot_size`, blend: `${base}.spot_blend` } })];
+const LIGHT_SETTINGS = [...new Set(Object.keys(LIGHT_STRUCTS).flatMap(lightFields))];
+
 // What a run does with each property of a struct that Bylonder keeps equal in Main (rna-bylonder.js syncNames): the one
 // list of what becomes a control. A function gives its controls, each bound to the exported object or by a named kind
 // the runtime applies; KEPT: the run shows it as it is, with nothing to set; REBUILD: the export's patch remakes the
-// object; RELOAD: the run loads fresh; APP: the editor's own, which a run does not show.
-export const KEPT = 'kept', REBUILD = 'rebuild', RELOAD = 'reload', APP = 'app';
+// object; RELOAD: the run loads fresh; NONE: pages do not draw it yet (an export gap); APP: the editor's own, which a
+// run does not show.
+export const KEPT = 'kept', REBUILD = 'rebuild', RELOAD = 'reload', NONE = 'none', APP = 'app';
 const rotation = ({ base, ob, transform }) => vectorKnobs(base, ob, rotationOf(ob), transform());
 // A driven Disable in Viewports switches a viewport's proxies (driver-export.js leaves it out): the page shows renders.
 const drivenHide = (ob) => [...(ob.animation_data?.drivers ?? [])].some((fc) => fc.data_path === 'hide_viewport');
@@ -113,6 +154,31 @@ export const SYNCED = {
     // Millimeters or field of view: how the editor shows the lens.
     lens_unit: APP,
   },
+  // A light's settings Bylonder draws in proportion are set by their measured factors, its power and its cone by named
+  // kinds, its shadows switched; its type, shape and influence radius remake it; what Bylonder's lights and shadows do
+  // not draw (fixed shadow bias, map size and filter; no temperature or cascades of Blender's) changes nothing.
+  Light: {
+    ...Object.fromEntries(LIGHT_SETTINGS.map((name) => [name, REBUILD])),
+    ...Object.fromEntries(['use_temperature', 'temperature', 'transmission_factor', 'normalize', 'use_nodes', 'shadow_buffer_clip_start', 'shadow_filter_radius',
+      'shadow_maximum_resolution', 'use_shadow_jitter', 'shadow_jitter_overblur', 'use_absolute_resolution', 'use_square', 'use_soft_falloff', 'spread',
+      'shadow_cascade_max_distance', 'shadow_cascade_count', 'shadow_cascade_exponent', 'shadow_cascade_fade'].map((name) => [name, NONE])),
+    type: REBUILD,
+    energy: powerSetting('energy', { type: 'FLOAT', subtype: 'POWER', unit: 'POWER' }),
+    exposure: powerSetting('exposure', { type: 'FLOAT' }),
+    color: drawnSetting('color', { type: 'FLOAT', subtype: 'COLOR', soft_min: 0, soft_max: 1 }),
+    diffuse_factor: drawnSetting('diffuse_factor', { type: 'FLOAT', subtype: 'FACTOR' }),
+    specular_factor: drawnSetting('specular_factor', { type: 'FLOAT', subtype: 'FACTOR' }),
+    shadow_soft_size: drawnSetting('shadow_soft_size', { type: 'FLOAT', subtype: 'DISTANCE', unit: 'LENGTH' }),
+    angle: drawnSetting('angle', { type: 'FLOAT', subtype: 'ANGLE' }),
+    size: drawnSetting('size', { type: 'FLOAT', subtype: 'DISTANCE', unit: 'LENGTH' }),
+    size_y: drawnSetting('size_y', { type: 'FLOAT', subtype: 'DISTANCE', unit: 'LENGTH' }),
+    spot_size: spotSetting('spot_size'),
+    spot_blend: spotSetting('spot_blend'),
+    // Show Cone: how the editor draws a spot.
+    show_cone: APP,
+    // Shadows switched on the light; a light exported without them takes its shadow map from the export's patch.
+    use_shadow: ({ base, light, node }) => [knob(`${base}.use_shadow`, !!light.use_shadow, {}, { node: node.id, property: 'shadowEnabled' })],
+  },
 };
 
 // The sensor the camera's frame fits (Auto and Horizontal: its width), whose half extent over the lens is the field of
@@ -141,9 +207,7 @@ function objectControls(node, ob, parentInverse) {
 
 function lightControls(node, light) {
   const base = `lights${key(light.name)}`;
-  const power = knob(`${base}.energy`, light.energy, { type: 'FLOAT', subtype: 'POWER', unit: 'POWER' }, light.energy ? { node: node.id, property: 'intensity', factor: node.intensity / light.energy } : undefined);
-  const color = [...light.color].map((v, i) => knob(`${base}.color[${i}]`, v, { type: 'FLOAT', subtype: 'COLOR', soft_min: 0, soft_max: 1 }, { node: node.id, property: `diffuse.${'rgb'[i]}` }));
-  return [power, ...color, ...customProperties(light, base)];
+  return [...syncedControls('Light', node, { base, light, node }), ...customProperties(light, base)];
 }
 
 function cameraControls(node, camera, entry) {

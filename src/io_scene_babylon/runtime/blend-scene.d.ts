@@ -444,6 +444,25 @@ export type Binding = {
      */
     offset?: boolean | undefined;
     /**
+     * the node's properties a value sets, each by its factor
+     */
+    properties?: [string, number][] | undefined;
+    /**
+     * a spot light's cone: the paths of its size and blend
+     */
+    spot?: {
+        size: string;
+        blend: string;
+    } | undefined;
+    /**
+     * a light's intensity: its energy times 2 to its exposure, by the factor
+     */
+    power?: {
+        energy: string;
+        exposure: string;
+        factor: number;
+    } | undefined;
+    /**
      * whether its node's meshes cast the lights' shadows (Object > Visibility > Shadow)
      */
     shadow?: boolean | undefined;

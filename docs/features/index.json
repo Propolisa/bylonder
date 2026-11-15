@@ -360,7 +360,7 @@
   "id": "game",
   "title": "Game",
   "summary": "Bylonder's own editor that plays the scene as File > Export > JavaScript ships it, run by the exported page's runtime, while edits, undo and redo made in the app reach the running game.",
-  "expect": "Play exports the scene in memory and runs it in the area on an engine of its own, as its page does; a value edit (a move, a material colour, a light's power or colour, a camera's lens, visibility, a shape key, a custom property) shows in the game on the next frame, and the scoped export behind it checks it once the app is idle, loading the game fresh if they disagree; other edits reach it as a patch after that export (about a second on Rigged Character); the game's own state never writes back to the scene; Reset starts the game again from the scene as it is now; Play takes as long as an export.",
+  "expect": "Play exports the scene in memory and runs it in the area on an engine of its own, as its page does; a value edit (a move, a material colour, a light's power, exposure, colour or spot cone, a camera's lens, sensor or orthographic scale, visibility, a shape key, a custom property) shows in the game on the next frame, and the scoped export behind it checks it once the app is idle, loading the game fresh if they disagree; other edits reach it as a patch after that export (about a second on Rigged Character); the game's own state never writes back to the scene; Reset starts the game again from the scene as it is now; Play takes as long as an export.",
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/files/import_export.html"
@@ -404,7 +404,8 @@
    "A separate window is not built yet.",
    "The game draws with WebGL 2, as an exported page does by default, also where the app draws with WebGPU, until exported pages draw area lights on WebGPU.",
    "A change of the scene, its world, a node group or a collection exports the whole scene, so on a large scene it reaches the game after an export's time.",
-   "Settings with no fast control yet (a light's shadow and spot settings, render settings) reach the game after the export; a camera's type and sensor fit remake the camera.",
+   "Settings with no fast control yet (render and scene settings) reach the game after the export; a light's type, shape, area size and influence radius, and a camera's type and sensor fit, remake that object once the export is done.",
+   "Exported pages do not draw a light's color temperature, transmission, power normalization, soft falloff, spread, or Blender's shadow resolution, filter, jitter and cascade settings yet (their shadows have a fixed bias, map size and filter per light type), so editing those changes nothing in the game. tests/controls-coverage-wasm.test.js lists them.",
    "A camera's lens shift (Shift X and Y) is not drawn by exported pages yet, so the game shows the camera unshifted.",
    "A value the game animates (an F-Curve's or a driver's) is the game's: an edit of it reaches the game through the export only.",
    "Game code (game.js) does not run in it yet."
