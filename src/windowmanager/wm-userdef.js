@@ -57,7 +57,8 @@ const readInput = ({ inputs }) => {
 export const inputPreferences = () => input;
 // The Preferences read as WM_init reads them: the saved ones, else factory settings.
 export function readPreferences() {
-  blenderMain().run('wm.read_userpref');
+  // Without a saved file Blender keeps its factory settings, as WM_init does; reading one would report it missing.
+  if ([...files.keys()].some((path) => path.startsWith(USER_DIR) && path.endsWith('/userpref.blend'))) blenderMain().run('wm.read_userpref');
   readInput(preferences());
 }
 
