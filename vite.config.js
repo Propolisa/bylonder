@@ -147,8 +147,12 @@ export default defineConfig({
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
   // Agents' worktrees live under .claude/: their edits must not reload this checkout's pages (a worktree's own server
   // watches its own files).
-  // Blender's backups (*.blend1, written beside a saved .blend) and the dev tools never reload the page.
-  server: { watch: { ignored: [`${fileURLToPath(new URL("./.claude", import.meta.url)).replaceAll("\\", "/")}/**`, "**/*.blend1", "**/.tools/**", "**/.shots/**", "**/examples/*/downloads/**"] } },
+  // Blender's backups (*.blend1, written beside a saved .blend), the dev tools and what tools generate (npm run module,
+  // npm run build, npm test) never reload the page: a session open on the dev server outlives a module fetch or a build.
+  server: { watch: { ignored: [`${fileURLToPath(new URL("./.claude", import.meta.url)).replaceAll("\\", "/")}/**`, "**/*.blend1", "**/.tools/**", "**/.shots/**", "**/examples/*/downloads/**",
+    "**/dist/**", "**/src/bmesh/*.{wasm,zip,key}", "**/docs/demos/*/world/**", "**/docs/demos/*/run.js", "**/public/{webgpu,babylon-assets,bylonder-dev-tools}/**",
+    "**/public/{app-source.zip,babylon-types.json}", "**/src/editors/object/builder-schema.json", "**/src/editors/space_node/editor-classes.json",
+    "**/docs/features/index.json", "**/src/coverage/runtime.json"] } },
   build: {
     target: "esnext",
     rollupOptions: {
