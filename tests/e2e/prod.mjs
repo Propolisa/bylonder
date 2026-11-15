@@ -584,7 +584,9 @@ try {
       assert.ok(response.ok, `the ${demo} demo's package (${asset}) is not in the build: run npm run module before npm run build`);
       const page = await browser.newPage(), errors = [];
       page.on("pageerror", (error) => errors.push(error.message));
-      await page.goto(new URL(`docs/demos/${demo}/index.html?step`, server.url).href);
+      // The page fetches Babylon's modules from the CDN, which on a CI runner can take longer than goto's limit to
+      // finish loading; the wait for window.demo below is the real readiness check.
+      await page.goto(new URL(`docs/demos/${demo}/index.html?step`, server.url).href, { waitUntil: "domcontentloaded" });
       await page.waitForFunction(() => window.demo, null, { timeout: 5 * 60 * 1000 });
       assert.deepEqual(errors, [], `the ${demo} demo's page errors`);
       await page.close();
