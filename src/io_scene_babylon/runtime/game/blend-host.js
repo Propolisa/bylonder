@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // A run's scene as game/world.js reads it, from a package's controller (BlendScene): the objects with behaviours (the
 // IR's `["behaviors"]` custom property group of each), their props live from the controls (an edit in Blender reaches
-// them at once), ID pointers by their IDs' names, and Blender's own transforms for `entity.authored`.
+// them at once), ID pointers by their IDs' names, Blender's own transforms for `entity.authored`, and the .blend's sounds,
+// played as the page plays an action's sound (character/sound.js).
+import { createVoice } from '../character/sound.js';
 
 const key = (/** @type {string} */ name) => `["${name.replace(/["\\]/g, (c) => '\\' + c)}"]`;
 const GROUP = key('behaviors');
@@ -27,8 +29,18 @@ export function blendHost(blend) {
     if (!kind) kinds.set(path, (kind = has(path) ? 'control' : has(`${path}[0]`) ? 'array' : 'data'));
     return kind;
   };
+  /** The sounds game code played, by name, in order: what a test reads. @type {string[]} */
+  const played = [];
   return {
     scene: blend.scene,
+    played,
+    /** Plays one of the .blend's sounds once, by name (game.play). @param {string} name */
+    playSound(name) {
+      const sound = blend.played?.[name];
+      if (!sound) return;
+      played.push(name);
+      createVoice({ ...sound, start: 0, volume: 1 }, { spatial: false }).play(0);
+    },
     blend,
     // The scene's objects with behaviours, those of prefab collections (excluded or hidden) left for spawn().
     objects: () => {

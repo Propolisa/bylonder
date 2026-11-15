@@ -75,6 +75,7 @@ export function runGame(blend: any, code: {
         dispose(): void;
     };
     blend: any;
+    host: import("./world.js").Host;
     dispose(): void;
 };
 /** The behaviours the runtime brings, which a project adds to objects without writing them. */

@@ -70,10 +70,11 @@ async function ffmpegAac(bytes) {
 }
 
 /**
- * The scene's sound strips (RNA Scene `scene`) as the IR's scene time holds them, and their files by package path; a
- * sound shared by strips is one file.
+ * The scene's sound strips (RNA Scene `scene`) as the IR's scene time holds them, the sounds game code plays
+ * (`library`, RNA Sounds: game.play) by name, and their files by package path; a sound shared by strips and the library
+ * is one file.
  */
-export async function exportSounds(scene) {
+export async function exportSounds(scene, library = []) {
   const strips = [...(scene.sequence_editor?.strips_all ?? [])].filter((strip) => strip.type === 'SOUND' && strip.sound);
   const files = {}, paths = new Map(), sounds = [];
   const ship = async (/** @type {any} */ sound) => {
@@ -93,5 +94,10 @@ export async function exportSounds(scene) {
     const { name, channel, frame_start, frame_final_start, frame_final_end, frame_offset_start, frame_offset_end, volume, mute } = strip;
     sounds.push({ name, ...sound, channel, frame_start, frame_final_start, frame_final_end, frame_offset_start, frame_offset_end, volume, mute });
   }
-  return { sounds, files };
+  const played = {};
+  for (const sound of library) {
+    if (!paths.has(sound.name)) paths.set(sound.name, await ship(sound));
+    if (paths.get(sound.name)) played[sound.name] = paths.get(sound.name);
+  }
+  return { sounds, played, files };
 }

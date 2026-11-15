@@ -267,7 +267,7 @@ export class BlendScene {
     this.#values = new Map(knobs.map((knob) => [knob.path, knob.default]));
     /** The scene's one clock: its frame, which the animation and what reads the frame follow. */
     this.playhead = createPlayhead(scene, this.ir.scene.time);
-    const { fps, fps_base, frame_start, sounds } = this.ir.scene.time, seconds = (/** @type {number} */ frames) => (frames * fps_base) / fps;
+    const { fps, fps_base, frame_start, sounds, played = {} } = this.ir.scene.time, seconds = (/** @type {number} */ frames) => (frames * fps_base) / fps;
     /**
      * The scene's sequencer sound strips by name, as a page plays them: the sound's URL, when the strip starts (seconds
      * after the scene's first frame), where in the decoded sound it starts (its start offset after the file's encoder
@@ -275,6 +275,8 @@ export class BlendScene {
      */
     this.sounds = Object.fromEntries(sounds.map((s) => [s.name, { url: new URL(s.file, root || globalThis.location?.href).href, start: seconds(s.frame_final_start - frame_start),
       offset: s.delay + seconds(s.frame_offset_start), duration: seconds(s.frame_final_end - s.frame_final_start), channel: s.channel, volume: s.volume, mute: s.mute }]));
+    /** The .blend's sounds game code plays (game.play), by name: each one's URL and its encoder delay. @type {Record<string, { url: string, offset: number }>} */
+    this.played = Object.fromEntries(Object.entries(played).map(([name, s]) => [name, { url: new URL(s.file, root || globalThis.location?.href).href, offset: s.delay }]));
     // Meshes the export skins with dual quaternions (Preserve Volume, armature.js).
     for (const mesh of scene.meshes) if (mesh.metadata?.bylonderDualQuaternions) useDualQuaternionSkinning(mesh, true);
     // A skinned mesh's bounds over its clips' poses (armature.js clipBounds), so it is culled where it can be.

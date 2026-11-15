@@ -111,6 +111,7 @@ def tone(name, freqs, seconds, noise=0.0):
     sound = bpy.data.sounds.load(path)
     sound.name = name
     sound.use_fake_user = True
+    sound.pack()  # in the .blend, which the app and an export read it from
     return sound
 
 

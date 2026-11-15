@@ -19,6 +19,8 @@ assert.ok(barista.holding.node.isVisible, 'the cup shows, though its prefab coll
 await barista.walkTo(rock).press('Use');
 await game.step({ seconds: 1 });
 assert.match(game.get(Subtitles).line ?? '', /^[*].+[*]$/, "the rock's noise is subtitled from the Ink story");
+assert.deepEqual(game.played.filter((name) => name !== 'Steam').length, 1, `the rock makes one of its noises: ${game.played}`);
+assert.ok(['Grind', 'Rumble', 'Clack'].includes(game.played.at(-1)) && game.played[0] === 'Steam', `the machine hissed, then the rock: ${game.played}`);
 await game.step({ seconds: 2 });
 assert.ok(!barista.holding, 'serving does not pour another cup');
 assert.deepEqual(game.get(Shift).save(), { served: 1, walkouts: 0 });

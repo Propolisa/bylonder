@@ -22,7 +22,8 @@ export const BUILTINS = /** @type {import('./define.js').Behavior[]} */ (/** @ty
 export function runGame(blend, code, { canvas, assets, seed, engine, kept, step = true, paused = () => false, report } = {}) {
   const input = createInput(code.game?.input ?? {}, canvas);
   const behaviors = [...BUILTINS.filter((b) => !code.behaviors.some((own) => own.name === b.name)), ...code.behaviors];
-  const world = createWorld({ host: blendHost(blend), behaviors, game: code.game, engine, assets, input, seed, kept, report });
+  const host = blendHost(blend);
+  const world = createWorld({ host, behaviors, game: code.game, engine, assets, input, seed, kept, report });
   world.start();
   /** @type {Promise<void> | null} */
   let stepping = null, owed = 0;
@@ -36,7 +37,7 @@ export function runGame(blend, code, { canvas, assets, seed, engine, kept, step 
     stepping = world.step(dt).finally(() => { stepping = null; });
   }) : null;
   return {
-    world, input, blend,
+    world, input, blend, host,
     dispose() {
       if (observer) blend.scene.onBeforeRenderObservable.remove(observer);
       world.dispose();

@@ -25,7 +25,8 @@
           "sample_rates": {},
           "clips": {},
           "markers": [],
-          "sounds": []
+          "sounds": [],
+          "played": {}
         }
       },
       "type": "object",
@@ -62,7 +63,8 @@
             "sample_rates": {},
             "clips": {},
             "markers": [],
-            "sounds": []
+            "sounds": [],
+            "played": {}
           },
           "type": "object",
           "properties": {
@@ -290,6 +292,28 @@
                 },
                 "required": [
                   "name",
+                  "file"
+                ]
+              }
+            },
+            "played": {
+              "default": {},
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string"
+                  },
+                  "delay": {
+                    "default": 0,
+                    "type": "number"
+                  }
+                },
+                "required": [
                   "file"
                 ]
               }

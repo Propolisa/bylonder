@@ -36,7 +36,7 @@ import { AREA_LIGHTS_LTC, AREA_SPECULAR, FOG_GLOW, PANEL_ICONS, BABYLON_ASSETS, 
 import { AREA_SPECULAR_UNIT, FOG_GLOW_UNIT, PANEL_ICONS_UNIT, replaces, stripEntities, stripPieces, unitManifest } from './unit-manifest.js';
 import { CURVES_GLSL_FILE, curvesGlslFile } from './curves-export.js';
 import { exportVolumes, VOLUMES_FILE } from './volumes-export.js';
-import { idStruct } from '../python/bpy_rna.js';
+import { blendData, idStruct } from '../python/bpy_rna.js';
 import { displayExponent } from '../render/view-settings.js';
 import { AREA_LIGHT } from './area-lights.js';
 import { clusteredLights } from '../blenkernel/light/clustered-lights.js';
@@ -447,9 +447,11 @@ async function moduleSource(world, live, mapped, { step, parity, hostCompression
   const collected = world.mainSync && !asset ? exportCollections(sceneOf(world.mainSync)) : null;
   const controls = withUI([...exportControls(world, data), ...(collected?.controls ?? []), ...(compositorState === 'LIVE' ? composited?.knobs ?? [] : [])]);
   const timelineGroups = data.animationGroups.filter((group) => !isClip(group)), markers = world.mainSync ? [...sceneOf(world.mainSync).timeline_markers].map(({ name, frame }) => ({ name, frame })) : [];
-  const { sounds, files: soundFiles } = world.mainSync && !asset ? await exportSounds(sceneOf(world.mainSync)) : { sounds: [], files: {} };
+  // Game code plays the .blend's sounds by name (game.play): a scene with behaviours ships them all.
+  const behaviours = world.mainSync && [...blendData().objects].some((ob) => ob.get('behaviors'));
+  const { sounds, played, files: soundFiles } = world.mainSync && !asset ? await exportSounds(sceneOf(world.mainSync), behaviours ? [...blendData().sounds] : []) : { sounds: [], played: {}, files: {} };
   await step('Writing the scene');
-  const ir = exportIR(world, { controls, collections: collected, live, bin, animationGroups: timelineGroups, sampleRates: data.sampleRates, clips: irClips(data.clips), markers, sounds, curves: data.liveCurves, constraints: data.liveConstraints, skeletons: skeletonsOf(data), states });
+  const ir = exportIR(world, { controls, collections: collected, live, bin, animationGroups: timelineGroups, sampleRates: data.sampleRates, clips: irClips(data.clips), markers, sounds, played, curves: data.liveCurves, constraints: data.liveConstraints, skeletons: skeletonsOf(data), states });
   const computed = { ...ir, entities: structuredClone(ir.entities) };
   stripEntities(ir, replace);
   const irJson = json(ir);

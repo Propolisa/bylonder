@@ -23,7 +23,7 @@ assert.deepEqual(read({ schema: 'bylonder-ir', version: 1, entities: { 'OB:A/mod
 
 // Omitted fields take their defaults.
 const bare = read({ schema: 'bylonder-ir', version: 1 });
-assert.deepEqual(bare.ir, { schema: 'bylonder-ir', version: 2, scene: { id: null, collection: null, view_layer: null, time: { frame_current: 1, frame_start: 1, frame_end: 250, fps: 24, fps_base: 1, loop: true, sample_rates: {}, clips: {}, markers: [], sounds: [] } }, ids: {}, collections: {}, references: [], properties: {}, graphs: {}, meshes: {},
+assert.deepEqual(bare.ir, { schema: 'bylonder-ir', version: 2, scene: { id: null, collection: null, view_layer: null, time: { frame_current: 1, frame_start: 1, frame_end: 250, fps: 24, fps_base: 1, loop: true, sample_rates: {}, clips: {}, markers: [], sounds: [], played: {} } }, ids: {}, collections: {}, references: [], properties: {}, graphs: {}, meshes: {},
   entities: {}, order: [] });
 assert.deepEqual(read({ schema: 'bylonder-ir', version: 1, entities: { 'OB:A/driver/x': { type: 'driver:SCRIPTED', id: 'OB:A' } } }).ir.entities['OB:A/driver/x'],
   { type: 'driver:SCRIPTED', id: 'OB:A', inputs: {}, outputs: {} });

@@ -13,7 +13,7 @@ import { propValue } from './define.js';
  *   objects: () => HostObject[],
  *   value: (object: string, behavior: string, prop: string) => any,
  *   play?: (action: string, object: string) => void,
- *   playSound?: (sound: string, at?: Entity) => void,
+ *   playSound?: (sound: string, at?: Entity) => void, played?: string[],
  *   spawn?: (collection: string) => HostObject[],
  *   blend?: any,
  * }} Host

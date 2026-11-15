@@ -145,8 +145,10 @@ export const TimeSchema = z.object({
   markers: fresh(z.array(MarkerSchema), () => []),
   /** the sound strips of the scene's sequencer */
   sounds: fresh(z.array(SoundSchema), () => []),
+  /** the .blend's sounds game code plays (game.play), by name: each one's file in the package and its encoder delay */
+  played: fresh(z.record(Name, z.object({ file: z.string(), delay: z._default(z.number(), 0) })), () => ({})),
 });
-const TIME = () => ({ frame_current: 1, frame_start: 1, frame_end: 250, fps: 24, fps_base: 1, loop: true, sample_rates: {}, clips: {}, markers: [], sounds: [] });
+const TIME = () => ({ frame_current: 1, frame_start: 1, frame_end: 250, fps: 24, fps_base: 1, loop: true, sample_rates: {}, clips: {}, markers: [], sounds: [], played: {} });
 
 /** The scene the page shows: its ID, its scene collection (the collections' root), the view layer it draws and its time. */
 export const SceneSchema = z.object({

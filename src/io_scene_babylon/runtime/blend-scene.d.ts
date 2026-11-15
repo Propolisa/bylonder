@@ -134,6 +134,10 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
                     volume: number;
                     mute: boolean;
                 }[];
+                played: Record<string, {
+                    file: string;
+                    delay: number;
+                }>;
             };
         };
         ids: Record<string, {
@@ -245,6 +249,11 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
      * delay) and how long it plays, in seconds; its channel, volume and whether it is muted. @type {Record<string, Sound>}
      */
     sounds: Record<string, Sound>;
+    /** The .blend's sounds game code plays (game.play), by name: each one's URL and its encoder delay. @type {Record<string, { url: string, offset: number }>} */
+    played: Record<string, {
+        url: string;
+        offset: number;
+    }>;
     /** Told of each marker passed: the scene's as the playhead plays past it, an action's as its clip does. */
     onMarker: Observable<import("./clips.js").MarkerEvent>;
     /**

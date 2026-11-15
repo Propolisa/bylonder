@@ -2,7 +2,7 @@
 id: game-code
 title: Game Code
 summary: Game code as behaviours added to objects in Object properties > Behaviors, systems and a game file, written in the project's src/ and run in the Game area with live props, events, waits and hot swap.
-expect: A behaviour's props are custom properties of its object, edited as Blender properties and read live by the playing game; saving a file swaps its code in keeping each behaviour's state, and a version that does not load keeps the last good one running; the Game area plays it, and File > Export > JavaScript ships it as game.js, which the page plays the same way; the editor completes the .blend's names. Sounds do not play yet and there is no game UI layer.
+expect: A behaviour's props are custom properties of its object, edited as Blender properties and read live by the playing game; saving a file swaps its code in keeping each behaviour's state, and a version that does not load keeps the last good one running; the Game area plays it, and File > Export > JavaScript ships it as game.js, which the page plays the same way; the editor completes the .blend's names. Sounds play, not yet placed in the scene, and there is no game UI layer.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/files/custom_properties.html
@@ -38,7 +38,7 @@ tests:
   - tests/rock-hard-cafe-wasm.test.js
   - tests/game-export.test.js
 limits:
-  - Game sounds (game.play, sound props) are kept as names; playing them is not built yet.
+  - Game sounds (game.play) play at full volume from no place: not yet positioned at the entity they are played at.
   - There is no game UI layer yet (defineUI); a system can draw with Babylon's GUI itself.
   - Hover docs and completion come from TypeScript in the code editor; go to definition from a behaviour to the objects using it is the user count's list, not the editor's.
   - A behaviour that holds several sounds keeps them as a group of the object's custom properties, which Blender's Custom Properties panel shows but does not edit.

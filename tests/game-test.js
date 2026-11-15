@@ -38,7 +38,7 @@ export async function run(example, { seed = 1 } = {}) {
   const [{ runGame, BUILTINS }, { default: code }] = await Promise.all([import(at('bylonder/game/run.js')), import(at('game.js'))]);
   const assets = { url: at, text: async (path) => readFileSync(new URL(path, written.url), 'utf8') };
   const errors = [];
-  const { world: run, input } = runGame(blend, code, { seed, assets, step: false, report: (error, where) => errors.push(`${where}: ${error?.stack ?? error}`) });
+  const { world: run, input, host } = runGame(blend, code, { seed, assets, step: false, report: (error, where) => errors.push(`${where}: ${error?.stack ?? error}`) });
   const step = async (seconds = STEP) => { for (let t = 0; t < seconds - 1e-9; t += STEP) { await run.step(STEP); blend.scene.render?.(); } };
   // An object as a test drives it: its entity, its behaviours' handles, and actions that take the run's time.
   const find = (name) => {
@@ -82,6 +82,8 @@ export async function run(example, { seed = 1 } = {}) {
     step: ({ seconds }) => step(seconds),
     get: (system) => run.game.get(system),
     get ended() { return run.ended; },
+    /** The sounds the game played, by name, in order. */
+    get played() { return [...host.played]; },
     dispose() { run.dispose(); written.remove(); },
   };
 }
