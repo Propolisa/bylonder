@@ -7,7 +7,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { JUDGE_VERSION } from '../src/io_scene_babylon/pose-export.js';
 
 // The hash of the judge's files at each version.
-const RECORDED = { 1: '5b029c8c90f50151', 2: 'a7cf94cc4e187634' };
+const RECORDED = { 1: '5b029c8c90f50151', 2: 'a7cf94cc4e187634', 3: '60e17e9f7a8e014f' };
 const src = new URL('../src/', import.meta.url);
 const tree = (dir) => readdirSync(new URL(dir, src), { recursive: true }).filter((f) => f.endsWith('.js')).map((f) => `${dir}${f.replaceAll('\\', '/')}`);
 const FILES = ['io_scene_babylon/pose-export.js', 'io_scene_babylon/rig-description.js', 'io_scene_babylon/runtime/native-solve.js',

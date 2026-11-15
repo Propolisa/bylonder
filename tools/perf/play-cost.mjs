@@ -7,40 +7,26 @@
 // The example opens by its #example= link, so its .blend must be in examples/<example>/ while this runs (Snow's is not
 // in git: copy it in, and out again before npm test). Nothing may write into the served tree while it runs.
 import { writeFileSync } from 'node:fs';
-import { createServer } from 'vite';
 import { chromium, openApp } from '../../tests/e2e/app.mjs';
+import { appServer, play, gameFps, logPage } from './play.mjs';
 
 const [example, node, profileOut] = process.argv.slice(2);
 const cap = Number(process.env.CAP ?? 20) * 60000;
-const server = process.env.E2E_URL ? null : await createServer({ logLevel: 'error', server: { port: 4330, strictPort: false } });
-if (server) await server.listen();
-const url = process.env.E2E_URL ?? server.resolvedUrls.local[0];
+const server = await appServer(4330), { url } = server;
 const browser = await chromium.launch();
 const t = () => performance.now();
 let t0 = t();
 const app = await openApp(browser, url, { link: example, node });
 console.log('OPEN', Math.round(t() - t0), 'ms');
 const since = () => `${Math.round((t() - t0) / 1000)} s`;
-app.page.on('console', (message) => { if (['error', 'warning'].includes(message.type())) console.log(since(), `console.${message.type()}`, message.text().slice(0, 600)); });
-app.page.on('pageerror', (error) => console.log(since(), 'pageerror', error.stack?.slice(0, 1200)));
-await app.bylonder((b, stack) => { b.dock.show('game'); b.modules.bpyRna.blendData().scenes[0].bylonder.export_evaluation = stack; }, process.env.STACK ?? 'RENDER');
-await app.settled();
+logPage(app.page, since);
 const cdp = profileOut && await app.context.newCDPSession(app.page);
 if (cdp) { await cdp.send('Profiler.enable'); await cdp.send('Profiler.setSamplingInterval', { interval: 5000 }); await cdp.send('Profiler.start'); }
 t0 = t();
-// Play's own promise, kept in the page: how it ended, if it did.
-await app.bylonder((b) => {
-  globalThis.__play = { state: 'running' };
-  Promise.resolve(b.runOperator('bylonder.game_play')).then(() => { globalThis.__play.state = 'resolved'; }, (error) => { globalThis.__play = { state: 'rejected', error: error?.stack }; });
-});
-// Playing once the run has drawn a frame of its own.
-const done = await app.until((b) => b.game?.blend?.scene.getEngine().frameId > 0, null, cap).then(() => true, () => false);
+const done = await play(app, { stack: process.env.STACK ?? 'RENDER', cap });
 console.log(done ? `PLAY ${Math.round(t() - t0)} ms` : `CAPPED at ${cap / 60000} min`);
-if (done) console.log('FPS', await app.bylonder(async (b) => {
-  const engine = b.game.blend.scene.getEngine(), from = engine.frameId, at = performance.now();
-  await new Promise((resolve) => setTimeout(resolve, 10000));
-  return `${((engine.frameId - from) / ((performance.now() - at) / 1000)).toFixed(2)} on ${engine.isWebGPU ? 'WebGPU' : 'WebGL 2'}`;
-}));
+// Three spans of 10 s: the first frames still settle (pipelines, textures).
+if (done) for (let i = 0; i < 3; i++) console.log('FPS', await gameFps(app));
 else console.log('STATE', await app.bylonder(async (b) => {
   const scene = globalThis.__playScene, at = performance.now();
   await new Promise((resolve) => setTimeout(resolve, 50));
@@ -49,5 +35,5 @@ else console.log('STATE', await app.bylonder(async (b) => {
 }).catch((error) => `no answer: ${error.message}`));
 if (cdp) writeFileSync(profileOut, JSON.stringify((await cdp.send('Profiler.stop')).profile));
 await browser.close();
-await server?.close();
+await server.close();
 process.exit(0);

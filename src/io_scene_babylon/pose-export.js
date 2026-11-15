@@ -37,7 +37,7 @@ const DEFORM_CHECKS = 10;
 export const vertexTolerance = { distance: 1e-4 };
 // The judge's version, part of the key a verdict is kept by (rig-verdicts.js): bumped when the judgement or the runtime
 // deform it compares changes, which tests/rig-judge-version.test.js checks by the files' content.
-export const JUDGE_VERSION = 2;
+export const JUDGE_VERSION = 3;
 
 // What a constraint reads, as the page finds it: a bone of the armature, or an object's node; undefined where it
 // cannot; null where there is none.

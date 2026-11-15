@@ -23,6 +23,9 @@ import { hookTables, hookMatrix } from '../deform/hook.js';
 import { evaluatedPositions } from '../deform/targets.js';
 
 const WG = 64;
+// Debug groups naming each dispatch's mesh and kernel, when a GPU profiler asks for them (tools/perf/gpu-profile.mjs sets
+// BYLONDER_GPU_MARKERS): they label its passes and a PIX capture's, and turn on Babylon's own (enableGPUDebugMarkers).
+const markers = (engine) => !!(globalThis.BYLONDER_GPU_MARKERS && engine._debugPushGroup && (engine._options.enableGPUDebugMarkers = true));
 const RW = Constants.BUFFER_CREATIONFLAG_READWRITE | Constants.BUFFER_CREATIONFLAG_VERTEX;
 const RO = Constants.BUFFER_CREATIONFLAG_READ | Constants.BUFFER_CREATIONFLAG_WRITE;
 
@@ -299,7 +302,7 @@ export function gpuSupported(deform) {
 // (a page's Babylon axes); positions and normals are written through it.
 export class GpuDeformer {
   constructor(engine, inst, deform, mesh, { axis = null } = {}) {
-    this.engine = engine; this.inst = inst; this.deform = deform; this.mesh = mesh;
+    this.engine = engine; this.inst = inst; this.deform = deform; this.mesh = mesh; this.marked = markers(engine);
     this.passes = [];
     let rest = deform.shapeKeys ? applyShapeKeys(inst, deform) : deform.base;
     let count = rest.length / 3;
@@ -530,7 +533,9 @@ export class GpuDeformer {
 
   dispatch(cs, buffers, n) {
     for (const [name, b] of Object.entries(buffers)) cs.setStorageBuffer(name, b);
+    if (this.marked) this.engine._debugPushGroup(`${this.mesh.name}: ${cs.name}`, 1);
     cs.dispatch(Math.ceil(n / WG));
+    if (this.marked) this.engine._debugPopGroup(1);
   }
 
   // Runs the stack for this frame (after inst.evaluate()).

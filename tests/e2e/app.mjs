@@ -55,10 +55,12 @@ export async function startServer({ build = true } = {}) {
 // project's scene) and waits until the 3D Viewport shows the node `node`. Page and GPU errors of every frame land in `errors`.
 // `link`: an example's id, opened by its #example= link instead of the splash. `video`: a directory to record the
 // session to. `persistent`: a browser profile of its own instead of an incognito context. `touch`: a touch device
-// (touch events, a coarse pointer, no hover).
-export async function openApp(browser, url, { example = "Default Cube", node = "Cube", link, size = { width: 1600, height: 950 }, scale = 1, video, persistent, touch } = {}) {
+// (touch events, a coarse pointer, no hover). `init`: scripts (Playwright addInitScript arguments) every document of the
+// context runs before its own.
+export async function openApp(browser, url, { example = "Default Cube", node = "Cube", link, size = { width: 1600, height: 950 }, scale = 1, video, persistent, touch, init = [] } = {}) {
   const options = { viewport: size, deviceScaleFactor: scale, acceptDownloads: true, ...(touch && { hasTouch: true, isMobile: true }), ...(video && { recordVideo: { dir: video, size } }) };
   const context = await (persistent ? persistentContext(options) : browser.newContext(options));
+  for (const script of init) await context.addInitScript(script);
   const page = await context.newPage();
   const errors = [];
   page.on("pageerror", (error) => errors.push(process.env.E2E_STACKS ? error.stack : error.message));

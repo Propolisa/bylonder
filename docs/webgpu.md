@@ -82,3 +82,57 @@ feature still runs its WebGL 2 version on WebGPU.
 - A file of many node materials takes longer to settle than on WebGL 2 (Gaku: Material Preview and Rendered each
   about 75 s in Chrome), and the browser's shader module creation can hold the page for seconds, longest for a light's
   soft cascaded shadows (PCSS).
+
+## GPU profiling
+
+`tools/perf/gpu-profile.mjs` measures where a page's GPU time goes on WebGPU: per render pass, per compute dispatch and
+per shader. It opens an example in the dev server with WebGPU, lets it settle (or plays it in the Game area), records
+frames and prints a table sorted by GPU time per frame; every frame also goes to a JSON file as it comes, so a stopped
+run still leaves its data.
+
+```
+node tools/perf/gpu-profile.mjs rigged-character Rig .shots/rigged.json
+PLAY=1 FRAMES=60 node tools/perf/gpu-profile.mjs rigged-character Rig .shots/rigged.json
+```
+
+- `PLAY=1` profiles the playing game (`STACK=VIEWPORT` for the Viewport modifier stack, `CAP` minutes to wait for its
+  first frame), `FRAMES` sets how many frames to record, `WARMUP` the seconds before recording, `ROWS` the table's
+  length, `TRACE=file.json` also records a Chrome trace of the same frames (CDP Tracing, GPU categories) to open in
+  Perfetto, `E2E_CHROME` runs an installed Chrome as the browser checks do. The page's console errors and uncaught
+  errors print as they come.
+- How: `tools/perf/gpu-profile-hook.js` runs in every document of the page before its own scripts and sits under
+  Babylon at the WebGPU API. It asks for the `timestamp-query` feature and puts begin and end timestamps on every
+  render and compute pass that has none (Babylon's own GPU timing, `engine.enableGPUTimingMeasurements`, keeps its
+  passes; those are counted without a time). Chrome is started with `--enable-webgpu-developer-features` and
+  `--disable-dawn-features=timestamp_quantization`, which give unquantized timestamps. Babylon's timing measures a
+  whole frame and each `ComputeShader` in sum, which does not tell passes or meshes apart, hence the hook.
+- Labels: a pass is named by its own label (Babylon names render passes by their render target), the debug groups open
+  around it and the shaders it ran (a compute kernel by its bindings, `compute(src,dst,joints,idx,wgt)`, else a hash of
+  its code). The profiler sets `BYLONDER_GPU_MARKERS` in the page, which turns on Babylon's GPU debug markers and
+  makes Bylonder's own dispatches push a group naming the mesh and the kernel (`gpu-deform.js`, `Body: skin`). Off by
+  default, it costs a check per dispatch.
+- Per frame it also counts what a frame should not repeat: pipelines and shader modules created, bind groups and
+  buffers created, buffer writes and their bytes, submits and buffer maps. A steady frame creates none.
+- A frame is the work encoded between two animation frame callbacks of a document that encoded any (the callbacks it
+  merged are its `rafs`); frames are taken once all their timestamps are read. A render pass also names its target
+  (texture label and size), which tells the Game's canvas from the 3D Viewport's.
+- A stall with no frames is not on the passes: a trace (`TRACE`) shows the GPU process's work, such as
+  `DeviceBase::APICreateRenderPipeline` compiling a shader. The JSON's `pipelines` lists the pipelines made, in order,
+  with their shaders, so a slow one in the trace is found by its place; `SHADERS=dir` writes their WGSL, and
+  `node tools/perf/pipeline-compile.mjs <vertex.wgsl> <fragment.wgsl> [--edit ...]` times one pipeline's compile in a
+  fresh Chrome, with edits (`stub:<function prefix>`, `no-inverse`, `no-derivatives`, `sample-level`) that tell what
+  the compiler spends its time on.
+
+### A PIX capture of the same frame (Windows)
+
+Chrome runs WebGPU on D3D12 through Dawn, so PIX on Windows captures it, with the same labels: debug groups are PIX
+events, pass and buffer labels name the D3D12 objects.
+
+1. Start Chrome on its own profile, with its GPU process unsandboxed and Dawn passing labels on:
+   `chrome.exe --user-data-dir=%TEMP%\pix-chrome --no-sandbox --disable-gpu-sandbox --disable-gpu-watchdog
+   --disable-direct-composition --enable-dawn-features=use_user_defined_labels_in_backend,emit_hlsl_debug_symbols,disable_symbol_renaming`
+   and open the app with `?gpu=webgpu` (`npm run dev`). Set `globalThis.BYLONDER_GPU_MARKERS = true` in the 3D Viewport
+   frame's console before Play, or the page's own groups are missing.
+2. In PIX: Select Target Process > Attach, pick Chrome's GPU process (`chrome.exe --type=gpu-process`), Attach, then
+   GPU Capture with one frame. The capture's timeline and Events list show the passes and dispatches by these labels,
+   with their GPU durations and the D3D12 work Dawn issued for them (barriers, copies).
