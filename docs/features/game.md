@@ -34,7 +34,8 @@ limits:
   - A separate window is not built yet.
   - The game draws with WebGL 2, as an exported page does by default, also where the app draws with WebGPU, until exported pages draw area lights on WebGPU.
   - A change of the scene, its world, a node group or a collection exports the whole scene, so on a large scene it reaches the game after an export's time.
-  - Settings with no fast control yet (a light's shadow and spot settings, a camera's sensor and shift, render settings) reach the game after the export.
+  - Settings with no fast control yet (a light's shadow and spot settings, render settings) reach the game after the export; a camera's type and sensor fit remake the camera.
+  - A camera's lens shift (Shift X and Y) is not drawn by exported pages yet, so the game shows the camera unshifted.
   - A value the game animates (an F-Curve's or a driver's) is the game's: an edit of it reaches the game through the export only.
   - Game code (game.js) does not run in it yet.
 ---

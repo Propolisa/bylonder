@@ -420,6 +420,14 @@ export type Binding = {
     hide?: "viewport" | "render" | undefined;
     lens?: number | undefined;
     /**
+     * a camera's fitted sensor: the path of its lens, whose value the field of view divides by
+     */
+    sensor?: string | undefined;
+    /**
+     * an orthographic camera's scale, over the view's longer side (ortho-scale.js)
+     */
+    orthoScale?: boolean | undefined;
+    /**
      * a morph target's name in its node's MorphTargetManager, whose influence it sets
      */
     morph?: string | undefined;

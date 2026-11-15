@@ -74,6 +74,8 @@ const FLOAT_EPSILON = 1.1920928955078125e-7;
  * @property {Transform} [transform]
  * @property {'viewport' | 'render'} [hide]
  * @property {number} [lens]
+ * @property {string} [sensor] a camera's fitted sensor: the path of its lens, whose value the field of view divides by
+ * @property {boolean} [orthoScale] an orthographic camera's scale, over the view's longer side (ortho-scale.js)
  * @property {string} [morph] a morph target's name in its node's MorphTargetManager, whose influence it sets
  * @property {string} [channel] the key in its node's `metadata.bylonderChannels` the scene's animation sets it through
  * @property {string} [collection] a collection's visibility flag or time offset: the key of the collection it sets
@@ -811,6 +813,10 @@ export class BlendScene {
       if (target) target.influence = value;
     } else if (bind.lens !== undefined) {
       node.fov = 2 * Math.atan(bind.lens / /** @type {number} */ (value));
+    } else if (bind.sensor !== undefined) {
+      node.fov = 2 * Math.atan((/** @type {number} */ (value) * (bind.factor ?? 1)) / /** @type {number} */ (this.#values.get(bind.sensor)));
+    } else if (bind.orthoScale) {
+      node.metadata = { ...node.metadata, orthoScale: value };
     } else if (bind.property) {
       assign(node, bind.property, typeof value === 'number' ? value * (bind.factor ?? 1) : value);
     }

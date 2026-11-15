@@ -93,7 +93,36 @@ export const SYNCED = {
     // Disable Selection: the editor's.
     hide_select: APP,
   },
+  // A camera's field of view as exported (its render frame's, babylon-export.js framedCameras) is the half extent of its
+  // fitted sensor over its lens: the lens and that sensor set it by the extent measured on the export.
+  Camera: {
+    lens: ({ base, camera, node, fov }) => [knob(`${base}.lens`, camera.lens, { type: 'FLOAT', subtype: 'DISTANCE_CAMERA', unit: 'CAMERA', soft_min: 1, soft_max: 5000 },
+      { node: node.id, lens: Math.tan(fov / 2) * camera.lens })],
+    sensor_width: (context) => sensorKnobs(context, 'sensor_width'),
+    sensor_height: (context) => sensorKnobs(context, 'sensor_height'),
+    clip_start: ({ base, camera, node }) => [knob(`${base}.clip_start`, camera.clip_start, { type: 'FLOAT', subtype: 'DISTANCE', unit: 'LENGTH' }, { node: node.id, property: 'minZ' })],
+    clip_end: ({ base, camera, node }) => [knob(`${base}.clip_end`, camera.clip_end, { type: 'FLOAT', subtype: 'DISTANCE', unit: 'LENGTH' }, { node: node.id, property: 'maxZ' })],
+    // An orthographic camera spans its scale over the view's longer side (runtime/ortho-scale.js).
+    ortho_scale: ({ base, camera, node }) => [knob(`${base}.ortho_scale`, camera.ortho_scale, { type: 'FLOAT', subtype: 'DISTANCE', unit: 'LENGTH' }, { node: node.id, orthoScale: true })],
+    // Perspective or orthographic, and which side the sensor fits: the camera is made again.
+    type: REBUILD,
+    sensor_fit: REBUILD,
+    // A page draws no lens shift yet: the patch carries the value.
+    shift_x: REBUILD,
+    shift_y: REBUILD,
+    // Millimeters or field of view: how the editor shows the lens.
+    lens_unit: APP,
+  },
 };
+
+// The sensor the camera's frame fits (Auto and Horizontal: its width), whose half extent over the lens is the field of
+// view's; the other leaves the view as it is.
+const fittedSensor = (camera) => (camera.sensor_fit === 'VERTICAL' ? 'sensor_height' : 'sensor_width');
+function sensorKnobs({ base, camera, node, fov }, name) {
+  const fitted = fittedSensor(camera) === name && camera[name] > 0;
+  return [knob(`${base}.${name}`, camera[name], { type: 'FLOAT', subtype: 'DISTANCE_CAMERA', unit: 'CAMERA' },
+    fitted ? { node: node.id, sensor: `${base}.lens`, factor: Math.tan(fov / 2) * camera.lens / camera[name] } : undefined)];
+}
 
 // The controls of a struct's synced properties over `owner` (rna-bylonder.js syncNames), in the table's order, each
 // kind once; `context` is what the kinds read.
@@ -117,14 +146,9 @@ function lightControls(node, light) {
   return [power, ...color, ...customProperties(light, base)];
 }
 
-function cameraControls(node, camera) {
+function cameraControls(node, camera, entry) {
   const base = `cameras${key(camera.name)}`;
-  return [
-    knob(`${base}.lens`, camera.lens, { type: 'FLOAT', subtype: 'DISTANCE_CAMERA', unit: 'CAMERA', soft_min: 1, soft_max: 5000 }, { node: node.id, lens: Math.tan(node.fov / 2) * camera.lens }),
-    knob(`${base}.clip_start`, camera.clip_start, { type: 'FLOAT', subtype: 'DISTANCE', unit: 'LENGTH' }, { node: node.id, property: 'minZ' }),
-    knob(`${base}.clip_end`, camera.clip_end, { type: 'FLOAT', subtype: 'DISTANCE', unit: 'LENGTH' }, { node: node.id, property: 'maxZ' }),
-    ...customProperties(camera, base),
-  ];
+  return [...syncedControls('Camera', node, { base, camera, node, fov: entry?.fov ?? node.fov }), ...customProperties(camera, base)];
 }
 
 // A node material's tunable values: its InputBlocks named by their RNA path from the material (node-material-export.js),
@@ -249,6 +273,7 @@ export function exportControls(world, data) {
   const { scene } = world, byUniqueId = new Map([...scene.meshes, ...scene.transformNodes, ...scene.lights, ...scene.cameras].map((n) => [n.uniqueId, n]));
   const nodes = [...data.meshes, ...data.transformNodes, ...data.lights, ...data.cameras].map((entry) => byUniqueId.get(entry.uniqueId)).filter(Boolean);
   const entryOf = new Map(data.meshes.map((entry) => [entry.uniqueId, entry]));
+  const cameraOf = new Map(data.cameras.map((entry) => [entry.uniqueId, entry]));
   const mainScene = sceneOf(sync);
   const list = [];
   for (const node of nodes) {
@@ -257,7 +282,7 @@ export function exportControls(world, data) {
     const ob = idStruct(pointer);
     list.push(...objectControls(node, ob, sync.blender.transform(pointer).matrix_parent_inverse));
     if (ob.type === 'LIGHT') list.push(...lightControls(node, ob.data));
-    if (ob.type === 'CAMERA') list.push(...cameraControls(node, ob.data));
+    if (ob.type === 'CAMERA') list.push(...cameraControls(node, ob.data, cameraOf.get(node.uniqueId)));
     if (ob.type === 'ARMATURE') list.push(...poseControls(ob, data.skeletons ?? []));
     if (ob.type === 'MESH') list.push(...shapeKeyControls(node, ob, entryOf.get(node.uniqueId)));
   }
