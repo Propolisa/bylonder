@@ -11,13 +11,10 @@ const CONTEXT = '[data-blender="RENDER_PT_context"]';
 await record("cycles", { example: "rendering", node: "Carafe" }, async (r) => {
   const { app, page } = r;
   await r.tab("Render");
-  await r.gif("engine", CONTEXT, async () => {
-    await app.locator(CONTEXT).getByRole("combobox").first().click();
-    await page.getByRole("option", { name: "Cycles" }).click();
-    await app.settled();
-    await r.pause(1500);
-  });
-  await r.shot("sampling", '[data-blender="CYCLES_RENDER_PT_sampling"]');
+  await app.bylonder((b) => b.world.renderSettings.set("render.blenderEngine", "CYCLES"));
+  await app.until(() => /Cycles loaded|Cycles needs/.test(document.body.textContent), null, 120000);
+  await app.settled();
+  await r.shot("engine", CONTEXT);
   await page.click('[data-blender="TOPBAR_MT_render"]');
   await page.getByRole("menuitem", { name: "Render Image" }).click();
   await app.until(() => /^(Finished|Render failed)/.test(document.querySelector(".render-result [data-status]")?.textContent ?? ""), null, 600000);

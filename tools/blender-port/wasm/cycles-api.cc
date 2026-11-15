@@ -4,6 +4,7 @@
 #include <Python.h>
 
 #include "blender/CCL_api.h"
+#include "blender/session.h"
 
 #define EXPORT(name) extern "C" __attribute__((export_name(#name)))
 
@@ -20,4 +21,7 @@ EXPORT(cycles_start) void cycles_start()
   PyRun_SimpleString(
       "import addon_utils, importlib\nimportlib.invalidate_caches()\naddon_utils.enable('cycles', default_set=True)\n");
   PyGILState_Release(gil);
+  /* No GPU display to draw into (F12 reads the render result), so Cycles renders as Blender's does headless; set after
+   * the add-on's init, which sets it from bpy.app.background. */
+  ccl::BlenderSession::headless = true;
 }
