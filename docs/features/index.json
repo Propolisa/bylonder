@@ -472,6 +472,7 @@
    "tests/game-export.test.js"
   ],
   "limits": [
+   "A mesh's visibility (mesh.visibility below 1) does not fade the exported scene's materials yet: game code can hide a mesh, not fade it.",
    "Game sounds (game.play) play at full volume from no place: not yet positioned at the entity they are played at.",
    "There is no game UI layer yet (defineUI); a system can draw with Babylon's GUI itself.",
    "Hover docs and completion come from TypeScript in the code editor; go to definition from a behaviour to the objects using it is the user count's list, not the editor's.",

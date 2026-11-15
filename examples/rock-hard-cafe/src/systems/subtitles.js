@@ -19,6 +19,12 @@ export default defineSystem({
     });
     screen.addControl(text);
     return {
+      /** The text a knot gives (an Ink shuffle's pick), not shown. */
+      tell(knot) {
+        if (!story) return null;
+        story.ChoosePathString(knot);
+        return story.ContinueMaximally().trim();
+      },
       /** The text a knot says, shown for a few seconds. */
       say(knot) {
         if (!story) return null;

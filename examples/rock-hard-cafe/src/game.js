@@ -2,10 +2,11 @@
 import { defineGame } from 'bylonder';
 import Shift from './systems/shift.js';
 import Subtitles from './systems/subtitles.js';
+import Hud from './systems/hud.js';
 
 export default defineGame({
   start: 'Rock Hard Café',
-  systems: [Shift.with({ length: 30 }), Subtitles],
+  systems: [Shift.with({ length: 60 }), Subtitles, Hud],
   input: {
     Move: ['WASD'],
     Use: ['E', 'Space'],

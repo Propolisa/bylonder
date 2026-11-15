@@ -61,8 +61,8 @@ export async function packagedFiles(files, options) {
 
 // The project's game (game-export.js): game.js, made with the app's esbuild and its archive of the libraries game code imports.
 async function projectGame(project) {
-  const [{ esbuildService }, { archivedLibrary }] = await Promise.all([import('../workspace/esbuild.js'), import('./game-libraries.js')]);
-  return gameFiles(project, { esbuild: await esbuildService(), library: archivedLibrary });
+  const [{ esbuildService }, { archivedLibrary }, { babylonSources }] = await Promise.all([import('../workspace/esbuild.js'), import('./game-libraries.js'), import('./babylon-sources.js')]);
+  return gameFiles(project, { esbuild: await esbuildService(), library: archivedLibrary, babylon: await babylonSources(AbstractEngine.Version) });
 }
 /**
  * Export options for `world`'s project: with its game (game.js) when it has one, which the page's load() plays, and the

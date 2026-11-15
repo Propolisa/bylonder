@@ -14,7 +14,7 @@ export default defineBehavior({
       holding: null,
       update() {
         if (!input.pressed('Use')) return;
-        const rock = this.holding && game.near(entity, 2, Rock, (r) => r.state.mood === 'waiting');
+        const rock = this.holding && game.near(entity, 2.5, Rock, (r) => r.state.mood === 'waiting');
         if (rock) {
           game.emit(rock, 'served', { cup: this.holding });
           this.holding = null;

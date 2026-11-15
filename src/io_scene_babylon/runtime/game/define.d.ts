@@ -133,12 +133,12 @@ export function knot(name?: KnotName, options?: PropOptions): {
 } & PropOptions & {
     default: string;
 };
-export function collection(name?: CollectionName, options?: PropOptions): {
+export function collection<T extends CollectionName | CollectionName[]>(names?: T, options?: PropOptions): {
     type: PropType;
     default: any;
     options?: string[];
 } & PropOptions & {
-    default: string;
+    default: T;
 };
 /**
  * What a behaviour's or a system's `create` receives.

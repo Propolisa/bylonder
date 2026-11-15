@@ -1,9 +1,12 @@
-"""Rock Hard Café: a café counter whose customers are rocks, the scene of the game in src/.
+"""Rock Hard Café: an open-air coffee stand in a low-poly forest by a brook, whose customers are rocks, the scene of the
+game in src/.
 
-A counter, a coffee machine, a door the rocks come in by, the barista behind the counter and one rock waiting. The
-Rock and Cup collections are prefabs the game spawns copies of (excluded from the view layer); each object's
-behaviours are its `behaviors` custom property group, as Object properties > Behaviors adds them. The rocks' noises and
-the machine's hiss are short sounds this script writes into sounds/.
+A wooden counter with a coffee machine and a parasol beside it, the barista behind the counter, one rock waiting at the stand and
+the trailhead the next rocks roll up from. The Rock and Cup collections are prefabs the game spawns copies of (excluded
+from the view layer); each object's behaviours are its `behaviors` custom property group, as Object properties >
+Behaviors adds them. The rocks' noises and the machine's hiss are short sounds this script writes into sounds/ and
+packs. The forest is Quaternius' Stylized Nature MegaKit (CC0), as the character examples use it
+(../character-controller/environment.py, which downloads it).
 
 blender -b --factory-startup -P cafe.py   (writes rock-hard-cafe.blend and sounds/ beside this file)
 """
@@ -13,17 +16,23 @@ import random
 import struct
 import wave
 
+import sys
+
 import bmesh
 import bpy
+from mathutils import Matrix
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(HERE, "..", "character-controller"))
+import environment  # noqa: E402
 random.seed(7)
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
 scene = bpy.context.scene
 scene.name = "Rock Hard Café"
 scene.render.resolution_x, scene.render.resolution_y = 1280, 800
-scene.frame_start, scene.frame_end, scene.render.fps = 1, 24, 24
+# The mannequin's actions are 30 fps; the scene's range is the barista's Idle (set below), as the character examples set it.
+scene.render.fps = 30
 
 
 def material(name, color, roughness=0.5, metallic=0.0):
@@ -37,9 +46,9 @@ def material(name, color, roughness=0.5, metallic=0.0):
 
 
 WOOD = material("Counter Wood", (0.28, 0.14, 0.06, 1), 0.55)
-TILES = material("Floor Tiles", (0.55, 0.5, 0.44, 1), 0.7)
+CANVAS = material("Parasol", (0.75, 0.22, 0.16, 1), 0.8)
+WATER = material("Brook", (0.12, 0.32, 0.42, 1), 0.08)
 CHROME = material("Chrome", (0.75, 0.75, 0.78, 1), 0.2, 1.0)
-STONE = material("Stone", (0.42, 0.4, 0.38, 1), 0.85)
 CHINA = material("China", (0.92, 0.9, 0.86, 1), 0.25)
 CHALKBOARD = material("Chalkboard", (0.03, 0.05, 0.04, 1), 0.9)
 CHALK = material("Chalk", (0.9, 0.88, 0.8, 1), 0.95)
@@ -77,22 +86,6 @@ def cylinder(name, radius, depth, location, mat, collection=None, segments=24):
     return link(ob, collection)
 
 
-def rock_mesh():
-    """A lumpy rock: an icosphere pushed in and out a little, smooth shaded."""
-    mesh = bpy.data.meshes.new("Rock")
-    bm = bmesh.new()
-    bmesh.ops.create_icosphere(bm, subdivisions=3, radius=0.35)
-    for v in bm.verts:
-        v.co *= 1 + random.uniform(-0.12, 0.12)
-        v.co.z *= 0.8
-    bm.to_mesh(mesh)
-    bm.free()
-    mesh.materials.append(STONE)
-    for polygon in mesh.polygons:
-        polygon.use_smooth = True
-    return mesh
-
-
 def tone(name, freqs, seconds, noise=0.0):
     """A short sound written to sounds/<name>.wav: a sum of decaying tones and some noise, 22 kHz mono."""
     os.makedirs(os.path.join(HERE, "sounds"), exist_ok=True)
@@ -119,10 +112,26 @@ SOUNDS = {name: tone(name, *args) for name, args in {
     "Grind": ([70, 93], 0.6, 0.6), "Rumble": ([45, 61], 0.9, 0.3), "Clack": ([900, 1400], 0.15, 0.4), "Steam": ([2000], 0.7, 0.9),
 }.items()}
 
-# The café: floor, counter, machine, the door the rocks come in by.
-box("Floor", (8, 6, 0.1), (0, 0, -0.05), TILES)
+# The forest: the character examples' ground, grass, rocks, bushes and pines, sky and sun (environment.py), then a brook
+# across the clearing behind the rocks' side and pines around it.
+environment.build()
+brook = box("Brook", (40, 1.4, 0.02), (0, -5.5, 0.02), WATER)
+for name, places in {"Pine_5": [(-6, -9, 1.1), (5, -10, 1.3), (-11, -3, 1.0), (10, -6, 1.2), (-8, 5, 0.9), (8, 6, 1.0)],
+                     "Rock_Medium_1": [(-3.5, -6.4, 0.5), (2.5, -4.7, 0.4), (6.5, -6.3, 0.6)],
+                     "Bush_Common_Flowers": [(-4.5, -1.5, 0.7), (6.8, -2.6, 0.9), (4.2, 3.0, 0.6)]}.items():
+    environment.instanced(environment.megakit(name), f"Stand {name}", [(x, y, 0, size, random.uniform(0, math.tau)) for x, y, size in places])
+
+# The stand, open to the sky: a counter with the coffee machine on it, and a parasol beside it for shade.
 counter = box("Counter", (3.2, 0.7, 1.0), (0, 0.6, 0.5), WOOD)
 machine = box("Machine", (0.5, 0.4, 0.6), (-1.2, 0.6, 1.3), CHROME)
+box("Parasol Pole", (0.05, 0.05, 2.3), (3.3, 1.2, 1.15), WOOD)
+parasol = bpy.data.meshes.new("Parasol")
+bm = bmesh.new()
+bmesh.ops.create_cone(bm, cap_ends=False, segments=8, radius1=1.1, radius2=0.02, depth=0.45)
+bm.to_mesh(parasol)
+bm.free()
+parasol.materials.append(CANVAS)
+link(bpy.data.objects.new("Parasol", parasol)).location = (3.3, 1.2, 2.35)
 
 
 def words(name, text, size, location, rotation, mat):
@@ -145,9 +154,11 @@ def words(name, text, size, location, rotation, mat):
 board = box("Menu Board", (1.0, 0.04, 0.55), (0.95, 0.6, 1.3), CHALKBOARD)
 for side, (y, turn) in {"Back": (0.63, math.pi), "Front": (0.57, 0)}.items():
     words(f"Menu {side}", "ROCK HARD CAFÉ\nespresso  2 pebbles\nflat white  3 pebbles", 0.075, (0.95, y, 1.3), (math.radians(90), 0, turn), CHALK)
-door = bpy.data.objects.new("Door", None)
-door.empty_display_type, door.empty_display_size, door.location = "ARROWS", 0.5, (3.5, -2.0, 0)
-link(door)
+# Where a rock waits at the stand, and the trailhead behind the bushes the rocks roll up from and back to.
+spot = link(bpy.data.objects.new("Stand Spot", None))
+spot.empty_display_type, spot.location = "CIRCLE", (0.3, -0.75, 0)
+trailhead = link(bpy.data.objects.new("Trailhead", None))
+trailhead.empty_display_type, trailhead.empty_display_size, trailhead.location = "ARROWS", 0.5, (7.5, -2.8, 0)
 
 # The barista behind the counter: the character examples' mannequin (Quaternius, CC0) with its Idle, Walk, Run and Jump,
 # appended from ../basic-character/basic-character.blend, facing the customers.
@@ -163,36 +174,45 @@ barista = rig
 barista.name = "Barista"
 barista.location, barista.rotation_euler = (0.4, 1.5, 0), (0, 0, math.pi)
 bpy.context.view_layer.objects.active = barista
+idle_start, idle_end = barista.animation_data.action.frame_range
+scene.frame_start, scene.frame_end = int(round(idle_start)), int(round(idle_end))
 
-# The prefabs: one rock and one cup, in collections the view layer excludes, which the game spawns copies of.
+# The prefabs, in collections the view layer excludes, which the game spawns copies of: three kinds of rock, each a
+# MegaKit rock of its own size, and the cup.
 prefabs = bpy.data.collections.new("Prefabs")
 scene.collection.children.link(prefabs)
-rock_prefabs = bpy.data.collections.new("Rock")
+
+
+def megakit_rock(name, model, size, tone):
+    """A MegaKit rock (CC0) `size` metres across, its origin at its base, so it sits on the ground where it is placed, in
+    a plain stone of its own `tone`, which the game tints (a customer's stain)."""
+    rock = environment.megakit(model)
+    rock.data.materials.clear()
+    rock.data.materials.append(material(f"{name} Stone", (tone, tone * 0.96, tone * 0.9, 1), 0.85))
+    rock.name = rock.data.name = name
+    for c in list(rock.users_collection):
+        c.objects.unlink(rock)
+    largest = max(rock.dimensions)
+    rock.data.transform(Matrix.Scale(size / largest, 4))
+    lowest = min(v.co.z for v in rock.data.vertices)
+    for v in rock.data.vertices:
+        v.co.z -= lowest
+    return rock
+
+
+rock_kinds = {}
+for kind, model, size, tone in (("Rock A", "Rock_Medium_1", 0.55, 0.42), ("Rock B", "Rock_Medium_2", 0.7, 0.33), ("Rock C", "Rock_Medium_3", 0.45, 0.5)):
+    rock_kinds[kind] = bpy.data.collections.new(kind)
+    prefabs.children.link(rock_kinds[kind])
+    link(megakit_rock(f"{kind} Prefab", model, size, tone), rock_kinds[kind])
 cup_prefabs = bpy.data.collections.new("Cup")
-prefabs.children.link(rock_prefabs)
 prefabs.children.link(cup_prefabs)
-shared_rock = rock_mesh()
-prefab_rock = link(bpy.data.objects.new("Rock Prefab", shared_rock), rock_prefabs)
 cup = cylinder("Cup", 0.1, 0.14, (0, 0, 0.07), CHINA, cup_prefabs)  # larger than life, to read from the camera
 bpy.context.view_layer.layer_collection.children["Prefabs"].exclude = True
 
-# The rock waiting at the counter, a copy of the prefab's mesh.
-rock = link(bpy.data.objects.new("Rock", shared_rock))
-rock.location = (0.3, -0.75, 0.28)
-
-# Wobble: the rock's admiring wobble, an object action.
-wobble = bpy.data.actions.new("Wobble")
-rock.animation_data_create().action = wobble
-for frame, angle in ((1, 0), (7, 10), (13, -10), (19, 6), (24, 0)):
-    rock.rotation_euler = (0, math.radians(angle), 0)
-    rock.keyframe_insert("rotation_euler", index=1, frame=frame)
-rock.rotation_euler = (0, 0, 0)
-rock.animation_data.action = None
-# On a muted NLA track of each rock, as a game file keeps its clips: the export ships it as a clip the game plays.
-for ob in (rock, prefab_rock):
-    track = (ob.animation_data or ob.animation_data_create()).nla_tracks.new()
-    track.name, track.mute = "Wobble", True
-    track.strips.new("Wobble", 1, wobble)
+# The rock waiting at the stand.
+rock = link(megakit_rock("Rock", "Rock_Medium_2", 0.6, 0.4))
+rock.location = spot.location
 
 # Each object's behaviours, as Object properties > Behaviors adds them: one group per behaviour, its props as members.
 # Python cannot give a nested custom property its UI data (a colour's subtype, limits): the app gives each prop the
@@ -206,27 +226,14 @@ def behaviors(ob, **groups):
     return ob
 
 
-ROCK = {"patience": 8.0, "admire": wobble, "noises": {"0": SOUNDS["Grind"], "1": SOUNDS["Rumble"], "2": SOUNDS["Clack"]},
-        "reaction": "rock_reaction", "stain": [0.24, 0.14, 0.07]}
-for ob in (rock, prefab_rock):
+ROCK = {"patience": 12.0, "noises": {"0": SOUNDS["Grind"], "1": SOUNDS["Rumble"], "2": SOUNDS["Clack"]},
+        "reaction": "rock_reaction", "stain": [0.24, 0.14, 0.07], "spot": spot, "trailhead": trailhead, "speed": 1.2}
+for ob in (rock, *(c.objects[0] for c in rock_kinds.values())):
     behaviors(ob, Rock=ROCK)
 behaviors(machine, Machine={"cup": cup_prefabs, "brew": 0.6, "hiss": SOUNDS["Steam"]})
-behaviors(door, Spawner={"prefab": rock_prefabs, "every": 4.0, "max": 3})
+behaviors(trailhead, Spawner={"prefabs": {str(i): c for i, c in enumerate(rock_kinds.values())}, "every": 3.0})
 behaviors(barista, Character={"speed": 2.5, "feet": True, "gaze": True, "lean": True}, Barista={})
-# Light and camera: a warm café, seen from the customers' side.
-sun = bpy.data.lights.new("Window", "SUN")
-sun.energy, sun.color, sun.angle = 3, (1.0, 0.86, 0.7), math.radians(8)
-sun_ob = link(bpy.data.objects.new("Window", sun))
-sun_ob.rotation_euler = (math.radians(50), 0, math.radians(35))
-lamp = bpy.data.lights.new("Lamp", "POINT")
-lamp.energy, lamp.color, lamp.shadow_soft_size = 300, (1.0, 0.75, 0.5), 0.3
-lamp_ob = link(bpy.data.objects.new("Lamp", lamp))
-lamp_ob.location = (0, 0.2, 2.6)
-
-world = bpy.data.worlds.new("Café")
-world.node_tree.nodes["Background"].inputs["Color"].default_value = (0.05, 0.04, 0.035, 1)
-scene.world = world
-
+# The camera, seen from the rocks' side (the game's follows the barista).
 camera = bpy.data.objects.new("Camera", bpy.data.cameras.new("Camera"))
 camera.data.lens = 35
 camera.location = (0.5, -5.2, 2.4)

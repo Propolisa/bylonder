@@ -15,7 +15,8 @@ const files = async (id) => ({
 
 export const examples = [
   // Newest first, as the splash lists them.
-  { id: "rock-hard-cafe", title: "Rock Hard Café" },
+  // Opens on Bylonder's Game workspace: the 3D View beside a large Game area.
+  { id: "rock-hard-cafe", title: "Rock Hard Café", workspaces: [["Game", "OBJECT"], ["Layout", "OBJECT"], ["Modeling", "EDIT"], ["Shading", "OBJECT"], ["Animation", "POSE"], ["Scripting", "OBJECT"]] },
   { id: "project-files", title: "Project Files" },
   { id: "character-controller", title: "Snow at the Bar" },
   { id: "compositor", title: "Akari Noodle House" },

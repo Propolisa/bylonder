@@ -55,8 +55,11 @@ export const action = (name = /** @type {ActionName} */ (''), options) => prop('
 export const sound = (names = /** @type {T} */ (''), options) => prop('sound', names, options);
 /** A knot of the project's Ink stories, which a subtitles system says. @param {KnotName} [name] @param {PropOptions} [options] */
 export const knot = (name = /** @type {KnotName} */ (''), options) => prop('knot', name, options);
-/** A collection of the .blend, a prefab `game.spawn()` makes copies of. @param {CollectionName} [name] @param {PropOptions} [options] */
-export const collection = (name = /** @type {CollectionName} */ (''), options) => prop('collection', name, options);
+/**
+ * A collection of the .blend, a prefab `game.spawn()` makes copies of, or several to pick one from with `time.pick`.
+ * @template {CollectionName | CollectionName[]} T @param {T} [names] @param {PropOptions} [options]
+ */
+export const collection = (names = /** @type {T} */ (''), options) => prop('collection', names, options);
 
 /**
  * What a behaviour's or a system's `create` receives.

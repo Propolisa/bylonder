@@ -1,6 +1,10 @@
 VAR served = 0
 VAR walkouts = 0
 
+=== rock_noise ===
+{~Grind|Rumble|Clack}
+-> END
+
 === rock_reaction ===
 {~*grinds approvingly*|*a deep, satisfied rumble*|*clack*|*sediment shifts*|*says nothing, but warmly*}
 -> END

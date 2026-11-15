@@ -38,6 +38,7 @@ tests:
   - tests/rock-hard-cafe-wasm.test.js
   - tests/game-export.test.js
 limits:
+  - A mesh's visibility (mesh.visibility below 1) does not fade the exported scene's materials yet: game code can hide a mesh, not fade it.
   - Game sounds (game.play) play at full volume from no place: not yet positioned at the entity they are played at.
   - There is no game UI layer yet (defineUI); a system can draw with Babylon's GUI itself.
   - Hover docs and completion come from TypeScript in the code editor; go to definition from a behaviour to the objects using it is the user count's list, not the editor's.
@@ -53,14 +54,16 @@ it all; saving a file swaps its code into the running game, keeping each behavio
 
 [Open in Bylonder](https://propolisa.github.io/bylonder/#example=rock-hard-cafe)
 
-The demo, Rock Hard Café, is a 30-second shift behind the counter of a café whose only customers are rocks: pour a
-coffee at the machine, hand it to a waiting rock, and it admires it, makes a rock noise, spills it on itself and
-rolls out.
+The demo, Rock Hard Café, is a one-minute shift at an open-air coffee stand in a forest by a brook, whose only
+customers are rocks: one at a time a rock rolls up from the trailhead, you pour a coffee at the machine and hand it
+over, and it shivers with delight, makes a rock noise, spills it on itself and rolls back down. Each rock's path,
+shiver and noise come from the run's seeded random, so every serve plays out differently and a replay plays the same.
+The example opens on the Game workspace, the 3D View beside the Game area.
 
 ## Steps
 
 1. **Add a behaviour.** Select a rock, open Object properties > Behaviors and choose Add Behavior > Rock. Its props
-   (Patience, Admire, Reaction, Stain) appear as Blender properties; the count beside its name is its users, and
+   (Patience, Noises, Reaction, Stain, Spot, Trailhead, Speed) appear as Blender properties; the count beside its name is its users, and
    hovering it lists the objects that carry it.
 
    ![Object properties > Behaviors with the Rock behaviour](../media/features/game-code/behaviors.png)
@@ -71,8 +74,8 @@ rolls out.
 
    ![Edit Source opens rock.js at defineBehavior](../media/features/game-code/edit-source.png)
 
-3. **Play.** The Game area's Play runs the scene with its game code: WASD walks the barista, E pours at the machine and
-   serves a rock. Drag Patience while it plays and the waiting rocks change at once; save `rock.js` and its code is
+3. **Play.** The Game area's Play runs the scene with its game code and gives it the keys (a click on the game takes
+   them back after you work elsewhere): WASD walks the barista, E pours at the machine and serves a rock. Drag Patience while it plays and the waiting rocks change at once; save `rock.js` and its code is
    swapped in without restarting.
 
    ![The café playing in the Game area](../media/features/game-code/play.gif)
@@ -85,3 +88,5 @@ rolls out.
 - [src/game.js](../../examples/rock-hard-cafe/src/game.js): the composition.
 - [content/dialogue/cafe.ink](../../examples/rock-hard-cafe/content/dialogue/cafe.ink): the rocks' lines, an Ink story.
 - Recorded by [record-game-code.mjs](../../tools/docs/record-game-code.mjs).
+- Credits: the barista and the forest are Quaternius' Universal Animation Library and Stylized Nature MegaKit (CC0),
+  [CREDITS.md](../../examples/rock-hard-cafe/CREDITS.md).

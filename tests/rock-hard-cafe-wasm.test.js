@@ -27,6 +27,14 @@ assert.deepEqual(game.get(Shift).save(), { served: 1, walkouts: 0 });
 const near = (a, b) => a.every((v, i) => Math.abs(v - b[i]) < 1e-3);
 assert.ok(near(rock.material().baseColor, rock.props.stain), 'the rock wears the stain in the run');
 assert.ok(!near(rock.authored.material().baseColor, rock.props.stain), 'the .blend keeps a clean rock');
+// One customer at a time: the served rock rolls back out of sight, and the next comes up the path to the stand.
+const atStand = () => game.world.instances && [...game.world.instances.values()].filter((i) => i.definition.name === 'Rock' && ['arriving', 'waiting', 'admiring'].includes(i.state.mood));
+for (let t = 0; t < 14; t++) {
+  await game.step({ seconds: 1 });
+  assert.ok(atStand().length <= 1, `one rock at the stand at a time: ${atStand().map((i) => i.entity.name)}`);
+}
+assert.equal(rock.state.mood, 'gone', 'the served rock rolled out of sight');
+assert.ok(atStand().some((i) => i.state.mood === 'waiting' && i.entity.name !== 'Rock'), 'the next rock waits at the stand');
 assert.deepEqual(game.errors, []);
 game.dispose();
 console.log('Rock Hard Café: a served rock admires with a subtitled noise, spills on itself and leaves; the .blend stays clean');

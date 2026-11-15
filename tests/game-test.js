@@ -31,7 +31,7 @@ export async function run(example, { seed = 1 } = {}) {
   const exported = (await exportPackage(world, { animations: 'BOTH', game: true })).files;
   const project = { files: files(fileURLToPath(root)), read: (path) => readFile(new URL(path, root)) };
   const library = folderLibrary((path) => readFile(new URL(`../node_modules/${path}`, import.meta.url), 'utf8'));
-  const written = writePackage({ ...exported, ...(await gameFiles(project, { esbuild: await import('esbuild-wasm'), library })) });
+  const written = writePackage({ ...exported, ...(await gameFiles(project, { esbuild: await import('esbuild-wasm'), library, babylon: (path) => readFile(new URL(`../node_modules/@babylonjs/core/${path}`, import.meta.url), 'utf8') })) });
   const at = (path) => new URL(path, written.url).href;
   const engine = Object.assign(new core.NullEngine(), { getFontOffset: () => ({ ascent: 0, height: 0, descent: 0 }) });
   const blend = await (await import(written.url)).load({ scene: new core.Scene(engine) });

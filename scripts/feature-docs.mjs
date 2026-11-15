@@ -20,7 +20,7 @@ const SCALARS = ["id", "title", "summary", "expect", "blender_version", "example
 const LISTS = ["blender_manual", "media", "ui", "operators", "code", "tests", "limits"];
 const blenderVersion = JSON.parse(read("tools/blender-port/manifest.json")).blender.replace(/^v/, "");
 const manual = `https://docs.blender.org/manual/en/${blenderVersion.split(".").slice(0, 2).join(".")}/`;
-const examples = new Map([...read("src/workspace/examples.js").matchAll(/\{ id: "([\w-]+)", title: "([^"]+)" \}/g)].map(([, id, title]) => [id, title]));
+const examples = new Map([...read("src/workspace/examples.js").matchAll(/\{ id: "([\w-]+)", title: "([^"]+)"[ ,]/g)].map(([, id, title]) => [id, title]));
 // Blender's identifiers: the interface Blender reports (tools/blender-reference/surface.py), its object modes
 // (rna_enum_object_mode_items) and its tools' idnames (space_toolsystem_toolbar.py).
 const surface = JSON.parse(read("src/coverage/blender-surface.json"));
