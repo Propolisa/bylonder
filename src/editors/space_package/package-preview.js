@@ -9,12 +9,12 @@ import { packageState, tablesPatch } from '../../io_scene_babylon/scene-patch.js
 import { exportChanged, keyOfPointer } from '../../io_scene_babylon/scoped-export.js';
 import { referencesIn } from '../../io_scene_babylon/runtime/ir.js';
 import { float32 } from '../../io_scene_babylon/ir-export.js';
-import { blendData } from '../../python/bpy_rna.js';
+import { dataPathValue } from '../../python/bpy_rna.js';
 
 /** A control's value as an export reads it: its RNA path's from bpy.data, a float at its float32 text; else undefined. */
 function controlValue(path) {
   try {
-    const value = blendData().path_resolve(path);
+    const value = dataPathValue(path);
     return typeof value === 'number' ? float32(value) : typeof value === 'boolean' || typeof value === 'string' ? value : undefined;
   } catch { return undefined; }
 }

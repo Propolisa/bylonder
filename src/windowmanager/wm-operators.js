@@ -143,6 +143,12 @@ export function extendMenus(fn) {
   pending.splice(0).forEach((args) => fn(...args));
 }
 
+// An operator button's tooltip from its properties, as a Python operator's description(context, properties) gives
+// one (the user count's objects): `tip(properties)` by idname.
+const tips = new Map();
+export const registerOperatorTip = (idname, tip) => tips.set(idname, tip);
+export const operatorTip = (idname, properties = {}) => tips.get(idname)?.(properties);
+
 // Python keyword arguments for a layout call from JS, as Transcrypt passes them.
 export const kw = (keywords) => ({ ...keywords, __kwargtrans__: null });
 

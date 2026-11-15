@@ -37,6 +37,7 @@
     "esbuild-wasm": "0.25.0",
     "fflate": "0.8.2",
     "fontkit": "2.0.4",
+    "inkjs": "2.4.0",
     "kubeezcut-embed": "github:Propolisa/KubeezCut#a0075ca690f802d27497d14455d0bbd7e15753a1",
     "marked": "15.0.12",
     "mediabunny": "1.61.4",

@@ -1,9 +1,11 @@
-// Node module hooks for running example projects as the app does: `@workbench/sdk` is the running project's SDK (a
-// module of its own per project folder, as each run has),
-// `?raw` imports are text, and app modules may import without extensions, as Vite allows.
+// Node module hooks for running example projects as the app does: `bylonder` is the game framework, `@workbench/sdk`
+// is the running project's SDK (a module of its own per project folder, as each run has), `?raw` imports are text, and
+// app modules may import without extensions, as Vite allows.
 const SDK = 'bylonder:sdk';
 
 export async function resolve(specifier, context, next) {
+  // `bylonder`, what game code imports: the framework's own module, as the app's import map gives it.
+  if (specifier === 'bylonder') return { url: new URL('../../src/io_scene_babylon/runtime/game/define.js', import.meta.url).href, shortCircuit: true };
   if (specifier === '@workbench/sdk') return { url: `${SDK}?${new URL('.', context.parentURL).href}`, shortCircuit: true };
   if (specifier.endsWith('?raw')) return { url: new URL(specifier, context.parentURL).href, shortCircuit: true };
   try {

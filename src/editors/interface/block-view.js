@@ -26,6 +26,7 @@ import { onBack } from '../../windowmanager/wm-back.js';
 import { treeMenu, treeSearch, propSearchItems, press, runOperator } from './tree-menu.js';
 import { parse as parseUnit, editText as unitText } from '../../blenkernel/unit.js';
 import { hoverButton, leaveButton } from '../animation/keyframing-button.js';
+import { operatorTip } from '../../windowmanager/wm-operators.js';
 
 const W = 'bl-widget';
 const struct = ({ pointer }) => pointerStruct(...pointer);
@@ -40,16 +41,21 @@ function corners(aligned = '') {
 }
 
 // A property button's value and its setting through RNA, then the button's functions (ui_apply_but_funcs_after).
+// A button's property on its struct: an RNA property by its identifier, a custom property (an ID property, which RNA
+// names by its key) by its `["key"]` path.
+const rnaKey = (data, prop) => (data[prop] !== undefined ? prop : `["${prop}"]`);
 function rnaValue(b) {
-  const value = struct(b.rna)[b.rna.prop];
+  const data = struct(b.rna), value = data[rnaKey(data, b.rna.prop)];
   return b.rna.index >= 0 && value?.__getitem__ ? value.__getitem__(b.rna.index) : value;
 }
 function setRna(b, value, ui, finish = true) {
   try {
     // A button of a property that is not an array may still carry index 0 (rnaindex), as rnaValue reads it.
-    const data = struct(b.rna), array = b.rna.index >= 0 && data[b.rna.prop]?.__getitem__;
-    if (array) data[b.rna.prop][b.rna.index] = value;
-    else data[b.rna.prop] = value;
+    const data = struct(b.rna), key = rnaKey(data, b.rna.prop), array = b.rna.index >= 0 && data[key]?.__getitem__;
+    if (array) data[key][b.rna.index] = value;
+    // A custom property's array is read as a copy: it is written whole.
+    else if (b.rna.index >= 0 && Array.isArray(data[key])) data[key] = data[key].map((v, i) => (i === b.rna.index ? value : v));
+    else data[key] = value;
     ui.inContext((C) => buttonApplied(C, b));
     if (finish) ui.undoPush(b.tip || b.rna.prop);
     ui.refresh();
@@ -140,7 +146,7 @@ function widgetNode(b, env) {
   const { ui } = env, text = b.text ?? '', shown = b.display ?? text, iconName = b.icon;
   // A scaled layout's buttons (scale_y), and a tree view's spacer labels, keep the height Blender gave them.
   const style = { ...corners(b.aligned), ...((b.h > 1 || (b.type === 'LABEL' && b.h < 1)) && { height: `calc(var(--bl-row) * ${b.h})` }) };
-  const common = { disabled: b.disabled || !env.enabled, inactive: b.inactive || !env.active, title: b.tip };
+  const common = { disabled: b.disabled || !env.enabled, inactive: b.inactive || !env.active, title: (b.operator && operatorTip(b.operator, b.properties)) || b.tip };
   const flat = b.emboss === 'NONE' || b.emboss === 'NONE_OR_STATUS' || env.emboss === 'NONE';
   const withStyle = (vnode) => { if (vnode) vnode.props = { ...vnode.props, style: { ...vnode.props?.style, ...style }, 'data-blender': b.operator ?? b.rna?.prop ?? b.menu ?? b.popover }; return vnode; };
   switch (b.type) {
@@ -155,7 +161,7 @@ function widgetNode(b, env) {
       return withStyle(textField({ value: b.rna ? String(rnaValue(b) ?? '') : b.value ?? shown, iconName, ...common, flat, editing: !!b.renaming,
         onChange: (v) => (b.rna ? setRna(b, v, ui) : (ui.inContext((C) => buttonTextSet(C, b, v)), ui.refresh())) }));
     case 'COLOR':
-      return withStyle(colorSwatch({ value: b.rna ? [...struct(b.rna)[b.rna.prop]] : [0, 0, 0], ...common, onChange: (v, finish) => setRna({ ...b, rna: { ...b.rna, index: -1 } }, v, ui, finish) }));
+      return withStyle(colorSwatch({ value: b.rna ? [...rnaValue({ ...b, rna: { ...b.rna, index: -1 } })] : [0, 0, 0], ...common, onChange: (v, finish) => setRna({ ...b, rna: { ...b.rna, index: -1 } }, v, ui, finish) }));
     case 'MENU': case 'POPOVER': case 'BLOCK': case 'COLOR_BAND':
       return withStyle(menuButton({ text: shown, iconName, ...common, iconOnly: !shown && !!iconName, socket: b.node_link, onClick: (e) => open(b, ui, e) }));
     case 'PULLDOWN':

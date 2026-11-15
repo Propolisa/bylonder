@@ -29,6 +29,8 @@ import { installBack } from "../windowmanager/wm-back.js";
 import { zipSync, unzipSync, strToU8, strFromU8 } from "fflate";
 import { createApp, h, reactive, ref } from "vue";
 import FileTree from "./explorer/FileTree.vue";
+import { definitionAt } from "../editors/space_game/game-code.js";
+import { gameTypes, projectKnots, TYPES_PATH } from "../editors/space_game/game-types.js";
 import "@/editors/interface/components/tailwind.css";
 performance.mark("bl:workspace-imported");
 await preloadIcons();
@@ -250,6 +252,7 @@ function syncModels() {
         project.files[path].content = model.getValue();
         frame?.contentWindow.postMessage({ channel, type: "text", payload: { name: path, content: project.files[path].content } }, location.origin);
         markDirty();
+        if (path.endsWith(".ink")) writeGameTypes();
       });
       models.set(path, model);
     } else if (model.getValue() !== file.content) model.setValue(file.content);
@@ -701,6 +704,10 @@ window.addEventListener("message", (e) => {
     log(payload.message, "error");
   }
   if (type === "console") log(payload.text, payload.level);
+  // Game code the Game area did not take (game-code.js): its error on its line, until a version of the file runs.
+  if (type === "code-error") gameCodeError(payload);
+  if (type === "edit-source") editSource(payload).catch(failure);
+  if (type === "names") { blendNamesNow = payload; writeGameTypes(); }
   if (type === "animation") { project.animation = payload; markDirty(false); }
   if (type === "overrides" && project.settings.remember) {
     project.overrides = payload;
@@ -709,6 +716,37 @@ window.addEventListener("message", (e) => {
   if (type === "remember") setRemember(payload, false);
   if (type === "status") topbar.status(payload);
 });
+// types/blend.d.ts (space_game/game-types.js): the .blend's names, as the scene sends them, and the project's Ink knots;
+// written where it changed, for a project with game code.
+let blendNamesNow = null;
+function writeGameTypes() {
+  if (!blendNamesNow || !Object.keys(project.files).some((path) => /^src\/.+\.m?js$/.test(path))) return;
+  const content = gameTypes({ ...blendNamesNow, knots: projectKnots(project.files) });
+  if (project.files[TYPES_PATH]?.content === content) return;
+  project.files[TYPES_PATH] = textFile(content);
+  syncModels();
+  renderTree();
+  markDirty(false);
+}
+// Edit Source of a behaviour (Object properties > Behaviors): its file in the code editor at its defineBehavior call.
+async function editSource({ path, name }) {
+  if (!project.files[path]) return;
+  await code();
+  dock.show("code");
+  openFile(path);
+  const { line, column } = definitionAt(project.files[path].content, name);
+  // The jump shows: `defineBehavior` selected, its line in the centre.
+  editor.setSelection({ startLineNumber: line, startColumn: column, endLineNumber: line, endColumn: column + "defineBehavior".length });
+  editor.revealLineInCenter(line);
+  editor.focus();
+}
+function gameCodeError({ path, message, line = 1, column = 1 }) {
+  const model = models.get(path);
+  if (!monaco || !model) return;
+  monaco.editor.setModelMarkers(model, "game", message ? [{ severity: monaco.MarkerSeverity.Error, message: `Not swapped into the game: ${message}`,
+    startLineNumber: line, startColumn: column, endLineNumber: line, endColumn: model.getLineMaxColumn(line) }] : []);
+  if (message) log(`${path}:${line}: ${message}`, "error");
+}
 // A text the scene's Text Editor changed, created (content) or deleted (null): the project file follows.
 function textChanged({ name, content }) {
   if (content === null) {

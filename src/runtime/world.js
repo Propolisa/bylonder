@@ -22,6 +22,7 @@ import { createWorlds } from "../blenkernel/scene/world.js";
 import { createRenderSettings } from "../blenkernel/scene/render.js";
 import { createCollections } from "../blenkernel/scene/collections.js";
 import { createSequenceEditor } from "../sequencer/sequence-editor.js";
+import * as gameModule from "../io_scene_babylon/runtime/game/define.js";
 import { apply } from "../editors/undo/storage.js";
 import { openProject } from "./project-state.js";
 import { loadLibraries } from "../blenkernel/libraries.js";
@@ -60,6 +61,18 @@ export async function createWorld({ input, engine, canvas, hooks = {}, audioCont
     root + "__wb_sdk.js",
     new Response(sdkModuleSource, { headers: { "Content-Type": "text/javascript" } }),
   );
+  // `bylonder`, what game code is written with (io_scene_babylon/runtime/game/define.js), this window's own module.
+  globalThis.__bylonderGame = gameModule;
+  await cache.put(
+    root + "__wb_game.js",
+    new Response(Object.keys(gameModule).map((k) => `export const ${k}=globalThis.__bylonderGame.${k};`).join(""), { headers: { "Content-Type": "text/javascript" } }),
+  );
+  // inkjs (MIT), the Ink runtime and compiler, for a project with Ink stories: `import { Compiler } from 'inkjs/full'`.
+  const ink = (input.files ?? []).some((path) => path.endsWith(".ink")) ? await import("inkjs/full") : null;
+  if (ink) {
+    globalThis.__inkjs = ink;
+    await cache.put(root + "__wb_ink.js", new Response(Object.keys(ink).map((k) => `export const ${k}=globalThis.__inkjs.${k};`).join(""), { headers: { "Content-Type": "text/javascript" } }));
+  }
   const userMap = JSON.parse(input.importmap);
   const imports = {};
   for (const [key, value] of Object.entries(userMap.imports || {}))
@@ -68,6 +81,8 @@ export async function createWorld({ input, engine, canvas, hooks = {}, audioCont
     "@babylonjs/core": root + "__wb_babylon.js",
     babylonjs: root + "__wb_babylon.js",
     "@workbench/sdk": root + "__wb_sdk.js",
+    bylonder: root + "__wb_game.js",
+    ...(ink && { inkjs: root + "__wb_ink.js", "inkjs/full": root + "__wb_ink.js" }),
   });
   const scopes = {};
   for (const [scope, map] of Object.entries(userMap.scopes || {})) {

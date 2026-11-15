@@ -4,6 +4,8 @@ import TSWorker from "monaco-editor/esm/vs/language/typescript/ts.worker?worker"
 import JSONWorker from "monaco-editor/esm/vs/language/json/json.worker?worker";
 import CSSWorker from "monaco-editor/esm/vs/language/css/css.worker?worker";
 import HTMLWorker from "monaco-editor/esm/vs/language/html/html.worker?worker";
+// `bylonder`, what game code imports: the game framework's own declarations, with their JSDoc.
+const gameTypes = import.meta.glob("../io_scene_babylon/runtime/game/*.d.ts", { query: "?raw", import: "default", eager: true });
 self.MonacoEnvironment = {
   getWorker(_, label) {
     if (["javascript", "typescript"].includes(label)) return new TSWorker();
@@ -93,7 +95,10 @@ export async function setupIntelligence(onStatus) {
   const bundle = await response.json();
   for (const [uri, content] of Object.entries(bundle)) extra(content, uri);
   extra(sdk, "file:///node_modules/@workbench/sdk/index.d.ts");
+  for (const [path, source] of Object.entries(gameTypes)) extra(source, "file:///node_modules/bylonder/" + path.split("/").pop());
   extra(globals, "file:///workspace/__globals.d.ts");
+  // inkjs, which the Game area provides to a project with Ink stories (src/runtime/world.js), loosely typed.
+  extra("export const Story: any, Compiler: any, InkList: any;", "file:///node_modules/inkjs/index.d.ts");
   extra(
     'declare module "*?raw" { const source:string;export default source } declare module "*.css?module" {const style:HTMLStyleElement;export default style}',
     "file:///workspace/__assets.d.ts",
@@ -103,6 +108,9 @@ export async function setupIntelligence(onStatus) {
     "@babylonjs/core/*": ["../node_modules/@babylonjs/core/*"],
     babylonjs: ["../node_modules/@babylonjs/core/index.d.ts"],
     "@workbench/sdk": ["../node_modules/@workbench/sdk/index.d.ts"],
+    bylonder: ["../node_modules/bylonder/define.d.ts"],
+    inkjs: ["../node_modules/inkjs/index.d.ts"],
+    "inkjs/full": ["../node_modules/inkjs/index.d.ts"],
   };
   let generation = 0,
     remoteDisposers = [],

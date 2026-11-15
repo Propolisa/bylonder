@@ -138,8 +138,16 @@ function walker(onReference) {
     }
     return out;
   };
-  return Object.assign(struct, { resolve });
+  // A custom property group (a behaviour's props) as IR data: its members by name, groups within it walked, IDs by key.
+  const members = (owner, path, group, depth) => Object.fromEntries([...group.keys()].map((name) => {
+    const v = group.get(name), at = path + key(name), pointer = pointerOf(v);
+    return [name, pointer && !isID(v, pointer) ? members(owner, at, v, depth) : value(owner, at, v, depth)];
+  }));
+  return Object.assign(struct, { resolve, members });
 }
+
+// The custom property group of an object's behaviours (Object properties > Behaviors), which the IR carries.
+export const BEHAVIORS = 'behaviors';
 
 // The IDs reachable from `roots` (RNA ID structs), each with its data, and the references between them.
 export function exportIDs(roots, depth = 6) {
@@ -154,6 +162,8 @@ export function exportIDs(roots, depth = 6) {
     const code = codeOf(id), collection = COLLECTION_OF.get(code);
     ids[k] = { type: id.rna_type.identifier.toUpperCase(), name: id.name, path: collection ? `${collection}${key(id.name)}` : null, data: null };
     ids[k].data = struct(id, '', id, depth);
+    const behaviors = code === 'OB' ? safe(() => id.get(BEHAVIORS)) : null;
+    if (behaviors && pointerOf(behaviors)) ids[k].data = { ...ids[k].data, [key(BEHAVIORS)]: struct.members(id, key(BEHAVIORS), behaviors, depth) };
   }
   for (const entry of Object.values(ids)) entry.data = struct.resolve(entry.data);
   return { ids, references };

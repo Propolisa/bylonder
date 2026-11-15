@@ -38,6 +38,22 @@ function customProperties(id, base) {
   });
 }
 
+// The props of an object's behaviours (its `behaviors` custom property group, Object properties > Behaviors) a run reads
+// live: numbers, booleans and strings, and a colour by its components. ID pointers are the IR's data, not values.
+function behaviorProperties(ob, base) {
+  const behaviors = safe(() => ob.get('behaviors'));
+  if (!behaviors?.keys) return [];
+  return [...behaviors.keys()].flatMap((name) => {
+    const group = behaviors.get(name), at = `${base}${key('behaviors')}${key(name)}`;
+    return group?.keys ? [...group.keys()].flatMap((prop) => {
+      const value = group.get(prop), path = at + key(prop);
+      if (['number', 'boolean', 'string'].includes(typeof value)) return [knob(path, value, { suggested: true, ...(customPropertyType(group, prop) === 'FLOAT' && { type: 'FLOAT' }) })];
+      const items = safe(() => [...value]);
+      return items?.length && items.every((v) => typeof v === 'number') ? items.map((v, i) => knob(`${path}[${i}]`, v, { type: 'FLOAT', suggested: true })) : [];
+    }) : [];
+  });
+}
+
 // What turns Blender's rotation, as the page draws it (blend-scene.js babylonRotation), into the node's own: a camera's
 // turn to look along Babylon's +Z, else nothing.
 function rotationOffset(node, mode, values) {
@@ -232,7 +248,7 @@ function objectControls(node, ob, parentInverse) {
   const base = `objects${key(ob.name)}`;
   let bound;
   const transform = () => (bound ??= transformBinding(node, ob, [...ob[rotationOf(ob)]], parentInverse));
-  return [...syncedControls('Object', node, { base, ob, node, transform }), ...customProperties(ob, base)];
+  return [...syncedControls('Object', node, { base, ob, node, transform }), ...customProperties(ob, base), ...behaviorProperties(ob, base)];
 }
 
 function lightControls(node, light) {

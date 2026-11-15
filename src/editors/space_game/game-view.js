@@ -12,27 +12,73 @@ import { packagedFiles } from '../../io_scene_babylon/export.js';
 import { exportOptions } from '../../io_scene_babylon/export-options.js';
 import { EVALUATIONS, exportEvaluation, setExportEvaluation } from '../../io_scene_babylon/export-settings.js';
 import { sharedStatus } from '../../io_scene_babylon/runtime/shared-resources.js';
-import { publishFiles, removeRun } from '../../workspace/module-host.js';
+import { publishFiles, removeRun, RUN_CACHE } from '../../workspace/module-host.js';
 import { registerOperator } from '../../windowmanager/wm-operators.js';
+import { createWorld } from '../../io_scene_babylon/runtime/game/world.js';
+import { blendHost } from '../../io_scene_babylon/runtime/game/blend-host.js';
+import { createGameCode, errorAt } from './game-code.js';
+import { createInput } from '../../io_scene_babylon/runtime/game/input.js';
 
 // The app's modules a package's scene.js imports (runtime-files.js appSource), by src/ path.
 const sources = import.meta.glob(['../../io_scene_babylon/runtime/**/*.js', '../../overrides/**/*.js', '../../blenkernel/light/area-specular.js', '../../compositor/fog-glow.js',
   '../../io_scene_babylon/panel-icons.js', '../../io_scene_babylon/polyfill/volumes.js', '../../draw/curves-blocks.js', '../../draw/pointcloud.js']);
 const appModule = (source) => (source === '@babylonjs/core' ? core : sources[`../../${source}`]());
 
-export function mountGameView(section, { world, header }) {
+export function mountGameView(section, { world, header, run: files, codeError }) {
   const state = reactive({ status: '', shared: '', busy: false, running: false, paused: false, evaluation: exportEvaluation(world) });
   // WebGL 2, whatever the app draws with, until exported pages draw on WebGPU again (the area light fixes in progress).
-  const options = exportOptions({ controlPanel: false, target: 'WEBGL2' });
+  // A project with game code gets its actions as clips too, which behaviours play (entity.play).
+  const hasGameCode = !!files?.files.some((path) => /^src\/.+\.m?js$/.test(path));
+  const options = exportOptions({ controlPanel: false, target: 'WEBGL2', ...(hasGameCode && { animations: 'BOTH' }) });
   const canvas = Object.assign(document.createElement('canvas'), { className: 'block h-full w-full outline-none', tabIndex: 0 });
+  // Keys typed into the playing game are the game's, not Blender's shortcuts.
+  canvas.dataset.gameInput = '';
   const game = createGameRun({ appModule, exportAgain: () => preview.reload(), engine: (createEngine) => createEngine(canvas) });
   // The area's size is the game's, as a page's canvas is its engine's.
   const resized = new ResizeObserver(() => game.engine?.resize());
   resized.observe(canvas);
   let base = null, patching = Promise.resolve(), looping = null;
   const report = (status) => { state.status = status; };
+  // The project's game code (game-code.js) over the run: one world per loaded run, so Reset and a fresh load start it
+  // fresh, while a patch keeps it; a saved file swaps its definitions in, keeping each behaviour's state.
+  const publish = async (path, content) => (await caches.open(RUN_CACHE)).put(files.root + path, new Response(content, { headers: { 'Content-Type': 'text/javascript' } }));
+  const code = files && createGameCode({ ...files, publish });
+  // The project's files the game reads (an Ink story), served with the run's.
+  const assets = files && { url: (path) => files.root + path, text: async (path) => (await fetch(files.root + path)).text() };
+  let played = null;
+  // The project's behaviours are loaded at once: the Behaviors panel lists them before the game plays.
+  const loadingCode = code?.load().catch((error) => report(`Game code: ${error.message}`));
+  const swapTimers = new Map();
+  const stopGame = () => {
+    played?.blend.scene.onBeforeRenderObservable.remove(played.observer);
+    played?.world.dispose();
+    played?.input.dispose();
+    played = null;
+  };
+  const startGame = async () => {
+    const blend = game.blend;
+    if (played?.blend === blend) return played.world.sync();
+    if (!code || !blend) return;
+    stopGame();
+    await loadingCode;
+    if (game.blend !== blend) return;
+    const input = createInput(code.game.input ?? {}, canvas);
+    const run = createWorld({ host: blendHost(blend), behaviors: code.behaviors, game: code.game, engine: game.engine, assets, input, report: (error, where) => report(`${where}: ${error?.message ?? error}`) });
+    run.start();
+    let stepping = null, owed = 0;
+    const observer = blend.scene.onBeforeRenderObservable.add(() => {
+      if (state.paused) return;
+      owed += blend.scene.getEngine().getDeltaTime() / 1000;
+      if (stepping) return;
+      const dt = owed;
+      owed = 0;
+      stepping = run.step(dt).finally(() => { stepping = null; });
+    });
+    played = { blend, world: run, observer, input };
+  };
   const shown = () => {
     state.shared = game.blend ? sharedStatus(game.blend.scene) : '';
+    startGame().catch((error) => report(`Game code: ${error.message}`));
     if (looping === game.engine) return;
     looping = game.engine;
     looping.runRenderLoop(() => { if (!state.paused) game.blend?.scene.render(); });
@@ -103,7 +149,37 @@ export function mountGameView(section, { world, header }) {
     },
     settled: async () => { await preview.settled(); await patching; },
     get blend() { return game.blend; },
+    /** The game's world while it plays (game/world.js). */
+    get world() { return played?.world ?? null; },
+    /** The project's game code (game-code.js), and when it is first loaded. */
+    code,
+    codeReady: loadingCode,
+    /** A project file edited: game code is swapped into the playing game once typing pauses, keeping state. */
+    codeChanged(path, content) {
+      if (!code) return;
+      clearTimeout(swapTimers.get(path));
+      swapTimers.set(path, setTimeout(async () => {
+        // A version that does not load or whose create throws never replaces the running one; its error shows here and
+        // on its line in the code editor until a version runs.
+        const failed = (error) => {
+          report(`${path}: ${error?.message ?? error}`);
+          codeError?.({ path, message: String(error?.message ?? error), ...errorAt(error, path) });
+        };
+        try {
+          const next = await code.candidate(path, content);
+          if (!next) return;
+          const errors = played ? played.world.swap(next.behaviors, next.game) : [];
+          if (errors.length) return failed(errors[0]);
+          next.accept();
+          codeError?.({ path, message: null });
+          report(`Swapped in ${path}`);
+        } catch (error) {
+          failed(error);
+        }
+      }, 600));
+    },
     dispose() {
+      stopGame();
       resized.disconnect();
       game.dispose();
       if (base) removeRun(base);

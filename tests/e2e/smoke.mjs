@@ -220,6 +220,18 @@ const checks = {
     await app.page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
     await app.page.keyboard.press("w");
     assert.ok(await app.frame().evaluate(() => window.gameInput) > 0, "input over the Game does");
+    // Keys typed into the playing game are the game's: Blender's shortcuts leave Main as it was; over the 3D View they act.
+    const main = () => app.bylonder((b) => JSON.stringify({ edit: !!b.world.editMode.active, objects: [...b.modules.bpyRna.blendData().objects]
+      .map((o) => [o.name, o.select_get(), [...o.location, ...o.scale].map((v) => +v.toFixed(4))]) }));
+    const before = await main();
+    for (const key of ["s", "a", "g", "x", "Tab"]) await app.page.keyboard.press(key);
+    await app.settled();
+    assert.equal(await main(), before, "S, A, G, X and Tab in the Game leave selection, transforms and mode as they were");
+    await app.page.mouse.move(area.x + area.width / 2, area.y + area.height / 2);
+    await app.page.keyboard.press("Alt+a");
+    await app.settled();
+    assert.notEqual(await main(), before, "over the 3D View the keys are Blender's: Alt A deselects");
+    await app.bylonder((b) => b.runOperator("ed.undo"));
     for (let i = 0; i < 10; i++) {
       await app.bylonder(async (b) => { await b.runOperator("bylonder.game_reset"); });
       await app.until((b) => !!b.game.blend, null, 120000);

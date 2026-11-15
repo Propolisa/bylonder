@@ -71,6 +71,9 @@ import { registerRuntimeTypes } from "./runtimes/runtimes.js";
 import { registerEeveeParityTypes } from "./draw/eevee-parity.js";
 import { registerRenderExtensions } from "./draw/render-extension.js";
 import { registerExportSettings } from "./io_scene_babylon/export-settings.js";
+import { registerBehaviorTypes } from "./editors/space_buttons/behaviors-panel.js";
+import { blendNames } from "./editors/space_game/game-types.js";
+import { repairBehaviors } from "./blenkernel/behaviors.js";
 import { restorePreferences, readPreferences, onPreferencesChanged, preferencesChanged, preferences, inputPreferences, savedPreferences, savePreferences } from "./windowmanager/wm-userdef.js";
 import { touchKeyconfig } from "./windowmanager/input/wm-touch.js";
 import { mountTouch, showScale, followPixelRatio } from "./editors/interface/touch.js";
@@ -438,7 +441,7 @@ window.addEventListener("message", (e) => {
     const has = mode && (mode === "OBJECT" || world.mainModes.modes.includes(mode)) && world.mainSync.blender.enumItems("object.mode_set", "mode").some(([id]) => id === mode);
     if (has) runOperator("object.mode_set", { mode });
   }
-  if (e.data.type === "text") world.texts.load(e.data.payload.name, e.data.payload.content);
+  if (e.data.type === "text") { world.texts.load(e.data.payload.name, e.data.payload.content); gameView?.codeChanged(e.data.payload.name, e.data.payload.content); }
 });
 let ui;
 let sceneChanged = () => {};
@@ -581,6 +584,21 @@ registerRuntimeTypes(bylonderIcon());
 registerEeveeParityTypes(bylonderIcon());
 registerRenderExtensions(bylonderIcon());
 registerExportSettings();
+// The .blend's names for the project's types/blend.d.ts (space_game/game-types.js), sent when they change.
+let sentNames = "";
+const sendNames = () => {
+  const names = blendNames(bpyRna.blendData()), text = JSON.stringify(names);
+  if (text !== sentNames) send("names", names);
+  sentNames = text;
+};
+world.mainSync.onEvaluated(sendNames);
+sendNames();
+// Object properties > Behaviors, over the project's game code (the Game area's, space_game/game-code.js).
+registerBehaviorTypes({
+  icon: bylonderIcon(), code: () => gameView?.code, editSource: (path, name) => send("edit-source", { path, name }),
+  select: (ob) => { const node = world.objects.find((n) => n.name === ob.name); if (node) { editor.selection.replace([node]); editor.reconcile(); } },
+  changed: () => { world.mainSync.view(); commit(); refreshUI(); },
+});
 // The theme and Resolution Scale on the design tokens of this window and the app's.
 const themed = () => {
   applyTheme(preferences().themes[0], [document, parent.document]);
@@ -678,7 +696,9 @@ const editObject = () => {
   return edit ? { ob, mesh: edit.mesh } : null;
 };
 packageView = mountPackageView(document.querySelector("#package-section"), { world });
-gameView = mountGameView(document.querySelector("#game-section"), { world, header: viewportDock.header("game") });
+gameView = mountGameView(document.querySelector("#game-section"), { world, header: viewportDock.header("game"), run: { root: location.origin + input.base, files: input.files ?? [] }, codeError: (error) => send("code-error", error) });
+// The .blend's behaviours follow their code as the project opens (a prop added in code, a script's kinds).
+gameView.codeReady?.then(() => { if (gameView.code && repairBehaviors(new Map(gameView.code.behaviors.map((b) => [b.name, b])))) world.mainSync.view(); refreshUI(); });
 const imageEditor = mountImageEditor(document.querySelector("#image-section"), { header: viewportDock.header("image"), engine, views, sync: world.mainSync, editObject });
 let inspectorBusy = false;
 async function inspector() {
@@ -818,7 +838,7 @@ function undoRedo(redo) {
 // Keys the window manager takes: not those typed into fields, meant for the Video Sequencer (its menu commands
 // run as synthetic key events) or for an open dialog or menu.
 const acceptsKey = (e) => e.isTrusted && !e.repeat && (e.key === "F12" || !document.querySelector(".vse-area:hover")) &&
-  !e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host,.anim-editor,.bl-outliner,.wm-area');
+  !e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host,.anim-editor,.bl-outliner,.wm-area,[data-game-input]');
 const viewAt = (e) => (e ? views.all.find((v) => v.canvas === e.target) ?? null : activeView());
 const inView = (event) => !!event?.view;
 // Mesh Edit Mode's gestures are Blender's (editmesh-mode.js); the other modes select in the page, those Blender runs on

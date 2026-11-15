@@ -185,12 +185,30 @@ function resolvePath(ptr, path) {
   const value = propertyGet(owner, prop);
   return index !== 0xffffffff && value?.__getitem__ ? value.__getitem__(index) : value;
 }
+const enumItemsOf = ([type, id, data], prop) => JSON.parse(cString(x.bpy_enum_items(C, type, id, data, prop))).filter((item) => item?.[0]);
+// A custom property (an RNA path ending in `["key"]`) as Python's subscript reads it, the IDProperty's own value: an
+// enum's item value, not its identifier.
+function customValue(ptr, path) {
+  const value = resolvePath(ptr, path);
+  if (typeof value !== 'string' || !path.endsWith('"]') || !withText([path], (p) => x.bpy_path_resolve(...ptr, p))) return value;
+  const owner = outStruct(), [, , , prop] = out();
+  return propertyInfo(owner, prop).kind === ENUM ? enumItemsOf(owner, prop).find((item) => item[0] === value)?.[4] ?? value : value;
+}
+/** The value at an RNA path from bpy.data, a custom property's as its IDProperty holds it. */
+export const dataPathValue = (path) => customValue(pointerOf(blendData()), path);
 // The RNA type of a struct's custom property (`FLOAT` also when it holds a whole number), or null.
 export function customPropertyType(struct, key) {
   const ptr = pointerOf(struct);
   if (!ptr || !withText([quoted(key)], (p) => x.bpy_path_resolve(...ptr, p))) return null;
   const owner = outStruct(), [, , , prop] = out(), { kind } = propertyInfo(owner, prop);
   return kind === FLOAT ? 'FLOAT' : kind === INT ? 'INT' : kind === BOOLEAN ? 'BOOLEAN' : null;
+}
+/** The RNA subtype (PropertySubType's value) of a struct's custom property, or null. */
+export function customPropertySubtype(struct, key) {
+  const ptr = pointerOf(struct);
+  if (!ptr || !withText([quoted(key)], (p) => x.bpy_path_resolve(...ptr, p))) return null;
+  const owner = outStruct(), [, , , prop] = out();
+  return propertyInfo(owner, prop).subtype;
 }
 /** Writes a struct's numeric custom property (`struct["key"] = value`, which a JS class cannot hook). */
 export function setCustomProperty(struct, key, value) {
@@ -213,10 +231,10 @@ const STRUCT_METHODS = {
   as_pointer: (ptr) => () => ptr[2],
   id_data: (ptr) => (ptr[1] ? idStruct(ptr[1]) : null),
   keys: (ptr) => () => idpropKeys(ptr),
-  values: (ptr) => () => idpropKeys(ptr).map((key) => resolvePath(ptr, quoted(key))),
-  items: (ptr) => () => idpropKeys(ptr).map((key) => tuple([key, resolvePath(ptr, quoted(key))])),
-  get: (ptr) => (key, fallback = null) => (idpropKeys(ptr).includes(key) ? resolvePath(ptr, quoted(key)) : fallback),
-  __getitem__: (ptr) => (key) => { if (!idpropKeys(ptr).includes(key)) throw KeyError(`bpy_struct[key]: key "${key}" not found`); return resolvePath(ptr, quoted(key)); },
+  values: (ptr) => () => idpropKeys(ptr).map((key) => customValue(ptr, quoted(key))),
+  items: (ptr) => () => idpropKeys(ptr).map((key) => tuple([key, customValue(ptr, quoted(key))])),
+  get: (ptr) => (key, fallback = null) => (idpropKeys(ptr).includes(key) ? customValue(ptr, quoted(key)) : fallback),
+  __getitem__: (ptr) => (key) => { if (!idpropKeys(ptr).includes(key)) throw KeyError(`bpy_struct[key]: key "${key}" not found`); return customValue(ptr, quoted(key)); },
   __contains__: (ptr) => (key) => idpropKeys(ptr).includes(key),
   __eq__: (ptr) => (other) => { const o = pointerOf(other); return !!o && o[0] === ptr[0] && o[2] === ptr[2]; },
   __ne__: (ptr) => (other) => { const o = pointerOf(other); return !o || o[0] !== ptr[0] || o[2] !== ptr[2]; },
@@ -329,6 +347,8 @@ function writeProperty([type, id, data], prop, kind, flags, value, index) {
     }
     case STRING: withText([value ?? ''], (p) => x.bpy_string_set(C, type, id, data, prop, p)); return;
     case ENUM:
+      // A custom enum is set by its item value too, as Python's subscript sets its IDProperty.
+      if (typeof value === 'number') value = enumItemsOf([type, id, data], prop).find((item) => item[4] === value)?.[0] ?? String(value);
       if (!withText([enumText(value)], (p) => x.bpy_enum_set(C, type, id, data, prop, p))) {
         throw py_TypeError(`bpy_struct: item.attr = val: enum "${value}" not found in ${cString(x.bpy_property_identifier(prop))}`);
       }
@@ -471,6 +491,8 @@ function setParameter(parms, index, [, kind, flags, , length], value) {
     }
     case STRING: withText([value ?? ''], (p) => x.bpy_param_string_set(parms, index, p)); return;
     case ENUM:
+      // A custom enum is set by its item value too, as Python's subscript sets its IDProperty.
+      if (typeof value === 'number') value = enumItemsOf([type, id, data], prop).find((item) => item[4] === value)?.[0] ?? String(value);
       if (!withText([enumText(value)], (p) => x.bpy_param_enum_set(C, parms, index, p))) throw py_TypeError(`enum "${value}" not found`);
       return;
     case POINTER: {
