@@ -30,6 +30,7 @@ import { zipSync, unzipSync, strToU8, strFromU8 } from "fflate";
 import { createApp, h, reactive, ref } from "vue";
 import FileTree from "./explorer/FileTree.vue";
 import { definitionAt } from "../editors/space_game/game-code.js";
+import { babylonImportIssues } from "../io_scene_babylon/game-export.js";
 import { gameTypes, projectKnots, TYPES_PATH } from "../editors/space_game/game-types.js";
 import "@/editors/interface/components/tailwind.css";
 performance.mark("bl:workspace-imported");
@@ -230,6 +231,12 @@ function markDirty(source = true) {
     runTimer = setTimeout(() => run().catch(failure), 1500);
   }
 }
+// Game code's imports a package cannot ship (Babylon imported whole), marked while typing as the export refuses them.
+function markGameImports(path, model) {
+  if (!/^src\/.+\.m?js$/.test(path)) return;
+  monaco.editor.setModelMarkers(model, "game-imports", babylonImportIssues(model.getValue()).map(({ line, column, endColumn, message }) => ({
+    severity: monaco.MarkerSeverity.Error, message, startLineNumber: line, startColumn: column, endLineNumber: line, endColumn })));
+}
 function syncModels() {
   if (!monaco) return;
   suppress = true;
@@ -247,7 +254,9 @@ function syncModels() {
         language(path),
         monaco.Uri.parse("file:///workspace/" + path),
       );
+      markGameImports(path, model);
       model.onDidChangeContent(() => {
+        markGameImports(path, model);
         if (suppress || !project.files[path]) return;
         project.files[path].content = model.getValue();
         frame?.contentWindow.postMessage({ channel, type: "text", payload: { name: path, content: project.files[path].content } }, location.origin);

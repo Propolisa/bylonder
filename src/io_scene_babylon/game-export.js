@@ -57,8 +57,18 @@ async function byModule(source, file, babylon) {
     }
     return [...byPath].map(([path, items]) => `import { ${items.join(', ')} } from '@babylonjs/core/${path}';`).join(' ');
   });
-  if (/['"]@babylonjs\/core['"]/.test(rewritten)) throw Error(`${file} imports @babylonjs/core whole: import its classes by name (import { Vector3 } from '@babylonjs/core')`);
+  const [whole] = babylonImportIssues(rewritten);
+  if (whole) throw Error(`${file}:${whole.line}: ${whole.message}`);
   return rewritten;
+}
+
+/** Imports of Babylon whole (`import * as BABYLON`, a default import), which a package cannot ship, with their places: the export refuses them and the code editor marks them. */
+export const WHOLE_BABYLON = "Babylon is imported whole: import its classes by name, import { Vector3 } from '@babylonjs/core'";
+export function babylonImportIssues(source) {
+  return [...source.matchAll(/import\s+(?:\*\s*as\s+[\w$]+|[\w$]+)(?:\s*,\s*\{[^}]*\})?\s*from\s*['"]@babylonjs\/core['"]/g)].map((m) => {
+    const before = source.slice(0, m.index), line = before.split('\n').length, column = m.index - before.lastIndexOf('\n');
+    return { line, column, endColumn: column + m[0].length, message: WHOLE_BABYLON };
+  });
 }
 const libraryOf = (path) => Object.keys(GAME_LIBRARIES).find((name) => path === name || path.startsWith(`${name}/`));
 const text = (data) => (typeof data === 'string' ? data : new TextDecoder().decode(data));

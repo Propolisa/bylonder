@@ -7,7 +7,7 @@ import { readdirSync, statSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { folderLibrary, gameFiles, GAME_LIBRARIES } from '../src/io_scene_babylon/game-export.js';
+import { babylonImportIssues, folderLibrary, gameFiles, GAME_LIBRARIES } from '../src/io_scene_babylon/game-export.js';
 
 const esbuild = await import('esbuild-wasm');
 const babylon = (path) => readFile(new URL(`../node_modules/@babylonjs/core/${path}`, import.meta.url), 'utf8');
@@ -37,4 +37,8 @@ assert.match((await gameFiles(memory(plain), { esbuild, library, babylon }))['TH
 await assert.rejects(gameFiles(memory({ ...plain, 'package.json': '{}' }), { esbuild, library, babylon }), /add "license" to its package\.json/);
 await assert.rejects(gameFiles(memory({ ...plain, 'src/game.js': "import _ from 'lodash';\nexport default _;\n" }), { esbuild, library, babylon }), /imports lodash/);
 await assert.rejects(gameFiles(memory({ ...plain, 'src/game.js': "import * as BABYLON from '@babylonjs/core';\nexport default BABYLON;\n" }), { esbuild, library, babylon }), /import its classes by name/);
+// The same rule marks the line in the code editor while typing: the whole import, not one by name.
+const marked = babylonImportIssues("const a = 1;\nimport * as BABYLON from '@babylonjs/core';\nimport { Vector3 } from '@babylonjs/core';\n");
+assert.deepEqual(marked.map(({ line, column }) => [line, column]), [[2, 1]]);
+assert.match(marked[0].message, /import \{ Vector3 \} from '@babylonjs\/core'/);
 console.log('game export: game.js under the project\'s licence, its libraries inlined and listed in THIRD-PARTY.md');
