@@ -7,9 +7,15 @@ const isNode = !!globalThis.process?.versions?.node;
 
 // Where shared memory can be made and handed to workers: cross-origin isolated pages, and Node.
 export const threadsAvailable = () => isNode || !!globalThis.crossOriginIsolated;
-// The threads a module runs on: the page's processors; in Node, BYLONDER_THREADS (one when unset, so tests and build
-// tools start no workers).
-export const hardwareThreads = () => (isNode ? Number(process.env.BYLONDER_THREADS ?? 1) : navigator.hardwareConcurrency) || 1;
+// Bylonder's Threads preference (workspace/preferences.js), mirrored in the browser's storage as the module starts
+// before the Preferences load: AUTO uses the page's processors, OFF one thread.
+const THREADS_KEY = 'bylonder-threads';
+const threadsPreference = () => { try { return localStorage.getItem(THREADS_KEY) ?? 'AUTO'; } catch { return 'AUTO'; } };
+export const rememberThreads = (value) => { try { localStorage.setItem(THREADS_KEY, value); } catch {} };
+// The threads a module runs on: the page's processors unless the preference is OFF; in Node, BYLONDER_THREADS (one when
+// unset, so tests and build tools start no workers).
+export const hardwareThreads = () => (isNode ? Number(process.env.BYLONDER_THREADS ?? 1)
+  : threadsPreference() === 'OFF' ? 1 : navigator.hardwareConcurrency) || 1;
 
 // wasi's thread-spawn over a pool's slots: an idle slot takes the thread; a negative errno (EAGAIN) when none is idle.
 export const threadSpawn = (control) => {
