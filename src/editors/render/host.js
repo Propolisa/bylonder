@@ -7,6 +7,7 @@ import './result.css';
 import { onPreparing } from '../../render/ready.js';
 import { frameRate } from '../../blenkernel/scene/time.js';
 import { cyclesSource } from './cycles-source.js';
+import { sceneEngine } from '../../render/cycles.js';
 
 const cancelled = () => new DOMException('Render cancelled', 'AbortError');
 // A frame's promise, rejected on Cancel: a frame can wait on modifiers that take very long, and disposing the render
@@ -81,7 +82,7 @@ export function createRenderHost({ world, live, sceneAudio, sequencer, name = ()
     let source = null, writer = null;
     try {
       const edit = settings.render.useSequencer && sequencer?.hasStrips();
-      const cycles = !edit && settings.render.blenderEngine === 'CYCLES';
+      const cycles = !edit && sceneEngine(world) === 'CYCLES';
       if (cycles && frames.length > 1) throw Error('Cycles renders single frames (F12) for now');
       source = edit ? await openUntilCancelled(sequencer.openCompositor({ frameStart: frames[0], frameEnd: frames.at(-1), ...size }), signal)
         : cycles ? await openUntilCancelled(cyclesSource(world), signal) : await cameraSource(size, frames, spec.audio?.rate, signal);

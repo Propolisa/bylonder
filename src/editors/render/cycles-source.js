@@ -3,7 +3,6 @@
 // window shows it.
 import { blenderModule } from '../../bmesh/bmesh-wasm.js';
 import { loadCycles } from '../../render/cycles.js';
-import { pointerStruct, structFind } from '../../python/bpy_rna.js';
 
 const { exports: x } = blenderModule;
 
@@ -38,7 +37,6 @@ export async function cyclesSource(world) {
   return {
     label: 'Cycles',
     async renderFrame(frame, progress) {
-      pointerStruct(structFind('Scene'), scene(), scene()).render.engine = 'CYCLES';
       job = blender.invoke('render.render', {}, { type: 'F12' });
       if (!(job.status & (OPERATOR_RUNNING_MODAL | OPERATOR_FINISHED))) throw Error(job.report || 'Cycles did not render');
       while (x.render_job_running(blender.C, scene())) {

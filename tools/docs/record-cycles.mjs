@@ -12,7 +12,12 @@ await record("cycles", { example: "rendering", node: "Carafe" }, async (r) => {
   const { app, page } = r;
   await r.tab("Render");
   // A quarter of the output's resolution, so the recording's render takes seconds.
-  await app.bylonder((b) => { b.world.renderSettings.set("render.resolutionPercentage", 25); b.world.renderSettings.set("render.blenderEngine", "CYCLES"); });
+  await app.bylonder((b) => b.world.renderSettings.set("render.resolutionPercentage", 25));
+  await r.gif("engine-pick", CONTEXT, async () => {
+    await app.locator(CONTEXT).getByText("EEVEE", { exact: true }).first().click();
+    await r.pause(600);
+    await page.getByText("Cycles", { exact: true }).last().click();
+  });
   // Cycles is fetched and started (render/cycles.js).
   await r.pause(20000);
   console.log("engine set");

@@ -6,6 +6,7 @@ import { files, missing, read } from '../port/wasm.js';
 import { loadSideModule } from '../port/side-modules.js';
 import { startPython } from '../python/python.js';
 import { unzip } from '../python/unzip.js';
+import { pointerStruct, structFind } from '../python/bpy_rna.js';
 import { report } from '../windowmanager/wm-reports.js';
 
 const MODULE = new URL('../bmesh/cycles.wasm', import.meta.url);
@@ -23,4 +24,10 @@ export function loadCycles() {
     cycles.cycles_start();
     report('INFO', 'Cycles loaded');
   })());
+}
+
+// The render engine of the scene in `world`, as Blender's scene has it (Properties > Render > Render Engine sets it).
+export function sceneEngine(world) {
+  const scene = world.mainSync?.blender.scene;
+  return scene ? pointerStruct(structFind('Scene'), scene, scene).render.engine : null;
 }

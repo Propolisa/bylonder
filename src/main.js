@@ -3,7 +3,7 @@ import { preloadIcons } from "./editors/interface/icon.js";
 import { mountNodeEditor } from './editors/space_node/node-editor.js';
 import { crossingLosses } from "./blenkernel/light/light-home.js";
 import { report } from "./windowmanager/wm-reports.js";
-import { loadCycles } from "./render/cycles.js";
+import { loadCycles, sceneEngine } from "./render/cycles.js";
 import { syncLightDirections } from "./runtime/object-transform.js";
 import { createCompositorBackdrop } from './editors/space_node/compositor-backdrop.js';
 import { createNodeContexts } from './editors/space_node/contexts.js';
@@ -783,10 +783,10 @@ const sequencerAdapter = createSequencerAdapter({
   notify,
 });
 world.renderSettings.subscribe(() => sequencerAdapter.setFormat(sequencerFormat()));
-// Cycles is fetched and started when the render engine becomes Cycles (render/cycles.js), not before.
+// Cycles is fetched and started when the scene's render engine becomes Cycles (render/cycles.js), not before.
 let renderEngine = null;
-world.renderSettings.subscribe(() => {
-  const engine = world.renderSettings.state.render.blenderEngine;
+blenderAreas.watchRedraws(() => {
+  const engine = sceneEngine(world);
   if (engine === "CYCLES" && renderEngine !== engine) loadCycles().catch((error) => report("ERROR", error.message));
   renderEngine = engine;
 });
