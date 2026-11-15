@@ -3,6 +3,7 @@
 // window shows it. The render blocks the page while it runs, so the status says so first.
 import { blenderModule } from '../../bmesh/bmesh-wasm.js';
 import { loadCycles } from '../../render/cycles.js';
+import { pointerStruct, structFind } from '../../python/bpy_rna.js';
 
 const { exports: x } = blenderModule;
 
@@ -36,6 +37,7 @@ export async function cyclesSource(world) {
       progress?.(0, 1, 'Rendering');
       // A frame for the status to show before the render holds the page.
       await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve)));
+      pointerStruct(structFind('Scene'), blender.scene, blender.scene).render.engine = 'CYCLES';
       const { status, report } = blender.run('render.render', {});
       // OPERATOR_FINISHED
       if (!(status & 1)) throw Error(report || 'Cycles did not render');
