@@ -1,4 +1,10 @@
 /**
+ * A stick's `{ x, y }` on the ground as `camera` shows it: x toward the screen's right, y toward its top (forward for a
+ * camera behind, up the screen for one looking down); as the scene's x and z without a camera.
+ * @param {import('@babylonjs/core').Camera | null | undefined} camera @param {number} x @param {number} y
+ */
+export function onGround(camera: import("@babylonjs/core").Camera | null | undefined, x: number, y: number): Vector3;
+/**
  * The run's clock for a behaviour or system.
  * @typedef {{ readonly now: number, wait(seconds: number): Promise<void>, every(seconds: number): boolean, pick<T>(list: T | T[]): T, random(): number }} Time
  * An object of the run as game code reaches it.
@@ -12,9 +18,9 @@
  * @typedef {{
  *   get(system: System): any, all(behavior: Behavior): any[], near(from: Entity, radius: number, behavior: Behavior, filter?: (handle: any) => boolean): any,
  *   on(behavior: Behavior, event: string, fn: (data: any, from: any) => void): void, emit(target: any, event: string, data?: any): void,
- *   play(sound: string, options?: { at?: Entity }): void, end(result?: any): void,
+ *   play(sound: string, options?: { at?: Entity, rate?: number, volume?: number }): void, end(result?: any): void,
  *   spawn(collection: string, options?: { at?: Entity, attachTo?: any, jitter?: number }): Entity | null,
- *   camera: { follow(entity: Entity, options?: { pitch?: number, distance?: number, height?: number }): void },
+ *   camera: { follow(entity: Entity, options?: { pitch?: number, distance?: number, height?: number }): void, controls: boolean, onGround(stick: { x: number, y: number }): Vector3 },
  * }} Game
  */
 /**
@@ -146,6 +152,8 @@ export type Game = {
     emit(target: any, event: string, data?: any): void;
     play(sound: string, options?: {
         at?: Entity;
+        rate?: number;
+        volume?: number;
     }): void;
     end(result?: any): void;
     spawn(collection: string, options?: {
@@ -159,6 +167,11 @@ export type Game = {
             distance?: number;
             height?: number;
         }): void;
+        controls: boolean;
+        onGround(stick: {
+            x: number;
+            y: number;
+        }): Vector3;
     };
 };
 /**
@@ -167,9 +180,13 @@ export type Game = {
 export type Host = {
     scene: import("@babylonjs/core").Scene;
     objects: () => HostObject[];
+    bodies?: () => HostObject[];
     value: (object: string, behavior: string, prop: string) => any;
     play?: (action: string, object: string) => void;
-    playSound?: (sound: string, at?: Entity) => void;
+    playSound?: (sound: string, at?: Entity, options?: {
+        rate?: number;
+        volume?: number;
+    }) => void;
     played?: string[];
     spawn?: (collection: string) => HostObject[];
     blend?: any;
@@ -182,6 +199,7 @@ export type HostObject = {
     name: string;
     node: import("@babylonjs/core").TransformNode | null;
     behaviors: string[];
+    rigid?: Record<string, any> | null;
 };
 /**
  * The scene a run plays, as game/blend-host.js gives it from a package's controller.
@@ -208,6 +226,10 @@ export type Input = {
         x: number;
         y: number;
     };
+    readonly pointer?: {
+        x: number;
+        y: number;
+    } | null;
     step?: () => void;
 };
 /**

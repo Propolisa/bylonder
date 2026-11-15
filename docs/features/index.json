@@ -470,14 +470,20 @@
    "tests/behaviors-panel-wasm.test.js",
    "tests/rock-hard-cafe-wasm.test.js",
    "tests/game-export.test.js",
-   "tests/game-physics.test.js"
+   "tests/game-physics.test.js",
+   "tests/game-camera-controls.test.js",
+   "tests/cafe-reach-ik-wasm.test.js",
+   "tests/export-rigid-bodies-wasm.test.js"
   ],
   "limits": [
    "A mesh's visibility (mesh.visibility below 1) does not fade the exported scene's materials yet: game code can hide a mesh, not fade it.",
    "Game sounds (game.play) play at full volume from no place: not yet positioned at the entity they are played at.",
    "There is no game UI layer yet (defineUI); a system can draw with Babylon's GUI itself.",
    "Hover docs and completion come from TypeScript in the code editor; go to definition from a behaviour to the objects using it is the user count's list, not the editor's.",
-   "A behaviour that holds several sounds keeps them as a group of the object's custom properties, which Blender's Custom Properties panel shows but does not edit."
+   "A behaviour that holds several sounds keeps them as a group of the object's custom properties, which Blender's Custom Properties panel shows but does not edit.",
+   "Physics (`physics: 'havok'`) runs Blender's rigid bodies (type, Animated, mass, shape, friction, bounciness) on Havok; rigid body constraints, collision margins, damping and the Rigid Body World's settings are not read yet.",
+   "An exported camera keeps its render frame whole in any view: a `camera.fov` that game code sets is taken along the side the frame was exported for, not as Babylon's own field of view (the café's Framing system reads it back to fit).",
+   "The café's reach runs the barista's IK on Blender's own constraint kernels, a GPL unit in the export (units.json lists it): a licence-free export of the café needs that unit replaced."
   ],
   "page": "docs/features/game-code.md",
   "open": "https://propolisa.github.io/bylonder/#example=rock-hard-cafe",

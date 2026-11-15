@@ -141,6 +141,8 @@ export function collection<T extends CollectionName | CollectionName[]>(names?: 
 } & PropOptions & {
     default: T;
 };
+export { defineEffect } from "../character/api.js";
+export { reach } from "../character/effects/reach.js";
 /**
  * What a behaviour's or a system's `create` receives.
  */

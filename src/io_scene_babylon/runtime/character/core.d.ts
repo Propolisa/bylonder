@@ -180,9 +180,10 @@ export class Character<N extends import("./names.js").ArmatureName = string> {
      * @param {any} blend the loaded scene (load's result)
      * @param {N} armature
      * @param {{ roles?: Record<string, string | string[] | string[][]>, input?: 'default' | (() => Intent) | null,
-     *   responsiveness?: number, ground?: (string | RegExp)[], idle?: boolean, seed?: number, manual?: boolean,
+     *   responsiveness?: number, ground?: (string | RegExp)[], idle?: boolean, seed?: number, manual?: boolean, radius?: number,
      *   preset?: { body?: string, effects?: [string, object][] } }} [options]
-     * `manual`: updated by `update(seconds)` (a recording's clock, Node) instead of each frame the scene draws.
+     * `radius`: how near walls the body comes (0.3 m). `manual`: updated by `update(seconds)` (a recording's clock,
+     * Node) instead of each frame the scene draws.
      */
     constructor(blend: any, armature: N, options?: {
         roles?: Record<string, string | string[] | string[][]>;
@@ -192,6 +193,7 @@ export class Character<N extends import("./names.js").ArmatureName = string> {
         idle?: boolean;
         seed?: number;
         manual?: boolean;
+        radius?: number;
         preset?: {
             body?: string;
             effects?: [string, object][];

@@ -20,6 +20,9 @@ export function blendHost(blend) {
   let spawned = 0;
   const source = (/** @type {string} */ object) => sources.get(object) ?? object;
   const behaviorsOf = (/** @type {string} */ object) => ids[source(object)]?.data?.[GROUP] ?? null;
+  /** An object's rigid body (Physics properties > Rigid Body), as the IR holds it. */
+  const rigidOf = (/** @type {string} */ object) => ids[source(object)]?.data?.rigid_body ?? null;
+  const shownObjects = () => new Set(blend.collections().filter((c) => c.visible).flatMap((c) => c.objects));
   /** How a path reads: a control, three controls of a colour, or the IR's data. @type {Map<string, 'control' | 'array' | 'data'>} */
   const kinds = new Map();
   const has = (/** @type {string} */ path) => { try { blend.get(path); return true; } catch { return false; } };
@@ -34,19 +37,25 @@ export function blendHost(blend) {
   return {
     scene: blend.scene,
     played,
-    /** Plays one of the .blend's sounds once, by name (game.play). @param {string} name */
-    playSound(name) {
+    /** Plays one of the .blend's sounds once, by name (game.play), at a rate (its pitch) and volume. @param {string} name @param {any} [at] @param {{ rate?: number, volume?: number }} [options] */
+    playSound(name, at, { rate = 1, volume = 1 } = {}) {
       const sound = blend.played?.[name];
       if (!sound) return;
       played.push(name);
-      createVoice({ ...sound, start: 0, volume: 1 }, { spatial: false }).play(0);
+      createVoice({ ...sound, start: 0, volume, rate }, { spatial: false }).play(0);
     },
     blend,
     // The scene's objects with behaviours, those of prefab collections (excluded or hidden) left for spawn().
     objects: () => {
-      const shown = new Set(blend.collections().filter((c) => c.visible).flatMap((c) => c.objects));
+      const shown = shownObjects();
       return Object.keys(ids).filter((object) => ids[object].type === 'OBJECT' && behaviorsOf(object) && shown.has(object))
         .map((object) => ({ key: object, name: ids[object].name, node: /** @type {any} */ (blend.nodeOf(object)), behaviors: Object.keys(behaviorsOf(object)) }));
+    },
+    // The scene's objects with a rigid body, those of prefab collections left for spawn().
+    bodies: () => {
+      const shown = shownObjects();
+      return Object.keys(ids).filter((object) => ids[object].type === 'OBJECT' && rigidOf(object) && shown.has(object))
+        .map((object) => ({ key: object, name: ids[object].name, node: /** @type {any} */ (blend.nodeOf(object)), behaviors: [], rigid: rigidOf(object) }));
     },
     value(object, behavior, prop) {
       object = source(object);
@@ -81,7 +90,7 @@ export function blendHost(blend) {
           // Shown: a prefab's collection is excluded or hidden, which hid the original, not its copies.
           to.setEnabled(true);
           if ('isVisible' in to) to.isVisible = true;
-          made.push({ key: copyKey, name: to.name, node: to, behaviors: Object.keys(behaviorsOf(original) ?? {}) });
+          made.push({ key: copyKey, name: to.name, node: to, behaviors: Object.keys(behaviorsOf(original) ?? {}), rigid: rigidOf(original) });
         });
         copy?.setEnabled(true);
       }

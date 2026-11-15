@@ -191,7 +191,11 @@ same way. Built: `io_scene_babylon/game-export.js`.
   inlined into `game.js` and listed in `THIRD-PARTY.md`, and `HavokPhysics.wasm` (about 2 MB) ships beside it, fetched
   only when the game plays. The run steps Havok in fixed steps of 1/60 s from its own clock, before the behaviours'
   `update`, so a seed reproduces a run at any frame rate; the bodies game code makes go with its behaviour, and Havok
-  with the run (`runtime/game/physics.js`).
+  with the run (`runtime/game/physics.js`). Each object's rigid body (Physics properties > Rigid Body: Active, Passive,
+  Animated, mass, shape, friction, bounciness) becomes a Havok body, a spawned copy's too; for such a game the export
+  bakes no rigid body's motion (Blender's simulation), which the game simulates instead. While a game plays, the scene
+  camera's own mouse controls are off (`game.camera.controls = true` turns them on), and a Character's stick moves it
+  as the camera shows it.
 - `game.js` starts with the project's licence from `package.json` `license`. Without one the export fails and says
   so; it is never merged with Blender's code or the runtime. With Bundle on, `game.js` is an entry of its own that
   shares Babylon's chunks with `scene.js`.

@@ -91,3 +91,15 @@ page, and Babylon's Havok for the objects on the counter. Nothing of it is built
 - The IK tests above, against Blender's evaluated pose.
 - Keep `tests/rock-hard-cafe-wasm.test.js` and the prod step working (the prod step drives keys; it will need the
   hand: mouse moves and a held button).
+
+## Notes from building it
+
+- **A camera's field of view on an exported camera.** The export keeps the render frame whole in any view
+  (`runtime/ortho-scale.js` fitsFrame): `camera.fov` is written along the side the frame was exported for and read back
+  along the side that fits the view. Game code that sets `camera.fov` gets it reinterpreted, which breaks "Babylon
+  unwrapped". The café's Framing system works round it by reading the value back. The clean rule for later: when game
+  code sets the camera itself, Babylon's own semantics apply and the frame fit steps aside, as an opt-in helper.
+- **The reach effect's control runs off when the target is out of reach** (the character runtime keeps pushing the IK
+  control outward, as far as 38 m). The barista keeps the wrist's aim within the arm's length and steps after the hand.
+- **Rigid bodies and the export.** For a game with `physics: 'havok'` the export bakes no rigid body's motion (Blender's
+  simulation); without one it does, so a page without game physics still plays Blender's simulation.

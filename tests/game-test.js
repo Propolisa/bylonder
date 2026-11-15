@@ -28,8 +28,8 @@ export async function run(example, { seed = 1 } = {}) {
   const root = new URL(`../${example}/`, import.meta.url), id = example.split('/').pop();
   const { world, sync } = openExample(id);
   world.mainSync = sync;
-  const exported = (await exportPackage(world, { animations: 'BOTH', game: true })).files;
   const project = { files: files(fileURLToPath(root)), read: (path) => readFile(new URL(path, root)) };
+  const exported = (await exportPackage(world, { animations: 'BOTH', game: true, project })).files;
   const library = folderLibrary((path) => readFile(new URL(`../node_modules/${path}`, import.meta.url)));
   const written = writePackage({ ...exported, ...(await gameFiles(project, { esbuild: await import('esbuild-wasm'), library, babylon: (path) => readFile(new URL(`../node_modules/@babylonjs/core/${path}`, import.meta.url), 'utf8') })) });
   const at = (path) => new URL(path, written.url).href;
@@ -80,7 +80,14 @@ export async function run(example, { seed = 1 } = {}) {
     return chain;
   };
   return {
-    find, errors, world: run, blend,
+    find, errors, world: run, blend, input,
+    /** Points the pointer at a place in the scene, as a mouse over the canvas would. */
+    point(at) {
+      const scene = blend.scene, engine = scene.getEngine(), camera = scene.activeCamera;
+      const viewport = camera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight());
+      const p = core.Vector3.Project(at, core.Matrix.Identity(), scene.getTransformMatrix(), viewport);
+      input.point(p.x * engine.getHardwareScalingLevel(), p.y * engine.getHardwareScalingLevel());
+    },
     step: ({ seconds }) => step(seconds),
     get: (system) => run.game.get(system),
     get ended() { return run.ended; },

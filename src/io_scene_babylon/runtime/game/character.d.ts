@@ -6,6 +6,13 @@ declare const _default: import("./define.js").Behavior<{
     } & import("./define.js").PropOptions & {
         default: number;
     };
+    radius: {
+        type: import("./define.js").PropType;
+        default: any;
+        options?: string[];
+    } & import("./define.js").PropOptions & {
+        default: number;
+    };
     feet: {
         type: import("./define.js").PropType;
         default: any;

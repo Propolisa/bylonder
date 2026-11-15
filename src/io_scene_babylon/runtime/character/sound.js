@@ -24,7 +24,7 @@ function audioContext() {
 /**
  * The voice of an action with a sound: `time()` is the action's time by the sound (null until it plays), and
  * `play(at)`, `pause()` follow the action. A strip that fails to load warns and leaves the action on the page's clock.
- * @param {{ url: string, start: number, offset: number, volume: number }} strip the strip (BlendScene.sounds), `start`
+ * @param {{ url: string, start: number, offset: number, volume: number, rate?: number }} strip the strip (BlendScene.sounds), `start`
  *   against the action's first frame @param {{ spatial?: boolean, head?: () => import('@babylonjs/core').Vector3 | null }} options
  * @param {AudioContext | null} [context]
  */
@@ -70,6 +70,7 @@ export function createVoice(strip, { spatial = true, head = () => null } = {}, c
       if (into >= buffer.duration) return;
       const source = context.createBufferSource();
       source.buffer = buffer;
+      if (strip.rate) source.playbackRate.value = strip.rate;
       source.connect(gain);
       startedAt = context.currentTime + Math.max(0, -into);
       from = Math.max(0, into) + strip.start;

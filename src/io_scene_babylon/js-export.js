@@ -8,6 +8,7 @@ import { findRoles } from './runtime/character/roles.js';
 import { AbstractEngine, Animation, Matrix } from '@babylonjs/core';
 import { objectMatrix } from '../runtime/object-transform.js';
 import { CLOCK, sampledGaps, serializeScene } from './babylon-export.js';
+import { gamePhysics } from './game-export.js';
 import { binaryClipKeys, CLIP_KEYS_SOURCE, irClips, isClip } from './clip-export.js';
 import { binaryMorphTargets, MORPH_KEYS_SOURCE } from './morph-export.js';
 import { remappedIndices, skinSkeletons } from './skeleton-export.js';
@@ -380,7 +381,7 @@ function selectedWorld(world, selected) {
 export const exportModule = async (world, options) => (await exportPackage(world, options)).files;
 
 // The package's files, its tables by datablock and its buffers by key (scene-patch.js makes a patch of two).
-export async function exportPackage(whole, { scope = 'SCENE', selected = [], live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, animations = 'TIMELINE', clipCompression = 'STANDARD', target = 'BOTH', runtime = null, runtimes = {}, replace = [], bundle = false, game = false, controlPanel = true, devTools = 'CDN', navigation = 'FIXED', navigationModes = {}, branchState = null, branches = {}, sampleRate = {}, verified = true, changed = null, progress = null } = {}) {
+export async function exportPackage(whole, { scope = 'SCENE', selected = [], live: keepLive = false, parity = false, hostCompression = false, bakeAnimation = false, animations = 'TIMELINE', clipCompression = 'STANDARD', target = 'BOTH', runtime = null, runtimes = {}, replace = [], bundle = false, game = false, project = null, controlPanel = true, devTools = 'CDN', navigation = 'FIXED', navigationModes = {}, branchState = null, branches = {}, sampleRate = {}, verified = true, changed = null, progress = null } = {}) {
   const step = async (status) => { if (progress) { progress(status); await new Promise((resume) => setTimeout(resume)); } };
   const world = scope === 'SELECTED' ? selectedWorld(whole, selected) : whole;
   const states = { branchState, branches }, stackState = (node) => chosenState(states, 'modifiers', node.name) ?? (keepLive ? 'LIVE' : 'BAKED');
@@ -392,12 +393,14 @@ export async function exportPackage(whole, { scope = 'SCENE', selected = [], liv
     await Promise.all([prepareKernels(), loadVerdicts()]);
     // The mapped meshes' geometry is read below: their mapping holds until the module is written.
     const sampling = exportSampling(world.animation.time.state, sampleRate);
+    // A game that runs physics simulates the rigid bodies Blender would.
+    const simulated = !!project && await gamePhysics(project);
     await step('Mapping the scene');
     const mapped = exportRuntimes(world, { bake: bakeAnimation, runtime, runtimes, sampling, verified, changed });
     try {
       await mapped.judge(step);
       await step(`Sampling ${sampling.frames.length} frames`);
-      return await moduleSource(world, live, mapped, { step, parity, hostCompression, bakeAnimation, animations, clipCompression, target, replace, bundle, game, controlPanel, devTools, navigation, navigationModes, states, sampling });
+      return await moduleSource(world, live, mapped, { step, parity, hostCompression, bakeAnimation, animations, clipCompression, target, replace, bundle, game, controlPanel, devTools, navigation, navigationModes, states, sampling, simulated });
     } finally {
       mapped.restore();
       saveVerdicts();
@@ -407,9 +410,9 @@ export async function exportPackage(whole, { scope = 'SCENE', selected = [], liv
   }
 }
 
-async function moduleSource(world, live, mapped, { step, parity, hostCompression, bakeAnimation, animations, clipCompression, target, replace, bundle, game, controlPanel, devTools, navigation, navigationModes, states, sampling }) {
+async function moduleSource(world, live, mapped, { step, parity, hostCompression, bakeAnimation, animations, clipCompression, target, replace, bundle, game, controlPanel, devTools, navigation, navigationModes, states, sampling, simulated }) {
   const graphs = [], graphOf = materialGraphs(world, graphs), asset = !!world.only;
-  const data = await serializeScene(world, { geometry: false, live, mapped, parity, graphOf, bake: bakeAnimation, sampling, only: world.only, animations, onBones: true });
+  const data = await serializeScene(world, { geometry: false, live, mapped, parity, graphOf, bake: bakeAnimation, sampling, only: world.only, animations, onBones: true, simulated });
   if (chosenState(states, 'postProcessing') === 'OFF') Object.assign(data, { renderingPipelines: [], postProcesses: [] });
   // Selected objects bring none of the scene's settings: its world, environment, effect layers or volumes.
   if (asset) Object.assign(data, { environmentTexture: undefined, effectLayers: [] });

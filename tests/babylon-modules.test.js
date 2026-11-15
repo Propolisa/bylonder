@@ -32,4 +32,8 @@ import { x } from './x.js';
 mesh.thinInstanceSetBuffer('matrix', data);
 `);
 assert.throws(() => deepImports("import { NoSuchClass } from '@babylonjs/core';"), /exports no NoSuchClass/);
+// Minified code (a game.js, its imports mid-line) keeps its licence line first: the members' modules come after it.
+const minified = deepImports("// The game code, licensed MIT.\nvar a=1;import{Mesh as M}from'@babylonjs/core';M.thinInstanceSetBuffer();\n");
+assert.match(minified.split('\n')[0], /licensed MIT/);
+assert.match(minified.split('\n')[1], /^import '@babylonjs\/core\//);
 console.log(`${Object.keys(BABYLON).length} names, each from its module`);

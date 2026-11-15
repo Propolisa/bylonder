@@ -1,5 +1,6 @@
 // A customer: rolls up from the trailhead to the stand along a path of its own, waits, shivers with delight at the
-// coffee it is served, spills it on itself and rolls back down, out of sight. Each rock's path and shiver come from the
+// coffee set down on it, spills it (a shrug of its own that tips the cup off, under Havok), takes the stain and rolls
+// back down, out of sight. Each rock's path and shiver come from the
 // run's seeded random, so every serve plays out differently and a run with the same seed plays out the same.
 import { Quaternion, Vector3 } from '@babylonjs/core';
 import { defineBehavior, float, sound, color, knot, object } from 'bylonder';
@@ -16,8 +17,9 @@ function rollToward(entity, to, step) {
 export default defineBehavior({
   name: 'Rock',
   props: {
-    patience: float(12, { min: 1, unit: 's' }),
-    noises: sound(['Grind', 'Rumble', 'Clack']),
+    patience: float(20, { min: 1, unit: 's' }),
+    noises: sound(['Wood Clack', 'Plank Clack', 'Clack']),
+    delight: sound('Served'),
     reaction: knot('rock_reaction'),
     stain: color([0.24, 0.14, 0.07]),
     spot: object('Stand Spot'),
@@ -37,6 +39,8 @@ export default defineBehavior({
     state.leg ??= 0;
     const rest = entity.node.rotationQuaternion?.clone() ?? Quaternion.FromEulerVector(entity.node.rotation);
     let shiver = null;
+    // Its voice: each rock clacks at a pitch of its own.
+    const voice = 0.75 + time.random() * 0.6;
     const leave = (served) => { state.mood = 'leaving'; state.leg = 0; this.emit('left', { served }); };
     return {
       async served({ cup }) {
@@ -44,11 +48,14 @@ export default defineBehavior({
         // Its delight: a shiver of its own amplitude, pace and length.
         shiver = { amplitude: 0.06 + time.random() * 0.14, rate: 8 + time.random() * 10, length: 1.2 + time.random(), t: 0 };
         const subtitles = game.get(Subtitles);
-        game.play(subtitles?.tell('rock_noise') ?? time.pick(props.noises), { at: entity });
+        game.play(props.delight, { at: entity, volume: 0.6 });
+        game.play(subtitles?.tell('rock_noise') ?? time.pick(props.noises), { at: entity, rate: voice });
         subtitles?.say(props.reaction, { speaker: entity });
         await time.wait(shiver.length);
+        // The spill: a shrug to a side of its own tips the cup off its top.
+        const side = time.random() * Math.PI * 2, top = cup?.node.getAbsolutePosition().add(new Vector3(0, 0.08, 0));
+        if (top) cup.node.physicsBody?.applyImpulse(new Vector3(Math.cos(side), 0.4, Math.sin(side)).scale(0.25), top);
         entity.material().set('baseColor', props.stain); // the run's copy: the .blend keeps a clean rock
-        cup?.hide();
         await time.wait(0.5);
         leave(true);
       },

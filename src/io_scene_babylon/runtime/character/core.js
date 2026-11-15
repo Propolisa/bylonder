@@ -414,9 +414,10 @@ export class Character {
    * @param {any} blend the loaded scene (load's result)
    * @param {N} armature
    * @param {{ roles?: Record<string, string | string[] | string[][]>, input?: 'default' | (() => Intent) | null,
-   *   responsiveness?: number, ground?: (string | RegExp)[], idle?: boolean, seed?: number, manual?: boolean,
+   *   responsiveness?: number, ground?: (string | RegExp)[], idle?: boolean, seed?: number, manual?: boolean, radius?: number,
    *   preset?: { body?: string, effects?: [string, object][] } }} [options]
-   * `manual`: updated by `update(seconds)` (a recording's clock, Node) instead of each frame the scene draws.
+   * `radius`: how near walls the body comes (0.3 m). `manual`: updated by `update(seconds)` (a recording's clock,
+   * Node) instead of each frame the scene draws.
    */
   constructor(blend, armature, options = {}) {
     this.blend = blend;
@@ -431,7 +432,7 @@ export class Character {
     /** The armature's node, which the movement moves (a node of its own where the scene has none). */
     this.node = this.rig.root ?? new TransformNode(armature, blend.scene);
     /** The movement (movement.js) that owns the root. */
-    this.movement = createMovement(blend.scene, { node: this.node, front: restFront(this.rig, /** @type {string[][]} */ (this.roles.legs ?? [])), responsiveness: options.responsiveness ?? 0.1, ground: options.ground ?? null });
+    this.movement = createMovement(blend.scene, { node: this.node, front: restFront(this.rig, /** @type {string[][]} */ (this.roles.legs ?? [])), responsiveness: options.responsiveness ?? 0.1, ground: options.ground ?? null, ...(options.radius && { radius: options.radius }) });
     this.velocity = this.movement.velocity;
     /** @type {((() => Intent) & { dispose(): void }) | null} */
     this.keys = null;

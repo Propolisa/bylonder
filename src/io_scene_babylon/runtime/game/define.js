@@ -166,3 +166,10 @@ export function propValue(schema, value) {
     default: return value;
   }
 }
+
+/**
+ * Effects game code adds to a Character, `entity.character.add(reach({ hand: 'hand.R', target }))`, and defines
+ * (defineEffect). The character runtime is entered through its api.js, before any effect.
+ */
+export { defineEffect } from '../character/api.js';
+export { reach } from '../character/effects/reach.js';

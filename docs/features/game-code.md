@@ -39,12 +39,18 @@ tests:
   - tests/rock-hard-cafe-wasm.test.js
   - tests/game-export.test.js
   - tests/game-physics.test.js
+  - tests/game-camera-controls.test.js
+  - tests/cafe-reach-ik-wasm.test.js
+  - tests/export-rigid-bodies-wasm.test.js
 limits:
   - A mesh's visibility (mesh.visibility below 1) does not fade the exported scene's materials yet: game code can hide a mesh, not fade it.
   - Game sounds (game.play) play at full volume from no place: not yet positioned at the entity they are played at.
   - There is no game UI layer yet (defineUI); a system can draw with Babylon's GUI itself.
   - Hover docs and completion come from TypeScript in the code editor; go to definition from a behaviour to the objects using it is the user count's list, not the editor's.
   - A behaviour that holds several sounds keeps them as a group of the object's custom properties, which Blender's Custom Properties panel shows but does not edit.
+  - Physics (`physics: 'havok'`) runs Blender's rigid bodies (type, Animated, mass, shape, friction, bounciness) on Havok; rigid body constraints, collision margins, damping and the Rigid Body World's settings are not read yet.
+  - An exported camera keeps its render frame whole in any view: a `camera.fov` that game code sets is taken along the side the frame was exported for, not as Babylon's own field of view (the café's Framing system reads it back to fit).
+  - The café's reach runs the barista's IK on Blender's own constraint kernels, a GPL unit in the export (units.json lists it): a licence-free export of the café needs that unit replaced.
 ---
 # Game Code
 
@@ -57,10 +63,13 @@ it all; saving a file swaps its code into the running game, keeping each behavio
 [Open in Bylonder](https://propolisa.github.io/bylonder/#example=rock-hard-cafe)
 
 The demo, Rock Hard Café, is a one-minute shift at an open-air coffee stand in a forest by a brook, whose only
-customers are rocks: one at a time a rock rolls up from the trailhead, you pour a coffee at the machine and hand it
-over, and it shivers with delight, makes a rock noise, spills it on itself and rolls back down. Each rock's path,
-shiver and noise come from the run's seeded random, so every serve plays out differently and a replay plays the same.
-The example opens on the Game workspace, the 3D View beside the Game area.
+customers are rocks: one at a time a rock rolls up from the trailhead and waits across the counter. You reach across
+with the barista's right hand, take the cup the machine brewed onto its tray, steer it round the jars and set it down
+on the rock, which shivers with delight, makes a rock noise, spills it off and rolls back down, stained. The hand is
+Blender's IK on the barista's rig (an arm and a spine constraint, set in `cafe.py`), solved live in the page; the cups
+and jars are Blender rigid bodies that the game runs on Havok. Each rock's path, shiver, spill and noise come from the
+run's seeded random and the physics, so every serve plays out differently and a replay plays the same. The example
+opens on the Game workspace, the 3D View beside the Game area.
 
 ## Steps
 
@@ -77,18 +86,21 @@ The example opens on the Game workspace, the 3D View beside the Game area.
    ![Edit Source opens rock.js at defineBehavior](../media/features/game-code/edit-source.png)
 
 3. **Play.** The Game area's Play runs the scene with its game code and gives it the keys (a click on the game takes
-   them back after you work elsewhere): WASD walks the barista, E pours at the machine and serves a rock. Drag Patience while it plays and the waiting rocks change at once; save `rock.js` and its code is
+   them back after you work elsewhere): the mouse moves the hand over the counter, holding Space or the left button
+   closes it on a cup under the palm and letting go sets the cup down; WASD walks the barista. Drag Patience while it plays and the waiting rocks change at once; save `rock.js` and its code is
    swapped in without restarting.
 
    ![The café playing in the Game area](../media/features/game-code/play.gif)
 
 ## Project files
 
-- [cafe.py](../../examples/rock-hard-cafe/cafe.py): builds the café, its prefabs, sounds and behaviours in Blender 5.2.
-- [src/behaviors/](../../examples/rock-hard-cafe/src/behaviors/): Rock, Barista, Machine and Spawner.
-- [src/systems/](../../examples/rock-hard-cafe/src/systems/): Shift and Subtitles.
+- [cafe.py](../../examples/rock-hard-cafe/cafe.py): builds the café, its prefabs, sounds, rigid bodies, the barista's
+  reach constraints and the behaviours in Blender 5.2.
+- [src/behaviors/](../../examples/rock-hard-cafe/src/behaviors/): Rock, Barista, Cup, Machine and Spawner.
+- [src/systems/](../../examples/rock-hard-cafe/src/systems/): Shift, Subtitles and Hud.
 - [src/game.js](../../examples/rock-hard-cafe/src/game.js): the composition.
 - [content/dialogue/cafe.ink](../../examples/rock-hard-cafe/content/dialogue/cafe.ink): the rocks' lines, an Ink story.
 - Recorded by [record-game-code.mjs](../../tools/docs/record-game-code.mjs).
 - Credits: the barista and the forest are Quaternius' Universal Animation Library and Stylized Nature MegaKit (CC0),
-  [CREDITS.md](../../examples/rock-hard-cafe/CREDITS.md).
+  the sounds Kenney's Impact Sounds and Interface Sounds (CC0), the music "Bubble Gum Groovin'" by Eric Matyas,
+  www.soundimage.org (CC BY 3.0), [CREDITS.md](../../examples/rock-hard-cafe/CREDITS.md).

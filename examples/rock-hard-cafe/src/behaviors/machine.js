@@ -1,19 +1,22 @@
-// The coffee machine: asked to pour (the barista's Use near it), it brews and puts a cup in the barista's hands.
-import { defineBehavior, float, sound, collection } from 'bylonder';
+// The coffee machine: whenever its tray is empty, it brews a cup onto it.
+import { Vector3 } from '@babylonjs/core';
+import { defineBehavior, float, collection, object } from 'bylonder';
+import Cup from './cup.js';
 
 export default defineBehavior({
   name: 'Machine',
-  props: { cup: collection('Cup'), brew: float(0.6, { unit: 's' }), hiss: sound('Steam') },
-  create({ entity, props, game, time }) {
+  props: { cup: collection('Cup'), tray: object('Tray Spot'), brew: float(0.6, { unit: 's' }) },
+  create({ props, game, time, babylon }) {
     let brewing = false;
+    const tray = () => babylon.scene.getTransformNodeByName(props.tray);
+    const onTray = (at) => game.all(Cup).some((cup) => Vector3.Distance(cup.entity.node.getAbsolutePosition(), at) < 0.12);
     return {
-      async pour({ barista }) {
-        if (brewing || barista.holding) return;
+      async update() {
+        const spot = tray();
+        if (brewing || !spot || onTray(spot.getAbsolutePosition())) return;
         brewing = true;
-        game.play(props.hiss, { at: entity });
         await time.wait(props.brew);
-        barista.holding = game.spawn(props.cup, { attachTo: barista.entity }); // owned by the run: gone on Reset
-        barista.holding?.position.set(0.35, 1.0, 0.1); // held out at the side, where the camera sees it
+        game.spawn(props.cup, { at: { node: spot } }); // owned by the run: gone on Reset
         brewing = false;
       },
     };

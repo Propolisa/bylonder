@@ -32,6 +32,7 @@ export function deepImports(code) {
   });
   const added = AUGMENTS.filter(([name]) => new RegExp(String.raw`\.${name}\b`).test(code)).map(([, file]) => file);
   if (!added.length) return rewritten;
-  const at = Math.max(0, rewritten.search(/^import\b/m));
+  // Before the first import, else after the leading comments (a game.js's licence line, which a bundle keeps first).
+  const first = rewritten.search(/^import\b/m), at = first >= 0 ? first : /^(?:\/\/.*\n)*/.exec(rewritten)[0].length;
   return `${rewritten.slice(0, at)}${sideEffectImports(added)}\n${rewritten.slice(at)}`;
 }

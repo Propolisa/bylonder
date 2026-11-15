@@ -74,9 +74,15 @@ export function runGame(blend: any, code: {
             x: number;
             y: number;
         };
+        readonly pointer: {
+            x: number;
+            y: number;
+        } | null;
         step(): void;
         hold(action: string, on?: boolean): void;
         press(action: string): void;
+        key(code: string, on?: boolean): void;
+        point(x: number, y: number): void;
         dispose(): void;
     };
     blend: any;

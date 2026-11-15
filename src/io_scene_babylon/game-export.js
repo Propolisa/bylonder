@@ -17,6 +17,8 @@ const CORE = '@babylonjs/core';
 
 /** Whether a project (`{ files, read }`, its file paths and a reader) has a game: src/game.js. */
 export const hasGame = (project) => !!project?.files.includes('src/game.js');
+/** Whether a project's game runs physics (`physics: 'havok'` in src/game.js), which simulates the scene's rigid bodies. */
+export const gamePhysics = async (project) => hasGame(project) && usesHavok(text(await project.read('src/game.js')));
 
 const joined = (from, path) => {
   const parts = from.split('/').slice(0, -1);
@@ -116,6 +118,8 @@ export default { game, behaviors: [${modules.map((_, i) => `m${i}.default`).join
     banner: { js: `// ${manifest.name ?? 'The project'}'s game code, licensed ${manifest.license}. The libraries inlined in it, and their licences: THIRD-PARTY.md.` } });
   const files = { 'game.js': built.outputFiles[0].text };
   files['THIRD-PARTY.md'] = `# Third-party code in game.js\n\n${[...used].map(([name, { version, license, notice }]) => `## ${name} ${version} (${license})\n\n\`\`\`text\n${notice.trim()}\n\`\`\`\n`).join('\n') || 'None.\n'}`;
+  // The project's own credits (the authors and licences of its music, sounds and models) ship with it.
+  if (project.files.includes('CREDITS.md')) files['THIRD-PARTY.md'] += `\n# The project's credits\n\n${(await read('CREDITS.md')).replace(/^# .*\n+/, '')}`;
   if (havok) files['HavokPhysics.wasm'] = await used.get('@babylonjs/havok').bytes(HAVOK_WASM);
   for (const path of project.files.filter((p) => p.startsWith('content/'))) files[path] = await project.read(path);
   return files;

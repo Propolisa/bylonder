@@ -450,12 +450,12 @@ const authoredMetadata = (node) => {
 // (export-options.js); `sampling`, the frames what is baked is sampled at (sampling.js), a key per frame unset;
 // `animations`, the timeline's animation group, an animation group per action (clips) or both (export-options.js ANIMATIONS);
 // `onBones`, objects parented to bones written to hang from them (boneParents), for a page that attaches them.
-export async function serializeScene(world, { geometry = true, live = null, mapped = null, parity = false, graphOf = () => null, bake = true, runtime = null, runtimes: chosen = {}, sampling = null, only = null, animations = 'TIMELINE', onBones = false } = {}) {
+export async function serializeScene(world, { geometry = true, live = null, mapped = null, parity = false, graphOf = () => null, bake = true, runtime = null, runtimes: chosen = {}, sampling = null, only = null, animations = 'TIMELINE', onBones = false, simulated = false } = {}) {
   await world.modifiers.settled();
   sampling ??= exportSampling(world.animation.time.state);
   const runtimes = mapped ?? exportRuntimes(world, { bake, runtime, runtimes: chosen, sampling });
   try {
-    return await serializeMapped(world, { geometry, live, mapped: runtimes, parity, graphOf, bake, sampling, only, animations, onBones });
+    return await serializeMapped(world, { geometry, live, mapped: runtimes, parity, graphOf, bake, sampling, only, animations, onBones, simulated });
   } finally {
     if (!mapped) runtimes.restore();
   }
@@ -471,7 +471,7 @@ function shadowsOf(world, content) {
   return generators.filter((g) => lights.has(g.getLight().name)).map((g) => ({ ...g.serialize(), lightId: lights.get(g.getLight().name).id, customShaderOptions: g.customShaderOptions }));
 }
 
-async function serializeMapped(world, { geometry, live, mapped, parity, graphOf, bake, sampling, only, animations, onBones }) {
+async function serializeMapped(world, { geometry, live, mapped, parity, graphOf, bake, sampling, only, animations, onBones, simulated }) {
   const { scene } = world;
   // An asset brings no camera, so none of a camera's effects.
   const camera = only ? null : world.sceneSettings.camera() ?? scene.activeCamera;
@@ -505,6 +505,8 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
   // An instanced light is placed at its instance (main-view.js drawLightInstances), as an object at its world matrix.
   if (world.mainSync) for (const light of content.nodes) if (light instanceof Light && light.metadata?.instancers && evaluatedMatrix(light)) transforms.set(light.uniqueId, evaluatedTransform(world.mainSync, light));
   for (const node of [...stacks.keys(), ...bones.keys()]) evaluated.transforms?.delete(node);
+  // With `simulated` (a game that runs physics), a rigid body's motion is the page's to simulate, not Blender's to bake.
+  if (simulated) for (const node of objects) if (idStruct(world.mainSync?.objectOf(node))?.rigid_body) evaluated.transforms?.delete(node);
   // Taken after the frames are evaluated, which redraw what the view draws per frame (a Grease Pencil's strokes).
   const all = [...scene.meshes, ...scene.transformNodes, ...scene.lights, ...scene.cameras];
   const restores = [

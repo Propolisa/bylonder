@@ -30,7 +30,9 @@ export function mountGameView(section, { world, header, run: files, codeError })
   // A project with game code gets its actions as clips too, which behaviours play (entity.play). Never bundled: the run
   // links scene.js to the app's own modules (package-link.js), so a bundle would only cost time.
   const hasGameCode = !!files?.files.some((path) => /^src\/.+\.m?js$/.test(path));
-  const options = exportOptions({ controlPanel: false, target: world.scene.getEngine().isWebGPU ? 'WEBGPU' : 'WEBGL2', bundle: false, ...(hasGameCode && { animations: 'BOTH' }) });
+  // Its project too, whose game may run physics: then the rigid bodies are the game's to simulate, not baked.
+  const project = hasGameCode && { files: files.files, read: async (path) => new Uint8Array(await (await fetch(files.root + path)).arrayBuffer()) };
+  const options = { ...exportOptions({ controlPanel: false, target: world.scene.getEngine().isWebGPU ? 'WEBGPU' : 'WEBGL2', bundle: false, ...(hasGameCode && { animations: 'BOTH' }) }), ...(project && { project }) };
   const canvas = Object.assign(document.createElement('canvas'), { className: 'block h-full w-full outline-none', tabIndex: 0 });
   // Keys typed into the playing game are the game's, not Blender's shortcuts.
   canvas.dataset.gameInput = '';

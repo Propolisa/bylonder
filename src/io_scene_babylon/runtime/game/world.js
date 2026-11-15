@@ -5,24 +5,25 @@
 // disposed with it, its waits never resume once it is gone, and its `state` is handed to the next run of a hot swap.
 import { Vector3 } from '@babylonjs/core';
 import { propValue } from './define.js';
-import { enablePhysics } from './physics.js';
+import { enablePhysics, rigidBody } from './physics.js';
 
 /**
  * The scene a run plays, as game/blend-host.js gives it from a package's controller.
  * @typedef {{
  *   scene: import('@babylonjs/core').Scene,
  *   objects: () => HostObject[],
+ *   bodies?: () => HostObject[],
  *   value: (object: string, behavior: string, prop: string) => any,
  *   play?: (action: string, object: string) => void,
- *   playSound?: (sound: string, at?: Entity) => void, played?: string[],
+ *   playSound?: (sound: string, at?: Entity, options?: { rate?: number, volume?: number }) => void, played?: string[],
  *   spawn?: (collection: string) => HostObject[],
  *   blend?: any,
  * }} Host
- * @typedef {{ key: string, name: string, node: import('@babylonjs/core').TransformNode | null, behaviors: string[] }} HostObject
+ * @typedef {{ key: string, name: string, node: import('@babylonjs/core').TransformNode | null, behaviors: string[], rigid?: Record<string, any> | null }} HostObject
  * @typedef {import('./define.js').Behavior} Behavior
  * @typedef {import('./define.js').System} System
  * @typedef {{ scene: import('@babylonjs/core').Scene, engine: import('@babylonjs/core').AbstractEngine }} Babylon
- * @typedef {{ pressed(action: string): boolean, held(action: string): boolean, stick(action: string): { x: number, y: number }, step?: () => void }} Input
+ * @typedef {{ pressed(action: string): boolean, held(action: string): boolean, stick(action: string): { x: number, y: number }, readonly pointer?: { x: number, y: number } | null, step?: () => void }} Input
  * The project's files a run reads (an Ink story, a GUI layout): `url(path)`, and `text(path)` read.
  * @typedef {{ url(path: string): string, text(path: string): Promise<string> }} Assets
  */
@@ -43,6 +44,19 @@ function distanceToBounds(entity, point) {
   const bounds = entity.node?.getHierarchyBoundingVectors?.(true);
   if (!bounds || !Number.isFinite(bounds.min.x)) return Vector3.Distance(placeOf(entity), point);
   return Vector3.Distance(Vector3.Clamp(point, bounds.min, bounds.max), point);
+}
+
+/** A direction on the ground, unit length (zero stays zero). @param {Vector3} v */
+const flat = (v) => new Vector3(v.x, 0, v.z).normalize();
+/**
+ * A stick's `{ x, y }` on the ground as `camera` shows it: x toward the screen's right, y toward its top (forward for a
+ * camera behind, up the screen for one looking down); as the scene's x and z without a camera.
+ * @param {import('@babylonjs/core').Camera | null | undefined} camera @param {number} x @param {number} y
+ */
+export function onGround(camera, x, y) {
+  if (!camera) return new Vector3(x, 0, y);
+  const right = flat(camera.getDirection(Vector3.Right())), up = flat(camera.getDirection(Vector3.Up()).add(camera.getDirection(Vector3.Forward())));
+  return right.scale(x).addInPlace(up.scale(y));
 }
 
 /** A seeded random in [0, 1) (mulberry32), so a run with the same seed picks the same. @param {number} seed */
@@ -70,9 +84,9 @@ function random(seed) {
  * @typedef {{
  *   get(system: System): any, all(behavior: Behavior): any[], near(from: Entity, radius: number, behavior: Behavior, filter?: (handle: any) => boolean): any,
  *   on(behavior: Behavior, event: string, fn: (data: any, from: any) => void): void, emit(target: any, event: string, data?: any): void,
- *   play(sound: string, options?: { at?: Entity }): void, end(result?: any): void,
+ *   play(sound: string, options?: { at?: Entity, rate?: number, volume?: number }): void, end(result?: any): void,
  *   spawn(collection: string, options?: { at?: Entity, attachTo?: any, jitter?: number }): Entity | null,
- *   camera: { follow(entity: Entity, options?: { pitch?: number, distance?: number, height?: number }): void },
+ *   camera: { follow(entity: Entity, options?: { pitch?: number, distance?: number, height?: number }): void, controls: boolean, onGround(stick: { x: number, y: number }): Vector3 },
  * }} Game
  */
 
@@ -84,6 +98,15 @@ function random(seed) {
  */
 export function createWorld({ host, behaviors, game: composition = {}, seed = 1, engine, kept = {}, input = idleInput(), assets = noAssets, havok, dev = true, report = (error, where) => console.error(`${where}:`, error) }) {
   const scene = host.scene, rng = random(seed), babylon = { scene, engine: engine ?? scene.getEngine() };
+  // The scene camera's own controls (a page's orbit with the mouse) are off while a game plays: the mouse and keys are
+  // the game's. A game turns them on with `game.camera.controls = true`.
+  let controls = false;
+  const setControls = (/** @type {boolean} */ on) => {
+    const camera = scene.activeCamera, canvas = scene.getEngine().getRenderingCanvas?.();
+    if (on && canvas) camera?.attachControl(canvas, true);
+    else camera?.detachControl();
+  };
+  setControls(false);
   let now = 0, ended = /** @type {any} */ (undefined), definitions = new Map(behaviors.map((b) => [b.name, b]));
   /** Whose code runs now: what Babylon makes meanwhile is theirs. @type {Owner | null} */
   let owner = null;
@@ -106,6 +129,9 @@ export function createWorld({ host, behaviors, game: composition = {}, seed = 1,
 
   // A physics body made by game code goes with its owner, as what Babylon makes does.
   const physics = havok ? enablePhysics(scene, havok, (body) => { if (owner && !owner.disposed) owner.made.add(body); }) : null;
+  /** The Havok bodies of objects with a rigid body in Blender, the run's own. @param {HostObject[]} objects */
+  const bodiesOf = (objects) => { if (physics) for (const o of objects) if (o.rigid && o.node) rigidBody(o.node, o.rigid); };
+  bodiesOf(host.bodies?.() ?? []);
   const tracking = ADDED.map((name) => /** @type {any} */ (scene)[name]?.add((/** @type {any} */ made) => { if (owner && !owner.disposed) owner.made.add(made); })).filter(Boolean);
   /** @param {string} label @returns {Owner} */
   const newOwner = (label) => ({ made: new Set(), listeners: new Set(), disposed: false, label });
@@ -190,7 +216,8 @@ export function createWorld({ host, behaviors, game: composition = {}, seed = 1,
       get position() { return node?.position ?? Vector3.Zero(); },
       get rotation() { return node?.rotation ?? Vector3.Zero(); },
       get scaling() { return node?.scaling ?? Vector3.One(); },
-      hide() { node?.setEnabled(false); },
+      /** Hides the object, and takes its rigid body out of the simulation. */
+      hide() { node?.setEnabled(false); node?.physicsBody?.dispose(); },
       show() { node?.setEnabled(true); },
       get visible() { return !!node?.isEnabled(); },
       /** This object's material in this run: `set` copies it on its first write, so other objects and the .blend keep theirs. */
@@ -261,10 +288,17 @@ export function createWorld({ host, behaviors, game: composition = {}, seed = 1,
       const instance = [...instances.values()].find((i) => i.handlers === target);
       if (instance && typeof instance.handlers[event] === 'function') run(instance.owner, event, () => instance.handlers[event](data));
     },
-    /** Plays a sound, at an entity's place where given. @param {string} sound @param {{ at?: Entity }} [options] */
-    play: (sound, options) => host.playSound?.(sound, options?.at),
+    /** Plays a sound, at an entity's place where given, at a rate (1 as recorded, 2 an octave up) and a volume. @param {string} sound @param {{ at?: Entity, rate?: number, volume?: number }} [options] */
+    play: (sound, options) => host.playSound?.(sound, options?.at, options),
     /** The game's camera: `follow(entity, { pitch, distance, height })` follows a Character from above and behind. */
-    camera: { follow: (entity, options) => /** @type {any} */ (entity).character?.follow?.(options) },
+    camera: {
+      follow: (entity, options) => /** @type {any} */ (entity).character?.follow?.(options),
+      /** Whether the scene camera's own controls (orbit, zoom) take the mouse; off while a game plays unless it sets them. */
+      get controls() { return controls; },
+      set controls(on) { setControls((controls = !!on)); },
+      /** A stick's `{ x, y }` as a direction on the ground, as the camera shows it: x right, y up the screen. */
+      onGround: (stick) => onGround(scene.activeCamera, stick.x, stick.y),
+    },
     /** Ends the run with a result (`world.ended`). @param {any} result */
     end(result) { if (ended === undefined) ended = result ?? null; },
     /**
@@ -283,6 +317,7 @@ export function createWorld({ host, behaviors, game: composition = {}, seed = 1,
         if (attachTo) root.parent = attachTo.node ?? attachTo;
         else if (at) root.setAbsolutePosition(placeOf(at));
         if (jitter) root.position.addInPlaceFromFloats((rng() - 0.5) * 2 * jitter, 0, (rng() - 0.5) * 2 * jitter);
+        bodiesOf(made);
         for (const object of made) for (const name of object.behaviors) { const d = definitions.get(name); if (d && !instances.has(`${object.key}/${name}`)) createInstance(object, d); }
         return entityOf(made.find((o) => o.node === root) ?? made[0]);
       } finally {
@@ -312,6 +347,11 @@ export function createWorld({ host, behaviors, game: composition = {}, seed = 1,
     for (const child of instance.entity.node?.getDescendants?.(false) ?? []) if (!authoredNodes.has(child) && !child.isDisposed()) child.dispose();
   }
 
+  /** @param {{ owner: Owner, handlers: any }} system */
+  function disposeSystem(system) {
+    run(system.owner, 'dispose', () => system.handlers.dispose?.());
+    release(system.owner);
+  }
   /** @param {System} definition */
   function createSystem(definition) {
     const who = newOwner(definition.name);
@@ -378,7 +418,7 @@ export function createWorld({ host, behaviors, game: composition = {}, seed = 1,
       /** @param {Map<string, Behavior>} defs @param {import('./define.js').GameDefinition} game @param {boolean} copies */
       const attempt = (defs, game, copies) => {
         for (const i of [...instances.values()]) disposeInstance(i);
-        for (const s of systems.values()) release(s.owner);
+        for (const s of systems.values()) disposeSystem(s);
         systems.clear();
         waits = [];
         // A trial gets copies of the states, so one that fails leaves them as they were.
@@ -406,7 +446,7 @@ export function createWorld({ host, behaviors, game: composition = {}, seed = 1,
     },
     dispose() {
       for (const i of [...instances.values()]) disposeInstance(i);
-      for (const s of systems.values()) release(s.owner);
+      for (const s of systems.values()) disposeSystem(s);
       systems.clear();
       waits = [];
       tracking.forEach((observer, i) => /** @type {any} */ (scene)[ADDED.filter((n) => /** @type {any} */ (scene)[n])[i]]?.remove(observer));
@@ -419,7 +459,7 @@ export function createWorld({ host, behaviors, game: composition = {}, seed = 1,
 const noAssets = { url: (path) => path, text: async (path) => { throw new Error(`No project file ${path} in this run`); } };
 
 /** Input that presses nothing, for a run without a player. @returns {Input} */
-export const idleInput = () => ({ pressed: () => false, held: () => false, stick: () => ({ x: 0, y: 0 }) });
+export const idleInput = () => ({ pressed: () => false, held: () => false, stick: () => ({ x: 0, y: 0 }), pointer: null });
 
 /**
  * Development's read-only rule on what an object shares: game code writing a geometry other objects draw throws, naming
