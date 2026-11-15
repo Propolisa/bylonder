@@ -3,6 +3,7 @@
 // memory and its outputs back out.
 
 import { hardwareThreads, startThreads, threadsAvailable } from './wasm-threads.js';
+import { filesBuffer, serveFiles, threadFiles } from './thread-files.js';
 
 // Files Blender's code writes and reads (a .blend Blender's writer saves), by absolute path: the module's file system,
 // in memory. JS puts files in and takes them out.
@@ -314,9 +315,10 @@ export const provideModule = (url, module) => compiled.set(url.href, Promise.res
 // The imports from JS other than WASI's (env), with what a threaded module imports: its memory and the number of
 // threads it runs on (wasm/threads.cc's processor count).
 const env = (memory, threads, own = {}) => (memory ? new Proxy({}, { get: (_, name) => ({ memory, hardware_threads: () => threads(), ...own })[name] ?? missing[name] }) : missing);
-// A thread's imports (wasm-threads.js): WASI's calls on its own file system (threads read no files), thread-spawn, and
-// the thread's own (`own`: loading side modules).
-export const threadImports = (memory, threads, spawn, own) => ({ wasi_snapshot_preview1: wasiFor(() => memory), env: env(memory, () => threads, own), wasi: { 'thread-spawn': spawn } });
+// A thread's imports (wasm-threads.js): WASI's calls, those on files made by the page's thread (thread-files.js: `files`
+// and the thread's slot in it, `notify` to tell the page), thread-spawn, and the thread's own (`own`: loading side modules).
+export const threadImports = (memory, threads, spawn, own, { buffer, slot, notify }) => ({ wasi_snapshot_preview1: threadFiles(buffer, slot, wasiFor(() => memory), notify),
+  env: env(memory, () => threads, own), wasi: { 'thread-spawn': spawn } });
 
 // The module's first thread is the page's: its instance is made first, as the first to instantiate a shared memory's
 // module copies its data in and takes the first thread's thread-locals; the other threads' instances follow. When they
@@ -326,14 +328,16 @@ export async function instantiate(url, threads = hardwareThreads(), options) {
   const { module, memory: limits } = await compile(url);
   let memory = limits && new WebAssembly.Memory(limits), spawn = () => -6, threadsError, workers = 0;
   if (!limits?.shared) threads = 1;
-  const imports = { wasi_snapshot_preview1: wasiFor(() => memory), env: env(memory, () => threads), wasi: { 'thread-spawn': (arg) => spawn(arg) } };
+  // A worker per processor for oneTBB, and spares for threads of Blender's own (window-manager jobs, Cycles' session).
+  const pool = threads + 4, files = threads > 1 && filesBuffer(pool), wasi = wasiFor(() => memory);
+  const serve = () => files && serveFiles(files, wasi);
+  const imports = { wasi_snapshot_preview1: wasi, env: env(memory, () => threads, { serve_files: serve }), wasi: { 'thread-spawn': (arg) => spawn(arg) } };
   const instance = await WebAssembly.instantiate(module, imports);
   memory = instance.exports.memory;
-  // A worker per processor for oneTBB, and spares for threads of Blender's own (window-manager jobs, Cycles' session).
   if (threads > 1) {
     try {
-      workers = threads + 4;
-      spawn = await startThreads(module, memory, workers, options);
+      workers = pool;
+      spawn = await startThreads(module, memory, workers, { ...options, files, serve });
     } catch (error) {
       threadsError = `Blender runs on one thread: ${error.message}`;
       console.warn(threadsError);

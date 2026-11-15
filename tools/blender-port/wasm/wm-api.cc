@@ -737,8 +737,12 @@ static bContext *handling_context = nullptr;
 /* The context of the event the window handles, for the module's gizmo map (editor-context.cc), or null. */
 bContext *wm_handling_context() { return handling_context; }
 
+/* The file calls of the module's threads, made by the page's thread (src/port/thread-files.js). */
+extern "C" __attribute__((import_module("env"), import_name("serve_files"))) void serve_files();
+
 static const char *wm_window_handle(bContext *C, FunctionRef<void(wmWindowManager *, wmWindow *)> add_events)
 {
+  serve_files();
   wmWindowManager *wm = CTX_wm_manager(C);
   wmWindow *win = static_cast<wmWindow *>(wm->windows.first);
   const XrayPicking xray(win);
@@ -811,6 +815,22 @@ EXPORT(wm_pending) bool wm_pending(bContext *C)
     if (!wt.sleep && !(wt.flags & WM_TIMER_TAGGED_FOR_REMOVAL) && wt.event_type != TIMERAUTOSAVE &&
         (wt.event_type == TIMERJOBS || BLI_findindex(&wm->windows, wt.win) != -1))
     {
+      return true;
+    }
+  }
+  return false;
+}
+/* Whether a window-manager job runs: where the page or a test needs a job's result, it handles the window until this
+ * ends, as Blender's code tests WM_jobs_test. */
+EXPORT(wm_jobs_running) bool wm_jobs_running(bContext *C)
+{
+  return WM_jobs_has_running(CTX_wm_manager(C));
+}
+/* Whether a thread pool's work is a window-manager job, which runs on a thread of its own (platform.cc). */
+extern "C" bool is_wm_job(const void *callerdata)
+{
+  for (const wmWindowManager &wm : G_MAIN->wm) {
+    if (BLI_findindex(&wm.runtime->jobs, callerdata) != -1) {
       return true;
     }
   }

@@ -220,12 +220,17 @@ Blender's own code paths. The module's memory is shared. Each thread is a worker
 `thread-spawn` hands it one. The seams (`wasm/threads.cc`): the processor count is the page's
 (`navigator.hardwareConcurrency`), and the page's thread spins where a wait would block it, since a browser traps a
 blocking wait there; the page stalls for as long as Blender waits on its other threads (`threads_longest_wait`). Window
-manager jobs of the types `render-api.cc` lists (render and render preview, bakes next) run on threads of their own as
-in Blender while the page polls them; the others still run on the page's thread (`platform.cc`), since their
-subsystems (asset lists, the File Browser, the pose library shelf, edit mode) wait for them; moving those is a step of
-its own. The pool has a few workers beyond the processor count for such threads, as oneTBB takes one per processor. The snapshot (`wasm_snapshot.py`) keeps wasm-ld's way of
-starting a shared memory: the first instance copies the data in and takes the first thread's thread-locals, so the
-page's instance is made before the pool's.
+manager jobs (renders, previews, asset lists, the File Browser's listing, bakes) run on threads of their own as in
+Blender (`platform.cc`): the page handles its window each animation frame while a job runs (`wm_pending`), which
+polls the job (`wm_jobs_timer`), ends it when it is done (`wm_jobs_handle_finished`) and redraws what its notifiers
+tag. Where the page or a test needs a job's result, it handles the window until no job runs (`wm_jobs_running`), as
+Blender's code tests `WM_jobs_test`; opening a file and undo end the jobs first, as Blender's file read and undo do
+(`main-api.cc`, `undo-api.cc`), since a job may read the Main they free. Where no thread can be had (one thread,
+below) a job runs on the page's thread to its end when it starts. The pool has a few workers beyond the processor count for such threads, as oneTBB takes one
+per processor. A thread's WASI calls on files are made by the page's thread on the same memory
+(`src/port/thread-files.js`), as a process's threads share its files: a worker's own instance has no file system. The
+snapshot (`wasm_snapshot.py`) keeps wasm-ld's way of starting a shared memory: the first instance copies the data in and
+takes the first thread's thread-locals, so the page's instance is made before the pool's.
 
 Shared memory needs cross-origin isolation. The dev server sends COOP and COEP (`credentialless`); on GitHub Pages,
 which cannot, the site's service worker (`public/workspace-sw.js`) adds them, registered by `public/isolation.js`, which
@@ -410,8 +415,9 @@ Decided 2026-10-29 (docs/model.md, principle 5). Blender's window manager runs t
 - **3D View navigation** is Blender's navigation operators on the area's RegionView3D: the page sets the view from its
   camera before an event (`wm_view3d_set`) and the camera follows what the operators leave (`wm_view3d_get`); the
   navigation gizmo invokes them as a gizmo does (`wm_area_operator_invoke`).
-- **Threads.** WASI has none: a thread pool's work runs where it is inserted, to its end, and frees its slot; popping an
-  empty queue gives no work instead of waiting for a thread that cannot come (`platform.cc`).
+- **Threads.** A window-manager job runs on a thread of its own (Threads, above); a thread pool's other work (a
+  background task pool's) runs where it is inserted, to its end, and frees its slot; popping an empty queue gives no
+  work instead of waiting for a thread that cannot come (`platform.cc`).
 - **Checked.** `tests/wm-wasm.test.js`: G, mouse moves and a click move an object through Blender's transform modal
   handler, Escape cancels, an operator the page runs passes its event on, and Blender makes the click.
 

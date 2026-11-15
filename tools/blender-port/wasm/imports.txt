@@ -260,6 +260,7 @@ region_font_descender
 region_icon_svg
 region_mono_width
 region_text_width
+serve_files
 side_modules_sync
 thread-spawn
 waitpid
