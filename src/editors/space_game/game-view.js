@@ -26,17 +26,20 @@ const appModule = (source) => (source === '@babylonjs/core' ? core : sources[`..
 
 export function mountGameView(section, { world, header, run: files, codeError }) {
   const state = reactive({ status: '', shared: '', busy: false, running: false, paused: false, evaluation: exportEvaluation(world) });
-  // WebGL 2, whatever the app draws with, until exported pages draw on WebGPU again (the area light fixes in progress).
+  // On the app's own engine kind, WebGPU or WebGL 2, so a rig the native runtime deforms computes where the app does.
   // A project with game code gets its actions as clips too, which behaviours play (entity.play). Never bundled: the run
   // links scene.js to the app's own modules (package-link.js), so a bundle would only cost time.
   const hasGameCode = !!files?.files.some((path) => /^src\/.+\.m?js$/.test(path));
-  const options = exportOptions({ controlPanel: false, target: 'WEBGL2', bundle: false, ...(hasGameCode && { animations: 'BOTH' }) });
+  const options = exportOptions({ controlPanel: false, target: world.scene.getEngine().isWebGPU ? 'WEBGPU' : 'WEBGL2', bundle: false, ...(hasGameCode && { animations: 'BOTH' }) });
   const canvas = Object.assign(document.createElement('canvas'), { className: 'block h-full w-full outline-none', tabIndex: 0 });
   // Keys typed into the playing game are the game's, not Blender's shortcuts.
   canvas.dataset.gameInput = '';
   const game = createGameRun({ appModule, exportAgain: () => preview.reload(), engine: (createEngine) => createEngine(canvas) });
   // The area's size is the game's, as a page's canvas is its engine's.
-  const resized = new ResizeObserver(() => game.engine?.resize());
+  // The new size is taken at the start of the next frame, never between a frame's encoding and its submit, where a
+  // WebGPU canvas texture the resize replaced would be submitted.
+  let resize = false;
+  const resized = new ResizeObserver(() => { resize = true; });
   resized.observe(canvas);
   let base = null, patching = Promise.resolve(), looping = null;
   const report = (status) => { state.status = status; };
@@ -71,7 +74,10 @@ export function mountGameView(section, { world, header, run: files, codeError })
     startGame().catch((error) => report(`Game code: ${error.message}`));
     if (looping === game.engine) return;
     looping = game.engine;
-    looping.runRenderLoop(() => { if (!state.paused) game.blend?.scene.render(); });
+    looping.runRenderLoop(() => {
+      if (resize) { resize = false; game.engine.resize(); }
+      if (!state.paused) game.blend?.scene.render();
+    });
   };
   const preview = createPackagePreview({
     world, options, report,

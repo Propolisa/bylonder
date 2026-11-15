@@ -6,7 +6,7 @@ owner for what comes next.
 ## What landed
 
 - The Game area plays the scene in the app on an engine of its own (`src/editors/space_game/game-run.js`,
-  `game-view.js`), made by the package's own `createEngine`, WebGL 2 until exported pages draw area lights on WebGPU.
+  `game-view.js`), made by the package's own `createEngine`, of the app's engine kind (WebGPU or WebGL 2).
 - One Babylon by construction: the package's scene.js is linked to the app's own modules (`package-link.js`), by the
   table packaging copies from (`runtime-files.js` `appSource`); an import it cannot map throws. Runtime files that load
   package folders by path go through `runtime/package-modules.js`.
@@ -56,8 +56,6 @@ the reconciled state equals a full export. Measure a move on Rigged Character in
 
 ## Open
 
-- The Game draws with WebGL 2 while exported pages fail area lights on WebGPU (`preInfo` unresolved in WGSL); switch
-  `game-view.js` to the app's backend when that lands.
 - The Snow move by hand (patched frame against a fresh reload) was not run after the image processing fix, which
   likely explains the wash-out the lighting work saw.
 - A WebGL "getProgramParameter: attempt to use a deleted object" warning shows when the Package View reloads; it is

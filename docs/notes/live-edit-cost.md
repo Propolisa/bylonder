@@ -50,13 +50,12 @@ about 12 GB, so run it alone.
   fps after) and 112 s with the Viewport stack (52 fps), a fresh browser profile, so the rig judged. The export in the
   browser takes what it takes in Node.
 - Live edits never bundled (scoped exports patch the run); the Package View bundles in its own publish, on Reload.
-- WebGPU: branch `game-engine-follows` makes the Game area use the app's engine kind and resizes its engine at the
-  start of a frame (a resize between encode and submit gave "Destroyed texture [...SwapBufferProvider] used in a
-  submit", fixed on that branch). Held: Rigged Character plays on WebGPU in 6 s at 59 fps, Snow
-  starts (129 s, once its deformed meshes kept their bounds, `gpu-deform.js keepingBounds`) but then runs at 0.1 fps
-  with the page's main thread idle, so the GPU is the bottleneck: the native rig's compute deform of Snow's meshes
-  each frame (`GpuDeformer`), not yet profiled on the GPU side. WebGL 2, where the same meshes deform on the CPU, runs
-  at 35 fps. Land the branch when WebGPU plays Snow at least as fast.
+- WebGPU: the Game area draws with the app's engine kind and resizes its engine at the start of a frame (a resize
+  between encode and submit gave "Destroyed texture [...SwapBufferProvider] used in a submit"). Snow plays 124 s after
+  Play, as on WebGL 2 (120 s), then at 48 to 54 fps against WebGL 2's 27 to 30 (same run, Chrome on Windows), after
+  about 10 s of first-frame pipeline compiles. It ran at 0.1 fps for 190 to 300 s before: not the compute deform (all
+  of Snow's deform dispatches take about 1 ms a frame, `tools/perf/gpu-profile.mjs`) but DXC compiling six node
+  materials' shaders for 18 to 142 s each, which inverted a product of matrices (docs/notes/babylon-inverse-matrices.md).
 - Not tested: a mesh whose GPU deformer throws while being made falls back to the CPU deformer (`native-solve.js
   deformer`); faking WebGPU on Node's Null engine breaks the page's WebGPU overrides first.
 - The test runner once ended without a summary while export-side-effects-3 ran: a test that exhausts memory should fail
