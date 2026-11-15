@@ -102,6 +102,8 @@ export function mountGameView(section, { world, header, run: files, codeError })
     await preview.reload();
     Object.assign(state, { running: true, paused: false });
     report('Playing');
+    // Play is the intent to play: the game takes the keys at once.
+    canvas.focus();
   });
   const reset = run('Reset', async () => {
     await preview.settled();

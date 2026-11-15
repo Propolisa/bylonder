@@ -28,6 +28,10 @@ const GEOMETRY_NODES_AREAS=['spreadsheet','viewport','nodes','timeline','objects
 // header and a row, as in Geometry Nodes': an area's minimum here).
 const COMPOSITING_SPLITS={root:share(477,553),top:LAYOUT_SPLITS.root,rest:GEOMETRY_NODES_SPLITS.lower};
 const COMPOSITING_AREAS=['image','properties','nodes','timeline'];
+// Bylonder's Game screen, for a project with game code: the 3D Viewport beside a large Game area, and the Outliner over
+// the Properties editor (where Object properties > Behaviors is) as in Layout.
+const GAME_SPLITS={root:LAYOUT_SPLITS.root,main:share(42,58),inspector:LAYOUT_SPLITS.inspector};
+const GAME_AREAS=['viewport','game','objects','properties'];
 // The 2D Animation template's screens (bl_app_templates_system/2D_Animation/startup.blend): 2D Animation's 3D Viewport
 // over the Dope Sheet beside the Outliner over the Properties editor, and 2D Full Canvas's 3D Viewport over the Dope Sheet.
 const ANIMATION_2D_SPLITS={root:share(1583,330),main:share(856,172),inspector:share(179,849)};
@@ -92,6 +96,10 @@ export function mountRuntimeLayout(){
     tree:{id:'main',children:[0,1]},
     defaults:()=>({order:areaOrder(items,FULL_CANVAS_AREAS),hidden:hiddenBut(items,FULL_CANVAS_AREAS),sizes:structuredClone(FULL_CANVAS_SPLITS),horizontal:{main:true}}),
   };
-  const dock = mountDock({host,items,storageKey:RUNTIME_LAYOUT_KEY,tree:{id:'root',children:[{id:'animation',children:[0,3]},{id:'inspector',children:[1,2]}]},defaults:()=>({order:items.map(x=>x.id),hidden:['dopesheet','graph','drivers','nla','nodes','spreadsheet','sequencer','files','text','image','console','info','preferences','package','game'],sizes:structuredClone(LAYOUT_SPLITS),horizontal:{animation:true,root:false,inspector:true}}),screens:{scripting,shading,modeling,'geometry-nodes':geometryNodes,compositing,'uv-editing':imageScreen,'texture-paint':imageScreen,'2d-animation':animation2d,'2d-full-canvas':fullCanvas}});
+  const gameScreen={
+    tree:{id:'root',children:[{id:'main',children:[0,1]},{id:'inspector',children:[2,3]}]},
+    defaults:()=>({order:areaOrder(items,GAME_AREAS),hidden:hiddenBut(items,GAME_AREAS),sizes:structuredClone(GAME_SPLITS),horizontal:{root:false,main:false,inspector:true}}),
+  };
+  const dock = mountDock({host,items,storageKey:RUNTIME_LAYOUT_KEY,tree:{id:'root',children:[{id:'animation',children:[0,3]},{id:'inspector',children:[1,2]}]},defaults:()=>({order:items.map(x=>x.id),hidden:['dopesheet','graph','drivers','nla','nodes','spreadsheet','sequencer','files','text','image','console','info','preferences','package','game'],sizes:structuredClone(LAYOUT_SPLITS),horizontal:{animation:true,root:false,inspector:true}}),screens:{scripting,shading,modeling,'geometry-nodes':geometryNodes,compositing,'uv-editing':imageScreen,'texture-paint':imageScreen,'2d-animation':animation2d,'2d-full-canvas':fullCanvas,game:gameScreen}});
   return dock;
 }

@@ -1,12 +1,23 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import { onBeforeUnmount, onMounted, ref } from "vue";
 import BlIcon from "../interface/components/BlIcon.vue";
 import { Button } from "../interface/components/ui/button";
 
 const props = defineProps({ header: Object, canvas: Object, status: String, shared: String, busy: Boolean, running: Boolean, paused: Boolean, evaluation: String, evaluations: Array });
 defineEmits(["play", "pause", "reset", "evaluation"]);
 const host = ref(null);
-onMounted(() => host.value.append(props.canvas));
+// The game takes keys while its canvas has focus; until a click gives it focus, the area says so.
+const focused = ref(false);
+const focus = () => { focused.value = true; }, blur = () => { focused.value = false; };
+onMounted(() => {
+  host.value.append(props.canvas);
+  props.canvas.addEventListener("focus", focus);
+  props.canvas.addEventListener("blur", blur);
+});
+onBeforeUnmount(() => {
+  props.canvas.removeEventListener("focus", focus);
+  props.canvas.removeEventListener("blur", blur);
+});
 </script>
 
 <template>
@@ -34,5 +45,9 @@ onMounted(() => host.value.append(props.canvas));
   </Teleport>
   <div ref="host" class="bl-ui relative h-full bg-background text-foreground">
     <p v-if="!running" class="absolute inset-0 p-4 text-muted-foreground">Play runs the scene as File > Export > JavaScript ships it; edits reach it as you make them.</p>
+    <button v-else-if="!focused" type="button" class="absolute inset-0 flex items-center justify-center bg-background/40 text-foreground"
+      @pointerdown.prevent="canvas.focus()">
+      <span class="rounded-sm bg-background/80 px-3 py-1.5">Click to play</span>
+    </button>
   </div>
 </template>
