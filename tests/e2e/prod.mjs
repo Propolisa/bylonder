@@ -482,13 +482,11 @@ try {
       // The scene's frame, once it runs: the edit made on disk runs the project again, replacing the frame meanwhile.
       const ready = async () => {
         await page.locator("#run-status", { hasText: "Running" }).waitFor({ timeout: 120000 });
-        for (let tries = 1; ; tries++) {
-          try {
-            return await opened.until((b) => b?.editor && b.world.scene.getNodeByName("light"), null, 20000);
-          } catch (error) {
-            if (tries === 6) throw error;
-          }
-        }
+        // Asked of the page, as the 3D Viewport's frame may be gone between the old frame and the new one.
+        await page.waitForFunction(() => {
+          const b = document.querySelector('iframe[src*="viewport.html"]')?.contentWindow?.__bylonder;
+          return !!(b?.editor && b.world.scene.getNodeByName("light"));
+        }, null, { timeout: 120000 }).catch(() => { throw Error("the project did not run again with its light within 120 s"); });
       };
       const lightZ = () => opened.bylonder((b) => [...b.rna.objects()].map((ob) => b.rna.pointer("Object", ob)).find((o) => o.name === "light").location[2]);
       await ready();
