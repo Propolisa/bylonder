@@ -38,13 +38,14 @@ jobs:
       contents: write
     uses: ./.github/workflows/blender-wasm.yml
 
-  # A newer push supersedes an older run's site build and deploy.
+  # A running build and deploy finish; of the pushes made meanwhile only the newest waits to run, as GitHub's Pages
+  # template does (cancelling in progress left nothing deployed while pushes came faster than a run).
   build:
     needs: [module, build-module]
     if: ${{ !failure() && !cancelled() }}
     concurrency:
       group: pages-build
-      cancel-in-progress: true
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     env:
       PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/.tools/playwright
@@ -99,7 +100,7 @@ jobs:
     if: ${{ !failure() && !cancelled() }}
     concurrency:
       group: pages-deploy
-      cancel-in-progress: true
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     environment:
       name: github-pages
