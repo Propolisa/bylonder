@@ -1562,6 +1562,145 @@ EXPORT(id_property_string) const char *id_property_string(const ID *id, const ch
   return prop ? IDP_string_get(prop) : nullptr;
 }
 
+/* Custom property groups an ID holds members in, as an add-on's settings (a behaviour's props: `behaviors/Rock`): the
+ * group at a '/'-separated path of names, made where missing with `create`; null where a member on the way is not a
+ * group. The members below are set in the group at `path`, an empty path being the ID's own properties. */
+static IDProperty *id_property_group_at(ID *id, const char *path, const bool create)
+{
+  IDProperty *group = create ? IDP_EnsureProperties(id) : id->properties;
+  for (StringRef rest = path; group && !rest.is_empty();) {
+    const int64_t slash = rest.find('/');
+    const StringRef name = slash == StringRef::not_found ? rest : rest.substr(0, slash);
+    rest = slash == StringRef::not_found ? StringRef() : rest.drop_prefix(slash + 1);
+    if (name.is_empty()) {
+      continue;
+    }
+    IDProperty *member = IDP_GetPropertyFromGroup(group, name);
+    if (!member && create) {
+      member = bke::idprop::create_group(name).release();
+      IDP_AddToGroup(group, member);
+    }
+    group = member && member->type == IDP_GROUP ? member : nullptr;
+  }
+  return group;
+}
+EXPORT(id_property_group_ensure) int id_property_group_ensure(ID *id, const char *path)
+{
+  return id_property_group_at(id, path, true) != nullptr;
+}
+/* A member set to an ID pointer, or cleared (null), which counts as a user of that ID as Blender's own do. */
+EXPORT(id_property_id_set) int id_property_id_set(ID *id, const char *path, const char *name, ID *value)
+{
+  IDProperty *group = id_property_group_at(id, path, true);
+  if (group) {
+    IDP_ReplaceInGroup(group, bke::idprop::create(name, value).release());
+  }
+  return group != nullptr;
+}
+/* A member set to a string. */
+EXPORT(id_property_member_string_set) int id_property_member_string_set(ID *id, const char *path, const char *name, const char *value)
+{
+  IDProperty *group = id_property_group_at(id, path, true);
+  if (group) {
+    IDP_ReplaceInGroup(group, bke::idprop::create(name, StringRefNull(value)).release());
+  }
+  return group != nullptr;
+}
+/* A member set to a number (`length` 0) or an array of `length` numbers of a PropertyType (BOOLEAN, INT or FLOAT), with
+ * an RNA subtype (COLOR for a colour), soft limits where min < max, and a description. */
+EXPORT(id_property_member_set)
+int id_property_member_set(ID *id, const char *path, const char *name, const int type, const double *values, const int length,
+                           const int subtype, const double min, const double max, const char *description)
+{
+  IDProperty *group = id_property_group_at(id, path, true);
+  if (!group) {
+    return 0;
+  }
+  std::unique_ptr<IDProperty, bke::idprop::IDPropertyDeleter> made;
+  if (type == PROP_BOOLEAN && !length) {
+    made = bke::idprop::create_bool(name, values[0] != 0.0);
+  }
+  else if (type == PROP_INT) {
+    Array<int32_t> ints(std::max(length, 1));
+    for (int i = 0; i < ints.size(); i++) {
+      ints[i] = int32_t(values[i]);
+    }
+    made = length ? bke::idprop::create(name, ints.as_span()) : bke::idprop::create(name, ints[0]);
+  }
+  else {
+    made = length ? bke::idprop::create(name, Span<double>(values, length)) : bke::idprop::create(name, values[0]);
+  }
+  made->flag |= IDP_FLAG_OVERRIDABLE_LIBRARY;
+  IDProperty *prop = made.release();
+  IDPropertyUIData *ui_data = IDP_ui_data_ensure(prop);
+  ui_data->rna_subtype = subtype;
+  ui_data->description = BLI_strdup(description);
+  if (min < max && prop->type != IDP_BOOLEAN) {
+    if (type == PROP_INT) {
+      auto *ui = reinterpret_cast<IDPropertyUIDataInt *>(ui_data);
+      ui->soft_min = ui->min = int(min);
+      ui->soft_max = ui->max = int(max);
+    }
+    else {
+      auto *ui = reinterpret_cast<IDPropertyUIDataFloat *>(ui_data);
+      ui->soft_min = ui->min = min;
+      ui->soft_max = ui->max = max;
+    }
+  }
+  IDP_ReplaceInGroup(group, prop);
+  return 1;
+}
+/* A member that is an enum, as Blender's own enum ID properties are: an INT holding its item's value, whose UI data
+ * lists the items, so RNA draws it as a dropdown. `items` is one item a line: its identifier, its name and its value,
+ * separated by tabs; a value is the item's own, not its place, so the items can be reordered. */
+EXPORT(id_property_member_enum_set)
+int id_property_member_enum_set(ID *id, const char *path, const char *name, const char *items, const int value, const char *description)
+{
+  IDProperty *group = id_property_group_at(id, path, true);
+  if (!group) {
+    return 0;
+  }
+  Vector<Vector<std::string>> list;
+  for (StringRef rest = items; !rest.is_empty();) {
+    const int64_t end = rest.find('\n');
+    StringRef line = end == StringRef::not_found ? rest : rest.substr(0, end);
+    rest = end == StringRef::not_found ? StringRef() : rest.drop_prefix(end + 1);
+    Vector<std::string> fields;
+    for (int64_t tab = line.find('\t'); tab != StringRef::not_found; tab = line.find('\t')) {
+      fields.append(line.substr(0, tab));
+      line = line.drop_prefix(tab + 1);
+    }
+    fields.append(line);
+    if (fields.size() == 3) {
+      list.append(std::move(fields));
+    }
+  }
+  IDProperty *prop = bke::idprop::create(name, int32_t(value)).release();
+  prop->flag |= IDP_FLAG_OVERRIDABLE_LIBRARY;
+  auto *ui = reinterpret_cast<IDPropertyUIDataInt *>(IDP_ui_data_ensure(prop));
+  ui->base.description = BLI_strdup(description);
+  ui->enum_items_num = int(list.size());
+  /* blender-port: idprop_py_ui_api.cc idprop_enum_items_from_py */
+  ui->enum_items = MEM_new_array<IDPropertyUIDataEnumItem>(list.size(), __func__);
+  for (const int i : list.index_range()) {
+    ui->enum_items[i].identifier = BLI_strdup(list[i][0].c_str());
+    ui->enum_items[i].name = BLI_strdup(list[i][1].c_str());
+    ui->enum_items[i].value = std::atoi(list[i][2].c_str());
+  }
+  IDP_ReplaceInGroup(group, prop);
+  return 1;
+}
+/* A member removed, a group with all it holds. */
+EXPORT(id_property_member_remove) int id_property_member_remove(ID *id, const char *path, const char *name)
+{
+  IDProperty *group = id_property_group_at(id, path, false);
+  IDProperty *member = group ? IDP_GetPropertyFromGroup(group, name) : nullptr;
+  if (member) {
+    IDP_FreeFromGroup(group, member);
+  }
+  return member != nullptr;
+}
+
 /* The context's Main, scene and view layer after Blender's code replaced or re-read them (reading a file, loading an
  * undo step). */
 EXPORT(main_context_refresh) void main_context_refresh(BlenderMain *ctx)
