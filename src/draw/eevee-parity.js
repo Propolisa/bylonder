@@ -6,6 +6,7 @@
 import { Constants, Observable } from '@babylonjs/core';
 import { __class__, __kwargtrans__ } from '../bl_py/org.transcrypt.__runtime__.js';
 import { defineAssignedProperties, idStruct, registerClass } from '../python/bpy_rna.js';
+import { BABYLON_ENGINES } from './render-extension.js';
 
 const parity = new WeakMap();
 // Told with the Babylon scene whose setting changed: its node materials build again.
@@ -37,6 +38,8 @@ export function registerEeveeParityTypes(icon) {
   defineAssignedProperties();
   registerClass(__class__('RENDER_PT_bylonder_eevee_parity', [types().Panel], {
     bl_label: 'EEVEE Parity', bl_space_type: 'PROPERTIES', bl_region_type: 'WINDOW', bl_context: 'render',
+    // Babylon's renderer's, as Blender's engines show their own panels (COMPAT_ENGINES): not Cycles'.
+    poll(context) { return BABYLON_ENGINES.has(context.engine); },
     draw_header(context) { this.layout.label(kw({ text: '', icon_value: icon })); },
     draw(context) {
       const { layout } = this;

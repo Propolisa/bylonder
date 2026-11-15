@@ -5,6 +5,8 @@ import { Observable } from '@babylonjs/core';
 import { __class__, __kwargtrans__ } from '../bl_py/org.transcrypt.__runtime__.js';
 import { defineAssignedProperties, idStruct, registerClass } from '../python/bpy_rna.js';
 
+// The engines Babylon renders as (EEVEE's and Workbench's looks), whose panels Bylonder's render settings join.
+export const BABYLON_ENGINES = new Set(['BLENDER_EEVEE', 'BLENDER_WORKBENCH']);
 const extensions = [];
 const kw = (keywords) => __kwargtrans__(keywords);
 const types = () => globalThis.__py_modules['_bpy.types'];
@@ -48,6 +50,8 @@ export function registerRenderExtensions(icon) {
     types().Scene[id] = props().PointerProperty(kw({ type: Group, name: label, description }));
     registerClass(__class__(`RENDER_PT_${id}`, [types().Panel], {
       bl_label: label, bl_space_type: 'PROPERTIES', bl_region_type: 'WINDOW', bl_context: 'render',
+      // Babylon's renderer's, as Blender's engines show their own panels (COMPAT_ENGINES): not Cycles'.
+      poll(context) { return BABYLON_ENGINES.has(context.engine); },
       draw_header(context) {
         this.layout.prop(context.scene[id], 'use', kw({ text: '' }));
         this.layout.label(kw({ text: '', icon_value: icon }));
