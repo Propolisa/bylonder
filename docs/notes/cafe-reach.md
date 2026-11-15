@@ -103,3 +103,18 @@ page, and Babylon's Havok for the objects on the counter. Nothing of it is built
   control outward, as far as 38 m). The barista keeps the wrist's aim within the arm's length and steps after the hand.
 - **Rigid bodies and the export.** For a game with `physics: 'havok'` the export bakes no rigid body's motion (Blender's
   simulation); without one it does, so a page without game physics still plays Blender's simulation.
+- **Hits are contact starts.** Havok reports no contact between a kinematic and a static body, so the palm is a
+  dynamic body without gravity, driven by velocity. An Impact sounds only when a contact starts, at the closing speed
+  along its normal, so a rolling mug stays quiet.
+
+## Open after the played session (2026-11-15)
+
+- **The broken mug's pieces fall out of frame.** The rock spills the mug past the counter's far side, and the 12 pieces
+  land beyond the camera's frame. The headless test proves they spawn and lie on the ground, but a player never sees
+  them. Consider spilling toward the barista, or a frame that takes in the ground behind the rock.
+- **A swipe tips a jar instead of knocking it off.** Swept through the biscotti jar from behind, the hand tipped it
+  over onto the counter, so the rock did not get angry. The headless test knocks it off with a straight swipe from
+  further back and a heavier palm (2 kg). Playing, a jar needs a harder or longer sweep than feels natural: tune the
+  palm's speed cap (`slap`), the jars' mass or friction, or count a tipped jar as upset.
+- **Not written: same seed, same pieces.** A test that two runs with the same seed break the mug into the same piece
+  positions was skipped for time. It belongs beside tests/rock-hard-cafe-wasm.test.js.
