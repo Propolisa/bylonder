@@ -72,8 +72,10 @@ export async function openApp(browser, url, { example = "Default Cube", node = "
   const splash = page.locator("dialog.bl-splash");
   if (link) await page.waitForURL((url) => !url.hash);
   else if (example) {
-    const button = splash.getByRole("button", { name: example, exact: true });
-    if (!(await button.count())) await splash.getByRole("button", { name: "Examples…" }).click();
+    // The example's button where the splash shows it, else behind Examples…, once the splash shows either.
+    const button = splash.getByRole("button", { name: example, exact: true }), more = splash.getByRole("button", { name: "Examples…" });
+    await button.or(more).first().waitFor({ timeout: 60000 }).catch(() => { throw Error(`the splash showed neither ${example} nor Examples… within 60 s`); });
+    if (!(await button.count())) await more.click();
     await button.click();
   }
   else {
