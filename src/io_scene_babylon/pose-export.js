@@ -17,6 +17,7 @@ import { shownStack } from '../runtimes/applied-rest.js';
 import { blockData } from '../runtimes/key-blocks.js';
 import { loadConstraints } from './polyfill/constraints.js';
 import { rigOf } from './rig-export.js';
+import { judgementKey, keepVerdict, knownVerdict } from './rig-verdicts.js';
 import { bboneShape, key } from './controls-export.js';
 
 // Blender's kernels, loaded once an export needs them (prepareKernels); none where they cannot load.
@@ -34,6 +35,9 @@ const DEFORM_CHECKS = 10;
 // How far, in metres, a vertex a page deforms (on the native runtime, or by Babylon's skinning) may be from Main's;
 // beyond it the closer of the two is kept and reported. Tests lower it to take the per-mesh fallback.
 export const vertexTolerance = { distance: 1e-4 };
+// The judge's version, part of the key a verdict is kept by (rig-verdicts.js): bumped when the judgement or the runtime
+// deform it compares changes, which tests/rig-judge-version.test.js checks by the files' content.
+export const JUDGE_VERSION = 1;
 
 // What a constraint reads, as the page finds it: a bone of the armature, or an object's node; undefined where it
 // cannot; null where there is none.
@@ -290,8 +294,10 @@ const close = (a, b) => a.asArray().every((v, i) => Math.abs(v - b.asArray()[i])
 // `deviation`, the largest distance of a vertex from Main's by mesh name, which holds where within `allowed`
 // (vertexTolerance); `off`, the deforming bones whose pose is not Main's. `verdict()` gives what the checks found;
 // given back as `verdict` (a live re-export's, of the last full export), the checks are not run again: each frame only
-// records the bones' own matrices, and what the checks found is that verdict's.
-export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, nodeWorld, deformed = [], verdict = null, changed = null }) {
+// records the bones' own matrices, and what the checks found is that verdict's. `judgement`, what else a full export's
+// checks read (the frames, the tolerance): on the native runtime, a verdict found before for the same content and
+// `judgement` is taken as given (rig-verdicts.js), and `keep()` keeps a new one.
+export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, nodeWorld, deformed = [], verdict = null, changed = null, judgement = null }) {
   // The armature's own bones, without its B-Bones' segment joints after them.
   const bones = skeleton.bones.slice(0, skeleton.armatureBones);
   const targetOf = (ob, bone) => { const node = !bone && nodeOf(ob); return node ? { node: node.id } : undefined; };
@@ -299,6 +305,8 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
   // What the rig's descriptions read, once for all of them (nativeRig).
   const memo = rigMemo(arm, changed);
   const native = !rig && bones.length === arm.data.bones.length ? nativeRig(arm, nodeOf, deformed, false, memo) : null;
+  const contentKey = !verdict && native && judgement ? judgementKey(native, judgement) : null;
+  verdict ??= contentKey && knownVerdict(contentKey);
   const deforms = Object.keys(native?.meshes ?? {}), deviation = new Map(deforms.map((name) => [name, 0])), allowed = new Map();
   // The same meshes skinned by their Armature alone, as Babylon would (`skinned`): the cheaper, where it is within the
   // allowance or closer to Main's than the runtime beyond it; a mesh Babylon can skin that the runtime does not run too.
@@ -356,6 +364,9 @@ export function livePoseConstraints(arm, skeleton, mesh, { nodeOf, meshWorld, no
   return {
     moved,
     native: !!native,
+    // Whether the checks run (no verdict given or known).
+    checks: !verdict,
+    keep() { if (contentKey && !verdict) keepVerdict(contentKey, this.verdict()); },
     // On the kernels, meshes Babylon skins with what plain skinning approximates, which no check compares with Main's.
     unchecked: rig ? deformed.filter((d) => d.skinnable).map(({ ob }) => [ob.name, approximated(arm, ob)]).filter(([, what]) => what.length) : [],
     deforms,

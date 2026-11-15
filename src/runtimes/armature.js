@@ -9,7 +9,7 @@ import { modifierStack } from '../modifiers/stack.js';
 import { registerRuntime, runtimeOf, APPROXIMATION, FALLBACK } from './runtimes.js';
 import { report } from '../windowmanager/wm-reports.js';
 import { drivenPose, livePose } from '../io_scene_babylon/live-curves.js';
-import { livePoseConstraints, ownMatrix } from '../io_scene_babylon/pose-export.js';
+import { JUDGE_VERSION, livePoseConstraints, ownMatrix, vertexTolerance } from '../io_scene_babylon/pose-export.js';
 import { keyedVertices } from './key-blocks.js';
 import { useDualQuaternionSkinning } from '../io_scene_babylon/runtime/dual-quaternion-skinning.js';
 import { appliedRests, shownStack, smoothByAngle } from './applied-rest.js';
@@ -496,13 +496,14 @@ function poseAnimations(world, mappings, bake, sampling, scene, bases = new Set(
     const mesh = mapping.skeletons.size === 1 && scene.meshOf(mapping), [skeleton] = mapping.skeletons.values();
     const verdict = live ? world.rigVerdicts?.get(mapping.arm.name) ?? null : null;
     const stack = mesh && livePoseConstraints(mapping.arm, skeleton, mesh, { nodeOf: scene.nodeOf, deformed: scene.deformed(mapping),
-      meshWorld: () => sync.worldMatrix(mesh), nodeWorld: (id) => sync.worldMatrix(world.scene.getNodeById(id)), verdict, changed });
+      meshWorld: () => sync.worldMatrix(mesh), nodeWorld: (id) => sync.worldMatrix(world.scene.getNodeById(id)), verdict, changed,
+      judgement: !live && { judge: JUDGE_VERSION, frames: sampling.frames.join(), clipStep: CLIP_JUDGE_STEP, tolerance: vertexTolerance.distance } });
     // A skeleton the page poses is exported, whether or not a mesh skins to it.
     if (stack) { stacks.set(mapping, stack); skeleton.posedByPage = true; }
   }
   // What the page plays judges the route too: each action the export ships as a clip, every CLIP_JUDGE_STEP-th frame,
   // checked as the timeline's are (the rig's pose and its meshes' deform), before anything is decided from the checks.
-  for (const [mapping, stack] of stacks) for (const clip of live && world.rigVerdicts?.has(mapping.arm.name) ? [] : actionClips([mapping.arm])) {
+  for (const [mapping, stack] of stacks) for (const clip of stack.checks ? actionClips([mapping.arm]) : []) {
     withAction(clip.ids, clip.action, () => {
       for (let frame = Math.ceil(clip.frame_start); frame <= clip.frame_end; frame += CLIP_JUDGE_STEP) {
         sync.frameChanged(frame, { draw: false });
@@ -560,7 +561,7 @@ function poseAnimations(world, mappings, bake, sampling, scene, bases = new Set(
     live: new Set(stacks.keys()) });
   function finish() {
     // A full export's verdicts and samples, which live re-exports take until the next.
-    if (!live) for (const [mapping, stack] of stacks) (world.rigVerdicts ??= new Map()).set(mapping.arm.name, stack.verdict());
+    if (!live) for (const [mapping, stack] of stacks) { (world.rigVerdicts ??= new Map()).set(mapping.arm.name, stack.verdict()); stack.keep(); }
     if (!live) for (const mapping of mappings) (world.rigSamples ??= new Map()).set(mapping.arm.name, {
       frames: sampling.frames.join(), inputs: rigInputs(mapping.arm), state: poseState(mapping.arm),
       owns: new Map([...stacks.get(mapping)?.ownsByName() ?? []].map(([name, list]) => [name, list.map((m) => m.clone())])),

@@ -24,6 +24,7 @@ import { fillMaterials, MESH_VALUE } from './runtime/materials.js';
 import { exportSounds } from './sound-export.js';
 import { worldNodes } from '../blenkernel/scene/world-babylon.js';
 import { createSceneBin } from './scene-bin.js';
+import { loadVerdicts, saveVerdicts } from './rig-verdicts.js';
 import { digest, imageFiles } from './image-files.js';
 import { exportCompositor } from './compositor-export.js';
 import { fogGlowOnGPU } from '../compositor/compositor-replay.js';
@@ -386,7 +387,7 @@ export async function exportPackage(whole, { scope = 'SCENE', selected = [], liv
   const disable = exportEvaluation(whole) === 'RENDER' ? evaluateForRender(whole) : () => {};
   try {
     await world.modifiers.settled();
-    await prepareKernels();
+    await Promise.all([prepareKernels(), loadVerdicts()]);
     // The mapped meshes' geometry is read below: their mapping holds until the module is written.
     const sampling = exportSampling(world.animation.time.state, sampleRate);
     const mapped = exportRuntimes(world, { bake: bakeAnimation, runtime, runtimes, sampling, verified, changed });
@@ -394,6 +395,7 @@ export async function exportPackage(whole, { scope = 'SCENE', selected = [], liv
       return await moduleSource(world, live, mapped, { parity, hostCompression, bakeAnimation, animations, clipCompression, target, replace, bundle, controlPanel, devTools, navigation, navigationModes, states, sampling });
     } finally {
       mapped.restore();
+      saveVerdicts();
     }
   } finally {
     disable();
