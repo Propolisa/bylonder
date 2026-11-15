@@ -1,4 +1,4 @@
-// Babylon's declarations for the code editor's intelligence (src/workspace/intelligence.js), as public/babylon-types.json:
+// Babylon's declarations (its core, and the GUI games draw their screens with) for the code editor's intelligence (src/workspace/intelligence.js), as public/babylon-types.json:
 // each .d.ts under its file:/// URL, with forward slashes on every platform.
 import { readdir, readFile, writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
@@ -12,6 +12,7 @@ async function walk(dir) {
   }
 }
 await walk('node_modules/@babylonjs/core');
+await walk('node_modules/@babylonjs/gui');
 await mkdir('public', { recursive: true });
 await writeFile('public/babylon-types.json', JSON.stringify(files));
 console.log(`${Object.keys(files).length} Babylon declaration modules bundled`);

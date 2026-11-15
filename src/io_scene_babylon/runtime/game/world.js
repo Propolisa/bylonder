@@ -71,7 +71,7 @@ function random(seed) {
  *   on(behavior: Behavior, event: string, fn: (data: any, from: any) => void): void, emit(target: any, event: string, data?: any): void,
  *   play(sound: string, options?: { at?: Entity }): void, end(result?: any): void,
  *   spawn(collection: string, options?: { at?: Entity, attachTo?: any, jitter?: number }): Entity | null,
- *   camera: { follow(entity: Entity): void },
+ *   camera: { follow(entity: Entity, options?: { pitch?: number, distance?: number, height?: number }): void },
  * }} Game
  */
 
@@ -259,8 +259,8 @@ export function createWorld({ host, behaviors, game: composition = {}, seed = 1,
     },
     /** Plays a sound, at an entity's place where given. @param {string} sound @param {{ at?: Entity }} [options] */
     play: (sound, options) => host.playSound?.(sound, options?.at),
-    /** The game's camera: `follow(entity)` follows a Character. */
-    camera: { follow: (entity) => /** @type {any} */ (entity).character?.follow?.() },
+    /** The game's camera: `follow(entity, { pitch, distance, height })` follows a Character from above and behind. */
+    camera: { follow: (entity, options) => /** @type {any} */ (entity).character?.follow?.(options) },
     /** Ends the run with a result (`world.ended`). @param {any} result */
     end(result) { if (ended === undefined) ended = result ?? null; },
     /**

@@ -66,7 +66,9 @@ export function blendHost(blend) {
           if (!original) return;
           const copyKey = `${original}~${++spawned}`;
           sources.set(copyKey, original);
+          // Shown: a prefab's collection is excluded or hidden, which hid the original, not its copies.
           to.setEnabled(true);
+          if ('isVisible' in to) to.isVisible = true;
           made.push({ key: copyKey, name: to.name, node: to, behaviors: Object.keys(behaviorsOf(original) ?? {}) });
         });
         copy?.setEnabled(true);

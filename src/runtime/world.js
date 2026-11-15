@@ -73,6 +73,12 @@ export async function createWorld({ input, engine, canvas, hooks = {}, audioCont
     globalThis.__inkjs = ink;
     await cache.put(root + "__wb_ink.js", new Response(Object.keys(ink).map((k) => `export const ${k}=globalThis.__inkjs.${k};`).join(""), { headers: { "Content-Type": "text/javascript" } }));
   }
+  // Babylon's GUI (@babylonjs/gui), what a game draws its own screen with, for a game project (src/game.js).
+  const gui = (input.files ?? []).includes("src/game.js") ? await import("@babylonjs/gui") : null;
+  if (gui) {
+    globalThis.__babylonGui = gui;
+    await cache.put(root + "__wb_gui.js", new Response(Object.keys(gui).filter((k) => /^[A-Za-z_$][\w$]*$/.test(k)).map((k) => `export const ${k}=globalThis.__babylonGui.${k};`).join(""), { headers: { "Content-Type": "text/javascript" } }));
+  }
   const userMap = JSON.parse(input.importmap);
   const imports = {};
   for (const [key, value] of Object.entries(userMap.imports || {}))
@@ -83,6 +89,7 @@ export async function createWorld({ input, engine, canvas, hooks = {}, audioCont
     "@workbench/sdk": root + "__wb_sdk.js",
     bylonder: root + "__wb_game.js",
     ...(ink && { inkjs: root + "__wb_ink.js", "inkjs/full": root + "__wb_ink.js" }),
+    ...(gui && { "@babylonjs/gui": root + "__wb_gui.js" }),
   });
   const scopes = {};
   for (const [scope, map] of Object.entries(userMap.scopes || {})) {

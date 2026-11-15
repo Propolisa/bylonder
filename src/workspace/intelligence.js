@@ -106,6 +106,8 @@ export async function setupIntelligence(onStatus) {
   const basePaths = {
     "@babylonjs/core": ["../node_modules/@babylonjs/core/index.d.ts"],
     "@babylonjs/core/*": ["../node_modules/@babylonjs/core/*"],
+    "@babylonjs/gui": ["../node_modules/@babylonjs/gui/index.d.ts"],
+    "@babylonjs/gui/*": ["../node_modules/@babylonjs/gui/*"],
     babylonjs: ["../node_modules/@babylonjs/core/index.d.ts"],
     "@workbench/sdk": ["../node_modules/@workbench/sdk/index.d.ts"],
     bylonder: ["../node_modules/bylonder/define.d.ts"],

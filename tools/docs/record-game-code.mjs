@@ -39,8 +39,8 @@ await record("game-code", { example: "rock-hard-cafe", node: "Rock", size: { wid
     await hold("KeyA", 1000);
     await hold("KeyE", 120);
     await r.pause(1500);
-    await hold("KeyD", 1000);
+    await hold("KeyD", 1300); // past the machine's reach, so Use serves and does not pour again
     await hold("KeyE", 120);
-    await r.pause(3500);
+    await r.pause(4500);
   }, { hold: 800 });
 });

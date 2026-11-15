@@ -14,7 +14,7 @@
  *   on(behavior: Behavior, event: string, fn: (data: any, from: any) => void): void, emit(target: any, event: string, data?: any): void,
  *   play(sound: string, options?: { at?: Entity }): void, end(result?: any): void,
  *   spawn(collection: string, options?: { at?: Entity, attachTo?: any, jitter?: number }): Entity | null,
- *   camera: { follow(entity: Entity): void },
+ *   camera: { follow(entity: Entity, options?: { pitch?: number, distance?: number, height?: number }): void },
  * }} Game
  */
 /**
@@ -152,7 +152,11 @@ export type Game = {
         jitter?: number;
     }): Entity | null;
     camera: {
-        follow(entity: Entity): void;
+        follow(entity: Entity, options?: {
+            pitch?: number;
+            distance?: number;
+            height?: number;
+        }): void;
     };
 };
 /**

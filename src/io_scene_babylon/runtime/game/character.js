@@ -29,7 +29,7 @@ export default defineBehavior({
     let drive = null;
     // Game code's input: whatever it gives as the move, the character takes as a velocity.
     const handle = Object.create(character, {
-      follow: { value: () => followCamera(character) },
+      follow: { value: (/** @type {any} */ options) => followCamera(character, options) },
       input: { get: () => drive, set: (fn) => { drive = fn; character.input = fn && (() => { const intent = fn(); return { ...intent, move: velocity(intent?.move, props.speed) }; }); } },
     });
     Object.defineProperty(entity, 'character', { value: handle, configurable: true });

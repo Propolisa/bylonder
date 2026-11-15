@@ -41,6 +41,8 @@ TILES = material("Floor Tiles", (0.55, 0.5, 0.44, 1), 0.7)
 CHROME = material("Chrome", (0.75, 0.75, 0.78, 1), 0.2, 1.0)
 STONE = material("Stone", (0.42, 0.4, 0.38, 1), 0.85)
 CHINA = material("China", (0.92, 0.9, 0.86, 1), 0.25)
+CHALKBOARD = material("Chalkboard", (0.03, 0.05, 0.04, 1), 0.9)
+CHALK = material("Chalk", (0.9, 0.88, 0.8, 1), 0.95)
 
 
 def link(ob, collection=None):
@@ -120,6 +122,28 @@ SOUNDS = {name: tone(name, *args) for name, args in {
 box("Floor", (8, 6, 0.1), (0, 0, -0.05), TILES)
 counter = box("Counter", (3.2, 0.7, 1.0), (0, 0.6, 0.5), WOOD)
 machine = box("Machine", (0.5, 0.4, 0.6), (-1.2, 0.6, 1.3), CHROME)
+
+
+def words(name, text, size, location, rotation, mat):
+    """Text as a mesh: a Blender text object's evaluated mesh, so it exports as any mesh."""
+    curve = bpy.data.curves.new(name, "FONT")
+    curve.body, curve.size, curve.align_x, curve.align_y, curve.extrude = text, size, "CENTER", "CENTER", 0.004
+    source = bpy.data.objects.new(name, curve)
+    scene.collection.objects.link(source)
+    bpy.context.view_layer.update()
+    mesh = bpy.data.meshes.new_from_object(source.evaluated_get(bpy.context.evaluated_depsgraph_get()))
+    bpy.data.objects.remove(source)
+    bpy.data.curves.remove(curve)
+    mesh.materials.append(mat)
+    ob = bpy.data.objects.new(name, mesh)
+    ob.location, ob.rotation_euler = location, rotation
+    return link(ob)
+
+
+# The menu board on the counter, written on both faces: the barista's side and the customers'.
+board = box("Menu Board", (1.0, 0.04, 0.55), (0.95, 0.6, 1.3), CHALKBOARD)
+for side, (y, turn) in {"Back": (0.63, math.pi), "Front": (0.57, 0)}.items():
+    words(f"Menu {side}", "ROCK HARD CAFÉ\nespresso  2 pebbles\nflat white  3 pebbles", 0.075, (0.95, y, 1.3), (math.radians(90), 0, turn), CHALK)
 door = bpy.data.objects.new("Door", None)
 door.empty_display_type, door.empty_display_size, door.location = "ARROWS", 0.5, (3.5, -2.0, 0)
 link(door)
@@ -148,12 +172,12 @@ prefabs.children.link(rock_prefabs)
 prefabs.children.link(cup_prefabs)
 shared_rock = rock_mesh()
 prefab_rock = link(bpy.data.objects.new("Rock Prefab", shared_rock), rock_prefabs)
-cup = cylinder("Cup", 0.07, 0.11, (0, 0, 0.055), CHINA, cup_prefabs)
+cup = cylinder("Cup", 0.1, 0.14, (0, 0, 0.07), CHINA, cup_prefabs)  # larger than life, to read from the camera
 bpy.context.view_layer.layer_collection.children["Prefabs"].exclude = True
 
 # The rock waiting at the counter, a copy of the prefab's mesh.
 rock = link(bpy.data.objects.new("Rock", shared_rock))
-rock.location = (0.3, -0.15, 0.28)
+rock.location = (0.3, -0.75, 0.28)
 
 # Wobble: the rock's admiring wobble, an object action.
 wobble = bpy.data.actions.new("Wobble")

@@ -15,6 +15,10 @@ import { writePackage } from './export-package.js';
 import { openExample } from './open-example.js';
 
 const STEP = 1 / 60;
+// Node has no canvas nor DOM: a game's GUI (a Babylon dynamic texture) draws on a canvas whose 2D context does nothing,
+// its fonts measured as nothing (the engine's getFontOffset, below).
+const nothing = new Proxy(() => {}, { get: (_, key) => (key === 'measureText' ? () => ({ width: 0, actualBoundingBoxAscent: 0, actualBoundingBoxDescent: 0 }) : key === 'canvas' ? undefined : nothing), apply: () => undefined, set: () => true });
+globalThis.OffscreenCanvas ??= class { constructor(width, height) { Object.assign(this, { width, height }); } getContext() { return nothing; } };
 const files = (dir, base = dir) => readdirSync(dir).flatMap((name) => {
   const path = join(dir, name);
   return statSync(path).isDirectory() ? files(path, base) : [relative(base, path).replaceAll('\\', '/')];
@@ -26,7 +30,8 @@ export async function run(example, { seed = 1 } = {}) {
   const { world, sync } = openExample(id);
   world.mainSync = sync;
   const written = writePackage((await exportPackage(world, { animations: 'BOTH' })).files);
-  const blend = await (await import(written.url)).load({ scene: new core.Scene(new core.NullEngine()) });
+  const engine = Object.assign(new core.NullEngine(), { getFontOffset: () => ({ ascent: 0, height: 0, descent: 0 }) });
+  const blend = await (await import(written.url)).load({ scene: new core.Scene(engine) });
   const behaviors = [...BUILTINS], code = files(fileURLToPath(new URL('src/', root))).filter((path) => /\.m?js$/.test(path));
   let game = {};
   for (const path of code) {
