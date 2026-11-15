@@ -427,6 +427,71 @@
   }
  },
  {
+  "id": "game-code",
+  "title": "Game Code",
+  "summary": "Game code as behaviours added to objects in Object properties > Behaviors, systems and a game file, written in the project's src/ and run in the Game area with live props, events, waits and hot swap.",
+  "expect": "A behaviour's props are custom properties of its object, edited as Blender properties and read live by the playing game; saving a file swaps its code in keeping each behaviour's state, and a version that does not load keeps the last good one running; the Game area plays it; the editor completes the .blend's names. Sounds do not play yet and there is no game UI layer.",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/files/custom_properties.html"
+  ],
+  "example": "rock-hard-cafe",
+  "thumbnail": "game-code/thumbnail.png",
+  "media": [
+   "game-code/behaviors.png",
+   "game-code/edit-source.png",
+   "game-code/play.gif"
+  ],
+  "ui": [
+   "PROPERTIES",
+   "OBJECT_PT_custom_props"
+  ],
+  "operators": [
+   "object.duplicate_move"
+  ],
+  "code": [
+   "src/io_scene_babylon/runtime/game/define.js",
+   "src/io_scene_babylon/runtime/game/world.js",
+   "src/io_scene_babylon/runtime/game/blend-host.js",
+   "src/io_scene_babylon/runtime/game/input.js",
+   "src/io_scene_babylon/runtime/game/character.js",
+   "src/editors/space_game/game-code.js",
+   "src/editors/space_game/game-types.js",
+   "src/editors/space_buttons/behaviors-panel.js",
+   "src/blenkernel/behaviors.js"
+  ],
+  "tests": [
+   "tests/game-behaviors.test.js",
+   "tests/game-code.test.js",
+   "tests/game-types.test.js",
+   "tests/game-behaviors-wasm.test.js",
+   "tests/behaviors-panel-wasm.test.js",
+   "tests/rock-hard-cafe-wasm.test.js"
+  ],
+  "limits": [
+   "Game sounds (game.play, sound props) are kept as names; playing them is not built yet.",
+   "There is no game UI layer yet (defineUI); a system can draw with Babylon's GUI itself.",
+   "An exported page does not run game code yet; the Game area and tests do.",
+   "Hover docs and completion come from TypeScript in the code editor; go to definition from a behaviour to the objects using it is the user count's list, not the editor's.",
+   "A behaviour that holds several sounds keeps them as a group of the object's custom properties, which Blender's Custom Properties panel shows but does not edit."
+  ],
+  "page": "docs/features/game-code.md",
+  "open": "https://propolisa.github.io/bylonder/#example=rock-hard-cafe",
+  "example_title": "Rock Hard Café",
+  "coverage": {
+   "operators": {
+    "supported": 1,
+    "partial": 0,
+    "total": 1
+   },
+   "ui": {
+    "supported": 1,
+    "partial": 0,
+    "total": 1
+   }
+  }
+ },
+ {
   "id": "geometry-node-editor",
   "title": "Geometry Node Editor",
   "summary": "Show and edit the node group of the active Geometry Nodes modifier: add nodes from Shift A's search, link sockets and set values, here to lay out a sunflower's seeds by the golden angle.",

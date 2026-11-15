@@ -18,11 +18,13 @@ const GAPS = {
   'geometry-node-editor': ['view-layer'],
   'geometry-nodes': ['view-layer'],
   'hair-dynamics': ['info-link', 'self', 'view-layer'],
+  'rock-hard-cafe': ['view-layer'],
 };
 const OPEN = {
   'geometry-node-editor': ['view-layer'],
   'geometry-nodes': ['view-layer'],
   'hair-dynamics': ['view-layer'],
+  'rock-hard-cafe': ['view-layer'],
 };
 // What only the view layer says (an excluded collection, Is Viewport) is not a relation between IDs: it stays open.
 // The other kinds close once every depsgraph relation between carried IDs is one of the IR's references.

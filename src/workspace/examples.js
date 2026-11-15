@@ -1,9 +1,9 @@
 import { binaryFile, textFile } from "./project-model.js";
 
-// Each example is a project folder under examples/, shipped as text, and its .blend files as assets fetched when it
-// opens.
-const sources = import.meta.glob(["../../examples/**/*", "!**/*.blend", "!**/*.blend1", "!**/downloads/**"], { query: "?raw", import: "default", eager: true });
-const blends = import.meta.glob(["../../examples/**/*.blend", "!**/downloads/**"], { query: "?url", import: "default", eager: true });
+// Each example is a project folder under examples/, shipped as text, and its binary files (.blend files, sounds) as
+// assets fetched when it opens.
+const sources = import.meta.glob(["../../examples/**/*", "!**/*.{blend,blend1,wav,ogg}", "!**/downloads/**"], { query: "?raw", import: "default", eager: true });
+const blends = import.meta.glob(["../../examples/**/*.{blend,wav,ogg}", "!**/downloads/**"], { query: "?url", import: "default", eager: true });
 const json = (value) => textFile(JSON.stringify(value, null, 2));
 const inExample = (id, all) => Object.entries(all).filter(([path]) => path.startsWith(`../../examples/${id}/`)).map(([path, value]) => [path.slice(`../../examples/${id}/`.length), value]);
 const files = async (id) => ({
@@ -15,6 +15,7 @@ const files = async (id) => ({
 
 export const examples = [
   // Newest first, as the splash lists them.
+  { id: "rock-hard-cafe", title: "Rock Hard Café" },
   { id: "project-files", title: "Project Files" },
   { id: "character-controller", title: "Snow at the Bar" },
   { id: "compositor", title: "Akari Noodle House" },
