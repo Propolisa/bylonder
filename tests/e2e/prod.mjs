@@ -8,7 +8,7 @@
 // usage: npm run build && npm run test:prod   (E2E_URL checks a running server instead)
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -159,6 +159,16 @@ try {
   noErrors("booting");
   // GitHub Pages sends no isolation headers: the site's service worker adds them, so Blender's module runs on threads.
   await step("cross-origin isolated for Blender's threads", async () => assert.ok(await app.frame().evaluate(() => crossOriginIsolated)));
+  // Cycles (render/cycles.js) is fetched when the render engine becomes Cycles, so the site must serve it.
+  await step("serves Cycles", async () => {
+    const assets = readdirSync(new URL("../../dist/assets/", import.meta.url));
+    for (const name of ["cycles.wasm", "cycles.zip"]) {
+      const [base, extension] = name.split(".");
+      const built = assets.find((file) => file.startsWith(`${base}-`) && file.endsWith(`.${extension}`));
+      assert.ok(built, `${name} is not in the build: run npm run module before npm run build`);
+      assert.ok((await fetch(new URL(`assets/${built}`, server.url), { method: "HEAD" })).ok, `the site does not serve ${built}`);
+    }
+  });
 
   for (const id of TOPBAR) {
     await step(`topbar ${id}`, async () => {
