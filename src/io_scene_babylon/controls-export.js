@@ -179,6 +179,13 @@ export const SYNCED = {
     // Shadows switched on the light; a light exported without them takes its shadow map from the export's patch.
     use_shadow: ({ base, light, node }) => [knob(`${base}.use_shadow`, !!light.use_shadow, {}, { node: node.id, property: 'shadowEnabled' })],
   },
+  // A material's culling and alpha cutoff are its Babylon material's; its render method (blended or dithered) makes
+  // its shader again.
+  Material: {
+    use_backface_culling: ({ base, ma, entry }) => [knob(`${base}.use_backface_culling`, !!ma.use_backface_culling, {}, { material: entry.id, property: 'backFaceCulling' })],
+    alpha_threshold: ({ base, ma, entry }) => [knob(`${base}.alpha_threshold`, ma.alpha_threshold, { type: 'FLOAT', subtype: 'FACTOR' }, { material: entry.id, property: 'alphaCutOff' })],
+    surface_render_method: REBUILD,
+  },
 };
 
 // The sensor the camera's frame fits (Auto and Horizontal: its width), whose half extent over the lens is the field of
@@ -218,6 +225,14 @@ function cameraControls(node, camera, entry) {
 // A node material's tunable values: its InputBlocks named by their RNA path from the material (node-material-export.js),
 // a number or each component of a vector, and its images, a URL relative to the package.
 // A world's material is named `__world <name>` (main-view.js adoptWorld): its paths are the World's.
+// A material's synced settings (SYNCED.Material), where Main holds it.
+function materialControls(entry, scene, sync) {
+  const material = scene.getMaterialByUniqueId(entry.uniqueId), pointer = material && sync.materialOf(material);
+  if (!pointer) return [];
+  const ma = idStruct(pointer);
+  return syncedControls('Material', material, { base: `materials${key(ma.name)}`, ma, entry });
+}
+
 function nodeMaterialControls(entry) {
   if (entry.customType !== 'BABYLON.NodeMaterial') return [];
   const world = /^__world (.*)$/.exec(entry.name), base = world ? `worlds${key(world[1])}` : `materials${key(entry.name)}`, named = entry.blocks.filter((b) => b.name.startsWith('node_tree.'));
@@ -350,7 +365,7 @@ export function exportControls(world, data) {
     if (ob.type === 'ARMATURE') list.push(...poseControls(ob, data.skeletons ?? []));
     if (ob.type === 'MESH') list.push(...shapeKeyControls(node, ob, entryOf.get(node.uniqueId)));
   }
-  list.push(...data.materials.flatMap(nodeMaterialControls), ...data.materials.flatMap((entry) => principledControls(entry, scene, sync)));
+  list.push(...data.materials.flatMap(nodeMaterialControls), ...data.materials.flatMap((entry) => [...principledControls(entry, scene, sync), ...materialControls(entry, scene, sync)]));
   if (!data.materials.some((m) => m.name?.startsWith('__world '))) list.push(...worldControls(mainScene));
   list.push(frameControl(world, mainScene), ...customProperties(mainScene, `scenes${key(mainScene.name)}`), ...sdkControls(world, mainScene));
   return [...new Map(list.map((k) => [k.path, k])).values()];

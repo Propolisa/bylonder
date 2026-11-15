@@ -35,7 +35,7 @@ async function syncedIn(id) {
   // the export's patch.
   const { exportPackage } = await import('../src/io_scene_babylon/js-export.js');
   const { packageState } = await import('../src/io_scene_babylon/scene-patch.js');
-  const ROOTS = { objects: 'Object', lights: 'Light', cameras: 'Camera' }, bound = new Set();
+  const ROOTS = { objects: 'Object', lights: 'Light', cameras: 'Camera', materials: 'Material' }, bound = new Set();
   for (const [path, property] of Object.entries(packageState(await exportPackage(world, {})).tables.properties)) {
     const [, root, name] = /^(\w+)\["(?:[^"\\]|\\.)*"\]\.(\w+)/.exec(path) ?? [];
     if (property?.bind && ROOTS[root]) bound.add(`${ROOTS[root]}.${name}`);

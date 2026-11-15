@@ -55,6 +55,7 @@ const shown = (run) => {
   return {
     transform: find(scene.transformNodes, 'Key rig')?.position.asArray(),
     color: find(scene.materials, 'Skin')?.albedoColor.asArray(),
+    culling: find(scene.materials, 'Skin')?.backFaceCulling,
     light: light && [light.intensity, ...light.diffuse.asArray()],
     shape: morph?.influence,
     // The camera's field of view, as its frame fits it (rounded: Blender's and the bind's arithmetic differ in the last bits).
@@ -70,6 +71,7 @@ const objects = blendData().objects, skin = blendData().materials.get('Skin').no
 const EDITS = {
   transform: () => { objects.get('Key').location[0] += 0.5; },
   color: () => { skin.default_value[0] = 0.9; },
+  culling: () => { const ma = blendData().materials.get('Skin'); ma.use_backface_culling = !ma.use_backface_culling; },
   light: () => { objects.get('Key').data.energy *= 2; objects.get('Key').data.color[1] = 0.5; objects.get('Key').data.exposure = 0.5; },
   shape: () => { blendData().shape_keys.get('Key').key_blocks.get('Breathe').value = 0.75; },
   shadow: () => { objects.get('Body').visible_shadow = false; },
@@ -143,5 +145,5 @@ assert.notEqual(objects.get('Key').location[0], 9);
 
 game.dispose();
 written.remove();
-console.log('Instant edits: transform, material colour, light, shape key, shadow casting and camera lens on the next frame in every run and copy; the export reconciles');
+console.log('Instant edits: transform, material colour and culling, light, shape key, shadow casting and camera lens on the next frame in every run and copy; the export reconciles');
 process.exit(0);

@@ -788,7 +788,7 @@ export class BlendScene {
       return;
     }
     if (bind.material !== undefined && bind.property) {
-      for (const material of materialsOf(this.scene, bind.material)) assign(material, bind.property, /** @type {number} */ (value) * (bind.factor ?? 1));
+      for (const material of materialsOf(this.scene, bind.material)) assign(material, bind.property, typeof value === 'number' ? value * (bind.factor ?? 1) : value);
       return;
     }
     if (bind.material !== undefined) {

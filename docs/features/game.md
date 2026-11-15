@@ -2,7 +2,7 @@
 id: game
 title: Game
 summary: Bylonder's own editor that plays the scene as File > Export > JavaScript ships it, run by the exported page's runtime, while edits, undo and redo made in the app reach the running game.
-expect: Play exports the scene in memory and runs it in the area on an engine of its own, as its page does; a value edit (a move, a material colour, a light's power, exposure, colour or spot cone, a camera's lens, sensor or orthographic scale, visibility, a shape key, a custom property) shows in the game on the next frame, and the scoped export behind it checks it once the app is idle, loading the game fresh if they disagree; other edits reach it as a patch after that export (about a second on Rigged Character); the game's own state never writes back to the scene; Reset starts the game again from the scene as it is now; Play takes as long as an export.
+expect: Play exports the scene in memory and runs it in the area on an engine of its own, as its page does; a value edit (a move, a material colour, backface culling or alpha cutoff, a light's power, exposure, colour or spot cone, a camera's lens, sensor or orthographic scale, visibility, a shape key, a custom property) shows in the game on the next frame, and the scoped export behind it checks it once the app is idle, loading the game fresh if they disagree; other edits reach it as a patch after that export (about a second on Rigged Character); the game's own state never writes back to the scene; Reset starts the game again from the scene as it is now; Play takes as long as an export.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/files/import_export.html

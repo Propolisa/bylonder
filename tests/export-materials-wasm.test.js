@@ -16,7 +16,7 @@ async function load(id) {
   sync.view();
   const written = writePackage(await exportModule(world));
   const blend = await (await import(written.url)).load(new NullEngine());
-  return { blend, written, inputs: blend.controls().filter((c) => c.path.startsWith('materials[')) };
+  return { blend, written, inputs: blend.controls().filter((c) => c.path.startsWith('materials[') && c.path.includes('.node_tree.')) };
 }
 const nodeMaterial = (blend, path) => blend.scene.getMaterialByName(/^materials\["(.+?)"\]/.exec(path)[1]);
 const blockName = (path) => path.replace(/^materials\[".+?"\]\./, '').replace(/\[\d\]$/, '');
