@@ -49,4 +49,13 @@ void GPU_backend_type_selection_set_override(GPUBackendType /*backend_type*/) {}
 bool GPU_backend_type_selection_detect() { return true; }
 Span<GPUDevice> GPU_platform_devices_list() { return {}; }
 
+/* port-override: no off-screen GPU context for a render job (imbuf's and the render display's), as the module has no
+ * GPU; the job renders and converts its result on the CPU. */
+namespace gpu {
+GPUSecondaryContextData GPU_create_secondary_context() { return {}; }
+void GPU_activate_secondary_context(const GPUSecondaryContextData & /*data*/) {}
+void GPU_deactivate_secondary_context(const GPUSecondaryContextData & /*data*/) {}
+void GPU_destroy_secondary_context(GPUSecondaryContextData & /*data*/) {}
+}  // namespace gpu
+
 }  // namespace blender
