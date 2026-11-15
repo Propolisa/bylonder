@@ -57,6 +57,14 @@ EXPORT(threads_parallel_for) int threads_parallel_for(int size)
   return threads;
 }
 
+/* port-override: WASI has no shared libraries to load. oneTBB looks for its scalable allocator with dlopen (a weak
+ * reference it expects null where dlopen is missing, which the module's link makes a throwing import instead) and
+ * allocates with malloc when it is not found. */
+extern "C" void *dlopen(const char * /*filename*/, int /*flags*/)
+{
+  return nullptr;
+}
+
 static int64_t now()
 {
   timespec time;
