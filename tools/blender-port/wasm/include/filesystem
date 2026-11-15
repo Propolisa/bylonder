@@ -1,11 +1,12 @@
-/* The wasm32-wasi libc++ this build uses is configured without <filesystem> (_LIBCPP_HAS_NO_FILESYSTEM). This is the
- * part of std::filesystem OpenImageIO's Filesystem utilities (libutil/filesystem.cpp), Blender's asset indexer and its
- * shader source dump (gpu_shader.cc) use,
+/* The part of std::filesystem OpenImageIO's Filesystem utilities (libutil/filesystem.cpp), Blender's asset indexer, its
+ * shader source dump (gpu_shader.cc) and Cycles' path utilities (util/path.cpp) use, made for the wasm32-wasi libc++
+ * configured without <filesystem> (_LIBCPP_HAS_NO_FILESYSTEM),
  * over WASI's POSIX calls: paths with '/' separators, status, file times, directory listing, and creating, copying,
  * renaming and removing files. */
 #pragma once
 
 #include <__config>
+#include <algorithm>
 #include <chrono>
 #include <cstdint>
 #include <cstdio>
@@ -36,6 +37,80 @@ class path {
   std::string generic_string() const { return s_; }
   bool empty() const noexcept { return s_.empty(); }
   bool is_absolute() const { return !s_.empty() && s_[0] == '/'; }
+  bool is_relative() const { return !is_absolute(); }
+  /* POSIX paths have no root name (a Windows drive). */
+  path root_name() const { return path(); }
+  path root_directory() const { return is_absolute() ? path("/") : path(); }
+  path &make_preferred() { return *this; }
+  /* Its elements without the empty ones (repeated and trailing separators). */
+  std::vector<std::string> elements() const
+  {
+    std::vector<std::string> parts;
+    for (size_t at = 0; at <= s_.size();) {
+      const size_t slash = std::min(s_.find('/', at), s_.size());
+      if (slash > at) {
+        parts.push_back(s_.substr(at, slash - at));
+      }
+      at = slash + 1;
+    }
+    return parts;
+  }
+  /* blender-port: libc++ path::lexically_normal: '.' elements dropped, '..' taking the element before it. */
+  path lexically_normal() const
+  {
+    const std::vector<std::string> parts = elements();
+    std::vector<std::string> kept;
+    for (const std::string &part : parts) {
+      if (part == ".") {
+        continue;
+      }
+      if (part == ".." && !kept.empty() && kept.back() != "..") {
+        kept.pop_back();
+      }
+      else if (!(part == ".." && is_absolute())) {
+        kept.push_back(part);
+      }
+    }
+    std::string out = is_absolute() ? "/" : "";
+    for (size_t i = 0; i < kept.size(); i++) {
+      out += (i ? "/" : "") + kept[i];
+    }
+    const bool directory = !parts.empty() && (s_.back() == '/' || parts.back() == ".");
+    if (directory && !kept.empty() && kept.back() != "..") {
+      out += "/";
+    }
+    return path(out.empty() ? "." : out);
+  }
+  /* blender-port: libc++ path::lexically_relative: '..' for each of base's elements past the shared ones. */
+  path lexically_relative(const path &base) const
+  {
+    if (is_absolute() != base.is_absolute()) {
+      return path();
+    }
+    const std::vector<std::string> a = elements(), b = base.elements();
+    size_t same = 0;
+    while (same < a.size() && same < b.size() && a[same] == b[same]) {
+      same++;
+    }
+    int up = 0;
+    for (size_t i = same; i < b.size(); i++) {
+      up += b[i] == ".." ? -1 : b[i] == "." ? 0 : 1;
+    }
+    if (up < 0) {
+      return path();
+    }
+    if (up == 0 && same == a.size()) {
+      return path(".");
+    }
+    path out;
+    for (int i = 0; i < up; i++) {
+      out /= "..";
+    }
+    for (size_t i = same; i < a.size(); i++) {
+      out /= a[i];
+    }
+    return out;
+  }
   path filename() const
   {
     const size_t slash = s_.rfind('/');
