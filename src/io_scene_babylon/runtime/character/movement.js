@@ -6,7 +6,7 @@
 // capsule above the step height (collision.js), behind a body seam (`cast`, `move`) a physics engine's character
 // controller can take. An action or `place` can own the root; the springs follow it, so the hand back is
 // continuous.
-import { Quaternion, Vector3 } from '@babylonjs/core';
+import { Matrix, Quaternion, Vector3 } from '@babylonjs/core';
 import { collisionWorld, shown } from './collision.js';
 import { createWorldPose } from './procedural.js';
 
@@ -138,11 +138,24 @@ export function createMovement(scene, { node, front = new Vector3(0, 0, 1), resp
   const springY = () => (2 * Math.LN2) / Math.max(movement.responsiveness, 1e-3);
   const place = new Vector3(), toward = new Vector3();
 
+  // The root in the scene's space, written as the node's own: through its parent's inverse world matrix, where it has a
+  // parent (an export's root, which turns Blender's axes into Babylon's).
+  const worldTurn = new Quaternion(), worldMatrix = new Matrix(), inverseParent = new Matrix(), localMatrix = new Matrix(), unitScale = Vector3.One(), at = new Vector3();
   const show = () => {
-    node.position.copyFrom(position);
-    node.position.y += lift;
+    at.copyFrom(position);
+    at.y += lift;
     node.rotationQuaternion ??= new Quaternion();
-    Quaternion.RotationYawPitchRollToRef(yaw - frontYaw, 0, 0, node.rotationQuaternion);
+    Quaternion.RotationYawPitchRollToRef(yaw - frontYaw, 0, 0, worldTurn);
+    const parent = node.parent;
+    if (parent) {
+      Matrix.ComposeToRef(unitScale, worldTurn, at, worldMatrix);
+      parent.computeWorldMatrix(true).invertToRef(inverseParent);
+      worldMatrix.multiplyToRef(inverseParent, localMatrix);
+      localMatrix.decompose(undefined, node.rotationQuaternion, node.position);
+    } else {
+      node.position.copyFrom(at);
+      node.rotationQuaternion.copyFrom(worldTurn);
+    }
     facing.set(Math.sin(yaw), 0, Math.cos(yaw));
   };
   const runTween = (/** @type {number} */ dt) => {

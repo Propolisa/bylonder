@@ -261,4 +261,27 @@ for (const askedBefore of [0.2, 0.5]) {
   assert.ok(m.velocity.length() < 0.01 && m.position.x + 40 < 0.6, `came to rest: ${m.position.x + 40}`);
 }
 
+// Under an export's root, turned 180 degrees about Y as an export turns Blender's axes into Babylon's, a character off
+// the origin stays where it stands, walks the way the intent says in the scene's space, and faces where it walks.
+{
+  const scene = world();
+  const root = new TransformNode('__root__', scene);
+  root.rotation.y = Math.PI;
+  const node = new TransformNode('Armature', scene);
+  node.parent = root;
+  node.position.set(0.4, 0, 1.5);
+  const start = node.computeWorldMatrix(true).getTranslation();
+  const m = createMovement(scene, { node });
+  m.update(DT, { move: Vector3.Zero() });
+  const placed = node.computeWorldMatrix(true).getTranslation();
+  close(placed.x, start.x, 1e-4, 'it stays where it stands (x)');
+  close(placed.z, start.z, 1e-4, 'it stays where it stands (z)');
+  run(m, 1, () => ({ move: new Vector3(2, 0, 0) }));
+  const walked = node.computeWorldMatrix(true).getTranslation();
+  assert.ok(walked.x - start.x > 1, `it walks toward +x in the scene: ${walked.x - start.x}`);
+  close(walked.z, start.z, 0.05, 'and not sideways');
+  const front = Vector3.TransformNormal(new Vector3(0, 0, 1), node.getWorldMatrix());
+  assert.ok(front.x > 0.9, `it faces where it walks: ${front.asArray()}`);
+}
+
 console.log('character movement ok');
