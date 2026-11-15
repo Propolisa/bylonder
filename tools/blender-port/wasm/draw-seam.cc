@@ -35,6 +35,12 @@ void DRW_module_init() {}
 void DRW_module_exit() {}
 void DRW_engines_free() {}
 bool DRW_gpu_context_try_enable() { return false; }
+/* port-override: an engine Blender renders in the module (Cycles) gets no draw GPU context, and no Grease Pencil pass
+ * from the draw module, which is past the seam. */
+bool DRW_render_check_grease_pencil(Depsgraph * /*depsgraph*/, View3D * /*v3d*/) { return false; }
+void DRW_render_gpencil(RenderEngine * /*engine*/, Depsgraph * /*depsgraph*/) {}
+void DRW_render_context_enable(Render * /*render*/) {}
+void DRW_render_context_disable(Render * /*render*/) {}
 
 /* port-override: the GPU module is past the seam; the browser chooses the graphics backend and device for Babylon, so
  * none is overridden or listed in the Preferences. */
