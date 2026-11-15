@@ -68,8 +68,8 @@ static int64_t now()
  * or starts, as a thread that sleeps inside the module receives no messages. */
 static std::atomic<int> side_generation;
 /* The loaded side modules for the threads (side-modules.js writes them): how many instances loaded one, then per
- * module its bytes, their size, and its memory and table bases. */
-static int side_modules[1 + 4 * 16];
+ * module its bytes, their size, its memory and table bases, and the threads' thread-local blocks. */
+static int side_modules[1 + 7 * 8];
 EXPORT(side_modules_generation) int *side_modules_generation()
 {
   return reinterpret_cast<int *>(&side_generation);

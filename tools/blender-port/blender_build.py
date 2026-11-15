@@ -29,12 +29,12 @@ from wasm_module import SHARED_MEMORY, TARGET, WASM, demangle
 # CMake targets on the far side of the seams, and Blender's generators and tests, matched against target names.
 SEAMS = re.compile(r'^(bf_intern_ghost|bf_gpu|bf_draw|bf_python_gpu|bf_intern_audaspace|audaspace'
                    r'|bf_intern_libmv|extern_glog|extern_ceres|bf_intern_mantaflow|bf_blendthumb|blender$|makesdna|makesrna|datatoc'
-                   r'|msgfmt|.*_test|.*_tests|gtest|bf_intern_wayland|bf_intern_sky_gpu|.*_cpp_shaders_.*|shader_tool)')
+                   r'|msgfmt|zstd_compress|.*_test|.*_tests|gtest|bf_intern_wayland|bf_intern_sky_gpu|.*_cpp_shaders_.*|shader_tool)')
 # Cycles' libraries, built into their own side module (cycles.wasm, link_cycles) that the app loads when Cycles renders.
 CYCLES = re.compile(r'^(bf_intern_cycles|cycles_)')
 # Host flags that have no meaning for wasm32 or name host paths; and WITH_CYCLES, as Blender's own sources build as they
 # do without Cycles, which comes as a side module.
-DROP = re.compile(r'^(-DFMT_SHARED|-DWITH_CYCLES$|-DEIGEN_HAS_TBB|-DWITH_OPENVDB_BLOSC|-DHAVE_EXECINFO_H|-DHAVE_MALLOC_STATS_H|-I/usr/|-isystem/usr/|-march=|-mtune=|-msse|-mavx|-mfpmath|-m64|-fPIC|-fopenmp|-O\d|-g\d?$|-W|-pedantic|-fno-strict-overflow'
+DROP = re.compile(r'^(-DFMT_SHARED|-DWITH_CYCLES$|-DEIGEN_HAS_TBB|-DWITH_OPENVDB_BLOSC|-DHAVE_EXECINFO_H|-DHAVE_MALLOC_STATS_H|-I/usr/|-isystem/usr/|-march=|-mtune=|-m(sse|ssse|avx|fma|lzcnt|bmi|f16c|popcnt)|-mfpmath|-m64|-fPIC|-fopenmp|-O\d|-g\d?$|-W|-pedantic|-fno-strict-overflow'
                   r'|-fmacro-prefix-map|-ffile-prefix-map|-fdiagnostics|-fcolor-diagnostics|-ffp-contract|-fno-trapping-math)')
 # Sources built as a Blender with a window draws them, though the configure is headless: the interface, whose drawing
 # the API records (its icons are registered only then, icons_init).
