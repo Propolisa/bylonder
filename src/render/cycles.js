@@ -14,6 +14,8 @@ const ADDON = new URL('../bmesh/cycles.zip', import.meta.url);
 let loading = null;
 export function loadCycles() {
   return (loading ??= (async () => {
+    // Its session renders on a thread of its own.
+    if (blenderModule.threads < 2) throw Error('Cycles needs threads: a cross-origin isolated page with Preferences > System > Threads on Auto');
     report('INFO', 'Cycles is loading');
     const [bytes, addon] = await Promise.all([read(MODULE), read(ADDON), startPython()]);
     for (const [name, data] of await unzip(addon)) files.set(`/blender/scripts/${name}`, data);

@@ -3,10 +3,13 @@
 // a few samples into a Render Result read through the view transform (wasm/render-api.cc).
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { blenderMain, blenderModule } from '../src/bmesh/bmesh-wasm.js';
-import '../src/python/bpy_interface.js';
-import { pointerStruct, setContextPointer, structFind } from '../src/python/bpy_rna.js';
-import { loadCycles } from '../src/render/cycles.js';
+
+// Cycles renders on threads of its own (its session's).
+process.env.BYLONDER_THREADS ??= '4';
+const { blenderMain, blenderModule } = await import('../src/bmesh/bmesh-wasm.js');
+await import('../src/python/bpy_interface.js');
+const { pointerStruct, setContextPointer, structFind } = await import('../src/python/bpy_rna.js');
+const { loadCycles } = await import('../src/render/cycles.js');
 
 const { exports: x } = blenderModule;
 const main = blenderMain();
