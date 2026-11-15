@@ -157,7 +157,7 @@ async function thread({ module, memory, control, count, slot }, post) {
     Atomics.store(slots, slot, IDLE);
   }
 }
-var IDLE, CLAIMED, STARTED, SLOT, isNode, threadsAvailable, THREADS_KEY, threadsPreference, hardwareThreads, threadSpawn;
+var IDLE, CLAIMED, STARTED, SLOT, isNode, threadsAvailable, THREADS_KEY, threadsPreference, browserThreads, hardwareThreads, threadSpawn;
 var init_wasm_threads = __esm({
   "src/port/wasm-threads.js"() {
     IDLE = 0;
@@ -174,7 +174,11 @@ var init_wasm_threads = __esm({
         return "AUTO";
       }
     };
-    hardwareThreads = () => (isNode ? Number(process.env.BYLONDER_THREADS ?? 1) : threadsPreference() === "OFF" ? 1 : navigator.hardwareConcurrency) || 1;
+    browserThreads = () => {
+      const cores = navigator.hardwareConcurrency || 1;
+      return cores > 2 ? cores - 1 : cores;
+    };
+    hardwareThreads = () => (isNode ? Number(process.env.BYLONDER_THREADS ?? 1) : threadsPreference() === "OFF" ? 1 : browserThreads()) || 1;
     threadSpawn = (control) => {
       const slots = new Int32Array(control);
       return (arg) => {
