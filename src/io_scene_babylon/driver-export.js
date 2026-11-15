@@ -138,7 +138,8 @@ export function bonesDriversRead(arm) {
 export function driverEntities(properties, skeletons = {}) {
   const data = blendData(), entities = {}, time = Object.keys(properties).find((path) => path.endsWith('.frame_current'));
   for (const collection of Object.values(COLLECTIONS)) for (const id of data[collection] ?? []) {
-    for (const fc of id.animation_data?.drivers ?? []) {
+    // A muted driver sets nothing, as in Blender.
+    for (const fc of [...(id.animation_data?.drivers ?? [])].filter((fc) => !fc.mute)) {
       const entry = driverEntity(collection, id, fc, properties, time, skeletons);
       if (entry) entities[entry[0]] = entry[1];
     }
