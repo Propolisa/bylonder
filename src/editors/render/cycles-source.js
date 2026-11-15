@@ -39,8 +39,8 @@ export async function cyclesSource(world) {
       await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve)));
       pointerStruct(structFind('Scene'), blender.scene, blender.scene).render.engine = 'CYCLES';
       const { status, report } = blender.run('render.render', {});
-      // OPERATOR_FINISHED
-      if (!(status & 1)) throw Error(report || 'Cycles did not render');
+      const OPERATOR_FINISHED = 1 << 2;
+      if (!(status & OPERATOR_FINISHED)) throw Error(report || 'Cycles did not render');
       return resultImage(blender.scene);
     },
     dispose() {},

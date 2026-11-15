@@ -12,6 +12,7 @@ const { pointerStruct, setContextPointer, structFind } = await import('../src/py
 const { loadCycles } = await import('../src/render/cycles.js');
 
 const { exports: x } = blenderModule;
+const OPERATOR_FINISHED = 1 << 2;
 const main = blenderMain();
 setContextPointer(main.C);
 main.readBlend(await readFile(new URL('../examples/rendering/rendering.blend', import.meta.url)));
@@ -22,7 +23,7 @@ assert.equal(scene.render.engine, 'CYCLES', "Cycles' add-on registered its rende
 Object.assign(scene.render, { resolution_x: 64, resolution_y: 48, resolution_percentage: 100 });
 scene.cycles.samples = 4;
 const { status, report } = main.run('render.render', {});
-assert.ok(status & 1, `render.render finished: ${report}`);
+assert.ok(status & OPERATOR_FINISHED, `render.render finished: status ${status}, ${report}`);
 
 const size = x.malloc(8) >>> 0;
 assert.ok(x.render_result_size(main.scene, size), 'a render result');
