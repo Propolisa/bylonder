@@ -157,6 +157,14 @@ export function createRenderEngine(scene, { dof = () => null, displayTransform =
       // Views whose materials apply it: exposure in scene linear, then the view transform and look (the lattice).
       Object.assign(ip, { toneMappingEnabled: false, contrast: 1, colorGradingTexture: lut.texture, colorGradingEnabled: true, exposure: exposure / lut.range });
     },
+    // The scene's image processing as its view settings set it, without what a view sets for itself (setView, each
+    // frame): what an export writes.
+    sceneImageProcessing() {
+      const ip = new ImageProcessingConfiguration();
+      viewTransformOf(view.viewTransform).apply(ip);
+      ip.contrast = contrastOf(view.look);
+      return ip;
+    },
     dispose() { for (const observer of [gateGeometryBuffer, focus]) scene.onBeforeCameraRenderObservable.remove(observer); for (const camera of [...attached.keys()]) drop(camera); },
   };
 }

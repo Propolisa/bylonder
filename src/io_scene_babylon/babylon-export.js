@@ -558,7 +558,7 @@ async function serializeMapped(world, { geometry, live, mapped, parity, graphOf,
   for (const entry of json.cameras) aimed(entry, scene.getCameraByUniqueId(entry.uniqueId));
   turnedCameras(json.cameras, animationGroups);
   extraInfluences(json, scene);
-  Object.assign(json, { animationGroups, activeCameraID, defaultMaterialId: content.defaultMaterial?.uniqueId, renderingPipelines: effects.renderingPipelines, imageProcessingConfiguration: scene.imageProcessingConfiguration.serialize(), producer: { name: 'Bylonder', file: 'scene.babylon' } });
+  Object.assign(json, { animationGroups, activeCameraID, defaultMaterialId: content.defaultMaterial?.uniqueId, renderingPipelines: effects.renderingPipelines, imageProcessingConfiguration: world.renderSettings.sceneImageProcessing().serialize(), producer: { name: 'Bylonder', file: 'scene.babylon' } });
   writePostProcesses(json, effects.postProcesses);
   await environment(json, scene);
   // The F-Curves the page runs (live-curves.js), for the package's IR, and what it still plays as samples (sampledGaps):

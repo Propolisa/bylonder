@@ -44,6 +44,7 @@ export function createRenderSettings(world, { commit = () => {}, authored = {} }
     get renderedCameras() { return [...cameras]; },
     // The view about to render ({ rendered, sceneLinear, background }). Cheap; per view.
     setView: (view) => engine.setView(view),
+    sceneImageProcessing: () => engine.sceneImageProcessing(),
     film: (camera) => engine.film(camera),
     display: (camera) => engine.display(camera),
     resetFilms: () => engine.resetFilms(),
