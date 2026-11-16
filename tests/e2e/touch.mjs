@@ -6,7 +6,8 @@ import assert from "node:assert/strict";
 import { tmpdir } from "node:os";
 import { chromium, openApp, startServer } from "./app.mjs";
 
-export const DEVICES = { phone: { width: 412, height: 915 }, "large phone": { width: 430, height: 930 }, "tablet portrait": { width: 1024, height: 1366 }, "tablet landscape": { width: 1366, height: 1024 } };
+// A phone at its device pixel ratio (a Pixel 7's), where picks and the game's fingers must land under the finger too.
+export const DEVICES = { phone: { width: 412, height: 915, scale: 2.625 }, "large phone": { width: 430, height: 930 }, "tablet portrait": { width: 1024, height: 1366 }, "tablet landscape": { width: 1366, height: 1024 } };
 
 // Fingers through CDP's touch events, at page coordinates: each step moves every finger, as a hand does. `show(points)`
 // sees where the fingers are down at each step (none when they lift). A point is [x, y], or [x, y, id] to name its
@@ -438,7 +439,7 @@ if (process.argv[1] === fileURLToPath(new URL(import.meta.url))) {
   let failed = 0;
   try {
     for (const [device, size] of Object.entries(DEVICES)) {
-      app = await openApp(browser, server.url, { size, touch: true });
+      app = await openApp(browser, server.url, { size: { width: size.width, height: size.height }, scale: size.scale ?? 1, touch: true });
       touch = fingers(app.page);
       for (const [name, check] of Object.entries(checks)) {
         if (filter && !`${device}: ${name}`.includes(filter)) continue;

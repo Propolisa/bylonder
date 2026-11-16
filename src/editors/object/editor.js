@@ -31,10 +31,10 @@ export function createEditor(world, views, history, changed, capture) {
   // Client coordinates to the selectable object under them in a view: an overlay extra (an empty) within reach, else
   // the nearest of the topmost mesh and an armature's bones. Objects in a group pick as the group.
   const pickIn = (view, clientX, clientY) => {
-    const p = views.pickPoint(view, clientX, clientY);
+    const p = views.pickPoint(view, clientX, clientY), at = views.scenePoint(view, clientX, clientY);
     let node = world.pickExtra?.(p.x, p.y, view.camera, selectable);
     if (!node) {
-      const hit = scene.pick(p.x, p.y, selectable, false, view.camera), bones = world.pickArmature?.(view, p.x, p.y, selectable);
+      const hit = scene.pick(at.x, at.y, selectable, false, view.camera), bones = world.pickArmature?.(view, p.x, p.y, selectable);
       const depth = hit?.hit ? Vector3.Project(hit.pickedPoint, Matrix.Identity(), view.camera.getTransformationMatrix(), { x: 0, y: 0, width: 1, height: 1 }).z : Infinity;
       node = bones && bones.depth < depth ? bones.node : hit?.hit ? owner(hit.pickedMesh) : null;
     }
@@ -85,7 +85,7 @@ export function createEditor(world, views, history, changed, capture) {
   const gizmoState = (event) => {
     const visible = mode !== "select" && selection.size > 0 && !world.editMode?.active && !!event?.view;
     if (!visible) return { visible };
-    const p = views.pickPoint(event.view, event.x, event.y);
+    const p = views.scenePoint(event.view, event.x, event.y);
     return { visible, highlight: !!gizmos.utilityLayer.utilityLayerScene.pick(p.x, p.y, undefined, false, event.view.camera)?.hit };
   };
   const selectOperator = (event, { toggle, extend, deselect, deselect_all, select_passthrough }) => {

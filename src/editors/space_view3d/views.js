@@ -151,10 +151,16 @@ export function createViews({ engine, scene, live = () => false, settle = () => 
       frozen = on ? new Map([...views.keys()].map((canvas) => [canvas, copyOf(canvas)])) : null;
       if (!on) api.wake();
     },
-    // Converts client coordinates to the coordinates scene.pick expects for this view.
+    // Client coordinates as pixels of the view's render target (what overlays project to).
     pickPoint(view, clientX, clientY) {
       const rect = view.canvas.getBoundingClientRect(), k = (view.scale ?? 1);
       return { x: (clientX - rect.left) * k, y: (clientY - rect.top) * k };
+    },
+    // Client coordinates as Babylon's scene.pick takes them: render pixels times the hardware scaling it divides by, so
+    // a phone's high device pixel ratio picks under the finger.
+    scenePoint(view, clientX, clientY) {
+      const { x, y } = api.pickPoint(view, clientX, clientY);
+      return { x: x * scaling(), y: y * scaling() };
     },
     dispose() {
       engine.onBeforeViewRenderObservable.remove(before);

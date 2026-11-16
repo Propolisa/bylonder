@@ -68,7 +68,7 @@ export function viewProjection(view) {
     // The scene's geometry under a client point, as a depth read of the view finds it (ED_view3d_autodist): its point,
     // face normal and object's axes (Blender world), or null. `accept(mesh)` limits what counts.
     surface([x, y], accept = drawn) {
-      const scene = camera.getScene(), k = view.scale ?? 1;
+      const scene = camera.getScene(), k = (view.scale ?? 1) * scene.getEngine().getHardwareScalingLevel();
       const hit = scene.pick((x - rect.left) * k, (y - rect.top) * k, accept, false, camera);
       if (!hit?.hit) return null;
       const mesh = hit.pickedMesh;
