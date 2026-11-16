@@ -6,12 +6,13 @@ import Subtitles from './systems/subtitles.js';
 import Hud from './systems/hud.js';
 import Framing from './systems/framing.js';
 import Orientation from './systems/orientation.js';
+import Quality from './systems/quality.js';
 import Music from './systems/music.js';
 import Touch from './systems/touch.js';
 
 export default defineGame({
   start: 'Rock Hard Café',
-  systems: [Shift.with({ length: 60 }), Subtitles, Hud, Framing, Orientation, Music, Touch],
+  systems: [Shift.with({ length: 60 }), Subtitles, Hud, Framing, Orientation, Quality, Music, Touch],
   physics: 'havok',
   input: {
     Move: ['WASD', 'LeftStick'],

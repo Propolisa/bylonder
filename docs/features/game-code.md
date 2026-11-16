@@ -106,7 +106,9 @@ opens on the Game workspace, the 3D View beside the Game area.
    button beside the
    mute button opens the game's settings: Orientation is Auto (turning the phone reflows the page and the view),
    Portrait or Landscape, which lock the screen to it where the browser can (fullscreen, as the café plays on a phone)
-   and else ask you to turn the phone. The hand stops at the machine: its palm is a Havok body that chases where you
+   and else ask you to turn the phone. Quality is Auto (Mobile on a phone, Full elsewhere), Mobile (shadows with
+   Babylon's low filtering, and the view drawn at two thirds of its resolution) or Full (as
+   exported). The hand stops at the machine: its palm is a Havok body that chases where you
    point, and the arm reaches for that body.
 
 ## Project files
@@ -114,7 +116,7 @@ opens on the Game workspace, the 3D View beside the Game area.
 - [cafe.py](../../examples/rock-hard-cafe/cafe.py): builds the café, its prefabs, sounds, rigid bodies, the barista's
   reach constraints and the behaviours in Blender 5.2.
 - [src/behaviors/](../../examples/rock-hard-cafe/src/behaviors/): Rock, Barista, Cup, Machine and Spawner.
-- [src/systems/](../../examples/rock-hard-cafe/src/systems/): Shift, Subtitles, Hud, Touch, Framing, Orientation and Music.
+- [src/systems/](../../examples/rock-hard-cafe/src/systems/): Shift, Subtitles, Hud, Touch, Framing, Orientation, Quality and Music.
 - [src/game.js](../../examples/rock-hard-cafe/src/game.js): the composition.
 - [content/dialogue/cafe.ink](../../examples/rock-hard-cafe/content/dialogue/cafe.ink): the rocks' lines, an Ink story.
 - Recorded by [record-game-code.mjs](../../tools/docs/record-game-code.mjs).
