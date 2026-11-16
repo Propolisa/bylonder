@@ -11,6 +11,7 @@ const { blenderMain, blenderModule } = await import('../src/bmesh/bmesh-wasm.js'
 await import('../src/python/bpy_interface.js');
 const { pointerStruct, setContextPointer, structFind } = await import('../src/python/bpy_rna.js');
 const { loadCycles } = await import('../src/render/cycles.js');
+const { files } = await import('../src/port/wasm.js');
 
 const { exports: x } = blenderModule;
 const OPERATOR_FINISHED = 1 << 2;
@@ -54,5 +55,23 @@ assert.ok(differences.every((d) => d < 2), `the render matches desktop Blender's
 // Rendering again (F12 twice) renders the same image: its session's new thread starts clean on the memory the first freed.
 for (let again = 0; again < 2; again++) assert.deepEqual(render(), rgba, 'a render again gives the same image');
 x.free(size);
+// Baking again and again, on the page's thread and Cycles' (object.bake into an image of the first mesh with a
+// material): the page's thread-locals of Cycles are its own, so no bake overwrites the allocator's state, which a later
+// allocation trapped on.
+files.set('/bakes.py', new TextEncoder().encode(`import bpy, json
+ob = next(o for o in bpy.context.scene.objects if o.type == 'MESH' and o.active_material)
+mat = ob.active_material
+node = mat.node_tree.nodes.new('ShaderNodeTexImage')
+mat.node_tree.nodes.active = node
+for o in bpy.context.view_layer.objects: o.select_set(o == ob)
+bpy.context.view_layer.objects.active = ob
+done = 0
+for i in range(8):
+    node.image = bpy.data.images.new(f'Bake {i}', 128, 128, float_buffer=True)
+    done += bpy.ops.object.bake(type='COMBINED', margin=2) == {'FINISHED'}
+open('/bakes.json', 'w').write(json.dumps(done))
+`));
+main.run('script.python_file_run', { filepath: '/bakes.py' });
+assert.equal(JSON.parse(new TextDecoder().decode(files.get('/bakes.json'))), 8, 'eight bakes in a row finish');
 console.log(`Cycles renders Window Light as desktop Blender does, again too: mean differences ${differences.map((d) => d.toFixed(2)).join(', ')} of 255 per channel`);
 process.exit(0);

@@ -152,6 +152,10 @@ static void file_read_notify(BlenderMain *ctx)
   WM_event_add_notifier_ex(ctx->wm, &ctx->window, NC_ASSET | ND_ASSET_LIST_READING, nullptr);
 }
 
+/* Blender's guarded allocator, as --debug-memory turns it on at the start of main() (creator_args.cc): each block's head
+ * and tail are checked when it is freed, naming a block written past. Called before anything allocates (wasm.js). */
+EXPORT(mem_debug) void mem_debug() { MEM_use_guarded_allocator(); }
+
 EXPORT(main_new) BlenderMain *main_new()
 {
   types_ensure();
