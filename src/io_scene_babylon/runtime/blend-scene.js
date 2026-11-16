@@ -14,6 +14,7 @@ import { collectionKey, collectionTree, objectsIn, showing } from './collections
 import { useDualQuaternionSkinning } from './dual-quaternion-skinning.js';
 import { sharedIR } from './shared-resources.js';
 import { fitCascades } from './cascades.js';
+import { freezeStill } from './statics.js';
 
 // A 32-bit float's step at 1.
 const FLOAT_EPSILON = 1.1920928955078125e-7;
@@ -321,6 +322,24 @@ export class BlendScene {
     this.#showObjects([...this.#hiddenAtExport, ...Object.keys(this.ir.ids).filter((key) => this.ir.ids[key].data?.hide_render === true)]);
     if (this.#animated()) this.playhead.play();
     this.#flush();
+    this.#freeze();
+  }
+
+  /** The still meshes' world matrices, frozen until something moves them (statics.js). */
+  #still = { thaw: (/** @type {any} */ node) => {}, dispose: () => {} };
+  /** Freezes what nothing moves: not in a copy or a page's own scene, whose roots the page's code moves. */
+  #freeze() {
+    if (this.entries || this.#source) return;
+    const animated = new Set(this.scene.animationGroups.flatMap((group) => group.targetedAnimations.map((t) => t.target)));
+    // What the page computes may move or redraw a node by itself (a constraint, a modifier): the object an entity is of,
+    // the node it names and the mesh it draws; and what a game moves: an object with behaviours or a rigid body not
+    // static (Active, as Blender's default, or Animated).
+    const moving = (/** @type {any} */ body) => body && (body.kinematic || (body.type ?? 'ACTIVE') === 'ACTIVE');
+    const played = Object.values(this.ir.ids).filter((id) => moving(id.data?.rigid_body) || id.data?.['["behaviors"]']).map((id) => id.node);
+    const computed = new Set([...Object.values(this.ir.entities).flatMap((e) => [this.ir.ids[e.id]?.node, e.inputs?.node, ...Object.values(e.outputs).map((o) => (o && 'draw' in o ? o.draw : null))]), ...played]
+      .filter((id) => typeof id === 'string').map((id) => nodeById(this.scene, id)));
+    // A bone may be posed any frame: what hangs from one moves with it.
+    this.#still = freezeStill(this.scene, (node) => animated.has(node) || computed.has(node) || !!node.physicsBody || node.getClassName?.() === 'Bone');
   }
 
   /** Whether the scene moves with its frame: a range of frames, and an animation or what reads the frame. */
@@ -411,7 +430,7 @@ export class BlendScene {
     // A node's animation, and its skeleton's bones and morph targets, follow its object.
     this.#targetOffsets.clear();
     for (const [object, offset] of this.#objectOffsets) {
-      const node = /** @type {any} */ (this.nodeOf(object));
+      const node = /** @type {any} */ (this.#nodeOf(object));
       if (!offset || !node) continue;
       const manager = node.morphTargetManager;
       for (const target of [node, ...(node.skeleton?.bones ?? []), ...Array.from({ length: manager?.numTargets ?? 0 }, (_, i) => manager.getTarget(i))]) this.#targetOffsets.set(target, offset);
@@ -473,8 +492,15 @@ export class BlendScene {
 
   /** The Babylon node an object (by key) draws as, if any. @param {string} object */
   nodeOf(object) {
-    const node = this.ir.ids[object]?.node;
-    return node === undefined ? null : nodeById(this.scene, node);
+    const node = this.#nodeOf(object);
+    // Code given a node may move or change it.
+    if (node) this.#still.thaw(node);
+    return node;
+  }
+  /** @param {string} object */
+  #nodeOf(object) {
+    const id = this.ir.ids[object]?.node;
+    return id === undefined ? null : nodeById(this.scene, id);
   }
 
   /**
@@ -619,6 +645,7 @@ export class BlendScene {
     /** @type {Record<string, Record<string, any>>} */
     const entries = patch.tables, playing = this.#clips.playing(), tables = this.#tables.tables, ir = /** @type {Record<string, any>} */ (this.ir);
     const replaced = JSON.stringify(Object.entries(patch.tables).map(([table, part]) => Object.keys(part).map((key) => (tables[table] ?? ir[table])?.[key])));
+    this.#still.dispose();
     try {
       this.#tables.apply(patch);
     } catch (error) {
@@ -653,6 +680,7 @@ export class BlendScene {
     } catch (error) {
       return reload(error);
     }
+    this.#freeze();
     this.#dropUnusedBuffers(replaced);
     return this;
   }
@@ -727,7 +755,10 @@ export class BlendScene {
       if (node.getRestMatrix) {
         const [[path, transform]] = parts.values();
         this.#place(node, path, transform);
-      } else for (const [path, transform] of parts.values()) this.#place(node, path, transform);
+      } else {
+        this.#still.thaw(node);
+        for (const [path, transform] of parts.values()) this.#place(node, path, transform);
+      }
     }
     this.#placing.clear();
   }
@@ -742,6 +773,7 @@ export class BlendScene {
     this.scene.onAfterAnimationsObservable.remove(this.#placed[0]);
     this.scene.onBeforeRenderObservable.remove(this.#placed[1]);
     this.#placing.clear();
+    this.#still.dispose();
     this.#unfit();
     this.#source?.copies.delete(this);
     this.#scheduler?.dispose();
