@@ -1,4 +1,5 @@
-// The café's music: one track, looped quietly under the game with Babylon's audio engine; the Music key mutes it. Its
+// The café's music: one track, looped quietly under the game with Babylon's audio engine; the Music key or the board's
+// button mutes it. Its
 // file is content/music/cafe.ogg; without one the café plays without music.
 import { CreateAudioEngineAsync, CreateStreamingSoundAsync } from '@babylonjs/core';
 import { defineSystem, float } from 'bylonder';
@@ -19,14 +20,18 @@ export default defineSystem({
         else track = TRACK;
       })().catch((error) => console.warn(`The café's music did not play: ${error?.message ?? error}`));
     }
+    const toggle = () => {
+      muted = !muted;
+      if (sound) sound.volume = muted ? 0 : props.volume;
+    };
     return {
       /** The track playing, if any. */
       get track() { return track; },
       get muted() { return muted; },
+      /** Mutes the music, or plays it again. */
+      toggle,
       update() {
-        if (!input.pressed('Music')) return;
-        muted = !muted;
-        if (sound) sound.volume = muted ? 0 : props.volume;
+        if (input.pressed('Music')) toggle();
       },
       dispose() { gone = true; audio?.dispose(); },
     };

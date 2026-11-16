@@ -36,8 +36,8 @@ export default defineSystem({
     grabSide.onPointerUpObservable.add(() => hold(false));
     // The GUI's pixels are the render's; the barista takes CSS pixels, as the scene's picking does.
     const css = ({ x, y }) => ({ x: x * engine.getHardwareScalingLevel(), y: y * engine.getHardwareScalingLevel() });
-    let last = null;
-    reachSide.onPointerDownObservable.add((at) => { last = css(at); });
+    let last = null, dragged = false;
+    reachSide.onPointerDownObservable.add((at) => { last = css(at); dragged = true; });
     reachSide.onPointerMoveObservable.add((at) => {
       if (!last) return;
       const next = css(at);
@@ -54,6 +54,8 @@ export default defineSystem({
       Object.assign(ring, { width: px(engine, look.ring), height: px(engine, look.ring) });
     };
     return {
+      /** Whether a finger has reached with the hand yet. */
+      get dragged() { return dragged; },
       update() {
         const shown = !!input.touch;
         if (grabSide.isVisible !== shown) for (const control of [grabSide, reachSide, ring]) control.isVisible = shown;
