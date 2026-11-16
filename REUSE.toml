@@ -88,6 +88,7 @@ path = [
   "src/io_scene_babylon/polyfill/volumes.bundle.js",
   "src/io_scene_babylon/polyfill/volumes.js",
   "src/nodes/blender/shader-nodes.js",
+  "src/render/cycles-panels.js",
   "src/render/film.js",
   "src/render/view-settings.js",
   "src/windowmanager/wm-event-system.js",

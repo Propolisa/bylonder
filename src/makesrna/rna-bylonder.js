@@ -589,7 +589,16 @@ const STRUCTS = {
   Light: (light) => (isBlenderLight(light) ? blenderLight(light) : babylonLight),
   Camera: {
     name: settable('name'),
-    type: { get: (camera) => (camera.mode === Camera.ORTHOGRAPHIC_CAMERA ? 'ORTHO' : 'PERSP'), set: (camera, type) => { camera.mode = type === 'ORTHO' ? Camera.ORTHOGRAPHIC_CAMERA : Camera.PERSPECTIVE_CAMERA; if (type === 'ORTHO') fitsOrthoScale(camera); }, sync: true },
+    // A panoramic camera is Cycles' alone: Babylon draws it as a perspective one, as EEVEE renders it.
+    type: {
+      get: (camera) => (camera.mode === Camera.ORTHOGRAPHIC_CAMERA ? 'ORTHO' : camera.metadata?.wbPanoramic ? 'PANO' : 'PERSP'),
+      set: (camera, type) => {
+        camera.mode = type === 'ORTHO' ? Camera.ORTHOGRAPHIC_CAMERA : Camera.PERSPECTIVE_CAMERA;
+        camera.metadata = { ...camera.metadata, wbPanoramic: type === 'PANO' };
+        if (type === 'ORTHO') fitsOrthoScale(camera);
+      },
+      sync: true,
+    },
     sensor_fit: lensValue('sensor_fit'),
     sensor_width: lensValue('sensor_width'),
     sensor_height: lensValue('sensor_height'),

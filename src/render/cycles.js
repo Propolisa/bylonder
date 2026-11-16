@@ -7,6 +7,7 @@ import { loadSideModule } from '../port/side-modules.js';
 import { startPython } from '../python/python.js';
 import { unzip } from '../python/unzip.js';
 import { pointerStruct, structFind } from '../python/bpy_rna.js';
+import { showBlenderPanels } from './cycles-panels.js';
 import { report } from '../windowmanager/wm-reports.js';
 
 const MODULE = new URL('../bmesh/cycles.wasm', import.meta.url);
@@ -22,6 +23,7 @@ export function loadCycles() {
     for (const [name, data] of await unzip(addon)) files.set(`/blender/scripts/${name}`, data);
     const cycles = await loadSideModule(blenderModule.exports, bytes, missing, blenderModule.workers);
     cycles.cycles_start();
+    showBlenderPanels();
     report('INFO', 'Cycles loaded');
   })());
 }

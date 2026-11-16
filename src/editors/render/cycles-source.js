@@ -2,9 +2,23 @@
 // (render/cycles.js), its result read through the scene's view transform (wasm/render-api.cc) as Blender's render
 // window shows it.
 import { blenderModule } from '../../bmesh/bmesh-wasm.js';
+import { files } from '../../port/wasm.js';
+import { blendData, pointerStruct, structFind } from '../../python/bpy_rna.js';
 import { loadCycles } from '../../render/cycles.js';
 
 const { exports: x } = blenderModule;
+
+// The Render Result as a file of the scene's output format, written by Blender's image writer (Image.save_render), so
+// float formats keep their range: Radiance HDR and OpenEXR for an environment rendered with a panoramic camera.
+function savedResult(C, scenePointer, name) {
+  const scene = pointerStruct(structFind('Scene'), scenePointer, scenePointer);
+  const filename = name + scene.render.file_extension, path = '/tmp/render/' + filename;
+  blendData(C).images.get('Render Result').save_render(path, scene);
+  const bytes = files.get(path);
+  files.delete(path);
+  if (!bytes) throw Error(`Blender wrote no ${scene.render.image_settings.file_format} file`);
+  return { blob: new Blob([bytes]), filename };
+}
 
 // The result as an ImageBitmap: Blender's rows start at the bottom.
 function resultImage(scene) {
@@ -48,6 +62,7 @@ export async function cyclesSource(world) {
       job = null;
       return resultImage(scene());
     },
+    save: (name) => savedResult(blender.C, scene(), name),
     dispose() {
       if (!job) return;
       x.render_job_stop(blender.C, scene());

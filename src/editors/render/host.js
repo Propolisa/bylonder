@@ -61,7 +61,8 @@ export function createRenderHost({ world, live, sceneAudio, sequencer, name = ()
     let spec;
     const scene = world.mainSync.blender.scene;
     // A still is shown first and saved on request, so Render Image renders whatever the output format; a format the
-    // browser cannot write (OpenEXR) or a video one saves the still as PNG, as Blender's Save As offers.
+    // browser cannot write (OpenEXR) or a video one saves the still as PNG, as Blender's Save As offers; a Cycles still
+    // is written by Blender itself, in any format.
     let note = '';
     try { spec = outputSpec(pointerStruct(structFind('Scene'), scene, scene).render); } catch (error) {
       if (kind !== 'image') { last = null; sync(); show(); setStatus('Render failed: ' + error.message); return; }
@@ -90,7 +91,7 @@ export function createRenderHost({ world, live, sceneAudio, sequencer, name = ()
       const mixing = (done, total) => { setStatus(`Mixing scene sound | ${done} / ${total} | ${clock(started)}`); setProgress(done / total); };
       // The sequencer mixes its sound first; the camera's mixes while its frames render.
       let audio = spec.audio && edit ? await untilCancelled(source.audio(signal, mixing), signal) : null;
-      writer = await createWriter(spec, { ...size, fps: frameRate(time), name: name(), frames: frames.length, audio: !!(spec.audio && (audio || !edit)) });
+      if (!source.save) writer = await createWriter(spec, { ...size, fps: frameRate(time), name: name(), frames: frames.length, audio: !!(spec.audio && (audio || !edit)) });
       const out = new OffscreenCanvas(size.width, size.height), ctx = out.getContext('2d');
       for (let index = 0; index < frames.length; index++) {
         if (signal.aborted) throw cancelled();
@@ -104,7 +105,7 @@ export function createRenderHost({ world, live, sceneAudio, sequencer, name = ()
         image.close?.();
         draw(await createImageBitmap(out));
         if (spec.kind === 'video') await writer.add(new VideoFrame(out, { timestamp: Math.round(index * 1e6 / frameRate(time)) }));
-        else await writer.add(out, frames[index]);
+        else await writer?.add(out, frames[index]);
         setProgress((index + 1) / frames.length);
         setStatus(`Frame ${frames[index]} | ${index + 1} / ${frames.length} | ${size.width} x ${size.height} | ${source.label} | ${clock(started)}`);
       }
@@ -113,9 +114,9 @@ export function createRenderHost({ world, live, sceneAudio, sequencer, name = ()
         audio = await untilCancelled(source.audio(), signal);
       }
       if (audio) await writer.addAudio(audio);
-      last = await writer.finish();
+      last = source.save ? source.save(name()) : await writer.finish();
       writer = null;
-      setStatus(`Finished ${frames.length === 1 ? 'frame ' + frames[0] : frames.length + ' frames'} in ${clock(started)} | ${last.filename}${[note, ...(source.warnings ?? [])].filter(Boolean).map((w) => ' | ' + w).join('')}`);
+      setStatus(`Finished ${frames.length === 1 ? 'frame ' + frames[0] : frames.length + ' frames'} in ${clock(started)} | ${last.filename}${[source.save ? '' : note, ...(source.warnings ?? [])].filter(Boolean).map((w) => ' | ' + w).join('')}`);
       if (kind === 'animation') download(last);
     } catch (error) {
       await writer?.cancel();
