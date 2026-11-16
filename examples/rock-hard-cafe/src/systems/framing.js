@@ -2,10 +2,13 @@
 // spot), widened to the barista's lane along it, fills the view at any shape of the Game area or page. Each frame starts
 // from the camera as authored (game.camera.authored, which edits in Blender keep current): it keeps that direction and
 // moves sideways from that place to centre the frame, so moving the camera in the 3D View moves the game's view.
-// On a screen taller than wide (a phone upright) the camera rolls a quarter turn, so the counter runs along the long
-// side and shows twice as large.
+// In portrait the camera rolls a quarter turn, so the counter runs along the long side of an upright phone and shows
+// twice as large. Orientation (the board's button) is Auto, Portrait or Landscape: Auto takes portrait while the game's
+// view is taller than wide, decided each frame from the view's own shape.
 import { Axis, Camera, Matrix, Quaternion, Vector3 } from '@babylonjs/core';
-import { defineSystem } from 'bylonder';
+import { defineSystem, enumOf } from 'bylonder';
+
+export const ORIENTATIONS = ['Auto', 'Portrait', 'Landscape'];
 
 /** Room around the barista's body, in metres. */
 const BODY = 0.4;
@@ -14,9 +17,10 @@ const QUARTER = Quaternion.RotationAxis(Axis.Z, Math.PI / 2);
 
 export default defineSystem({
   name: 'Framing',
-  create({ game, babylon }) {
+  props: { orientation: enumOf(ORIENTATIONS) },
+  create({ game, babylon, props }) {
     const scene = babylon.scene;
-    let corners = null;
+    let corners = null, orientation = props.orientation, portrait = false;
     /** The Play Area's corners in its own space, its box grown to take in the barista's lane (where he stands at the start). */
     const lane = (area) => {
       const min = new Vector3(-1, -1, -1), max = new Vector3(1, 1, 1), barista = scene.getNodeByName('Barista');
@@ -29,6 +33,11 @@ export default defineSystem({
       return [min.x, max.x].flatMap((x) => [min.y, max.y].flatMap((y) => [min.z, max.z].map((z) => new Vector3(x, y, z))));
     };
     return {
+      /** Auto, Portrait or Landscape. */
+      get orientation() { return orientation; },
+      set orientation(value) { if (ORIENTATIONS.includes(value)) orientation = value; },
+      /** Whether the view is framed for portrait (the camera rolled). */
+      get portrait() { return portrait; },
       update() {
         const camera = scene.activeCamera, area = scene.getTransformNodeByName('Play Area');
         if (!camera || !area) return;
@@ -36,7 +45,8 @@ export default defineSystem({
         const { position, rotation } = game.camera.authored;
         camera.position.copyFrom(position);
         camera.rotationQuaternion = (camera.rotationQuaternion ?? new Quaternion()).copyFrom(rotation);
-        if (aspect < 1) camera.rotationQuaternion.multiplyInPlace(QUARTER);
+        portrait = orientation === 'Auto' ? aspect < 1 : orientation === 'Portrait';
+        if (portrait) camera.rotationQuaternion.multiplyInPlace(QUARTER);
         const view = camera.getViewMatrix(true), world = area.computeWorldMatrix(true);
         // Where the area's corners are seen from the authored place, across and up the view, and how far.
         let left = Infinity, right = -Infinity, bottom = Infinity, top = -Infinity, depth = 0;

@@ -543,6 +543,22 @@ try {
         const after = await game();
         assert.ok(Math.hypot(after.palm[0] - before.palm[0], after.palm[2] - before.palm[2]) > 0.05, `${where}: a drag on the right half moves the hand: ${before.palm} to ${after.palm}`);
       };
+      // An upright phone frames the café in portrait from Play on, the framing settling for good (the owner saw it turn
+      // to landscape about a second in), and the board's Orientation forces each framing.
+      const framing = (set) => opened.bylonder((b, set) => {
+        const handle = b.game.world.game.get({ name: "Framing" });
+        if (set) handle.orientation = set;
+        return { orientation: handle.orientation, portrait: handle.portrait };
+      }, set);
+      for (let i = 0; i < 8; i++) {
+        await opened.page.waitForTimeout(500);
+        assert.deepEqual(await framing(), { orientation: "Auto", portrait: true }, `an upright phone stays in portrait (${(i + 1) / 2} s after Play)`);
+      }
+      for (const [orientation, portrait] of [["Landscape", false], ["Portrait", true], ["Auto", true]]) {
+        await framing(orientation);
+        await opened.page.waitForTimeout(300);
+        assert.deepEqual(await framing(), { orientation, portrait }, `Orientation ${orientation} frames the café ${portrait ? "in portrait" : "in landscape"}`);
+      }
       await plays("in Focus Mode");
       // Back to the layout: the area still belongs to the game's fingers.
       await opened.page.evaluate(() => history.back());

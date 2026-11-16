@@ -96,7 +96,9 @@ opens on the Game workspace, the 3D View beside the Game area.
 
    ![The café playing in the Game area](../media/features/game-code/play.gif)
 
-   On an upright phone the camera turns so the counter runs along the screen. The Framing system starts each frame
+   On an upright phone the camera turns so the counter runs along the screen. The round button beside the mute
+   button opens the game's settings: Orientation is Auto (portrait while the view is taller than wide), Portrait or
+   Landscape. The Framing system starts each frame
    from the camera as authored (`game.camera.authored`): it keeps its direction, moves sideways from its place to
    centre the play area and fits the field of view to it, so moving or turning the camera in the 3D View moves the
    café's view, while a lens edit is not shown (the header says the game's code sets the field of view).
