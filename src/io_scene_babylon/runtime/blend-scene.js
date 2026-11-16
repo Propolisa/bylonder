@@ -15,6 +15,7 @@ import { useDualQuaternionSkinning } from './dual-quaternion-skinning.js';
 import { sharedIR } from './shared-resources.js';
 import { fitCascades } from './cascades.js';
 import { freezeStill } from './statics.js';
+import { cacheStillShadows } from './shadow-cache.js';
 
 // A 32-bit float's step at 1.
 const FLOAT_EPSILON = 1.1920928955078125e-7;
@@ -327,19 +328,36 @@ export class BlendScene {
 
   /** The still meshes' world matrices, frozen until something moves them (statics.js). */
   #still = { thaw: (/** @type {any} */ node) => {}, dispose: () => {} };
-  /** Freezes what nothing moves: not in a copy or a page's own scene, whose roots the page's code moves. */
+  /** Stops caching the still casters' shadows (shadow-cache.js). */
+  #uncache = () => {};
+  #shadowCache = true;
+  /** Whether the sun's shadows of what never moves are drawn once and kept (shadow-cache.js): on by default, the same pixels. */
+  get shadowCache() { return this.#shadowCache; }
+  set shadowCache(on) {
+    this.#shadowCache = on;
+    this.#freeze();
+  }
+  /**
+   * Freezes what nothing moves and caches its shadows: not in a copy or a page's own scene, whose roots the page's code
+   * moves. What the page computes may move or redraw a node by itself (a constraint, a modifier): the object an entity
+   * is of, the node it names and the mesh it draws; a rigid body not static (Active, as Blender's default, or Animated)
+   * moves; an object with behaviours may be moved by its code, which the freeze takes as moving and the cache finds out.
+   */
   #freeze() {
+    this.#still.dispose();
+    this.#uncache();
     if (this.entries || this.#source) return;
     const animated = new Set(this.scene.animationGroups.flatMap((group) => group.targetedAnimations.map((t) => t.target)));
-    // What the page computes may move or redraw a node by itself (a constraint, a modifier): the object an entity is of,
-    // the node it names and the mesh it draws; and what a game moves: an object with behaviours or a rigid body not
-    // static (Active, as Blender's default, or Animated).
     const moving = (/** @type {any} */ body) => body && (body.kinematic || (body.type ?? 'ACTIVE') === 'ACTIVE');
-    const played = Object.values(this.ir.ids).filter((id) => moving(id.data?.rigid_body) || id.data?.['["behaviors"]']).map((id) => id.node);
-    const computed = new Set([...Object.values(this.ir.entities).flatMap((e) => [this.ir.ids[e.id]?.node, e.inputs?.node, ...Object.values(e.outputs).map((o) => (o && 'draw' in o ? o.draw : null))]), ...played]
-      .filter((id) => typeof id === 'string').map((id) => nodeById(this.scene, id)));
+    const nodes = (/** @type {any[]} */ ids) => new Set(ids.filter((id) => typeof id === 'string').map((id) => nodeById(this.scene, id)));
+    const ids = Object.values(this.ir.ids);
+    const computed = nodes([...Object.values(this.ir.entities).flatMap((e) => [this.ir.ids[e.id]?.node, e.inputs?.node, ...Object.values(e.outputs).map((o) => (o && 'draw' in o ? o.draw : null))]),
+      ...ids.filter((id) => moving(id.data?.rigid_body)).map((id) => id.node)]);
+    const scripted = nodes(ids.filter((id) => id.data?.['["behaviors"]']).map((id) => id.node));
+    const moves = (/** @type {any} */ node) => animated.has(node) || computed.has(node);
     // A bone may be posed any frame: what hangs from one moves with it.
-    this.#still = freezeStill(this.scene, (node) => animated.has(node) || computed.has(node) || !!node.physicsBody || node.getClassName?.() === 'Bone');
+    this.#still = freezeStill(this.scene, (node) => moves(node) || scripted.has(node) || !!node.physicsBody || node.getClassName?.() === 'Bone');
+    if (this.#shadowCache) this.#uncache = cacheStillShadows(this.scene, moves);
   }
 
   /** Whether the scene moves with its frame: a range of frames, and an animation or what reads the frame. */
@@ -646,6 +664,7 @@ export class BlendScene {
     const entries = patch.tables, playing = this.#clips.playing(), tables = this.#tables.tables, ir = /** @type {Record<string, any>} */ (this.ir);
     const replaced = JSON.stringify(Object.entries(patch.tables).map(([table, part]) => Object.keys(part).map((key) => (tables[table] ?? ir[table])?.[key])));
     this.#still.dispose();
+    this.#uncache();
     try {
       this.#tables.apply(patch);
     } catch (error) {
@@ -774,6 +793,7 @@ export class BlendScene {
     this.scene.onBeforeRenderObservable.remove(this.#placed[1]);
     this.#placing.clear();
     this.#still.dispose();
+    this.#uncache();
     this.#unfit();
     this.#source?.copies.delete(this);
     this.#scheduler?.dispose();

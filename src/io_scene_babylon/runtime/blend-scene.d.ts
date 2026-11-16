@@ -256,6 +256,9 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
     }>;
     /** Told of each marker passed: the scene's as the playhead plays past it, an action's as its clip does. */
     onMarker: Observable<import("./clips.js").MarkerEvent>;
+    set shadowCache(on: boolean);
+    /** Whether the sun's shadows of what never moves are drawn once and kept (shadow-cache.js): on by default, the same pixels. */
+    get shadowCache(): boolean;
     /**
      * The clips (docs/ir.md, Clips): an animation group per Blender action exported with Animations set to Clips or Both,
      * named by the action, each with Babylon's group.
