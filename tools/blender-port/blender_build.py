@@ -33,6 +33,8 @@ SEAMS = re.compile(r'^(bf_intern_ghost|bf_gpu|bf_draw|bf_python_gpu|bf_intern_au
                    r'|msgfmt|zstd_compress|.*_test|.*_tests|gtest|bf_intern_wayland|bf_intern_sky_gpu|.*_cpp_shaders_.*|shader_tool)')
 # Cycles' libraries, built into their own side module (cycles.wasm, link_cycles) that the app loads when Cycles renders.
 CYCLES = re.compile(r'^(bf_intern_cycles|cycles_)')
+# Position independent, with the inline variables it shares with the module (CPPType's instances) reached through its GOT.
+CYCLES_PIC = ['-fPIC', '-include', os.path.join(WASM, 'cycles-shared.h')]
 # Host flags that have no meaning for wasm32 or name host paths; and WITH_CYCLES, as Blender's own sources build as they
 # do without Cycles, which comes as a side module.
 DROP = re.compile(r'^(-DFMT_SHARED|-DWITH_CYCLES$|-DEIGEN_HAS_TBB|-DWITH_OPENVDB_BLOSC|-DHAVE_EXECINFO_H|-DHAVE_MALLOC_STATS_H|-I/usr/|-isystem/usr/|-march=|-mtune=|-m(sse|ssse|avx|fma|lzcnt|bmi|f16c|popcnt)|-mfpmath|-m64|-fPIC|-fopenmp|-O\d|-g\d?$|-W|-pedantic|-fno-strict-overflow'
@@ -375,7 +377,7 @@ def main():
     results = {}
     with concurrent.futures.ThreadPoolExecutor(int(os.environ.get("JOBS", os.cpu_count()))) as pool:
         for target, group in sorted(by_target.items()):
-            pic = ['-fPIC'] if CYCLES.match(target) else []
+            pic = CYCLES_PIC if CYCLES.match(target) else []
             done = list(pool.map(lambda e: compile_one(objects, e, extra + own.get(target, []) + pic), group))
             results[target] = done
             failed = [s for s, o, _ in done if not o]
@@ -446,7 +448,7 @@ def cycles_api(objects, sibling, extra):
     args = shlex.split(sibling['command']) if 'command' in sibling else sibling['arguments']
     entry = {'directory': sibling['directory'], 'file': source,
              'arguments': [arg for arg in args if not arg.endswith(os.path.basename(sibling['file']))]}
-    built = compile_one(objects, entry, [*extra, '-fPIC'])
+    built = compile_one(objects, entry, [*extra, *CYCLES_PIC])
     if not built[1]:
         sys.exit(f'cycles-api.cc does not build: {first_error(built[2])}')
     return built[1]

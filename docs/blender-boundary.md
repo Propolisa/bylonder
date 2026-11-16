@@ -251,7 +251,10 @@ its own. A thread that sleeps inside the module receives no messages, so `wasm/t
 modules in the module's memory: spawned threads wait in slices of 200 ms and load new ones between them, idle workers of
 the pool do the same from their JavaScript loop, and the page's load resolves once every thread has one. The module
 exports what a side module imports (`link_module`: each name kept with `-u` and exported), with its stack pointer and a
-growable function table.
+growable function table. A side module's code is hidden (wasm's default visibility), so an inline variable it shares
+with the module would be a copy of its own; those whose address is a type's identity (`CPPType::get`, `Any::is`) are
+declared with default visibility in `wasm/cycles-shared.h`, included first in each of Cycles' sources, and reached
+through its GOT, bound to the module's one copy.
 
 ### Cycles
 
