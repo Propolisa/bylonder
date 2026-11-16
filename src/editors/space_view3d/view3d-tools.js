@@ -43,7 +43,7 @@ export function createView3DTools({ world, editor, views, area, mode, toolSettin
     return constrainMode === 2 && active ? worldAxes(active.computeWorldMatrix(true)) : unit_m3();
   };
   // The active tool's gizmo group, then the redo gizmos the last operator asked for (MESH_GGT_spin_redo).
-  const toolGroup = () => (activeView() && !activeView().state.cameraView ? tool()?.gizmo_group ?? '' : '');
+  const toolGroup = () => (activeView() ? tool()?.gizmo_group ?? '' : '');
   const gizmoMap = createGizmoMap({ groups: () => [toolGroup(), ...(world.editMode.active ? world.editMode.lastOperation?.gizmos ?? [] : [])] });
   const ruler = createRuler({ world, region, sources, wm: world.wm, commit, orientation, active: toolActive('VIEW3D_GGT_ruler') });
   const annotate = createAnnotate({

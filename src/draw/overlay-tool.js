@@ -35,7 +35,7 @@ export function createToolOverlay(view) {
     const ctx = canvas.getContext('2d');
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, width, height);
-    if (!callbacks.size || view.state.cameraView || !view.state.overlays) return;
+    if (!callbacks.size || !view.state.overlays) return;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const region = viewProjection(view);
     for (const draw of callbacks) {

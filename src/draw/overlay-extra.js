@@ -303,8 +303,8 @@ export function createExtrasOverlay(scene, { objects, instances = () => [], colo
     out[0] = c[0]; out[1] = c[1]; out[2] = c[2]; out[3] = 1;
   };
 
-  // Fills a shape's uniforms from its object (Cameras/Lights/Empties::object_sync).
-  function update(data) {
+  // Fills a shape's uniforms from its object (Cameras/Lights/Empties::object_sync), as `through` sees it.
+  function update(data, through = scene.activeCamera) {
     const { entry, shape, matrix: m, color } = data, node = entry.node;
     wireColor(entry.instance?.instancer ?? node, entry.kind, color);
     if (entry.kind === 'camera') {
@@ -313,15 +313,15 @@ export function createExtrasOverlay(scene, { objects, instances = () => [], colo
       right.normalize(); up.normalize(); forward.normalize();
       setMatrix(m, right, up, forward, position);
       // BKE_camera_view_frame_ex at its Display Size: the frame projected to depth 1.
-      const size = node.metadata?.display_size ?? 1, ratio = aspect(), drawsize = size / 2, { fov, vertical } = outputFrame(node);
+      const size = node.metadata?.display_size ?? 1, ratio = aspect(), drawsize = size / 2, { fov, vertical, shift: [sx, sy] = [0, 0] } = outputFrame(node);
       const ortho = node.mode === Camera.ORTHOGRAPHIC_CAMERA;
-      const fac = ortho ? 0.5 * Math.abs((node.orthoRight ?? 1) - (node.orthoLeft ?? -1)) : drawsize;
+      const fac = ortho ? 0.5 * (node.metadata?.orthoScale ?? Math.abs((node.orthoRight ?? 1) - (node.orthoLeft ?? -1))) : drawsize;
       const depth = ortho ? -size : -drawsize / Math.tan(fov / 2);
       const facx = fac * (vertical ? ratio : 1), facy = fac * (vertical ? 1 : 1 / ratio);
       const cx = facx / Math.abs(depth), cy = facy / Math.abs(depth);
       // Looked through (camera view), only its frame is drawn, without the wires behind it (overlay_camera.hh).
-      const lookedThrough = scene.activeCamera === node && !entry.instance;
-      if (shape === 'camera_frame') { m[3] = cx; m[7] = cy; m[11] = 0; m[15] = 0; }
+      const lookedThrough = through === node && !entry.instance;
+      if (shape === 'camera_frame') { m[3] = cx; m[7] = cy; m[11] = sx * cx; m[15] = sy * cy; }
       else if (lookedThrough) m[3] = m[7] = 0;
       else {
         const tria_size = 0.7 * drawsize / Math.abs(depth), tria_margin = 0.1 * drawsize / Math.abs(depth);
@@ -398,7 +398,7 @@ export function createExtrasOverlay(scene, { objects, instances = () => [], colo
         // An instance selects its instancer, as Blender selects a dupli's.
         const node = entry.instance?.instancer ?? entry.node;
         if (!node || !visible(node) || !accept(node)) continue;
-        const points = pickSegments(entry);
+        const points = pickSegments(entry, camera);
         for (let i = 0; i < points.length; i += 2) {
           const a = project(points[i]), b = points[i + 1] ? project(points[i + 1]) : a;
           const d = segmentDistance(x, y, a, b) - (entry.kind === 'light' && !points[i + 1] ? 12 : 0);
@@ -416,9 +416,9 @@ export function createExtrasOverlay(scene, { objects, instances = () => [], colo
   };
 
   // World-space line segments (pairs of Babylon points) that select an extra; a lone point is a light's icon.
-  function pickSegments(entry) {
+  function pickSegments(entry, camera) {
     const data = entry.meshes[0].metadata.extra;
-    update(data);
+    update(data, camera);
     const m = data.matrix, point = (x, y, z) => new Vector3(
       m[0] * x + m[4] * y + m[8] * z + m[12], m[2] * x + m[6] * y + m[10] * z + m[14], m[1] * x + m[5] * y + m[9] * z + m[13]);
     if (entry.kind === 'light') return [point(0, 0, 0), null];
@@ -427,9 +427,10 @@ export function createExtrasOverlay(scene, { objects, instances = () => [], colo
       return Array.from({ length: lines.length / 3 }, (_, i) => point(lines[i * 3], lines[i * 3 + 1], lines[i * 3 + 2]));
     }
     if (entry.kind === 'camera') {
-      const depth = Math.abs(data.color[3]), cx = m[3] * depth, cy = m[7] * depth;
-      const corners = [[-cx, -cy], [-cx, cy], [cx, cy], [cx, -cy]].map(([x, y]) => point(x, y, -depth));
-      return corners.flatMap((c, i) => [c, corners[(i + 1) % 4], c, point(0, 0, 0)]);
+      const depth = Math.abs(data.color[3]), cx = m[3] * depth, cy = m[7] * depth, ox = m[11] * depth, oy = m[15] * depth;
+      const corners = [[-cx, -cy], [-cx, cy], [cx, cy], [cx, -cy]].map(([x, y]) => point(ox + x, oy + y, -depth));
+      // Looked through, only the frame is drawn and selects.
+      return corners.flatMap((c, i) => [c, corners[(i + 1) % 4], ...(camera === entry.node ? [] : [c, point(0, 0, 0)])]);
     }
     const size = m[15];
     return SHAPES[data.shape === 'arrows' ? 'plain_axes' : data.shape]().filter((v) => v[3] === VCLASS.EMPTY_SCALED || v[3] === VCLASS.NONE).map(([x, y, z]) => point(x * size, y * size, z * size));

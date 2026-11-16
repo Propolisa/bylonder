@@ -30,7 +30,7 @@ import { viewTransforms, viewTransformOf, looks } from './scene/render-babylon.j
 import { createDisplayLut } from '../render/display-lut.js';
 import { BlenderAnimation } from './animation/anim-blender.js';
 import { Camera, MultiMaterial, VertexData } from '@babylonjs/core';
-import { setOrthoView } from '../io_scene_babylon/runtime/ortho-scale.js';
+import { fitsOrthoScale, setOrthoView } from '../io_scene_babylon/runtime/ortho-scale.js';
 import { setOutputFrame } from '../runtime/object-transform.js';
 import { armatureData, setArmatureData } from './armature/armature.js';
 import { armatureChanged } from '../draw/overlay-armature.js';
@@ -99,6 +99,12 @@ function shiftLens(camera) {
     m[row * 4 + 1] -= y * m[row * 4 + 3];
   }
   projection.markAsUpdated();
+}
+// A Blender camera's Type and Orthographic Scale on its Babylon camera (a panoramic one draws as a perspective one).
+function setProjection(camera, data) {
+  const ortho = dnaGet('Camera', data, 'type') === 'ORTHO';
+  camera.mode = ortho ? Camera.ORTHOGRAPHIC_CAMERA : Camera.PERSPECTIVE_CAMERA;
+  if (ortho) fitsOrthoScale(camera).metadata = { ...camera.metadata, orthoScale: dnaGet('Camera', data, 'ortho_scale') };
 }
 // A camera's field of view along the side it fits and its Shift (clip space).
 function setLens(camera, { fov, vertical }, shift) {
@@ -941,6 +947,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     fitCamera(camera, size) {
       const frame = api.cameraFrame(camera, size);
       if (!frame) return;
+      setProjection(camera, blender.data(blenderCameraOf(camera)));
       setOutputFrame(camera, frame);
       setLens(camera, frame, frame.shift);
       setOrthoView(camera, null);
@@ -952,6 +959,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       const ob = blenderCameraOf(camera);
       if (!ob) return null;
       const data = blender.data(ob);
+      setProjection(camera, data);
       setOutputFrame(camera, blender.cameraViewFov(ob, output.width, output.height));
       setLens(camera, view, view.shift);
       setOrthoView(camera, camera.mode === Camera.ORTHOGRAPHIC_CAMERA ? view.half : null);

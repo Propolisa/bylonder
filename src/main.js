@@ -1038,16 +1038,11 @@ const blenderKeymaps = (event) => inArea(view3dArea, () => view3dKeys(event));
 // A menu of the 3D View opened as wm.call_menu opens it, at a point of the page.
 world.callMenu = (name, at) => inArea(view3dArea, () => view3dArea.menu(name)?.(at));
 // The handler stack below modal handlers: the gizmo map, the mode's own keymaps, then Blender's and Bylonder's.
-// Through the scene camera only Blender's keymaps work.
 // The gizmo map's handler comes first: a press on the tool's gizmo is the gizmo's (Babylon's transform gizmos drag
 // themselves; the tools' gizmos run their keymaps).
 const gizmoState = (event) => (world.editMode.active || !TOOL_GIZMOS[world.toolsystem.active("OBJECT").idname] ? tools.gizmoState(event) : editor.gizmoState(event));
 const gizmoKeys = (event) => (event.type === "leftmouse" && event.value === "PRESS" && !!editor.gizmoState(event).highlight) || tools.keymap(event);
-const keyLayers = () => {
-  const view = activeView();
-  if (!view || view.state.cameraView) return [blenderAreas.areaKeys, blenderKeymaps, bylonderKeys];
-  return [blenderAreas.areaKeys, gizmoKeys, world.editMode.keymap, blenderKeymaps, bylonderKeys];
-};
+const keyLayers = () => (activeView() ? [blenderAreas.areaKeys, gizmoKeys, world.editMode.keymap, blenderKeymaps, bylonderKeys] : [blenderAreas.areaKeys, blenderKeymaps, bylonderKeys]);
 
 let last = 0, lastRest = "";
 // Once per animation frame, before views decide whether to render.

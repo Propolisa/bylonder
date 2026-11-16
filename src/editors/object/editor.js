@@ -135,7 +135,7 @@ export function createEditor(world, views, history, changed, capture) {
     const candidates = objects.filter((n) => selectable(n) && n.isEnabled());
     selectList(candidates.filter((n) => OPS[op](selection.has(n), drawnInside(n))));
   };
-  const inView = (event) => !!event.view && !event.view.state.cameraView && !world.editMode?.active;
+  const inView = (event) => !!event.view && !world.editMode?.active;
   window.addEventListener("mousemove", track);
   setMode("select");
   return {

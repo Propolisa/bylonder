@@ -245,6 +245,8 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     // Camera view shows the scene's output framed in the region, the passepartout darkening around it.
     const area = state.cameraView && world.renderSettings && world.view3dArea?.(view);
     const frame = area ? world.mainSync?.viewCamera(view.camera, outputSize(world.renderSettings.state.render), area.camera(), { width, height }) : null;
+    // The camera's Type may have just changed.
+    if (frame) nameView();
     // view3d_draw.cc drawviewborder: the passepartout and its outline always, the dashed guide with the overlays.
     cameraBorder.hidden = !frame;
     if (frame) {
