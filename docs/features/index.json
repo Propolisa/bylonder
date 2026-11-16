@@ -550,7 +550,7 @@
    "Hover docs and completion come from TypeScript in the code editor; go to definition from a behaviour to the objects using it is the user count's list, not the editor's.",
    "A behaviour that holds several sounds keeps them as a group of the object's custom properties, which Blender's Custom Properties panel shows but does not edit.",
    "Physics (`physics: 'havok'`) runs Blender's rigid bodies (type, Animated, mass, shape, friction, bounciness) on Havok; rigid body constraints, collision margins, damping and the Rigid Body World's settings are not read yet.",
-   "An exported camera keeps its render frame whole in any view: a `camera.fov` that game code sets is taken along the side the frame was exported for, not as Babylon's own field of view (the café's Framing system reads it back to fit).",
+   "An exported camera keeps its render frame whole in any view: a `camera.fov` that game code sets is taken along the side the frame was exported for, not as Babylon's own field of view (the café's Framing system reads it back to set its own).",
    "The café's reach runs the barista's IK on Blender's own constraint kernels, a GPL unit in the export (units.json lists it): a licence-free export of the café needs that unit replaced."
   ],
   "page": "docs/features/game-code.md",

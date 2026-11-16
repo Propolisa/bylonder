@@ -543,21 +543,30 @@ try {
         const after = await game();
         assert.ok(Math.hypot(after.palm[0] - before.palm[0], after.palm[2] - before.palm[2]) > 0.05, `${where}: a drag on the right half moves the hand: ${before.palm} to ${after.palm}`);
       };
-      // An upright phone frames the café in portrait from Play on, the framing settling for good (the owner saw it turn
-      // to landscape about a second in), and the board's Orientation forces each framing.
-      const framing = (set) => opened.bylonder((b, set) => {
-        const handle = b.game.world.game.get({ name: "Framing" });
-        if (set) handle.orientation = set;
-        return { orientation: handle.orientation, portrait: handle.portrait };
-      }, set);
-      for (let i = 0; i < 8; i++) {
+      // An upright phone shows the café from behind the barista, never rolled: the waiting rock up the screen above
+      // him, from Play on (the owner saw the view turned against the page). The board's Orientation locks the screen
+      // where it can, and else asks to turn the phone.
+      const view = () => opened.bylonder((b) => {
+        const scene = b.game.blend.scene, camera = scene.activeCamera, engine = scene.getEngine(), V = camera.position.constructor;
+        const node = (name) => [...b.game.world.instances.values()].find((i) => i.definition.name === name)?.entity.node;
+        const screen = (n) => V.Project(n.getAbsolutePosition(), scene.getTransformMatrix().constructor.Identity(), scene.getTransformMatrix(), camera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight()));
+        const barista = screen(node("Barista")), rock = screen(node("Rock")), up = camera.getDirection(V.Up());
+        return { above: barista.y - rock.y, height: engine.getRenderHeight(), roll: Math.abs(up.x) };
+      });
+      for (let i = 0; i < 4; i++) {
         await opened.page.waitForTimeout(500);
-        assert.deepEqual(await framing(), { orientation: "Auto", portrait: true }, `an upright phone stays in portrait (${(i + 1) / 2} s after Play)`);
+        const { above, height, roll } = await view();
+        assert.ok(above > height * 0.05 && roll < 0.01, `an upright phone shows the rock up the screen from the barista, unrolled (${(i + 1) / 2} s after Play): ${above} px above, roll ${roll}`);
       }
-      for (const [orientation, portrait] of [["Landscape", false], ["Portrait", true], ["Auto", true]]) {
-        await framing(orientation);
+      const orientation = (set) => opened.bylonder((b, set) => {
+        const handle = b.game.world.game.get({ name: "Orientation" });
+        if (set) handle.orientation = set;
+        return { orientation: handle.orientation, hinted: handle.hinted };
+      }, set);
+      for (const [set, hinted] of [["Landscape", true], ["Portrait", false], ["Auto", false]]) {
+        await orientation(set);
         await opened.page.waitForTimeout(300);
-        assert.deepEqual(await framing(), { orientation, portrait }, `Orientation ${orientation} frames the café ${portrait ? "in portrait" : "in landscape"}`);
+        assert.deepEqual(await orientation(), { orientation: set, hinted }, `Orientation ${set} ${hinted ? "asks to turn the phone where the screen cannot be locked" : "needs no turn"}`);
       }
       await plays("in Focus Mode");
       // Back to the layout: the area still belongs to the game's fingers.

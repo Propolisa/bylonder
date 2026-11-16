@@ -4,13 +4,16 @@ import { PhysicsMotionType, Vector3 } from '@babylonjs/core';
 import { defineBehavior } from 'bylonder';
 import Rock from './rock.js';
 
+/** The physics category of a held mug, which the hand holding it passes through. */
+export const HELD = 1 << 30;
+
 export default defineBehavior({
   name: 'Cup',
   create({ entity, game }) {
     const node = entity.node, body = node.physicsBody;
     const { min, max } = node.getHierarchyBoundingVectors(true);
     const radius = (max.x - min.x) / 2, height = max.y - min.y;
-    let served = false;
+    let served = false, membership = 0;
     body?.setCollisionCallbackEnabled(true);
     const landed = body?.getCollisionObservable().add(({ collidedAgainst }) => {
       if (served || body.getMotionType() !== PhysicsMotionType.DYNAMIC) return;
@@ -29,15 +32,19 @@ export default defineBehavior({
         node.renderOutline = on;
         node.outlineWidth = 0.008;
       },
-      /** Held: moved by the hand, pushing what it meets. */
+      /** Held: moved by the hand, pushing what it meets, but not the hand. */
       grab() {
-        body?.setMotionType(PhysicsMotionType.ANIMATED);
-        if (body) body.disablePreStep = false;
+        if (!body) return;
+        body.setMotionType(PhysicsMotionType.ANIMATED);
+        body.disablePreStep = false;
+        membership = body.shape.filterMembershipMask;
+        body.shape.filterMembershipMask = HELD;
       },
       /** Let go with the hand's velocity. @param {Vector3} velocity */
       release(velocity) {
         if (!body) return;
         body.disablePreStep = true;
+        body.shape.filterMembershipMask = membership;
         body.setMotionType(PhysicsMotionType.DYNAMIC);
         body.setLinearVelocity(velocity);
       },

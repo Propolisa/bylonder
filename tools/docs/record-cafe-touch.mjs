@@ -1,6 +1,6 @@
 // Records docs/features/game-code.md's touch media: a pour in Rock Hard Café played by touch on an upright phone. The
 // right thumb's strokes, a trackpad's, take the hand where the headless test takes it (tests/rock-hard-cafe-wasm.test.js):
-// round behind the jars and swung onto the machine's button from its side, over the brewed mug, then, the left thumb
+// round behind the jars and pushed onto the machine's button from the barista's side, over the brewed mug, then, the left thumb
 // holding Grab, drawn back round the sugar jar and onto the near side of the rock's top, where letting go serves it.
 // usage: node tools/docs/record-cafe-touch.mjs
 import { record } from "./record.mjs";
@@ -60,11 +60,11 @@ await record("game-code", { example: "rock-hard-cafe", node: "Rock", size: PHONE
   await fingers.tap(rest);
   await r.pause(600);
   await r.gif("touch", undefined, async () => {
-    // Behind the jars, on the barista's side of the counter, to the machine's side of its button, then onto it.
+    // Behind the jars, on the barista's side of the counter, in front of the machine's button, then onto it.
     for (const point of [[-0.2, -0.98], [1.0, -0.98]]) await reach(() => where(point));
-    await reach(() => where("button", [0.25, 0]));
+    await reach(() => where("button", [0, -0.25]));
     await r.pause(800);
-    await reach(() => where("button", [-0.05, 0]), { steps: 4 });
+    await reach(() => where("button", [0, 0.05]), { steps: 4 });
     await app.until((b) => [...b.game.world.instances.values()].some((i) => i.definition.name === "Cup"), null, 20000);
     await r.pause(5500);
     await reach(() => where("cup"));

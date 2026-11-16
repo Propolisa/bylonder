@@ -14,7 +14,7 @@ solved live in the page; the cups and jars are Blender rigid bodies the game run
   properties (Object properties > Behaviors); what Havok moves is each object's rigid body (Physics properties >
   Rigid Body).
 - **Code.** `src/behaviors/` (Rock, Barista, Cup, Machine, Impact, Spawner), `src/systems/` (Shift, Subtitles, Hud, Touch,
-  Framing, Music), `src/sounds.js` (the machine's and the impacts' sounds, made in code), `src/game.js`.
+  Framing, Orientation, Music), `src/sounds.js` (the machine's and the impacts' sounds, made in code), `src/game.js`.
 - **Content.** `content/dialogue/cafe.ink`, the rocks' noises and lines, an Ink story; `content/music/cafe.ogg`, the
   music.
 - **Play.** The example opens on the Game workspace. Play, then the mouse (or the right stick) moves the hand over the

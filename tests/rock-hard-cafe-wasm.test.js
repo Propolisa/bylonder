@@ -27,9 +27,9 @@ await game.step({ seconds: 1 });
 const cups = () => [...game.world.instances.values()].filter((i) => i.definition.name === 'Cup').map((i) => i.handlers);
 assert.equal(cups().length, 0, 'the machine waits to be asked');
 assert.equal(machine.doing, 'idle', 'its button glows ready');
-// A slap on the button: the hand swung in from the button's side onto its face.
-await reachTo(button.add(new Vector3(0.25, 0, 0)), 4);
-await reachTo(button.add(new Vector3(-0.05, 0, 0)), 0.4);
+// A slap on the button: the hand brought in front of its face, on the barista's side, then pushed onto it.
+await reachTo(button.add(new Vector3(0, 0, -0.25)), 4);
+await reachTo(button.add(new Vector3(0, 0, 0.05)), 0.4);
 assert.equal(machine.doing, 'grinding', 'a slap on the button starts a brew');
 await reachTo(new Vector3(0.3, 0, -0.85), 0.5);
 await game.step({ seconds: 9 });

@@ -7,7 +7,7 @@ import { AdvancedDynamicTexture, Control, Ellipse, StackPanel, TextBlock } from 
 import Shift from './shift.js';
 import Music from './music.js';
 import Touch from './touch.js';
-import Framing, { ORIENTATIONS } from './framing.js';
+import Orientation, { ORIENTATIONS } from './orientation.js';
 import { look, pill, px } from '../look.js';
 
 const HELP = {
@@ -39,7 +39,7 @@ export default defineSystem({
       const choice = pill(`Orientation ${name}`);
       choice.text.text = name;
       choice.panel.isPointerBlocker = true;
-      choice.panel.onPointerClickObservable.add(() => { const framing = game.get(Framing); if (framing) framing.orientation = name; });
+      choice.panel.onPointerClickObservable.add(() => { const setting = game.get(Orientation); if (setting) setting.orientation = name; });
       return { name, ...choice };
     });
     for (const item of [label, ...choices]) menu.addControl(item.panel);
@@ -74,9 +74,9 @@ export default defineSystem({
         const music = game.get(Music);
         mute.isVisible = !!music?.track;
         note.alpha = music?.muted ? 0.4 : 1;
-        const framing = game.get(Framing);
-        gear.isVisible = !!framing;
-        for (const choice of choices) choice.panel.background = choice.name === framing?.orientation ? look.accent : look.panel;
+        const setting = game.get(Orientation);
+        gear.isVisible = !!setting;
+        for (const choice of choices) choice.panel.background = choice.name === setting?.orientation ? look.accent : look.panel;
         const how = input.touch ? (game.get(Touch)?.dragged ? '' : HELP.touch) : served ? '' : HELP.keys;
         if (help.text.text !== how) { help.text.text = how; size(); }
         help.panel.isVisible = !!how;

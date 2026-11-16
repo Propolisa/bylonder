@@ -145,8 +145,10 @@ machine = parts("Machine", [("box", (0.34, 0.18, 0.4), (0, 0, 0.2), 0), ("box", 
                             ("box", (0.24, 0.15, 0.02), (0, 0.2, 0.01), 1)], (-0.55, 0.5, COUNTER_TOP))
 machine.data.materials.append(CHROME)
 machine.data.materials.append(material("Machine Black", (0.02, 0.02, 0.02, 1), 0.4))
-button = cylinder("Machine Button", 0.05, 0.03, (-0.745, 0.5, COUNTER_TOP + 0.2), material("Button Orange", (0.95, 0.35, 0.05, 1), 0.4))
-button.rotation_euler.y = math.radians(90)
+# The button on the machine's face to the barista, beside the group head, at the height his hand moves at, where the
+# camera behind him sees it.
+button = cylinder("Machine Button", 0.065, 0.03, (-0.45, 0.605, COUNTER_TOP + 0.2), material("Button Orange", (0.95, 0.35, 0.05, 1), 0.4))
+button.rotation_euler.x = math.radians(90)
 tray = link(bpy.data.objects.new("Tray Spot", None))
 tray.empty_display_type, tray.empty_display_size, tray.location = "CIRCLE", 0.06, (-0.55, 0.7, COUNTER_TOP + 0.02)
 GLASS = material("Jar Glass", (0.75, 0.85, 0.82, 1), 0.1)
@@ -380,16 +382,16 @@ for ob, kind in ((counter, "wood"), (pole, "wood"), (bpy.data.objects["Ground"],
 behaviors(trailhead, Spawner={"prefabs": {str(i): c for i, c in enumerate(rock_kinds.values())}, "every": 3.0})
 behaviors(barista, Character={"speed": 1.5, "radius": 0.16, "feet": True, "gaze": True, "lean": True}, Barista={})
 behaviors(cup, Cup={}, Impact={"material": "ceramic", "breaks": broken})
-# The camera, high over the counter, just behind the barista's head, looking almost straight down: the whole counter top in view,
-# the barista's head and shoulders at the frame's bottom edge, the waiting rock across the counter, the brook in a corner.
+# The camera, above and behind the barista, looking down at him the way he faces, toward the rocks: the counter across
+# the frame, the waiting rock beyond it and the trailhead they come from up the frame, never rolled.
 # The Play Area: the counter, the barista's reach and the rock's spot, which the game's camera keeps in view whatever the
 # shape of the view (src/systems/framing.js).
 area = link(bpy.data.objects.new("Play Area", None))
 area.empty_display_type, area.empty_display_size, area.location, area.scale = "CUBE", 1.0, (0.0, 0.2, 0.5), (1.25, 0.65, 0.5)
 camera = bpy.data.objects.new("Camera", bpy.data.cameras.new("Camera"))
 camera.data.lens = 40
-camera.location = (0.0, 0.6, 5.2)
-camera.rotation_euler = (math.radians(5), 0, math.pi)
+camera.location = (0.0, 2.4, 4.0)
+camera.rotation_euler = (math.radians(35), 0, math.pi)
 link(camera)
 scene.camera = camera
 

@@ -50,7 +50,7 @@ limits:
   - Hover docs and completion come from TypeScript in the code editor; go to definition from a behaviour to the objects using it is the user count's list, not the editor's.
   - A behaviour that holds several sounds keeps them as a group of the object's custom properties, which Blender's Custom Properties panel shows but does not edit.
   - Physics (`physics: 'havok'`) runs Blender's rigid bodies (type, Animated, mass, shape, friction, bounciness) on Havok; rigid body constraints, collision margins, damping and the Rigid Body World's settings are not read yet.
-  - An exported camera keeps its render frame whole in any view: a `camera.fov` that game code sets is taken along the side the frame was exported for, not as Babylon's own field of view (the café's Framing system reads it back to fit).
+  - An exported camera keeps its render frame whole in any view: a `camera.fov` that game code sets is taken along the side the frame was exported for, not as Babylon's own field of view (the café's Framing system reads it back to set its own).
   - The café's reach runs the barista's IK on Blender's own constraint kernels, a GPL unit in the export (units.json lists it): a licence-free export of the café needs that unit replaced.
 ---
 # Game Code
@@ -96,19 +96,25 @@ opens on the Game workspace, the 3D View beside the Game area.
 
    ![The café playing in the Game area](../media/features/game-code/play.gif)
 
-   On an upright phone the camera turns so the counter runs along the screen. The round button beside the mute
-   button opens the game's settings: Orientation is Auto (portrait while the view is taller than wide), Portrait or
-   Landscape. The Framing system starts each frame
-   from the camera as authored (`game.camera.authored`): it keeps its direction, moves sideways from its place to
-   centre the play area and fits the field of view to it, so moving or turning the camera in the 3D View moves the
-   café's view, while a lens edit is not shown (the header says the game's code sets the field of view).
+   The camera looks down at the barista from above and behind him, the way he faces, toward the rocks: up the screen
+   is always away from the player, upright or sideways, and W walks toward the rocks. The Framing system starts each
+   frame from the camera as authored (`game.camera.authored`): it keeps its direction, takes a 48 degree field of view
+   along the view's longer side and moves across, up and back from its place until the play area just fits (the
+   counter's width on an upright phone, its depth on a wide view), the room to spare going above it, so moving or
+   turning the camera in the 3D View moves the café's view, while a lens edit is not shown (the header says the game's
+   code sets the field of view). The orange button on the machine's face breathes until its first slap. The round
+   button beside the
+   mute button opens the game's settings: Orientation is Auto (turning the phone reflows the page and the view),
+   Portrait or Landscape, which lock the screen to it where the browser can (fullscreen, as the café plays on a phone)
+   and else ask you to turn the phone. The hand stops at the machine: its palm is a Havok body that chases where you
+   point, and the arm reaches for that body.
 
 ## Project files
 
 - [cafe.py](../../examples/rock-hard-cafe/cafe.py): builds the café, its prefabs, sounds, rigid bodies, the barista's
   reach constraints and the behaviours in Blender 5.2.
 - [src/behaviors/](../../examples/rock-hard-cafe/src/behaviors/): Rock, Barista, Cup, Machine and Spawner.
-- [src/systems/](../../examples/rock-hard-cafe/src/systems/): Shift, Subtitles, Hud and Framing.
+- [src/systems/](../../examples/rock-hard-cafe/src/systems/): Shift, Subtitles, Hud, Touch, Framing, Orientation and Music.
 - [src/game.js](../../examples/rock-hard-cafe/src/game.js): the composition.
 - [content/dialogue/cafe.ink](../../examples/rock-hard-cafe/content/dialogue/cafe.ink): the rocks' lines, an Ink story.
 - Recorded by [record-game-code.mjs](../../tools/docs/record-game-code.mjs).
