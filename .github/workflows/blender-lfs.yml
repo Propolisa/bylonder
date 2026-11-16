@@ -1,0 +1,39 @@
+name: Blender LFS datafiles
+
+# Blender's LFS datafiles at the manifest's tag, cached on main as blender-lfs-<tag>, the key blender-wasm.yml restores:
+# a branch reads the caches main saved, so a first module build on a new branch does not depend on Blender's LFS
+# server, which fails at times.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [tools/blender-port/manifest.json, .github/workflows/blender-lfs.yml]
+
+jobs:
+  lfs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Blender tag
+        id: blender
+        run: echo "tag=$(python3 -c "import json; print(json.load(open('tools/blender-port/manifest.json'))['blender'])")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        id: cache
+        with:
+          path: work/blender-lfs
+          key: blender-lfs-${{ steps.blender.outputs.tag }}
+      # As configure_host.sh fetches them, retried from no clone when the server fails.
+      - name: Fetch the datafiles
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          LFS=https://projects.blender.org/blender/blender.git/info/lfs
+          for i in 1 2 3; do
+            rm -rf work/blender
+            GIT_LFS_SKIP_SMUDGE=1 git clone -q --depth 1 --branch "${{ steps.blender.outputs.tag }}" https://github.com/blender/blender.git work/blender
+            git -C work/blender config lfs.url "$LFS"
+            git -C work/blender config "lfs.$LFS.access" none
+            git -C work/blender config lfs.storage "$PWD/work/blender-lfs"
+            (cd work/blender && GIT_TERMINAL_PROMPT=0 git lfs pull --include="release/datafiles/**") && exit 0
+            sleep 60
+          done
+          exit 1
