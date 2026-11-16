@@ -12,12 +12,12 @@ import { drawGeometry } from './mesh.js';
 
 /**
  * An implementation the package ships: it runs an entity on its resolved inputs; `runChain` runs a chain of entities
- * that each read the one before, in one call, giving the last one's outputs; `draw` gives an IR mesh's draw buffers;
- * `detach` lets go of what it holds for an entity a patch replaced or whose objects it made again.
+ * that each read the one before, in one call, giving the last one's outputs; `draw` gives an IR mesh's draw buffers; `detach` lets
+ * go of what it holds for an entity a patch replaced or whose objects it made again; `constant`: it gives one value at every frame.
  * @typedef {Record<string, any> | Promise<Record<string, any>>} Outputs
  * @typedef {{ run(inputs: Record<string, any>, context: { frame: number }, entity: import('./ir.js').Entity): Outputs,
  *   runChain?(run: [Record<string, any>, import('./ir.js').Entity][], context: { frame: number }): Outputs,
- *   draw?(mesh: import('./ir.js').Mesh): Promise<import('./mesh.js').DrawBuffers>, settled?(): Promise<void>, detach?(entity: import('./ir.js').Entity): void }} Evaluator
+ *   draw?(mesh: import('./ir.js').Mesh): Promise<import('./mesh.js').DrawBuffers>, settled?(): Promise<void>, detach?(entity: import('./ir.js').Entity): void, constant?(inputs: Record<string, any>, entity: import('./ir.js').Entity): boolean }} Evaluator
  * @typedef {{ get(path: string): any, write(path: string, value: any): void, set(path: string, value: any): void, frame(id?: string): number, flush?(before: import('./ir.js').Entity): void }} Controls `frame(id)`: the frame an ID shows (its time offset applied); `set`: a write from outside the scheduler's run, whose readers then run; `flush`: what was written placed on the nodes, before an entity runs that may read them
  * What an implementation loads for: the page's scene, the package's URL, the IR, scene.bin's buffers and the properties.
  * @typedef {{ scene: import('@babylonjs/core').Scene, root: string, ir: import('./ir.js').IR, buffers: import('./buffers.js').Buffers, controls: Controls }} Page
@@ -58,7 +58,7 @@ export function createScheduler(ir, page) {
     }
   };
   index();
-  const dirty = new Set(), outputs = new Map(), loaded = new Map();
+  const dirty = new Set(), outputs = new Map(), loaded = new Map(), still = new Set(); // still: reads the frame, gives one value
   // What draws by its implementation, loaded when first drawn; meshes with the modifier kernel's draw step where the
   // package ships it, Blender's kernels loading only for an entity no registered unit runs.
   const by = (/** @type {string} */ name, /** @type {string} */ method) => async (/** @type {any[]} */ ...args) => /** @type {any} */ (await evaluator(name))[method](...args);
@@ -137,8 +137,9 @@ export function createScheduler(ir, page) {
       chain.forEach((k) => outputs.set(k, null));
       controls.flush?.(entities[last]);
       try {
-        const context = { frame: controls.frame(entities[last].id) }, result = found.runChain && chain.length
-          ? found.runChain([...chain, last].map((k) => [resolve(entities[k].inputs, entities[k].id), entities[k]]), context) : found.run(resolve(entities[last].inputs, entities[last].id), context, entities[last]);
+        const context = { frame: controls.frame(entities[last].id) }, inputs = !chain.length && resolve(entities[last].inputs, entities[last].id);
+        if (inputs && found.constant?.(inputs, entities[last])) still.add(last);
+        const result = inputs ? found.run(inputs, context, entities[last]) : /** @type {any} */ (found).runChain([...chain, last].map((k) => [resolve(entities[k].inputs, entities[k].id), entities[k]]), context);
         const after = result instanceof Promise ? result.then((r) => land(last, r)) : land(last, result);
         if (after) return wait(after);
       } catch (error) {
@@ -148,14 +149,13 @@ export function createScheduler(ir, page) {
   };
 
   /** What reads the frame and is not Babylon's own. */
-  const timedLive = () => timed.filter((key) => unitFor(entities[key].type) || !NATIVE.includes(entities[key].implementation ?? ''));
+  const timedLive = () => timed.filter((key) => !still.has(key) && (unitFor(entities[key].type) || !NATIVE.includes(entities[key].implementation ?? '')));
 
   // After Babylon's animation: what reads the frame runs again when it changed, and live values are written over the baked ones where they differ.
   const replay = scene.onAfterAnimationsObservable.add(() => {
     if (controls.frame() !== frame) { frame = controls.frame(); timedLive().forEach(mark); run(); }
-    for (const [key, result] of outputs) for (const [name, target] of Object.entries(entities[key].outputs)) {
+    for (const [key, result] of outputs) for (const [name, target] of Object.entries(entities[key].outputs))
       if (target && 'property' in target && result?.[name] !== undefined && controls.get(target.property) !== result[name]) controls.write(target.property, result[name]);
-    }
   });
 
   // What reads the frame loads its implementation now, to run as the first frame draws (a failed load is reported then).
@@ -177,7 +177,7 @@ export function createScheduler(ir, page) {
       const again = Object.keys(entities).filter((key) => key in replaced || remade(entities[key].implementation ?? ''));
       for (const key of again) {
         /** @type {any} */ (loaded.get(entities[key].implementation ?? ''))?.detach?.(entities[key]);
-        outputs.delete(key);
+        outputs.delete(key); still.delete(key);
         if (replaced[key] === null) delete entities[key];
       }
       for (const [key, entity] of Object.entries(replaced)) if (entity) entities[key] = entity;

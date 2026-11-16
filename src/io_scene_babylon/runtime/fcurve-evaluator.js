@@ -46,8 +46,21 @@ const curves = new WeakMap();
  * @param {object} entity
  */
 export function run({ curve, frame }, context, entity) {
-  if (!curves.has(entity)) curves.set(entity, prepareFCurve({ ...curve, keyframes: unpackKeys(curve.keyframes) }));
-  return { value: curveValue(curve, /** @type {import('./drivers/fcurve.js').FCurve} */ (curves.get(entity)), frame ?? context.frame) };
+  return { value: curveValue(curve, prepared(curve, entity), frame ?? context.frame) };
+}
+
+/** @param {any} curve @param {object} entity @returns {import('./drivers/fcurve.js').FCurve} */
+const prepared = (curve, entity) => curves.get(entity) ?? /** @type {any} */ (curves.set(entity, prepareFCurve({ ...curve, keyframes: unpackKeys(curve.keyframes) })).get(entity));
+
+/**
+ * Whether the F-Curve gives one value at every frame: its keys and their handles at one height, so no interpolation,
+ * easing, extrapolation or cycle leaves it. One height within a float's noise (a millionth): a flat channel of a
+ * captured or baked action is rarely flat to the bit.
+ * @param {Record<string, any>} inputs @param {object} entity
+ */
+export function constant({ curve }, entity) {
+  const { keys } = prepared(curve, entity), height = keys[0]?.co[1], noise = 1e-6 * Math.max(1, Math.abs(height ?? 0));
+  return keys.every((k) => [k.co[1], k.left[1], k.right[1]].every((v) => Math.abs(v - height) <= noise));
 }
 
 /**

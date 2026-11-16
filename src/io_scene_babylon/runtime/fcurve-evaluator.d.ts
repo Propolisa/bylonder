@@ -21,6 +21,13 @@ export function run({ curve, frame }: Record<string, any>, context: {
     value: number;
 };
 /**
+ * Whether the F-Curve gives one value at every frame: its keys and their handles at one height, so no interpolation,
+ * easing, extrapolation or cycle leaves it. One height within a float's noise (a millionth): a flat channel of a
+ * captured or baked action is rarely flat to the bit.
+ * @param {Record<string, any>} inputs @param {object} entity
+ */
+export function constant({ curve }: Record<string, any>, entity: object): boolean;
+/**
  * A curve's value at a frame: an integer or boolean property's (`whole`) rounded, as Blender evaluates its F-Curve.
  * @param {{ whole?: boolean }} input @param {import('./drivers/fcurve.js').FCurve} prepared @param {number} frame
  */
