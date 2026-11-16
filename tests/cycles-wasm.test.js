@@ -1,7 +1,8 @@
 // Cycles as the side module cycles.wasm (src/render/cycles.js, src/port/side-modules.js): loaded into Blender's module
 // on first use, its add-on enabled, and Blender's render operator rendering Window Light (examples/rendering) with it at
 // a few samples into a Render Result read through the view transform (wasm/render-api.cc), as desktop Blender 5.2's
-// Cycles renders it on the CPU (tools/blender-reference/cycles-window-light.py), and again the same.
+// Cycles renders it on the CPU (tools/blender-reference/cycles-window-light.py), and again the same; and faces of two
+// materials each in its own.
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
@@ -11,6 +12,7 @@ const { blenderMain, blenderModule } = await import('../src/bmesh/bmesh-wasm.js'
 await import('../src/python/bpy_interface.js');
 const { pointerStruct, setContextPointer, structFind } = await import('../src/python/bpy_rna.js');
 const { loadCycles } = await import('../src/render/cycles.js');
+const { files } = await import('../src/port/wasm.js');
 
 const { exports: x } = blenderModule;
 const OPERATOR_FINISHED = 1 << 2;
@@ -53,6 +55,37 @@ const differences = [0, 1, 2].map((c) => rgba.reduce((sum, v, i) => (i % 4 === c
 assert.ok(differences.every((d) => d < 2), `the render matches desktop Blender's: mean differences ${differences.map((d) => d.toFixed(2)).join(', ')} of 255`);
 // Rendering again (F12 twice) renders the same image: its session's new thread starts clean on the memory the first freed.
 for (let again = 0; again < 2; again++) assert.deepEqual(render(), rgba, 'a render again gives the same image');
+// Each face its own material: eight strips, red and blue by their material index, filling the camera's view across.
+// Cycles (the side module) reads the faces' material_index through Blender's attribute API in the module, by C++
+// types the two share.
+const PATTERN = [0, 1, 1, 0, 1, 0, 0, 1];
+files.set('/strips.py', new TextEncoder().encode(`import bpy
+scene = bpy.context.scene
+for ob in list(scene.objects):
+    bpy.data.objects.remove(ob)
+mesh = bpy.data.meshes.new('Strips')
+mesh.from_pydata([(x, y, 0) for x in range(9) for y in (0, 1)], [], [(2 * i, 2 * i + 2, 2 * i + 3, 2 * i + 1) for i in range(8)])
+for name, color in (('Red', (1, 0, 0, 1)), ('Blue', (0, 0, 1, 1))):
+    mat = bpy.data.materials.new(name)
+    mat.use_nodes = True
+    nodes = mat.node_tree.nodes
+    nodes.clear()
+    emission = nodes.new('ShaderNodeEmission')
+    emission.inputs['Color'].default_value = color
+    mat.node_tree.links.new(emission.outputs[0], nodes.new('ShaderNodeOutputMaterial').inputs['Surface'])
+    mesh.materials.append(mat)
+mesh.polygons.foreach_set('material_index', ${JSON.stringify(PATTERN)})
+mesh.update()
+scene.collection.objects.link(bpy.data.objects.new('Strips', mesh))
+camera = bpy.data.objects.new('Camera', bpy.data.cameras.new('Camera'))
+camera.data.type, camera.data.ortho_scale, camera.location = 'ORTHO', 8, (4, 0.5, 5)
+scene.collection.objects.link(camera)
+scene.camera = camera
+`));
+main.run('script.python_file_run', { filepath: '/strips.py' });
+const strips = render(), at = (x, y) => strips.slice((y * 64 + x) * 4, (y * 64 + x) * 4 + 3);
+const seen = PATTERN.map((_, i) => { const [r, , b] = at(i * 8 + 4, 24); return r > b ? 0 : 1; });
+assert.deepEqual(seen, PATTERN, `each strip renders its own material: ${seen.join('')}, not ${PATTERN.join('')}`);
 x.free(size);
-console.log(`Cycles renders Window Light as desktop Blender does, again too: mean differences ${differences.map((d) => d.toFixed(2)).join(', ')} of 255 per channel`);
+console.log(`Cycles renders Window Light as desktop Blender does, again too: mean differences ${differences.map((d) => d.toFixed(2)).join(', ')} of 255 per channel; each face its own material`);
 process.exit(0);
