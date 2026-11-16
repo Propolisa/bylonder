@@ -13,6 +13,7 @@ import { createClips, isClip } from './clips.js';
 import { collectionKey, collectionTree, objectsIn, showing } from './collections.js';
 import { useDualQuaternionSkinning } from './dual-quaternion-skinning.js';
 import { sharedIR } from './shared-resources.js';
+import { fitCascades } from './cascades.js';
 
 // A 32-bit float's step at 1.
 const FLOAT_EPSILON = 1.1920928955078125e-7;
@@ -310,6 +311,7 @@ export class BlendScene {
     // A frame's writes place each node they move once, after the animation and what reads the frame have run, and
     // before anything draws or game code reads the nodes.
     this.#placed = [scene.onAfterAnimationsObservable.add(() => this.#flush()), scene.onBeforeRenderObservable.add(() => this.#flush())];
+    this.#unfit = fitCascades(scene);
     this.#channels(knobs);
     this.#indexKnobs();
     this.playhead.offsetOf = (/** @type {any} */ target) => this.#targetOffsets.get(target) ?? 0;
@@ -706,6 +708,8 @@ export class BlendScene {
   #partOf = new Map();
   /** @type {any[]} */
   #placed = [];
+  /** Stops fitting the sun's cascades to the view. */
+  #unfit = () => {};
   /** Places each node the writes since the last time moved, once: a bone by its whole pose, an object by each part written. */
   #flush() {
     if (!this.#placing.size) return;
@@ -728,6 +732,7 @@ export class BlendScene {
     this.scene.onAfterAnimationsObservable.remove(this.#placed[0]);
     this.scene.onBeforeRenderObservable.remove(this.#placed[1]);
     this.#placing.clear();
+    this.#unfit();
     this.#source?.copies.delete(this);
     this.#scheduler?.dispose();
     this.#clips.dispose();
