@@ -5,6 +5,7 @@ import { blenderModule } from '../../bmesh/bmesh-wasm.js';
 import { files } from '../../port/wasm.js';
 import { blendData, pointerStruct, structFind } from '../../python/bpy_rna.js';
 import { loadCycles } from '../../render/cycles.js';
+import { checkThreads } from '../../port/wasm.js';
 
 const { exports: x } = blenderModule;
 
@@ -54,6 +55,7 @@ export async function cyclesSource(world) {
       job = blender.invoke('render.render', {}, { type: 'F12' });
       if (!(job.status & (OPERATOR_RUNNING_MODAL | OPERATOR_FINISHED))) throw Error(job.report || 'Cycles did not render');
       while (x.render_job_running(blender.C, scene())) {
+        checkThreads(x);
         progress?.(0, 1, `Rendering ${Math.round(x.render_job_progress(blender.C, scene()) * 100)}%`);
         await new Promise((resolve) => setTimeout(resolve, 200));
       }

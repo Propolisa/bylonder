@@ -320,6 +320,16 @@ const env = (memory, threads, own = {}) => (memory ? new Proxy({}, { get: (_, na
 export const threadImports = (memory, threads, spawn, own, { buffer, slot, notify }) => ({ wasi_snapshot_preview1: threadFiles(buffer, slot, wasiFor(() => memory), notify),
   env: env(memory, () => threads, own), wasi: { 'thread-spawn': spawn } });
 
+function stopped(memory, message) {
+  const bytes = new Uint8Array(memory.buffer, message >>> 0, 1020).slice();
+  throw Error(`A thread of Blender's stopped: ${new TextDecoder().decode(bytes.subarray(0, bytes.indexOf(0)))}`);
+}
+// Throws what stopped a thread of Blender's that trapped, for a loop that polls a job's thread without waiting on it.
+export function checkThreads(exports) {
+  const at = exports.threads_died_word?.() >>> 0;
+  if (at && Atomics.load(new Int32Array(exports.memory.buffer, at, 1), 0)) stopped(exports.memory, at + 4);
+}
+
 // The module's first thread is the page's: its instance is made first, as the first to instantiate a shared memory's
 // module copies its data in and takes the first thread's thread-locals; the other threads' instances follow. When they
 // fail to start, the module runs on the page's thread alone, as where threads are not available, and `threadsError` says
@@ -332,10 +342,7 @@ export async function instantiate(url, threads = hardwareThreads(), options) {
   const pool = threads + 4, files = threads > 1 && filesBuffer(pool), wasi = wasiFor(() => memory);
   const serve = () => files && serveFiles(files, wasi);
   // A thread stopped on a trap while the page waited for it (wasm/threads.cc): the page's call into the module throws.
-  const died = (at) => {
-    const bytes = new Uint8Array(memory.buffer, at >>> 0, 1020).slice();
-    throw Error(`A thread of Blender's stopped: ${new TextDecoder().decode(bytes.subarray(0, bytes.indexOf(0)))}`);
-  };
+  const died = (message) => stopped(memory, message);
   const imports = { wasi_snapshot_preview1: wasi, env: env(memory, () => threads, { serve_files: serve, threads_died: died }), wasi: { 'thread-spawn': (arg) => spawn(arg) } };
   const instance = await WebAssembly.instantiate(module, imports);
   memory = instance.exports.memory;

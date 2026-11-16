@@ -49,7 +49,7 @@ limits:
   - Bake Lightmaps needs Cycles, so a cross-origin isolated page with threads (see Cycles); it bakes on the CPU, several times slower than desktop Blender.
   - Denoising needs WebGPU; without it the lightmaps are stored as baked, noisy, and the Info editor says so.
   - Resolution is for new lightmaps (1024 px by default): an object with a lightmap image bakes at its size.
-  - A bake of 2048 px or more now and then stops on a crash in Cycles' threads, reported in the Info editor as "A thread of Blender's stopped"; bakes of 1024 px and less have not.
+  - The page waits while each bake runs (Blender's bake on the page's thread, about 2 minutes for a 2048 px lightmap at 64 samples); the status bar names the object baking, and Cancel takes effect after the bake running. Bakes as Blender's job, while the page goes on, wait for a fix in Cycles' threads.
   - uv.lightmap_pack from the UV menu does not run in the app yet; Bake Lightmaps makes its UV map with Lightmap Pack's own function.
   - A lightmap holds diffuse light only: a lightmapped surface loses its glossy reflections in the page, so the example's surfaces are matte.
   - Noise F-Curve modifiers play in a page as sampled keys, not live; Cycles modifiers play live.
@@ -99,8 +99,8 @@ modifiers.
    ![Render properties > Bake > Lightmaps](../media/features/lightmaps/bake-panel.png)
 
 5. **Bake.** Select the room and press Bake Lightmaps. Each selected mesh gets a UV map named Lightmap (Lightmap Pack,
-   where it has none) and is baked by Blender's own bake (Bake Type Diffuse, by its Direct), on threads of its own while
-   the page goes on; the status bar shows how far it is, and its Cancel stops it. The light is denoised by Open Image
+   where it has none) and is baked by Blender's own bake (Bake Type Diffuse, by its Direct), while the page waits;
+   the status bar names the object baking and how far Bake Lightmaps is, and its Cancel stops it after that bake. The light is denoised by Open Image
    Denoise, guided by the surface's normals and colour, then stored over its brightest value as a JPEG packed in the
    .blend, its Intensity that value, and set in Object properties > Lightmap. No bake nodes are left behind. The
    example's room is baked with the turtle's Object properties > Visibility > Ray Visibility > Diffuse off, so the floor

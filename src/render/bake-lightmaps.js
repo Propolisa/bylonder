@@ -5,7 +5,7 @@
 // (examples/meditation/meditation.py); it runs in the module's Python, its arrays passed through the module's files.
 import { __class__, __kwargtrans__, set } from '../bl_py/org.transcrypt.__runtime__.js';
 import { blenderModule, OPERATOR_FINISHED, OPERATOR_RUNNING_MODAL, operatorEnded } from '../bmesh/bmesh-wasm.js';
-import { files, read } from '../port/wasm.js';
+import { checkThreads, files, read } from '../port/wasm.js';
 import { registerClass } from '../python/bpy_rna.js';
 import { registerSettings } from '../runtimes/runtimes.js';
 import { tick } from '../windowmanager/wm-areas.js';
@@ -61,25 +61,30 @@ const literal = (value) => JSON.stringify(value);
 
 class Cancelled extends Error {}
 
-// Blender's bake of the object as its job (object.bake's invoke); `progress(fraction)` as it goes. Cancel is Esc, as in
-// Blender (bake_modal). Resolves once the job ended.
-async function bakeJob(blender, args, progress, cancelled) {
-  // The window's interface is locked while the job's thread bakes, as Blender's Lock Interface does for renders
-  // (docs/blender-boundary.md, Jobs).
-  x.wm_interface_lock(blender.C, true);
-  try {
-    await runJob(blender, args, progress, cancelled);
-  } finally {
-    x.wm_interface_lock(blender.C, false);
+// Whether a bake runs as Blender's job (object.bake's invoke), on a thread of its own while the page goes on, or by its
+// exec on the page's thread, which waits for it. Exec until a long bake's job stops corrupting the allocator now and
+// then (docs/blender-boundary.md, Threads).
+const AS_JOB = false;
+
+// Blender's bake of the object (object.bake); `progress(fraction)` as it goes. As a job, Cancel is Esc, as in Blender
+// (bake_modal); by exec, Cancel waits for the bake running. Resolves once it ended.
+async function bake(blender, args, progress, cancelled) {
+  if (AS_JOB) await bakeJob(blender, args, progress, cancelled);
+  else {
+    // A frame first, so the status bar shows which bake the page waits for.
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    const { status, report: message } = blender.run('object.bake', args);
+    if (!(status & OPERATOR_FINISHED)) throw Error(message || 'Cycles did not bake');
   }
   if (cancelled()) throw new Cancelled();
 }
 
-async function runJob(blender, args, progress, cancelled) {
+async function bakeJob(blender, args, progress, cancelled) {
   const job = blender.invoke('object.bake', args, { type: 'LEFTMOUSE' });
   if (!(job.status & (OPERATOR_RUNNING_MODAL | OPERATOR_FINISHED))) throw Error(job.report || 'Cycles did not bake');
   let stopping = false;
   while (job.op) {
+    checkThreads(x);
     tick();
     if (cancelled() && !stopping) {
       blender.modal(job.op, { type: 'ESC' });
@@ -112,10 +117,11 @@ export async function bakeLightmaps(blender, names, { resolution, samples, progr
       const steps = python(blender, `start(${literal(name)}, ${resolution}, ${samples})`), parts = steps.length + 1;
       for (const [at, step] of steps.entries()) {
         const args = python(blender, `begin(${literal(step)})`);
-        await bakeJob(blender, args, (fraction) => progress((index + (at + fraction) / parts) / names.length, `${name} ${step}`), cancelled);
+        progress((index + at / parts) / names.length, `Baking ${name} (${index + 1} of ${names.length})`);
+        await bake(blender, args, (fraction) => progress((index + (at + fraction) / parts) / names.length, `Baking ${name} (${index + 1} of ${names.length})`), cancelled);
         python(blender, `end(${literal(step)})`);
       }
-      progress((index + steps.length / parts) / names.length, `${name} denoising`);
+      progress((index + steps.length / parts) / names.length, `Denoising ${name} (${index + 1} of ${names.length})`);
       const size = python(blender, `write_inputs(${literal(PIXELS)})`);
       const [light, albedo, normal] = planes(size), denoised = await denoise(light, albedo, normal, size);
       files.set(PIXELS, new Uint8Array((denoised ?? light).slice().buffer));
@@ -150,6 +156,8 @@ export function registerBakeLightmaps({ icon, blender, changed }) {
       let cancel = false;
       const job = startJob(BAKING, () => { cancel = true; });
       baking = true;
+      // The page waits during each bake (by exec): its cursor says so.
+      globalThis.document?.documentElement.style.setProperty('cursor', 'progress');
       const started = performance.now();
       bakeLightmaps(blender(), names, { resolution, samples, cancelled: () => cancel, progress: (fraction, text) => Object.assign(job, { progress: fraction, text }) })
         .then((baked) => {
@@ -158,7 +166,12 @@ export function registerBakeLightmaps({ icon, blender, changed }) {
           if (baked.some((b) => !b.denoised)) report('WARNING', 'Lightmaps not denoised: Open Image Denoise needs WebGPU');
         })
         .catch((error) => report('ERROR', `Bake Lightmaps: ${error.message}`))
-        .finally(() => { baking = false; job.end(); changed(); });
+        .finally(() => {
+          baking = false;
+          globalThis.document?.documentElement.style.removeProperty('cursor');
+          job.end();
+          changed();
+        });
       return set(['FINISHED']);
     },
   }));

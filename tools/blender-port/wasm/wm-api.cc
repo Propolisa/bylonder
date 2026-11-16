@@ -799,10 +799,6 @@ EXPORT(wm_tick) const char *wm_tick(bContext *C)
   return wm_window_handle(C, [](wmWindowManager * /*wm*/, wmWindow * /*win*/) {});
 }
 /* Whether the window has work its main loop would do without input: notifiers queued (a file read's) or timers due. */
-/* The window's interface locked while a job works on data (WM_locked_interface_set): no depsgraph update, events for
- * the operators that bypass the lock only. */
-EXPORT(wm_interface_lock) void wm_interface_lock(bContext *C, bool lock) { WM_locked_interface_set(CTX_wm_manager(C), lock); }
-
 EXPORT(wm_pending) bool wm_pending(bContext *C)
 {
   wmWindowManager *wm = CTX_wm_manager(C);

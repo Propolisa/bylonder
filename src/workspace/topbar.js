@@ -206,7 +206,7 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
   // Running jobs as Blender's status bar shows them (uiTemplateRunningJobs): a progress bar with the job's name, and Cancel.
   const job = ({ name, progress, text }) => {
     const bar = Object.assign(document.createElement('span'), { className: 'bl-job-bar', title: text });
-    bar.append(Object.assign(document.createElement('span'), { style: `width:${(progress * 100).toFixed(1)}%` }), Object.assign(document.createElement('b'), { textContent: `${name} ${Math.round(progress * 100)}%` }));
+    bar.append(Object.assign(document.createElement('span'), { style: `width:${(progress * 100).toFixed(1)}%` }), Object.assign(document.createElement('b'), { textContent: `${text || name} ${Math.round(progress * 100)}%` }));
     const span = Object.assign(document.createElement('span'), { className: 'bl-job' });
     span.append(bar, iconButton('x', 'Cancel', () => send('job-cancel', { name })));
     return span;
