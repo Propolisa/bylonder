@@ -8,6 +8,7 @@ import { createArmatureOverlay } from '../../draw/overlay-armature.js';
 import { createRelationsOverlay } from '../../draw/overlay-relations.js';
 import { paintWeightView } from '../../draw/overlay-paint-weight.js';
 import { hidden } from '../object/identity.js';
+import { runningJobs } from '../../windowmanager/wm-jobs.js';
 
 // Overlays shared by every 3D Viewport (shown per view by view3d.js): the floor grid and axes, the 3D cursor, selected objects' origins
 // and outlines, the extras of cameras, lights and empties, armatures' bones and relationship lines. Each view's header, gizmo and
@@ -75,8 +76,8 @@ export function createViewportStatus({ world, editor, views, send }) {
       ? `${collection}${active ? ' | ' + active.name : ''} | ${editGeometry()} | Objects:${editor.selection.size}/${world.objects.filter(n => !hidden(n)).length} | ${fps}`
       : `${world.mainSync.blender.statistics()} | ${fps}`;
     const viewLayers = cols && { list: cols.viewLayers().map(({ id, name }) => [id, name]), active: cols.layer().id };
-    const next = JSON.stringify([hints, stats, viewLayers]);
-    if (next !== last) { last = next; send('status', { hints, stats, viewLayers }); }
+    const jobs = runningJobs(), next = JSON.stringify([hints, stats, viewLayers, jobs]);
+    if (next !== last) { last = next; send('status', { hints, stats, viewLayers, jobs }); }
   };
   return {
     tick() {

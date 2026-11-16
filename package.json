@@ -43,6 +43,7 @@
     "marked": "15.0.12",
     "mediabunny": "1.61.4",
     "monaco-editor": "0.52.2",
+    "oidn-web": "0.5.0",
     "reka-ui": "2.11.0",
     "splitpanes": "4.1.2",
     "tailwind-merge": "3.7.0",

@@ -225,7 +225,8 @@ Blender (`platform.cc`): the page handles its window each animation frame while 
 polls the job (`wm_jobs_timer`), ends it when it is done (`wm_jobs_handle_finished`) and redraws what its notifiers
 tag. Where the page or a test needs a job's result, it handles the window until no job runs (`wm_jobs_running`), as
 Blender's code tests `WM_jobs_test`; opening a file and undo end the jobs first, as Blender's file read and undo do
-(`main-api.cc`, `undo-api.cc`), since a job may read the Main they free. Where no thread can be had (one thread,
+(`main-api.cc`, `undo-api.cc`), since a job may read the Main they free. A polling loop over a job checks
+the threads-died word itself (`checkThreads`), as only the page's waits see it. Where no thread can be had (one thread,
 below) a job runs on the page's thread to its end when it starts. The pool has a few workers beyond the processor count for such threads, as oneTBB takes one
 per processor. A thread's WASI calls on files are made by the page's thread on the same memory
 (`src/port/thread-files.js`), as a process's threads share its files: a worker's own instance has no file system.

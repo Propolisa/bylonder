@@ -444,16 +444,17 @@ var compileBytes = async (bytes) => {
 };
 var compile = (url) => compiled.get(url.href) ?? compiled.set(url.href, read(url).then(compileBytes)).get(url.href);
 var env = (memory, threads, own = {}) => memory ? new Proxy({}, { get: (_, name) => ({ memory, hardware_threads: () => threads(), ...own })[name] ?? missing[name] }) : missing;
+function stopped(memory, message) {
+  const bytes = new Uint8Array(memory.buffer, message >>> 0, 1020).slice();
+  throw Error(`A thread of Blender's stopped: ${new TextDecoder().decode(bytes.subarray(0, bytes.indexOf(0)))}`);
+}
 async function instantiate(url, threads = hardwareThreads(), options) {
   const { module, memory: limits } = await compile(url);
   let memory = limits && new WebAssembly.Memory(limits), spawn = () => -6, threadsError, workers = 0;
   if (!limits?.shared) threads = 1;
   const pool = threads + 4, files2 = threads > 1 && filesBuffer(pool), wasi = wasiFor(() => memory);
   const serve = () => files2 && serveFiles(files2, wasi);
-  const died = (at) => {
-    const bytes = new Uint8Array(memory.buffer, at >>> 0, 1020).slice();
-    throw Error(`A thread of Blender's stopped: ${new TextDecoder().decode(bytes.subarray(0, bytes.indexOf(0)))}`);
-  };
+  const died = (message) => stopped(memory, message);
   const imports = { wasi_snapshot_preview1: wasi, env: env(memory, () => threads, { serve_files: serve, threads_died: died }), wasi: { "thread-spawn": (arg) => spawn(arg) } };
   const instance = await WebAssembly.instantiate(module, imports);
   memory = instance.exports.memory;
