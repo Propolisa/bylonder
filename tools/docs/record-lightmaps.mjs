@@ -61,7 +61,7 @@ await record("lightmaps", { example: "meditation", node: "Room" }, async (r) => 
   await app.locator(BAKE).waitFor({ state: "attached", timeout: 120000 }).catch(async () => {
     await app.locator('[data-blender="CYCLES_RENDER_PT_bake"]').locator("header").first().click();
   });
-  await app.locator(BAKE).first().scrollIntoViewIfNeeded();
+  await app.locator(BAKE).getByRole("button", { name: "Bake Lightmaps" }).scrollIntoViewIfNeeded();
   await r.field(app.locator(BAKE), "Samples", SAMPLES);
   await r.shot("bake-panel", SIDE_BY_SIDE);
   // The room first, the turtle hidden from its diffuse rays (Object properties > Visibility), as meditation.py bakes it:

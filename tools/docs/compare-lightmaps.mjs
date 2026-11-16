@@ -17,8 +17,8 @@ const [a, b, out, labelA = 'Desktop Blender', labelB = 'Bylonder'] = process.arg
 const WIDTH = 960, HEIGHT = 540;
 // Spots as fractions of the frame: what each shows of the room's light.
 const SPOTS = [
-  ['sun on the floor', 0.62, 0.86], ['floor in shade', 0.2, 0.9], ['back wall', 0.5, 0.25], ['wall by the window', 0.86, 0.3],
-  ['turtle shell', 0.36, 0.8], ['cushion', 0.47, 0.72], ['figure, chest', 0.5, 0.5], ['ceiling corner', 0.08, 0.06],
+  ['sun on the floor', 0.3, 0.63], ['floor in shade', 0.3, 0.9], ['back wall', 0.55, 0.2], ['sun on the wall', 0.83, 0.42],
+  ['turtle shell', 0.5, 0.7], ['cushion', 0.62, 0.66], ['figure, chest', 0.62, 0.43], ['wall in shade', 0.88, 0.75],
 ];
 
 const work = mkdtempSync(join(tmpdir(), 'bylonder-compare-'));
