@@ -72,11 +72,20 @@ export function createPackagePreview({ world, options = {}, publish, post, set =
     if (changes.some(([path]) => controls.remade.has(path))) exportNow();
     else shown = true;
   };
+  // The IDs evaluated while an export ran: its own evaluation of the frames, and edits made meanwhile (it yields as it
+  // goes), told apart once it is done by whether their values still differ from what it wrote.
+  const evaluatedMeanwhile = new Set();
   world.mainSync?.onEvaluated((updates) => {
-    if (exporting) return;
-    for (const id of updates.keys()) updated.add(id);
-    if (last) setChanged(updates.keys());
+    for (const id of updates.keys()) (exporting ? evaluatedMeanwhile : updated).add(id);
+    if (last && !exporting) setChanged(updates.keys());
   });
+  const catchUp = () => {
+    const ids = [...evaluatedMeanwhile];
+    evaluatedMeanwhile.clear();
+    if (!ids.length) return;
+    setChanged(ids);
+    for (const id of ids) if (controls.byID.get(keyOfPointer(id)?.replace(/@.*$/, ''))?.some((path) => setFast.has(path))) updated.add(id);
+  };
   const whileExporting = async (run) => { exporting = true; try { return await run(); } finally { exporting = false; } };
   const exported = () => whileExporting(async () => {
     updated.clear();
@@ -91,6 +100,7 @@ export function createPackagePreview({ world, options = {}, publish, post, set =
     report('Exporting the change');
     const state = await whileExporting(() => exportChanged(world, last, ids, options)), patch = tablesPatch(last, state), changed = Object.keys(patch.tables).length;
     remember(state);
+    catchUp();
     // A value set fast that the export does not give: the runs load fresh rather than keep a state no export makes.
     const differs = [...fast].find(([path, value]) => state.tables.properties?.[path]?.default !== value && setFast.get(path) === undefined);
     if (changed || differs) post(patch, !!differs);
@@ -102,6 +112,7 @@ export function createPackagePreview({ world, options = {}, publish, post, set =
       report('Exporting');
       const { made, state } = await exported(), url = await publish(made, state);
       remember(state);
+      catchUp();
       report('Loaded');
       // Exported whole again, as what it read of the edit is not known.
       if (editedFirst) { editedFirst = false; exportNow(); }

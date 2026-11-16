@@ -20,7 +20,8 @@ export function onGround(camera: import("@babylonjs/core").Camera | null | undef
  *   on(behavior: Behavior, event: string, fn: (data: any, from: any) => void): void, emit(target: any, event: string, data?: any): void,
  *   play(sound: string, options?: { at?: Entity, rate?: number, volume?: number }): void, end(result?: any): void,
  *   spawn(collection: string, options?: { at?: Entity, attachTo?: any, jitter?: number }): Entity | null,
- *   camera: { follow(entity: Entity, options?: { pitch?: number, distance?: number, height?: number }): void, controls: boolean, onGround(stick: { x: number, y: number }): Vector3 },
+ *   camera: { follow(entity: Entity, options?: { pitch?: number, distance?: number, height?: number }): void, controls: boolean, onGround(stick: { x: number, y: number }): Vector3,
+ *     readonly authored: { position: Vector3, rotation: Quaternion } },
  *   readonly audio: { context: AudioContext, destination: AudioNode } | null,
  * }} Game
  */
@@ -175,6 +176,10 @@ export type Game = {
             x: number;
             y: number;
         }): Vector3;
+        readonly authored: {
+            position: Vector3;
+            rotation: Quaternion;
+        };
     };
     readonly audio: {
         context: AudioContext;
@@ -197,6 +202,10 @@ export type Host = {
     played?: string[];
     spawn?: (collection: string) => HostObject[];
     audio?: () => AudioContext | null;
+    authoredCamera?: () => {
+        position: Vector3;
+        rotation: Quaternion;
+    } | null;
     blend?: any;
 };
 /**
@@ -250,3 +259,4 @@ export type Assets = {
     text(path: string): Promise<string>;
 };
 import { Vector3 } from '@babylonjs/core';
+import { Quaternion } from '@babylonjs/core';

@@ -67,7 +67,30 @@ export function mountGameView(section, { world, header, run: files, codeError, f
   };
   watch();
   let base = null, patching = Promise.resolve();
-  const report = (status) => { state.status = status; };
+  // What the run says, after a camera edit the game's code holds, which stays said until the camera shows an edit again.
+  let said = '', held = '';
+  const report = (status) => { said = status; state.status = held ? `${held}. ${status}` : status; };
+  const hold = (text) => { held = text; report(said); };
+  // The scene camera as the game shows it: its world matrix and field of view.
+  const cameraView = () => {
+    const camera = game.blend?.scene.activeCamera;
+    return camera && { matrix: camera.computeWorldMatrix(true).clone(), fov: camera.fov };
+  };
+  const same = (a, b) => a.matrix.equalsWithEpsilon(b.matrix, 1e-5);
+  // A camera edit that the game's code undoes within its next frames (a step may finish a frame late) is said, not
+  // dropped silently.
+  const heldCamera = (before, edited) => {
+    if (!before || !edited || (same(before, edited) && before.fov === edited.fov)) return;
+    let frames = 3;
+    const scene = game.blend.scene, observer = scene.onAfterRenderObservable.add(() => {
+      if (--frames) return;
+      scene.onAfterRenderObservable.remove(observer);
+      const shown = cameraView(), parts = [];
+      if (!same(before, edited) && same(before, shown)) parts.push('places the camera');
+      if (before.fov !== edited.fov && Math.abs(before.fov - shown.fov) < 1e-6) parts.push('sets its field of view');
+      hold(parts.length ? `Camera edit not shown: the game's code ${parts.join(' and ')}` : '');
+    });
+  };
   // The project's game code (game-code.js) over the run: one world per loaded run, so Reset and a fresh load start it
   // fresh, while a patch keeps it; a saved file swaps its definitions in, keeping each behaviour's state.
   const publish = async (path, content) => (await caches.open(RUN_CACHE)).put(files.root + path, new Response(content, { headers: { 'Content-Type': 'text/javascript' } }));
@@ -91,8 +114,10 @@ export function mountGameView(section, { world, header, run: files, codeError, f
     await loadingCode;
     if (game.blend !== blend) return;
     const started = await runGame(blend, code, { canvas, assets, engine: game.engine, havok, paused: () => state.paused, report: (error, where) => report(`${where}: ${error?.message ?? error}`) });
-    if (game.blend !== blend || played) started.dispose();
-    else played = started;
+    if (game.blend !== blend || played) return started.dispose();
+    played = started;
+    // The game's code goes before its scene does (a fresh load), while the bodies and nodes it lets go of still exist.
+    blend.scene.onDisposeObservable.addOnce(() => { if (played === started) stopGame(); });
   };
   const shown = () => {
     state.shared = game.blend ? sharedStatus(game.blend.scene) : '';
@@ -109,7 +134,12 @@ export function mountGameView(section, { world, header, run: files, codeError, f
       return base;
     },
     // A value edit is set on the run at once, ahead of the patches still on their way, which carry the same values.
-    set: (changes) => { if (state.running) game.set(changes); },
+    set: (changes) => {
+      if (!state.running) return;
+      const before = cameraView();
+      game.set(changes);
+      if (!state.paused) heldCamera(before, cameraView());
+    },
     post: (patch, fresh) => {
       patching = patching.then(async () => {
         if (!state.running) return;
@@ -140,6 +170,7 @@ export function mountGameView(section, { world, header, run: files, codeError, f
     canvas.focus();
   });
   const reset = run('Reset', async () => {
+    held = '';
     await preview.settled();
     await patching;
     await game.reset(preview.state);
@@ -150,6 +181,7 @@ export function mountGameView(section, { world, header, run: files, codeError, f
   // The run, its engine (scene, physics, game code) and its files gone; the game's sound held until the next Play.
   const stop = run('Stop', async () => {
     Object.assign(state, { running: false, paused: false, shared: '' });
+    held = '';
     await preview.settled();
     await patching;
     loop.update();

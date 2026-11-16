@@ -305,6 +305,17 @@ export class BlendScene<Controls extends Record<string, Value> = Record<string, 
     /** The Babylon node an object (by key) draws as, if any. @param {string} object */
     nodeOf(object: string): import("@babylonjs/core").Node | null;
     /**
+     * Where an object's location, rotation and scale place its node now, whatever code did to the node since: the object
+     * as authored, its edits included; null for one without them as controls.
+     * @param {string} object its key
+     */
+    authored(object: string): {
+        position: Vector3;
+        rotation: Quaternion;
+        scaling: Vector3;
+        direction: Vector3 | null;
+    } | null;
+    /**
      * Shows or hides a collection (by key or name) in the view layer drawn, as the outliner's eye does: what it holds
      * shows only where it and the collections holding it show. With `children`, its child collections too, as Shift does.
      * @param {string} collection

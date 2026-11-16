@@ -1,6 +1,7 @@
 // The camera's frame: the Play Area (a box empty in the .blend, around the counter, the barista's reach and the rock's
-// spot), widened to the barista's lane along it, fills the view at any shape of the Game area or page, the camera
-// keeping its direction as authored and moving sideways from its place to centre the frame.
+// spot), widened to the barista's lane along it, fills the view at any shape of the Game area or page. Each frame starts
+// from the camera as authored (game.camera.authored, which edits in Blender keep current): it keeps that direction and
+// moves sideways from that place to centre the frame, so moving the camera in the 3D View moves the game's view.
 // On a screen taller than wide (a phone upright) the camera rolls a quarter turn, so the counter runs along the long
 // side and shows twice as large.
 import { Axis, Camera, Matrix, Quaternion, Vector3 } from '@babylonjs/core';
@@ -9,19 +10,13 @@ import { defineSystem } from 'bylonder';
 /** Room around the barista's body, in metres. */
 const BODY = 0.4;
 const inScene = new Vector3(), at = new Vector3(), side = new Vector3(), rise = new Vector3();
-const QUARTER = Quaternion.RotationAxis(Axis.Z, Math.PI / 2), BACK = Quaternion.RotationAxis(Axis.Z, -Math.PI / 2);
-
-/** `camera` rolled a quarter turn about its view (`on`) or back. */
-function roll(camera, on) {
-  if (camera.rotationQuaternion) camera.rotationQuaternion.multiplyInPlace(on ? QUARTER : BACK);
-  else camera.rotation.z += on ? Math.PI / 2 : -Math.PI / 2;
-}
+const QUARTER = Quaternion.RotationAxis(Axis.Z, Math.PI / 2);
 
 export default defineSystem({
   name: 'Framing',
-  create({ babylon }) {
+  create({ game, babylon }) {
     const scene = babylon.scene;
-    let rolled = false, corners = null, authored = null;
+    let corners = null;
     /** The Play Area's corners in its own space, its box grown to take in the barista's lane (where he stands at the start). */
     const lane = (area) => {
       const min = new Vector3(-1, -1, -1), max = new Vector3(1, 1, 1), barista = scene.getNodeByName('Barista');
@@ -38,9 +33,10 @@ export default defineSystem({
         const camera = scene.activeCamera, area = scene.getTransformNodeByName('Play Area');
         if (!camera || !area) return;
         const aspect = scene.getEngine().getAspectRatio(camera);
-        if (aspect < 1 !== rolled) roll(camera, (rolled = aspect < 1));
-        authored ??= camera.position.clone();
-        camera.position.copyFrom(authored);
+        const { position, rotation } = game.camera.authored;
+        camera.position.copyFrom(position);
+        camera.rotationQuaternion = (camera.rotationQuaternion ?? new Quaternion()).copyFrom(rotation);
+        if (aspect < 1) camera.rotationQuaternion.multiplyInPlace(QUARTER);
         const view = camera.getViewMatrix(true), world = area.computeWorldMatrix(true);
         // Where the area's corners are seen from the authored place, across and up the view, and how far.
         let left = Infinity, right = -Infinity, bottom = Infinity, top = -Infinity, depth = 0;

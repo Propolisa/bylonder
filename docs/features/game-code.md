@@ -96,14 +96,17 @@ opens on the Game workspace, the 3D View beside the Game area.
 
    ![The café playing in the Game area](../media/features/game-code/play.gif)
 
-   On an upright phone the camera turns so the counter runs along the screen.
+   On an upright phone the camera turns so the counter runs along the screen. The Framing system starts each frame
+   from the camera as authored (`game.camera.authored`): it keeps its direction, moves sideways from its place to
+   centre the play area and fits the field of view to it, so moving or turning the camera in the 3D View moves the
+   café's view, while a lens edit is not shown (the header says the game's code sets the field of view).
 
 ## Project files
 
 - [cafe.py](../../examples/rock-hard-cafe/cafe.py): builds the café, its prefabs, sounds, rigid bodies, the barista's
   reach constraints and the behaviours in Blender 5.2.
 - [src/behaviors/](../../examples/rock-hard-cafe/src/behaviors/): Rock, Barista, Cup, Machine and Spawner.
-- [src/systems/](../../examples/rock-hard-cafe/src/systems/): Shift, Subtitles and Hud.
+- [src/systems/](../../examples/rock-hard-cafe/src/systems/): Shift, Subtitles, Hud and Framing.
 - [src/game.js](../../examples/rock-hard-cafe/src/game.js): the composition.
 - [content/dialogue/cafe.ink](../../examples/rock-hard-cafe/content/dialogue/cafe.ink): the rocks' lines, an Ink story.
 - Recorded by [record-game-code.mjs](../../tools/docs/record-game-code.mjs).

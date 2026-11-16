@@ -18,6 +18,7 @@ import { enablePhysics, rigidBody } from './physics.js';
  *   playSound?: (sound: string, at?: Entity, options?: { rate?: number, volume?: number }) => void, played?: string[],
  *   spawn?: (collection: string) => HostObject[],
  *   audio?: () => AudioContext | null,
+ *   authoredCamera?: () => { position: Vector3, rotation: Quaternion } | null,
  *   blend?: any,
  * }} Host
  * @typedef {{ key: string, name: string, node: import('@babylonjs/core').TransformNode | null, behaviors: string[], rigid?: Record<string, any> | null }} HostObject
@@ -96,7 +97,8 @@ function random(seed) {
  *   on(behavior: Behavior, event: string, fn: (data: any, from: any) => void): void, emit(target: any, event: string, data?: any): void,
  *   play(sound: string, options?: { at?: Entity, rate?: number, volume?: number }): void, end(result?: any): void,
  *   spawn(collection: string, options?: { at?: Entity, attachTo?: any, jitter?: number }): Entity | null,
- *   camera: { follow(entity: Entity, options?: { pitch?: number, distance?: number, height?: number }): void, controls: boolean, onGround(stick: { x: number, y: number }): Vector3 },
+ *   camera: { follow(entity: Entity, options?: { pitch?: number, distance?: number, height?: number }): void, controls: boolean, onGround(stick: { x: number, y: number }): Vector3,
+ *     readonly authored: { position: Vector3, rotation: Quaternion } },
  *   readonly audio: { context: AudioContext, destination: AudioNode } | null,
  * }} Game
  */
@@ -118,6 +120,8 @@ export function createWorld({ host, behaviors, game: composition = {}, seed = 1,
     else camera?.detachControl();
   };
   setControls(false);
+  const camera = /** @type {any} */ (scene.activeCamera);
+  const startCamera = { position: camera?.position.clone() ?? Vector3.Zero(), rotation: camera?.rotationQuaternion?.clone() ?? Quaternion.FromEulerVector(camera?.rotation ?? Vector3.Zero()) };
   let now = 0, ended = /** @type {any} */ (undefined), definitions = new Map(behaviors.map((b) => [b.name, b]));
   /** Whose code runs now: what Babylon makes meanwhile is theirs. @type {Owner | null} */
   let owner = null;
@@ -320,6 +324,11 @@ export function createWorld({ host, behaviors, game: composition = {}, seed = 1,
       set controls(on) { setControls((controls = !!on)); },
       /** A stick's `{ x, y }` as a direction on the ground, as the camera shows it: x right, y up the screen. */
       onGround: (stick) => onGround(scene.activeCamera, stick.x, stick.y),
+      /**
+       * The scene camera as authored: its place and turn (in its parent's space) as the scene gives them now, edits in
+       * Blender included. Code that moves the camera starts from it each frame, so moving the camera in the 3D View moves the game's view.
+       */
+      get authored() { return host.authoredCamera?.() ?? startCamera; },
     },
     /** Ends the run with a result (`world.ended`). @param {any} result */
     end(result) { if (ended === undefined) ended = result ?? null; },

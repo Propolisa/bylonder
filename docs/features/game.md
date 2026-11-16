@@ -2,7 +2,7 @@
 id: game
 title: Game
 summary: Bylonder's own editor that plays the scene as File > Export > JavaScript ships it, run by the exported page's runtime, while edits, undo and redo made in the app reach the running game.
-expect: Play exports the scene in memory and runs it in the area on an engine of its own, as its page does; a value edit (a move, a material colour, backface culling or alpha cutoff, a light's power, exposure, colour or spot cone, a camera's lens, sensor or orthographic scale, the view's exposure or gamma, visibility, a shape key, a custom property) shows in the game on the next frame, and the scoped export behind it checks it once the app is idle, loading the game fresh if they disagree; other edits reach it as a patch after that export (about a second on Rigged Character); the game's own state never writes back to the scene; Reset starts the game again from the scene as it is now; Play takes as long as an export, and takes the area into Focus Mode with the page fullscreen, which Esc, Back or the corner button leave; Stop ends the game and frees its engine, scene, physics and sound; a Game area hidden by the layout draws nothing.
+expect: Play exports the scene in memory and runs it in the area on an engine of its own, as its page does; a value edit (a move, a material colour, backface culling or alpha cutoff, a light's power, exposure, colour or spot cone, a camera's lens, sensor or orthographic scale, the scene camera's place, which game code that moves the camera builds on, the view's exposure or gamma, visibility, a shape key, a custom property) shows in the game on the next frame, and the scoped export behind it checks it once the app is idle, loading the game fresh if they disagree; other edits reach it as a patch after that export (about a second on Rigged Character); the game's own state never writes back to the scene; Reset starts the game again from the scene as it is now; Play takes as long as an export, and takes the area into Focus Mode with the page fullscreen, which Esc, Back or the corner button leave; Stop ends the game and frees its engine, scene, physics and sound; a Game area hidden by the layout draws nothing.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/files/import_export.html
@@ -48,7 +48,8 @@ limits:
   - Exported pages do not draw a light's color temperature, transmission, power normalization, soft falloff, spread, or Blender's shadow resolution, filter, jitter and cascade settings yet (their shadows have a fixed bias, map size and filter per light type), so editing those changes nothing in the game. tests/controls-coverage-wasm.test.js lists them.
   - A camera's lens shift (Shift X and Y) is not drawn by exported pages yet, so the game shows the camera unshifted.
   - A value the game animates (an F-Curve's or a driver's) is the game's: an edit of it reaches the game through the export only.
-  - Game code (game.js) does not run in it yet.
+  - Lock Camera to View moves Rock Hard Café's camera in the 3D View without the game following yet (it follows on Rigged Character).
+  - Where game code holds a part of the scene camera itself (`game.camera.follow`, a fitted field of view), an edit of that part is not shown; the header says so.
 ---
 
 # Game
@@ -81,6 +82,12 @@ own editor, chosen from an area's editor type menu.
    new modifier or object) reach the game once that export is done.
 
    ![The game following an edit](../media/features/game/edit.gif)
+
+   The scene camera follows too: moving it in the 3D View (a grab or the sidebar's Transform),
+   or changing its lens, moves the game's view. Game code that moves the camera builds on it: each frame it starts
+   from `game.camera.authored`, the camera as the scene places it now, so the authored camera stays the base. Where the
+   game's code holds a part of the camera itself (a follow camera's place, a field of view fitted to the play area),
+   an edit of that part is not shown, and the header says so.
 
 4. Choose the modifier stack the game evaluates in its header, Viewport or Render. It is the scene's export setting
    (File > Export > JavaScript's Modifier Stack, saved in the .blend), Render by default. Choosing one exports the scene

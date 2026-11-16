@@ -74,6 +74,11 @@ export function blendHost(blend) {
       }
     },
     play: (action) => { blend.play(action); },
+    // The scene camera's place and turn as its object's controls give them now, which edits in Blender keep current.
+    authoredCamera() {
+      const camera = blend.scene.activeCamera, object = camera && Object.keys(ids).find((k) => ids[k].type === 'OBJECT' && blend.nodeOf(k) === camera);
+      return object ? blend.authored(object) : null;
+    },
     // A collection's objects copied for the run, as a prefab: each object's node cloned with its children (geometry and
     // materials shared, read-only to game code), shown, and reading its source's props.
     spawn(collection) {

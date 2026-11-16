@@ -478,6 +478,16 @@ export class BlendScene {
   }
 
   /**
+   * Where an object's location, rotation and scale place its node now, whatever code did to the node since: the object
+   * as authored, its edits included; null for one without them as controls.
+   * @param {string} object its key
+   */
+  authored(object) {
+    const path = this.ir.ids[object]?.path, transform = path && this.#knobs.get(`${path}.location[0]`)?.bind?.transform;
+    return transform ? placement(transform, (name, count) => this.#paths(path, name, count).map((key) => /** @type {number} */ (this.#values.get(key) ?? 1))) : null;
+  }
+
+  /**
    * Shows or hides a collection (by key or name) in the view layer drawn, as the outliner's eye does: what it holds
    * shows only where it and the collections holding it show. With `children`, its child collections too, as Shift does.
    * @param {string} collection
