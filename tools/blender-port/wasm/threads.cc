@@ -3,7 +3,9 @@
 #include <atomic>
 #include <cerrno>
 #include <cstdint>
+#include <cstring>
 #include <ctime>
+#include <pthread.h>
 #include <unistd.h>
 
 #include "BLI_task.hh"
@@ -26,6 +28,40 @@ extern "C" void __wrap___wasi_thread_start_C(int tid, void *arg)
 {
   spawned = true;
   __real___wasi_thread_start_C(tid, arg);
+}
+
+/* port-override: wasi-libc's pthread_create takes a thread's stack, thread-locals and thread-specific values in one
+ * block from malloc where musl maps fresh zeroed pages, so a thread started where freed memory lies (Cycles' session
+ * thread of a second render) finds another's values for its keys (oneTBB's thread data) instead of none. Its
+ * thread-locals (with its pthread) and thread-specific values, which follow them, are cleared where __copy_tls is given
+ * them, before it fills the thread-locals in. */
+extern "C" const size_t __pthread_tsd_size;
+extern "C" void *__real___copy_tls(unsigned char *mem);
+extern "C" void *__wrap___copy_tls(unsigned char *mem)
+{
+  memset(mem, 0, __builtin_wasm_tls_size() + __builtin_wasm_tls_align() + __pthread_tsd_size);
+  return __real___copy_tls(mem);
+}
+
+/* Set by a thread's worker when the thread stopped on a trap, with what stopped it (src/port/wasm-thread.js): the page's
+ * thread, which may wait for it, stops waiting and reports it (threads_died, which throws) instead of spinning forever. */
+static struct {
+  std::atomic<int> word;
+  char message[1020];
+} thread_died;
+EXPORT(threads_died_word) void *threads_died_word()
+{
+  return &thread_died;
+}
+extern "C" __attribute__((import_module("env"), import_name("threads_died"))) void threads_died(const char *message);
+
+/* A thread that traps, for tests (tests/threads-wasm.test.js): the page waits for it and reports its stop. */
+EXPORT(threads_trap) void threads_trap()
+{
+  pthread_t thread;
+  if (pthread_create(&thread, nullptr, [](void *) -> void * { __builtin_trap(); }, nullptr) == 0) {
+    pthread_join(thread, nullptr);
+  }
 }
 
 /* The longest wait of the page's thread, in nanoseconds: how long the page stalled on other threads. */
@@ -124,6 +160,9 @@ extern "C" int __wrap___wasilibc_futex_wait(volatile void *addr, int op, int val
       continue;
     }
     serve_files();
+    if (thread_died.word.load(std::memory_order_acquire)) {
+      threads_died(thread_died.message);
+    }
     if (max_wait_ns >= 0 && now() - start >= max_wait_ns) {
       result = -ETIMEDOUT;
       break;

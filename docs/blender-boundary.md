@@ -228,9 +228,13 @@ Blender's code tests `WM_jobs_test`; opening a file and undo end the jobs first,
 (`main-api.cc`, `undo-api.cc`), since a job may read the Main they free. Where no thread can be had (one thread,
 below) a job runs on the page's thread to its end when it starts. The pool has a few workers beyond the processor count for such threads, as oneTBB takes one
 per processor. A thread's WASI calls on files are made by the page's thread on the same memory
-(`src/port/thread-files.js`), as a process's threads share its files: a worker's own instance has no file system. The
-snapshot (`wasm_snapshot.py`) keeps wasm-ld's way of starting a shared memory: the first instance copies the data in and
-takes the first thread's thread-locals, so the page's instance is made before the pool's.
+(`src/port/thread-files.js`), as a process's threads share its files: a worker's own instance has no file system.
+wasi-libc takes a new thread's stack, thread-locals and thread-specific values from malloc where musl maps zeroed
+pages, so `threads.cc` clears them (`__copy_tls`): a thread started on freed memory (a second render's session thread)
+would read another's oneTBB data. A thread that stops on a trap marks a word in the module's memory that the page's
+waits look at, so the page's call throws what stopped it instead of waiting for it forever. The snapshot
+(`wasm_snapshot.py`) keeps wasm-ld's way of starting a shared memory: the first instance copies the data in and takes
+the first thread's thread-locals, so the page's instance is made before the pool's.
 
 Shared memory needs cross-origin isolation. The dev server sends COOP and COEP (`credentialless`); on GitHub Pages,
 which cannot, the site's service worker (`public/workspace-sw.js`) adds them, registered by `public/isolation.js`, which
@@ -257,8 +261,10 @@ downloaded until something renders with Cycles (`src/render/cycles.js`). Its req
 OpenColorIO, OpenEXR, oneTBB, OpenVDB, OpenSubdiv, Python) are the module's own, which it imports; Blender's sources
 build without `WITH_CYCLES`. The configure gives Cycles its CPU device only, without Embree, OpenImageDenoise, OSL,
 NanoVDB or path guiding. On wasm32 Cycles' headers define none of its x86 or Arm SIMD paths, so the CPU kernel is its
-plain (scalar) one. `wasm/cycles-api.cc` starts it as Blender's `main()` does and puts its Python module `_cycles` in
-`sys.modules` before enabling its add-on.
+plain (scalar) one. Its SSE4.2 kernel on WebAssembly SIMD128 (SSE through SIMDe, as Blender's Arm build runs it through
+sse2neon; branch `cycles-simd128-reference`) rendered Window Light the same and only 1 to 6% faster, so the scalar kernel
+stays: without Embree, Cycles' CPU time is mostly scalar per-ray work. `wasm/cycles-api.cc` starts it as Blender's
+`main()` does and puts its Python module `_cycles` in `sys.modules` before enabling its add-on.
 
 ### Adding a subsystem
 

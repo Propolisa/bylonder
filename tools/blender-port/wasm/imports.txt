@@ -263,6 +263,7 @@ region_text_width
 serve_files
 side_modules_sync
 thread-spawn
+threads_died
 waitpid
 wm_keyconfig_reload
 wm_page_operator

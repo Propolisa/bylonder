@@ -26,10 +26,21 @@ async function thread({ module, memory, control, count, slot, files, index }, po
     try {
       instance.exports.wasi_thread_start(slots[slot + 1], slots[slot + 2]);
     } catch (error) {
+      died(instance.exports, memory, error.stack ?? error.message);
       post({ error: error.stack ?? error.message });
     }
     Atomics.store(slots, slot, IDLE);
   }
+}
+
+// A thread that stopped on a trap: what stopped it, and the word the page's waits look at (wasm/threads.cc), so the
+// page stops waiting for it and reports it.
+function died(exports, memory, message) {
+  const at = exports.threads_died_word?.() >>> 0;
+  if (!at) return;
+  const text = new TextEncoder().encode(message).subarray(0, 1019);
+  new Uint8Array(memory.buffer, (at + 4) >>> 0, text.length + 1).set([...text, 0]);
+  Atomics.store(new Int32Array(memory.buffer, at >>> 0, 1), 0, 1);
 }
 
 if (isNode) {

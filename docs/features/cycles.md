@@ -32,7 +32,8 @@ tests:
   - tests/threads-wasm.test.js
 limits:
   - Cycles needs threads, so a cross-origin isolated page and Preferences > System > Bylonder > Threads on Auto; Safari, which cannot isolate a page this way, has no Cycles.
-  - The CPU device only, on Cycles' plain kernel (WebAssembly has no SSE or AVX), several times slower than desktop Blender's CPU render; no GPU devices.
+  - The CPU device only, on Cycles' plain kernel, several times slower than desktop Blender's CPU render, mostly for want of Embree; no GPU devices.
+  - Cycles' SSE4.2 kernel on WebAssembly SIMD128 (through SIMDe) measured only 1 to 6% faster, so it is not used.
   - No denoising (OpenImageDenoise), no Open Shading Language, no Embree, no path guiding and no NanoVDB volumes yet.
   - Render Image of a still only; Render Animation, the 3D Viewport's Rendered shading and baking with Cycles are not done yet.
   - Cycles' panels in Properties > Render come with its add-on once it is fetched; Bylonder's own render panels for Babylon show beside them.
