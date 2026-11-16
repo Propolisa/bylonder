@@ -350,6 +350,8 @@ export async function instantiate(url, threads = hardwareThreads(), options) {
       workers = 0;
     }
   }
+  // Blender's --debug-memory: BYLONDER_MEM_DEBUG in Node, ?debug-memory on the page.
+  if (globalThis.process?.env?.BYLONDER_MEM_DEBUG || new URLSearchParams(globalThis.location?.search).has('debug-memory')) instance.exports.mem_debug?.();
   instance.exports._initialize?.();
   instance.exports.blender_init?.();
   // `workers`: the pool's instances of the module, each of which loads a side module too (side-modules.js).
