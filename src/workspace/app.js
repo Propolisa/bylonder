@@ -698,7 +698,7 @@ window.addEventListener("message", (e) => {
   if (type === "rename-scene") renameSceneTo(activeSceneId(project), payload);
   if (type === "ready")
     frame.contentWindow.postMessage(
-      { channel, type: "init", payload: { ...runData, screen: topbar.screen() } },
+      { channel, type: "init", payload: { ...runData, screen: topbar.screen(), workspace: topbar.workspace() } },
       location.origin,
     );
   if (type === "text") textChanged(payload);

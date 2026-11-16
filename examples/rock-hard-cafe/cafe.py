@@ -393,5 +393,8 @@ camera.rotation_euler = (math.radians(5), 0, math.pi)
 link(camera)
 scene.camera = camera
 
+# The rig drawn only where it is posed: Layout's Overlays > Bones off, the Animation workspace's on.
+for area in (a for a in bpy.data.screens["Layout"].areas if a.type == "VIEW_3D"):
+    area.spaces[0].overlay.show_bones = False
 bpy.ops.object.select_all(action="DESELECT")
 bpy.ops.wm.save_as_mainfile(filepath=os.path.join(HERE, "rock-hard-cafe.blend"), compress=True, relative_remap=True)

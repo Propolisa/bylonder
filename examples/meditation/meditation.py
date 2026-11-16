@@ -670,5 +670,8 @@ if BAKE:
     lightmap(figure, np.clip(full - sun_direct, 0, None), False, 512)
     scene.render.engine = 'BLENDER_EEVEE'
 
+# The rig drawn only where it is posed: Layout's Overlays > Bones off, the Animation workspace's on.
+for area in (a for a in bpy.data.screens['Layout'].areas if a.type == 'VIEW_3D'):
+    area.spaces[0].overlay.show_bones = False
 scene.frame_set(1)
 bpy.ops.wm.save_as_mainfile(filepath=os.path.join(HERE, 'meditation.blend'), compress=True)

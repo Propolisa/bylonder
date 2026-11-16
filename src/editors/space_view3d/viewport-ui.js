@@ -26,7 +26,7 @@ export function createViewportOverlays(scene, { extras, origins, outlines, armat
     extras: extra,
     // Called per view right before it renders, with its state (view3d.js).
     setEnabled(value, state = {}) {
-      const { shading, xray, overlays = true } = state;
+      const { shading, xray, overlays = true, show_bones = true } = state;
       // Edit Mode's overlay follows the view's Overlays toggle only: Blender shows it in Rendered shading too, as it does
       // Weight Paint's weights.
       for (const mesh of scene.meshes) {
@@ -34,7 +34,7 @@ export function createViewportOverlays(scene, { extras, origins, outlines, armat
         if (mesh.metadata?.paintWeight) paintWeightView(mesh, state);
       }
       extra.setEnabled(value);
-      armature.setEnabled(value, { shading, xray });
+      armature.setEnabled(value && show_bones, { shading, xray });
       relations.setEnabled(value);
       origin.update(value);
       // Wireframe draws selected objects' edges in the selection colors instead (workbench.js).

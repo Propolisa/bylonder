@@ -3,6 +3,7 @@ import { registerOperators, kw } from '../windowmanager/wm-operators.js';
 import { iconEl, iconButton } from '../editors/interface/icon.js';
 import { fullDate, timeAgo } from './relative-time.js';
 import { listedDemoFiles, openDemoFile, openFromUrl } from './demo-files.js';
+import { GENERAL } from './examples.js';
 
 export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, newProject, recentProjects, openProject, openBlend, openFolder, resetApp }) {
   const $ = id => document.getElementById(id);
@@ -10,25 +11,26 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
   const bar = $('appbar');
   const menus = $('topbar-menus');
   const autoRun = $('auto-run');
-  // Blender's default workspaces with their object modes (startup.blend's WorkSpace.object_mode), each opening the screen
-  // the scene's window has for it (docs/blender-boundary.md, Workspaces): Scripting's, Shading's, Modeling's (Modeling
-  // and Sculpting), UV Editing's, Texture Paint's, Geometry Nodes', Compositing's, else Layout's.
+  // The workspaces (examples.js GENERAL by default), each opening the screen the scene's window has for it
+  // (docs/blender-boundary.md, Workspaces): Scripting's, Shading's, Modeling's (Modeling and Sculpting), UV Editing's,
+  // Texture Paint's, Geometry Nodes', Compositing's, else Layout's.
   // A project made from an application template has the template's workspaces (the 2D Animation template's).
   const SCREENS = { Scripting: 'scripting', Shading: 'shading', Modeling: 'modeling', Sculpting: 'modeling', 'UV Editing': 'uv-editing', 'Texture Paint': 'texture-paint',
     'Geometry Nodes': 'geometry-nodes', Compositing: 'compositing', '2D Animation': '2d-animation', '2D Full Canvas': '2d-full-canvas', Game: 'game' };
-  const GENERAL = [['Layout', 'OBJECT'], ['Modeling', 'EDIT'], ['Sculpting', 'SCULPT'], ['UV Editing', 'EDIT'], ['Texture Paint', 'TEXTURE_PAINT'], ['Shading', 'OBJECT'],
-    ['Animation', 'POSE'], ['Rendering', 'OBJECT'], ['Compositing', 'OBJECT'], ['Geometry Nodes', 'OBJECT'], ['Scripting', 'OBJECT']];
-  const workspacesOf = (list) => list.map(([name, mode]) => ({ id: name.toLowerCase().replaceAll(' ', '-'), name, mode, screen: SCREENS[name] ?? 'layout' }));
+  const workspacesOf = (list) => list.map(([name, mode, overlay = {}]) => ({ id: name.toLowerCase().replaceAll(' ', '-'), name, mode, overlay, screen: SCREENS[name] ?? 'layout' }));
   let workspaces = workspacesOf(GENERAL);
   let selected = 'layout';
   const current = () => selected;
   const screen = () => workspaces.find((w) => w.id === selected).screen;
+  // The workspace's id and the overlay settings its 3D View starts with.
+  const workspace = () => { const { id, overlay } = workspaces.find((w) => w.id === selected); return { id, overlay }; };
+  const sendScreen = (mode) => send('screen', { screen: screen(), workspace: workspace(), mode });
   // As ED_workspace_change: the workspace's object mode where it differs from the last one's.
   const setWorkspace = id => {
     const mode = (w) => workspaces.find((x) => x.id === w).mode, changed = mode(id) !== mode(selected);
     selected = id;
     if (dock.maximized !== 'scene') dock.maximize('scene');
-    send('screen', { screen: screen(), mode: changed ? mode(id) : null });
+    sendScreen(changed ? mode(id) : null);
     sync();
   };
   const recent = [];
@@ -123,7 +125,7 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
   // The first workspace's object mode, entered once the project's scene runs (ED_workspace_change on opening a file).
   let entering = null;
   const connect = () => {
-    if (entering && scene()) { send('screen', { screen: screen(), mode: entering }); entering = null; }
+    if (entering && scene()) { sendScreen(entering); entering = null; }
     if (menus.childElementCount || !scene()) return;
     for (const { label, menu } of scene().bar()) {
       const logo = menu === 'TOPBAR_MT_blender';
@@ -133,7 +135,7 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
     bar.querySelector('.bl-logo')?.remove();
   };
   const tabs = $('workspace-tabs');
-  // The project's workspaces ([name, object mode] pairs, General's by default), the first one active.
+  // The project's workspaces ([name, object mode, overlay] entries, General's by default), the first one active.
   const setWorkspaces = (list = GENERAL) => {
     workspaces = workspacesOf(list);
     tabs.replaceChildren(...workspaces.map(({ id, name }) => Object.assign(document.createElement('button'), { type: 'button', textContent: name, onclick: () => setWorkspace(id) })));
@@ -183,11 +185,11 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
     // As Blender's: General and the application templates; the examples open in their place.
     const newFile = column('New File', []);
     const exampleItem = (example) => item(example.title, 'file_new', () => openExample(example));
-    const showExamples = () => newFile.replaceChildren(newFile.firstChild, ...examples.filter((e) => !e.workspaces).map(exampleItem));
+    const showExamples = () => newFile.replaceChildren(newFile.firstChild, ...examples.filter((e) => !e.template).map(exampleItem));
     // Blender's demo files, each downloaded only once the user confirms it (demo-files.js).
     const showDemoFiles = () => newFile.replaceChildren(newFile.firstChild,
       ...listedDemoFiles.map((file) => item(file.title, 'url', () => openDemoFile(file, openBlend))));
-    newFile.append(item('General', 'file_new', newProject), ...examples.filter((e) => e.workspaces).map(exampleItem),
+    newFile.append(item('General', 'file_new', newProject), ...examples.filter((e) => e.template).map(exampleItem),
       Object.assign(item('Examples…', 'file_folder', showExamples), { onclick: showExamples }),
       Object.assign(item('Blender Demo Files…', 'url', showDemoFiles), { onclick: showDemoFiles }));
     files.append(newFile, recent);
@@ -211,6 +213,7 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
     sync,
     setWorkspaces,
     screen,
+    workspace,
     splash,
     connect,
     status({ hints: list = [], stats: text = '', viewLayers }) {

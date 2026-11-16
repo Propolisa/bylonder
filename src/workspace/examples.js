@@ -13,11 +13,19 @@ const files = async (id) => ({
   ...Object.fromEntries(await Promise.all(inExample(id, blends).map(async ([path, url]) => [path, binaryFile(new Uint8Array(await (await fetch(url)).arrayBuffer()))]))),
 });
 
+// Blender's default workspaces with their object modes (startup.blend's WorkSpace.object_mode). A workspace's third item
+// is where its 3D View's overlay starts other than Blender's default (View3DOverlay settings).
+export const GENERAL = [["Layout", "OBJECT"], ["Modeling", "EDIT"], ["Sculpting", "SCULPT"], ["UV Editing", "EDIT"], ["Texture Paint", "TEXTURE_PAINT"], ["Shading", "OBJECT"],
+  ["Animation", "POSE"], ["Rendering", "OBJECT"], ["Compositing", "OBJECT"], ["Geometry Nodes", "OBJECT"], ["Scripting", "OBJECT"]];
+// A character's rig drawn only where it is posed: Layout's Overlays > Bones off, Animation's on.
+const NO_BONES = { show_bones: false };
+const characterWorkspaces = GENERAL.map(([name, mode]) => (name === "Layout" ? [name, mode, NO_BONES] : [name, mode]));
+
 export const examples = [
   // Newest first, as the splash lists them.
   // Opens on Bylonder's Game workspace: the 3D View beside a large Game area.
-  { id: "meditation", title: "Meditation" },
-  { id: "rock-hard-cafe", title: "Rock Hard Café", workspaces: [["Game", "OBJECT"], ["Layout", "OBJECT"], ["Modeling", "EDIT"], ["Shading", "OBJECT"], ["Animation", "POSE"], ["Scripting", "OBJECT"]] },
+  { id: "meditation", title: "Meditation", workspaces: characterWorkspaces },
+  { id: "rock-hard-cafe", title: "Rock Hard Café", template: true, workspaces: [["Game", "OBJECT", NO_BONES], ["Layout", "OBJECT", NO_BONES], ["Modeling", "EDIT"], ["Shading", "OBJECT"], ["Animation", "POSE"], ["Scripting", "OBJECT"]] },
   { id: "project-files", title: "Project Files" },
   { id: "character-controller", title: "Snow at the Bar" },
   { id: "compositor", title: "Akari Noodle House" },
@@ -52,7 +60,7 @@ export const examples = [
   { id: "texture-paint", title: "Texture Paint" },
   { id: "lava", title: "Lava Sphere" },
   { id: "rigged-character", title: "Rigged Character" },
-  { id: "basic-character", title: "Basic Character" },
+  { id: "basic-character", title: "Basic Character", workspaces: characterWorkspaces },
   { id: "hair-dynamics", title: "Sea Anemone" },
   { id: "island", title: "Volcanic Island" },
   { id: "still-life", title: "Still Life" },
@@ -68,5 +76,5 @@ export const examples = [
   { id: "arrays", title: "Spiral Stair" },
   { id: "animation", title: "Keyframe Animation" },
   // An application template: its startup file and workspaces (File > New > 2D Animation).
-  { id: "2d-animation", title: "2D Animation", workspaces: [["2D Animation", "PAINT_GREASE_PENCIL"], ["2D Full Canvas", "PAINT_GREASE_PENCIL"]] },
+  { id: "2d-animation", title: "2D Animation", template: true, workspaces: [["2D Animation", "PAINT_GREASE_PENCIL"], ["2D Full Canvas", "PAINT_GREASE_PENCIL"]] },
 ].map((example) => ({ ...example, files: () => files(example.id) }));

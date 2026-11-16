@@ -27,6 +27,7 @@ const SHADING = { wire: 'WIREFRAME', solid: 'SOLID', material: 'MATERIAL', rende
 const SPACE_STATE = [
   ['show_gizmo', ['show_gizmo']],
   ['overlays', ['overlay', 'show_overlays']],
+  ['show_bones', ['overlay', 'show_bones']],
   ['xray', ['shading', 'show_xray'], (value) => !!value],
   ['color_type', ['shading', 'color_type']],
   ['use_compositor', ['shading', 'use_compositor']],

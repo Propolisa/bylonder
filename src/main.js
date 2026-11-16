@@ -437,8 +437,8 @@ window.addEventListener("message", (e) => {
   // The workspace's screen, and its object mode where it changed, one Bylonder has, for an active object that has the
   // mode (ED_workspace_change); a project text file changed in the Code workspace.
   if (e.data.type === "screen") {
-    const { screen, mode } = e.data.payload;
-    setScreen(screen);
+    const { screen, workspace, mode } = e.data.payload;
+    setScreen(screen, workspace);
     if (IMAGE_MODES[screen]) imageEditor.setMode(IMAGE_MODES[screen]);
     world.mainSync.flush();
     const has = mode && (mode === "OBJECT" || world.mainModes.modes.includes(mode)) && world.mainSync.blender.enumItems("object.mode_set", "mode").some(([id]) => id === mode);
@@ -775,19 +775,27 @@ shadingReady = true;
 const primary = mountView({ section: document.querySelector("#viewport-section"), canvas, headerId: "viewport", cameraName: "__editorCamera" });
 // Each screen's 3D Viewport keeps its own shading and its Node Editor its own tree type, as each of Blender's screens
 // has its own: Shading's starts in Material Preview over the Shader Editor, Geometry Nodes' in the Geometry Node Editor,
-// Compositing's in the Compositor.
+// Compositing's in the Compositor. Each workspace keeps its 3D Viewport's overlay settings, from those it starts with
+// (examples.js GENERAL).
 const screenShading = { shading: "material" };
 const screenNodeTree = { shading: "shader", "geometry-nodes": "geometry", compositing: "compositor" };
-function setScreen(name) {
+const workspaceOverlay = {};
+let currentWorkspace = null;
+function setScreen(name, { id: workspace, overlay } = {}) {
   const previous = viewportDock.screen ?? "layout";
   viewportDock.setScreen(name);
   screenShading[previous] = primary.state.shading;
   screenNodeTree[previous] = nodeEditor.type;
+  if (currentWorkspace) workspaceOverlay[currentWorkspace] = { show_bones: primary.state.show_bones };
+  currentWorkspace = workspace;
+  Object.assign(primary.state, { show_bones: true, ...overlay, ...workspaceOverlay[workspace] });
   primary.setShading(screenShading[name] ?? "solid");
   if (screenNodeTree[name] && screenNodeTree[name] !== nodeEditor.type) nodeEditor.setType(screenNodeTree[name]);
 }
 viewportDock.setFactory("viewport", (host, id) => mountView({ section: host, headerId: id, from: activeView()?.editorCamera || primary.editorCamera }));
 views.setInput(primary);
+currentWorkspace = input.workspace?.id;
+Object.assign(primary.state, input.workspace?.overlay);
 views.onFocus = () => viewportCtx.shadingChanged();
 world.compositor.subscribe(() => viewportCtx.shadingChanged());
 const status = createViewportStatus({ world, editor, views, send });
