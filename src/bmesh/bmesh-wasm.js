@@ -103,6 +103,9 @@ function operatorEnumItems(C, idname, prop) {
 // RegionView3D.persp's camera view (DNA_view3d_types.h).
 export const RV3D_CAMOB = 2;
 export const OPERATOR_RUNNING_MODAL = 1, OPERATOR_CANCELLED = 2, OPERATOR_FINISHED = 4, OPERATOR_PASS_THROUGH = 8;
+// Whether a modal operator ended with this status, as Blender's handler frees it (wm_handler_operator_call): passing an
+// event through alone keeps it running (a job's operator waiting for its job).
+export const operatorEnded = (status) => !!(status & (OPERATOR_FINISHED | OPERATOR_CANCELLED)) || !(status & (OPERATOR_RUNNING_MODAL | OPERATOR_PASS_THROUGH));
 
 // Blender's enums by identifier (rna_enum_text): event types (0), event values (1) and property subtypes (2).
 export const enumTable = (which) => new Map(cString(x.rna_enum_text(which)).split('\n').filter(Boolean).map((line) => {
@@ -664,7 +667,7 @@ export class BlenderMain {
   // Gives a running operator an event (`modal`: a modal keymap item's value): its status; it is freed once it ends.
   modal(op, event) {
     const status = x.operator_modal(this.#C, op, wmEvent(this.#C, event));
-    if (!(status & OPERATOR_RUNNING_MODAL)) x.operator_free(op);
+    if (operatorEnded(status)) x.operator_free(op);
     return status;
   }
   // A modal keymap item's value for a running operator when its keymap lets it through now, else -1.

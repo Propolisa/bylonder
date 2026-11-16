@@ -3,7 +3,7 @@
 // as items, until it ends. The module side (`target`: Edit Mode's EditMesh, Object Mode's BlenderMain) has
 // invoke(idname, props, event) -> { status, op, keymap, report }, modal(op, event) -> status, modalItem(op, identifier)
 // -> its value or -1, and status (the header's text).
-import { OPERATOR_RUNNING_MODAL, OPERATOR_PASS_THROUGH } from '../../bmesh/bmesh-wasm.js';
+import { OPERATOR_PASS_THROUGH, operatorEnded } from '../../bmesh/bmesh-wasm.js';
 import { viewProjection } from './view3d-project.js';
 import { modalItem } from '../../windowmanager/keyconfig.js';
 import { tagRedraw } from '../../draw/overlay-tool.js';
@@ -36,7 +36,7 @@ export function runModal({ wm, view, pointer, target, idname, props, event, noti
     if (!running) return false;
     const item = keymap && modalItem(keymap, e, (id) => target.modalItem(op, id) >= 0);
     const result = target.modal(op, item ? { ...toBlender(e), modal: target.modalItem(op, item) } : toBlender(e));
-    if (result & OPERATOR_RUNNING_MODAL) {
+    if (!operatorEnded(result)) {
       step();
       notify(target.status);
     } else {

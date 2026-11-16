@@ -202,7 +202,15 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
     document.body.append(dialog);
     dialog.showModal();
   }
-  const hints = $('status-hints'), stats = $('scene-stats'), viewLayer = $('view-layer');
+  const hints = $('status-hints'), stats = $('scene-stats'), viewLayer = $('view-layer'), jobs = $('running-jobs');
+  // Running jobs as Blender's status bar shows them (uiTemplateRunningJobs): a progress bar with the job's name, and Cancel.
+  const job = ({ name, progress, text }) => {
+    const bar = Object.assign(document.createElement('span'), { className: 'bl-job-bar', title: text });
+    bar.append(Object.assign(document.createElement('span'), { style: `width:${(progress * 100).toFixed(1)}%` }), Object.assign(document.createElement('b'), { textContent: `${name} ${Math.round(progress * 100)}%` }));
+    const span = Object.assign(document.createElement('span'), { className: 'bl-job' });
+    span.append(bar, iconButton('x', 'Cancel', () => send('job-cancel', { name })));
+    return span;
+  };
   const viewLayerOp = (op) => () => send('view-layer', { op, id: viewLayer.value });
   viewLayer.onchange = viewLayerOp('set');
   const removeViewLayer = iconButton('x', 'Remove View Layer', viewLayerOp('remove'));
@@ -213,7 +221,8 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
     screen,
     splash,
     connect,
-    status({ hints: list = [], stats: text = '', viewLayers }) {
+    status({ hints: list = [], stats: text = '', viewLayers, jobs: running = [] }) {
+      jobs.replaceChildren(...running.map(job));
       if (viewLayers) {
         viewLayer.replaceChildren(...viewLayers.list.map(([value, textContent]) => Object.assign(document.createElement('option'), { value, textContent })));
         viewLayer.value = viewLayers.active;

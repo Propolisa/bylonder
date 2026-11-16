@@ -20,6 +20,7 @@ usage: blender -b --factory-startup -P meditation.py
 import math
 import os
 import random
+import sys
 
 import bmesh
 import bpy
@@ -28,6 +29,9 @@ from bpy_extras import anim_utils
 from mathutils import Matrix, Quaternion, Vector, noise
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+# Bylonder's Bake Lightmaps, which bakes and stores each lightmap as the app does.
+sys.path.insert(0, os.path.join(HERE, '..', '..', 'src', 'render'))
+import bylonder_lightmaps as lightmaps  # noqa: E402
 BAKE = os.environ.get('MEDITATION_BAKE', '1') != '0'
 SAMPLES = int(os.environ.get('MEDITATION_SAMPLES', '256'))
 FPS, BREATH, BREATHS = 30, 135, 12
@@ -544,7 +548,8 @@ for frame, offset in ((1, 0.0), (LOOP // 2, 0.06), (LOOP, 0.0)):
     camera.keyframe_insert('rotation_euler', frame=frame)
 
 # ---- Lightmaps: a second UV map on each lit mesh (Smart UV Project: few large islands, so the curves bake without
-# seams), then Cycles' bake of its light into an image of its own.
+# seams), then Bylonder's Bake Lightmaps (src/render/bylonder_lightmaps.py): Cycles' bake of its light, denoised by Open
+# Image Denoise, stored over its peak as the object's lightmap.
 ROOM = {room: 2048, inlay: 1024, cushion: 256, bench: 256, bowl: 128}
 
 
@@ -561,114 +566,23 @@ def lightmap_uvs(ob):
     bpy.ops.mesh.select_all(action='SELECT')
     bpy.ops.uv.smart_project(angle_limit=math.radians(66), island_margin=0.004, area_weight=1.0, scale_to_bounds=True)
     bpy.ops.object.mode_set(mode='OBJECT')
+    ob.data.uv_layers.active = ob.data.uv_layers[0]
 
 
 for ob in [*ROOM, figure]:
     lightmap_uvs(ob)
 
 
-def bake(ob, size, passes, world_strength=None, kind='DIFFUSE'):
-    """Cycles' bake (Diffuse, or `kind`) of `ob` into a float image of `size`, through its Lightmap UV map, as an array."""
-    image = bpy.data.images.new(f'{ob.name} Bake', size, size, float_buffer=True)
-    nodes = []
-    for mat in {slot.material for slot in ob.material_slots}:
-        node = mat.node_tree.nodes.new('ShaderNodeTexImage')
-        node.image = image
-        mat.node_tree.nodes.active = node
-        nodes.append((mat, node))
-    ob.data.uv_layers.active = ob.data.uv_layers['Lightmap']
-    bpy.ops.object.select_all(action='DESELECT')
-    bpy.context.view_layer.objects.active = ob
-    ob.select_set(True)
-    if world_strength is not None:
-        background.inputs['Strength'].default_value, kept = world_strength, background.inputs['Strength'].default_value
-    bpy.ops.object.bake(type=kind, pass_filter=passes or set(), normal_space='OBJECT', margin=8, use_clear=True)
-    if world_strength is not None:
-        background.inputs['Strength'].default_value = kept
-    for mat, node in nodes:
-        mat.node_tree.nodes.remove(node)
-    pixels = np.empty(size * size * 4, np.float32)
-    image.pixels.foreach_get(pixels)
-    bpy.data.images.remove(image)
-    return pixels.reshape(size, size, 4)[..., :3]
-
-
-def float_image(name, rgb):
-    size = rgb.shape[0]
-    image = bpy.data.images.new(name, size, size, float_buffer=True)
-    image.pixels.foreach_set(np.concatenate([rgb, np.ones((size, size, 1))], axis=2).astype(np.float32).ravel())
-    return image
-
-
-def denoised(rgb, normal):
-    """A bake's light denoised by the compositor's Denoise node (Open Image Denoise), as a render of it alone, guided by
-    the surface's normals (baked in object space) and a white albedo, as the light is baked without colour."""
-    size = rgb.shape[0]
-    sources = [float_image('Bake', rgb), float_image('Bake Normal', normal * 2 - 1), float_image('Bake Albedo', np.ones_like(rgb))]
-    tree = bpy.data.node_groups.new('Denoise Bake', 'CompositorNodeTree')
-    tree.interface.new_socket('Image', in_out='OUTPUT', socket_type='NodeSocketColor')
-    denoise, output = tree.nodes.new('CompositorNodeDenoise'), tree.nodes.new('NodeGroupOutput')
-    for source, socket in zip(sources, ('Image', 'Normal', 'Albedo')):
-        node = tree.nodes.new('CompositorNodeImage')
-        node.image = source
-        tree.links.new(node.outputs['Image'], denoise.inputs[socket])
-    tree.links.new(denoise.outputs['Image'], output.inputs[0])
-    render, kept = scene.render, (scene.render.resolution_x, scene.render.resolution_y, scene.render.filepath)
-    # The scene itself is not rendered: no view layer is used.
-    scene.compositing_node_group, bpy.context.view_layer.use = tree, False
-    render.resolution_x = render.resolution_y = size
-    render.image_settings.file_format, render.image_settings.color_depth = 'OPEN_EXR', '32'
-    render.filepath = os.path.join(bpy.app.tempdir, 'denoised.exr')
-    bpy.ops.render.render(write_still=True)
-    render.resolution_x, render.resolution_y, render.filepath = kept
-    render.image_settings.file_format = 'PNG'
-    scene.compositing_node_group, bpy.context.view_layer.use = None, True
-    result = bpy.data.images.load(os.path.join(bpy.app.tempdir, 'denoised.exr'))
-    pixels = np.empty(size * size * 4, np.float32)
-    result.pixels.foreach_get(pixels)
-    for data in (result, *sources):
-        bpy.data.images.remove(data)
-    bpy.data.node_groups.remove(tree)
-    return pixels.reshape(size, size, 4)[..., :3]
-
-
-def lightmap(ob, rgb, direct, size):
-    """The baked light, denoised, as the object's lightmap: an sRGB JPEG packed in the .blend, its brightest light its
-    Intensity, dithered before it is quantised so the plaster's slow gradients do not band."""
-    rgb = np.clip(denoised(rgb, bake(ob, size, None, kind='NORMAL')), 0, None)
-    intensity = float(max(1.0, rgb.max()))
-    linear = np.clip(rgb / intensity, 0, 1)
-    srgb = np.where(linear <= 0.0031308, linear * 12.92, 1.055 * np.power(linear, 1 / 2.4) - 0.055)
-    srgb = np.clip(srgb + np.random.default_rng(1).uniform(-0.5, 0.5, srgb.shape) / 255, 0, 1)
-    size = rgb.shape[0]
-    image = bpy.data.images.new(f'{ob.name} Lightmap', size, size)
-    image.pixels.foreach_set(np.concatenate([srgb, np.ones((size, size, 1))], axis=2).astype(np.float32).ravel())
-    path = os.path.join(bpy.app.tempdir, f'{ob.name} Lightmap.jpg')
-    image.file_format = 'JPEG'
-    image.save(filepath=path, quality=97)
-    image.source, image.filepath = 'FILE', path
-    image.reload()
-    image.pack()
-    settings = ob.bylonder.lightmap
-    settings.image, settings.uv_map, settings.intensity, settings.direct = image, 'Lightmap', round(intensity, 4), direct
-    ob.data.uv_layers.active = ob.data.uv_layers[0]
-
-
 if BAKE:
-    scene.render.engine = 'CYCLES'
-    scene.cycles.samples = SAMPLES
     scene.cycles.device = 'GPU' if os.environ.get('MEDITATION_GPU') else 'CPU'
     scene.frame_set(1)
     for ob, size in ROOM.items():
         # The floor under the turtle bakes as if it were not there (it lies a few millimetres above it).
         inlay.visible_diffuse = ob != room
-        lightmap(ob, bake(ob, size, {'DIRECT', 'INDIRECT'}), True, size)
+        lightmaps.bake_lightmap(ob, size, direct=True, samples=SAMPLES)
     inlay.visible_diffuse = True
     # The figure: the light it gives back of everything but the sun's direct light, which the page gives it live.
-    full = bake(figure, 512, {'DIRECT', 'INDIRECT', 'COLOR'})
-    sun_direct = bake(figure, 512, {'DIRECT', 'COLOR'}, world_strength=0.0)
-    lightmap(figure, np.clip(full - sun_direct, 0, None), False, 512)
-    scene.render.engine = 'BLENDER_EEVEE'
+    lightmaps.bake_lightmap(figure, 512, direct=False, samples=SAMPLES)
 
 scene.frame_set(1)
 bpy.ops.wm.save_as_mainfile(filepath=os.path.join(HERE, 'meditation.blend'), compress=True)
