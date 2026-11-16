@@ -6,6 +6,7 @@
 import { createApp, h, reactive, markRaw } from 'vue';
 import { BlockView, sidebarView } from '../interface/block-view.js';
 import { regionHeader, regionLayout, panelClosedSet, viewItemDrag } from '../interface/ui-tree.js';
+import { isinstance, py_TypeError } from '../../bl_py/org.transcrypt.__runtime__.js';
 import { contextStruct } from '../../python/bpy_rna.js';
 import { panels, headers, menus } from '../../python/bpy_interface.js';
 import { loadRNAUI } from '../../makesrna/rna.js';
@@ -35,6 +36,15 @@ const SPACE_STATE = [
   ['weight_paint_mode_opacity', ['overlay', 'weight_paint_mode_opacity']],
   ['show_wpaint_contours', ['overlay', 'show_wpaint_contours']],
 ];
+// A value Blender's enum does not list now is left as the space has it, as Python's `except TypeError` would: Rendered
+// shading is listed only for engines that draw the viewport (rna_3DViewShading_type_itemf), which Cycles here does not.
+const assign = (owner, name, value) => {
+  try {
+    owner[name] = value;
+  } catch (error) {
+    if (!isinstance(error, py_TypeError)) throw error;
+  }
+};
 // Region flags follow the page's regions (rects()): only Blender's changes to them come back.
 const REGION_STATE = ['show_region_toolbar', 'show_region_ui', 'show_region_tool_header'];
 const polls = (type, context) => { try { return !type.poll || !!type.poll(context); } catch { return false; } };
@@ -100,7 +110,7 @@ export function createRegions({ view, area, scene, legacy, context, ui, menu, te
     laidOut = Object.fromEntries(REGION_STATE.map((key) => [key, data[key]]));
     for (const [key, path, out = (v) => v] of SPACE_STATE) {
       const owner = path.slice(0, -1).reduce((o, name) => o[name], data), value = out(view.state[key]);
-      if (owner[path.at(-1)] !== value) owner[path.at(-1)] = value;
+      if (owner[path.at(-1)] !== value) assign(owner, path.at(-1), value);
     }
   };
   const fromSpace = () => {
