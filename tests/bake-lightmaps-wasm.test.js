@@ -12,7 +12,8 @@ await import('../src/python/bpy_interface.js');
 const { blendData, setContextPointer } = await import('../src/python/bpy_rna.js');
 const { files } = await import('../src/port/wasm.js');
 await import('../src/io_scene_babylon/lightmaps.js');
-const { bakeLightmaps } = await import('../src/render/bake-lightmaps.js');
+const { bakeLightmaps, registerBakeLightmaps } = await import('../src/render/bake-lightmaps.js');
+const { runningJobs } = await import('../src/windowmanager/wm-jobs.js');
 const { registerRuntimeTypes } = await import('../src/runtimes/runtimes.js');
 const { bylonderIcon } = await import('../src/python/bpy_icons.js');
 
@@ -64,14 +65,21 @@ for (const [kind, [finished, min, max]] of Object.entries(types)) {
 assert.ok(types['EMIT TILE'][2] > 1, 'the glowing tile bakes its emission');
 assert.ok(Math.abs(types.ROUGHNESS[2] - 0.4) < 1e-3, "the block's roughness bakes as its material's 0.4");
 
-// Bake Lightmaps of the floor (Direct on) and the block (Direct off), as Blender's job.
+// Render properties > Bake > Lightmaps' Bake Lightmaps (bylonder.bake_lightmaps) of the selected floor (Direct on) and
+// block (Direct off), each bake Blender's job, its progress the status bar's (wm-jobs.js).
+registerBakeLightmaps({ icon: bylonderIcon(), blender: () => main, changed: () => {} });
 const floor = data.objects.get('Floor'), block = data.objects.get('Block');
 block.bylonder.lightmap.direct = false;
+Object.assign(data.scenes.get('Bake Corner').bylonder.lightmap_bake, { resolution: 64, samples: 8 });
+for (const ob of data.objects) ob.select_set(ob === floor || ob === block);
 const materials = () => [...data.materials].map((m) => m.node_tree.nodes.length).join();
 const before = materials();
-let fractions = [];
-const baked = await bakeLightmaps(main, ['Floor', 'Block'], { resolution: 64, samples: 8, progress: (fraction) => fractions.push(fraction) });
-assert.deepEqual(baked.map((b) => b.name), ['Floor', 'Block']);
+assert.ok(main.run('bylonder.bake_lightmaps').status & 4, 'Bake Lightmaps starts');
+const fractions = [];
+while (runningJobs().length) {
+  fractions.push(runningJobs()[0].progress);
+  await new Promise((resolve) => setTimeout(resolve, 50));
+}
 assert.ok(fractions.length > 2 && fractions.every((f, i) => f >= 0 && f <= 1 && (!i || f >= fractions[i - 1] - 1e-6)), 'progress rises from 0 to 1');
 assert.equal(materials(), before, 'the temporary bake nodes are gone');
 for (const ob of [floor, block]) {
@@ -98,5 +106,5 @@ assert.deepEqual(cancelled, [], 'Cancel bakes nothing more');
 assert.equal(floor.bylonder.lightmap.image.name, image, "the floor keeps its lightmap");
 assert.equal(materials(), before, 'a cancelled bake leaves no bake nodes');
 assert.deepEqual([...data.objects].filter((ob) => ob.select_get()).map((ob) => ob.name), ['Pebble'], 'the selection is as it was');
-console.log(`bake types: ${Object.keys(types).join(', ')}; lightmaps: ${baked.map((b) => `${b.name} ${b.intensity.toFixed(2)}`).join(', ')}`);
+console.log(`bake types: ${Object.keys(types).join(', ')}; lightmaps: ${[floor, block].map((ob) => `${ob.name} ${ob.bylonder.lightmap.intensity.toFixed(2)}`).join(', ')}`);
 process.exit(0);
