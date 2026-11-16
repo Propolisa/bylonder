@@ -4,6 +4,7 @@
 // bpy.data (`objects["Cube"].location[0]`) whose value the page sets, and which lands on the Babylon objects it binds to.
 import { AbstractMesh, BoundingInfo, Matrix, Observable, Quaternion, Texture, Vector3 } from '@babylonjs/core';
 import { createScheduler, EVALUATORS, NATIVE } from './scheduler.js';
+import { unitFor } from './units.js';
 import { TABLES } from './scene-tables.js';
 import { nodeById } from '../../overrides/babylon/clustered-lights.js';
 import { readIR, referencesIn } from './ir.js';
@@ -284,7 +285,7 @@ export class BlendScene {
       const bounds = mesh.metadata?.bylonderBounds;
       if (bounds) mesh.setBoundingInfo(new BoundingInfo(Vector3.FromArray(bounds[0]), Vector3.FromArray(bounds[1])));
     }
-    this.#clips = createClips(scene, this.ir.scene.time, this.playhead, (path, value) => this.set(path, value));
+    this.#clips = createClips(scene, this.ir.scene.time, this.playhead, (path, value) => this.#assign(path, value));
     /** Told of each marker passed: the scene's as the playhead plays past it, an action's as its clip does. */
     this.onMarker = this.#clips.onMarker;
     const frameControl = knobs.find((knob) => knob.bind?.frame)?.path;
@@ -294,13 +295,21 @@ export class BlendScene {
       this.#values.set(frameControl, Math.floor(frame));
       this.onChanged.notifyObservers({ path: frameControl, value: Math.floor(frame) });
     });
+    /** What reads its inputs alone, never the scene's nodes. */
+    const VALUES_ONLY = ['driver', 'fcurve'];
     this.#scheduler = Object.keys(this.ir.entities).length ? createScheduler(this.ir, { scene, root, ir: this.ir, buffers, controls: {
       get: (path) => this.#values.get(path),
       // A property a started clip keys is the clip's: the timeline's curves do not write it meanwhile.
       write: (path, value) => { if (!this.#clips?.holds(path)) this.#write(path, value); },
       set: (path, value) => { this.#write(path, value); this.#scheduler?.changed(path); },
       frame: (/** @type {string | undefined} */ id) => this.playhead.frameAt(id ? this.#idOffset(id) : 0),
+      // An entity may read the nodes (a rig's constraints its bones), but for drivers and F-Curves, which read their
+      // inputs alone; a unit, whatever it runs, may.
+      flush: (entity) => { if (unitFor(entity.type) || !VALUES_ONLY.includes(entity.implementation ?? '')) this.#flush(); },
     } }) : null;
+    // A frame's writes place each node they move once, after the animation and what reads the frame have run, and
+    // before anything draws or game code reads the nodes.
+    this.#placed = [scene.onAfterAnimationsObservable.add(() => this.#flush()), scene.onBeforeRenderObservable.add(() => this.#flush())];
     this.#channels(knobs);
     this.#indexKnobs();
     this.playhead.offsetOf = (/** @type {any} */ target) => this.#targetOffsets.get(target) ?? 0;
@@ -309,6 +318,7 @@ export class BlendScene {
     // The app's viewport draws what Disable in Renders hides; the page shows what Blender renders.
     this.#showObjects([...this.#hiddenAtExport, ...Object.keys(this.ir.ids).filter((key) => this.ir.ids[key].data?.hide_render === true)]);
     if (this.#animated()) this.playhead.play();
+    this.#flush();
   }
 
   /** Whether the scene moves with its frame: a range of frames, and an animation or what reads the frame. */
@@ -536,6 +546,12 @@ export class BlendScene {
     const knob = this.#knobs.get(path);
     if (!knob) throw new Error(`No control ${path}`);
     if (typeof value !== typeof knob.default) throw new TypeError(`${path} takes a ${typeof knob.default}, not ${typeof value}`);
+    this.#assign(path, value);
+    this.#flush();
+  }
+
+  /** A control set, and the entities that read it run; the nodes it moves are placed with the frame's others. @param {string} path @param {Value} value */
+  #assign(path, value) {
     this.#write(path, value);
     this.#scheduler?.changed(path);
   }
@@ -553,7 +569,7 @@ export class BlendScene {
         get: () => this.#values.get(path),
         set: (value) => {
           const typed = typeof initial === 'boolean' ? !!value : value;
-          if (typed !== this.#values.get(path)) this.set(path, typed);
+          if (typed !== this.#values.get(path)) this.#assign(path, typed);
         },
       });
     }
@@ -621,6 +637,7 @@ export class BlendScene {
       this.#retime();
       // What a binding writes is the control's, on the objects the patch made too.
       for (const [path, knob] of this.#knobs) if (knob.bind) this.#write(path, /** @type {Value} */ (this.#values.get(path)));
+      this.#flush();
     } catch (error) {
       return reload(error);
     }
@@ -677,9 +694,28 @@ export class BlendScene {
     // set one; any other is clamped to its hard range, as Blender's RNA sets a property.
     if (typeof value === 'number' && knob.type === 'BOOLEAN') value = value > 1 - FLOAT_EPSILON;
     else if (typeof value === 'number') value = Math.min(knob.hard_max ?? Infinity, Math.max(knob.hard_min ?? -Infinity, value));
+    const previous = this.#values.get(path);
     this.#values.set(path, value);
     if (knob.bind) this.#apply(knob.bind, path, value);
-    this.onChanged.notifyObservers({ path, value });
+    if (value !== previous && this.onChanged.hasObservers()) this.onChanged.notifyObservers({ path, value });
+  }
+
+  /** The nodes a frame's writes move, each with the paths of the parts written (location, rotation, scale). @type {Map<any, Map<string, [string, Transform]>>} */
+  #placing = new Map();
+  /** The part of its transform each control path sets (`location`), read once. @type {Map<string, string>} */
+  #partOf = new Map();
+  /** @type {any[]} */
+  #placed = [];
+  /** Places each node the writes since the last time moved, once: a bone by its whole pose, an object by each part written. */
+  #flush() {
+    if (!this.#placing.size) return;
+    for (const [node, parts] of this.#placing) {
+      if (node.getRestMatrix) {
+        const [[path, transform]] = parts.values();
+        this.#place(node, path, transform);
+      } else for (const [path, transform] of parts.values()) this.#place(node, path, transform);
+    }
+    this.#placing.clear();
   }
 
   /** The controls, as Blender's RNA describes them. @returns {Control[]} */
@@ -689,6 +725,9 @@ export class BlendScene {
 
   /** Disposes of the scene. */
   dispose() {
+    this.scene.onAfterAnimationsObservable.remove(this.#placed[0]);
+    this.scene.onBeforeRenderObservable.remove(this.#placed[1]);
+    this.#placing.clear();
     this.#source?.copies.delete(this);
     this.#scheduler?.dispose();
     this.#clips.dispose();
@@ -819,7 +858,12 @@ export class BlendScene {
     if (!node) return;
     if (bind.transform) {
       // A clip playing takes the bones and objects it animates: the timeline's own curves do not move them meanwhile.
-      if (!this.playhead.claimed(node)) this.#place(node, path, bind.transform);
+      if (this.playhead.claimed(node)) return;
+      let part = this.#partOf.get(path);
+      if (part === undefined) this.#partOf.set(path, (part = path.slice(path.lastIndexOf('.') + 1).replace(/\[\d+\]$/, '')));
+      let parts = this.#placing.get(node);
+      if (!parts) this.#placing.set(node, (parts = new Map()));
+      parts.set(part, [path, bind.transform]);
     } else if (bind.hide) {
       const object = Object.keys(this.ir.ids).find((k) => this.ir.ids[k].node === bind.node);
       if (object) this.#showObjects([object]);

@@ -21,7 +21,7 @@ export function createScheduler(ir: import("./ir.js").IR, page: Page): {
  * @typedef {{ run(inputs: Record<string, any>, context: { frame: number }, entity: import('./ir.js').Entity): Outputs,
  *   runChain?(run: [Record<string, any>, import('./ir.js').Entity][], context: { frame: number }): Outputs,
  *   draw?(mesh: import('./ir.js').Mesh): Promise<import('./mesh.js').DrawBuffers>, settled?(): Promise<void>, detach?(entity: import('./ir.js').Entity): void }} Evaluator
- * @typedef {{ get(path: string): any, write(path: string, value: any): void, set(path: string, value: any): void, frame(id?: string): number }} Controls `frame(id)`: the frame an ID shows (its time offset applied); `set`: a write from outside the scheduler's run, whose readers then run
+ * @typedef {{ get(path: string): any, write(path: string, value: any): void, set(path: string, value: any): void, frame(id?: string): number, flush?(before: import('./ir.js').Entity): void }} Controls `frame(id)`: the frame an ID shows (its time offset applied); `set`: a write from outside the scheduler's run, whose readers then run; `flush`: what was written placed on the nodes, before an entity runs that may read them
  * What an implementation loads for: the page's scene, the package's URL, the IR, scene.bin's buffers and the properties.
  * @typedef {{ scene: import('@babylonjs/core').Scene, root: string, ir: import('./ir.js').IR, buffers: import('./buffers.js').Buffers, controls: Controls }} Page
  */
@@ -52,7 +52,7 @@ export type Evaluator = {
     detach?(entity: import("./ir.js").Entity): void;
 };
 /**
- * `frame(id)`: the frame an ID shows (its time offset applied); `set`: a write from outside the scheduler's run, whose readers then run
+ * `frame(id)`: the frame an ID shows (its time offset applied); `set`: a write from outside the scheduler's run, whose readers then run; `flush`: what was written placed on the nodes, before an entity runs that may read them
  * What an implementation loads for: the page's scene, the package's URL, the IR, scene.bin's buffers and the properties.
  */
 export type Controls = {
@@ -60,6 +60,7 @@ export type Controls = {
     write(path: string, value: any): void;
     set(path: string, value: any): void;
     frame(id?: string): number;
+    flush?(before: import("./ir.js").Entity): void;
 };
 /**
  * An implementation the package ships: it runs an entity on its resolved inputs; `runChain` runs a chain of entities

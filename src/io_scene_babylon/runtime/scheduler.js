@@ -18,7 +18,7 @@ import { drawGeometry } from './mesh.js';
  * @typedef {{ run(inputs: Record<string, any>, context: { frame: number }, entity: import('./ir.js').Entity): Outputs,
  *   runChain?(run: [Record<string, any>, import('./ir.js').Entity][], context: { frame: number }): Outputs,
  *   draw?(mesh: import('./ir.js').Mesh): Promise<import('./mesh.js').DrawBuffers>, settled?(): Promise<void>, detach?(entity: import('./ir.js').Entity): void }} Evaluator
- * @typedef {{ get(path: string): any, write(path: string, value: any): void, set(path: string, value: any): void, frame(id?: string): number }} Controls `frame(id)`: the frame an ID shows (its time offset applied); `set`: a write from outside the scheduler's run, whose readers then run
+ * @typedef {{ get(path: string): any, write(path: string, value: any): void, set(path: string, value: any): void, frame(id?: string): number, flush?(before: import('./ir.js').Entity): void }} Controls `frame(id)`: the frame an ID shows (its time offset applied); `set`: a write from outside the scheduler's run, whose readers then run; `flush`: what was written placed on the nodes, before an entity runs that may read them
  * What an implementation loads for: the page's scene, the package's URL, the IR, scene.bin's buffers and the properties.
  * @typedef {{ scene: import('@babylonjs/core').Scene, root: string, ir: import('./ir.js').IR, buffers: import('./buffers.js').Buffers, controls: Controls }} Page
  */
@@ -116,7 +116,6 @@ export function createScheduler(ir, page) {
 
   /** The one entity that reads an entity's outputs, if one alone does. @param {string} key */
   const soleReader = (key) => (readers.get(key)?.length === 1 ? readers.get(key)?.[0] : undefined);
-
   /** @param {Promise<any>} promise */
   const wait = (promise) => { pending = promise.catch((error) => console.warn(error.message)).then(() => { pending = null; run(); }); };
 
@@ -136,6 +135,7 @@ export function createScheduler(ir, page) {
       }
       const last = /** @type {string} */ (chain.pop());
       chain.forEach((k) => outputs.set(k, null));
+      controls.flush?.(entities[last]);
       try {
         const context = { frame: controls.frame(entities[last].id) }, result = found.runChain && chain.length
           ? found.runChain([...chain, last].map((k) => [resolve(entities[k].inputs, entities[k].id), entities[k]]), context) : found.run(resolve(entities[last].inputs, entities[last].id), context, entities[last]);
