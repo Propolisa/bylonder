@@ -14,7 +14,7 @@ import { fingers } from "../../tests/e2e/touch.mjs";
 const root = fileURLToPath(new URL("../..", import.meta.url));
 const PORT = process.env.DOCS_PORT ?? "5205", URL_ = `http://localhost:${PORT}/`;
 const SIZE = { width: 1280, height: 800 };
-const MAX_GIF = 1024 * 1024;
+const MAX_GIF = 1_000_000;
 
 const reachable = () => fetch(URL_).then((r) => r.ok, () => false);
 async function devServer() {

@@ -36,22 +36,22 @@ await record("character-animation", { example: "basic-character", node: "Armatur
     await demo.waitForTimeout(ms);
     for (const key of [...keys].reverse()) await demo.keyboard.up(key);
   };
-  const gif = (name, steps) => screencastGif(demo, `${r.out}${name}.gif`, steps, { crop: SCENE, size: SIZE, hold: 1000 });
+  const gif = (name, steps, hold = 1000) => screencastGif(demo, `${r.out}${name}.gif`, steps, { crop: SCENE, size: SIZE, hold });
 
-  // A short walk, run and turn that stays well inside the field's rim (21 m out).
+  // A short walk, run, turn, stop and jump (about 6 s, so the GIF stays small) well inside the field's rim (21 m out).
   await gif("walk", async () => {
-    await hold(["KeyW"], 1500);
-    await hold(["Shift", "KeyW"], 1200);
-    await hold(["Shift", "KeyW", "KeyD"], 1800);
-    await demo.waitForTimeout(1500);
+    await hold(["KeyW"], 1000);
+    await hold(["Shift", "KeyW"], 900);
+    await hold(["Shift", "KeyW", "KeyD"], 1300);
+    await demo.waitForTimeout(1000);
     // The stop, a still for the basic character's own checks (STOP: where to write it), not a page medium.
     if (process.env.STOP) await demo.screenshot({ path: process.env.STOP, clip: SCENE });
     await demo.keyboard.down("KeyW");
-    await demo.waitForTimeout(500);
+    await demo.waitForTimeout(300);
     await demo.keyboard.press("Space");
-    await demo.waitForTimeout(1200);
+    await demo.waitForTimeout(1100);
     await demo.keyboard.up("KeyW");
-  });
+  }, 500);
 
   // Up the steps from their front: the side along which Step 1 reaches furthest past Step 5, the top one. The run there
   // from wherever the walk ended happens before the clip, so it shows the climb alone. A walk that never arrives gives
