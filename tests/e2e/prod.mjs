@@ -511,28 +511,43 @@ try {
   // the hand (before, every finger became the window's mouse: a hold a right click, two fingers a camera gesture).
   await step("the Game area's café plays by touch", async () => {
     const gpu = await hardwareGPU();
-    const opened = await openApp(browser, server.url, { link: "rock-hard-cafe", node: "Rock", size: { width: 412, height: 915 }, touch: true });
+    const opened = await openApp(browser, server.url, { link: "rock-hard-cafe", node: "Rock", size: { width: 412, height: 915 }, scale: 2.625, touch: true });
     try {
       if (!gpu) { console.log(`      play skipped: ${NO_WEBGPU}`); return; }
       const touch = fingers(opened.page);
-      await opened.bylonder((b) => { b.dock.show("game"); return b.runOperator("bylonder.game_play"); });
+      const center = async (locator) => { const box = await locator.boundingBox(); return [box.x + box.width / 2, box.y + box.height / 2]; };
+      // Play tapped in the Game area's header, as the owner does: the game in Focus Mode.
+      await opened.bylonder((b) => b.dock.show("game"));
+      await touch.tap(await center(opened.frame().locator('button[title^="Play the scene"]')));
       await opened.until((b) => b.game.drawing && !!b.game.world, null, 240000);
       const game = () => opened.bylonder((b) => {
         const scene = b.game.blend.scene, grab = scene.textures.find((t) => t.name === "Touch")?.getControlByName("Grab");
         const barista = [...b.game.world.instances.values()].find((i) => i.definition.name === "Barista").handlers;
         return { lit: grab?.background, palm: barista.palm.getAbsolutePosition().asArray() };
       });
-      await touch.tap([300, 700]);
-      await opened.page.waitForTimeout(500);
-      const before = await game();
-      await touch.send("touchStart", [[80, 800, 7]]);
-      await opened.page.waitForTimeout(400);
-      assert.notEqual((await game()).lit, before.lit, "holding the left half lights Grab");
-      await touch.send("touchEnd", []);
-      await touch.drag([300, 700], [240, 560], { steps: 12, interval: 30 });
-      await opened.page.waitForTimeout(1500);
-      const after = await game();
-      assert.ok(Math.hypot(after.palm[0] - before.palm[0], after.palm[2] - before.palm[2]) > 0.05, `a drag on the right half moves the hand: ${before.palm} to ${after.palm}`);
+      const canvas = () => opened.frame().locator("#game-section canvas").boundingBox();
+      // The game's own fingers, with no "Click to play" step on a touch screen: a hold on the left half lights Grab,
+      // a drag on the right half moves the hand.
+      const plays = async (where) => {
+        const box = await canvas(), at = (fx, fy) => [box.x + box.width * fx, box.y + box.height * fy];
+        assert.equal(await opened.frame().getByText("Click to play").count(), 0, `${where}: no click-to-play step on a touch screen`);
+        await touch.tap(at(0.75, 0.75));
+        await opened.page.waitForTimeout(500);
+        const before = await game();
+        await touch.send("touchStart", [[...at(0.2, 0.85), 7]]);
+        await opened.page.waitForTimeout(1000);
+        assert.notEqual((await game()).lit, before.lit, `${where}: holding the left half lights Grab (no press-and-hold of the window's)`);
+        await touch.send("touchEnd", []);
+        await touch.drag(at(0.75, 0.75), at(0.6, 0.6), { steps: 12, interval: 30 });
+        await opened.page.waitForTimeout(1500);
+        const after = await game();
+        assert.ok(Math.hypot(after.palm[0] - before.palm[0], after.palm[2] - before.palm[2]) > 0.05, `${where}: a drag on the right half moves the hand: ${before.palm} to ${after.palm}`);
+      };
+      await plays("in Focus Mode");
+      // Back to the layout: the area still belongs to the game's fingers.
+      await opened.page.evaluate(() => history.back());
+      await opened.until((b) => !b.dock.focused);
+      await plays("in the layout");
       assert.deepEqual(opened.errors, [], "page errors");
     } finally {
       await opened.close();

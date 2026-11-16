@@ -6,8 +6,9 @@ import { Button } from "../interface/components/ui/button";
 const props = defineProps({ header: Object, canvas: Object, status: String, shared: String, busy: Boolean, running: Boolean, paused: Boolean, evaluation: String, evaluations: Array });
 defineEmits(["play", "pause", "stop", "reset", "evaluation"]);
 const host = ref(null);
-// The game takes keys while its canvas has focus; until a click gives it focus, the area says so.
-const focused = ref(false);
+// The game takes keys while its canvas has focus; until a click gives it focus, the area says so. A touch screen has no
+// such step: a finger on the game is the game's input at once.
+const focused = ref(false), touchScreen = window.matchMedia?.("(pointer: coarse)").matches;
 const focus = () => { focused.value = true; }, blur = () => { focused.value = false; };
 // Each run's canvas (game-view.js), in place of the last.
 const attach = (canvas, old) => {
@@ -53,10 +54,11 @@ onBeforeUnmount(() => {
       <span v-if="shared" class="ml-auto truncate text-muted-foreground">{{ shared }}</span>
     </div>
   </Teleport>
-  <div ref="host" class="bl-ui relative h-full bg-background text-foreground">
+  <!-- The whole area is the game's: the window's touch layer leaves its fingers alone (wm-touch.js). -->
+  <div ref="host" class="bl-ui relative h-full bg-background text-foreground" data-game-input>
     <!-- While Play exports, its status shows here too: in Focus Mode the header is hidden. -->
     <p v-if="!running" class="absolute inset-0 p-4 text-muted-foreground">{{ busy ? status || "Exporting the scene" : "Play runs the scene as File > Export > JavaScript ships it; edits reach it as you make them." }}</p>
-    <button v-else-if="!focused" type="button" class="absolute inset-0 flex items-center justify-center bg-background/40 text-foreground"
+    <button v-else-if="!focused && !touchScreen" type="button" class="absolute inset-0 flex items-center justify-center bg-background/40 text-foreground"
       @pointerdown.prevent="canvas.focus()">
       <span class="rounded-sm bg-background/80 px-3 py-1.5">Click to play</span>
     </button>
