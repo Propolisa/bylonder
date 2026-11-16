@@ -150,11 +150,11 @@ export function createScheduler(ir, page) {
   /** What reads the frame and is not Babylon's own. */
   const timedLive = () => timed.filter((key) => unitFor(entities[key].type) || !NATIVE.includes(entities[key].implementation ?? ''));
 
-  // After Babylon's animation: what reads the frame runs again when it changed, and live values are written over the baked ones.
+  // After Babylon's animation: what reads the frame runs again when it changed, and live values are written over the baked ones where they differ.
   const replay = scene.onAfterAnimationsObservable.add(() => {
     if (controls.frame() !== frame) { frame = controls.frame(); timedLive().forEach(mark); run(); }
     for (const [key, result] of outputs) for (const [name, target] of Object.entries(entities[key].outputs)) {
-      if (target && 'property' in target && result?.[name] !== undefined) controls.write(target.property, result[name]);
+      if (target && 'property' in target && result?.[name] !== undefined && controls.get(target.property) !== result[name]) controls.write(target.property, result[name]);
     }
   });
 
