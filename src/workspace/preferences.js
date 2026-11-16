@@ -19,6 +19,7 @@ const SETTINGS = [
   ['sequencer_setup_video', 'Video Output', 'Remembered choice: render the edit as MPEG-4 video', true],
   ['sequencer_setup_scene', 'Scene Strip', 'Remembered choice: add the active scene as a strip', true],
   ['sequencer_setup_audio', 'Scene Audio', "Remembered choice: add the scene's sound beside its strip", true],
+  ['inspector_key', 'Babylon Inspector: Shift Ctrl I', "Shift Ctrl I over a Babylon view (a 3D Viewport, the Game area, the Package View) opens Babylon's Inspector on its scene, where Blender binds nothing to it; elsewhere the browser keeps the key (its developer tools)", false],
 ];
 
 // Bylonder's AddonPreferences ('bylonder') and its panel, once Blender's Python is loaded; `icon` is the Bylonder
@@ -39,6 +40,11 @@ export function registerBylonderPreferences(icon) {
     bl_label: 'Bylonder', bl_space_type: 'PREFERENCES', bl_region_type: 'WINDOW', bl_context: 'system',
     draw_header(context) { this.layout.label(kw({ text: '', icon_value: icon })); },
     draw(context) { drawSettings(this.layout, bylonderPreferences()); },
+  }));
+  registerClass(__class__('USERPREF_PT_bylonder_keymap', [types().Panel], {
+    bl_label: 'Bylonder', bl_space_type: 'PREFERENCES', bl_region_type: 'WINDOW', bl_context: 'keymap',
+    draw_header(context) { this.layout.label(kw({ text: '', icon_value: icon })); },
+    draw(context) { this.layout.prop(bylonderPreferences(), 'inspector_key'); },
   }));
   if (!userdef().addons.get(ADDON)) userdef().addons.py_new().module = ADDON;
 }

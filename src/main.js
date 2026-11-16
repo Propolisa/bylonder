@@ -728,15 +728,15 @@ gameView = mountGameView(document.querySelector("#game-section"), { world, heade
 gameView.codeReady?.then(() => { if (gameView.code && repairBehaviors(new Map(gameView.code.behaviors.map((b) => [b.name, b])))) world.mainSync.view(); refreshUI(); });
 const imageEditor = mountImageEditor(document.querySelector("#image-section"), { header: viewportDock.header("image"), engine, views, sync: world.mainSync, editObject });
 let inspectorBusy = false;
-async function inspector() {
+async function inspector(scene = world.scene) {
   if (inspectorBusy) return;
   inspectorBusy = true;
   try {
-    if (world.scene.debugLayer.isVisible()) world.scene.debugLayer.hide();
+    if (scene.debugLayer.isVisible()) scene.debugLayer.hide();
     else {
       notify("Loading Babylon Inspector…");
       await import("@babylonjs/inspector");
-      await world.scene.debugLayer.show({ embedMode: true });
+      await scene.debugLayer.show({ embedMode: true });
     }
   } catch (e) {
     console.error(e);
@@ -949,7 +949,7 @@ registerOperators({
     },
   },
   "wm.toolbar": { poll: () => !!contextView(), run: () => contextView().toolbar.popup(editor.pointer) },
-  "bylonder.inspector": { keys: () => "Shift Ctrl I", run: inspector },
+  "bylonder.inspector": { keys: () => (inspectorKey() ? "Shift Ctrl I" : undefined), run: () => inspector() },
 });
 appendMenu("VIEW3D_MT_view", ({ layout }) => {
   layout.separator();
@@ -1001,10 +1001,19 @@ function openEdgeMenu({ areas: [first, second], vertical, joinable }, event) {
 }
 viewportDock.onEdgeMenu((edge, event) => { areaEdge = edge; try { invokeOperator("screen.area_options", {}, event); } finally { areaEdge = null; } });
 viewportDock.onSwap((a, b) => onEdge({ areas: [a, b] }, "screen.area_swap")());
-// Bylonder's own keys, below Blender's keymaps.
+// The scene of the Babylon view under the pointer: a 3D Viewport's, the playing game's, the Package View page's when
+// its Babylon has the debug layer.
+const hoveredScene = () => {
+  if (viewports().some((view) => view.canvas.matches(":hover"))) return world.scene;
+  const scene = document.querySelector("#game-section canvas:hover") ? gameView?.blend?.scene
+    : document.querySelector("#package-section iframe:hover")?.contentWindow?.blend?.scene;
+  return scene?.debugLayer ? scene : null;
+};
+const inspectorKey = () => !!bylonderPreferences()?.inspector_key;
+// Bylonder's own keys, below Blender's keymaps; a key none of them takes is the browser's.
 const bylonderKeys = createKeymap([
   { keys: "ESC", poll: () => !world.wm.modal, run: () => renderHost.escape() },
-  { keys: "Shift Ctrl I", run: () => inspector() },
+  { keys: "Shift Ctrl I", poll: () => inspectorKey() && !!hoveredScene(), run: () => inspector(hoveredScene()) },
 ]);
 // Blender's keymaps a 3D View runs: the active tool's and its fallback's, the mode's (Object Mode, Mesh, Curve, Font, Armature, Pose or Particle), then the
 // 3D View's and the window's. Tool keymaps run with the tool's settings.
