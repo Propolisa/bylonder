@@ -111,7 +111,7 @@ export function createFilm(scene, camera) {
   // its view, its size or the shaders its meshes drew with (one compiled, swapped in), or a reset() (Main evaluated),
   // starts again. Shaders of other passes (shadows, overlays, probes) do not. `manual` leaves the samples to a render
   // (frames.js), which jitters and adds them itself.
-  let count = 0, signature = '', sampled = false, jittered = false, drawn = 0, shaders = 0;
+  let count = 0, signature = '', sampled = false, jittered = null, drawn = 0, shaders = 0;
   const viewOf = () => {
     const projection = camera.getProjectionMatrix(true).m;
     return [...camera.getViewMatrix().m, ...projection, engine.getRenderWidth(), engine.getRenderHeight(), shaders].join();
@@ -138,10 +138,10 @@ export function createFilm(scene, camera) {
     sampled = true;
     if (!count) { controls.sample([0, 0], 0, true); return; }
     const jitter = filmJitter(count), width = engine.getRenderWidth() * camera.viewport.width, height = engine.getRenderHeight() * camera.viewport.height;
-    camera.freezeProjectionMatrix(Matrix.FromArray(jitterProjection(Array.from(camera.getProjectionMatrix(true).m), jitter, width, height, camera.mode === Camera.ORTHOGRAPHIC_CAMERA)));
+    jittered = Matrix.FromArray(jitterProjection(Array.from(camera.getProjectionMatrix(true).m), jitter, width, height, camera.mode === Camera.ORTHOGRAPHIC_CAMERA));
+    camera.freezeProjectionMatrix(jittered);
     // The scene took the camera's matrices before this observer: it takes them again, jittered.
     scene.updateTransformMatrix(true);
-    jittered = true;
     controls.sample(jitter, count);
   });
   const after = scene.onAfterCameraRenderObservable.add((rendering) => {
@@ -151,7 +151,8 @@ export function createFilm(scene, camera) {
     sampling.delete(scene);
     if (jittered) camera.unfreezeProjectionMatrix();
     if (sampled) count++;
-    sampled = jittered = false;
+    sampled = false;
+    jittered = null;
   });
   // A frame a frame graph draws fires no camera observables: its sample ends with the frame.
   const afterFrame = scene.onAfterRenderObservable.add(() => sampling.delete(scene));
@@ -163,6 +164,18 @@ export function createFilm(scene, camera) {
     samples: () => 1,
     // Starts again: the next sample is the first.
     reset() { state.clear = true; count = 0; },
+    // The camera's own projection while the sample renders, for what draws over the film unjittered (Blender's overlays);
+    // returns what puts the sample's back.
+    unjitter() {
+      const sample = jittered;
+      if (!sample) return () => {};
+      camera.unfreezeProjectionMatrix();
+      scene.updateTransformMatrix(true);
+      return () => {
+        camera.freezeProjectionMatrix(sample);
+        scene.updateTransformMatrix(true);
+      };
+    },
     // The jitter, in pixels, of the sample rendering now (none once the film is complete).
     get jitter() { return state.adding ? state.jitter : [0, 0]; },
     // Whether the view holds all its samples (EEVEE's viewport stops drawing then).

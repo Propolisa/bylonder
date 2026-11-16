@@ -25,8 +25,8 @@ export function createRelationsOverlay(scene, { sync, wake }) {
     const lines = relationsDraw(main.blender.C);
     if (same(lines, drawn)) return;
     drawn = lines;
-    mesh?.dispose();
-    mesh = lines.length ? relationLinesMesh(scene, lines) : null;
+    if (!lines.length) mesh?.dispose();
+    mesh = lines.length ? relationLinesMesh(scene, lines, mesh ?? undefined) : null;
     mesh?.setEnabled(shown);
     wake();
   });

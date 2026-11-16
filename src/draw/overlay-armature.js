@@ -259,22 +259,45 @@ function pointsTexture(scene, points) {
   return RawTexture.CreateRGBATexture(texels, width, height, scene, false, false, Texture.NEAREST_SAMPLINGMODE, Constants.TEXTURETYPE_FLOAT);
 }
 
+// A vertex input's values, written over the mesh's buffer of the same length, else into a new one.
+function fillInput(mesh, kind, values, size) {
+  const buffer = mesh.getVertexBuffer(kind);
+  if (buffer?.getData()?.length === values.length) buffer.update(values);
+  else mesh.setVerticesBuffer(new VertexBuffer(mesh.getEngine(), values, kind, { size, updatable: true }));
+}
+// The instances' data, written over the mesh's buffer of the same length, else into a new one.
+function fillInstances(mesh, data, vec4s) {
+  const { instances } = mesh.metadata;
+  if (instances?.getData()?.length === data.length) return instances.update(data);
+  instances?.dispose();
+  mesh.metadata.instances = new Buffer(mesh.getEngine(), data, true, vec4s * 4, false, true);
+  for (let i = 0; i < vec4s; i++) mesh.setVerticesBuffer(mesh.metadata.instances.createVertexBuffer(`inst${i}`, i * 4, 4));
+}
+function newPassMesh(scene, name) {
+  const mesh = new Mesh(`__armature ${name}`, scene);
+  Object.assign(mesh, { isPickable: false, alwaysSelectAsActiveMesh: true, doNotSerialize: true, isUnIndexed: true, metadata: { overlay: true, arrows: name === 'arrows' } });
+  mesh.onDisposeObservable.add(() => { mesh.metadata.instances?.dispose(); mesh.metadata.ownTexture?.dispose(); });
+  return mesh;
+}
 // One pass's instances of one shape: a mesh of the shape's vertices with the buffer's data as instance attributes.
-function passMesh(scene, name, shape, pass, transparent, { data, count }) {
-  const engine = scene.getEngine(), mesh = new Mesh(`__armature ${name}`, scene);
-  Object.assign(mesh, { isPickable: false, alwaysSelectAsActiveMesh: true, doNotSerialize: true, metadata: { overlay: true, arrows: name === 'arrows' } });
-  const inputs = SHADERS[pass.shader].inputs;
-  for (const [input, values] of Object.entries(shape.inputs)) mesh.setVerticesBuffer(new VertexBuffer(engine, Float32Array.from(values), input, { size: inputs[input] }));
-  const vertices = shape.inputs.position.length / inputs.position, vec4s = DATA[SHADERS[pass.shader].data].vec4s;
+// The pass's mesh of the last sync is filled again, as Blender's draw cache refills its batches: a new mesh's shaders
+// may still compile on its first frames, which would leave the bones out of them.
+function passMesh(scene, name, shape, pass, transparent, { data, count }, mesh = newPassMesh(scene, name)) {
+  const inputs = SHADERS[pass.shader].inputs, vec4s = DATA[SHADERS[pass.shader].data].vec4s;
+  if (mesh.metadata.shape !== shape) {
+    for (const [input, values] of Object.entries(shape.inputs)) fillInput(mesh, input, Float32Array.from(values), inputs[input]);
+    mesh.metadata.shape = shape;
+  }
   if (vec4s) {
-    const buffer = new Buffer(engine, data, false, vec4s * 4, false, true);
-    for (let i = 0; i < vec4s; i++) mesh.setVerticesBuffer(buffer.createVertexBuffer(`inst${i}`, i * 4, 4));
+    fillInstances(mesh, data, vec4s);
     mesh.forcedInstanceCount = count;
   }
-  if (shape.points) mesh.metadata.points = shape.texture;
-  mesh.isUnIndexed = true;
-  mesh.subMeshes = [];
-  new SubMesh(0, 0, vertices, 0, vertices, mesh);
+  mesh.metadata.points = shape.texture;
+  const vertices = shape.inputs.position.length / inputs.position;
+  if (mesh.subMeshes?.length !== 1 || mesh.subMeshes[0].verticesCount !== vertices) {
+    mesh.subMeshes = [];
+    new SubMesh(0, 0, vertices, 0, vertices, mesh);
+  }
   mesh.material = passMaterial(scene, pass, transparent);
   mesh.material.fillMode = shape.mode;
   return mesh;
@@ -288,17 +311,19 @@ function sceneShape(scene, key, make) {
   return shapes.get(key);
 }
 
-// The meshes an armature's draw data makes, in the passes' order.
-function drawMeshes(scene, drawn) {
-  const meshes = [];
+// The meshes an armature's draw data makes, in the passes' order, by key: those of `previous` (the last sync's) filled
+// again where a pass draws again, the rest disposed.
+function drawMeshes(scene, drawn, previous = new Map()) {
+  const meshes = new Map();
+  const add = (key, name, shape, pass, buffer) => meshes.set(key, passMesh(scene, name, shape, pass, drawn.transparent, buffer, previous.get(key)));
   for (const pass of PASSES) {
     if (pass.custom) {
-      for (const custom of drawn.customs.filter((c) => c.pass === pass.custom && c.ids.length)) {
-        const empty = !!SHAPES[custom.geometry];
+      for (const [n, custom] of drawn.customs.filter((c) => c.pass === pass.custom && c.ids.length).entries()) {
+        const empty = !!SHAPES[custom.geometry], key = `${pass.custom} ${custom.geometry} ${n}`;
         const shape = empty ? sceneShape(scene, `custom ${custom.geometry}`, () => emptyShape(custom.geometry)) : withTexture(scene, customShape(custom));
-        const mesh = passMesh(scene, custom.geometry, shape, pass, drawn.transparent, { data: custom.data, count: custom.ids.length });
-        if (!empty && shape.texture) mesh.onDisposeObservable.add(() => shape.texture.dispose());
-        meshes.push(mesh);
+        add(key, custom.geometry, shape, pass, { data: custom.data, count: custom.ids.length });
+        const mesh = meshes.get(key), own = empty ? undefined : shape.texture;
+        if (mesh.metadata.ownTexture !== own) { mesh.metadata.ownTexture?.dispose(); mesh.metadata.ownTexture = own; }
       }
       continue;
     }
@@ -307,17 +332,19 @@ function drawMeshes(scene, drawn) {
     // Lines are vertex pairs of position and color, drawn as they are.
     const shape = pass.shape ? sceneShape(scene, pass.shape, SHAPE_VERTICES[pass.shape])
       : { mode: LINES, inputs: { position: [...data].filter((_, i) => i % 8 < 3), vcolor: [...data].filter((_, i) => i % 8 >= 4) } };
-    meshes.push(passMesh(scene, pass.buffer, shape, pass, drawn.transparent, { data, count: ids.length }));
+    add(pass.buffer, pass.buffer, shape, pass, { data, count: ids.length });
   }
+  for (const [key, mesh] of previous) if (meshes.get(key) !== mesh) mesh.dispose();
   return meshes;
 }
 
 // Lines given as vertex pairs of position (xyz, w) and color, drawn as the overlay draws its relationship lines (its
 // extra_wire shader and state): the Relations overlay's too (overlay-relations.js).
-export function relationLinesMesh(scene, data) {
+// `mesh`: the lines mesh to fill again.
+export function relationLinesMesh(scene, data, mesh) {
   const pass = PASSES.find((p) => p.buffer === 'relations');
   const shape = { mode: LINES, inputs: { position: [...data].filter((_, i) => i % 8 < 3), vcolor: [...data].filter((_, i) => i % 8 >= 4) } };
-  return passMesh(scene, 'relations', shape, pass, false, { data, count: data.length / 16 });
+  return passMesh(scene, 'relations', shape, pass, false, { data, count: data.length / 16 }, mesh);
 }
 
 // Bone names as the overlay's text cache draws them (draw_manager_text.cc DRW_text_cache_draw): at their point, 10
@@ -345,22 +372,23 @@ export const armatureChanged = (node) => revisions.set(node, (revisions.get(node
 // selected(node), active(node), wake() (the views draw again). Each view calls setEnabled(value, { shading, xray })
 // right before it renders.
 export function createArmatureOverlay(scene, { sync, objects, visible, selected, active, wake }) {
-  // Per armature: what the last sync was for, and its draw data and meshes per variant (opaque or transparent view).
+  // Per armature: what the last sync was for, and its draw data and meshes per variant (opaque or transparent view); a
+  // stale variant's meshes are filled again when a view draws it.
   const entries = new Map();
   const flags = (transparent) => DRAW.SHOW_RELATIONS | DRAW.SHOW_OUTLINE | DRAW.SHOW_TEXT | (transparent ? DRAW.TRANSPARENT : 0);
   const clear = (entry) => { for (const variant of Object.values(entry.variants)) variant.meshes.forEach((mesh) => mesh.dispose()); entry.variants = {}; };
   function variant(entry, transparent) {
-    const main = sync();
-    if (!entry.variants[transparent]) {
+    const main = sync(), last = entry.variants[transparent];
+    if (!last || last.stale) {
       const drawn = armatureDraw(main.blender.C, main.objectOf(entry.node), flags(transparent));
-      const meshes = drawMeshes(scene, drawn);
+      const meshes = drawMeshes(scene, drawn, last?.meshes);
       meshes.forEach((mesh) => { mesh.renderingGroupId = drawn.inFront ? 1 : 0; });
       entry.variants[transparent] = { drawn, meshes };
       entry.texts = drawn.texts;
       tagRedraw();
     }
     // A view may stop drawing before new meshes' shaders are ready.
-    if (entry.variants[transparent].meshes.some((mesh) => !mesh.isReady(true))) wake();
+    if ([...entry.variants[transparent].meshes.values()].some((mesh) => !mesh.isReady(true))) wake();
     return entry.variants[transparent];
   }
   // Once a frame: armatures Main evaluated again, or whose selection changed (pushed into Main first), sync anew.
@@ -376,7 +404,7 @@ export function createArmatureOverlay(scene, { sync, objects, visible, selected,
       const key = `${revisions.get(node) ?? 0}:${node.metadata.wbMode}:${chosen}`;
       if (key === entry.key) continue;
       Object.assign(entry, { key, chosen });
-      clear(entry);
+      for (const variant of Object.values(entry.variants)) variant.stale = true;
       wake();
     }
     for (const [node, entry] of entries) if (!present.has(node)) { clear(entry); entries.delete(node); }

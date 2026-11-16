@@ -655,6 +655,19 @@ export function createOutlineOverlay(scene, { outlined, isActive, isTransform = 
     scene.resetCachedMaterial();
   });
 
+  // Line meshes have no surface to outline.
+  const surfaced = (mesh) => !mesh.getClassName().includes('LinesMesh');
+  // Each scene mesh's prepass shader compiled before it is first outlined: one compiling on the frame of a click would
+  // leave its outline out of the frames until it is ready.
+  const warmed = new WeakSet();
+  const warm = () => {
+    for (const mesh of scene.meshes) {
+      if (warmed.has(mesh) || mesh.sourceMesh || mesh.metadata?.overlay || mesh.name.startsWith('__') || !mesh.getTotalVertices() || !surfaced(mesh)) continue;
+      warmed.add(mesh);
+      surface.forceCompilation(mesh, undefined, { useInstances: mesh.hasThinInstances });
+    }
+  };
+
   const show = (value) => {
     const index = scene.customRenderTargets.indexOf(prepassTarget);
     if (value && index < 0) scene.customRenderTargets.push(prepassTarget);
@@ -664,8 +677,8 @@ export function createOutlineOverlay(scene, { outlined, isActive, isTransform = 
   return {
     // Fills the prepass from the outlined meshes, or skips every pass when none is; called per view before it renders.
     update(shown, { xray: inXray = false } = {}) {
-      // Line meshes have no surface to outline.
-      const meshes = shown ? outlined().filter((mesh) => !mesh.getClassName().includes('LinesMesh')) : [];
+      if (shown) warm();
+      const meshes = shown ? outlined().filter(surfaced) : [];
       show(meshes.length > 0);
       for (const [mesh, lines] of wires) if (mesh.isDisposed()) { lines.dispose(); wires.delete(mesh); }
       if (!active) return;

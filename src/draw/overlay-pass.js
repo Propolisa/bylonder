@@ -47,7 +47,10 @@ export function createOverlayPass(scene) {
     const ip = scene.imageProcessingConfiguration, sceneLinear = ip.applyByPostProcess;
     ip._applyByPostProcess = false;
     setRenderList(target, scene.meshes.filter((mesh) => mesh.layerMask === OVERLAY_LAYER));
+    // Blender draws the overlays of every sample with the view's own projection, the film's jitter only in the render.
+    const rejitter = film.unjitter();
     target.render();
+    rejitter();
     ip._applyByPostProcess = sceneLinear;
   });
   const mergeOverlays = scene.onAfterCameraRenderObservable.add((rendered) => {
