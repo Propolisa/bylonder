@@ -64,6 +64,18 @@ class Cancelled extends Error {}
 // Blender's bake of the object as its job (object.bake's invoke); `progress(fraction)` as it goes. Cancel is Esc, as in
 // Blender (bake_modal). Resolves once the job ended.
 async function bakeJob(blender, args, progress, cancelled) {
+  // The window's interface is locked while the job's thread bakes, as Blender's Lock Interface does for renders
+  // (docs/blender-boundary.md, Jobs).
+  x.wm_interface_lock(blender.C, true);
+  try {
+    await runJob(blender, args, progress, cancelled);
+  } finally {
+    x.wm_interface_lock(blender.C, false);
+  }
+  if (cancelled()) throw new Cancelled();
+}
+
+async function runJob(blender, args, progress, cancelled) {
   const job = blender.invoke('object.bake', args, { type: 'LEFTMOUSE' });
   if (!(job.status & (OPERATOR_RUNNING_MODAL | OPERATOR_FINISHED))) throw Error(job.report || 'Cycles did not bake');
   let stopping = false;
@@ -79,7 +91,6 @@ async function bakeJob(blender, args, progress, cancelled) {
   }
   // The window frees the ended job (wm_jobs_handle_finished), so the next bake may start.
   tick();
-  if (cancelled()) throw new Cancelled();
 }
 
 // The light, albedo and normals the module's Python wrote, as RGB float planes.

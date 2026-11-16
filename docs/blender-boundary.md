@@ -225,7 +225,13 @@ Blender (`platform.cc`): the page handles its window each animation frame while 
 polls the job (`wm_jobs_timer`), ends it when it is done (`wm_jobs_handle_finished`) and redraws what its notifiers
 tag. Where the page or a test needs a job's result, it handles the window until no job runs (`wm_jobs_running`), as
 Blender's code tests `WM_jobs_test`; opening a file and undo end the jobs first, as Blender's file read and undo do
-(`main-api.cc`, `undo-api.cc`), since a job may read the Main they free. Where no thread can be had (one thread,
+(`main-api.cc`, `undo-api.cc`), since a job may read the Main they free. While a bake's job runs, the page locks the
+window's interface (`wm_interface_lock`, Blender's `WM_locked_interface_set`, as its Lock Interface does for renders):
+unlocked, the window's handling on the page's thread during a long Cycles bake corrupted the allocator now and then (a
+trap in `dlmalloc` or `dlfree` from Cycles; a 2048 px bake 2 of 3 times), locked never, nor did a bake run by
+`object.bake`'s exec. Cycles renders as F12's job did not (six 1280 x 720 renders), so they run unlocked. No depsgraph update ran meanwhile, so the unsafe piece is in what the lock skips:
+`wm_event_do_depsgraph`'s untagged work or the handlers it blocks. Next: find that piece, so jobs can run unlocked as
+in desktop Blender. Where no thread can be had (one thread,
 below) a job runs on the page's thread to its end when it starts. The pool has a few workers beyond the processor count for such threads, as oneTBB takes one
 per processor. A thread's WASI calls on files are made by the page's thread on the same memory
 (`src/port/thread-files.js`), as a process's threads share its files: a worker's own instance has no file system.
