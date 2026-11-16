@@ -1420,7 +1420,6 @@
   ],
   "operators": [
    "object.bake",
-   "bylonder.bake_lightmaps",
    "uv.smart_project",
    "uv.lightmap_pack",
    "graph.fmodifier_add"
@@ -1456,7 +1455,7 @@
    "operators": {
     "supported": 4,
     "partial": 10,
-    "total": 15
+    "total": 14
    },
    "ui": {
     "supported": 2,
