@@ -643,6 +643,8 @@ const checks = {
     await expectStats(({ Objects }) => Objects[1] === 0);
     await app.page.keyboard.press("Control+z");
     await expectStats(({ Objects }) => Objects[1] === total);
+    // Drawn again, not only back in Main.
+    await app.until((b, total) => b.world.objects.filter((n) => n.isEnabled(false)).length === total, total);
   },
 
   async "Outliner: click selects, drag moves into a collection, X deletes, Ctrl Z undoes"() {

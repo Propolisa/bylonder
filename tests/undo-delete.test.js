@@ -25,7 +25,7 @@ objects.push(cube, lamp, camera);
 const selection = createSelection(scene, objects);
 const sync = sceneMain(world, selection);
 history = createHistory(objects, () => {}, { main: sync, capture: () => world.collections.capture() ?? null, restore: (state) => world.collections.apply(state ?? undefined) });
-const live = () => objects.filter((n) => !n.metadata?.wbDeleted).map((n) => n.name).sort().join();
+const live = () => objects.filter((n) => !n.metadata?.wbDeleted && n.isEnabled(false)).map((n) => n.name).sort().join();
 selection.replace([cube, lamp, camera]);
 sync.run(() => sync.blender.run('object.delete', { use_global: false, confirm: false }));
 history.commit();

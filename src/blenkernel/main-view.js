@@ -270,6 +270,7 @@ export function createMainView(state) {
         const kept = world.objects.find((node) => !objects.has(node) && nodeId(node) === id);
         if (kept) {
           kept.metadata = { ...kept.metadata, wbDeleted: false };
+          kept.setEnabled(!!blender.base(ob));
           setHidden(kept, !!blender.base(ob)?.hidden);
           revived.push(link(kept, ob, type));
           continue;
