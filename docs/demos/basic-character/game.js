@@ -16,7 +16,9 @@ hero.add(feet());
 hero.add(gaze({ targets: [blend.scene.activeCamera] }));
 followCamera(hero);
 
-const { recordRun, replayRun } = params.has('debug') || replaying ? await import('../run.js').catch(() => import('./run.js')) : {};
+// A copy beside the page serves a server whose root is this folder; named by a variable, so the dev server needs none.
+const runBeside = './run.js';
+const { recordRun, replayRun } = params.has('debug') || replaying ? await import('../run.js').catch(() => import(/* @vite-ignore */ runBeside)) : {};
 const replay = replaying && replayRun(hero, await (await fetch(replaying)).json());
 if (params.has('debug') && !replaying) {
   recordRun(hero, 'basic-character');

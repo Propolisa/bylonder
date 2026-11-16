@@ -99,7 +99,9 @@ function step(dt, view = {}) {
   checks?.take();
 }
 
-const { recordRun, replayRun } = params.has('debug') || replaying ? await import('../run.js').catch(() => import('./run.js')) : {};
+// A copy beside the page serves a server whose root is this folder; named by a variable, so the dev server needs none.
+const runBeside = './run.js';
+const { recordRun, replayRun } = params.has('debug') || replaying ? await import('../run.js').catch(() => import(/* @vite-ignore */ runBeside)) : {};
 let replayTakeOver = null;
 const replay = replaying && replayRun(hero, await (await fetch(replaying)).json(), {
   act: () => { replayTakeOver = act(); },
