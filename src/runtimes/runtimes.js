@@ -33,7 +33,7 @@ export function registerRuntime(feature) {
   features.push(feature);
 }
 // Bylonder's own settings on a struct's `bylonder` beside its features' runtime (io_scene_babylon/lightmaps.js):
-// settings(props, types) gives bpy.props by name, panel(types, icon) its panel.
+// settings(props, types) gives bpy.props by name, panel(types, icon) its panel, if it has one.
 const ownSettings = [];
 export function registerSettings(struct, { settings, panel }) {
   ownSettings.push({ struct, settings, panel });
@@ -198,7 +198,7 @@ export function registerRuntimeTypes(icon) {
   for (const [struct, list] of byStruct) propertyGroup(struct, list);
   defineAssignedProperties();
   for (const feature of features) registerClass(runtimePanel(feature, icon));
-  for (const { panel } of ownSettings) registerClass(panel(types(), icon));
+  for (const { panel } of ownSettings) if (panel) registerClass(panel(types(), icon));
   registerClass(scenePanel(icon));
 }
 

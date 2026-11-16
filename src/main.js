@@ -74,6 +74,8 @@ import { registerEeveeParityTypes } from "./draw/eevee-parity.js";
 import { registerRenderExtensions } from "./draw/render-extension.js";
 import { registerExportSettings } from "./io_scene_babylon/export-settings.js";
 import { registerBehaviorTypes } from "./editors/space_buttons/behaviors-panel.js";
+import { registerBakeLightmaps } from "./render/bake-lightmaps.js";
+import { cancelJob } from "./windowmanager/wm-jobs.js";
 import { blendNames } from "./editors/space_game/game-types.js";
 import { repairBehaviors } from "./blenkernel/behaviors.js";
 import { restorePreferences, readPreferences, onPreferencesChanged, preferencesChanged, preferences, inputPreferences, savedPreferences, savePreferences } from "./windowmanager/wm-userdef.js";
@@ -408,6 +410,7 @@ window.addEventListener("message", (e) => {
     ({ set: () => cols.setViewLayer(id), add: () => cols.createViewLayer(), remove: () => cols.removeViewLayer(cols.layer().id) })[op]?.();
   }
   if (e.data.type === "render-settings") applyRenderSettings(engine, e.data.payload);
+  if (e.data.type === "job-cancel") cancelJob(e.data.payload.name);
   if (e.data.type === "export") {
     crossingLosses(world.objects, "BABYLON").forEach((loss) => report("WARNING", loss));
     compositorLosses(world).forEach((loss) => report("WARNING", loss));
@@ -602,6 +605,8 @@ registerBehaviorTypes({
   select: (ob) => { const node = world.objects.find((n) => n.name === ob.name); if (node) { editor.selection.replace([node]); editor.reconcile(); } },
   changed: () => { world.mainSync.view(); commit(); refreshUI(); },
 });
+// Render properties > Bake > Lightmaps (Cycles' panel, once Cycles is loaded).
+registerBakeLightmaps({ icon: bylonderIcon(), blender: () => world.mainSync.blender, changed: () => { world.mainSync.view(); commit(); refreshUI(); } });
 // The theme and Resolution Scale on the design tokens of this window and the app's.
 const themed = () => {
   applyTheme(preferences().themes[0], [document, parent.document]);

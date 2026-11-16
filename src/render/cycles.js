@@ -14,6 +14,12 @@ const MODULE = new URL('../bmesh/cycles.wasm', import.meta.url);
 const ADDON = new URL('../bmesh/cycles.zip', import.meta.url);
 
 let loading = null;
+const loaded = [];
+// fn() once Cycles is loaded (its add-on's panels registered), at once if it is.
+export function whenCyclesLoads(fn) {
+  if (loading) loading.then(fn, () => {});
+  else loaded.push(fn);
+}
 export function loadCycles() {
   return (loading ??= (async () => {
     // Its session renders on a thread of its own.
@@ -23,6 +29,7 @@ export function loadCycles() {
     for (const [name, data] of await unzip(addon)) files.set(`/blender/scripts/${name}`, data);
     const cycles = await loadSideModule(blenderModule.exports, bytes, missing, blenderModule.workers);
     cycles.cycles_start();
+    for (const fn of loaded) fn();
     showBlenderPanels();
     report('INFO', 'Cycles loaded');
   })());

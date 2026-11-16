@@ -293,3 +293,10 @@ path = "LICENSE-APACHE"
 precedence = "override"
 SPDX-FileCopyrightText = "NONE"
 SPDX-License-Identifier = "Apache-2.0"
+
+# Open Image Denoise's trained weights (oidn-weights), which Bake Lightmaps denoises with.
+[[annotations]]
+path = "src/render/oidn/*.tza"
+precedence = "override"
+SPDX-FileCopyrightText = "Intel Corporation"
+SPDX-License-Identifier = "Apache-2.0"

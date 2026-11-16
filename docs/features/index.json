@@ -1390,8 +1390,8 @@
  {
   "id": "lightmaps",
   "title": "Lightmaps",
-  "summary": "Draw a scene's light baked in Cycles in an exported page, each object's lightmap set in Object properties > Lightmap and drawn with Babylon's own lightmapTexture.",
-  "expect": "An object's Lightmap setting names a baked image and the UV map it is laid out on, and File > Export > JavaScript draws the object with it through Babylon's lightmapTexture on a copy of its material, so the page shows Cycles' soft light, bounce and contact shadows at the cost of a texture read; the copy is Babylon's PBRMaterial made from the material's Principled BSDF values, so node setups beyond them are not carried, and the app's own views still light the object live.",
+  "summary": "Bake a scene's light with Cycles in the app and draw it in an exported page, each object's lightmap set in Object properties > Lightmap and drawn with Babylon's own lightmapTexture.",
+  "expect": "Bake Lightmaps (Render properties > Bake > Lightmaps) bakes the selected meshes with Blender's own Cycles bake on the page's processors, denoises with Open Image Denoise on WebGPU and sets each object's lightmap, as desktop Blender bakes the example; an object's Lightmap setting names a baked image and the UV map it is laid out on, and File > Export > JavaScript draws the object with it through Babylon's lightmapTexture on a copy of its material, so the page shows Cycles' soft light, bounce and contact shadows at the cost of a texture read; the copy is Babylon's PBRMaterial made from the material's Principled BSDF values, so node setups beyond them are not carried, and the app's own views still light the object live.",
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/render/cycles/baking.html",
@@ -1403,7 +1403,11 @@
   "media": [
    "lightmaps/breathing.gif",
    "lightmaps/room-lightmap.png",
-   "lightmaps/figure-lightmap.png"
+   "lightmaps/figure-lightmap.png",
+   "lightmaps/bake-panel.png",
+   "lightmaps/bake.gif",
+   "lightmaps/room-baked.png",
+   "lightmaps/compare.png"
   ],
   "ui": [
    "VIEW_3D",
@@ -1416,24 +1420,32 @@
   ],
   "operators": [
    "object.bake",
+   "bylonder.bake_lightmaps",
    "uv.smart_project",
    "uv.lightmap_pack",
    "graph.fmodifier_add"
   ],
   "code": [
+   "src/render/bake-lightmaps.js",
+   "src/render/bylonder_lightmaps.py",
+   "src/render/denoise.js",
    "src/io_scene_babylon/lightmaps.js",
    "src/io_scene_babylon/babylon-export.js",
    "src/io_scene_babylon/js-export.js",
    "src/runtimes/runtimes.js"
   ],
   "tests": [
+   "tests/bake-lightmaps-wasm.test.js",
    "tests/meditation-wasm.test.js"
   ],
   "limits": [
    "Lightmaps are drawn only in exported pages; the app's 3D Viewport and Render Image light the object live, as Blender does.",
    "The lightmapped copy of a material takes its Principled BSDF's unlinked Base Color, Roughness and Metallic (else its viewport display values); textures and other nodes of the material are not carried.",
-   "An image is a PNG or JPEG of 8 bits scaled by Intensity, so light beyond Intensity clips; HDR lightmaps (EXR, RGBD) are not read.",
-   "Bylonder does not bake yet; the example bakes with desktop Blender's Cycles in its script.",
+   "An image is a PNG or JPEG of 8 bits scaled by Intensity; Bake Lightmaps sets Intensity to the brightest light, so nothing clips, but HDR lightmaps (EXR, RGBD) are not read.",
+   "Bake Lightmaps needs Cycles, so a cross-origin isolated page with threads (see Cycles); it bakes on the CPU, several times slower than desktop Blender.",
+   "Denoising needs WebGPU; without it the lightmaps are stored as baked, noisy, and the Info editor says so.",
+   "Resolution is for new lightmaps: an object with a lightmap image bakes at its size.",
+   "uv.lightmap_pack from the UV menu does not run in the app yet; Bake Lightmaps makes its UV map with Lightmap Pack's own function.",
    "A lightmap holds diffuse light only: a lightmapped surface loses its glossy reflections in the page, so the example's surfaces are matte.",
    "Noise F-Curve modifiers play in a page as sampled keys, not live; Cycles modifiers play live."
   ],
@@ -1444,7 +1456,7 @@
    "operators": {
     "supported": 4,
     "partial": 10,
-    "total": 14
+    "total": 15
    },
    "ui": {
     "supported": 2,
