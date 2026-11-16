@@ -68,8 +68,8 @@ const AS_JOB = false;
 
 // Blender's bake of the object (object.bake); `progress(fraction)` as it goes. As a job, Cancel is Esc, as in Blender
 // (bake_modal); by exec, Cancel waits for the bake running. Resolves once it ended.
-async function bake(blender, args, progress, cancelled) {
-  if (AS_JOB) await bakeJob(blender, args, progress, cancelled);
+async function bake(blender, args, progress, cancelled, asJob) {
+  if (asJob) await bakeJob(blender, args, progress, cancelled);
   else {
     // A frame first, so the status bar shows which bake the page waits for.
     await new Promise((resolve) => setTimeout(resolve, 300));
@@ -107,9 +107,10 @@ function planes(size) {
 /**
  * Bakes the lightmaps of the named objects (`names`) in Blender's module (`blender`, a BlenderMain), each by its
  * setting's Direct, at its image's size or else `resolution` pixels, with `samples`; `progress(fraction, text)` as it
- * goes, `cancelled()` stops it after the bake running. Returns each object's { name, intensity, denoised }.
+ * goes, `cancelled()` stops it after the bake running; `asJob`, each bake as Blender's job (AS_JOB). Returns each
+ * object's { name, intensity, denoised }.
  */
-export async function bakeLightmaps(blender, names, { resolution, samples, progress = () => {}, cancelled = () => false }) {
+export async function bakeLightmaps(blender, names, { resolution, samples, progress = () => {}, cancelled = () => false, asJob = AS_JOB }) {
   await Promise.all([loadCycles(), install()]);
   const baked = [];
   for (const [index, name] of names.entries()) {
@@ -118,7 +119,7 @@ export async function bakeLightmaps(blender, names, { resolution, samples, progr
       for (const [at, step] of steps.entries()) {
         const args = python(blender, `begin(${literal(step)})`);
         progress((index + at / parts) / names.length, `Baking ${name} (${index + 1} of ${names.length})`);
-        await bake(blender, args, (fraction) => progress((index + (at + fraction) / parts) / names.length, `Baking ${name} (${index + 1} of ${names.length})`), cancelled);
+        await bake(blender, args, (fraction) => progress((index + (at + fraction) / parts) / names.length, `Baking ${name} (${index + 1} of ${names.length})`), cancelled, asJob);
         python(blender, `end(${literal(step)})`);
       }
       progress((index + steps.length / parts) / names.length, `Denoising ${name} (${index + 1} of ${names.length})`);
