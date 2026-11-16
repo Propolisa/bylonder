@@ -48,7 +48,8 @@ limits:
   - An image is a PNG or JPEG of 8 bits scaled by Intensity; Bake Lightmaps sets Intensity to the brightest light, so nothing clips, but HDR lightmaps (EXR, RGBD) are not read.
   - Bake Lightmaps needs Cycles, so a cross-origin isolated page with threads (see Cycles); it bakes on the CPU, several times slower than desktop Blender.
   - Denoising needs WebGPU; without it the lightmaps are stored as baked, noisy, and the Info editor says so.
-  - Resolution is for new lightmaps: an object with a lightmap image bakes at its size.
+  - Resolution is for new lightmaps (1024 px by default): an object with a lightmap image bakes at its size.
+  - A bake of 2048 px or more now and then stops on a crash in Cycles' threads, reported in the Info editor as "A thread of Blender's stopped"; bakes of 1024 px and less have not.
   - uv.lightmap_pack from the UV menu does not run in the app yet; Bake Lightmaps makes its UV map with Lightmap Pack's own function.
   - A lightmap holds diffuse light only: a lightmapped surface loses its glossy reflections in the page, so the example's surfaces are matte.
   - Noise F-Curve modifiers play in a page as sampled keys, not live; Cycles modifiers play live.
