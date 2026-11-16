@@ -13,12 +13,14 @@ solved live in the page; the cups and jars are Blender rigid bodies the game run
   the Rock A, B, C and Cup collections the game spawns copies of. Each object's behaviours are its `behaviors` custom
   properties (Object properties > Behaviors); what Havok moves is each object's rigid body (Physics properties >
   Rigid Body).
-- **Code.** `src/behaviors/` (Rock, Barista, Cup, Machine, Impact, Spawner), `src/systems/` (Shift, Subtitles, Hud,
+- **Code.** `src/behaviors/` (Rock, Barista, Cup, Machine, Impact, Spawner), `src/systems/` (Shift, Subtitles, Hud, Touch,
   Framing, Music), `src/sounds.js` (the machine's and the impacts' sounds, made in code), `src/game.js`.
 - **Content.** `content/dialogue/cafe.ink`, the rocks' noises and lines, an Ink story; `content/music/cafe.ogg`, the
   music.
 - **Play.** The example opens on the Game workspace. Play, then the mouse (or the right stick) moves the hand over the
   counter, holding Space or the left button grabs a cup under the palm, letting go sets it down; WASD walks the
-  barista; M mutes the music.
+  barista; M mutes the music. By touch, a drag on the right half of the screen moves the hand as a trackpad moves a
+  cursor (a ring on the wrist shows it), and dragged past its reach the barista walks after it; holding the left half
+  grabs (`src/systems/touch.js`).
 - **Credits.** CREDITS.md: the mannequin and the forest are Quaternius' (CC0), the voices and spills rubberduck's
   (CC0), the jingles Kenney's (CC0), the music "Bubble Gum Groovin'" by Eric Matyas, www.soundimage.org (CC BY 3.0).

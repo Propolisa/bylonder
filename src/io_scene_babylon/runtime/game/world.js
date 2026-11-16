@@ -24,7 +24,7 @@ import { enablePhysics, rigidBody } from './physics.js';
  * @typedef {import('./define.js').Behavior} Behavior
  * @typedef {import('./define.js').System} System
  * @typedef {{ scene: import('@babylonjs/core').Scene, engine: import('@babylonjs/core').AbstractEngine }} Babylon
- * @typedef {{ pressed(action: string): boolean, held(action: string): boolean, stick(action: string): { x: number, y: number }, readonly pointer?: { x: number, y: number } | null, step?: () => void }} Input
+ * @typedef {{ pressed(action: string): boolean, held(action: string): boolean, stick(action: string): { x: number, y: number }, readonly pointer?: { x: number, y: number } | null, readonly touch?: boolean, hold?(action: string, on?: boolean): void, step?: () => void }} Input
  * The project's files a run reads (an Ink story, a GUI layout): `url(path)`, and `text(path)` read.
  * @typedef {{ url(path: string): string, text(path: string): Promise<string> }} Assets
  */

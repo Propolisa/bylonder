@@ -90,10 +90,13 @@ opens on the Game workspace, the 3D View beside the Game area.
 3. **Play.** The Game area's Play runs the scene with its game code and gives it the keys (a click on the game takes
    them back after you work elsewhere): the mouse moves the hand over the counter, a slap on the orange button brews a
    mug, holding Space or the left button closes the hand on a mug under the palm and letting go sets it down; WASD walks
-   the barista, M mutes the music. Drag Patience while it plays and the waiting rocks change at once; save `rock.js` and its code is
+   the barista, M mutes the music. On a phone or tablet, drag on the right half of the screen to move the hand (a ring
+   on the wrist shows it; dragged past its reach the barista walks after it) and hold the left half to grab. Drag Patience while it plays and the waiting rocks change at once; save `rock.js` and its code is
    swapped in without restarting.
 
    ![The café playing in the Game area](../media/features/game-code/play.gif)
+
+   On an upright phone the camera turns so the counter runs along the screen.
 
 ## Project files
 

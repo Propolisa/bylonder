@@ -238,6 +238,8 @@ export type Input = {
         x: number;
         y: number;
     } | null;
+    readonly touch?: boolean;
+    hold?(action: string, on?: boolean): void;
     step?: () => void;
 };
 /**

@@ -17,6 +17,8 @@ export function createInput(map: Record<string, string[]>, target?: EventTarget)
         x: number;
         y: number;
     } | null;
+    /** Whether a finger has touched the target: a game shows its touch controls from then on. */
+    readonly touch: boolean;
     /** The next frame: keys that went down since the last are this frame's presses. */
     step(): void;
     /** A test's or a replay's key, by action: `press` for one frame, `hold` until released. @param {string} action @param {boolean} [on] */

@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // A game's mapped input (defineGame's `input`: an action to the keys and buttons that drive it, `Move: ['WASD',
 // 'LeftStick']`, `Grab: ['Space', 'MouseLeft', 'South']`): held and pressed this frame, a stick from four keys or a
-// gamepad's stick, and the pointer over the canvas. A run steps it once a frame; a test drives it by action and point.
+// gamepad's stick, and the pointer over the canvas. A finger is not a mouse: touches leave the pointer and the mouse
+// buttons alone, for the game's own touch controls. A run steps it once a frame; a test drives it by action and point.
 
 /** Each key of a mapping, as KeyboardEvent.code reads it: `WASD` the four of a stick, `E` KeyE, `Space` Space. @param {string} key */
 const codes = (key) => (key === 'WASD' ? ['KeyW', 'KeyA', 'KeyS', 'KeyD'] : key === 'Arrows' ? ['ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight']
@@ -23,7 +24,7 @@ export function createInput(map, target) {
   /** @type {Set<string>} */
   let pressedNow = new Set(), padHeld = new Set();
   /** The pointer over the target, in CSS pixels from its top left, as Babylon's scene.pick takes it. @type {{ x: number, y: number } | null} */
-  let pointer = null;
+  let pointer = null, touched = false;
   /** The gamepad's sticks this frame. @type {Record<string, { x: number, y: number }>} */
   const sticks = {};
   const keysOf = (/** @type {string} */ action) => (map[action] ?? []).flatMap(codes);
@@ -31,6 +32,7 @@ export function createInput(map, target) {
   const onDown = (/** @type {any} */ e) => press(e.code);
   const onUp = (/** @type {any} */ e) => held.delete(e.code);
   const onPointer = (/** @type {any} */ e) => {
+    if (e.pointerType === 'touch') { touched = true; return; }
     const box = e.currentTarget?.getBoundingClientRect?.();
     pointer = { x: e.clientX - (box?.left ?? 0), y: e.clientY - (box?.top ?? 0) };
     if (e.type === 'pointerdown' && MOUSE[e.button]) press(MOUSE[e.button]);
@@ -64,6 +66,8 @@ export function createInput(map, target) {
     },
     /** Where the pointer is over the canvas (CSS pixels from its top left, as `scene.pick` takes them), null before it moved. */
     get pointer() { return pointer; },
+    /** Whether a finger has touched the target: a game shows its touch controls from then on. */
+    get touch() { return touched; },
     /** The next frame: keys that went down since the last are this frame's presses. */
     step() { readPad(); pressedNow = new Set(down); down.clear(); },
     /** A test's or a replay's key, by action: `press` for one frame, `hold` until released. @param {string} action @param {boolean} [on] */

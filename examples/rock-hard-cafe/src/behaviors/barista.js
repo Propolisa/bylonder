@@ -64,8 +64,25 @@ export default defineBehavior({
       return best;
     };
     let hovered = null;
+    // The Play Area's box, which the hand stays in when a finger drags it, so the barista never walks out of frame.
+    const area = scene.getTransformNodeByName('Play Area');
+    const inArea = (point) => {
+      if (!area) return point;
+      const local = Vector3.TransformCoordinates(point, area.computeWorldMatrix(true).clone().invert());
+      local.x = Math.max(-1, Math.min(1, local.x));
+      local.z = Math.max(-1, Math.min(1, local.z));
+      return Vector3.TransformCoordinates(local, area.getWorldMatrix());
+    };
     return {
       get holding() { return holding; },
+      /** The palm's body, which touch controls show the hand by. */
+      palm: hand,
+      /** The hand moved as a finger drags from one point of the screen to another (CSS pixels), as a trackpad moves a
+       * cursor; past its reach, the barista walks after it. */
+      drag(from, to) {
+        const a = onPlane(scene, from, props.height), b = onPlane(scene, to, props.height);
+        if (a && b) want.copyFrom(inArea(want.add(b.subtract(a))));
+      },
       update(dt) {
         // The hand's goal: the pointer's place over the counter, or moved by the right stick, within reach.
         const stick = input.stick('Reach');

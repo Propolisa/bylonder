@@ -80,6 +80,7 @@ export function runGame(blend: any, code: {
             x: number;
             y: number;
         } | null;
+        readonly touch: boolean;
         step(): void;
         hold(action: string, on?: boolean): void;
         press(action: string): void;
