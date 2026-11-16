@@ -4,10 +4,16 @@
 // camera's far plane, hundreds of metres for a page, so the near cascade's texels are coarse and the shadows step. Here
 // the cascades end where the scene does along the view (the rays through the view's corners and middle leaving the
 // scene's bounding box), worked out on the CPU when the camera moves, not with a depth pass and readback each frame.
+// A range one map's texels cover finely (5 mm a texel) twice over takes Babylon's fewest cascades, two, not the export's
+// four: the same texels where the view looks, half the shadow passes.
 import { CascadedShadowGenerator, Matrix, Vector3 } from '@babylonjs/core';
 
 const POINTS = [[0, 0], [1, 0], [0, 1], [1, 1], [0.5, 0.5]], IDENTITY = Matrix.Identity();
 const exit = new Vector3();
+/** A texel's size the cascades keep to, in metres. */
+const TEXEL = 0.005;
+/** Each generator's cascades as exported. @type {WeakMap<CascadedShadowGenerator, number>} */
+const exported = new WeakMap();
 
 /**
  * How far along a ray it leaves a box, or null where it misses it.
@@ -49,7 +55,12 @@ export function fitCascades(scene) {
       if (t !== null) depth = Math.max(depth, Vector3.Dot(ray.origin.addToRef(ray.direction.scale(t), exit).subtractInPlace(camera.globalPosition), forward));
     }
     if (depth <= camera.minZ) return;
-    for (const generator of /** @type {CascadedShadowGenerator[]} */ (generators)) generator.shadowMaxZ = camera.maxZ ? Math.min(depth, camera.maxZ) : depth;
+    for (const generator of /** @type {CascadedShadowGenerator[]} */ (generators)) {
+      if (!exported.has(generator)) exported.set(generator, generator.numCascades);
+      const range = (camera.maxZ ? Math.min(depth, camera.maxZ) : depth) - camera.minZ, reach = generator.mapSize * TEXEL;
+      generator.numCascades = range <= 2 * reach ? CascadedShadowGenerator.MIN_CASCADES_COUNT : /** @type {number} */ (exported.get(generator));
+      generator.shadowMaxZ = camera.minZ + range;
+    }
   });
   return () => scene.onBeforeRenderObservable.remove(observer);
 }
