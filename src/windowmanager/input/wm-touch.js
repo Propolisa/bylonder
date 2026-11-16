@@ -10,6 +10,8 @@
 // mouse's, armed at the hold so it can keep the browser from scrolling (its touchmove's preventDefault).
 
 export const RIGHT_CLICK_DELAY = 800;
+// The hold's ring shows once a still finger has stayed this long (a platform's long press), never for a tap.
+export const RING_DELAY = 300;
 const TOOLTIP_DELAY = 400, TAP_TIME = 300, SCALE_RANGE = [0.5, 2];
 // Blender's drag threshold for a tablet (U.drag_threshold_tablet): the nearest of its inputs to a finger.
 const THRESHOLD = 10;
@@ -80,8 +82,9 @@ export function installTouch(win, { ui, scale, keys, input = {} }) {
   const clearTimers = () => { timers.forEach(clearTimeout); timers = []; ui.hold(null); };
   const swallowClick = (...ids) => ids.forEach((id) => swallowed.add(id));
 
-  // One finger, once known: its held events replayed in order, then its own as they come.
-  function commit() {
+  // One finger, once known: its held events replayed in order, then its own as they come. A tap's are not: a finger
+  // never lands quite still, and its few pixels of drift would reach Blender as a drag, not the click a tap is.
+  function commit(tap = false) {
     clearTimers();
     mode = 'mouse';
     button = input.button?.() ?? 0;
@@ -89,7 +92,7 @@ export function installTouch(win, { ui, scale, keys, input = {} }) {
     // The mouse comes to the finger before it presses, as Blender reads a press where the pointer last moved.
     dispatchClone('pointermove', first.down, { target: first.down.target, buttons: 0 });
     dispatchClone('pointerdown', first.down, { target: first.down.target });
-    for (const move of first.moves) dispatchClone('pointermove', move);
+    if (!tap) for (const move of first.moves) dispatchClone('pointermove', move);
   }
   function rightClick() {
     clearTimers();
@@ -110,7 +113,7 @@ export function installTouch(win, { ui, scale, keys, input = {} }) {
   const drop = (phase, at) => { carry(phase, at); first.carry = null; };
   function startHold() {
     const point = { x: first.down.clientX, y: first.down.clientY }, tip = tooltipOf(first.down.target);
-    ui.hold(point);
+    timers.push(setTimeout(() => mode === 'pending' && ui.hold(point), RING_DELAY));
     timers.push(setTimeout(() => {
       if (mode !== 'pending') return;
       first.carry = first.down.target.closest?.(CARRIES) ?? null;
@@ -214,7 +217,7 @@ export function installTouch(win, { ui, scale, keys, input = {} }) {
     if (event.pointerId === first?.down.pointerId && first.carry) {
       if (mode === 'carry') { drop(cancelled ? 'cancel' : 'end', event); mode = 'done'; swallowClick(event.pointerId); } else drop('cancel', event);
     }
-    if (mode === 'pending' && !cancelled) { commit(); dispatchClone('pointerup', event); focusField(event.target); input.pressed?.(); }
+    if (mode === 'pending' && !cancelled) { commit(true); dispatchClone('pointerup', first.down, { target: first.down.target }); focusField(event.target); input.pressed?.(); }
     // A press the browser took back (a system gesture) is released, so no button stays down.
     else if (mode === 'mouse' && event.pointerId === first.down.pointerId) { dispatchClone('pointerup', event); input.pressed?.(); }
     else if (mode === 'tooltip') { clearTimers(); tooltipOpen = true; mode = 'done'; swallowClick(event.pointerId); }

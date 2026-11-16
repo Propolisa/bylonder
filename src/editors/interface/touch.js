@@ -13,7 +13,7 @@ import ShortcutBubbles from './components/ui/touch-bar/ShortcutBubbles.vue';
 import KeysPie from './components/ui/touch-bar/KeysPie.vue';
 import KeyboardSheet from './components/ui/touch-bar/KeyboardSheet.vue';
 import './components/tailwind.css';
-import { installTouch, RIGHT_CLICK_DELAY } from '../../windowmanager/input/wm-touch.js';
+import { installTouch, RIGHT_CLICK_DELAY, RING_DELAY } from '../../windowmanager/input/wm-touch.js';
 import { keyOf } from '../../windowmanager/input/keymap.js';
 import { modalBubbles, pieSlots } from './touch-keys.js';
 
@@ -57,7 +57,7 @@ export function mountTouch(win, { scale, hint, keys, modal = () => null, mode = 
 
   const host = doc.body.appendChild(doc.createElement('div'));
   const app = createApp({ render: () => [
-    h(TouchHold, { hold: state.hold, tip: state.tip, duration: RIGHT_CLICK_DELAY }),
+    h(TouchHold, { hold: state.hold, tip: state.tip, duration: RIGHT_CLICK_DELAY - RING_DELAY }),
     state.drag && h(ValueDragOverlay, { drag: state.drag, modifiers: state.modifiers, onModifier: setModifier }),
     state.pie && h(KeysPie, { center: state.pie, slots: pieSlots(mode()), onPress: (slot) => { state.pie = null; press(slot); }, onClose: () => { state.pie = null; } }),
   ] });
