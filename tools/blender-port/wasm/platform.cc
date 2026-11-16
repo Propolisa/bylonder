@@ -44,8 +44,46 @@ void operator delete[](void *p, std::size_t, std::align_val_t) noexcept { std::f
 extern "C" void *__cxa_allocate_exception(std::size_t) { std::abort(); }
 extern "C" void __cxa_throw(void *, void *, void (*)(void *)) { std::abort(); }
 
-/* thread_local destructors: the module's threads live as long as the page. */
+#ifdef _REENTRANT
+#include <pthread.h>
+
+/* port-override: a thread's thread_local destructors run when it ends, as libc++abi's own fallback runs them (its weak
+ * reference to the libc's __cxa_thread_atexit_impl becomes a throwing import in the module's link): an object that
+ * registered itself elsewhere (guardedalloc's per-thread memory counters) unregisters before the thread's block is
+ * freed, instead of being written to there after. */
+namespace {
+struct ThreadExit {
+  void (*dtor)(void *);
+  void *object;
+  ThreadExit *next;
+};
+thread_local ThreadExit *thread_exits = nullptr;
+pthread_key_t thread_exit_key;
+void run_thread_exits(void * /*value*/)
+{
+  while (ThreadExit *entry = thread_exits) {
+    thread_exits = entry->next;
+    entry->dtor(entry->object);
+    std::free(entry);
+  }
+}
+}  // namespace
+extern "C" int __cxa_thread_atexit(void (*dtor)(void *), void *object, void * /*dso*/)
+{
+  static const int key_error = pthread_key_create(&thread_exit_key, run_thread_exits);
+  ThreadExit *entry = key_error ? nullptr : static_cast<ThreadExit *>(std::malloc(sizeof(ThreadExit)));
+  if (!entry) {
+    return -1;
+  }
+  *entry = {dtor, object, thread_exits};
+  thread_exits = entry;
+  /* Any value but null, so the key's destructor runs. */
+  return pthread_setspecific(thread_exit_key, entry);
+}
+#else
+/* thread_local destructors: a unit runs on the page's thread alone, which never ends. */
 extern "C" int __cxa_thread_atexit(void (*)(void *), void *, void *) { return 0; }
+#endif
 /* port-override: WASI has no users: one user, without a passwd entry (Blender then uses $HOME or its defaults). */
 extern "C" __attribute__((weak)) unsigned getuid() { return 0; }
 extern "C" __attribute__((weak)) struct passwd *getpwuid(unsigned) { return nullptr; }

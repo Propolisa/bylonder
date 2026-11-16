@@ -64,6 +64,26 @@ EXPORT(threads_trap) void threads_trap()
   }
 }
 
+/* Whether a thread's thread_local destructors ran when it ended (tests/threads-wasm.test.js). */
+EXPORT(threads_local_destructed) bool threads_local_destructed()
+{
+  static std::atomic<bool> destructed;
+  struct Local {
+    ~Local() { destructed = true; }
+  };
+  destructed = false;
+  pthread_t thread;
+  const auto start = [](void *) -> void * {
+    static thread_local Local local;
+    return &local;
+  };
+  if (pthread_create(&thread, nullptr, start, nullptr) != 0) {
+    return false;
+  }
+  pthread_join(thread, nullptr);
+  return destructed;
+}
+
 /* The longest wait of the page's thread, in nanoseconds: how long the page stalled on other threads. */
 static int64_t longest_wait;
 EXPORT(threads_longest_wait) double threads_longest_wait()
