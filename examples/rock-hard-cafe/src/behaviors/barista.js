@@ -29,7 +29,9 @@ export default defineBehavior({
     // Where the palm should be (the goal), and where the wrist goes for it (the IK's aim).
     // At first a little in front of the body, on the right hand's side, as the barista stands facing the counter.
     const goal = entity.node.getAbsolutePosition().add(new Vector3(0.15, 0, 0.35)), aim = goal.clone(), want = goal.clone();
-    let pointer = null, holding = null, grip = new Vector3(), last = new Vector3(), short = 0;
+    let pointer = null, holding = null, short = 0;
+    // Scratch vectors, so a frame allocates nothing.
+    const grip = new Vector3(), last = new Vector3(), out = new Vector3(), toAim = new Vector3(), flat = new Vector3(), velocity = new Vector3(), held = new Vector3(), top = new Vector3();
     character.add(reach({ hand: 'hand.R', target: aim, halfLife: 0.05 }));
     // The head watches the hand (the intent's look, below), not the camera above, glancing down with the head alone.
     Object.assign(character.effect('gaze'), { targets: [], turn: { yaw: 1.2, pitch: 0.3 } });
@@ -57,8 +59,10 @@ export default defineBehavior({
     /** The cup nearest under the palm, over it or at its rim, if any. */
     const cupUnder = (at) => {
       let best = null, nearest = Infinity;
-      for (const cup of game.all(Cup).filter((c) => c.entity.visible)) {
-        const top = cup.top(), d = Math.hypot(top.x - at.x, top.z - at.z), above = at.y - top.y;
+      for (const cup of game.all(Cup)) {
+        if (!cup.entity.visible) continue;
+        cup.top(top);
+        const d = Math.hypot(top.x - at.x, top.z - at.z), above = at.y - top.y;
         if (d < cup.radius + 0.06 && above > -0.05 && above < 0.2 && d < nearest) [best, nearest] = [cup, d];
       }
       return best;
@@ -89,30 +93,40 @@ export default defineBehavior({
         if (input.pointer && input.pointer !== pointer) {
           pointer = input.pointer;
           want.copyFrom(onPlane(scene, pointer, props.height) ?? want);
-        } else if (stick.x || stick.y) want.addInPlace(game.camera.onGround(stick).scale(props.speed * dt));
+        } else if (stick.x || stick.y) want.addInPlace(game.camera.onGround(stick).scaleInPlace(props.speed * dt));
         want.y = props.height;
         // The goal: where the hand is wanted, as far as the arm and a lean go.
-        const from = shoulder.getAbsolutePosition(), out = new Vector3(want.x - from.x, 0, want.z - from.z);
-        goal.copyFrom(out.length() > props.reach ? from.add(out.normalize().scale(props.reach)) : want).y = props.height;
+        const from = shoulder.getAbsolutePosition();
+        out.set(want.x - from.x, 0, want.z - from.z);
+        if (out.length() > props.reach) from.addToRef(out.normalize().scaleInPlace(props.reach), goal);
+        else goal.copyFrom(want);
+        goal.y = props.height;
         const at = palm.getAbsolutePosition();
-        aim.copyFrom(goal).subtractInPlace(at.subtract(wrist.getAbsolutePosition()));
+        at.subtractToRef(wrist.getAbsolutePosition(), toAim);
+        goal.subtractToRef(toAim, aim);
         // The wrist's aim within the arm's length, so the IK reaches it and its target never runs off: the chest leans
         // after the hand (Blender's constraints), which brings the shoulder, and so the hand, farther next frame.
         const s = shoulder.getAbsolutePosition(), e = elbow.getAbsolutePosition(), w = wrist.getAbsolutePosition();
-        const arm = (Vector3.Distance(s, e) + Vector3.Distance(e, w)) * 0.98, toAim = aim.subtract(s);
+        const arm = (Vector3.Distance(s, e) + Vector3.Distance(e, w)) * 0.98;
+        aim.subtractToRef(s, toAim);
         // Short of the goal by more than a few centimetres, the barista steps after it (input, below).
         short = toAim.length() - arm;
         // Short: the aim drawn in toward the shoulder at its own height, so the hand stays over the counter.
         if (short > 0) {
-          const across = Math.sqrt(Math.max(0, arm * arm - toAim.y * toAim.y)), flat = new Vector3(toAim.x, 0, toAim.z);
-          aim.copyFrom(s.add(flat.normalize().scale(Math.min(across, flat.length())))).y = s.y + toAim.y;
+          const across = Math.sqrt(Math.max(0, arm * arm - toAim.y * toAim.y)), height = toAim.y;
+          flat.set(toAim.x, 0, toAim.z);
+          const length = flat.length();
+          s.addToRef(flat.normalize().scaleInPlace(Math.min(across, length)), aim);
+          aim.y = s.y + height;
         }
         // A jump (the first frame, a step's catch-up) is placed, not swept, so it hits nothing at a made-up speed.
         const jump = Vector3.Distance(at, hand.position) > 0.3;
         touch.disablePreStep = !jump;
         if (jump) hand.position.copyFrom(at);
-        const toward = at.subtract(hand.position).scale(1 / Math.max(dt, 1 / 120));
-        touch.setLinearVelocity(jump ? Vector3.Zero() : toward.scale(Math.min(1, props.slap / Math.max(toward.length(), 1e-6))));
+        at.subtractToRef(hand.position, velocity).scaleInPlace(1 / Math.max(dt, 1 / 120));
+        if (jump) velocity.setAll(0);
+        else velocity.scaleInPlace(Math.min(1, props.slap / Math.max(velocity.length(), 1e-6)));
+        touch.setLinearVelocity(velocity);
         // The cup the hand would take shows its outline.
         const under = holding ?? cupUnder(at);
         if (under !== hovered) { hovered?.hover(false); under?.hover(true); hovered = under; }
@@ -120,12 +134,12 @@ export default defineBehavior({
         if (input.held('Grab') && !holding) {
           holding = under;
           holding?.grab();
-          if (holding) grip = holding.entity.node.getAbsolutePosition().subtract(at);
+          if (holding) holding.entity.node.getAbsolutePosition().subtractToRef(at, grip);
         } else if (!input.held('Grab') && holding) {
-          holding.release(at.subtract(last).scale(1 / Math.max(dt, 1e-3)));
+          holding.release(at.subtract(last).scaleInPlace(1 / Math.max(dt, 1e-3)));
           holding = null;
         }
-        holding?.entity.node.setAbsolutePosition(at.add(grip));
+        if (holding) holding.entity.node.setAbsolutePosition(at.addToRef(grip, held));
         last.copyFrom(at);
       },
     };

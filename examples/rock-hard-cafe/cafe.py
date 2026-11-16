@@ -102,6 +102,10 @@ SPILLS = {str(i): SOUNDS[n] for i, n in enumerate(n for n in SOUNDS if n.startsw
 # The forest: the character examples' ground, grass, rocks, bushes and pines, sky and sun (environment.py), then a brook
 # across a corner of the clearing, and pines and bushes around it, where the camera above the counter sees them.
 environment.build()
+# The forest's lamps stand metres outside the frame, where their shadows never show: only the sun casts shadows, so a
+# phone draws one shadow map, not three more cube maps of six faces each.
+for lamp in (ob.data for ob in bpy.data.objects if ob.type == 'LIGHT' and ob.data.type == 'POINT'):
+    lamp.use_shadow = False
 brook = box("Brook", (14, 0.9, 0.02), (1.8, -1.7, 0.03), WATER)
 brook.rotation_euler.z = math.radians(40)
 for name, places in {"Pine_5": [(-4.2, 1.6, 0.8), (3.9, -2.2, 0.9), (4.4, 1.9, 0.7), (-1.6, -3.9, 0.75), (2.0, -4.4, 0.85)],

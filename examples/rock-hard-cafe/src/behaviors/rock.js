@@ -11,13 +11,19 @@ import Impact from './impact.js';
 import Cup from './cup.js';
 import { createSounds } from '../sounds.js';
 
+const next = new Vector3(), turn = new Quaternion();
 /** Moves `entity` toward `to` (a point) on the ground by up to `step` metres; gives whether it got there. */
 function rollToward(entity, to, step) {
   const at = entity.node.getAbsolutePosition(), dx = to.x - at.x, dz = to.z - at.z, d = Math.hypot(dx, dz);
-  if (d <= step) { entity.node.setAbsolutePosition(new Vector3(to.x, at.y, to.z)); return true; }
-  entity.node.setAbsolutePosition(new Vector3(at.x + (dx / d) * step, at.y, at.z + (dz / d) * step));
+  if (d <= step) { entity.node.setAbsolutePosition(next.set(to.x, at.y, to.z)); return true; }
+  entity.node.setAbsolutePosition(next.set(at.x + (dx / d) * step, at.y, at.z + (dz / d) * step));
   return false;
 }
+/** `node` turned from `rest` by a yaw, pitch and roll, in place. */
+const tilt = (node, rest, yaw, pitch, roll) => {
+  node.rotationQuaternion ??= new Quaternion();
+  rest.multiplyToRef(Quaternion.RotationYawPitchRollToRef(yaw, pitch, roll, turn), node.rotationQuaternion);
+};
 
 export default defineBehavior({
   name: 'Rock',
@@ -46,6 +52,7 @@ export default defineBehavior({
     state.mood ??= !spot || Vector3.Distance(entity.node.getAbsolutePosition(), spot) < 0.5 ? 'waiting' : 'arriving';
     state.waited ??= 0;
     state.leg ??= 0;
+    const arriving = [bend, spot], leaving = [bend, trailhead];
     const rest = entity.node.rotationQuaternion?.clone() ?? Quaternion.FromEulerVector(entity.node.rotation);
     // Its voice, one of the voices; and an angry wobble of its own, faster than its delight.
     const voice = time.pick(props.voices), audio = game.audio, sounds = audio && createSounds(audio, time.random());
@@ -90,21 +97,21 @@ export default defineBehavior({
           if (to && rollToward(entity, to, props.speed * dt)) state.leg++;
           return state.leg >= path.length;
         };
-        if (state.mood === 'arriving' && roll([bend, spot])) state.mood = 'waiting';
+        if (state.mood === 'arriving' && roll(arriving)) state.mood = 'waiting';
         else if (state.mood === 'waiting' && (state.waited += dt) > props.patience) leave(false);
-        else if (state.mood === 'leaving' && roll([bend, trailhead])) {
+        else if (state.mood === 'leaving' && roll(leaving)) {
           state.mood = 'gone';
           entity.hide();
         }
         if (shiver && (shiver.t += dt) < shiver.length) {
           const fade = 1 - shiver.t / shiver.length, a = shiver.amplitude * fade;
-          entity.node.rotationQuaternion = rest.multiply(Quaternion.RotationYawPitchRoll(0, a * Math.sin(shiver.t * shiver.rate * 6.28), a * Math.cos(shiver.t * shiver.rate * 4.1)));
+          tilt(entity.node, rest, 0, a * Math.sin(shiver.t * shiver.rate * 6.28), a * Math.cos(shiver.t * shiver.rate * 4.1));
         } else if (shiver) {
-          entity.node.rotationQuaternion = rest.clone();
+          tilt(entity.node, rest, 0, 0, 0);
           shiver = null;
         } else if (state.angry && state.mood === 'waiting') {
           const t = state.waited, a = fury.amplitude;
-          entity.node.rotationQuaternion = rest.multiply(Quaternion.RotationYawPitchRoll(a * Math.sin(t * fury.rate), 0, a * Math.cos(t * fury.rate * 1.3)));
+          tilt(entity.node, rest, a * Math.sin(t * fury.rate), 0, a * Math.cos(t * fury.rate * 1.3));
         }
       },
     };

@@ -22,8 +22,8 @@ export default defineBehavior({
     return {
       radius,
       get served() { return served; },
-      /** The middle of its rim, in the scene. */
-      top: () => node.getAbsolutePosition().add(new Vector3(0, height, 0)),
+      /** The middle of its rim, in the scene, into `to` if given. */
+      top: (to = new Vector3()) => to.copyFrom(node.getAbsolutePosition()).addInPlaceFromFloats(0, height, 0),
       /** Outlined while the hand is over it, or holds it. @param {boolean} on */
       hover(on) {
         node.renderOutline = on;

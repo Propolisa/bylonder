@@ -8,6 +8,15 @@ import { createSounds } from '../sounds.js';
 
 /** Contacts slower than this are a thing resting or rolling, which makes no sound (m/s). */
 const QUIET = 0.4;
+/** The most impact sounds at once, across every thing, each held for about its length (s): a broken mug's pieces
+ * landing make a clatter, not a pile of voices. */
+const VOICES = 6, LENGTH = 0.3, ends = [];
+const voice = (now) => {
+  while (ends.length && ends[0] < now) ends.shift();
+  if (ends.length >= VOICES) return false;
+  ends.push(now + LENGTH);
+  return true;
+};
 
 export default defineBehavior({
   name: 'Impact',
@@ -52,7 +61,7 @@ export default defineBehavior({
       if (broken || breaking || speed < QUIET || time.now - last < 0.08) return;
       last = time.now;
       const breaks = !!props.breaks && dynamic() && speed > props.breakSpeed;
-      sounds?.impact(audio.context.currentTime + 0.01, { size, speed, material: props.material, breaks });
+      if (sounds && voice(audio.context.currentTime)) sounds.impact(audio.context.currentTime + 0.01, { size, speed, material: props.material, breaks });
       emit('hit', { entity, speed, by: other?.transformNode ?? null });
       // Broken at the next update, not inside Havok's step.
       if (breaks) breaking = { velocity: before.clone(), speed };
