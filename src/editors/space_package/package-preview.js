@@ -132,6 +132,8 @@ export function createPackagePreview({ world, options = {}, publish, post, set =
     settled: () => sending,
     /** The tables the page holds now: packageState's, as a whole export would make them. */
     get state() { return last; },
+    /** The controls' values as the scene has them now, those set fast since the last export included: `[path, value]` pairs. */
+    get values() { return [...controls.values]; },
   };
 }
 

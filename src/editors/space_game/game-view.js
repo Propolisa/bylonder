@@ -124,6 +124,8 @@ export function mountGameView(section, { world, header, run: files, codeError, f
     startGame().catch((error) => report(`Game code: ${error.message}`));
     loop.update();
   };
+  // A run loaded fresh from the last export, with the values set since it (an edit made while it ran): the scene as it is now.
+  const freshRun = async () => { await game.reset(preview.state); game.set(preview.values); hold(''); };
   const preview = createPackagePreview({
     world, options, report,
     publish: async (made, tables) => {
@@ -143,8 +145,8 @@ export function mountGameView(section, { world, header, run: files, codeError, f
     post: (patch, fresh) => {
       patching = patching.then(async () => {
         if (!state.running) return;
-        if (fresh) await game.reset(preview.state);
-        else if (!(await game.patch(patch, preview.state))) report('Loaded again: a patch did not apply');
+        if (fresh) await freshRun();
+        else if (!(await game.patch(patch, preview.state))) { game.set(preview.values); held = ''; report('Loaded again: a patch did not apply'); }
         shown();
       }).catch((error) => report(`Not loaded: ${error.message}`));
     },
@@ -173,7 +175,7 @@ export function mountGameView(section, { world, header, run: files, codeError, f
     held = '';
     await preview.settled();
     await patching;
-    await game.reset(preview.state);
+    await freshRun();
     shown();
     state.paused = false;
     report('Reset');

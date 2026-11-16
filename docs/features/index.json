@@ -474,7 +474,6 @@
    "Exported pages do not draw a light's color temperature, transmission, power normalization, soft falloff, spread, or Blender's shadow resolution, filter, jitter and cascade settings yet (their shadows have a fixed bias, map size and filter per light type), so editing those changes nothing in the game. tests/controls-coverage-wasm.test.js lists them.",
    "A camera's lens shift (Shift X and Y) is not drawn by exported pages yet, so the game shows the camera unshifted.",
    "A value the game animates (an F-Curve's or a driver's) is the game's: an edit of it reaches the game through the export only.",
-   "Lock Camera to View moves Rock Hard Café's camera in the 3D View without the game following yet (it follows on Rigged Character).",
    "Where game code holds a part of the scene camera itself (`game.camera.follow`, a fitted field of view), an edit of that part is not shown; the header says so."
   ],
   "page": "docs/features/game.md",

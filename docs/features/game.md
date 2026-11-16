@@ -48,7 +48,6 @@ limits:
   - Exported pages do not draw a light's color temperature, transmission, power normalization, soft falloff, spread, or Blender's shadow resolution, filter, jitter and cascade settings yet (their shadows have a fixed bias, map size and filter per light type), so editing those changes nothing in the game. tests/controls-coverage-wasm.test.js lists them.
   - A camera's lens shift (Shift X and Y) is not drawn by exported pages yet, so the game shows the camera unshifted.
   - A value the game animates (an F-Curve's or a driver's) is the game's: an edit of it reaches the game through the export only.
-  - Lock Camera to View moves Rock Hard Café's camera in the 3D View without the game following yet (it follows on Rigged Character).
   - Where game code holds a part of the scene camera itself (`game.camera.follow`, a fitted field of view), an edit of that part is not shown; the header says so.
 ---
 
@@ -83,7 +82,7 @@ own editor, chosen from an area's editor type menu.
 
    ![The game following an edit](../media/features/game/edit.gif)
 
-   The scene camera follows too: moving it in the 3D View (a grab or the sidebar's Transform),
+   The scene camera follows too: moving it in the 3D View (a grab, the sidebar's Transform, or Lock Camera to View),
    or changing its lens, moves the game's view. Game code that moves the camera builds on it: each frame it starts
    from `game.camera.authored`, the camera as the scene places it now, so the authored camera stays the base. Where the
    game's code holds a part of the camera itself (a follow camera's place, a field of view fitted to the play area),
