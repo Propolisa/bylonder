@@ -1140,6 +1140,8 @@ document.addEventListener("visibilitychange", () => {
 });
 (async () => {
   try {
+    // A first visit that loads once more for isolation (public/isolation.js) starts only on that load.
+    await self.isolated;
     repo = createRepository(await openOPFS());
     const projects = await repo.list();
     const last = localStorage.getItem("babylon-active-project");

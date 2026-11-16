@@ -238,7 +238,7 @@ the first thread's thread-locals, so the page's instance is made before the pool
 
 Shared memory needs cross-origin isolation. The dev server sends COOP and COEP (`credentialless`); on GitHub Pages,
 which cannot, the site's service worker (`public/workspace-sw.js`) adds them, registered by `public/isolation.js`, which
-loads a page once more on its first visit. The docs viewer stays as served, for its embeds. Where isolation is not
+loads a page once more on its first visit; the app starts only on that second load, so the first makes no project. The docs viewer stays as served, for its embeds. Where isolation is not
 available (Safari, which has no `credentialless`; the app embedded in a page that is not isolated), the same module runs
 on one thread: the loader imports its memory unshared (`src/port/wasm.js`). In Node it runs on `BYLONDER_THREADS`
 threads, one when unset. Preferences > System > Bylonder > Threads (Auto or Off) turns the pool off from the next start;
