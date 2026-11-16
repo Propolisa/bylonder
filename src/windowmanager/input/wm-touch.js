@@ -13,8 +13,9 @@ export const RIGHT_CLICK_DELAY = 800;
 const TOOLTIP_DELAY = 400, TAP_TIME = 300, SCALE_RANGE = [0.5, 2];
 // Blender's drag threshold for a tablet (U.drag_threshold_tablet): the nearest of its inputs to a finger.
 const THRESHOLD = 10;
-// Elements whose touches are their own: the touch layer's own controls.
-const OWN = '.bl-touch-own', CARRIES = '[data-touch-hold-drag]';
+// Elements whose touches are their own: the touch layer's own controls, and a playing game's canvas (the Game area),
+// whose fingers are the game's (its own touch controls, several at once), not the window's mouse.
+const OWN = '.bl-touch-own, [data-game-input]', CARRIES = '[data-touch-hold-drag]';
 
 const clones = new WeakSet();
 const gestureWheels = new WeakSet();

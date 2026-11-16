@@ -14,6 +14,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { POSIX, stop } from "../../scripts/process-group.mjs";
 import { BOOT, chromium, openApp, runtimeCoverage, startServer } from "./app.mjs";
+import { fingers } from "./touch.mjs";
 import { strFromU8, unzipSync } from "fflate";
 
 // A page of an exported package: its tenth frame read back, how much of it is lit.
@@ -505,6 +506,39 @@ try {
   });
 
   // The docs' Open in Bylonder link (index.html#example=<id>) opens its example without the splash.
+  // The café played by touch in the editor's Game area, as on the owner's phone: the window's touch layer leaves the
+  // game's canvas its own fingers, so holding the left half lights Grab and holds it, and a drag on the right half moves
+  // the hand (before, every finger became the window's mouse: a hold a right click, two fingers a camera gesture).
+  await step("the Game area's café plays by touch", async () => {
+    const gpu = await hardwareGPU();
+    const opened = await openApp(browser, server.url, { link: "rock-hard-cafe", node: "Rock", size: { width: 412, height: 915 }, touch: true });
+    try {
+      if (!gpu) { console.log(`      play skipped: ${NO_WEBGPU}`); return; }
+      const touch = fingers(opened.page);
+      await opened.bylonder((b) => { b.dock.show("game"); return b.runOperator("bylonder.game_play"); });
+      await opened.until((b) => b.game.drawing && !!b.game.world, null, 240000);
+      const game = () => opened.bylonder((b) => {
+        const scene = b.game.blend.scene, grab = scene.textures.find((t) => t.name === "Touch")?.getControlByName("Grab");
+        const barista = [...b.game.world.instances.values()].find((i) => i.definition.name === "Barista").handlers;
+        return { lit: grab?.background, palm: barista.palm.getAbsolutePosition().asArray() };
+      });
+      await touch.tap([300, 700]);
+      await opened.page.waitForTimeout(500);
+      const before = await game();
+      await touch.send("touchStart", [[80, 800, 7]]);
+      await opened.page.waitForTimeout(400);
+      assert.notEqual((await game()).lit, before.lit, "holding the left half lights Grab");
+      await touch.send("touchEnd", []);
+      await touch.drag([300, 700], [240, 560], { steps: 12, interval: 30 });
+      await opened.page.waitForTimeout(1500);
+      const after = await game();
+      assert.ok(Math.hypot(after.palm[0] - before.palm[0], after.palm[2] - before.palm[2]) > 0.05, `a drag on the right half moves the hand: ${before.palm} to ${after.palm}`);
+      assert.deepEqual(opened.errors, [], "page errors");
+    } finally {
+      await opened.close();
+    }
+  });
+
   await step("example link #example=lava", async () => {
     const opened = await openApp(browser, server.url, { link: "lava", node: "Sphere" });
     try {
